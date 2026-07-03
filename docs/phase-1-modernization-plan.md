@@ -317,3 +317,31 @@ Compatibility:
 - No existing public URLs changed.
 - No existing database table names changed.
 - Phase 1 is still in progress. Continue prepared-statement/input cleanup on high-risk admin writes before starting Phase 2.
+
+## 2026-07-03 Code Batch 8
+
+Completed:
+
+- Tightened the existing protected area update handlers:
+  - `admin/bin/update_section.php`
+  - `admin/bin/update_category.php`
+  - `admin/bin/update_subcategory.php`
+- Added minimal no-op payload guards so valid-CSRF empty requests return `no` before legacy SQL paths run.
+- Initialized rename/update state variables before POST processing.
+- Removed an obsolete commented PHP `each()` loop from `admin/bin/update_section.php`.
+
+Verification:
+
+- `scripts/dev-php-lint.sh` passes for all active PHP files.
+- Public homepage returned HTTP 200 from the local FrankenPHP server.
+- The three area update endpoints return HTTP 403 and `no` without an admin session.
+- The three area update endpoints return HTTP 403 and `csrf` with an admin session but no CSRF token.
+- The three area update endpoints return HTTP 200 and `no` with an admin session, valid CSRF token, and empty no-op payload.
+- `rg -n "\beach\s*\(|while \(list" --glob "*.php"` now finds only jQuery `.each()` calls in active PHP files.
+- Temporary smoke-test sessions were destroyed and the local PHP server was stopped.
+
+Compatibility:
+
+- No existing public URLs changed.
+- No existing database table names changed.
+- Phase 1 is still in progress. Continue prepared-statement/input cleanup on high-risk admin writes before starting Phase 2.

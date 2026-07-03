@@ -11,7 +11,13 @@
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true); ?>
+red_require_admin(true);
+$payloadFields = array_diff(array_keys($_POST), ['csrf_token', 'RecordID', 'CurrentCategory']);
+if (empty($payloadFields) || empty($_POST['RecordID'])) {
+	echo 'no';
+	exit;
+}
+?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
 <?php
@@ -22,7 +28,9 @@ if(empty($_SESSION['alias']))
 	$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 	
 	$x = 0;
-    global $updatearticles;
+	$updatearticles = false;
+	$category = '';
+	$CurrentCategory = '';
         
 	foreach($_POST as $name => $value)
 	{
