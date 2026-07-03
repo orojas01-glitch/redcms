@@ -1,0 +1,4 @@
+.DS_Store
+.ftpquota
+error_log
+includes/config.local.php

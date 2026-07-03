@@ -1,0 +1,68 @@
+/*#advanced{position:fixed;z-index:999;right:0;top:0px;background:#181818;padding:20px 16px 20px 18px;width:459px;font-size:11px;border-right:3px solid #3a3a3a;font-family:Tahoma,Geneva,sans-serif;-webkit-border-bottom-left-radius:6px;-moz-border-radius-bottomleft:6px;border-radius:0 0 0 6px;line-height:1.6em}
+#advanced span.trigger{display:block;position:absolute;left:-81px;top:25px;margin-top:-25px;width:81px;height:114px;cursor:pointer;text-align:center;background:url(/admin/images/adv-trigger.png) no-repeat 0 0}
+#advanced div.scrollboxes{max-height:710px; padding-left:10px;padding-right:10px; overflow:auto;}
+#advanced div.toptitleleft{float:left; height:35px;}
+#advanced div.toptitleright{float:right; height:35px;}
+#advanced div.center{text-align:center}
+#advanced span.trigger strong{display:block;padding:4px 0 0 0}
+#advanced ul li{background:url(/admin/images/panel-arrow.gif) no-repeat 10px 10px #181818;padding:0 0 0 13px;font-size:12px}
+#advanced ul li.trigger_adv{padding:0 0 0 0}
+#advanced ul li.trigger_adv > span{background:url(/admin/images/panel-arrow2.gif) no-repeat 100% 8px #636363;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;padding:0 20px 0 12px;color:#dfdfdf;font-weight:bold;display:inline-block}
+#advanced ul li.trigger_adv > a:hover{text-decoration:none}
+/*#advanced ul li a{color:#4393d0;text-decoration:none}
+#advanced ul li a{color:#4393d0;text-decoration:none}
+#advanced ul li a:hover{text-decoration:underline}
+#advanced ul ul{margin-left:13px}
+#advanced ul ul li{font-size:11px;background:url(/admin/images/panel-arrow1.gif) no-repeat 0 7px}
+#advanced ul ul a{text-transform:capitalize;color:#dfdfdf}
+#advanced ul ul ul{margin-left:8px}
+#advanced ul ul ul li{background:none}
+#advanced ul ul ul li a{color:#939393}*/
+
+
+#advanced{position:static;z-index:999;background:#181818;padding:20px 16px 20px 16px;margin-left:auto;margin-right:auto;width:1220px;font-size:11px;font-family:Tahoma,Geneva,sans-serif; color:#000;-webkit-border-bottom-left-radius:6px;-moz-border-radius-bottomleft:6px;-webkit-border-bottom-right-radius:6px;-moz-border-radius-bottomright:6px;border-radius:0 0 6px 6px;line-height:1.6em}
+/*#advanced span.trigger{display:block;position:absolute;left:50%;top:50%;margin-top:-25px;width:81px;height:114px;cursor:pointer;text-align:center;background:url(/admin/images/adv-trigger.png) no-repeat 0 0}*/
+#advanced div.scrollboxes{overflow:auto;}
+#advanced div.toptitleleft{float:left; height:35px;}
+#advanced div.toptitleright{float:right; height:35px;}
+#advanced div.center{text-align:center}
+#advanced span.trigger strong{display:block;padding:4px 0 0 0}
+#advanced ul li{background:url(/admin/images/panel-arrow.gif) no-repeat 10px 10px #181818;padding:0 0 0 13px;font-size:12px}
+#advanced ul li.trigger_adv{padding:0 0 0 0}
+#advanced ul li.trigger_adv > span{background:url(/admin/images/panel-arrow2.gif) no-repeat 100% 8px #636363;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;padding:0 20px 0 12px;color:#dfdfdf;font-weight:bold;display:inline-block}
+#advanced ul li.trigger_adv > a:hover{text-decoration:none}
+/*#advanced ul li a{color:#4393d0;text-decoration:none}*/
+#advanced ul li a{color:#4393d0;text-decoration:none}
+#advanced ul li a:hover{text-decoration:underline}
+#advanced ul ul{margin-left:13px}
+#advanced ul ul li{font-size:11px;background:url(/admin/images/panel-arrow1.gif) no-repeat 0 7px}
+#advanced ul ul a{text-transform:capitalize;color:#dfdfdf}
+#advanced ul ul ul{margin-left:8px}
+#advanced ul ul ul li{background:none}
+#advanced ul ul ul li a{color:#939393}
+
+/* #Tablet (Portrait)
+================================================== */
+
+	/* Note: Design for a width of 768px */
+@media only screen and (max-width: 995px) {
+	#advanced{width:768px;}
+}
+/*  #Mobile (Landscape)
+================================================== */
+
+	/* Note: Design for a width of 480px */
+	@media only screen and (max-width: 767px) {
+		#advanced{width:420px;}
+		
+	}
+	
+/* #Mobile (Portrait)
+================================================== */
+	
+	/* Note: Design for a width of 320px */
+	@media only screen and (max-width: 479px) {
+		#advanced{width:320px;}
+	}
+
+#advanced .row{--bs-gutter-x:0;--bs-gutter-y:0;display:flex;flex-wrap:wrap;margin-top:calc(-1 * var(--bs-gutter-y));margin-right:calc(-.5 * var(--bs-gutter-x));margin-left:calc(-.5 * var(--bs-gutter-x))}

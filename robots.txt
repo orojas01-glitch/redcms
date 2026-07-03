@@ -1,0 +1,8 @@
+User-agent: gsa-crawler
+Disallow: /administracion/
+
+User-agent: phx-wlv
+Disallow: /administracion/
+
+User-agent: *
+Disallow: /administracion/

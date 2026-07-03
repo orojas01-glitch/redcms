@@ -1,0 +1,206 @@
+.clear {
+    clear: both;
+    display: block;
+    overflow: hidden;
+    visibility: hidden;
+    width: 0px;
+    height: 0px;
+}
+
+
+/***** login admin *****/
+#login {
+position:relative;
+vertical-align:top;
+width:100%;
+z-index:1;
+}
+
+#login fieldset {border:none; padding:0; width:100%;}
+
+
+#login label {display:block; min-height:46px; position:relative;color: #333745;
+font: 14px/14px "Open Sans";}
+#login .message{min-height:299px;}
+
+#login input, #contact-form textarea {
+padding:10px 14px;
+margin:0;
+font: 14px Arial, Helvetica, sans-serif;
+color:#62676d;
+background: #fff;
+outline:none;
+border:1px solid #e1e1e1;
+box-sizing: border-box;
+-moz-box-sizing: border-box;
+-webkit-box-sizing: border-box;}
+
+#login .area .error {float:none;}
+
+#login textarea {
+width:320px;
+height:246px;
+resize:none;
+overflow:auto;
+border:1px solid #e1e1e1;
+padding:10px 14px;}
+
+#login .success {display:none; margin-bottom:15px;}
+
+#login .error, #login .empty {
+color:#f00;
+font-size:11px;
+line-height:14px;
+display:none;
+overflow:hidden;
+margin-bottom:5px;}
+
+#login select {
+font: 14px Arial, Helvetica, sans-serif;
+border:1px solid #ccc;
+vertical-align:top;
+padding:10px 14px;}
+
+.buttons-wrapper{text-align:right; position:relative;}
+.buttons-wrapper a {cursor:pointer; margin-right:3px;}
+.buttons-wrapper a[data-type="reset"]{margin-right:19px;}
+
+#login .button{box-shadow: none;
+position: relative;
+padding: 13px 26px;
+font: 600 14px 'Open Sans';
+margin: 0;
+letter-spacing: 0;
+text-shadow: none;
+color: #ffffff;
+border: none;
+/*background: #e74c3c;*/
+background: #f9333f;
+text-transform: uppercase;
+text-decoration: none;
+display: inline-block;
+-webkit-transition: all 0.35s ease;
+transition: all 0.35s ease; }
+
+
+#login .button:hover{color: #ffffff;
+background: #80838d;
+text-decoration: none !important;
+-webkit-transition: all 0.35s ease;
+transition: all 0.35s ease;}
+#login .btns{margin-left:26%;margin-top:10px;}
+#login fieldset {padding: 1em;  font:80%/1 sans-serif;  }
+#login label {float:left;  width:25%;  margin-right:0.5em;  padding-top:1.0em;  text-align:right;  font-weight:bold;  }
+
+/***** contact form *****/
+#formulario {
+position:relative;
+vertical-align:top;
+width:100%;
+z-index:1;
+}
+
+#formulario fieldset {border:none; padding:0; width:100%;}
+#formulario label {display:block; min-height:46px; position:relative;color: #333745;
+font: 14px/14px "Open Sans";}
+#formulario label.terms_and_conditions{margin-top:20px;}
+#formulario .message{min-height:299px;}
+
+#formulario input, #contact-form textarea {
+padding:10px 14px;
+font: 14px Arial, Helvetica, sans-serif;
+color:#62676d;
+background: #fff;
+outline:none;
+border:1px solid #e1e1e1;
+box-sizing: border-box;
+-moz-box-sizing: border-box;
+ -webkit-box-sizing: border-box;
+}
+
+#formulario .area .error {float:none;}
+
+#formulario textarea {
+height:246px;
+resize:none;
+overflow:auto;
+border:1px solid #e1e1e1;
+padding:10px 14px;
+}
+#formulario #terms_and_conditions{height:100px;min-width: 337px;padding-top:20px; margin-top:20px;}
+
+#formulario .success {display:none; margin-bottom:15px;}
+#formulario .error,#formulario .empty {
+color:#f00;
+font-size:11px;
+line-height:14px;
+display:none;
+overflow:hidden;
+margin-bottom:5px;
+}
+
+#formulario select {
+font: 14px Arial, Helvetica, sans-serif;
+border:1px solid #ccc;
+vertical-align:top;
+padding:10px 14px;
+}
+.buttons-wrapper{text-align:right; position:relative;}
+.buttons-wrapper a {cursor:pointer; margin-right:3px;}
+.buttons-wrapper a[data-type="reset"]{margin-right:19px;}
+
+
+#formulario .button{box-shadow: none;
+position: relative;
+padding: 13px 26px;
+font: 600 14px 'Open Sans';
+margin: 0;
+letter-spacing: 0;
+text-shadow: none;
+color: #ffffff;
+border: none;
+/*background: #e74c3c;*/
+background: #f9333f;
+text-transform: uppercase;
+text-decoration: none;
+display: inline-block;
+-webkit-transition: all 0.35s ease;
+transition: all 0.35s ease; }
+
+#formulario .button:hover{color: #ffffff;
+background: #80838d;
+text-decoration: none !important;
+-webkit-transition: all 0.35s ease;
+transition: all 0.35s ease;}
+
+#formulario .btns{ margin-left:28%; margin-top:10px;}
+#formulario fieldset {padding: 1em;  font:80%/1 sans-serif;  }
+#formulario label {float:left;  width:28%;  margin-right:0.5em;  padding-top:1.0em;  text-align:right;  font-weight:bold;  }
+#formulario .radio{float:left;  width:20%; margin-top:0px; text-align: left; margin-right: 4px    }
+#formulario p.question{ font-size:14px; font-weight:bold; padding-top:14px ; color:#000;  }
+#formulario label.tipo_clase{display:none }
+#formulario .checkbox{float:left;  width:0%;   }
+#formulario label.dias{display:none }
+
+.buttons-wrapper{text-align:right; position:relative;}
+.buttons-wrapper a {cursor:pointer; margin-right:3px;}
+.buttons-wrapper a[data-type="reset"]{margin-right:19px;}
+
+@media (min-width: 768px) and (max-width: 991px) {
+#login input{width:250px;}
+#login textarea{width:250px;}
+}
+
+@media only screen and (max-width: 767px){
+#login textarea{width:250px;}
+#formulario textarea{width:250px;}
+}
+
+@media only screen and (max-width: 479px){
+#login input, #contact-form textarea{width:220px;}
+#login label {min-height:26px;  }
+#contact-form textarea{width:220px;}
+#formulario label {padding-top: 0.5em; }
+}
+
+#MySpamTrap {display: none;}
