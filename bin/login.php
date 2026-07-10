@@ -5,21 +5,38 @@
 <?php
 function red_admin_password_column_supports_hash($connection)
 {
-	$result = mysqli_query($connection, "SHOW COLUMNS FROM RED_Admin LIKE 'Password'");
-	if (!$result) {
+	$stmt = mysqli_prepare(
+		$connection,
+		"SELECT DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=? LIMIT 1"
+	);
+	if (!$stmt) {
 		return false;
 	}
 
-	$column = mysqli_fetch_assoc($result);
-	if (!$column || empty($column['Type'])) {
+	$tableName = 'RED_Admin';
+	$columnName = 'Password';
+	mysqli_stmt_bind_param($stmt, 'ss', $tableName, $columnName);
+	if (!mysqli_stmt_execute($stmt)) {
+		mysqli_stmt_close($stmt);
 		return false;
 	}
 
-	if (preg_match('/varchar\((\d+)\)/i', $column['Type'], $matches)) {
-		return (int) $matches[1] >= 255;
+	$result = mysqli_stmt_get_result($stmt);
+	$column = $result ? mysqli_fetch_assoc($result) : null;
+	mysqli_stmt_close($stmt);
+
+	if (!$column || empty($column['DATA_TYPE'])) {
+		return false;
 	}
 
-	return preg_match('/text/i', $column['Type']) === 1;
+	$dataType = strtolower((string) $column['DATA_TYPE']);
+	$maxLength = isset($column['CHARACTER_MAXIMUM_LENGTH']) ? (int) $column['CHARACTER_MAXIMUM_LENGTH'] : 0;
+
+	if (in_array($dataType, ['varchar', 'char'], true)) {
+		return $maxLength >= 255;
+	}
+
+	return in_array($dataType, ['text', 'mediumtext', 'longtext'], true);
 }
 
 function red_update_admin_password_hash($connection, $recordId, $password)
@@ -46,15 +63,19 @@ function red_update_admin_password_hash($connection, $recordId, $password)
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
 
-if ($username === '' || $password === '') {
+if ($username === '' || strlen($username) > 255 || $password === '') {
 	echo "no";
 	exit;
 }
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-$stmt = mysqli_prepare($db->connection, "SELECT * FROM RED_Admin WHERE Username=? LIMIT 1");
+$stmt = mysqli_prepare(
+	$db->connection,
+	"SELECT RecordID, Alias, AdminType, AdminComponents, Password FROM RED_Admin WHERE Username=? LIMIT 1"
+);
 if (!$stmt) {
 	echo "no";
+	$db->close();
 	exit;
 }
 

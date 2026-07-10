@@ -1,11 +1,16 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+red_start_session();
+red_require_admin(); ?>
 <?php
 #[\AllowDynamicProperties]
 class newsection
 {
 	public function section_form($Language)
 	{
+        $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+        $layoutOptions = red_admin_area_layouts($db->connection);
+        $featureOptions = red_admin_area_features($db->connection);
 		?>
         <!-- The main script file -->
 <script type="text/javascript">
@@ -78,28 +83,10 @@ function run_insert_section (insert_section)
                 
                 <?php
                 echo '<select name="Layout" id="layout">';
-                //$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                $result = $db->query("SELECT UniqueName FROM RED_Layouts");
-//                while($row2 = mysqli_fetch_assoc($result))
-//                {
-//                    $This->layout=$row2['UniqueName'];
-//                    echo '<option value="'.$This->layout.'">'.$This->layout.'</option>';
-//                }
-//                $db->close();
-                $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                $result = $db->query("SELECT UniqueName FROM RED_Layouts");
-                if ($result) {
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        // Correct the use of $this (lowercase) for object context and escape output to prevent XSS
-                        $this->layout = htmlspecialchars($row['UniqueName']);
-                        echo '<option value="' . $this->layout . '">' . $this->layout . '</option>';
-                    }
-                } else {
-                    // Handle query error, e.g., log it or display an error message
+                foreach ($layoutOptions as $layoutOption) {
+                    $layoutOption = red_admin_area_html($layoutOption);
+                    echo '<option value="' . $layoutOption . '">' . $layoutOption . '</option>';
                 }
-                $db->close();
-
-                
                 echo '</select>';
 				?>
                 </label>  
@@ -114,14 +101,10 @@ function run_insert_section (insert_section)
             	<label>Features:
                     <select name="Features[]" size="3" multiple>
                     <?php
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT UniqueName FROM RED_Features");
-                    $result_counter = $result3->num_rows;
-                    while($row3 = mysqli_fetch_assoc($result3))
+                    foreach ($featureOptions as $featureOption)
                     {
-                        echo '<option value="'.$row3['UniqueName'].'">'.$row3['UniqueName'].'</option>';
-                    $selected='';
-                    $result_counter = ($result_counter - 1);
+                        $featureOption = red_admin_area_html($featureOption);
+                        echo '<option value="'.$featureOption.'">'.$featureOption.'</option>';
                     }
                     ?>
                     </select>
@@ -148,9 +131,10 @@ function run_insert_section (insert_section)
     </div>
 </div>
 </fieldset>
-<input type="hidden" name="Language" id="Language" value="<?php echo $Language?>" />
+<input type="hidden" name="Language" id="Language" value="<?php echo red_admin_area_html($Language)?>" />
 </form>
 <?php
+        $db->close();
 	}
 }
 ?>

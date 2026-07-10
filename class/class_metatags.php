@@ -23,6 +23,8 @@ Multi-Columns2)
 * $this->PLquery
 
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
+
 #[\AllowDynamicProperties]
 class Page_Metatags
 {
@@ -36,9 +38,7 @@ class Page_Metatags
 		//$this->articlequery=$rquery[0];
 		//$this->VarPosition=$rquery[1];
 		//$this->VarFeatured=$rquery[2];
-		$this->metaquery=$rquery[3];
 		$this->Table=$rquery[4];
-		$this->otherquery=$rquery[5];
 		
 		//echo $this->query;
         
@@ -55,50 +55,28 @@ class Page_Metatags
 			
 			//echo 'no article. select metatags from other table: '.$this->Table;
 			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-              
-			$result = $db->query("SELECT Description, Tags FROM RED_".$this->Table." WHERE Active='Y' AND Language='" . language . "' ".$this->metaquery."");
-			//echo ($result->num_rows);
-			$result_counter = $result->num_rows;
-			
-			while($row = mysqli_fetch_assoc($result))
-			{
-				$Description=$row['Description'];
-				$Tags=$row['Tags'];
-				echo '<meta name="description" content="'.$Description.'">' . "\n";
-    			echo '<meta name="keywords" content="'.$Tags.'">' . "\n";
-				echo '<meta property="og:description" content="'.$Description.'">';
-				
-				//$limit='1';
-				//echo 'layout='. $layout . '<br/>';
-				//echo 'limit='. $this->limit . '<br/>'; 		
-				$result_counter = ($result_counter - 1);
+			$row = red_public_area_row($db->connection, $this->Table, ['Description', 'Tags']);
+			if ($row) {
+				$Description = $row['Description'];
+				$Tags = $row['Tags'];
+				echo '<meta name="description" content="' . red_public_html($Description) . '">' . "\n";
+				echo '<meta name="keywords" content="' . red_public_html($Tags) . '">' . "\n";
+				echo '<meta property="og:description" content="' . red_public_html($Description) . '">';
 			}
-			//echo 'end'. $result_counter;
-			if ($result_counter == 0);
 		
 			break;
 			
 			default:
 			//echo 'article. select metatags from article.';
-            $table = !empty($this->Table) ? $this->Table : 'Articles';    
 			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			$result = $db->query("SELECT ShortDesc, Tags FROM RED_".$table." WHERE Active='Y' AND Language='" . language . "' ".$this->otherquery."");
-			//echo ($result->num_rows);
-			$result_counter = $result->num_rows;
-			
-			while($row = mysqli_fetch_assoc($result))
-			{
-				$Description=strip_tags($row['ShortDesc']);
-				$Description=preg_replace ( "'<[^>]+>'U", "", $Description);
-				$Tags=$row['Tags'];
-				echo '<meta name="description" content="'.$Description.'">' . "\n";
-    			echo '<meta name="keywords" content="'.$Tags.'">' . "\n";
-				echo '<meta property="og:description" content="'.$Description.'">';
-				//echo 'layout='. $layout . '<br/>'; 		
-				$result_counter = ($result_counter - 1);
+			$row = red_public_article_route_row($db->connection, ['ShortDesc', 'Tags']);
+			if ($row) {
+				$Description = red_public_plain_text($row['ShortDesc']);
+				$Tags = $row['Tags'];
+				echo '<meta name="description" content="' . red_public_html($Description) . '">' . "\n";
+				echo '<meta name="keywords" content="' . red_public_html($Tags) . '">' . "\n";
+				echo '<meta property="og:description" content="' . red_public_html($Description) . '">';
 			}
-			//echo 'end'. $result_counter;
-			if ($result_counter == 0);
 			
 			break;
 		}

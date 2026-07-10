@@ -26,6 +26,7 @@
 * $position - 5 options: 1. 2. 3. 4. null. 
 * $layout - Full-Width. Two-Columns. Three-Columns. Four-Columns. Multi-Columns1. Multi-Columns2.
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
 
 #[\AllowDynamicProperties]
 class content
@@ -39,17 +40,15 @@ class content
 		//echo $this->query;
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		// display all active records. Position is Required.
-		$result = $db->query("SELECT * FROM RED_Articles WHERE Active='Y' AND StartDate <= NOW() AND Language='" . language . "' AND ".$VarPosition."='".$position."' ".$query." ORDER BY ".$VarPosition."Order ASC, StartDate DESC LIMIT ".$limit."");
-		//echo ("SELECT * FROM RED_Articles WHERE Active='Y' AND StartDate <= NOW() AND Language='" . language . "' AND ".$VarPosition."='".$position."' ".$query." ORDER BY ".$VarPosition."Order ASC, StartDate DESC LIMIT ".$limit."");
-		//echo ('ini:'. $result->num_rows);
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
+		$rows = red_public_content_articles($db->connection, $VarPosition, $position, $limit, true);
+		$result_counter = count($rows);
+		foreach($rows as $row)
 		{
 			//echo $row['Component'];
 			//CHECK DATE EXPIRATION//
-			if ($row['ExpDate']!='0000-00-00 00:00:00'){
+			if ($row['ExpDate']!='0000-00-00 00:00:00' && $row['ExpDate']!=''){
 				date_default_timezone_set('America/New_York');
-				if( date($row['ExpDate']) < date('Y-m-d H:i:s', mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"))) ) {
+				if( $row['ExpDate'] < date('Y-m-d H:i:s', mktime(date("H"), date("i"), date("s"), date("m"), date("d"), date("Y"))) ) {
 					$ActiveDate=false;
 				}
 				else {
@@ -129,19 +128,18 @@ class content
         //echo $this->query;
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		// display all active records. Position is Required.
-		$result = $db->query("SELECT * FROM RED_Articles WHERE Active='Y' AND Language='" . language . "' AND ".$VarPosition."='".$position."' ".$query." ORDER BY ".$VarPosition."Order ASC, StartDate DESC LIMIT ".$limit."");
-		//echo ("SELECT * FROM RED_Articles WHERE Active='Y' AND Language='" . language . "' AND ".$VarPosition."='".$position."' ".$query." ORDER BY ".$VarPosition."Order ASC, StartDate DESC LIMIT ".$limit."");
-		//echo ($result->num_rows);
-		$result_counter = $result->num_rows;
+		$rows = red_public_content_articles($db->connection, $VarPosition, $position, $limit, false);
+		$total_rows = count($rows);
+		$result_counter = $total_rows;
 		$w=0;
-		while($row = mysqli_fetch_assoc($result))
+		foreach($rows as $row)
 		{
 			$RecordID=$row['RecordID'];
 			$Alias=$row['Alias'];
 			$Alias=preg_replace('/-/','_',$Alias);
 			$PosOrder=$row[$VarPosition."Order"];
 			
-			if ($result_counter === $result->num_rows){
+			if ($result_counter === $total_rows){
 				if ($position!='0')
 			echo '<div class="cp_titles">';
 			}

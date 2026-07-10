@@ -69,7 +69,6 @@ if (!function_exists('red_upload_detect_mime')) {
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             if ($finfo) {
                 $mime = finfo_file($finfo, $tmpName);
-                finfo_close($finfo);
                 return is_string($mime) ? $mime : '';
             }
         }
@@ -165,6 +164,54 @@ if (!function_exists('red_upload_move')) {
 
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
             red_upload_status('Something went wrong with your upload.', 400);
+        }
+
+        return $storedName;
+    }
+}
+
+if (!function_exists('red_upload_remove_stored_file')) {
+    function red_upload_remove_stored_file($relativeDirectory, $storedName)
+    {
+        $storedName = basename((string) $storedName);
+        if ($storedName === '' || $storedName === '.' || $storedName === '..') {
+            return false;
+        }
+
+        $documentRoot = realpath($_SERVER['DOCUMENT_ROOT']);
+        $targetDirectory = realpath($_SERVER['DOCUMENT_ROOT'] . '/' . trim((string) $relativeDirectory, '/'));
+        if (!$documentRoot || !$targetDirectory) {
+            return false;
+        }
+
+        $insideDocumentRoot = $targetDirectory === $documentRoot || strpos($targetDirectory, $documentRoot . DIRECTORY_SEPARATOR) === 0;
+        if (!$insideDocumentRoot) {
+            return false;
+        }
+
+        $targetPath = $targetDirectory . DIRECTORY_SEPARATOR . $storedName;
+        return is_file($targetPath) && unlink($targetPath);
+    }
+}
+
+if (!function_exists('red_upload_move_and_persist')) {
+    function red_upload_move_and_persist($file, $relativeDirectory, $safeName, $persist)
+    {
+        if (!is_callable($persist)) {
+            red_upload_status('Database query failed.', 500);
+        }
+
+        $storedName = red_upload_move($file, $relativeDirectory, $safeName);
+        try {
+            if (call_user_func($persist, $storedName) !== true) {
+                throw new RuntimeException('Upload database write failed.');
+            }
+        } catch (Throwable $e) {
+            if (!red_upload_remove_stored_file($relativeDirectory, $storedName)) {
+                error_log('Failed to remove orphaned upload: ' . $relativeDirectory . '/' . $storedName);
+            }
+            error_log('Upload database write failed: ' . $e->getMessage());
+            red_upload_status('Database query failed.', 500);
         }
 
         return $storedName;

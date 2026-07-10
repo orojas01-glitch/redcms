@@ -12,6 +12,8 @@
 /**
 * THIS CLASS DEFINE THE PAGE LAYOUT
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
+
 #[\AllowDynamicProperties]
 class limit
 {
@@ -24,31 +26,17 @@ class limit
 		//$this->articlequery=$rquery[0];
 		//$this->VarPosition=$rquery[1];
 		//$this->VarFeatured=$rquery[2];
-		$this->metaquery=$rquery[3];
 		$this->Table=$rquery[4];
 		
 		switch (article)
 		{
 			case '':
 			//echo 'section or category. select layout from section or category table.';
-			//echo "SELECT * FROM RED_".$this->Table." WHERE Active='Y' AND Language='".language."' ".$this->metaquery."";
 			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			$result = $db->query("SELECT * FROM RED_".$this->Table." WHERE Active='Y' AND Language='".language."' ".$this->metaquery."");
-			
-			
-			//echo ($result->num_rows);
-			$result_counter = $result->num_rows;
-			
-			while($row = mysqli_fetch_assoc($result))
-			{
-				$this->limit=$row['QueryLimit'];
-				return $this->limit;
-				$result_counter = ($result_counter - 1);
-			}
-			//echo 'end'. $result_counter;
-			if ($result_counter == 0);
-			
+			$row = red_public_area_row($db->connection, $this->Table, ['QueryLimit']);
+			$this->limit = $row['QueryLimit'] ?? null;
 			$db->close();
+			return $this->limit;
 			
 			break;
 			

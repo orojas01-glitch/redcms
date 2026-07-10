@@ -22,6 +22,8 @@ Multi-Columns2)
 * $this->PLquery
 
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
+
 #[\AllowDynamicProperties]
 class Page_Title
 {
@@ -35,9 +37,7 @@ class Page_Title
 		//$this->articlequery=$rquery[0];
 		//$this->VarPosition=$rquery[1];
 		//$this->VarFeatured=$rquery[2];
-		$this->metaquery=$rquery[3];
 		$this->Table=$rquery[4];
-		$this->otherquery=$rquery[5];
 		
 		//echo $this->Table;
 		
@@ -45,17 +45,9 @@ class Page_Title
 		{
 		
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			$result = $db->query("SELECT * FROM RED_Advanced WHERE Language='".language."' AND Item IN('Website_Title','Website_Slogan')");
-			//echo ($result->num_rows);
-			$result_counter = $result->num_rows;
-			
-			while($row = mysqli_fetch_assoc($result))
-       		{
-				if ($row['Item']==='Website_Title')
-				$Website_Title = preg_replace('/<[^>]*>/',' ',$row['Content']);
-				elseif ($row['Item']==='Website_Slogan')
-				$Website_Slogan = preg_replace('/<[^>]*>/',' ',$row['Content']);	
-			}
+			$advanced = red_public_advanced_items($db->connection, ['Website_Title', 'Website_Slogan']);
+			$Website_Title = red_public_plain_text($advanced['Website_Title'] ?? '');
+			$Website_Slogan = red_public_plain_text($advanced['Website_Slogan'] ?? '');
 			
 		switch (article)
 		{
@@ -63,48 +55,29 @@ class Page_Title
 			
 			
 			//echo 'no article. select metatags from other table:'.$this->Table;
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			//echo "SELECT * FROM RED_".$this->Table." WHERE Active='Y' AND Language='" . language . "' ".$this->metaquery."";
-			$result = $db->query("SELECT * FROM RED_".$this->Table." WHERE Active='Y' AND Language='" . language . "' ".$this->metaquery."");
-			//echo ($result->num_rows);
-			$result_counter = $result->num_rows;
-			
-			if($result->num_rows > 0) 
-			{
-				$info = mysqli_fetch_assoc($result); 	
+			$info = red_public_area_row($db->connection, $this->Table, [$this->Table, 'Title']);
+			if ($info) {
 				if (isset($info[$this->Table]) && strtolower($info[$this->Table]) === 'home') {
-                    echo $Website_Title . ' | ' . $Website_Slogan;
+                    echo red_public_html($Website_Title . ' | ' . $Website_Slogan);
                 } else {
-                    $Title = preg_replace('/<[^>]*>/', ' ', $info['Title']);
-                    echo $Website_Title . ' | ' . ucwords($Title);
+                    $Title = red_public_plain_text($info['Title']);
+                    echo red_public_html($Website_Title . ' | ' . ucwords($Title));
                 }
-				$result_counter = ($result_counter - 1);
 			}
-			//echo 'end'. $result_counter;
-			if ($result_counter == 0);
 		
 			break;
 			
 			default:
 			//echo 'article. select metatags from article.';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			$result = $db->query("SELECT Title FROM RED_".$this->Table." WHERE Active='Y' AND Language='" . language . "' ".$this->otherquery."");
-			//echo ($result->num_rows);
-			$result_counter = $result->num_rows;
-			
-			if($result->num_rows > 0) 
-			{
-				$info = mysqli_fetch_assoc($result); 
-				
+			$info = red_public_article_route_row($db->connection, ['Title']);
+			if ($info) {
 				$Title = preg_replace('/\-/',' ',$info['Title']);
-				echo $Website_Title .' | '.ucwords($Title);
-				$result_counter = ($result_counter - 1);
+				echo red_public_html($Website_Title .' | '.ucwords($Title));
 			}
-			//echo 'end'. $result_counter;
-			if ($result_counter == 0);
 			
 			break;
 		}
+		$db->close();
 		}
 		
 	

@@ -93,20 +93,20 @@ transition: all 0.35s ease;}
 #login label {float:left;  width:25%;  margin-right:0.5em;  padding-top:1.0em;  text-align:right;  font-weight:bold;  }
 
 /***** contact form *****/
-#formulario {
+#contact {
 position:relative;
 vertical-align:top;
 width:100%;
 z-index:1;
 }
 
-#formulario fieldset {border:none; padding:0; width:100%;}
-#formulario label {display:block; min-height:46px; position:relative;color: #333745;
+#contact fieldset {border:none; padding:0; width:100%;}
+#contact label {display:block; min-height:46px; position:relative;color: #333745;
 font: 14px/14px "Open Sans";}
-#formulario label.terms_and_conditions{margin-top:20px;}
-#formulario .message{min-height:299px;}
+#contact label.terms_and_conditions{margin-top:20px;}
+#contact .message{min-height:299px;}
 
-#formulario input, #contact-form textarea {
+#contact input, #contact textarea {
 padding:10px 14px;
 font: 14px Arial, Helvetica, sans-serif;
 color:#62676d;
@@ -118,19 +118,19 @@ box-sizing: border-box;
  -webkit-box-sizing: border-box;
 }
 
-#formulario .area .error {float:none;}
+#contact .area .error {float:none;}
 
-#formulario textarea {
+#contact textarea {
 height:246px;
 resize:none;
 overflow:auto;
 border:1px solid #e1e1e1;
 padding:10px 14px;
 }
-#formulario #terms_and_conditions{height:100px;min-width: 337px;padding-top:20px; margin-top:20px;}
+#contact #terms_and_conditions{height:100px;min-width: 337px;padding-top:20px; margin-top:20px;}
 
-#formulario .success {display:none; margin-bottom:15px;}
-#formulario .error,#formulario .empty {
+#contact .success {display:none; margin-bottom:15px;}
+#contact .error,#contact .empty {
 color:#f00;
 font-size:11px;
 line-height:14px;
@@ -139,7 +139,7 @@ overflow:hidden;
 margin-bottom:5px;
 }
 
-#formulario select {
+#contact select {
 font: 14px Arial, Helvetica, sans-serif;
 border:1px solid #ccc;
 vertical-align:top;
@@ -150,7 +150,7 @@ padding:10px 14px;
 .buttons-wrapper a[data-type="reset"]{margin-right:19px;}
 
 
-#formulario .button{box-shadow: none;
+#contact .button{box-shadow: none;
 position: relative;
 padding: 13px 26px;
 font: 600 14px 'Open Sans';
@@ -167,20 +167,20 @@ display: inline-block;
 -webkit-transition: all 0.35s ease;
 transition: all 0.35s ease; }
 
-#formulario .button:hover{color: #ffffff;
+#contact .button:hover{color: #ffffff;
 background: #80838d;
 text-decoration: none !important;
 -webkit-transition: all 0.35s ease;
 transition: all 0.35s ease;}
 
-#formulario .btns{ margin-left:28%; margin-top:10px;}
-#formulario fieldset {padding: 1em;  font:80%/1 sans-serif;  }
-#formulario label {float:left;  width:28%;  margin-right:0.5em;  padding-top:1.0em;  text-align:right;  font-weight:bold;  }
-#formulario .radio{float:left;  width:20%; margin-top:0px; text-align: left; margin-right: 4px    }
-#formulario p.question{ font-size:14px; font-weight:bold; padding-top:14px ; color:#000;  }
-#formulario label.tipo_clase{display:none }
-#formulario .checkbox{float:left;  width:0%;   }
-#formulario label.dias{display:none }
+#contact .btns{ margin-left:28%; margin-top:10px;}
+#contact fieldset {padding: 1em;  font:80%/1 sans-serif;  }
+#contact label {float:left;  width:28%;  margin-right:0.5em;  padding-top:1.0em;  text-align:right;  font-weight:bold;  }
+#contact .radio{float:left;  width:20%; margin-top:0px; text-align: left; margin-right: 4px    }
+#contact p.question{ font-size:14px; font-weight:bold; padding-top:14px ; color:#000;  }
+#contact label.tipo_clase{display:none }
+#contact .checkbox{float:left;  width:0%;   }
+#contact label.dias{display:none }
 
 .buttons-wrapper{text-align:right; position:relative;}
 .buttons-wrapper a {cursor:pointer; margin-right:3px;}
@@ -193,14 +193,14 @@ transition: all 0.35s ease;}
 
 @media only screen and (max-width: 767px){
 #login textarea{width:250px;}
-#formulario textarea{width:250px;}
+#contact textarea{width:250px;}
 }
 
 @media only screen and (max-width: 479px){
 #login input, #contact-form textarea{width:220px;}
 #login label {min-height:26px;  }
 #contact-form textarea{width:220px;}
-#formulario label {padding-top: 0.5em; }
+#contact label {padding-top: 0.5em; }
 }
 
 #MySpamTrap {display: none;}

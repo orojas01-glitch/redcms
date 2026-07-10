@@ -15,16 +15,17 @@ function red_post_file_stmt($connection, $query, $types = '', &...$values)
 {
     $stmt = mysqli_prepare($connection, $query);
     if (!$stmt) {
-        red_upload_status('Database query failed.', 500);
+        throw new RuntimeException('Database prepare failed.');
     }
 
-    if ($types !== '') {
-        mysqli_stmt_bind_param($stmt, $types, ...$values);
+    if ($types !== '' && !mysqli_stmt_bind_param($stmt, $types, ...$values)) {
+        mysqli_stmt_close($stmt);
+        throw new RuntimeException('Database parameter binding failed.');
     }
 
     if (!mysqli_stmt_execute($stmt)) {
         mysqli_stmt_close($stmt);
-        red_upload_status('Database query failed.', 500);
+        throw new RuntimeException('Database execution failed.');
     }
 
     return $stmt;
@@ -46,7 +47,12 @@ function red_post_file_save_article_picture($connection, $recordId, $field, $sto
         red_upload_status('Invalid upload target.', 400);
     }
 
-    if ($insert && !red_post_file_article_exists($connection, $recordId)) {
+    $articleExists = red_post_file_article_exists($connection, $recordId);
+    if (!$insert && !$articleExists) {
+        throw new RuntimeException('Article upload target does not exist.');
+    }
+
+    if ($insert && !$articleExists) {
         $query = "INSERT INTO RED_Articles (RecordID, `$field`) VALUES (?, ?)";
         $stmt = red_post_file_stmt($connection, $query, 'is', $recordId, $storedName);
     } else {
@@ -55,6 +61,7 @@ function red_post_file_save_article_picture($connection, $recordId, $field, $sto
     }
 
     mysqli_stmt_close($stmt);
+    return true;
 }
 
 function red_post_file_save_gallery($connection, $recordId, $artRecordId, $storedName)
@@ -78,11 +85,12 @@ function red_post_file_save_gallery($connection, $recordId, $artRecordId, $store
 
         $stmt = red_post_file_stmt($connection, 'UPDATE RED_C_Gallery SET LongDesc=? WHERE RecordID=?', 'si', $photos, $recordId);
         mysqli_stmt_close($stmt);
-        return;
+        return true;
     }
 
     $stmt = red_post_file_stmt($connection, 'INSERT INTO RED_C_Gallery (LongDesc, RecordID, RefID) VALUES (?, ?, ?)', 'sii', $storedName, $recordId, $artRecordId);
     mysqli_stmt_close($stmt);
+    return true;
 }
 
 function red_post_file_save_logo($connection, $recordId, $storedName)
@@ -91,41 +99,21 @@ function red_post_file_save_logo($connection, $recordId, $storedName)
         red_upload_status('Invalid upload target.', 400);
     }
 
-    $stmt = red_post_file_stmt($connection, 'UPDATE RED_Advanced SET Content=? WHERE RecordID=?', 'si', $storedName, $recordId);
-    mysqli_stmt_close($stmt);
-}
-
-function red_post_file_audio_exists($connection, $recordId)
-{
-    $stmt = red_post_file_stmt($connection, 'SELECT RecordID FROM RED_C_AudioStore WHERE RecordID=? LIMIT 1', 'i', $recordId);
+    $stmt = red_post_file_stmt($connection, 'SELECT RecordID FROM RED_Advanced WHERE RecordID=? LIMIT 1', 'i', $recordId);
     mysqli_stmt_store_result($stmt);
     $exists = mysqli_stmt_num_rows($stmt) > 0;
     mysqli_stmt_close($stmt);
-    return $exists;
-}
-
-function red_post_file_save_audio($connection, $recordId, $artRecordId, $field, $storedName)
-{
-    $allowedFields = ['ShortAudio', 'LongAudio'];
-    if ($recordId <= 0 || !in_array($field, $allowedFields, true)) {
-        red_upload_status('Invalid upload target.', 400);
+    if (!$exists) {
+        throw new RuntimeException('Logo upload target does not exist.');
     }
 
-    if (red_post_file_audio_exists($connection, $recordId)) {
-        $query = "UPDATE RED_C_AudioStore SET `$field`=? WHERE RecordID=?";
-        $stmt = red_post_file_stmt($connection, $query, 'si', $storedName, $recordId);
-    } else {
-        $query = "INSERT INTO RED_C_AudioStore (`$field`, RecordID, RefID) VALUES (?, ?, ?)";
-        $stmt = red_post_file_stmt($connection, $query, 'sii', $storedName, $recordId, $artRecordId);
-    }
-
+    $stmt = red_post_file_stmt($connection, 'UPDATE RED_Advanced SET Content=? WHERE RecordID=?', 'si', $storedName, $recordId);
     mysqli_stmt_close($stmt);
+    return true;
 }
 
 $allowedImages = ['jpg', 'jpeg', 'png', 'gif'];
-$allowedAudio = ['mp3'];
 $maxImageBytes = 6 * 1024 * 1024;
-$maxAudioBytes = 10 * 1024 * 1024;
 
 $recordId = (int) ($_GET['RecordID'] ?? 0);
 $artRecordId = (int) ($_GET['ArtRecordID'] ?? 0);
@@ -150,8 +138,14 @@ switch ($uploadCase) {
             red_upload_status('Invalid upload target.', 400);
         }
         $fileInfo = red_upload_validate_file($file, $allowedImages, $maxImageBytes, true);
-        $storedName = red_upload_move($file, 'images/gallery', $fileInfo['safe_name']);
-        red_post_file_save_gallery($db->connection, $recordId, $artRecordId, $storedName);
+        $storedName = red_upload_move_and_persist(
+            $file,
+            'images/gallery',
+            $fileInfo['safe_name'],
+            function ($storedName) use ($db, $recordId, $artRecordId) {
+                return red_post_file_save_gallery($db->connection, $recordId, $artRecordId, $storedName);
+            }
+        );
         $db->close();
         red_upload_status('File was uploaded successfully!', 200, ['stored_name' => $storedName]);
         break;
@@ -164,8 +158,14 @@ switch ($uploadCase) {
             red_upload_status('Invalid upload target.', 400);
         }
         $fileInfo = red_upload_validate_file($file, $allowedImages, $maxImageBytes, true);
-        $storedName = red_upload_move($file, 'images/articles', $fileInfo['safe_name']);
-        red_post_file_save_article_picture($db->connection, $recordId, $uploadCase, $storedName, $insert);
+        $storedName = red_upload_move_and_persist(
+            $file,
+            'images/articles',
+            $fileInfo['safe_name'],
+            function ($storedName) use ($db, $recordId, $uploadCase, $insert) {
+                return red_post_file_save_article_picture($db->connection, $recordId, $uploadCase, $storedName, $insert);
+            }
+        );
         $db->close();
         red_upload_status('File was uploaded successfully!', 200, ['stored_name' => $storedName]);
         break;
@@ -176,35 +176,16 @@ switch ($uploadCase) {
             red_upload_status('Invalid upload target.', 400);
         }
         $fileInfo = red_upload_validate_file($file, $allowedImages, $maxImageBytes, true);
-        $storedName = red_upload_move($file, 'images', $fileInfo['safe_name']);
-        red_post_file_save_logo($db->connection, $recordId, $storedName);
+        $storedName = red_upload_move_and_persist(
+            $file,
+            'images',
+            $fileInfo['safe_name'],
+            function ($storedName) use ($db, $recordId) {
+                return red_post_file_save_logo($db->connection, $recordId, $storedName);
+            }
+        );
         $db->close();
         red_upload_status('Logo was uploaded successfully!', 200, ['stored_name' => $storedName]);
-        break;
-
-    case 'AudioPreview':
-        if ($recordId <= 0) {
-            $db->close();
-            red_upload_status('Invalid upload target.', 400);
-        }
-        $fileInfo = red_upload_validate_file($file, $allowedAudio, $maxAudioBytes);
-        $storedName = red_upload_move($file, 'images/store', $fileInfo['safe_name']);
-        red_post_file_save_audio($db->connection, $recordId, $artRecordId, 'ShortAudio', $storedName);
-        $db->close();
-        red_upload_status('File was uploaded successfully!', 200, ['stored_name' => $storedName]);
-        break;
-
-    case 'AudioLong':
-        if ($recordId <= 0) {
-            $db->close();
-            red_upload_status('Invalid upload target.', 400);
-        }
-        $fileInfo = red_upload_validate_file($file, $allowedAudio, $maxAudioBytes);
-        $safeName = red_upload_clean_filename($file['name'], $recordId . '_');
-        $storedName = red_upload_move($file, 'images/store', $safeName);
-        red_post_file_save_audio($db->connection, $recordId, $artRecordId, 'LongAudio', $storedName);
-        $db->close();
-        red_upload_status('File was uploaded successfully!', 200, ['stored_name' => $storedName]);
         break;
 
     default:

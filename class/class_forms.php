@@ -9,6 +9,7 @@
  * Licensed under MIT licence:
  *   http://www.opensource.org/licenses/mit-license.php
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
 
 #[\AllowDynamicProperties]
 class forms
@@ -26,16 +27,16 @@ class forms
 		//echo $this->query;
 		
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_C_Form WHERE RefID='".$recordid."'");
+		$rows = red_public_form_rows($db->connection, $recordid);
 		
-		//echo ('start'.$result->num_rows.'<br/>');
-		$result_counter = $result->num_rows;
+		//echo ('start'.count($rows).'<br/>');
+		$result_counter = count($rows);
 		//
-		while($row = mysqli_fetch_assoc($result))
+		foreach($rows as $formRecord)
 		{
 
 			
-			$form=$row['LongDesc'];
+			$form=$formRecord['LongDesc'];
 			//explode first dimension of the array to create an array of rows
 
 			$outerARR = explode( ';', $form );
@@ -65,12 +66,11 @@ class forms
 			
 			//print_r($formarray);
 			
-			$AliasArt=$row['Alias'];
-			$Alias=$row['Alias'];
-			$Alias=preg_replace('/-/','_',$Alias);
-			$RecordID=$row['RecordID'];
-			$Title=$row['Title'];
-			$FormType=$row['FormType'];
+			$AliasArt=$formRecord['Alias'];
+			$Alias=red_public_js_identifier($formRecord['Alias'], 'form');
+			$RecordID=$formRecord['RecordID'];
+			$Title=red_public_display_text($formRecord['Title']);
+			$FormType=$formRecord['FormType'];
 			//$TLink=$row['Link'];
 			
 			
@@ -488,124 +488,6 @@ class forms
 					
 					
 				break;
-				
-				case 'Register_StoreLogin':
-					//response messages by language
-					
-					switch(language)
-					{
-					case 'en':
-					$responsemessagesuccess="Success!";
-					$error="Error. This email is register already.";
-					echo 'if (confirm ("You are being redirected to PayPal to process your payment. Please DO NOT close your browser.  If you opt to pay using a PayPal account you will be redirected automatically after 10 seconds to your player area. If you opt to pay with a Credit Card you will have to click on \'Return to Roland Kalt\'. \n\nTo continue click Ok. \nIf you are not sure click Cancel and read the instructions.")){;'. "\n";
-					break;
-					case 'sp':
-					$responsemessagesuccess="Exito!";
-					$error="Error. Este email ya está registrado.";
-					echo 'if (confirm ("Usted será redireccionado a Paypal para procesar su pago. Por favor NO cierre el navegador. Si usted selecciona pagos con su cuenta de Paypal entonces será redireccionado a su area de audio automáticamente despues de 10 segundos. Si selecciona pagar con Tarjeta de Crédito tendrá que hacer clic en \'Return to Roland Kalt\'.\n\nPara continuar clic en Ok. \nSi tiene dudas haga clic en Cancel y lea las instrucciones.")){;'. "\n";
-					break;
-					}
-					$_SESSION['StoreLogin']=date("H:i:s");
-					echo '$.ajax({ '. "\n";
-					echo'type: "POST", '. "\n";
-					echo 'url: "/bin/register_storelogin.php", '. "\n";
-					echo 'data: $("#'.$Alias.'").serialize(),'. "\n";
-					//echo 'data: dataString, '. "\n";
-					echo 'success: function(data) { '. "\n";
-					/*echo 'alert (data);'. "\n";
-					echo 'return false;'. "\n";*/
-					
-					echo 'if (data==\'error\')'. "\n"; 
-					echo '{'. "\n";
-					echo '$(\'#form_'.$Alias.'\').html("<div id=\'message_'.$Alias.'\'></div>");'. "\n";
-					echo '$(\'#message_'.$Alias.'\').html("<h6><img id=\'checkmark\' src=\'/images/icon-error.png\' align=\'left\' />'.$error.'</h6>")'. "\n";
-					//echo '.append("<p>Please try again.</p>")'. "\n";
-					echo '.hide()'. "\n";
-					echo '.fadeIn(1500, function() {'. "\n";
-					echo '$(\'#message_'.$Alias.'\');'. "\n";
-					echo 'document.location=\''.$_SERVER['HTTP_REFERER'].'\';'. "\n";
-					//echo '$(\'#message\').append("<img id=\'checkmark\' src=\'/'.language.'/images/check.png\' />");'. "\n";
-					echo '});'. "\n";
-					echo '}'. "\n";
-					echo 'else'. "\n"; 
-					echo '{'. "\n";
-					
-					echo '$(\'#form_'.$Alias.'\').html("<div id=\'message_'.$Alias.'\'></div>");'. "\n";
-					echo '$(\'#message_'.$Alias.'\').html("<h6><img id=\'checkmark\' src=\'/images/check.png\' align=\'left\' />'.$responsemessagesuccess.'</h6>")'. "\n";
-					echo '.append(data)'. "\n";
-					echo '.hide()'. "\n";
-					echo '.fadeIn(1500, function() {'. "\n";
-					echo '$(\'#message_'.$Alias.'\');'. "\n";
-					//echo '$(\'#message\').append("<img id=\'checkmark\' src=\'/'.language.'/images/check.png\' />");'. "\n";
-					echo '});'. "\n";
-					echo '}'. "\n";
-					
-					echo '}'. "\n";
-					echo '});'. "\n";
-					echo 'return false;'. "\n";
-					echo '}'. "\n";
-					echo '}'. "\n";
-					echo '//-->'. "\n";
-					echo '</script>';
-										
-					
-				break;
-				
-				case 'StoreLogin':
-					switch(language)
-					{
-					case 'en':
-					$responsemessagesuccess="Success!";
-					$error="Error. Please try again.";
-					break;
-					case 'sp':
-					$responsemessagesuccess="Exito!";
-					$error="Error. Por favor intente de nuevo.";
-					break;
-					}
-					$_SESSION['StoreLogin']=date("H:i:s");
-					echo '$.ajax({ '. "\n";
-					echo'type: "POST", '. "\n";
-					echo 'url: "/bin/storelogin.php", '. "\n";
-					echo 'data: $("#'.$Alias.'").serialize(),'. "\n";
-					//echo 'data: dataString, '. "\n";
-					echo 'success: function(data) { '. "\n";
-					/*echo 'alert (data);'. "\n";
-					echo 'return false;'. "\n";*/
-					echo 'if (data==\'error\')'. "\n"; 
-					echo '{'. "\n";
-					echo '$(\'#form_'.$Alias.'\').html("<div id=\'message_'.$Alias.'\'></div>");'. "\n";
-					echo '$(\'#message_'.$Alias.'\').html("<h6><img id=\'checkmark\' src=\'/images/icon-error.png\' align=\'left\' />'.$error.'</h6>")'. "\n";
-					//echo '.append("<p>Please try again.</p>")'. "\n";
-					echo '.hide()'. "\n";
-					echo '.fadeIn(1500, function() {'. "\n";
-					echo '$(\'#message_'.$Alias.'\');'. "\n";
-					echo 'document.location=\''.$_SERVER['REQUEST_URI'].'\';'. "\n";
-					//echo '$(\'#message\').append("<img id=\'checkmark\' src=\'/'.language.'/images/check.png\' />");'. "\n";
-					echo '});'. "\n";
-					echo '}'. "\n";
-					echo 'else'. "\n"; 
-					echo '{'. "\n";
-					echo '$(\'#form_'.$Alias.'\').html("<div id=\'message_'.$Alias.'\'></div>");'. "\n";
-					echo '$(\'#message_'.$Alias.'\').html("<h6><img id=\'checkmark\' src=\'/images/check.png\' align=\'left\' />'.$responsemessagesuccess.'</h6>")'. "\n";
-					echo '.append(data)'. "\n";
-					echo '.hide()'. "\n";
-					echo '.fadeIn(1500, function() {'. "\n";
-					echo '$(\'#message_'.$Alias.'\');'. "\n";
-					
-					//echo '$(\'#message\').append("<img id=\'checkmark\' src=\'/'.language.'/images/check.png\' />");'. "\n";
-					echo '});'. "\n";
-					echo '}'. "\n";
-					echo '}'. "\n";
-					echo '});'. "\n";
-					echo 'return false;'. "\n";
-					echo '}'. "\n";
-					echo '//-->'. "\n";
-					echo '</script>';
-					
-					
-				break;
-				
 				default:
 				
 					echo 'return true;'. "\n";
@@ -847,7 +729,7 @@ class forms
 					
 			}
 			echo '</fieldset>';
-			echo '<input type="hidden" name="alias" value="'.$AliasArt.'" />';
+			echo '<input type="hidden" name="alias" value="'.red_public_html($AliasArt).'" />';
 			echo '<input type="hidden" name="RecordID" value="'.$RecordID.'" />';
 			echo '<textarea id="MySpamTrap" name="MySpamTrap" rows="3" cols="4"></textarea>';
 			echo '</form>';
@@ -880,28 +762,22 @@ class forms
 		//echo $this->query;
 		
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_C_Form WHERE RefID='".$recordid."'");
+		$rows = red_public_form_rows($db->connection, $recordid);
 		
-		//echo ('start'.$result->num_rows.'<br/>');
-		$result_counter = $result->num_rows;
+		//echo ('start'.count($rows).'<br/>');
+		$result_counter = count($rows);
+		$adminComponentIds = red_public_admin_component_ids($_SESSION['AdminComponents'] ?? '');
+		$canEditForm = red_public_admin_component_authorized($db->connection, 'Form', $adminComponentIds);
 		//
-		while($row = mysqli_fetch_assoc($result))
+		foreach($rows as $formRecord)
 		{
-			$RecordID=$row['RecordID'];
-			$Alias=$row['Alias'];
-			$Alias=preg_replace('/-/','_',$Alias);
-			$Title=$row['Title'];
+			$RecordID=$formRecord['RecordID'];
+			$Alias=red_public_js_identifier($formRecord['Alias'], 'form');
+			$Title=red_public_display_text($formRecord['Title']);
 			
 			/// COMPARE SESSION 'AdminComponents' WITH RED_COMPONENTS.
 				// IF VALUE EXIST THEN SHOW UPDATE BUTTON. IF NOT, DISPLAY MESSAGE FOR "ADMIN NOT AUTHORIZED TO UPDATE".
-				$AdminComponents = explode(",", $_SESSION['AdminComponents']);
-				//echo($_SESSION['AdminComponents'].'='.count($AdminComponents.'<br/>'));
-				for ($w=0; $w<=count($AdminComponents); $w++)
-				{
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT RecordID FROM RED_Components WHERE RecordID='".$AdminComponents[$w]."' AND UniqueName='Form'");
-				//echo ($resultC->num_rows);
-				if(($resultC->num_rows==0)&&($w==count($AdminComponents))){
+				if(!$canEditForm){
 					//echo 'ADMINISTRATOR NOT AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -915,10 +791,9 @@ class forms
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_form" value="Edit Form"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_form" value="Edit Form"/>';
 					echo '</form>';
-				}elseif(($resultC->num_rows==0));
-				else{
+				}else{
 					//echo 'ADMINISTRATOR AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -962,18 +837,16 @@ class forms
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="forms_'.$Alias.'_'.$RecordID.'" class="form" name="forms_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_forms_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_form" value="Edit Form"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_form" value="Edit Form"/>';
 					echo '<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
 					echo '<input type="hidden" name="ArtRecordID" id="RecordID" value="'.$recordid.'" />';
-					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.$VarPosition.'" />';
-                    echo '<input type="hidden" name="Article" id="Article" value="'.article.'" />';
-					echo '<input type="hidden" name="Layout" id="Layout" value="'.$layout.'" />';
+					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.red_public_html($VarPosition).'" />';
+                    echo '<input type="hidden" name="Article" id="Article" value="'.red_public_html(red_public_route_value('article')).'" />';
+					echo '<input type="hidden" name="Layout" id="Layout" value="'.red_public_html($layout).'" />';
 					echo '</form>';
 					//END "ADMIN AUTHORIZED TO UPDATE".
-				break;
 				}
 				
-				}
 				//END COMPARE SESSION
 				echo '<hr id="cp">';
 			

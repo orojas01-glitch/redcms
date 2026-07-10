@@ -10,5 +10,6 @@ return [
     'DBPASS' => 'database_password',
     'DBNAME' => 'database_name',
     'IPSTACK_ACCESS_KEY' => '',
+    'PAYPAL_PDT_HOSTNAME' => 'www.paypal.com',
+    'PAYPAL_PDT_AUTH_TOKEN' => '',
 ];
-

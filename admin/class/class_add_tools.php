@@ -1,5 +1,7 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); 
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_tool_helpers.php";
+red_start_session();
+red_require_admin();
 
 /**
  * Red Sphere - Unique php CMS
@@ -31,7 +33,10 @@ class add_tools
 		echo 'Article='.$Article.'<br/>';
 		echo 'VarPosition='.$VarPosition.'<br/>'; 
 		echo 'Language='.$Language.'<br/>'; */
-		$cpareastyle=strtolower($cparea);
+		$cpareastyle=strtolower(red_admin_tool_identifier($cparea));
+        if ($cpareastyle === '') {
+            $cpareastyle = 'content';
+        }
 		
 	
 ?>
@@ -42,22 +47,26 @@ class add_tools
         // FOR EACH COMPONENT ADD BUTTON.
         
         $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $resultC = $db->query("SELECT * FROM RED_Tools WHERE CompGroup = '".$compgroup."'");
-        //echo ($resultC->num_rows);
-		while($row = mysqli_fetch_assoc($resultC))
+        $tools = red_admin_tool_rows_by_group($db->connection, $compgroup);
+		foreach($tools as $row)
 		{
-			$UniqueName=$row['UniqueName'];
+			$UniqueName=red_admin_tool_identifier($row['UniqueName'] ?? '');
+            if ($UniqueName === '') {
+                continue;
+            }
+            $UniqueNameLower=strtolower($UniqueName);
 			//$Layout=$row['Layout'];
-			$ButtonTag=$row['ButtonTag'];
-			$AltContent=$row['AltContent'];
+			$ButtonTag=red_admin_tool_html($row['ButtonTag'] ?? '');
+			$AltContent=red_admin_tool_html($row['AltContent'] ?? '');
+            $buttonOnClick = 'add_'.$UniqueNameLower.'_'.$cpareastyle.'('.json_encode(red_admin_tool_text($layout)).');';
 			
 			echo '<script language="JavaScript" type="text/javascript">'. "\n";
 			echo '<!--' ."\n";
-			echo 'function add_'.strtolower($UniqueName).'_'.$cpareastyle.' (contenttype){'. "\n";
+			echo 'function add_'.$UniqueNameLower.'_'.$cpareastyle.' (contenttype){'. "\n";
 			echo '$.ajax({'. "\n";
 			echo 'type: "POST", '. "\n";
-			echo 'url: "/admin/bin/tool_'.strtolower($UniqueName).'.php", '. "\n";
-			echo 'data: "Type=" + contenttype + "&CountPage='.countpage.'&Section='.$Section.'&Category='.$Category.'&SubCategory='.$SubCategory.'&Article='.$Article.'&VarPosition='.$VarPosition .'&Language='.$Language.'&cparea='.$cparea.'&compgroup='.$compgroup.'&Layout='.$layout.'", '. "\n";
+			echo 'url: "/admin/bin/tool_'.$UniqueNameLower.'.php", '. "\n";
+			echo 'data: {Type: contenttype, CountPage: '.json_encode(red_admin_tool_scalar($countpage)).', Section: '.json_encode(red_admin_tool_text($Section)).', Category: '.json_encode(red_admin_tool_text($Category)).', SubCategory: '.json_encode(red_admin_tool_text($SubCategory)).', Article: '.json_encode(red_admin_tool_text($Article)).', VarPosition: '.json_encode(red_admin_tool_text($VarPosition)).', Language: '.json_encode(red_admin_tool_text($Language)).', cparea: '.json_encode(red_admin_tool_text($cparea)).', compgroup: '.json_encode(red_admin_tool_text($compgroup)).', Layout: '.json_encode(red_admin_tool_text($layout)).'}, '. "\n";
 			echo 'success: function(data) { '. "\n";
 			echo '/*alert (data);'. "\n";
 			echo 'return false;*/'. "\n";
@@ -84,10 +93,10 @@ class add_tools
 			echo '}'. "\n";
 			echo '-->'. "\n";
 			echo '</script>';
-			echo '<div class="cp_addcontent" id="cp_tools"><a href="#cp_'.$cpareastyle.'" onClick="add_'.strtolower($UniqueName).'_'.$cpareastyle.'(\''.$layout.'\');" title="'.$AltContent.'" class="cp_addcontent_button">'.$ButtonTag.'</a></div>';
+			echo '<div class="cp_addcontent" id="cp_tools"><a href="#cp_'.$cpareastyle.'" onClick="'.red_admin_tool_html($buttonOnClick).'" title="'.$AltContent.'" class="cp_addcontent_button">'.$ButtonTag.'</a></div>';
 
-		$db->close();
 		}
+        $db->close();
 		?>
         
     </div>

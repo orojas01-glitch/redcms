@@ -1,42 +1,50 @@
-<?php 
+<?php
 /**
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)
  * @version: 4.0 - (2025/03/06)
- * @requires linux v1.2.2 or later 
+ * @requires linux v1.2.2 or later
  * @author Oscar Rojas
- * Examples and documentation at: http://red-sphere.tv/documentation/ 
+ * Examples and documentation at: http://red-sphere.tv/documentation/
  * Licensed under MIT licence:
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
-<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
-<?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
-<?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-		$RecordID=preg_replace ( "'<[^>]+>'U", "", $_POST['RecordID']);
-		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		//echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-		$result = $db->query("SELECT * FROM RED_Sections WHERE RecordID='".$RecordID."'");
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
-		{
-		$RecordID=$row['RecordID'];
-		$layout=$row['Layout'];
-		$Features=$row['Features'];		
+red_start_session();
+red_require_admin();
+require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
+require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
+require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+
+$recordId = (int) red_admin_post_text('RecordID');
+if ($recordId <= 0) {
+    echo 'no';
+    exit;
+}
+
+$db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+$row = red_admin_area_record($db->connection, 'RED_Sections', $recordId);
+if (!$row) {
+    echo 'no';
+    $db->close();
+    exit;
+}
+
+$RecordID = (int) $row['RecordID'];
+$layout = (string) $row['Layout'];
+$selectedFeatures = array_flip(array_filter(array_map('trim', explode(',', (string) $row['Features']))));
+$layouts = red_admin_area_layouts($db->connection);
+$features = red_admin_area_features($db->connection);
+$relatedCount = red_admin_area_related_article_count($db->connection, 'Sections', $row['Sections']);
 ?>
 <!-- The main script file -->
 <script type="text/javascript">
 <!--
 function run_update_section (update_section)
 {
-	$.ajax({ 
-	type: "POST", 
-	url: "/admin/bin/update_section.php", 
+	$.ajax({
+	type: "POST",
+	url: "/admin/bin/update_section.php",
 	data: $("#update_section").serialize(),
 	success: function(data) {
 	/*alert (data);
@@ -55,15 +63,15 @@ function run_update_section (update_section)
 	}
 	else if(data=='error')
 	{
-	alert ('There is a Section using the same name.  Please enter a different Section Name.');	
+	alert ('There is a Section using the same name.  Please enter a different Section Name.');
 	}
 	else if(data=='error2')
 	{
-	alert ('There is a Category using the same name.  Please enter a different Section Name.');	
+	alert ('There is a Category using the same name.  Please enter a different Section Name.');
 	}
 	else if(data=='error3')
 	{
-	alert ('There is a SubCategory using the same name.  Please enter a different Section Name.');	
+	alert ('There is a SubCategory using the same name.  Please enter a different Section Name.');
 	}
 	else
 	{
@@ -81,17 +89,14 @@ function run_update_section (update_section)
 <!--
 function run_deleterecord (RecordID)
 {
-	$(document).ready(function(){           
+	$(document).ready(function(){
    $('#deleterecord_'+RecordID).click(function(){
       if(confirm("Are you sure you want to delete this Record? It can't be recovered.")){
-         //alert('Successful Request!');
-		  $.ajax({ 
-		type: "POST", 
-		url: "/admin/bin/delete_label.php", 
+		  $.ajax({
+		type: "POST",
+		url: "/admin/bin/delete_label.php",
 		data: "RecordID=" + RecordID + "&T=sections",
 		success: function(data) {
-		//alert (data);
-		//return false;
 		if (data=='yes')
 		{
 		$('#msggbox_deleterecord').html("Record Deleted.")
@@ -112,13 +117,11 @@ function run_deleterecord (RecordID)
 		}
 		});
 		return false;
-      } else {
-         //alert('Cancelled Request');
       }
       return false;
    });
 });
-	
+
 }
 //-->
 </script>
@@ -134,123 +137,73 @@ label{color:#000}
         <div style="padding:10px;">
         <div class="wrapper">
             <div class="titleleft">
-            	<label>Section Title: <input name="Title" type="text" id="title" value="<?php echo $row['Title']?>" /></label>
+                <label>Section Title: <input name="Title" type="text" id="title" value="<?php echo red_admin_area_html($row['Title']); ?>" /></label>
             </div>
             <div class="titleleft">
-            	<label>Alias: <input name="Sections" type="text" id="sections" value="<?php echo $row['Sections']?>" /></label>
+                <label>Alias: <input name="Sections" type="text" id="sections" value="<?php echo red_admin_area_html($row['Sections']); ?>" /></label>
             </div>
             <div class="titleright">
-            	<a href="#" id="deleterecord_<?php echo $RecordID ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deleterecord(<?php echo $RecordID ?>);" title="Delete Record" style="cursor:pointer"></a>
+                <a href="#" id="deleterecord_<?php echo $RecordID; ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deleterecord(<?php echo $RecordID; ?>);" title="Delete Record" style="cursor:pointer"></a>
              </div>
             <div class="titleright">
-            	<label style="display:inline;">Active: <select name="Active">
-                <option value="Y" <?php if ($row['Active']=='Y') echo 'selected="selected"'?>>Y</option>
-                <option value="N" <?php if ($row['Active']=='N') echo 'selected="selected"'?>>N</option>
+                <label style="display:inline;">Active: <select name="Active">
+                <option value="Y" <?php if ($row['Active']=='Y') echo 'selected="selected"'; ?>>Y</option>
+                <option value="N" <?php if ($row['Active']=='N') echo 'selected="selected"'; ?>>N</option>
                 </select>
                 </label>
             </div>
         </div>
         <div class="wrapper">
             <div class="titleright">
-            	<span id="msggbox_deleterecord" style="display:none"></span>
-        	</div>
+                <span id="msggbox_deleterecord" style="display:none"></span>
+            </div>
         </div>
         <div class="wrapper">
             <div class="titleleft">
                 <label style="display:inline;">Layout:
-                
-                <?php
-                echo '<select name="Layout" id="layout">';
-                $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                $result = $db->query("SELECT UniqueName FROM RED_Layouts");
-                while($row2 = mysqli_fetch_assoc($result))
-                {
-                    $thislayout=$row2['UniqueName'];
-                    if ($thislayout===$layout)
-                    echo '<option value="'.$thislayout.'" selected="selected">'.$thislayout.'</option>';
-                    else
-                    echo '<option value="'.$thislayout.'">'.$thislayout.'</option>';
-                }
-                $db->close();
-                
-                echo '</select>';
-				?>
-                </label>  
+                <select name="Layout" id="layout">
+                <?php foreach ($layouts as $thislayout) { ?>
+                    <option value="<?php echo red_admin_area_html($thislayout); ?>" <?php if ($thislayout === $layout) echo 'selected="selected"'; ?>><?php echo red_admin_area_html($thislayout); ?></option>
+                <?php } ?>
+                </select>
+                </label>
             </div>
             <div class="titleright">
-                <label style="display:inline;" title="Articles Limit">Articles Limit: <input name="QueryLimit" type="text" id="limit" value="<?php echo $row['QueryLimit']?>" /></label>
+                <label style="display:inline;" title="Articles Limit">Articles Limit: <input name="QueryLimit" type="text" id="limit" value="<?php echo red_admin_area_html($row['QueryLimit']); ?>" /></label>
             </div>
-            
         </div>
         <div class="wrapper">
             <div class="titleleft">
-            	<label>Features:
+                <label>Features:
                     <select name="Features[]" size="3" multiple>
-                    <?php
-                    $feature=explode(',', $Features);
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT UniqueName FROM RED_Features");
-                    $result_counter = $result3->num_rows;
-                     global $selected;
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-                        
-                        for ($t=0; $t<count($feature); $t++)
-                        {
-                            //echo '<option value="'.$t.'">'.$t.'</option>';
-                            if ($feature[$t]===$row3['UniqueName']){
-                                $selected='selected="selected"';
-                                break;
-                            }
-                        }
-                        echo '<option value="'.$row3['UniqueName'].'" '.$selected.'>'.$row3['UniqueName'].'</option>';
-                    $selected='';
-                    $result_counter = ($result_counter - 1);
-                    }
-                    ?>
+                    <?php foreach ($features as $featureName) { ?>
+                        <option value="<?php echo red_admin_area_html($featureName); ?>" <?php if (isset($selectedFeatures[$featureName])) echo 'selected="selected"'; ?>><?php echo red_admin_area_html($featureName); ?></option>
+                    <?php } ?>
                     </select>
                 </label>
             </div>
 			<div class="titleright">
-            	<label style="display:inline;">Access Level: <select name="AccessLevel">
-                <option value="Public" <?php if ($row['AccessLevel']=='Public') echo 'selected="selected"'?>>Public</option>
-                <option value="Private" <?php if ($row['AccessLevel']=='Private') echo 'selected="selected"'?>>Private</option>
+                <label style="display:inline;">Access Level: <select name="AccessLevel">
+                <option value="Public" <?php if ($row['AccessLevel']=='Public') echo 'selected="selected"'; ?>>Public</option>
+                <option value="Private" <?php if ($row['AccessLevel']=='Private') echo 'selected="selected"'; ?>>Private</option>
                 </select>
-                </label> 
+                </label>
             </div>
         </div>
-         
+
          <label>Tags:
-        <input name="Tags" type="text" id="tags" value="<?php echo $row['Tags']?>" /></label>
-                 
+        <input name="Tags" type="text" id="tags" value="<?php echo red_admin_area_html($row['Tags']); ?>" /></label>
+
         <label>Long Description:
-        <textarea name="Description" id="ShortDesc" cols="" rows="4"><?php echo $row['Description']?></textarea></label>
+        <textarea name="Description" id="ShortDesc" cols="" rows="4"><?php echo red_admin_area_html($row['Description']); ?></textarea></label>
 		<div class="wrapper">
-         	<div class="titleleft">
-                
-                <?php
-                $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                 $result3 = $db->query("SELECT Title, Alias, Active FROM RED_Articles WHERE Sections='".$row['Sections']."' ORDER BY Updated DESC");
-                 echo '<label>Related articles:  '.$result3->num_rows.'';
-				 	/*if($result3->num_rows>0){
-						echo '</label><dl class="cp_slideDown">';
-						echo '<dt>More</dt> ';
-						echo '<dd>';
-						while($row3 = mysqli_fetch_assoc($result3))
-						{
-						echo $row3['Title'] . ','. $row3['Alias'] .',' . $row3['Active'] . '<br />';
-						}
-						echo '</dd>';
-         				echo '</dl>';
-					}else*/
-					echo '</label>';
-                ?>
-                
+             <div class="titleleft">
+                <label>Related articles:  <?php echo $relatedCount; ?></label>
             </div>
          </div>
- 
-         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
-          <input type="hidden" name="CurrentSection" id="CurrentSection" value="<?php echo $row['Sections']?>" />
+
+         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID; ?>" />
+          <input type="hidden" name="CurrentSection" id="CurrentSection" value="<?php echo red_admin_area_html($row['Sections']); ?>" />
         <input type="submit" name="submit" value="Save" id="save"/> <span id="msggbox_update_section" style="display:none"></span>
         </div>
         </article>
@@ -259,7 +212,5 @@ label{color:#000}
 </fieldset>
 </form>
 <?php
-		}
-		$db->close();
-		}
+$db->close();
 ?>

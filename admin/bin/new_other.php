@@ -10,24 +10,31 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php' ?>
 <?php
 if(empty($_SESSION['alias']))
 	header('Location: http://'.BASE_URL.'');
 	else {
-		$Type=preg_replace ( "'<[^>]+>'U", "", $_POST['Type']);
-		$CountPage=preg_replace ( "'<[^>]+>'U", "", $_POST['CountPage']);
-		$Section=preg_replace ( "'<[^>]+>'U", "", $_POST['Section']);
-		$Category=preg_replace ( "'<[^>]+>'U", "", $_POST['Category']);
-		$SubCategory=preg_replace ( "'<[^>]+>'U", "", $_POST['SubCategory']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$Language=preg_replace ( "'<[^>]+>'U", "", $_POST['Language']);
-		$Layout=preg_replace ( "'<[^>]+>'U", "", $_POST['Layout']);
-        $Article=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
+		$Type=red_admin_post_text('Type');
+		$CountPage=red_admin_post_text('CountPage');
+		$Section=red_admin_post_text('Section');
+		$Category=red_admin_post_text('Category');
+		$SubCategory=red_admin_post_text('SubCategory');
+		$VarPosition=red_admin_article_position_column($_POST['VarPosition'] ?? '', 'PagePosition');
+		if ($VarPosition === null) {
+			echo 'no';
+			exit;
+		}
+		$Language=substr(red_admin_post_text('Language'), 0, 2);
+		$Layout=red_admin_post_text('Layout');
+        $Article=red_admin_post_text('Article');
         
 		$RecordID=mt_rand();
+		$csrfToken=red_csrf_token();
 
 ?>
 <!-- Our CSS stylesheet file -->
@@ -56,7 +63,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=BigPict&Insert=true&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=BigPict&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -166,7 +173,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=SmallPict&Insert=true&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=SmallPict&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -330,25 +337,19 @@ function run_insert_content (insert_content)
                 </label>
             </div>
             <div class="titleright">
-                <label style="display:inline;" title="Position Order">Order: <input name="<?php echo $VarPosition.'Order'?>" type="text" id="order" value="" /></label>
-            </div>
-            <div class="titleright">
-                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
-                <?php
-				 //echo $Layout;
-				 $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-				//echo ($resultC->num_rows);
-				while($row = mysqli_fetch_assoc($resultC))
-				{
-					$Positions=$row['Positions'];
-				}
-				//echo $Positions;
-				for ($w=0; $w<=$Positions; $w++)
-				{
-					echo '<option value="'.$w.'">'.$w.'</option>';
-				}
-				?>
+	                <label style="display:inline;" title="Position Order">Order: <input name="<?php echo $VarPosition.'Order'?>" type="text" id="order" value="" /></label>
+	            </div>
+	            <div class="titleright">
+	                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
+	                <?php
+					$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+					$Positions=red_admin_article_layout_positions($db->connection, $Layout);
+					for ($w=0; $w<=$Positions; $w++)
+					{
+						echo '<option value="'.$w.'">'.$w.'</option>';
+					}
+					$db->close();
+					?>
                  </select>
                 </label>
              </div>
@@ -402,79 +403,46 @@ function run_insert_content (insert_content)
                 
                 <div class="titleright"  style="text-align:right">
                     <label>Article Location:</label>
-                    <label>Section: <select name="Sections">
-                    <option value="">- null -</option>
-                    <?php 
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Sections FROM RED_Sections WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Sections']==$Section)    
-                            echo '<option value="' . $row3['Sections'] . '" selected="selected">' . $row3['Sections'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Sections'] . '">' . $row3['Sections'] . '</option>';
-                        }
-                    }
-                    $db->close();
-                    ?>
+	                    <label>Section: <select name="Sections">
+	                    <option value="">- null -</option>
+	                    <?php
+	                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     
                     <label>Category: <select name="Categories">
                     <option value="">- null -</option>
-                    <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Categories FROM RED_Categories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Categories']==$Category)    
-                            echo '<option value="' . $row3['Categories'] . '" selected="selected">' . $row3['Categories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Categories'] . '">' . $row3['Categories'] . '</option>';
-                        }
-                    }
-                    $db->close();
-                    ?>
+	                    <?php
+	                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     
                     <label>Sub Category: <select name="SubCategories">
                     <option value="">- null -</option>
-                    <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT SubCategories FROM RED_SubCategories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['SubCategories']==$SubCategory)    
-                            echo '<option value="' . $row3['SubCategories'] . '" selected="selected">' . $row3['SubCategories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['SubCategories'] . '">' . $row3['SubCategories'] . '</option>';
-                        }
-                    }
-                    $db->close();
-                    ?>
+	                    <?php
+	                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     <label>Article: <select name="Article">
                     <option value="">- null -</option>
-                    <?php
-                    
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$result3 = $db->query("SELECT Title, Alias FROM RED_Articles WHERE Active = 'Y' AND Component='Article' ORDER BY Updated DESC");
-					
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-						$thisalias=$row3['Alias'];
+	                    <?php
 
-						if (strtolower($thisalias)==strtolower($Article))
-						echo '<option value="'.$row3['Alias'].'" selected="selected">'.$row3['Alias'].'</option>';
-						else
-						echo '<option value="'.$row3['Alias'].'">'.$row3['Alias'].'</option>';
-                    }
-                    ?>
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+						echo red_admin_article_page_options($db->connection, $Article);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     <div class="clear-cp"></div>
@@ -491,10 +459,11 @@ function run_insert_content (insert_content)
              <br />-->
          </dd>
          </dl>
-         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
-         <input type="hidden" name="Language" id="Language" value="<?php echo $Language ?>" />
-         <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo $_SESSION['alias']?>" />
-         <input type="hidden" name="Component" id="Component" value="Other" />
+	         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
+	         <input type="hidden" name="Language" id="Language" value="<?php echo red_admin_area_html($Language) ?>" />
+	         <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($_SESSION['alias'])?>" />
+	         <input type="hidden" name="Component" id="Component" value="Other" />
+	         <?php echo red_csrf_input(); ?>
         <input type="submit" name="submit" value="Save" id="save"/><span id="msggbox_insert_content" style="display:none"></span>
         </div>
         </article>

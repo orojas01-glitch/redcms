@@ -1,6 +1,8 @@
 <?php 
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); 
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_tool_helpers.php";
+red_start_session();
+red_require_admin();
 /**
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)
@@ -37,26 +39,26 @@ class add_menu
     	<?php
         // READ SESSION 'AdminComponents'
         // FOR EACH COMPONENT ADD BUTTON.
-        $AdminComponents = explode(",", $_SESSION['AdminComponents']);
-        //echo($_SESSION['AdminComponents'].'='.count($AdminComponents.'<br/>'));
-        for ($w=0; $w<count($AdminComponents); $w++)
-        {
         $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $resultC = $db->query("SELECT * FROM RED_Components WHERE RecordID='".$AdminComponents[$w]."'");
-        //echo ($resultC->num_rows);
-		while($row = mysqli_fetch_assoc($resultC))
-		{
-			$UniqueName=$row['UniqueName'];
-			$Layout=$row['Layout'];
-			$ButtonTag=$row['ButtonTag'];
+        $components = red_admin_tool_components_for_admin($db->connection, red_admin_tool_admin_component_ids($_SESSION['AdminComponents'] ?? ''));
+        foreach ($components as $row)
+        {
+			$UniqueName=red_admin_tool_identifier($row['UniqueName'] ?? '');
+            if ($UniqueName === '') {
+                continue;
+            }
+            $UniqueNameLower=strtolower($UniqueName);
+			$Layout=red_admin_tool_text($row['Layout'] ?? '');
+			$ButtonTag=red_admin_tool_html($row['ButtonTag'] ?? '');
+            $buttonOnClick = 'add_'.$UniqueNameLower.'('.json_encode($Layout).');';
 			
 			echo '<script language="JavaScript" type="text/javascript">'. "\n";
 			echo '<!--' ."\n";
-			echo 'function add_'.strtolower($UniqueName).' (contenttype){'. "\n";
+			echo 'function add_'.$UniqueNameLower.' (contenttype){'. "\n";
 			echo '$.ajax({'. "\n";
 			echo 'type: "POST", '. "\n";
-			echo 'url: "/admin/bin/new_'.strtolower($UniqueName).'.php", '. "\n";
-			echo 'data: "Type=" + contenttype + "&CountPage='.countpage.'&Section='.$Section.'&Category='.$Category.'&SubCategory='.$SubCategory.'&Article='.$Article.'&VarPosition='.$VarPosition .'&Language='.$Language.'&Layout='.$layout.'", '. "\n";
+			echo 'url: "/admin/bin/new_'.$UniqueNameLower.'.php", '. "\n";
+			echo 'data: {Type: contenttype, CountPage: '.json_encode(red_admin_tool_scalar($countpage)).', Section: '.json_encode(red_admin_tool_text($Section)).', Category: '.json_encode(red_admin_tool_text($Category)).', SubCategory: '.json_encode(red_admin_tool_text($SubCategory)).', Article: '.json_encode(red_admin_tool_text($Article)).', VarPosition: '.json_encode(red_admin_tool_text($VarPosition)).', Language: '.json_encode(red_admin_tool_text($Language)).', Layout: '.json_encode(red_admin_tool_text($layout)).'}, '. "\n";
 			echo 'success: function(data) { '. "\n";
 			echo '/*alert (data);'. "\n";
 			echo 'return false;*/'. "\n";
@@ -83,10 +85,9 @@ class add_menu
 			echo '}'. "\n";
 			echo '-->'. "\n";
 			echo '</script>';
-			echo '<div class="cp_addcontent" id="cp_'.strtolower($UniqueName).'"><a href="#atop" onClick="add_'.strtolower($UniqueName).'(\''.$Layout.'\');" class="cp_addcontent_button">'.$ButtonTag.'</a></div>';
+			echo '<div class="cp_addcontent" id="cp_'.$UniqueNameLower.'"><a href="#atop" onClick="'.red_admin_tool_html($buttonOnClick).'" class="cp_addcontent_button">'.$ButtonTag.'</a></div>';
 		}
 		$db->close();
-		}
 		?>
         
     </div>

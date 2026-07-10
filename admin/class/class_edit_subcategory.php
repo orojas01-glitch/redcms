@@ -1,5 +1,7 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+red_start_session();
+red_require_admin(); ?>
 <?php
 #[\AllowDynamicProperties]
 class editsubcategory
@@ -56,14 +58,14 @@ class editsubcategory
 		echo '<div class="clear-cp"></div>';
 		
         $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $result = $db->query("SELECT * FROM RED_SubCategories WHERE Language='".language."' ORDER BY RecordID ASC");
-        while($row = mysqli_fetch_assoc($result))
+        $rows = red_admin_area_list_rows($db->connection, 'RED_SubCategories', red_admin_area_language());
+        foreach($rows as $row)
         {
-            $SubCategories=$row['SubCategories'];
-			$Title=$row['Title'];
-            $Layout=$row['Layout'];
-            $Active=$row['Active'];
-            $RecordID=$row['RecordID'];
+            $SubCategories=red_admin_area_html($row['SubCategories'] ?? '');
+			$Title=red_admin_area_html($row['Title'] ?? '');
+            $Layout=red_admin_area_html($row['Layout'] ?? '');
+            $Active=red_admin_area_html($row['Active'] ?? '');
+            $RecordID=(int) ($row['RecordID'] ?? 0);
                 
             echo '<div class="wrapper row2">';
 			echo '<label style="display:inline;">';

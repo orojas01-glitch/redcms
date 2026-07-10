@@ -3,206 +3,64 @@
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)
  * @version: 4.0 - (2025/03/06)
- * @requires linux v1.2.2 or later 
+ * @requires linux v1.2.2 or later
  * @author Oscar Rojas
- * Examples and documentation at: http://red-sphere.tv/documentation/ 
+ * Examples and documentation at: http://red-sphere.tv/documentation/
  * Licensed under MIT licence:
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
 red_require_admin(true);
+
 $payloadFields = array_diff(array_keys($_POST), ['csrf_token', 'RecordID', 'CurrentSubCategory']);
 if (empty($payloadFields) || empty($_POST['RecordID'])) {
-	echo 'no';
-	exit;
+    echo 'no';
+    exit;
 }
-?>
-<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
-<?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
-<?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-	
-	$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-	
-	$x = 0;
-	$updatearticles = false;
-	$subcategory = '';
-	$CurrentSubCategory = '';
-	foreach($_POST as $name => $value)
-	{
-		
-		$name = preg_replace ( "'<[^>]+>'U", "", $name);
-		
-		switch ($name)
-		{
-			case 'RecordID':
-				$RecordID=mysqli_real_escape_string($db->connection,$value);
-			break;
-			case 'CurrentSubCategory':
-				$CurrentSubCategory=mysqli_real_escape_string($db->connection,$value);
-			break;
-			case 'Title':
-				$value=mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'SubCategories':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				$value = preg_replace('/\%/',' percentage',$value);
-				$value = preg_replace('/\@/',' at ',$value);
-				$value = preg_replace('/\s[\s]+/','-',$value);    // Strip off multiple spaces
-				$value = preg_replace('/[\s\W]+/','-',$value);    // Strip off spaces and non-alpha-numeric
-				$value = preg_replace('/^[\-]+/','',$value); // Strip off the starting hyphens
-				$value = preg_replace('/[\-]+$/','',$value); // // Strip off the ending hyphens
-				$value = strtolower($value); 
-				$subcategory = $value;
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'Active':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'Layout':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'QueryLimit':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'AccessLevel':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'Description':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			case 'Features':				
-			break;
-			case 'Tags':
-				$value = preg_replace('/\%/','',$value);
-				$value = preg_replace('/\@/','',$value);
-				$value = preg_replace('/\&/','',$value);
-				$value = preg_replace('/\s[\s]+/',',',$value);    // Strip off multiple spaces
-				$value = preg_replace('/[\s\W]+/',',',$value);    // Strip off spaces and non-alpha-numeric
-				$value = preg_replace('/^[\-]+/','',$value); // Strip off the starting hyphens
-				$value = preg_replace('/[\-]+$/','',$value); // // Strip off the ending hyphens
-				$value = strtolower($value); 
-				
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-			
-		}
-	
-	}
-	
-	if($subcategory <> strtolower($CurrentSubCategory)){
-		$updatearticles = true;
-		$subcategories = $subcategory;
-	}
-	
-	if (isset($_POST['Features'])) {
-    if (is_array($_POST['Features'])) {
-        // Join array elements with commas
-        $features = implode(',', $_POST['Features']);
-    } else {
-        // If not an array, use the value directly
-        $features = $_POST['Features'];
+
+require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
+require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
+require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+
+$db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+
+$recordId = (int) red_admin_post_text('RecordID');
+$currentSubCategory = strtolower(red_admin_post_text('CurrentSubCategory'));
+$data = red_admin_area_update_payload($_POST, 'SubCategories');
+$newSubCategory = $data['SubCategories'] ?? '';
+$language = red_admin_area_language();
+
+if ($recordId <= 0) {
+    echo 'no';
+    $db->close();
+    exit;
+}
+
+$renaming = array_key_exists('SubCategories', $data) && $newSubCategory !== '' && $newSubCategory !== $currentSubCategory;
+if ($renaming) {
+    $conflict = red_admin_area_alias_conflict($db->connection, $language, $newSubCategory);
+    if ($conflict !== '') {
+        echo $conflict;
+        $db->close();
+        exit;
     }
-    $features = mysqli_real_escape_string($db->connection, $features);
-    if ($x === 0) {
-        $queryset = "Features='" . $features . "'";
-    } else {
-        $queryset .= ", Features='" . $features . "'";
-    }
-    $x++;
+
+    $response = red_admin_area_rename(
+        $db->connection,
+        'RED_SubCategories',
+        'SubCategories',
+        $recordId,
+        $data,
+        $currentSubCategory,
+        $newSubCategory,
+        $language
+    );
+    echo $response !== false ? $response : 'no';
 } else {
-    if ($x === 0) {
-        $queryset = "Features=''";
-    } else {
-        $queryset .= ", Features=''";
-    }
-    $x++;
+    $areaRows = red_admin_update_area($db->connection, 'RED_SubCategories', 'SubCategories', $recordId, $data);
+    echo ($areaRows !== false && $areaRows > 0) ? 'yes' : 'no';
 }
-	
-	if ($updatearticles){
-		$result = $db->query("SELECT Sections FROM RED_Sections WHERE Language='".language."' AND Sections='".$subcategories."'");
-		$result_counter = $result->num_rows;
-		$result2 = $db->query("SELECT Categories FROM RED_Categories WHERE Language='".language."' AND Categories='".$subcategories."'");
-		$result_counter2 = $result2->num_rows;
-		$result3 = $db->query("SELECT SubCategories FROM RED_SubCategories WHERE Language='".language."' AND SubCategories='".$subcategories."'");
-		$result_counter3 = $result3->num_rows;
-		if ($result_counter > 0){
-			echo 'error';
-			$updatearticles=false;
-		}
-		elseif ($result_counter2 > 0){
-			echo 'error2';
-			$updatearticles=false;
-		}
-		elseif ($result_counter3 > 0){
-			echo 'error3';
-			$updatearticles=false;
-		}
-		if ($updatearticles){
-		//update all articles to this renamed section.
-		//echo "UPDATE RED_Articles SET Sections = '".$Sections."' WHERE Sections = '".$CurrentSection."'";
-		if ($result = $db->update("UPDATE RED_Articles SET SubCategories = '".$subcategories."' WHERE Language='".language."' AND SubCategories = '".$CurrentSubCategory."'"))
-		echo 'update';
-		//update navigation menu to this renamed section.
-		//echo "UPDATE RED_Menu set Link = replace(Link, '/".$CurrentSection."/', '/".$Sections."/');";
-		if ($result = $db->update("UPDATE RED_Menu set Link = replace(Link, '/".$CurrentSubCategory."/', '/".$subcategories."/');"))
-		echo 'update';
-		//update component navigation menu to this renamed section.
-		if ($result = $db->update("UPDATE RED_C_Menu set Link = replace(Link, '/".$CurrentSubCategory."/', '/".$subcategories."/');"))
-		echo 'update';	
-		//update subcategory name.
-		if ($result = $db->update("UPDATE RED_SubCategories SET ".$queryset." WHERE RecordID='".$RecordID."'"))
-		echo 'yes';
-		}
-		
-	}else{
-	//echo "UPDATE RED_Sections SET ".$queryset." WHERE RecordID='".$RecordID."'";
-	if ($result = $db->update("UPDATE RED_SubCategories SET ".$queryset." WHERE RecordID='".$RecordID."'"))
-		echo 'yes';
-	else
-		echo 'no';
-	}
-	$db->close();
-}
+
+$db->close();
 ?>

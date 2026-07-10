@@ -1,19 +1,26 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_advanced_helpers.php' ?>
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-		$RecordID=preg_replace ( "'<[^>]+>'U", "", $_POST['RecordID']);
-		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		//echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-		$result = $db->query("SELECT * FROM RED_Advanced WHERE RecordID='".$RecordID."'");
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
-		{	
+$RecordID = (int) red_admin_advanced_scalar($_POST['RecordID'] ?? 0);
+if ($RecordID <= 0) {
+	echo 'no';
+	exit;
+}
+
+$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+$row = red_admin_advanced_record($db->connection, $RecordID);
+if (!$row) {
+	$db->close();
+	echo 'no';
+	exit;
+}
+
+$language = red_admin_text($row['Language'] ?? (defined('language') ? language : ''));
+$csrfToken = red_csrf_token();
 ?>
 <!-- Our CSS stylesheet file -->
 <link rel="stylesheet" href="/admin/assets/css/styles.css" />
@@ -94,7 +101,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=Webpage_Logo&Language=<?php echo $language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=Webpage_Logo&Language=<?php echo rawurlencode($language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -239,7 +246,7 @@ function run_update_advanced (update_advanced)
 	return false;
 }
 function MM_jumpCSS(jumpCSS){ 
-	var dataString = "Item=Reload&jumpCSS=" + jumpCSS.options[jumpCSS.selectedIndex].value;
+	var dataString = "Item=Reload&csrf_token=<?php echo rawurlencode($csrfToken); ?>&jumpCSS=" + encodeURIComponent(jumpCSS.options[jumpCSS.selectedIndex].value);
 	//alert (dataString);
 	$.ajax({ 
 	type: "POST", 
@@ -247,7 +254,7 @@ function MM_jumpCSS(jumpCSS){
 	data: dataString,
 	success: function(data) {
 	//alert (data);
-	$('#CSS').html(data)
+	$('#CSS').val(data)
 	return false;
 	//alert (jumpCSS.options[jumpCSS.selectedIndex].value);
 	//return false;
@@ -275,8 +282,8 @@ label{color:#000}
 			case 'Website_Logo':
 				echo'<div class="titleleft">';
 				echo'<label title="Website Logo">Website Logo: </label>';
-				echo'<input name="'.$row['Item'].'" type="hidden" value="'.$row['Content'].'" />';
-				echo'<img src="/images/'.$row['Content'].'" alt="">';
+				echo'<input name="'.red_admin_advanced_html($row['Item']).'" type="hidden" value="'.red_admin_advanced_html($row['Content']).'" />';
+				echo'<img src="/images/'.red_admin_advanced_html($row['Content']).'" alt="">';
 				echo'</div>';
 				echo'<div id="dropbox" style="width: 99%; min-height:80px;">';
 				echo'<span class="message">Drop logo <br />here to upload.</span>';
@@ -284,50 +291,47 @@ label{color:#000}
 			break;
 			///////////////
 			case 'Website_CSS':
-				echo $_POST['jumpCSS'];
 				echo'<label>Select CSS to edit: </label><select name="jumpCSS" id="jumpCSS" onchange="MM_jumpCSS(this)">';
-				  if ($handle = opendir('../../css/')) {
-						while (false !== ($entry = readdir($handle))) {
-							if ($entry != "." && $entry != "..") {
-								if ($entry=="style.css")
-								echo '<option value="'.$entry.'" selected="selected">'.$entry.'</option>';
-								else
-								echo '<option value="'.$entry.'">'.$entry.'</option>';
-							}
-						}
-						closedir($handle);
-					}
+				  foreach (red_admin_advanced_css_files() as $entry) {
+						$selected = $entry === 'style.css' ? ' selected="selected"' : '';
+						echo '<option value="'.red_admin_advanced_html($entry).'"'.$selected.'>'.red_admin_advanced_html($entry).'</option>';
+				  }
 				echo'</select><div class="clear-cp"></div>';
 				
-				$css = file_get_contents('../../css/style.css', true);
-				echo'<label>'.preg_replace('/\_/',' ',$row['Item']);
-				echo'<textarea name="CSS" id="CSS" cols="" rows="30">'.$css.'</textarea></label>';
+				$styleCssPath = red_admin_advanced_css_path('style.css');
+				$css = $styleCssPath !== '' ? file_get_contents($styleCssPath) : '';
+				echo'<label>'.red_admin_advanced_html(preg_replace('/\_/',' ',$row['Item']));
+				echo'<textarea name="CSS" id="CSS" cols="" rows="30">'.red_admin_advanced_html($css).'</textarea></label>';
+				echo red_csrf_input();
 				echo'<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
-				echo'<input type="hidden" name="Item" id="Item" value="'.$row['Item'].'" />';
+				echo'<input type="hidden" name="Item" id="Item" value="'.red_admin_advanced_html($row['Item']).'" />';
 				echo'<input type="submit" name="submit" value="Save" id="save"/>';
 			break;
 			
 			case 'Website_Header':
-				echo'<label>'.preg_replace('/\_/',' ',$row['Item']);
-				echo'<textarea name="Content" id="Content" cols="" rows="4">'.$row['Content'].'</textarea></label>';
+				echo'<label>'.red_admin_advanced_html(preg_replace('/\_/',' ',$row['Item']));
+				echo'<textarea name="Content" id="Content" cols="" rows="4">'.red_admin_advanced_html($row['Content']).'</textarea></label>';
+				echo red_csrf_input();
 				echo'<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
-				echo'<input type="hidden" name="Item" id="Item" value="'.$row['Item'].'" />';
+				echo'<input type="hidden" name="Item" id="Item" value="'.red_admin_advanced_html($row['Item']).'" />';
 				echo'<input type="submit" name="submit" value="Save" id="save"/>';
 			break;
 			
 			case 'Website_Footer':
-				echo'<label>'.preg_replace('/\_/',' ',$row['Item']);
-				echo'<textarea name="Content" id="Content" cols="" rows="4">'.$row['Content'].'</textarea></label>';
+				echo'<label>'.red_admin_advanced_html(preg_replace('/\_/',' ',$row['Item']));
+				echo'<textarea name="Content" id="Content" cols="" rows="4">'.red_admin_advanced_html($row['Content']).'</textarea></label>';
+				echo red_csrf_input();
 				echo'<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
-				echo'<input type="hidden" name="Item" id="Item" value="'.$row['Item'].'" />';
+				echo'<input type="hidden" name="Item" id="Item" value="'.red_admin_advanced_html($row['Item']).'" />';
 				echo'<input type="submit" name="submit" value="Save" id="save"/>';
 			break;
 						
 			default:
-				echo'<label>'.preg_replace('/\_/',' ',$row['Item']);
-				echo'<textarea name="ShortLine" id="ShortLine" cols="" rows="4">'.$row['Content'].'</textarea></label>';
+				echo'<label>'.red_admin_advanced_html(preg_replace('/\_/',' ',$row['Item']));
+				echo'<textarea name="ShortLine" id="ShortLine" cols="" rows="4">'.red_admin_advanced_html($row['Content']).'</textarea></label>';
+				echo red_csrf_input();
 				echo'<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
-				echo'<input type="hidden" name="Item" id="Item" value="'.$row['Item'].'" />';
+				echo'<input type="hidden" name="Item" id="Item" value="'.red_admin_advanced_html($row['Item']).'" />';
 				echo'<input type="submit" name="submit" value="Save" id="save"/>';
 			break;
 		}
@@ -342,7 +346,5 @@ label{color:#000}
 </fieldset>
 </form>
 <?php
-		}
-		$db->close();
-		}
+	$db->close();
 ?>

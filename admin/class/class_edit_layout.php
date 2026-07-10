@@ -1,4 +1,9 @@
 <?php
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+red_start_session();
+red_require_admin();
+
 #[\AllowDynamicProperties]
 class editlayout
 {
@@ -44,35 +49,18 @@ class editlayout
 		echo '</script>';
 		
 		echo '<form id="update_layout" name="update_layout" method="post">';
-		echo '<input type="hidden" name="countpage" id="countpage" value="'.$countpage.'" />';
-		echo '<input type="hidden" name="sections" id="section" value="'.$section.'" />';
-		echo '<input type="hidden" name="categories" id="category" value="'.$category.'" />';
-		echo '<input type="hidden" name="subcategories" id="subcategory" value="'.$subcategory.'" />';
-		echo '<input type="hidden" name="article" id="article" value="'.$article.'" />';
+		echo '<input type="hidden" name="countpage" id="countpage" value="'.red_admin_area_html($countpage).'" />';
+		echo '<input type="hidden" name="sections" id="section" value="'.red_admin_area_html($section).'" />';
+		echo '<input type="hidden" name="categories" id="category" value="'.red_admin_area_html($category).'" />';
+		echo '<input type="hidden" name="subcategories" id="subcategory" value="'.red_admin_area_html($subcategory).'" />';
+		echo '<input type="hidden" name="article" id="article" value="'.red_admin_area_html($article).'" />';
 		echo '<select name="Layout" id="layout" onChange="return run_update_layout(update_layout);">';
 		
-		//$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//		$result = $db->query("SELECT UniqueName FROM RED_Layouts");
-//		while($row = mysqli_fetch_assoc($result))
-//		{
-//			$This->layout=$row['UniqueName'];
-//			if ($This->layout===$layout)
-//			echo '<option value="'.$This->layout.'" selected="selected">'.$This->layout.'</option>';
-//			else
-//			echo '<option value="'.$This->layout.'">'.$This->layout.'</option>';
-//		}
-//		$db->close();
-        
         $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $result = $db->query("SELECT UniqueName FROM RED_Layouts");
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $uniqueName = htmlspecialchars($row['UniqueName']);
-                $selected = $uniqueName === $layout ? ' selected="selected"' : '';
-                echo "<option value=\"$uniqueName\"$selected>$uniqueName</option>";
-            }
-        } else {
-            // Handle error, e.g., log it or display a message to the user
+        foreach (red_admin_area_layouts($db->connection) as $uniqueName) {
+            $selected = red_admin_text($uniqueName) === red_admin_text($layout) ? ' selected="selected"' : '';
+            $uniqueName = red_admin_area_html($uniqueName);
+            echo '<option value="'.$uniqueName.'"'.$selected.'>'.$uniqueName.'</option>';
         }
         $db->close();
 

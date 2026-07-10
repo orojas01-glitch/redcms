@@ -10,16 +10,20 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_feature_helpers.php' ?>
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-		$VarFeatures=preg_replace ( "'<[^>]+>'U", "", $_POST['VarFeatures']);
-		$Query=preg_replace ( "'<[^>]+>'U", "", $_POST['Query']);
-		$Language=preg_replace ( "'<[^>]+>'U", "", $_POST['Language']);
+$VarFeatures = red_admin_text($_POST['VarFeatures'] ?? '');
+$Language = red_admin_text($_POST['Language'] ?? '');
+if (red_admin_feature_order_column($VarFeatures) === '' || $Language === '') {
+	echo 'no';
+	exit;
+}
+
+$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 ?>
 <!-- The main script file -->
 <script type="text/javascript">
@@ -59,12 +63,9 @@ function run_update_slider (update_slider)
 
 
 <?php
-$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-$result3 = $db->query("SELECT UniqueName,CompGroup FROM RED_Components ORDER BY UniqueName ASC");
-$result_counter = $result3->num_rows;
 $UniqueNameMem = "";
-$checked = "";        
-while($row3 = mysqli_fetch_assoc($result3))
+$checked = "";
+foreach (red_admin_feature_components($db->connection) as $row3)
 {
 	$UniqueName=$row3['UniqueName'];
 	$CompGroup=$row3['CompGroup']; 
@@ -146,8 +147,6 @@ while($row3 = mysqli_fetch_assoc($result3))
 	}
 	
 	$UniqueNameMem=$UniqueName;
-	
-	$result_counter = ($result_counter - 1);
 }
 ?>
 </script>
@@ -181,11 +180,9 @@ while($row3 = mysqli_fetch_assoc($result3))
 		echo '</div>';
 		echo '<div class="clear-cp"></div>';
 		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_Articles WHERE Active='Y' AND Component='Article' AND Language='".$Language."' ORDER BY Updated DESC");
-		$result_counter = $result->num_rows;
 		$w=0;
-		while($row = mysqli_fetch_assoc($result))
+		$componentGroups = red_admin_feature_component_groups($db->connection);
+		foreach (red_admin_feature_articles($db->connection, $Language, $VarFeatures, true) as $row)
 		{
 			$RecordID= $row['RecordID'];
 			$Title=$row['Title'];
@@ -194,7 +191,7 @@ while($row3 = mysqli_fetch_assoc($result3))
 			$Component = $row['Component'];
 			$SliderDesc = $row['SliderDesc'];
 			$BigPict = $row['BigPict'];
-			$FeatureOrder = $row[$VarFeatures.'_Order'];
+			$FeatureOrder = $row['FeatureOrder'];
 			
 			$Features=$row[$VarFeatures];
 			$sliderExists = preg_match("/slider/", $Features);
@@ -207,53 +204,45 @@ while($row3 = mysqli_fetch_assoc($result3))
 			echo '<label style="display:inline;">';
 			echo '<div class="titleleft cp_checkbox">';
 			echo '<input name="sliderSelect['.$w.']" type="checkbox" '.$checked.' value="Y">';
-			echo '<input type="hidden" name="RecordID['.$w.']" value="'.$RecordID.'" />';
+			echo '<input type="hidden" name="RecordID['.$w.']" value="'.(int) $RecordID.'" />';
 			echo '</div>';
 			
 			
 			
 			echo '<div class="titleleft cp_thumbnail">';
 			if ($BigPict)
-			echo '<img src="/images/resize.php?w=57&h=41&amp;img=/images/articles/'.$BigPict.'" title="'.$Title.'">';
+			echo '<img src="/images/resize.php?w=57&h=41&amp;img=/images/articles/'.red_admin_feature_html($BigPict).'" title="'.red_admin_feature_html($Title).'">';
 			else
-			echo '<img src="/images/resize.php?w=57&h=41&amp;img=/images/icon-error.png" title="'.$Title.'">';
+			echo '<img src="/images/resize.php?w=57&h=41&amp;img=/images/icon-error.png" title="'.red_admin_feature_html($Title).'">';
 			echo '</div>';
 			echo '</label>';
 			echo '<div class="titleleft cp_checkbox">';
-			echo '<input name="FeatureOrder['.$w.']" type="input" style="width:15px;" value="'.$FeatureOrder.'">';
+			echo '<input name="FeatureOrder['.$w.']" type="input" style="width:15px;" value="'.red_admin_feature_html($FeatureOrder).'">';
 			echo '</div>';
 			
 		
 			
 			echo '<div class="titleleft cp_lefttitledesc">';
-			echo $SliderDesc;
+			echo red_admin_feature_html($SliderDesc);
 			echo '</div>';
 			echo '<div class="titleleft component">';
-			echo $row['Title'];
+			echo red_admin_feature_html($row['Title']);
 			echo '</div>';
 			echo '<div class="titleleft component">';
-			echo preg_replace('/<[^>]*>/', '', $row['SliderDesc']);
+			echo red_admin_feature_html(preg_replace('/<[^>]*>/', '', $row['SliderDesc']));
 			echo '</div>';
 			if ($sliderExists){
 			echo '<div class="titleright editico">';
 			// CHECK IF THIS COMPONENT IS A GROUP. IF IT IS, THE FUNCTION MUST CALL 2 RECORDS ID.
 			// ONE FOR THE ARTICLES TABLE, AND OTHER FOR THE SECONDARY TABLE.
 			// THERE ARE 3 CASES BY DEFAULT:  FORMS, GALLERY AND SUBMENU. SUBMENU IS NOT INCLUDED.
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$result4 = $db->query("SELECT CompGroup FROM RED_Components WHERE UniqueName='".$Component."' LIMIT 1");
-				$result_counter = $result4->num_rows;
-				while($row4 = mysqli_fetch_assoc($result4))
-				{
-				$CompGroup=$row4['CompGroup']; 	
-				}
+				$CompGroup=$componentGroups[$Component] ?? '';
 				switch ($CompGroup)
 				{
 				case 'Y':
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$result2 = $db->query("SELECT RecordID FROM RED_C_".$Component." WHERE RefID='".$RecordID."'");
-				while($row2 = mysqli_fetch_assoc($result2))
-				{
-					$CRecordID=$row2['RecordID'];
+				$CRecordID=red_admin_feature_component_record_id($db->connection, $Component, $RecordID);
+				if ($CRecordID <= 0) {
+					break;
 				}
 				echo '<img src="/admin/images/ico_edit.png" onClick="edit_'.strtolower($Component).'(' .$CRecordID. ','.$RecordID.');" title="Edit" style="cursor:pointer">';
 				break;
@@ -272,7 +261,8 @@ while($row3 = mysqli_fetch_assoc($result3))
 
 		?>
         <div class="clear-cp"></div>
-        <input type="hidden" name="VarFeatures" id="VarFeatures" value="<?php echo $VarFeatures ?>" />
+        <?php echo red_csrf_input(); ?>
+        <input type="hidden" name="VarFeatures" id="VarFeatures" value="<?php echo red_admin_feature_html($VarFeatures); ?>" />
         <input type="submit" name="submit" value="Save" id="save"/>
         <span id="msggbox_update_slider" style="display:none"></span>
         </div>
@@ -284,5 +274,4 @@ while($row3 = mysqli_fetch_assoc($result3))
 
 <?php
 	$db->close();
-	}
 ?>

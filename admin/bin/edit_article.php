@@ -10,50 +10,60 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php' ?>
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-		$RecordID=preg_replace ( "'<[^>]+>'U", "", $_POST['RecordID']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$ArticleSelected=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
-		$Layout=preg_replace ( "'<[^>]+>'U", "", $_POST['Layout']);
-		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		//echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-		$result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='".$RecordID."'");
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
-		{
-		$StartDate=$row['StartDate'];
-		//$StartDate=substr($StartDate, 0, 10);
-		$ExpDate=$row['ExpDate'];
-		//$ExpDate=substr($ExpDate, 0, 10);
-		$PosOrder=$row[$VarPosition.'Order'];
-		$Section=$row['Sections'];
-		//echo 'Section:'.$Section.'<br/>';
-		$Category=$row['Categories'];
-		//echo 'Category:'.$Category.'<br/>';
-		$SubCategory=$row['SubCategories'];
-		//echo 'SubCategory:'.$SubCategory.'<br/>';
-		$Article=$row['Article'];
-		$HomeFeature=$row['HomeFeature'];
-		$BigPict=$row['BigPict'];
-		$SmallPict=$row['SmallPict'];
-		$SmallPict2=$row['SmallPict2'];
-		$Language=$row['Language'];
-		$thisLink='https://'.BASE_URL;
-		if($row['Sections']<>'')
-			$thisLink=$thisLink.'/'.$Section.'/';
-		if($row['Categories']<>'')
-			$thisLink=$thisLink.''.$Category.'/';
-		if($row['SubCategories']<>'')
-			$thisLink=$thisLink.''.$SubCategory.'/';
-		
-		$thisLink=trim($thisLink.$row['Alias']);
+$RecordID = (int) ($_POST['RecordID'] ?? 0);
+$VarPosition = red_admin_article_position_column($_POST['VarPosition'] ?? '');
+if ($RecordID <= 0 || $VarPosition === null) {
+	echo 'no';
+	exit;
+}
+
+$ArticleSelected = red_admin_text($_POST['Article'] ?? '');
+$Layout = red_admin_text($_POST['Layout'] ?? '');
+
+$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+$row = red_admin_article_full_record($db->connection, $RecordID);
+if (!$row) {
+	$db->close();
+	echo 'no';
+	exit;
+}
+
+if ($Layout === '') {
+	$Layout = red_admin_text($row['Layout'] ?? '');
+}
+
+$StartDate=$row['StartDate'];
+//$StartDate=substr($StartDate, 0, 10);
+$ExpDate=$row['ExpDate'];
+//$ExpDate=substr($ExpDate, 0, 10);
+$PosOrder=(int) ($row[$VarPosition.'Order'] ?? 0);
+$Section=$row['Sections'];
+//echo 'Section:'.$Section.'<br/>';
+$Category=$row['Categories'];
+//echo 'Category:'.$Category.'<br/>';
+$SubCategory=$row['SubCategories'];
+//echo 'SubCategory:'.$SubCategory.'<br/>';
+$Article=$row['Article'];
+$HomeFeature=$row['HomeFeature'];
+$BigPict=$row['BigPict'];
+$SmallPict=$row['SmallPict'];
+$SmallPict2=$row['SmallPict2'];
+$Language=$row['Language'];
+$thisLink='https://'.BASE_URL;
+if($row['Sections']<>'')
+	$thisLink=$thisLink.'/'.$Section.'/';
+if($row['Categories']<>'')
+	$thisLink=$thisLink.''.$Category.'/';
+if($row['SubCategories']<>'')
+	$thisLink=$thisLink.''.$SubCategory.'/';
+
+$thisLink=trim($thisLink.$row['Alias']);
+$csrfToken=red_csrf_token();
 
 		
 ?>
@@ -143,7 +153,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=BigPict&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=BigPict&Language=<?php echo rawurlencode($Language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -253,7 +263,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=SmallPict&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=SmallPict&Language=<?php echo rawurlencode($Language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -363,7 +373,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=SmallPict2&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=SmallPict2&Language=<?php echo rawurlencode($Language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -506,7 +516,7 @@ function run_deleterecord (RecordID)
 		  $.ajax({ 
 		type: "POST", 
 		url: "/admin/bin/delete_label.php", 
-		data: "RecordID=" + RecordID,
+		data: {RecordID: RecordID, csrf_token: <?php echo json_encode($csrfToken); ?>},
 		success: function(data) {
 		//alert (data);
 		//return false;
@@ -549,11 +559,11 @@ function run_deleterecord (RecordID)
         <div style="padding:10px;">
         <div class="wrapper">
             <div class="titleleft">
-            	<label>Title: <input name="Title" type="text" id="title" value="<?php echo $row['Title']?>" /></label>
+                <label>Title: <input name="Title" type="text" id="title" value="<?php echo red_admin_area_html($row['Title'])?>" /></label>
             </div>
             <div class="titleleft">
-            	<label>Alias: <input name="Alias" type="text" id="alias" value="<?php echo $row['Alias']?>" /></label>
-				<label>Link: <a href="<?php echo $thisLink?>"><?php echo $thisLink?></a></label>
+                <label>Alias: <input name="Alias" type="text" id="alias" value="<?php echo red_admin_area_html($row['Alias'])?>" /></label>
+				<label>Link: <a href="<?php echo red_admin_area_html($thisLink)?>"><?php echo red_admin_area_html($thisLink)?></a></label>
             </div>
              <div class="titleright">
             	<a href="#" id="deleterecord_<?php echo $RecordID ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deleterecord(<?php echo $RecordID ?>);" title="Delete Record" style="cursor:pointer"></a>
@@ -575,24 +585,17 @@ function run_deleterecord (RecordID)
             </div>
             <div class="titleright">
 				
-                <label style="display:inline;" title="Position Order">Position Order: <input name="<?php echo $VarPosition.'Order'?>" type="text" id="order" value="<?php echo $PosOrder ?>" /></label>
+                <label style="display:inline;" title="Position Order">Position Order: <input name="<?php echo red_admin_area_html($VarPosition.'Order')?>" type="text" id="order" value="<?php echo $PosOrder ?>" /></label>
                 
             </div>
             <div class="titleright">
-                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
+                <label title="Layout Position">Layout Position: <select name="<?php echo red_admin_area_html($VarPosition) ?>">
                 <?php
 				 //echo $Layout;
 				$thisPosition=$row[$VarPosition];
 				settype($thisPosition, "integer");
-				echo $thisPosition;
 				 //echo '<option value="'.$row[$VarPosition].'">'.$row[$VarPosition].'</option>';
-				 $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-				//echo ($resultC->num_rows);
-				while($row4 = mysqli_fetch_assoc($resultC))
-				{
-					$Positions=$row4['Positions'];
-				}
+				$Positions = red_admin_article_layout_positions($db->connection, $Layout);
 				//echo $Positions;
 				for ($w=0; $w<=$Positions; $w++)
 				{
@@ -610,7 +613,7 @@ function run_deleterecord (RecordID)
             
             <div class="wrapper">
             	<div class="titleleft">
-            	<label>Tags SEO: <input name="Tags" type="text" id="title" value="<?php echo $row['Tags']?>" /></label>
+                <label>Tags SEO: <input name="Tags" type="text" id="title" value="<?php echo red_admin_area_html($row['Tags'])?>" /></label>
            		</div>
                 <div class="titleright">
                 <label style="display:inline;"><input name="HomeFeature" type="checkbox" value="Y" <?php if ($HomeFeature==='Y') echo 'checked="checked"' ?> />Home Featured</label>
@@ -626,11 +629,11 @@ function run_deleterecord (RecordID)
         <div class="clear-cp"></div> 
 
         <?php  
-       		echo('<label>Slider Short Description: <br /><textarea name="SliderDesc" id="SliderDesc" cols="" rows="1">'.$row['SliderDesc'].'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'SliderDesc\').show();return false;">[Show]</a>		<a href="javascript:;" onclick="tinyMCE.get(\'SliderDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div> ');
+                echo('<label>Slider Short Description: <br /><textarea name="SliderDesc" id="SliderDesc" cols="" rows="1">'.red_admin_area_html($row['SliderDesc']).'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'SliderDesc\').show();return false;">[Show]</a>		<a href="javascript:;" onclick="tinyMCE.get(\'SliderDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div> ');
 			
-			echo('<label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.$row['ShortDesc'].'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').show();return false;">[Show]</a>		<a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div> ');
+			echo('<label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.red_admin_area_html($row['ShortDesc']).'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').show();return false;">[Show]</a>		<a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div> ');
 			
-			 echo('<label>Long Description: <br /><textarea name="LongDesc" id="LongDesc" cols="" rows="6">'.$row['LongDesc'].'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'LongDesc\').show();return false;">[Show]</a>		<a href="javascript:;" onclick="tinyMCE.get(\'LongDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div>');
+			 echo('<label>Long Description: <br /><textarea name="LongDesc" id="LongDesc" cols="" rows="6">'.red_admin_area_html($row['LongDesc']).'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'LongDesc\').show();return false;">[Show]</a>		<a href="javascript:;" onclick="tinyMCE.get(\'LongDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div>');
 		?>
         
         
@@ -642,91 +645,13 @@ function run_deleterecord (RecordID)
             <div class="wrapper">
             	
                 	<?php
-                    //CREATE LINKNAVIGATOR LINKS
-                    //$LinkNavigator = ('<option value="">Select a link from available pages of the website...</option>');
-                    //$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                    $resultNav0 = $db->query("SELECT * FROM RED_Sections WHERE Active='Y' AND Sections <> 'administrator' ORDER BY Sections ASC");
-//                    $resultNav0_counter = $resultNav0->num_rows;
-//                    while($rowNav0 = mysqli_fetch_assoc($resultNav0))
-//                    {
-//                        $this->Section=$rowNav0['Sections'];
-//                        if ($this->Section=='home')
-//                        $this->SectionVal='';
-//                        else
-//                        $this->SectionVal='/'.$this->Section;
-//                        $LinkNavigator = $LinkNavigator . ('<option value="'.$this->SectionVal.'/">'.$this->SectionVal.'/</option>');
-//                        
-//                        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                        $resultNav1 = $db->query("SELECT * FROM RED_Articles WHERE  Sections='".$this->Section."' AND Categories='' AND SubCategories='' ORDER BY Updated DESC");
-//                        $resultNav1_counter = $resultNav1->num_rows;
-//                        while($rowNav1 = mysqli_fetch_assoc($resultNav1))
-//                        {
-//                            $this->Alias=$rowNav1['Alias'];
-//                            $LinkNavigator = $LinkNavigator . ('<option value="'.$this->SectionVal.'/'.$this->Alias.'">'.$this->SectionVal.'/'.$this->Alias.'</option>');
-//                        }
-//                        
-//                        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                        $resultNav3 = $db->query("SELECT * FROM RED_Categories WHERE Active='Y' ORDER BY Categories ASC");
-//                        $resultNav3_counter = $resultNav3->num_rows;
-//                        while($rowNav3 = mysqli_fetch_assoc($resultNav3))
-//                        {
-//                            $this->Category=$rowNav3['Categories'];
-//                            $LinkNavigator = $LinkNavigator . ('<option value="'.$this->SectionVal.'/'.$this->Category.'/">'.$this->SectionVal.'/'.$this->Category.'/</option>');
-//                            
-//                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                            $resultNav4 = $db->query("SELECT * FROM RED_Articles WHERE  Sections='".$this->Section."' AND Categories='".$this->Category."' AND SubCategories='' ORDER BY Updated DESC");
-//                            $resultNav4_counter = $resultNav4->num_rows;
-//                            while($rowNav4 = mysqli_fetch_assoc($resultNav4))
-//                            {
-//                                $this->Alias=$rowNav4['Alias'];
-//                                $LinkNavigator = $LinkNavigator . ('<option value="'.$this->SectionVal.'/'.$this->Category.'/'.$this->Alias.'">'.$this->SectionVal.'/'.$this->Category.'/'.$this->Alias.'</option>');
-//                            }
-//                            
-//                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                            $resultNav5 = $db->query("SELECT * FROM RED_SubCategories WHERE Active='Y' ORDER BY SubCategories ASC");
-//                            $resultNav5_counter = $resultNav5->num_rows;
-//                            while($rowNav5 = mysqli_fetch_assoc($resultNav5))
-//                            {
-//                                $this->SubCategory=$rowNav5['SubCategories'];
-//                                $LinkNavigator = $LinkNavigator . ('<option value="'.$this->SectionVal.'/'.$this->Category.'/'.$this->SubCategory.'/">'.$this->SectionVal.'/'.$this->Category.'/'.$this->SubCategory.'/</option>');
-//                                
-//                                $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                                $resultNav6 = $db->query("SELECT * FROM RED_Articles WHERE  Sections='".$this->Section."' AND Categories='".$this->Category."' AND SubCategories='".$this->SubCategory."' ORDER BY Updated DESC");
-//                                $resultNav6_counter = $resultNav6->num_rows;
-//                                while($rowNav6 = mysqli_fetch_assoc($resultNav6))
-//                                {
-//                                    $this->Alias=$rowNav6['Alias'];
-//                                    $LinkNavigator = $LinkNavigator . ('<option value="'.$this->SectionVal.'/'.$this->Category.'/'.$this->SubCategory.'/'.$this->Alias.'">'.$this->SectionVal.'/'.$this->Category.'/'.$this->SubCategory.'/'.$this->Alias.'</option>');	
-//                                }
-//                                
-//                            }
-//                            
-//                        }
-//                        
-//                    }
-                    //END LINKNAVIGATOR LINKS
-					
-					echo('<div class="titleleft"><label style="display:inline;">Link: <input name="Link" type="text" id="gal_link" value="' . $row['Link'] . '" /></label>');
+					echo('<div class="titleleft"><label style="display:inline;">Link: <input name="Link" type="text" id="gal_link" value="' . red_admin_area_html($row['Link']) . '" /></label>');
 					echo ('</div>'); 
-					//echo ('<div class="titleleft">');
-//					echo '<script type="text/javascript">'. "\n";
-//					echo '<!--' ."\n";
-//					echo '$(\'#LinkNavigator\').bind(\'change\', function() {'. "\n";
-//					echo '$(\'#gal_link\').val($(this).val());'. "\n";
-//					echo '});'. "\n";
-//					echo '-->'. "\n";
-//					echo '</script>';
-//					echo('<select name="LinkNavigator" id="LinkNavigator">');
-//					echo ($LinkNavigator);
-//					echo('</select>');
-//					echo ('</div>');
 					?>
             		
                 <div class="titleleft">
                 	<?php
-                    global $checked;
-					if ($row['NewWindow']==='Y')
-					$checked='checked="checked"';
+					$checked = ($row['NewWindow'] ?? '') === 'Y' ? ' checked="checked"' : '';
 					echo ('<label style="display:inline;" title="Open New Window">Open Blank <input name="NewWindow" type="checkbox" '.$checked.' value="Y" /></label>');
 					?>
                 </div>
@@ -739,8 +664,8 @@ function run_deleterecord (RecordID)
                         if ($BigPict<>''){
                             ?>
                         
-                            <input name="BigPict" type="hidden" value="<?php echo $BigPict ?>" />
-                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo $BigPict ?>" alt=""><br/>
+                            <input name="BigPict" type="hidden" value="<?php echo red_admin_area_html($BigPict) ?>" />
+                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo rawurlencode($BigPict) ?>" alt=""><br/>
                             <label><input name="Delete_BigPict" type="checkbox" value="Y">Delete</label>
                         
                         <?php
@@ -759,8 +684,8 @@ function run_deleterecord (RecordID)
                         if ($SmallPict<>''){
                             ?>
                         
-                            <input name="SmallPict" type="hidden" value="<?php echo $SmallPict ?>" />
-                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo $SmallPict ?>" alt=""><br/>
+                            <input name="SmallPict" type="hidden" value="<?php echo red_admin_area_html($SmallPict) ?>" />
+                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo rawurlencode($SmallPict) ?>" alt=""><br/>
                             <label><input name="Delete_SmallPict" type="checkbox" value="Y">Delete</label>
                         
                         <?php
@@ -790,8 +715,8 @@ function run_deleterecord (RecordID)
                         if ($SmallPict2<>''){
                             ?>
                         
-                            <input name="SmallPict2" type="hidden" value="<?php echo $SmallPict2 ?>" />
-                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo $SmallPict2 ?>" alt=""><br/>
+                            <input name="SmallPict2" type="hidden" value="<?php echo red_admin_area_html($SmallPict2) ?>" />
+                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo rawurlencode($SmallPict2) ?>" alt=""><br/>
                             <label><input name="Delete_SmallPict2" type="checkbox" value="Y">Delete</label>
                         
                         <?php
@@ -824,16 +749,7 @@ function run_deleterecord (RecordID)
                     <label>Section: <select name="Sections">
                     <option value="">- null -</option>
                     <?php 
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Sections FROM RED_Sections WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Sections']==$Section)    
-                            echo '<option value="' . $row3['Sections'] . '" selected="selected">' . $row3['Sections'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Sections'] . '">' . $row3['Sections'] . '</option>';
-                        }
-                    }
+                    echo red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
                     
                     ?>
                     </select>
@@ -843,16 +759,7 @@ function run_deleterecord (RecordID)
                     <label>Category: <select name="Categories">
                     <option value="">- null -</option>
                     <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Categories FROM RED_Categories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Categories']==$Category)    
-                            echo '<option value="' . $row3['Categories'] . '" selected="selected">' . $row3['Categories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Categories'] . '">' . $row3['Categories'] . '</option>';
-                        }
-                    }
+                    echo red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
                     
                     ?>
                     </select>
@@ -862,16 +769,7 @@ function run_deleterecord (RecordID)
                     <label>Sub Category: <select name="SubCategories">
                     <option value="">- null -</option>
                     <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT SubCategories FROM RED_SubCategories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['SubCategories']==$SubCategory)    
-                            echo '<option value="' . $row3['SubCategories'] . '" selected="selected">' . $row3['SubCategories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['SubCategories'] . '">' . $row3['SubCategories'] . '</option>';
-                        }
-                    }
+                    echo red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
                     
                     ?>
                     </select>
@@ -882,31 +780,21 @@ function run_deleterecord (RecordID)
                     
                     <?php
                     
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$result3 = $db->query("SELECT Title, Alias FROM RED_Articles WHERE Active = 'Y' AND Component='Article' ORDER BY Updated DESC");
-					
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-						$thisalias=$row3['Alias'];
-
-						if (strtolower($thisalias)==strtolower($Article))
-						echo '<option value="'.$row3['Alias'].'" selected="selected">'.$row3['Alias'].'</option>';
-						else
-						echo '<option value="'.$row3['Alias'].'">'.$row3['Alias'].'</option>';
-                    }
+					echo red_admin_article_page_options($db->connection, $Article);
                     
                     ?>
                     </select>
                     </label>
                     <div class="clear-cp"></div>
-                    <label title="yyyy-mm-dd hh:mm:ss" >Start Date: <input name="StartDate" type="text" id="date" value="<?php echo $StartDate ?>" /></label>
-                    <label title="yyyy-mm-dd hh:mm:ss">Exp Date: <input name="ExpDate" type="text" id="date" value="<?php echo $ExpDate ?>" /></label>
+                    <label title="yyyy-mm-dd hh:mm:ss" >Start Date: <input name="StartDate" type="text" id="date" value="<?php echo red_admin_area_html($StartDate) ?>" /></label>
+                    <label title="yyyy-mm-dd hh:mm:ss">Exp Date: <input name="ExpDate" type="text" id="date" value="<?php echo red_admin_area_html($ExpDate) ?>" /></label>
                 </div>
             </div>  
          </dd>
          </dl>  
+         <?php echo red_csrf_input(); ?>
          <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
-         <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo $_SESSION['alias']?>" />
+         <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($_SESSION['alias'] ?? '')?>" />
         <input type="submit" name="submit" value="Save" id="save"/> <span id="msggbox_update_content" style="display:none"></span>
         </div>
         </article>
@@ -915,7 +803,5 @@ function run_deleterecord (RecordID)
 </fieldset>
 </form>
 <?php
-		}
 		$db->close();
-		}
 ?>
