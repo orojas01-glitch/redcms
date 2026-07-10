@@ -29,50 +29,22 @@ Multi-Columns2)
 
 * refer to config.php.
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
+
 #[\AllowDynamicProperties]
 class Build_Breadcrumb
 {
 	private function get_friendlyname($alias,$table)
 	{
-		
-		switch ($table)
-		{
-			case 'Articles':
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$result = $db->query("SELECT Title FROM RED_".$table." WHERE Active='Y' AND Language='" . language . "' AND Alias='".$alias."'");
-				//echo ($result->num_rows);
-				$result_counter = $result->num_rows;
-				
-				while($row = mysqli_fetch_assoc($result))
-				{
-					$this->title=$row['Title'];
-					return $this->title;	
-					$result_counter = ($result_counter - 1);
-				}
-				//echo 'end'. $result_counter;
-				if ($result_counter == 0);
-				
-				$db->close();
-			break;
-			default:
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$result = $db->query("SELECT Title FROM RED_".$table." WHERE Active='Y' AND Language='" . language . "' AND ".$table."='".$alias."'");
-				//echo ($result->num_rows);
-				$result_counter = $result->num_rows;
-				
-				while($row = mysqli_fetch_assoc($result))
-				{
-					$this->title=$row['Title'];
-					return $this->title;	
-					$result_counter = ($result_counter - 1);
-				}
-				//echo 'end'. $result_counter;
-				if ($result_counter == 0);
-				
-				$db->close();
-			break;
-		}
-		
+		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		$title = red_public_breadcrumb_title($db->connection, $table, $alias);
+		$db->close();
+		return red_public_html(red_public_plain_text($title));
+	}
+
+	private function breadcrumb_href($path)
+	{
+		return red_public_html($path);
 	}
 	
 	public function get_breadcrumb()
@@ -114,7 +86,7 @@ class Build_Breadcrumb
 					default:
 					//echo 'Article Selected';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/" class="link-breadcrumb-1">'.self::get_friendlyname('Home','Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span>'.self::get_friendlyname(article,'Articles').'</li>';
 					
 					break;
@@ -127,14 +99,14 @@ class Build_Breadcrumb
 					case '':
 					//echo 'Category';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/" class="link-breadcrumb-1">'.self::get_friendlyname('Home','Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span>'.self::get_friendlyname(category,'Categories').'</li>';
 					break;
 					default:
 					//echo 'Article Selected';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/" class="link-breadcrumb-1">'.self::get_friendlyname('Home','Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/'.category.'/" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/'.category.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span>'.self::get_friendlyname(article,'Articles').'</li>';
 					break;
 				}
@@ -146,8 +118,8 @@ class Build_Breadcrumb
 					case '':
 					//echo 'sub-category'; 
 					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/" class="link-breadcrumb-1">'.self::get_friendlyname('Home','Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/'.category.'/" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/'.category.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span>'.self::get_friendlyname(subcategory,'SubCategories').'</li>';
 					
 		
@@ -155,9 +127,9 @@ class Build_Breadcrumb
 					default:
 					//echo 'Article Selected';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/" class="link-breadcrumb-1">'.self::get_friendlyname('Home','Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/'.category.'/" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><!--<a href="/'.section.'/'.category.'/'.subcategory.'/" class="link-breadcrumb-1">'.self::get_friendlyname(subcategory,'SubCategories').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/'.category.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><!--<a href="'.self::breadcrumb_href('/'.section.'/'.category.'/'.subcategory.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(subcategory,'SubCategories').'</a></li>';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span>'.self::get_friendlyname(article,'Articles').'</li>';
 					break;
 				}
@@ -166,9 +138,9 @@ class Build_Breadcrumb
 				case 6:
 					//echo 'Article Selected';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/" class="link-breadcrumb-1">'.self::get_friendlyname('Home','Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/'.category.'/" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
-					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="/'.section.'/'.category.'/'.subcategory.'/" class="link-breadcrumb-1">'.self::get_friendlyname(subcategory,'SubCategories').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(section,'Sections').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/'.category.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(category,'Categories').'</a></li>';
+					echo '<li><span class="bullet">&raquo;&nbsp;</span><a href="'.self::breadcrumb_href('/'.section.'/'.category.'/'.subcategory.'/').'" class="link-breadcrumb-1">'.self::get_friendlyname(subcategory,'SubCategories').'</a></li>';
 					echo '<li><span class="bullet">&raquo;&nbsp;</span>'.self::get_friendlyname(article,'Articles').'</li>';
 				break;
 			}

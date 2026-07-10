@@ -10,24 +10,32 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php' ?>
 <?php
 if(empty($_SESSION['alias']))
 	header('Location: http://'.BASE_URL.'');
 	else {
-		$Type=preg_replace ( "'<[^>]+>'U", "", $_POST['Type']);
-		$CountPage=preg_replace ( "'<[^>]+>'U", "", $_POST['CountPage']);
-		$Section=preg_replace ( "'<[^>]+>'U", "", $_POST['Section']);
-		$Category=preg_replace ( "'<[^>]+>'U", "", $_POST['Category']);
-		$SubCategory=preg_replace ( "'<[^>]+>'U", "", $_POST['SubCategory']);
-		$Article=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$Language=preg_replace ( "'<[^>]+>'U", "", $_POST['Language']);
-		$Layout=preg_replace ( "'<[^>]+>'U", "", $_POST['Layout']);
+		$Type=red_admin_post_text('Type');
+		$CountPage=red_admin_post_text('CountPage');
+		$Section=red_admin_post_text('Section');
+		$Category=red_admin_post_text('Category');
+		$SubCategory=red_admin_post_text('SubCategory');
+		$Article=red_admin_post_text('Article');
+		$VarPosition=red_admin_article_position_column($_POST['VarPosition'] ?? '', 'PagePosition');
+		if ($VarPosition === null) {
+			echo 'no';
+			exit;
+		}
+		$Language=substr(red_admin_post_text('Language'), 0, 2);
+		$Layout=red_admin_post_text('Layout');
 		$RecordID=mt_rand();
 		$ArtRecordID=mt_rand();
+		$csrfToken=red_csrf_token();
+		$ResponseTemplate='';
 
 ?>
 <!-- Our CSS stylesheet file -->
@@ -57,7 +65,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -167,7 +175,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -321,22 +329,17 @@ function run_insert_form (insert_form)
             <div class="titleright">
             	<label style="display:inline;" title="Position Order">Position Order: <input name="<?php echo $VarPosition.'Order'?>" type="text" id="order" value="" /></label>
             </div>
-            <div class="titleright">
-               <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
-                <?php
-				 //echo $Layout;
-				 $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-				while($row = mysqli_fetch_assoc($resultC))
-				{
-					$Positions=$row['Positions'];
-				}
-				//echo $Positions;
-				for ($w=0; $w<=$Positions; $w++)
-				{
-					echo '<option value="'.$w.'">'.$w.'</option>';
-				}
-				?>
+	            <div class="titleright">
+	               <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
+	                <?php
+					$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+					$Positions=red_admin_article_layout_positions($db->connection, $Layout);
+					for ($w=0; $w<=$Positions; $w++)
+					{
+						echo '<option value="'.$w.'">'.$w.'</option>';
+					}
+					$db->close();
+					?>
                  </select>
                 </label>
             </div>
@@ -348,20 +351,15 @@ function run_insert_form (insert_form)
             </div>
         </div>
         <div class="clear-cp"></div> 
-        <label>Form:
-        <textarea name="LongDesc" id="LongDesc" cols="" rows="3"><?php
-        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        //echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-        $resultA = $db->query("SELECT Template,ResponseTemplate FROM RED_Components WHERE UniqueName='Form' AND Layout='".$Type."'");
-        $result_counter = $resultA->num_rows;
-        if($resultA->num_rows > 0) 
-        {
-            $info = mysqli_fetch_assoc($resultA); 
-            $Template=$info['Template'];
-			$ResponseTemplate=$info['ResponseTemplate'];
-			echo $Template;
-		}
-		?></textarea></label>
+	        <label>Form:
+	        <textarea name="LongDesc" id="LongDesc" cols="" rows="3"><?php
+	        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	        $componentTemplate = red_admin_article_form_component_template($db->connection, $Type);
+	        $Template=$componentTemplate['Template'];
+			$ResponseTemplate=$componentTemplate['ResponseTemplate'];
+			echo red_admin_area_html($Template);
+			$db->close();
+			?></textarea></label>
         <?php if ($Type=='Contact' ||$Type=='Response'||$Type=='Register'){?>
         <div class="wrapper">
         <div class="titleleft">
@@ -385,9 +383,9 @@ function run_insert_form (insert_form)
         </div>
         </div>
         <?php }
-		if ($Type=='Response'||$Type=='Register'||$Type=='Register_StoreLogin'||$Type=='StoreLogin')
-			echo '<label>Response: <textarea name="Response" id="Response" cols="" rows="24">'.$ResponseTemplate.'</textarea></label>';
-		if ($Type=='Register_StoreLogin'||$Type=='StoreLogin'||$Type=='Register'){
+			if ($Type=='Response'||$Type=='Register')
+				echo '<label>Response: <textarea name="Response" id="Response" cols="" rows="24">'.red_admin_area_html($ResponseTemplate).'</textarea></label>';
+		if ($Type=='Register'){
 		echo  '<div class="wrapper">';
             echo '<div class="titleleft">';
             	echo '<label>Table Users Name: <input name="TableName" type="text" id="tablename" value="" /></label>';
@@ -428,76 +426,46 @@ function run_insert_form (insert_form)
                 </div>
                 <div class="titleright"  style="text-align:right">
                     <label>Article Location:</label>
-                    <label>Section: <select name="Sections">
-                    <option value="">- null -</option>
-                    <?php
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Sections, Features FROM RED_Sections");
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-                    $thissection=$row3['Sections'];
-                    if (strtolower($thissection)==strtolower($Section))
-                    echo '<option value="'.$thissection.'" selected="selected">'.$thissection.'</option>';
-                    else
-                    echo '<option value="'.$thissection.'">'.$thissection.'</option>';
-                    }
-                    ?>
+	                    <label>Section: <select name="Sections">
+	                    <option value="">- null -</option>
+	                    <?php
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section, false);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     
                     <label>Category: <select name="Categories">
                     <option value="">- null -</option>
-                    <?php
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Categories, Features FROM RED_Categories");
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-                    $thiscategory=$row3['Categories'];
-                    if (strtolower($thiscategory)==strtolower($Category))
-                    echo '<option value="'.$thiscategory.'" selected="selected">'.$thiscategory.'</option>';
-                    else
-                    echo '<option value="'.$thiscategory.'">'.$thiscategory.'</option>';
-                    }
-                    ?>
+	                    <?php
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category, false);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     
                     <label>Sub Category: <select name="SubCategories">
                     <option value="">- null -</option>
-                    <?php
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT SubCategories, Features FROM RED_SubCategories");
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-                    $thissubcat=$row3['SubCategories'];
-                    if (strtolower($thissubcat)==strtolower($SubCategory))
-                    echo '<option value="'.$thissubcat.'" selected="selected">'.$thissubcat.'</option>';
-                    else
-                    echo '<option value="'.$thissubcat.'">'.$thissubcat.'</option>';
-                    }
-                    ?>
+	                    <?php
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory, false);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     <label>Article: <select name="Article">
                     <option value="">- null -</option>
-                    <?php
-					
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$result3 = $db->query("SELECT Title, Alias FROM RED_Articles WHERE Active = 'Y' AND Component='Article' ORDER BY Updated DESC");
-					
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-						$thisalias=$row3['Alias'];
+	                    <?php
 
-						if (strtolower($thisalias)==strtolower($Article))
-						echo '<option value="'.$row3['Alias'].'" selected="selected">'.$row3['Alias'].'</option>';
-						else
-						echo '<option value="'.$row3['Alias'].'">'.$row3['Alias'].'</option>';
-                    }
-                    ?>
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+						echo red_admin_article_page_options($db->connection, $Article);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     <div class="clear-cp"></div>
@@ -516,11 +484,12 @@ function run_insert_form (insert_form)
          </dl>
         <input type="hidden" name="ArtRecordID" id="ArtRecordID" value="<?php echo $ArtRecordID ?>" />
         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
-        <input type="hidden" name="Language" id="Language" value="<?php echo $Language ?>" />
-        <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo $_SESSION['alias']?>" />
+        <input type="hidden" name="Language" id="Language" value="<?php echo red_admin_area_html($Language) ?>" />
+        <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($_SESSION['alias'])?>" />
         <input type="hidden" name="Component" id="Component" value="Form" />
-        <input type="hidden" name="Layout" id="Layout" value="<?php echo $Layout?>" />
-        <input type="hidden" name="FormType" id="Layout" value="<?php echo $Type?>" />
+        <input type="hidden" name="Layout" id="Layout" value="<?php echo red_admin_area_html($Layout)?>" />
+        <input type="hidden" name="FormType" id="Layout" value="<?php echo red_admin_area_html($Type)?>" />
+        <?php echo red_csrf_input(); ?>
         <input type="submit" name="submit" value="Save" id="save"/>
         <span id="msggbox_insert_form" style="display:none"></span>
         </div>

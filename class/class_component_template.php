@@ -31,6 +31,7 @@ INSTRUCTIONS:
 FIND AND REPLACE "component_template" with the component "UniqueName".
 
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
 
 #[\AllowDynamicProperties]
 class component_template
@@ -44,53 +45,22 @@ class component_template
 		**/
 		
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_Layouts WHERE UniqueName='" . $layout . "'");
-		
-		while($row = mysqli_fetch_assoc($result))
-		{
-			
-			switch ($position)
-			{
-				case '':
-				$This->Width=$row['w_Pos1'];
-				$This->WidthDivisor=$row['w_div_Pos1'];
-				$This->Height=$row['h_Pos1'];
-				break;
-				case '1':
-				$This->Width=$row['w_Pos1'];
-				$This->WidthDivisor=$row['w_div_Pos1'];
-				$This->Height=$row['h_Pos1'];
-				break;
-				case '2':
-				$This->Width=$row['w_Pos2'];
-				$This->WidthDivisor=$row['w_div_Pos2'];
-				$This->Height=$row['h_Pos2'];
-				break;
-				case '3':
-				$This->Width=$row['w_Pos3'];
-				$This->WidthDivisor=$row['w_div_Pos3'];
-				$This->Height=$row['h_Pos3'];
-				break;
-				case '4':
-				$This->Width=$row['w_Pos4'];
-				$This->WidthDivisor=$row['w_div_Pos4'];
-				$This->Height=$row['h_Pos4'];
-				break;
-				
-			}
-		}
+		$dimensions = red_public_layout_dimensions($db->connection, $layout, $position);
+		$this->Width = $dimensions['Width'];
+		$this->WidthDivisor = $dimensions['WidthDivisor'];
+		$this->Height = $dimensions['Height'];
+		$This = $this;
 		
 		/**
 		* END
 		**/
 		
 		//echo $this->query;
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		// display all active records. Position is Required.
-		$result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'");
+		$rows = red_public_article_render_rows($db->connection, $recordid);
 		
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
+		$result_counter = count($rows);
+		foreach($rows as $row)
 		{
 			//echo 'ini'. $result_counter;
 			//if ($result_counter == $result->num_rows){
@@ -181,16 +151,18 @@ class component_template
 	{
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		// display all active records. Position is Required.
-		$result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'");
+		$rows = red_public_article_render_rows($db->connection, $recordid);
 		
 		//echo ($result->num_rows);
-		$result_counter = $result->num_rows;
+		$result_counter = count($rows);
+		$adminComponentIds = red_public_admin_component_ids($_SESSION['AdminComponents'] ?? '');
+		$canEditTemplate = red_public_admin_component_authorized($db->connection, 'component_template', $adminComponentIds);
 		
-		while($row = mysqli_fetch_assoc($result))
+		foreach($rows as $row)
 		{
 			$RecordID=$row['RecordID'];
-			$Alias=$row['Alias'];
-			$Alias=preg_replace('/-/','_',$Alias);
+			$Alias=red_public_js_identifier($row['Alias']);
+			$Title=red_public_display_text($row['Title']);
 			
 			if ($position==='0'){
             	echo '<div style="float:left; padding-right:5px; margin-right:5px;">';
@@ -198,14 +170,7 @@ class component_template
 			
 				// COMPARE SESSION 'AdminComponents' WITH RED_COMPONENTS.
 				// IF VALUE EXIST THEN SHOW UPDATE BUTTON. IF NOT, DISPLAY MESSAGE FOR "ADMIN NOT AUTHORIZED TO UPDATE".
-				$AdminComponents = explode(",", $_SESSION['AdminComponents']);
-				//echo($_SESSION['AdminComponents'].'='.count($AdminComponents.'<br/>'));
-				for ($w=0; $w<=count($AdminComponents); $w++)
-				{
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT RecordID FROM RED_Components WHERE RecordID='".$AdminComponents[$w]."' AND UniqueName='component_template'");
-				//echo ($resultC->num_rows);
-				if(($resultC->num_rows==0)&&($w==count($AdminComponents))){
+				if(!$canEditTemplate){
 					//echo 'ADMINISTRATOR NOT AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -219,10 +184,9 @@ class component_template
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_article" value="Edit Article"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_article" value="Edit Article"/>';
 					echo '</form>';
-				}elseif(($resultC->num_rows==0));
-				else{
+				}else{
 					//echo 'ADMINISTRATOR AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -266,17 +230,15 @@ class component_template
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_component_template" value="Edit News"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_component_template" value="Edit News"/>';
 					echo '<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
-					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.$VarPosition.'" />';
-					echo '<input type="hidden" name="Article" id="Article" value="'.article.'" />';
+					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.red_public_html($VarPosition).'" />';
+					echo '<input type="hidden" name="Article" id="Article" value="'.red_public_html(red_public_route_value('article')).'" />';
 					echo '</form>';
 				
 				//END "ADMIN AUTHORIZED TO UPDATE".
-				break;
 				}
 				
-				}	
 				//END COMPARE SESSION
 				echo '<hr id="cp">';
 				//

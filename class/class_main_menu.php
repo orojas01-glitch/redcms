@@ -14,6 +14,8 @@
 /**
 * THIS CLASS CONSTRUCT THE MAIN MENU. 2 LEVELS OF BUTTONS.
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
+
 /*<nav class="navbar navbar-default navbar-static-top tm_navbar clearfix" role="navigation">
 	<ul class="nav sf-menu clearfix">
 		
@@ -80,200 +82,94 @@ class main_menu
     public $RecordID;
 	public function menu()
 	{
-		
-		/////FIRST LEVEL/////
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_Menu WHERE Language='".language."' AND RootOrder='1' AND Active='Y' ORDER BY MenuOrder ASC");
+		$rows = red_public_menu_rows($db->connection);
+		$db->close();
 
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
-		{
-			if ($result_counter == $result->num_rows)
-			echo('<nav class="navbar navbar-default navbar-static-top tm_navbar clearfix" role="navigation"><ul class="nav sf-menu clearfix">');
-			else
+		if (!$rows) {
+			return;
+		}
+
+		$children = [];
+		$roots = [];
+		foreach ($rows as $row) {
+			if ((string) $row['RootOrder'] === '1') {
+				$roots[] = $row;
+			}
+			$children[(string) $row['Parent']][] = $row;
+		}
+
+		if (!$roots) {
+			return;
+		}
+
+		echo('<nav class="navbar navbar-default navbar-static-top tm_navbar clearfix" role="navigation"><ul class="nav sf-menu clearfix">');
+		foreach ($roots as $index => $row) {
 			$this->RecordID = $row['RecordID'];
 			$this->Label = $row['Label'];
 			$this->Link = $row['Link'];
 			$this->NewWindow = $row['NewWindow'];
-			$this->active='';
-			
+			$this->active = '';
 
 			$GetCurSection=explode("/", $this->Link);
 			$this->Section = isset($GetCurSection[1]) ? $GetCurSection[1] : '';
             $this->Article = isset($GetCurSection[2]) ? $GetCurSection[2] : '';
 
-			
-			if (strtolower(section)===strtolower($this->Section))
+			if (strtolower(section)===strtolower($this->Section)) {
 				$this->active='active';
-				//echo('<li class="active"><a href="'.$this->Link.'" target="'.$this->NewWindow.'">' .$this->Label . '</a>');
-			else
-				
-				if (countpage <= 2 && $result_counter == $result->num_rows){
-					if (strtolower(article)===strtolower($this->Article))
-					$this->active='active';
-					//echo('<li class="active"><a href="'.$this->Link.'" target="'.$this->NewWindow.'">' .$this->Label . '</a>');
-				}else
-					$this->active='';
-					//echo('<li><a href="'.$this->Link.'" target="'.$this->NewWindow.'">' .$this->Label . '</a>');
-					
-					/////SECOND LEVEL/////
-					$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$result2 = $db->query("SELECT * FROM RED_Menu WHERE Language='" . language . "' AND Parent='" . $this->RecordID . "' AND RootOrder <> '1' AND Active='Y' ORDER BY MenuOrder ASC");
-					$result2_counter = $result2->num_rows;
-					if ($result2->num_rows>0){ 
-					if(strtolower($this->Label)=='inicio')
-					echo('<li class="sub-menu '.$this->active.'"><a href="'.$this->Link.'" target="'.$this->NewWindow.'"><i>Home</i><em></em><span></span></a>');
-					else
-					echo('<li class="sub-menu '.$this->active.'"><a href="'.$this->Link.'" target="'.$this->NewWindow.'">' .$this->Label . '<span></span></a>');
-					while($row = mysqli_fetch_assoc($result2))
-						{
-							//echo 'ini'. $result_counter;
-							$this->RecordID = $row['RecordID'];
-							$this->SubLabel = $row['Label'];
-							$this->SubLink = $row['Link'];
-							$this->SubNewWindow = $row['NewWindow'];
-							
-							if ($result2_counter == $result2->num_rows){
-								echo('<ul class="submenu">');
-								
-								/////THIRD LEVEL/////
-								$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-								$result3 = $db->query("SELECT * FROM RED_Menu WHERE Language='" . language . "' AND Parent='" . $this->RecordID . "' AND RootOrder <> '1' AND RootOrder <> '2' AND Active='Y' ORDER BY MenuOrder ASC");
-								//echo ($result3->num_rows);
-								$result3_counter = $result3->num_rows;
-								if ($result3->num_rows>0){ 
-								echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '<span></span></a>');
-								while($row = mysqli_fetch_assoc($result3))
-									{
-										//echo 'ini'. $result_counter;
-										$this->RecordID = $row['RecordID'];
-										$this->SubLabel = $row['Label'];
-										$this->SubLink = $row['Link'];
-										$this->SubNewWindow = $row['NewWindow'];
-										
-										if ($result3_counter == $result3->num_rows)
-											if ($result3_counter == 1)
-												echo('<ul class="submenu"><li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li><li class="tr"></li>');
-											else
-											echo('<ul class="submenu"><li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-										else {
-											if ($result3_counter == 1)
-											echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li><li class="tr"></li>');
-											else
-											echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-										}
-										$result3_counter = ($result3_counter - 1);
-										//echo 'end'. $result2_counter;
-										if ($result3_counter == 0)
-										echo('</ul></li>');	
-									}
-								}else
-								echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-								/////END THIRD LEVEL/////
-								
-							}else {
-								if ($result2_counter == 1){
-								
-									
-									/////THIRD LEVEL/////
-									$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-									$result3 = $db->query("SELECT * FROM RED_Menu WHERE Language='" . language . "' AND Parent='" . $this->RecordID . "' AND RootOrder <> '1' AND RootOrder <> '2' AND Active='Y' ORDER BY MenuOrder ASC");
-									//echo ($result3->num_rows);
-									$result3_counter = $result3->num_rows;
-									if ($result3->num_rows>0){
-										echo ('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '<span></span></a>'); 
-									while($row = mysqli_fetch_assoc($result3))
-										{
-											//echo 'ini'. $result_counter;
-											$this->RecordID = $row['RecordID'];
-											$this->SubLabel = $row['Label'];
-											$this->SubLink = $row['Link'];
-											$this->SubNewWindow = $row['NewWindow'];
-											
-											if ($result3_counter == $result3->num_rows)
-												if ($result3_counter == 1)
-													echo('<ul class="submenu"><li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li><li class="tr"></li>');
-												else
-												echo('<ul class="submenu"><li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-											else {
-												if ($result3_counter == 1)
-												echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li><li class="tr"></li>');
-												else
-												echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-											}
-											$result3_counter = ($result3_counter - 1);
-											//echo 'end'. $result2_counter;
-											if ($result3_counter == 0)
-											echo('</ul></li>');	
-										}
-									}else
-									echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-									/////END THIRD LEVEL/////
-								
-								}else {
-								
-									
-									/////THIRD LEVEL/////
-									$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-									$result3 = $db->query("SELECT * FROM RED_Menu WHERE Language='" . language . "' AND Parent='" . $this->RecordID . "' AND RootOrder <> '1' AND RootOrder <> '2' AND Active='Y' ORDER BY MenuOrder ASC");
-									//echo ($result3->num_rows);
-									$result3_counter = $result3->num_rows;
-									if ($result3->num_rows>0){ 
-										echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '<span></span></a>');
-									while($row = mysqli_fetch_assoc($result3))
-										{
-											//echo 'ini'. $result_counter;
-											$this->RecordID = $row['RecordID'];
-											$this->SubLabel = $row['Label'];
-											$this->SubLink = $row['Link'];
-											$this->SubNewWindow = $row['NewWindow'];
-											
-											if ($result3_counter == $result3->num_rows)
-												if ($result3_counter == 1)
-													echo('<ul class="submenu"><li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li><li class="tr"></li>');
-												else
-												echo('<ul class="submenu"><li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-											else {
-												if ($result3_counter == 1)
-												echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li><li class="tr"></li>');
-												else
-												echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-											}
-											$result3_counter = ($result3_counter - 1);
-											//echo 'end'. $result2_counter;
-											if ($result3_counter == 0)
-											echo('</ul></li>');	
-										}
-									}else
-									echo('<li><a href="'.$this->SubLink.'" target="'.$this->SubNewWindow.'">' .$this->SubLabel . '</a></li>');
-									/////END THIRD LEVEL/////
-									
-								}
-							}
-							$result2_counter = ($result2_counter - 1);
-							//echo 'end'. $result2_counter;
-							if ($result2_counter == 0)
-							echo('</ul></li>');
-						}
-					} else
-					if(strtolower($this->Label)=='inicio')
-					echo('<li class="'.$this->active.'"><a href="'.$this->Link.'" target="'.$this->NewWindow.'"><i>Home</i><em></em></a>');
-					else
-					echo('<li class="'.$this->active.'"><a href="'.$this->Link.'" target="'.$this->NewWindow.'">' .$this->Label . '</a></li>');
-					/////END SECOND LEVEL/////
-					
-					
-		$result_counter = ($result_counter - 1);
-		
-		}
-		//echo 'end'. $result_counter;
+			} elseif (countpage <= 2 && $index === 0 && strtolower(article)===strtolower($this->Article)) {
+				$this->active='active';
+			}
 
-		if ($result_counter == 0)
+			$secondLevel = array_values(array_filter($children[(string) $this->RecordID] ?? [], function ($child) {
+				return (string) $child['RootOrder'] !== '1';
+			}));
+
+			$liClass = $secondLevel ? 'sub-menu ' . $this->active : $this->active;
+			echo('<li class="' . red_public_html($liClass) . '">');
+			if(strtolower($this->Label)=='inicio') {
+				echo('<a href="' . red_public_html($this->Link) . '" target="' . red_public_html($this->NewWindow) . '"><i>Home</i><em></em>');
+				if ($secondLevel) {
+					echo('<span></span>');
+				}
+				echo('</a>');
+			} else {
+				echo('<a href="' . red_public_html($this->Link) . '" target="' . red_public_html($this->NewWindow) . '">' . red_public_html($this->Label));
+				if ($secondLevel) {
+					echo('<span></span>');
+				}
+				echo('</a>');
+			}
+
+			if ($secondLevel) {
+				echo('<ul class="submenu">');
+				foreach ($secondLevel as $child) {
+					$this->RecordID = $child['RecordID'];
+					$this->SubLabel = $child['Label'];
+					$this->SubLink = $child['Link'];
+					$this->SubNewWindow = $child['NewWindow'];
+
+					$thirdLevel = array_values(array_filter($children[(string) $this->RecordID] ?? [], function ($grandchild) {
+						return (string) $grandchild['RootOrder'] !== '1' && (string) $grandchild['RootOrder'] !== '2';
+					}));
+
+					if ($thirdLevel) {
+						echo('<li><a href="' . red_public_html($this->SubLink) . '" target="' . red_public_html($this->SubNewWindow) . '">' . red_public_html($this->SubLabel) . '<span></span></a>');
+						echo('<ul class="submenu">');
+						foreach ($thirdLevel as $grandchild) {
+							echo('<li><a href="' . red_public_html($grandchild['Link']) . '" target="' . red_public_html($grandchild['NewWindow']) . '">' . red_public_html($grandchild['Label']) . '</a></li>');
+						}
+						echo('<li class="tr"></li></ul></li>');
+					} else {
+						echo('<li><a href="' . red_public_html($this->SubLink) . '" target="' . red_public_html($this->SubNewWindow) . '">' . red_public_html($this->SubLabel) . '</a></li>');
+					}
+				}
+				echo('</ul>');
+			}
+
+			echo('</li>');
+		}
 		echo('</ul></nav>');
-		else
-		echo('</li>');
-		/////END FIRST LEVEL/////
-		
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,33 +179,27 @@ class main_menu
 	
 	public function cp_menu()
 	{
-		//echo "SELECT * FROM RED_C_Menu WHERE RefID='".$recordid."' AND RootOrder='1' ORDER BY MenuOrder ASC<br/>"; 
-		
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_Menu WHERE Language='".language."' AND RootOrder='1' AND Active='Y' ORDER BY MenuOrder ASC LIMIT 1");
-		
-		$result_counter = $result->num_rows;
+		$row = red_public_main_menu_root($db->connection);
+		$db->close();
+		$RecordID = isset($row['RecordID']) ? (int) $row['RecordID'] : 0;
+		$Title = isset($row['Title']) ? (string) $row['Title'] : '';
+
 		echo ('<article class="col-lg-12 col-md-12 col-sm-12">');
 		echo ('<div class="container_12 cp_padtop">');
 		echo ('<div class="wrapper">');
 		echo ('<article class="grid_12 cp_admin" style="text-align:center">');
 		
 		//echo ('result main nav='.$result_counter.'<br/>');
-		
-		while($row = mysqli_fetch_assoc($result))
-		{
-			
-				//echo('edit sub-menu');
-				$RecordID=$row['RecordID'];
-				$Alias=$row['Title'];
-				$Alias=preg_replace('/ /','_',$Alias);
-				$Alias=preg_replace('/-/','_',$Alias);
-				$Title=$row['Title'];
-		}
 		if($Title=='')
 		{
 			$Alias='Menu';
 			$Title='Menu';
+		} else {
+			$Alias=$Title;
+			$Alias=preg_replace('/ /','_',$Alias);
+			$Alias=preg_replace('/-/','_',$Alias);
+			$Alias=preg_replace('/[^A-Za-z0-9_]/','_',$Alias);
 		}
 
 		
@@ -359,10 +249,10 @@ class main_menu
 					echo '-->'. "\n";
 					echo '</script>';
 
-				echo '<form id="main_menu_'.$Alias.'" class="form" name="main_menu_'.$Alias.'" method="post" onSubmit="return edit_main_menu_'.$Alias.'(this);">';
+				echo '<form id="main_menu_'.red_public_html($Alias).'" class="form" name="main_menu_'.red_public_html($Alias).'" method="post" onSubmit="return edit_main_menu_'.$Alias.'(this);">';
 
-				echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" id="cp" value="Edit"/>';
-				echo '<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
+				echo '<h7 id="cp"> '.red_public_html($Title).'</h7><br/><input type="submit" name="Edit" id="cp" value="Edit"/>';
+				echo '<input type="hidden" name="RecordID" id="RecordID" value="'.red_public_html($RecordID).'" />';
 				echo '</form>';
 				
 			//echo('<br clear="all">');

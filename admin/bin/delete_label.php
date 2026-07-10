@@ -15,6 +15,7 @@ require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_tool_helpers.php' ?>
 <?php
 red_require_admin(true);
 
@@ -24,103 +25,56 @@ red_require_admin(true);
 		exit;
 	}
 
-	$T = preg_replace("'<[^>]+>'U", "", $_POST['T'] ?? '');	
+	$T = red_admin_tool_text($_POST['T'] ?? '');
+	$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	$response = 'no';
+
 	switch ($T)
 	{
 		case 'subcategories':
-			$Table='RED_SubCategories';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			$db->close();
+			$response = red_admin_tool_delete_by_id($db->connection, 'RED_SubCategories', $RecordID) ? 'yes' : 'no';
 		break;
 		case 'categories':
-			$Table='RED_Categories';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			$db->close();
+			$response = red_admin_tool_delete_by_id($db->connection, 'RED_Categories', $RecordID) ? 'yes' : 'no';
 		break;
 		
 		case 'sections':
-			$Table='RED_Sections';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			$db->close();
+			$response = red_admin_tool_delete_by_id($db->connection, 'RED_Sections', $RecordID) ? 'yes' : 'no';
 		break;
 		
 		case 'sub':
-			$Table='RED_C_Menu';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			$db->close();
+			$response = red_admin_tool_delete_by_id($db->connection, 'RED_C_Menu', $RecordID) ? 'yes' : 'no';
 		break;
 		
 		case 'main':
-		$Table='RED_Menu';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			$db->close();
+			$response = red_admin_tool_delete_by_id($db->connection, 'RED_Menu', $RecordID) ? 'yes' : 'no';
 		break;
 		
 		case 'gal':
-		$Table1='RED_C_Gallery';
-		$Table2='RED_Articles';
-		$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table1." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';			
-			if ($result = $db->delete("DELETE FROM ".$Table2." WHERE RecordID='".$ArtRecordID."'"))
-				echo 'yes';
-			$db->close();
+			$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
+			$response = red_admin_tool_delete_component_article($db->connection, 'RED_C_Gallery', $RecordID, $ArtRecordID) ? 'yesyes' : 'no';
 		break;
 		
 		case 'form':
-		$Table1='RED_C_Form';
-		$Table2='RED_Articles';
-		$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table1." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			if ($result = $db->delete("DELETE FROM ".$Table2." WHERE RecordID='".$ArtRecordID."'"))
-				echo 'yes';
-			$db->close();
+			$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
+			$response = red_admin_tool_delete_component_article($db->connection, 'RED_C_Form', $RecordID, $ArtRecordID) ? 'yesyes' : 'no';
 		break;
 		
 		case 'monstertemplate':
-		$Table1='RED_C_MonsterTemplate';
-		$Table2='RED_Articles';
-		$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table1." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			if ($result = $db->delete("DELETE FROM ".$Table2." WHERE RecordID='".$ArtRecordID."'"))
-				echo 'yes';
-			$db->close();
+			$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
+			$response = red_admin_tool_delete_component_article($db->connection, 'RED_C_MonsterTemplate', $RecordID, $ArtRecordID) ? 'yesyes' : 'no';
 		break;
 		
 		case 'allsub':
-		$Table1='RED_C_Menu';
-		$Table2='RED_Articles';
-		$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table1." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			if ($result = $db->delete("DELETE FROM ".$Table2." WHERE RecordID='".$ArtRecordID."'"))
-				echo 'yes';
-			$db->close();
+			$ArtRecordID=(int) ($_POST['ArtRecordID'] ?? 0);
+			$response = red_admin_tool_delete_component_article($db->connection, 'RED_C_Menu', $RecordID, $ArtRecordID) ? 'yesyes' : 'no';
 		break;
 		
 		default:
-		$Table='RED_Articles';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			if ($result = $db->delete("DELETE FROM ".$Table." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			$db->close();
+			$response = red_admin_tool_delete_by_id($db->connection, 'RED_Articles', $RecordID) ? 'yes' : 'no';
 		break;
 		
 	}
+	echo $response;
+	$db->close();
 ?>

@@ -1,21 +1,28 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php' ?>
 <?php
 if(empty($_SESSION['alias']))
 	header('Location: http://'.BASE_URL.'');
 	else {
-		$Type=preg_replace ( "'<[^>]+>'U", "", $_POST['Type']);
-		$CountPage=preg_replace ( "'<[^>]+>'U", "", $_POST['CountPage']);
-		$Section=preg_replace ( "'<[^>]+>'U", "", $_POST['Section']);
-		$Category=preg_replace ( "'<[^>]+>'U", "", $_POST['Category']);
-		$SubCategory=preg_replace ( "'<[^>]+>'U", "", $_POST['SubCategory']);
-		$Article=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$Language=preg_replace ( "'<[^>]+>'U", "", $_POST['Language']);
+		$Type=red_admin_post_text('Type');
+		$CountPage=red_admin_post_text('CountPage');
+		$Section=red_admin_post_text('Section');
+		$Category=red_admin_post_text('Category');
+		$SubCategory=red_admin_post_text('SubCategory');
+		$Article=red_admin_post_text('Article');
+		$VarPosition=red_admin_article_position_column($_POST['VarPosition'] ?? '', 'PagePosition');
+		if ($VarPosition === null) {
+			echo 'no';
+			exit;
+		}
+		$Language=substr(red_admin_post_text('Language'), 0, 2);
 		$RecordID=mt_rand();
 		$ArtRecordID=mt_rand();
+		$csrfToken=red_csrf_token();
 
 ?>
 <!-- Our CSS stylesheet file -->
@@ -39,7 +46,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 10,
-		url: '/admin/bin/post_ftp.php?UC=FTP&Language=<?php echo $Language?>',
+		url: '/admin/bin/post_ftp.php?UC=FTP&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');

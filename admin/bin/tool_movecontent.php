@@ -1,74 +1,63 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
-<?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_build_query.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_tool_helpers.php' ?>
 
 
 
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-		$Type=preg_replace ( "'<[^>]+>'U", "", $_POST['Type']);
-		$CountPage=preg_replace ( "'<[^>]+>'U", "", $_POST['CountPage']);
-		$Section=preg_replace ( "'<[^>]+>'U", "", $_POST['Section']);
-		$Category=preg_replace ( "'<[^>]+>'U", "", $_POST['Category']);
-		$SubCategory=preg_replace ( "'<[^>]+>'U", "", $_POST['SubCategory']);
-		$Article=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$Language=preg_replace ( "'<[^>]+>'U", "", $_POST['Language']);
-		$Layout=preg_replace ( "'<[^>]+>'U", "", $_POST['Layout']);
-		$cparea=preg_replace ( "'<[^>]+>'U", "", $_POST['cparea']);
-		$cpareastyle=strtolower($cparea);
-		$compgroup=preg_replace ( "'<[^>]+>'U", "", $_POST['compgroup']);
-        if (isset($_POST['SortBy'])) {
-        $SortBy = preg_replace("'<[^>]+>'U", "", $_POST['SortBy']);
-        } else {
-            $SortBy = ''; // or any default value you want
-        }
-
-        if (isset($_POST['SelectPosition'])) {
-            $FilterPosition = preg_replace("'<[^>]+>'U", "", $_POST['SelectPosition']);
-        } else {
-            $FilterPosition = ''; // or any default value you want
-        }
-		
-		switch ($cparea){
-		case 'Sections':
-		$rowposition='SectionPosition';
-		break;
-		case 'Categories':
-		$rowposition='CategoryPosition';
-		break;
-		case 'SubCategories':
-		$rowposition='SubCategoryPosition';
-		break;
-		default:
-		$rowposition=$VarPosition;
-		
-		break;
-		
+		$Type=red_admin_tool_post_text('Type');
+		$CountPage=red_admin_tool_count_page($_POST['CountPage'] ?? '');
+		$Section=red_admin_tool_post_text('Section');
+		$Category=red_admin_tool_post_text('Category');
+		$SubCategory=red_admin_tool_post_text('SubCategory');
+		$Article=red_admin_tool_post_text('Article');
+		$Language=red_admin_tool_post_text('Language');
+		$Layout=red_admin_tool_post_text('Layout');
+		$cparea=red_admin_tool_post_text('cparea');
+		$cpareaConfig=red_admin_tool_area_config($cparea);
+		if ($CountPage === 0 || ($cparea !== 'Content' && !$cpareaConfig)) {
+			echo 'no';
+			exit;
 		}
-		
+		$cpareastyle=$cparea === 'Content' ? 'content' : $cpareaConfig['style'];
+		$compgroup=red_admin_tool_post_text('compgroup');
+		$SortBy=red_admin_tool_post_text('SortBy');
+		$FilterPosition=red_admin_tool_post_text('SelectPosition');
+		$rowposition=$cparea === 'Content'
+			? red_admin_tool_position_column($_POST['VarPosition'] ?? '')
+			: $cpareaConfig['position'];
 		if ($FilterPosition === ''){
-		$FilterPosition= 'all';
-		if ($Section==='home')
-		$rowposition='HomePosition';
-		
+			$FilterPosition= 'all';
+			if ($Section==='home') {
+				$rowposition='HomePosition';
+			}
 		}
-		
-		$xquery=new Build_Query();
-		$rquery=$xquery->cp_get_query($CountPage, $Section, $Category, $SubCategory, $Article);
-		$articlequeryfilter=$rquery[0];
-		/*$this->VarPosition=$rquery[1];
-		$this->VarFeatures=$rquery[2];	
-		$this->metaquery=$rquery[3];
-		$this->Table=$rquery[4];*/
-		
-		/*echo $articlequeryfilter.'<br/>';
-		echo $this->VarFeatures.'<br/>';
-		echo $this->VarPosition;*/
+		$VarPosition=red_admin_tool_position_column($_POST['VarPosition'] ?? '', $rowposition);
+		if ($VarPosition === '') {
+			echo 'no';
+			exit;
+		}
+		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		$This = new stdClass();
+		$Positions=red_admin_tool_layout_positions($db->connection, $Layout);
+		$Articles=red_admin_tool_move_articles(
+			$db->connection,
+			$CountPage,
+			$Section,
+			$Category,
+			$SubCategory,
+			$Article,
+			$VarPosition,
+			$FilterPosition,
+			$SortBy,
+			$rowposition
+		);
+		$AdminComponentIDs=red_admin_tool_admin_component_ids($_SESSION['AdminComponents'] ?? '');
+		$LayoutParam=rawurlencode($Layout);
+		$VarPositionParam=rawurlencode($VarPosition);
 
 ?>
 <!-- Our CSS stylesheet file -->
@@ -93,7 +82,7 @@ function run_toolmove (toolmove)
 	window.location.reload();
 	});
 	}
-	//else
+	else
 	{
 	$('#msggbox_tool_content').html("&nbsp; Error. Please try again.")
 	.hide()
@@ -125,7 +114,7 @@ $(document).ready(function() {
 //-->
 <!--
 function MM_SelectPosition(SelectPosition){ 
-	var dataString = "Item=Reload&CountPage=<?php echo $CountPage ?>&Section=<?php echo $Section ?>&Category=<?php echo $Category ?>&SubCategory=<?php echo $SubCategory ?>&Article=<?php echo $Article ?>&Layout=<?php echo $Layout ?>&VarPosition=<?php echo $VarPosition?>&cparea=<?php echo $cparea ?>&SelectPosition=" + SelectPosition.options[SelectPosition.selectedIndex].value;
+	var dataString = "Item=Reload&CountPage=<?php echo $CountPage ?>&Section=<?php echo rawurlencode($Section) ?>&Category=<?php echo rawurlencode($Category) ?>&SubCategory=<?php echo rawurlencode($SubCategory) ?>&Article=<?php echo rawurlencode($Article) ?>&Layout=<?php echo rawurlencode($Layout) ?>&VarPosition=<?php echo rawurlencode($VarPosition)?>&cparea=<?php echo rawurlencode($cparea) ?>&SelectPosition=" + encodeURIComponent(SelectPosition.options[SelectPosition.selectedIndex].value);
 	//alert (dataString);
 	$.ajax({ 
 	type: "POST", 
@@ -144,7 +133,7 @@ function MM_SelectPosition(SelectPosition){
 <!--
 $('input:button').click(function() {
     //alert($(this).val());
-	var dataString = "CountPage=<?php echo $CountPage ?>&Section=<?php echo $Section ?>&Category=<?php echo $Category ?>&SubCategory=<?php echo $SubCategory ?>&Article=<?php echo $Article ?>&Layout=<?php echo $Layout ?>&VarPosition=<?php echo $VarPosition?>&cparea=<?php echo $cparea ?>&SelectPosition=<?php if($FilterPosition <>'current') echo $FilterPosition ?>&SortBy="+ $(this).val();
+	var dataString = "CountPage=<?php echo $CountPage ?>&Section=<?php echo rawurlencode($Section) ?>&Category=<?php echo rawurlencode($Category) ?>&SubCategory=<?php echo rawurlencode($SubCategory) ?>&Article=<?php echo rawurlencode($Article) ?>&Layout=<?php echo rawurlencode($Layout) ?>&VarPosition=<?php echo rawurlencode($VarPosition)?>&cparea=<?php echo rawurlencode($cparea) ?>&SelectPosition=<?php if($FilterPosition <>'current') echo rawurlencode($FilterPosition) ?>&SortBy="+ encodeURIComponent($(this).val());
 	//alert (dataString);
 	$.ajax({ 
 	type: "POST", 
@@ -181,15 +170,6 @@ label{color:#000}
                             <label>Filter by Layout Position: <select name="SelectPosition" id="SelectPosition" onchange="MM_SelectPosition(this)">
                             
                             <?php
-                            //echo $Layout;
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $resultA = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-                            //echo ($resultC->num_rows);
-                            while($row4 = mysqli_fetch_assoc($resultA))
-                            {
-                            $Positions=$row4['Positions'];
-                            }
-                            //echo $Positions;
                             for ($w=0; $w<=$Positions; $w++)
                             {
 								switch ($FilterPosition)
@@ -282,132 +262,28 @@ label{color:#000}
 
    
 							<?php
-                            // sort by
-							switch ($SortBy)
-							{
-								case 'Article Title ▲':
-								
-								$SortByQ='ORDER BY Title ASC';
-								break;
-								
-								case 'Article Title ▼':
-								
-								$SortByQ='ORDER BY Title DESC';
-								break;
-								
-								case 'Article Title':
-								
-								$SortByQ='ORDER BY Title ASC';
-								break;
-								
-								//
-								
-								case 'Pos ▲':
-								if($Section==='home')
-								$SortByQ='ORDER BY HomePosition ASC';
-								else
-								$SortByQ='ORDER BY '.$rowposition.' ASC';
-								//echo '1';
-								break;
-								
-								case 'Pos ▼':
-								if($Section==='home')
-								$SortByQ='ORDER BY HomePosition DESC';
-								else
-								$SortByQ='ORDER BY '.$rowposition.' DESC';
-								//echo '2';
-								break;
-								
-								case 'Pos':
-								if($Section==='home')
-								$SortByQ='ORDER BY HomePosition ASC';
-								else
-								$SortByQ='ORDER BY '.$rowposition.' ASC';
-								//echo '2';
-								break;
-								
-								//
-								
-								case 'Comp ▲':
-								$SortByQ='ORDER BY Component ASC';
-								break;
-								
-								case 'Comp ▼':
-								$SortByQ='ORDER BY Component DESC';
-								break;
-								
-								case 'Comp':
-								$SortByQ='ORDER BY Component ASC';
-								break;
-								
-								//
-								
-								
-								default:
-								$SortByQ='ORDER BY Updated DESC';
-								//echo '3';
-								break;
-							}
-							
-							$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            switch ($FilterPosition)
-                            {
-                            case 'all':
-                                $result3 = $db->query("SELECT * FROM RED_Articles WHERE Active = 'Y' ".$articlequeryfilter." ".$SortByQ."");
-                             break;
-                            
-                            default:
-                                $result3 = $db->query("SELECT * FROM RED_Articles WHERE ".$VarPosition." = '".$FilterPosition."' ".$articlequeryfilter." AND Active = 'Y' ".$SortByQ."");	
-                            break;
-                            }	
-                            
                             echo '<div class="wrapper row"><label><input type="checkbox" id="selecctall1"/> Select All</label></div>';
                             $w=0;
-                            while($row3 = mysqli_fetch_assoc($result3))
+                            foreach ($Articles as $row3)
                             {
-                                $RecordID=$row3['RecordID'];
-                                $Alias=$row3['Alias'];
-								$Alias=preg_replace('/-/','_',$Alias);
-								$Title=$row3['Title'];
-                                $Component=$row3['Component'];
-                                $HomeFeature=$row3['HomeFeature'];
-                                $ThisVarPosition=$row3[$VarPosition];
-								$Updated=$row3['Updated'];
-                                
-                                // COMPARE SESSION 'AdminComponents' WITH RED_COMPONENTS.
-                                // IF VALUE EXIST THEN SHOW UPDATE BUTTON. IF NOT, DISPLAY MESSAGE FOR "ADMIN NOT AUTHORIZED TO UPDATE".
-								//echo $_SESSION['AdminComponents'];
-                                $ThisAdminComponents = explode(",", $_SESSION['AdminComponents']);
-                                //echo($_SESSION['AdminComponents'].'='.count($ThisAdminComponents).'<br/>');
-                                for ($w=0; $w<=count($ThisAdminComponents); $w++)
-                                {
-                                    //echo 'Component = '.$ThisAdminComponents[$w].'<br/>';
-									$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                                    $resultC = $db->query("SELECT CompGroup FROM RED_Components WHERE RecordID='".$ThisAdminComponents[$w]."' AND UniqueName='".$Component."'");
-                                    if ($resultC && mysqli_num_rows($resultC) > 0) {
-                                    $row = mysqli_fetch_assoc($resultC);
-                                    $CompGroup=$row['CompGroup'];
-                                    }
-                                    switch ($CompGroup) { // CHECK IF THIS IS A GROUP COMPONENT. I.E: FORM, GALLERY, SUBMENU. GET RECORDID
-                                    case 'Y':
-                                        $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                                        $resultE = $db->query("SELECT RecordID FROM RED_C_" . $Component . " WHERE RefID='" . $RecordID . "'");
-                                        if ($resultE && $resultE->num_rows > 0) {
-                                            // Fetch the actual row as an associative array
-                                            $row = mysqli_fetch_assoc($resultE);
-                                            $CRecordID = $row['RecordID'];
-                                        } else {
-                                            // Handle the case when no row is returned
-                                            $CRecordID = ''; // Or handle it in another appropriate way
-                                        }
-                                        break;
-                                }
-                                    
-                                    if(($resultC->num_rows==0)&&($w==count($ThisAdminComponents))){
+	                                $RecordID=(int)($row3['RecordID'] ?? 0);
+	                                $FunctionSuffix=red_admin_tool_js_suffix($row3['Alias'] ?? '', $RecordID);
+									$Title=red_admin_tool_html($row3['Title'] ?? '');
+	                                $ComponentName=red_admin_tool_text($row3['Component'] ?? '');
+	                                $Component=red_admin_tool_html($ComponentName);
+									$ComponentEndpoint=preg_replace('/[^a-z0-9_-]/', '', strtolower($ComponentName));
+	                                $HomeFeature=red_admin_tool_text($row3['HomeFeature'] ?? '');
+	                                $ThisVarPosition=(int)($row3[$VarPosition] ?? 0);
+									$Updated=red_admin_tool_html($row3['Updated'] ?? '');
+									$Access=red_admin_tool_component_access($db->connection, $ComponentName, $AdminComponentIDs, $RecordID);
+									$CompGroup=$Access['comp_group'];
+									$CRecordID=(int)$Access['component_record_id'];
+
+	                                    if(!$Access['authorized']){
                                         //echo ' ADMINISTRATOR NOT AUTHORIZED TO UPDATE<br />';
                                         echo '<script type="text/javascript">'. "\n";
                                         echo '<!--' ."\n";
-                                        echo 'function edit_move_content_'.$Alias.'_'.$RecordID.' (){'. "\n";
+	                                        echo 'function edit_move_content_'.$FunctionSuffix.' (){'. "\n";
                                         echo '$(\'#msggbox_tool\').html("You\'re not authorized to edit this content.")'. "\n";
                                         echo '.fadeIn(1500, function() {'. "\n";
                                         echo '});'. "\n";
@@ -420,7 +296,7 @@ label{color:#000}
                                
                                         echo '<div class="wrapper row">';
                                         echo '<div class="col-lg-6 col-md-6 col-sm-6">';
-                                        echo '<label id="checkbox" title="'.$Title.' | '.$Updated.'"><input type="checkbox" class="checkbox1" name="Articles_Sel['.$w.']" value="'.$RecordID.'"" />'.$Title;
+                                        echo '<label id="checkbox" title="'.$Title.' | '.$Updated.'"><input type="checkbox" class="checkbox1" name="Articles_Sel['.$w.']" value="'.$RecordID.'" />'.$Title;
                                         if ($HomeFeature=='Y')
                                         echo '<font color="red" class="cp_red">*</font></label>';
                                         else
@@ -442,25 +318,22 @@ label{color:#000}
                                         echo $Component;
                                         echo '</div>';
                                         echo '<div class="col-lg-2 col-md-2 col-sm-2">';
-                                        echo '<img src="/admin/images/ico_edit.png" onClick="edit_move_content_'.$Alias.'_'.$RecordID.'();" title="Edit" style="cursor:pointer">';
+                                        echo '<img src="/admin/images/ico_edit.png" onClick="edit_move_content_'.$FunctionSuffix.'();" title="Edit" style="cursor:pointer">';
                                         echo '</div>';
                                         echo '</div>';
-                                        $w++;
-                                
-                                    break;
+	                                        $w++;
                                     
-                                    }elseif(($resultC->num_rows==0));
-                                    else{
+	                                    } else {
                                         //echo $w.' ADMINISTRATOR AUTHORIZED TO UPDATE<br />';
                                         switch ($CompGroup){ // CHECK IF THIS IS A GROUP COMPONENT. I.E:FORM, GALLERY, SUBMENU.
                                         case 'Y':
                                             echo '<script language="JavaScript" type="text/javascript">'. "\n";
                                             echo '<!--' ."\n";
-                                            echo 'function edit_move_content_'.$Alias.'_'.$RecordID.' (RecordID,CRecordID){'. "\n";
+	                                            echo 'function edit_move_content_'.$FunctionSuffix.' (RecordID,CRecordID){'. "\n";
                                             echo '$.ajax({'. "\n";
                                             echo 'type: "POST", '. "\n";
-                                            echo 'url: "/admin/bin/edit_'.strtolower($Component).'.php", '. "\n";
-                                            echo 'data: "RecordID=" + CRecordID + "&ArtRecordID=" + RecordID +"&Layout='.$Layout.'&VarPosition='.$VarPosition.'", '. "\n";
+	                                            echo 'url: "/admin/bin/edit_'.$ComponentEndpoint.'.php", '. "\n";
+	                                            echo 'data: "RecordID=" + CRecordID + "&ArtRecordID=" + RecordID +"&Layout='.$LayoutParam.'&VarPosition='.$VarPositionParam.'", '. "\n";
                                             echo 'success: function(data) { '. "\n";
                                             //echo 'alert (data);'. "\n";
                                             //echo 'return false;'. "\n";
@@ -490,7 +363,7 @@ label{color:#000}
                                 
                                             echo '<div class="wrapper row">';
                                             echo '<div class="col-lg-6 col-md-6 col-sm-6">';
-                                            echo '<label id="checkbox" title="'.$Title.' | '.$Updated.'"><input type="checkbox" class="checkbox1" name="Articles_Sel['.$w.']" value="'.$RecordID.'"" />'.$Title;
+                                            echo '<label id="checkbox" title="'.$Title.' | '.$Updated.'"><input type="checkbox" class="checkbox1" name="Articles_Sel['.$w.']" value="'.$RecordID.'" />'.$Title;
                                             if ($HomeFeature=='Y')
                                             echo '<font color="red" class="cp_red">*</font></label>';
                                             else
@@ -512,7 +385,7 @@ label{color:#000}
                                             echo $Component;
                                             echo '</div>';
                                             echo '<div class="col-lg-2 col-md-2 col-sm-2">';
-                                            echo '<img src="/admin/images/ico_edit.png" onClick="javascript:showdiv(\'editcontent\'); edit_move_content_'.$Alias.'_'.$RecordID.'(' .$RecordID . ','.$CRecordID.');" title="Edit" style="cursor:pointer">';
+                                            echo '<img src="/admin/images/ico_edit.png" onClick="javascript:showdiv(\'editcontent\'); edit_move_content_'.$FunctionSuffix.'(' .$RecordID . ','.$CRecordID.');" title="Edit" style="cursor:pointer">';
                                             echo '</div>';
                                             echo '</div>';
                                             $w++;
@@ -522,11 +395,11 @@ label{color:#000}
                                         
                                         echo '<script language="JavaScript" type="text/javascript">'. "\n";
                                         echo '<!--' ."\n";
-                                        echo 'function edit_move_content_'.$Alias.'_'.$RecordID.' (RecordID){'. "\n";
+                                        echo 'function edit_move_content_'.$FunctionSuffix.' (RecordID){'. "\n";
                                         echo '$.ajax({'. "\n";
                                         echo 'type: "POST", '. "\n";
-                                        echo 'url: "/admin/bin/edit_'.strtolower($Component).'.php", '. "\n";
-                                        echo 'data: "RecordID=" + RecordID + "&Layout='.$Layout.'&VarPosition='.$VarPosition.'", '. "\n";
+                                        echo 'url: "/admin/bin/edit_'.$ComponentEndpoint.'.php", '. "\n";
+                                        echo 'data: "RecordID=" + RecordID + "&Layout='.$LayoutParam.'&VarPosition='.$VarPositionParam.'", '. "\n";
                                         echo 'success: function(data) { '. "\n";
                                         //echo 'alert (data);'. "\n";
                                         //echo 'return false;'. "\n";
@@ -555,7 +428,7 @@ label{color:#000}
                                         
                                         echo '<div class="wrapper row">';
                                         echo '<div class="col-lg-6 col-md-6 col-sm-6">';
-                                        echo '<label id="checkbox" title="'.$Title.' | '.$Updated.'"><input type="checkbox" class="checkbox1" name="Articles_Sel['.$w.']" value="'.$RecordID.'"" />'.$Title;
+                                        echo '<label id="checkbox" title="'.$Title.' | '.$Updated.'"><input type="checkbox" class="checkbox1" name="Articles_Sel['.$w.']" value="'.$RecordID.'" />'.$Title;
                                         if ($HomeFeature=='Y')
                                         echo '<font color="red" class="cp_red">*</font></label>';
                                         else
@@ -576,16 +449,14 @@ label{color:#000}
                                         echo $Component;
                                         echo '</div>';
                                         echo '<div class="col-lg-2 col-md-2 col-sm-2">';
-                                        echo '<img src="/admin/images/ico_edit.png" onClick="javascript:showdiv(\'editcontent\'); edit_move_content_'.$Alias.'_'.$RecordID.'(' .$RecordID . ');" title="Edit" style="cursor:pointer">';
+                                        echo '<img src="/admin/images/ico_edit.png" onClick="javascript:showdiv(\'editcontent\'); edit_move_content_'.$FunctionSuffix.'(' .$RecordID . ');" title="Edit" style="cursor:pointer">';
                                         echo '</div>';
                                         echo '</div>';
                                         $w++;
                                         
                                     break;
-                                        }
-                                    break;
-                                }
-                                }
+	                                        }
+	                            }
                             }
                             ?>
                         
@@ -605,11 +476,9 @@ label{color:#000}
                             <label>Section: <select name="Sections">
                             <option value="">Select...</option>
                             <?php
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $result3 = $db->query("SELECT Sections, Features FROM RED_Sections WHERE Active='Y'");
-                            while($row3 = mysqli_fetch_assoc($result3))
+                            foreach (red_admin_tool_active_area_values($db->connection, 'Sections') as $row3)
                             {
-                            $ThisSection=$row3['Sections'];
+                            $ThisSection=red_admin_tool_html($row3['AreaName'] ?? '');
                             echo '<option value="'.$ThisSection.'">'.$ThisSection.'</option>';
                             }
                             ?>
@@ -620,11 +489,9 @@ label{color:#000}
                             <label>Category: <select name="Categories">
                             <option value="">Select...</option>
                             <?php
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $result3 = $db->query("SELECT Categories, Features FROM RED_Categories WHERE Active='Y'");
-                            while($row3 = mysqli_fetch_assoc($result3))
+                            foreach (red_admin_tool_active_area_values($db->connection, 'Categories') as $row3)
                             {
-                            $This->Categories=$row3['Categories'];
+                            $This->Categories=red_admin_tool_html($row3['AreaName'] ?? '');
                             echo '<option value="'.$This->Categories.'">'.$This->Categories.'</option>';
                             }
                             ?>
@@ -636,11 +503,9 @@ label{color:#000}
                             <label>Sub Category: <select name="SubCategories">
                             <option value="">Select...</option>
                             <?php
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $result3 = $db->query("SELECT SubCategories, Features FROM RED_SubCategories WHERE Active='Y'");
-                            while($row3 = mysqli_fetch_assoc($result3))
+                            foreach (red_admin_tool_active_area_values($db->connection, 'SubCategories') as $row3)
                             {
-                            $This->SubCategories=$row3['SubCategories'];
+                            $This->SubCategories=red_admin_tool_html($row3['AreaName'] ?? '');
                             echo '<option value="'.$This->SubCategories.'">'.$This->SubCategories.'</option>';
                             }
                             ?>
@@ -652,12 +517,10 @@ label{color:#000}
                             <label>Article: <select name="Article">
                             <option value="">Select...</option>
                             <?php
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                             $result3 = $db->query("SELECT Title, Alias FROM RED_Articles WHERE Active = 'Y' AND Component='Article' ORDER BY Updated DESC");
-                            while($row3 = mysqli_fetch_assoc($result3))
+                            foreach (red_admin_tool_active_articles($db->connection, true) as $row3)
                             {
-                            $Title=$row3['Title'];
-							$ThisAlias=$row3['Alias'];
+                            $Title=red_admin_tool_html($row3['Title'] ?? '');
+							$ThisAlias=red_admin_tool_html($row3['Alias'] ?? '');
                             echo '<option value="'.$ThisAlias.'">'.$ThisAlias.'</option>';
                             }
                             ?>
@@ -667,14 +530,7 @@ label{color:#000}
                             <span id="cp_step">
                         	<h4 class="pt-3"><p>Select Position:</h4></span>
                             <?php
-							 $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-							$resultC = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-							//echo ($resultC->num_rows);
-							while($row4 = mysqli_fetch_assoc($resultC))
-							{
-								$Positions=$row4['Positions'];
-							}
-							echo '<p>Current Page uses the Layout <strong>'.$Layout.'</strong>, <br/>which has <strong>'.$Positions.'</strong> Positions</p>';
+							echo '<p>Current Page uses the Layout <strong>'.red_admin_tool_html($Layout).'</strong>, <br/>which has <strong>'.$Positions.'</strong> Positions</p>';
 							?>
                             <p>
                             <label title="Layout Position">Position: <select name="Position">
@@ -707,8 +563,9 @@ label{color:#000}
                     
                  </div>
                  
-                <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo $_SESSION['alias']?>" />
-                <input type="hidden" name="VarPosition" value="<?php echo $VarPosition ?>" />
+                <?php echo red_csrf_input(); ?>
+                <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_tool_html($_SESSION['alias'] ?? '')?>" />
+                <input type="hidden" name="VarPosition" value="<?php echo red_admin_tool_html($VarPosition) ?>" />
                 <input type="submit" name="submit" value="Update" id="save"/>
                 <span id="msggbox_tool_content" style="display:none"></span>
                 </fieldset>
@@ -719,6 +576,5 @@ label{color:#000}
 </div>
 
 <?php
-
-		}
+$db->close();
 ?>

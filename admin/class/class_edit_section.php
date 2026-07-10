@@ -1,5 +1,7 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+red_start_session();
+red_require_admin(); ?>
 <?php
 #[\AllowDynamicProperties]
 class editsection
@@ -56,14 +58,14 @@ class editsection
 		echo '<div class="clear-cp"></div>';
 		
         $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $result = $db->query("SELECT * FROM RED_Sections WHERE Language='".language."' ORDER BY RecordID ASC");
-        while($row = mysqli_fetch_assoc($result))
+        $rows = red_admin_area_list_rows($db->connection, 'RED_Sections', red_admin_area_language());
+        foreach($rows as $row)
         {
-            $Sections=$row['Sections'];
-			$Title=$row['Title'];
-            $Layout=$row['Layout'];
-            $Active=$row['Active'];
-            $RecordID=$row['RecordID'];
+            $Sections=red_admin_text($row['Sections'] ?? '');
+			$Title=red_admin_area_html($row['Title'] ?? '');
+            $Layout=red_admin_area_html($row['Layout'] ?? '');
+            $Active=red_admin_area_html($row['Active'] ?? '');
+            $RecordID=(int) ($row['RecordID'] ?? 0);
                 
             echo '<div class="wrapper row2">';
 			echo '<label style="display:inline;">';
@@ -71,7 +73,7 @@ class editsection
 			if (strtolower($Sections)==='home')
 			echo '<strong><a href=/ />'.$Title.'</a></strong>';
             else
-			echo '<strong><a href=/'.$Sections.'/ />'.$Title.'</a></strong>';
+			echo '<strong><a href=/'.rawurlencode($Sections).'/ />'.$Title.'</a></strong>';
             echo '</div>';
             echo '<div class="titleleft layout">';
             echo $Layout;
