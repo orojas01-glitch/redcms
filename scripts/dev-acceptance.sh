@@ -4334,11 +4334,11 @@ printf '%s\n' 'Starting isolated PHP runtime and canonical public-route checks.'
 red_acceptance_start_php
 red_acceptance_inject_failure after_server
 
-red_acceptance_check_route 'home' '/' 'tm_navbar' 'Contacto'
+red_acceptance_check_route 'home' '/' 'starter-navigation' 'Contacto'
 red_acceptance_check_route 'contact' '/contacto/' 'id="form_contact"' 'name="message"'
 red_acceptance_check_route 'administration' '/administracion/' 'id="form_login"' 'name="password"'
 red_acceptance_check_route 'instructions' '/administracion/instructions' 'id="instructions"' 'RED-CMS'
-red_acceptance_check_route 'test-vimeo' '/administracion/test-vimeo' 'Como Agregar Contenido' 'tm_navbar'
+red_acceptance_check_route 'test-vimeo' '/administracion/test-vimeo' 'Como Agregar Contenido' 'starter-navigation'
 red_acceptance_check_not_found_route 'unmatched-route' '/codex-acceptance-missing-route/' '' '' 'route'
 
 printf '%s\n' 'Running disposable administrator authentication lifecycle.'

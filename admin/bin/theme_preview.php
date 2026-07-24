@@ -56,7 +56,6 @@ try {
 $inventoryScope = red_theme_admin_preview_inventory_scope();
 $contactPreviewLaunchAvailable = red_theme_admin_preview_can_launch($themeInventory, 'contact');
 $homePreviewLaunchAvailable = red_theme_admin_preview_can_launch($themeInventory, 'home');
-$adrianaHomePreviewLaunchAvailable = red_theme_admin_preview_can_launch($themeInventory, 'adriana-home');
 
 if ($method === 'POST') {
     try {
@@ -108,13 +107,11 @@ if ($method === 'POST') {
         }
 
         $action = red_theme_admin_preview_request_action($_POST);
-        if (in_array($action, ['start', 'start-home', 'start-adriana-home'], true)) {
-            $mode = $action === 'start-adriana-home'
-                ? 'adriana-home'
-                : ($action === 'start-home' ? 'home' : 'contact');
-            $launchAvailable = $mode === 'adriana-home'
-                ? $adrianaHomePreviewLaunchAvailable
-                : ($mode === 'home' ? $homePreviewLaunchAvailable : $contactPreviewLaunchAvailable);
+        if (in_array($action, ['start', 'start-home'], true)) {
+            $mode = $action === 'start-home' ? 'home' : 'contact';
+            $launchAvailable = $mode === 'home'
+                ? $homePreviewLaunchAvailable
+                : $contactPreviewLaunchAvailable;
             if (!$launchAvailable) {
                 throw new RuntimeException('The fixed theme preview is unavailable.');
             }
@@ -153,18 +150,16 @@ $previewState = red_theme_admin_preview_state(
     $sessionBinding
 );
 if ($previewState !== null) {
-    $stateLaunchAvailable = $previewState['mode'] === 'adriana-home'
-        ? $adrianaHomePreviewLaunchAvailable
-        : ($previewState['mode'] === 'home'
-            ? $homePreviewLaunchAvailable
-            : $contactPreviewLaunchAvailable);
+    $stateLaunchAvailable = $previewState['mode'] === 'home'
+        ? $homePreviewLaunchAvailable
+        : $contactPreviewLaunchAvailable;
     if (!$stateLaunchAvailable) {
         red_theme_admin_preview_exit($_SESSION);
         $previewState = null;
     }
 }
 
-if (in_array($query['view'], ['contact', 'home', 'adriana-home'], true)) {
+if (in_array($query['view'], ['contact', 'home'], true)) {
     if ($previewState === null || $previewState['mode'] !== $query['view']) {
         http_response_code(403);
         echo 'no';
@@ -172,9 +167,7 @@ if (in_array($query['view'], ['contact', 'home', 'adriana-home'], true)) {
     }
 
     session_write_close();
-    if ($query['view'] === 'adriana-home') {
-        require_once $projectRoot . '/includes/theme_preview_helpers.php';
-    } elseif ($query['view'] === 'home') {
+    if ($query['view'] === 'home') {
         require_once $projectRoot . '/includes/theme_preview_home_helpers.php';
     } else {
         require_once $projectRoot . '/includes/theme_preview_contact_helpers.php';
@@ -182,11 +175,7 @@ if (in_array($query['view'], ['contact', 'home', 'adriana-home'], true)) {
 
     $connection = null;
     try {
-        if ($query['view'] === 'adriana-home') {
-            $result = red_theme_preview_render_allowed_fixture('adriana-granobles', $projectRoot);
-            $expectedScope = red_theme_preview_scope();
-        } else {
-            $localConfig = [];
+        $localConfig = [];
             $localConfigFile = $projectRoot . '/includes/config.local.php';
             if (is_file($localConfigFile)) {
                 $loadedConfig = require $localConfigFile;
@@ -233,7 +222,6 @@ if (in_array($query['view'], ['contact', 'home', 'adriana-home'], true)) {
                 $result = red_theme_contact_preview_render($connection, $projectRoot);
                 $expectedScope = red_theme_contact_preview_scope(4);
             }
-        }
         if ($result['scope'] !== $expectedScope) {
             throw new RuntimeException('Authenticated preview scope changed unexpectedly.');
         }
@@ -459,11 +447,9 @@ $escape = function ($value) {
                                 && $contactPreviewLaunchAvailable;
                             $homePreviewAction = $theme['themeId'] === 'starter-reference'
                                 ? 'start-home'
-                                : ($theme['themeId'] === 'adriana-granobles' ? 'start-adriana-home' : '');
-                            $canPreviewHome = ($theme['themeId'] === 'starter-reference'
-                                    && $homePreviewLaunchAvailable)
-                                || ($theme['themeId'] === 'adriana-granobles'
-                                    && $adrianaHomePreviewLaunchAvailable);
+                                : '';
+                            $canPreviewHome = $theme['themeId'] === 'starter-reference'
+                                && $homePreviewLaunchAvailable;
                             $compatibility = $themeCompatibilityById[$theme['themeId']] ?? null;
                             $activationCompatible = is_array($compatibility)
                                 && !empty($compatibility['activationCompatible']);

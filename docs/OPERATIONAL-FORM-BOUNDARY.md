@@ -12,7 +12,7 @@ Status: Contact, Response, and Register resolve definition-driven operational fo
 - the paired article is active, has started, and is not expired; and
 - the posted alias exactly matches the stored form alias.
 
-This replaces the former fixed `93039112` Contact assumption. The original Contact form and the Adriana Contact form can therefore use the same endpoint without adding record-specific code. A missing, inactive, expired, wrong-type, orphaned, or mismatched form redirects through the existing home redirect behavior before the one-time Contact session is consumed.
+This replaces the former fixed `93039112` Contact assumption. Different standard-theme Contact forms can therefore use the same endpoint without adding record-specific code. A missing, inactive, expired, wrong-type, orphaned, or mismatched form redirects through the existing home redirect behavior before the one-time Contact session is consumed.
 
 ## Definition And Submission Validation
 
@@ -68,7 +68,7 @@ scripts/public-form-operation-self-test.sh
 scripts/theme-readiness-self-test.sh
 ```
 
-The operation suite is dependency-free: it opens no database, starts no session, sends no HTTP request, performs no network lookup, and sends no mail. It covers original and Adriana-like Contact definitions and record IDs; the shared Response/Register configuration and active-pair source boundary; alias, record, definition, field, choice, array, hidden, email, and size failures; disabled select placeholders; honeypot suppression; primary/fallback ordering; validated fallback destinations; exact managed Register storage derivation; Login compatibility; report redaction; and live source anchors.
+The operation suite is dependency-free: it opens no database, starts no session, sends no HTTP request, performs no network lookup, and sends no mail. It covers multiple Contact definitions and record IDs; the shared Response/Register configuration and active-pair source boundary; alias, record, definition, field, choice, array, hidden, email, and size failures; disabled select placeholders; honeypot suppression; primary/fallback ordering; validated fallback destinations; exact managed Register storage derivation; Login compatibility; report redaction; and live source anchors.
 
 The protected-source section intentionally retains hashes for unrelated display/runtime files. During a parallel UI batch, the focused semantic checks can pass before the suite stops on a separately owned source-hash drift; update those unrelated hashes only in the batch that intentionally changed those files.
 

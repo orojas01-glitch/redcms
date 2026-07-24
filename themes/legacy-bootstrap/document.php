@@ -32,7 +32,6 @@ if ($redThemeDocumentPhase === 'end') {
 	$page->Metatags();
 	?>
     
-    <meta property="og:image" content="https://adrianagranobles.com/images/articles/image-adrianagranobles-facebookshare.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">

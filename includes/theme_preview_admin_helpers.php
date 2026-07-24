@@ -13,10 +13,9 @@ if (!function_exists('red_theme_admin_preview_inventory_scope')) {
     {
         return [
             'liveCompatibilityThemeId' => 'legacy-bootstrap',
-            'previewThemeIds' => ['starter-reference', 'adriana-granobles'],
+            'previewThemeIds' => ['starter-reference'],
             'previewModes' => [
                 'starter-reference' => ['contact', 'home'],
-                'adriana-granobles' => ['home'],
             ],
             'databaseReads' => 0,
             'databaseWrites' => 0,
@@ -63,8 +62,6 @@ if (!function_exists('red_theme_admin_preview_inventory_from_discovery')) {
             $previewModes = [];
             if ($type === 'standard' && $themeId === 'starter-reference') {
                 $previewModes = ['Contact canary', 'Home route'];
-            } elseif ($type === 'standard' && $themeId === 'adriana-granobles') {
-                $previewModes = ['Home route'];
             }
             $previewAvailable = $previewModes !== [];
             $productionValidation = $type === 'standard'
@@ -121,7 +118,7 @@ if (!function_exists('red_theme_admin_preview_inventory')) {
 if (!function_exists('red_theme_admin_preview_mode')) {
     function red_theme_admin_preview_mode($mode)
     {
-        if (!is_string($mode) || !in_array($mode, ['contact', 'home', 'adriana-home'], true)) {
+        if (!is_string($mode) || !in_array($mode, ['contact', 'home'], true)) {
             throw new InvalidArgumentException('Theme preview mode is outside the fixed allowlist.');
         }
 
@@ -133,7 +130,7 @@ if (!function_exists('red_theme_admin_preview_theme_for_mode')) {
     function red_theme_admin_preview_theme_for_mode($mode)
     {
         $mode = red_theme_admin_preview_mode($mode);
-        return $mode === 'adriana-home' ? 'adriana-granobles' : 'starter-reference';
+        return 'starter-reference';
     }
 }
 
@@ -143,9 +140,7 @@ if (!function_exists('red_theme_admin_preview_can_launch')) {
         $mode = red_theme_admin_preview_mode($mode);
         $expectedThemeId = red_theme_admin_preview_theme_for_mode($mode);
         $expectedLabel = $mode === 'contact' ? 'Contact canary' : 'Home route';
-        $expectedModes = $expectedThemeId === 'starter-reference'
-            ? ['Contact canary', 'Home route']
-            : ['Home route'];
+        $expectedModes = ['Contact canary', 'Home route'];
         foreach ($inventory as $theme) {
             if (is_array($theme)
                 && ($theme['themeId'] ?? null) === $expectedThemeId
@@ -200,7 +195,7 @@ if (!function_exists('red_theme_admin_preview_request_action')) {
             throw new InvalidArgumentException('Theme preview action is required.');
         }
         $action = trim($request['action']);
-        if (!in_array($action, ['start', 'start-home', 'start-adriana-home', 'exit'], true)) {
+        if (!in_array($action, ['start', 'start-home', 'exit'], true)) {
             throw new InvalidArgumentException('Theme preview action is invalid.');
         }
 
@@ -219,9 +214,6 @@ if (!function_exists('red_theme_admin_preview_query')) {
         }
         if (array_keys($query) === ['view'] && $query['view'] === 'home') {
             return ['view' => 'home', 'status' => ''];
-        }
-        if (array_keys($query) === ['view'] && $query['view'] === 'adriana-home') {
-            return ['view' => 'adriana-home', 'status' => ''];
         }
         if (array_keys($query) === ['status'] && $query['status'] === 'exited') {
             return ['view' => 'shell', 'status' => 'exited'];

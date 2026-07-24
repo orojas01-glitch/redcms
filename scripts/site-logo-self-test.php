@@ -35,7 +35,7 @@ if (!mkdir($temporaryImages, 0700, true)) {
     throw new RuntimeException('Unable to create temporary logo fixture directory.');
 }
 $temporaryLogo = $temporaryImages . '/custom-logo.png';
-if (!copy($projectRoot . '/themes/adriana-granobles/assets/images/logo.png', $temporaryLogo)) {
+if (!copy($projectRoot . '/apple-touch-icon.png', $temporaryLogo)) {
     throw new RuntimeException('Unable to copy temporary logo fixture.');
 }
 
@@ -52,8 +52,8 @@ try {
             'url' => '/images/custom-logo.png',
             'filename' => 'custom-logo.png',
             'mime' => 'image/png',
-            'width' => 264,
-            'height' => 104,
+            'width' => 180,
+            'height' => 180,
             'source' => 'advanced.Website_Logo',
         ],
         'the public context exposes only bounded template-ready logo metadata'
@@ -74,15 +74,6 @@ try {
             && strpos($starterHeader, '/images/custom-logo.png') !== false
             && strpos($starterHeader, 'starter-brand__mark') === false,
         'the starter header consumes the shared logo override instead of its fallback mark'
-    );
-    ob_start();
-    require $projectRoot . '/themes/adriana-granobles/partials/production-header.php';
-    $adrianaHeader = ob_get_clean();
-    red_site_logo_test_assert(
-        is_string($adrianaHeader)
-            && strpos($adrianaHeader, '/images/custom-logo.png') !== false
-            && strpos($adrianaHeader, '/themes/adriana-granobles/assets/images/logo.png') === false,
-        'the Adriana header consumes the shared override instead of its bundled logo'
     );
     red_site_logo_test_assert(
         red_site_logo_fact($temporaryRoot, '../custom-logo.png')['reason'] === 'unsafe-filename',

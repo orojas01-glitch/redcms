@@ -24,14 +24,15 @@ Version 5.1 is documented as product direction only. Payment, member access, edi
 - Prepared database operations, CSRF enforcement, scoped permissions, and transactional writes
 - Migration ledger, guarded backup/restore tools, and disposable acceptance testing
 
-## Two Separate Profiles
+## Portable Starter Distribution
 
-This repository supports two profiles that share the RED-CMS core but keep separate content databases:
+This repository is the clean, reusable RED-CMS distribution. It ships with the
+`starter-reference` theme as the default public theme and keeps
+`legacy-bootstrap` only as the hard recovery renderer.
 
-1. **Adriana site** — the retained Adriana Granobles website using the `adriana-granobles` theme and its own 28-route content database.
-2. **Portable starter** — the reusable RED-CMS distribution using the `starter-reference` theme and generic starter data.
-
-Never overwrite one profile with the other. The retained Adriana database must not be removed by disposable test cleanup. See [Edition Profiles](docs/EDITION-PROFILES.md).
+Client themes, client media, and client databases are intentionally excluded.
+Site-specific installations must be backed up and distributed separately so a
+clean release can never overwrite retained production content.
 
 ## Local Development
 
@@ -42,7 +43,6 @@ The verified local environment uses:
 - MySQL at `127.0.0.1:3307`
 - Portable starter at `http://127.0.0.1:8055/`
 - Starter administrator at `http://127.0.0.1:8055/admin/`
-- Retained Adriana site at `http://127.0.0.1:8060/`
 
 From the repository root:
 
@@ -56,6 +56,7 @@ Check service state first and start only services that are stopped. Local creden
 
 Detailed setup notes:
 
+- [Clean installation](INSTALL.md)
 - [Local PHP runtime](docs/LOCAL-DEV-PHP.md)
 - [Local database](docs/LOCAL-DEV-DATABASE.md)
 - [Database migrations](docs/DATABASE-MIGRATIONS.md)
@@ -100,7 +101,7 @@ The acceptance runner creates a uniquely named temporary database, refuses the c
 - Test migrations first against a disposable restored copy.
 - Never edit an applied migration.
 - Preserve public URL and table-name compatibility unless a separate migration explicitly approves a change.
-- Keep the Adriana and portable starter databases, backups, and rollback points independent.
+- Keep every client database, media archive, and rollback point outside the clean starter release.
 - Review and merge release branches through pull requests; do not publish directly from an unverified dirty worktree.
 
 ## License

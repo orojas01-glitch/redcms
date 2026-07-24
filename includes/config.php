@@ -93,19 +93,6 @@ define('URL', $URL);
 define('BASE_URL', $_SERVER['HTTP_HOST']);
 
 $pagebase = explode("?", URL, 2);
-$redCanonicalThemeId = isset($redThemeRuntime['themeId'])
-    ? (string) $redThemeRuntime['themeId']
-    : '';
-$redCanonicalPath = red_public_route_legacy_canonical_path($pagebase[0], $redCanonicalThemeId);
-$redRequestMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
-if (is_string($redCanonicalPath)
-    && $redCanonicalPath !== ''
-    && in_array($redRequestMethod, ['GET', 'HEAD'], true)
-) {
-    $redCanonicalQuery = isset($pagebase[1]) && $pagebase[1] !== '' ? '?' . $pagebase[1] : '';
-    header('Location: ' . $redCanonicalPath . $redCanonicalQuery, true, 308);
-    exit;
-}
 $page = explode("/", $pagebase[0]);
 
 $rest = substr($pagebase[0], -1);

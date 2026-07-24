@@ -89,7 +89,7 @@ $originalDefinition =
     '#|question=|name=fax|type=textfield|required=false|displayname=Enter your Fax:|initialvalue=;' . "\r\n" .
     '#|question=|name=message|type=textarea|required=false|displayname=Enter your Message:|readonly=false|initialvalue=|cols=45|rows=5;' . "\r\n" .
     '#|question=|name=Submit|type=button|displayname=submit';
-$adrianaDefinition =
+$alternateDefinition =
     '#|question=|name=reason|type=select|required=true|displayname=Motivo|value=Por favor seleccione^selected,--------^disabled,Clases de música,Canto,Eventos;' .
     '#|question=|name=name|type=textfield|required=true|displayname=Nombre|initialvalue=|autocomplete=name|placeholder=Tu nombre;' .
     '#|question=|name=email|type=textfield|required=true|displayname=Email|initialvalue=|inputtype=email|autocomplete=email|placeholder=tu@email.com;' .
@@ -106,7 +106,7 @@ $richDefinition =
     '#|name=Submit|type=button|displayname=Send';
 
 $originalForm = red_public_form_operation_test_form(93039112, 459269660, 'contact', $originalDefinition);
-$adrianaForm = red_public_form_operation_test_form(3400000200, 3400000100, 'contact', $adrianaDefinition);
+$alternateForm = red_public_form_operation_test_form(3400000200, 3400000100, 'contact', $alternateDefinition);
 $richForm = red_public_form_operation_test_form(3000000001, 3000000002, 'contact-rich', $richDefinition);
 
 $originalPayload = [
@@ -120,10 +120,10 @@ $originalPayload = [
     'RecordID' => '93039112',
     'MySpamTrap' => '',
 ];
-$adrianaPayload = [
+$alternatePayload = [
     'reason' => 'Clases de música',
-    'name' => 'Adriana QA',
-    'email' => 'adriana@example.com',
+    'name' => 'Alternate QA',
+    'email' => 'alternate@example.com',
     'message' => 'Hola',
     'alias' => 'contact',
     'RecordID' => '3400000200',
@@ -145,10 +145,10 @@ $contactRequest = [
     'endpoint' => '/bin/contact.php',
     'payload' => $originalPayload,
 ];
-$adrianaRequest = [
+$alternateRequest = [
     'method' => 'POST',
     'endpoint' => '/bin/contact.php',
-    'payload' => $adrianaPayload,
+    'payload' => $alternatePayload,
 ];
 $loginPayload = [
     'username' => 'codex-boundary',
@@ -193,7 +193,7 @@ try {
 
     red_public_form_operation_test_assert(
         red_public_form_operation_submission('contact', $contactRequest)['payload'] === $originalPayload
-            && red_public_form_operation_submission('contact', $adrianaRequest)['payload'] === $adrianaPayload
+            && red_public_form_operation_submission('contact', $alternateRequest)['payload'] === $alternatePayload
             && red_public_form_operation_submission('login', $loginRequest)['payload'] === $loginPayload,
         'both Contact shapes and fixed Login envelope prepare without data loss'
     );
@@ -226,15 +226,15 @@ try {
     );
 
     $originalFields = red_public_contact_compile_fields($originalDefinition);
-    $adrianaFields = red_public_contact_compile_fields($adrianaDefinition);
+    $alternateFields = red_public_contact_compile_fields($alternateDefinition);
     $richFields = red_public_contact_compile_fields($richDefinition);
     red_public_form_operation_test_assert(
         count($originalFields) === 6
-            && count($adrianaFields) === 4
-            && $adrianaFields[0]['choices'] === ['Por favor seleccione', 'Clases de música', 'Canto', 'Eventos']
-            && $adrianaFields[0]['placeholderValue'] === 'Por favor seleccione'
+            && count($alternateFields) === 4
+            && $alternateFields[0]['choices'] === ['Por favor seleccione', 'Clases de música', 'Canto', 'Eventos']
+            && $alternateFields[0]['placeholderValue'] === 'Por favor seleccione'
             && count($richFields) === 6,
-        'original, Adriana-like, and full field definitions compile deterministically'
+        'original, alternate, and full field definitions compile deterministically'
     );
     $disabledPlaceholderFields = red_public_contact_compile_fields(
         '#|name=choice|type=select|required=true|displayname=Choice|value=- Select -^disabled,Option'
@@ -375,19 +375,19 @@ try {
         'original Contact executes lookup, validation, message, one-time session, and mail in order'
     );
 
-    $adrianaTrace = [];
-    $adrianaResult = red_public_form_operation_execute(
+    $alternateTrace = [];
+    $alternateResult = red_public_form_operation_execute(
         'contact',
-        $adrianaRequest,
+        $alternateRequest,
         ['contactSession' => true, 'baseUrl' => 'example.test'],
-        red_public_form_operation_test_dependencies($adrianaForm, $adrianaTrace, true, false, $contactMessage)
+        red_public_form_operation_test_dependencies($alternateForm, $alternateTrace, true, false, $contactMessage)
     );
     red_public_form_operation_test_assert(
-        $adrianaResult['httpStatus'] === 200
-            && $adrianaTrace === [
+        $alternateResult['httpStatus'] === 200
+            && $alternateTrace === [
                 'fetch:3400000200', 'build:contact:4:4', 'consume', 'send:contact:4:1',
             ],
-        'Adriana-like Contact resolves and submits through the same dynamic boundary'
+        'alternate Contact resolves and submits through the same dynamic boundary'
     );
 
     $aliasTrace = [];
@@ -569,7 +569,7 @@ try {
         'includes/theme_preview_login_helpers.php' => '348ed2c8edc6f3131881dc6c9001497254c7caa7ff0c0529d3d1f696e7a6e711',
         'includes/theme_preview_selected_contact_helpers.php' => '5f14c5f4791f831d24b2516859bf8cf74809ecfce6ee760f17ca362b4b8ae278',
         'themes/starter-reference/components/form.php' => '9ac0e640bf5d2442365aa1ceb58ecf5697bf9d275c08228d758c2a4313647ec2',
-        'themes/starter-reference/theme.json' => '83cb4b56b281e8b51d3a3910168d9a1e5cbdf6f2271d02e61462030edbd649ea',
+        'themes/starter-reference/theme.json' => '1cf62b930eff39be6430e75d07cf29844e213dae8660870bbd4077cca09db033',
     ];
     foreach ($protectedHashes as $relativePath => $expectedHash) {
         red_public_form_operation_test_assert(

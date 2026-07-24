@@ -12,7 +12,7 @@ The administrator area is designed around three everyday questions:
 
 Public visitors never see the administrator workspace. Theme presentation and administrator controls are intentionally separated, so changing a website template does not change the editing tools.
 
-RED-CMS 5.0 currently has two maintained profiles: the retained Adriana website and a separate portable `starter-reference` distribution. Their code foundation is shared, but their content databases and release backups must remain separate. See `docs/EDITION-PROFILES.md`.
+This manual describes the portable RED-CMS distribution with the `starter-reference` theme. Client themes, media, and content databases are packaged separately and are not part of the clean installer.
 
 ## First Login
 

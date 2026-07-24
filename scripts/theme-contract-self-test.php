@@ -2543,37 +2543,9 @@ try {
         'metaHtml' => '<meta name="red-test-meta" content="present">',
         'headAssetsHtml' => '<link rel="stylesheet" href="/red-test-head.css">',
         'adminOverlayHtml' => '<div id="advanced">Signed-in control panel</div>',
-        'themeId' => 'adriana-granobles',
+        'themeId' => 'starter-reference',
     ];
-    $signedInAdrianaDocument = red_theme_test_render_standard_document_start(
-        'themes/adriana-granobles/templates/production-page.php',
-        $signedInDocumentContext
-    );
-    $signedInAdrianaHeadEnd = strpos($signedInAdrianaDocument, '</head>');
-    $signedInAdrianaBody = strpos($signedInAdrianaDocument, '<body');
-    $signedInAdrianaAdmin = strpos($signedInAdrianaDocument, 'id="advanced"');
-    $signedInAdrianaSite = strpos($signedInAdrianaDocument, 'class="adriana-site"');
-    red_theme_test_assert(
-        $signedInAdrianaHeadEnd !== false
-            && $signedInAdrianaBody !== false
-            && $signedInAdrianaAdmin !== false
-            && $signedInAdrianaSite !== false
-            && $signedInAdrianaHeadEnd < $signedInAdrianaBody
-            && $signedInAdrianaBody < $signedInAdrianaAdmin
-            && $signedInAdrianaAdmin < $signedInAdrianaSite,
-        'signed-in Adriana document places the control panel after body start and before the theme shell'
-    );
-    red_theme_test_assert(
-        strpos($signedInAdrianaDocument, 'red-standard-theme--with-admin') !== false,
-        'signed-in Adriana document exposes the authenticated theme-state class'
-    );
-    red_theme_test_assert(
-        strpos(substr($signedInAdrianaDocument, 0, $signedInAdrianaHeadEnd), 'id="advanced"') === false,
-        'signed-in Adriana document keeps control-panel markup out of the document head'
-    );
-
     $signedInStarterContext = $signedInDocumentContext;
-    $signedInStarterContext['themeId'] = 'starter-reference';
     $signedInStarterDocument = red_theme_test_render_standard_document_start(
         'themes/starter-reference/templates/production-page.php',
         $signedInStarterContext
@@ -2598,17 +2570,6 @@ try {
         'signed-in starter document keeps control-panel markup out of the document head'
     );
 
-    $anonymousDocumentContext = $signedInDocumentContext;
-    $anonymousDocumentContext['adminOverlayHtml'] = '';
-    $anonymousAdrianaDocument = red_theme_test_render_standard_document_start(
-        'themes/adriana-granobles/templates/production-page.php',
-        $anonymousDocumentContext
-    );
-    red_theme_test_assert(
-        strpos($anonymousAdrianaDocument, 'red-standard-theme--with-admin') === false,
-        'anonymous Adriana document does not expose the authenticated theme-state class'
-    );
-
     $controlPanelCss = file_get_contents(dirname(__DIR__) . '/admin/assets/css/cp.css');
     red_theme_test_assert(
         is_string($controlPanelCss)
@@ -2621,43 +2582,6 @@ try {
         'control-panel wrapper reset is limited to the admin panel and admin forms'
     );
 
-    $adrianaProductionCss = file_get_contents(
-        dirname(__DIR__) . '/themes/adriana-granobles/assets/css/production.css'
-    );
-    red_theme_test_assert(
-        is_string($adrianaProductionCss)
-            && strpos(
-                $adrianaProductionCss,
-                '.red-standard-theme--adriana-granobles.red-standard-theme--with-admin .site-header'
-            ) !== false
-            && preg_match('/red-standard-theme--with-admin\s+\.site-nav\s*\{\s*position\s*:\s*absolute/s', $adrianaProductionCss) === 1,
-        'authenticated Adriana header and navigation are positioned inside the theme shell below the control panel'
-    );
-
-    $adrianaSiteJs = file_get_contents(dirname(__DIR__) . '/themes/adriana-granobles/assets/js/site.js');
-    red_theme_test_assert(
-        is_string($adrianaSiteJs)
-            && strpos(
-                $adrianaSiteJs,
-                "document.body.classList.contains('red-standard-theme--with-admin')"
-            ) !== false
-            && preg_match(
-                '/classList\.toggle\(\s*[\'\"]is-scrolled[\'\"]\s*,\s*!hasAdminOverlay\s*&&\s*window\.scrollY\s*>\s*12\s*\)/',
-                $adrianaSiteJs
-            ) === 1,
-        'authenticated Adriana rendering ignores control-panel height when deriving the compact header state'
-    );
-
-    $adrianaThemeCss = file_get_contents(dirname(__DIR__) . '/themes/adriana-granobles/assets/css/theme.css');
-    red_theme_test_assert(
-        is_string($adrianaThemeCss)
-            && preg_match('/\.hero__media\s+img\s*\{[^}]*object-position\s*:\s*62%\s+center/s', $adrianaThemeCss) === 1,
-        'Adriana homepage hero retains the original portrait crop position'
-    );
-    $adrianaManifest = json_decode(
-        (string) file_get_contents(dirname(__DIR__) . '/themes/adriana-granobles/theme.json'),
-        true
-    );
     $starterManifest = json_decode(
         (string) file_get_contents(dirname(__DIR__) . '/themes/starter-reference/theme.json'),
         true
@@ -2667,17 +2591,12 @@ try {
         true
     );
     red_theme_test_assert(
-        is_array($adrianaManifest) && !red_theme_standard_breadcrumbs_enabled($adrianaManifest),
-        'Adriana disables visible breadcrumbs across its imported template'
-    );
-    red_theme_test_assert(
         is_array($starterManifest) && red_theme_standard_breadcrumbs_enabled($starterManifest),
         'starter theme preserves the backwards-compatible breadcrumb default'
     );
     $layoutPreviewCatalogs = [
         'legacy-bootstrap' => red_theme_layout_manifest_catalog($legacyManifest),
         'starter-reference' => red_theme_layout_manifest_catalog($starterManifest),
-        'adriana-granobles' => red_theme_layout_manifest_catalog($adrianaManifest),
     ];
     $layoutPreviewCoverageIsExact = true;
     $installedLayoutGeometryIsDeclared = true;
@@ -2705,11 +2624,7 @@ try {
             && array_map(
                 static fn ($row) => array_column($row, 'position'),
                 $layoutPreviewCatalogs['starter-reference']['feature-grid']['previewRows']
-            ) === [[1], [2, 3, 4], [5]]
-            && array_map(
-                static fn ($row) => array_column($row, 'position'),
-                $layoutPreviewCatalogs['adriana-granobles']['contact-conversion']['previewRows']
-            ) === [[1], [2, 3]],
+            ) === [[1], [2, 3, 4], [5]],
         'all installed themes expose complete automatic layout maps with exact column and row groupings'
     );
     $standardAdapterSource = file_get_contents(
@@ -3097,7 +3012,6 @@ try {
     $siteLogoHelperSource = file_get_contents(dirname(__DIR__) . '/includes/site_logo_helpers.php');
     $logoUploadSource = file_get_contents(dirname(__DIR__) . '/admin/bin/post_file.php');
     $starterProductionHeaderSource = file_get_contents(dirname(__DIR__) . '/themes/starter-reference/partials/production-header.php');
-    $adrianaProductionHeaderSource = file_get_contents(dirname(__DIR__) . '/themes/adriana-granobles/partials/production-header.php');
     $adminInactiveListSource = file_get_contents(dirname(__DIR__) . '/admin/class/class_edit_hiddenarticles.php');
     $adminAreaListSourceBundle = implode('', [
         $adminSectionListSource,
@@ -3217,8 +3131,6 @@ try {
             && str_contains($standardAdapterSource, "'logo' => red_site_logo_public_context")
             && is_string($starterProductionHeaderSource)
             && str_contains($starterProductionHeaderSource, "is_array(\$header['logo'] ?? null)")
-            && is_string($adrianaProductionHeaderSource)
-            && str_contains($adrianaProductionHeaderSource, "is_array(\$header['logo'] ?? null)")
             && str_contains($controlPanelCss, '.red-admin-advanced-logo-dropzone')
             && str_contains($controlPanelCss, '@media (max-width: 700px)'),
         'Website Logo uses a polished PNG/JPG upload workspace and a safe shared template-fallback contract'
@@ -3244,7 +3156,6 @@ try {
     );
     $publicThemeHelperSource = file_get_contents(dirname(__DIR__) . '/includes/public_theme_helpers.php');
     $starterFooterSource = file_get_contents(dirname(__DIR__) . '/themes/starter-reference/partials/production-footer.php');
-    $adrianaFooterSource = file_get_contents(dirname(__DIR__) . '/themes/adriana-granobles/partials/production-footer.php');
     $legacyFooterSource = file_get_contents(dirname(__DIR__) . '/themes/legacy-bootstrap/partials/footer.php');
     $creditMigrationSource = file_get_contents(
         dirname(__DIR__) . '/database/migrations/2026-07-24-red-sphere-credit.sql'
@@ -3256,8 +3167,6 @@ try {
             && str_contains($publicThemeHelperSource, 'https://www.red-sphere.com')
             && is_string($starterFooterSource)
             && str_contains($starterFooterSource, 'red_public_render_red_sphere_credit($footer)')
-            && is_string($adrianaFooterSource)
-            && str_contains($adrianaFooterSource, 'red_public_render_red_sphere_credit($footer)')
             && is_string($legacyFooterSource)
             && str_contains($legacyFooterSource, 'red_public_render_red_sphere_credit($redThemeFooterContext)')
             && is_string($creditMigrationSource)
@@ -4173,20 +4082,6 @@ try {
             && str_contains($controlPanelCss, '.red-admin-layout-item__menu-panel select'),
         'Drag, keyboard/touch fallback, undo, conflict feedback, responsive styling, and shell loading stay connected'
     );
-    $adrianaRoutes = json_decode(
-        (string) file_get_contents(dirname(__DIR__) . '/content-migrations/adriana-granobles-v4/routes.json'),
-        true
-    );
-    $adrianaHomeHtml = (string) ($adrianaRoutes['routes'][0]['bodyHtml'] ?? '');
-    red_theme_test_assert(
-        ($adrianaRoutes['routes'][0]['path'] ?? null) === '/'
-            && strpos(
-                $adrianaHomeHtml,
-                '<img src="/images/articles/adriana-granobles-v4/adriana-portrait-1.jpg" alt="" width="1920" height="1080"'
-            ) !== false,
-        'Adriana homepage migration retains the original portrait asset and dimensions'
-    );
-
     echo 'Theme contract self-test passed: ' . $assertionCount . ' assertions.' . PHP_EOL;
 } finally {
     red_theme_test_remove_tree($projectRoot);

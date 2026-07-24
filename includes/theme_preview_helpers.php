@@ -961,7 +961,7 @@ if (!function_exists('red_theme_preview_validate_reference_theme')) {
 if (!function_exists('red_theme_preview_fixture_theme_ids')) {
     function red_theme_preview_fixture_theme_ids()
     {
-        return ['starter-reference', 'adriana-granobles'];
+        return ['starter-reference'];
     }
 }
 

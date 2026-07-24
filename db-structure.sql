@@ -49,7 +49,7 @@ CREATE TABLE `RED_Admin` (
 
 LOCK TABLES `RED_Admin` WRITE;
 /*!40000 ALTER TABLE `RED_Admin` DISABLE KEYS */;
-INSERT INTO `RED_Admin` (`RecordID`, `Username`, `Password`, `Administrator`, `Alias`, `AdminType`, `AdminComponents`, `AdminTools`, `Email`, `Contact_Form`, `Contact_Form_Pref`, `Donation_Form`, `Donation_Form_Pref`) VALUES (1,'orojas','$2y$12$PczEdcFO0Kk3SbNsiFKfJu8AvfRNigSg3UdkCQruOFJQcAUD9uTCC','Admin','Admin','webmaster','100,102,103,104,105,117,107,111,116','1,2','','Y','bcc','Y','bcc'),(2,'adriana','$2y$12$hOfzqIDkD0oLQ8YAq7ZGHevqJckukLsIUKAVPNpIJ1vix1UC38Shi','Admin','Adriana','guest','100,107,116,111','1,2','','N','to','N','to');
+INSERT INTO `RED_Admin` (`RecordID`, `Username`, `Password`, `Administrator`, `Alias`, `AdminType`, `AdminComponents`, `AdminTools`, `Email`, `Contact_Form`, `Contact_Form_Pref`, `Donation_Form`, `Donation_Form_Pref`) VALUES (1,'admin','$2y$12$OTiENcqJ.UJZiwsRnUKXauau2Nv37PuBLQbuTxW.wgmphEpZeYpY2','Admin','Administrator','webmaster','100,102,103,104,105,117,107,111,116','1,2','','Y','bcc','Y','bcc'),(2,'guest','$2y$12$UhcRJ5sRhH39xJMs0Kufb.n6xQShgcXajZV7keqDVciACf2XCmEme','Admin','Guest','guest','100,107,116,111','1,2','','N','to','N','to');
 /*!40000 ALTER TABLE `RED_Admin` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,7 +114,7 @@ CREATE TABLE `RED_Advanced` (
 
 LOCK TABLES `RED_Advanced` WRITE;
 /*!40000 ALTER TABLE `RED_Advanced` DISABLE KEYS */;
-INSERT INTO `RED_Advanced` (`RecordID`, `Item`, `Content`, `Language`) VALUES (1,'Website_Title','','sp'),(2,'Website_Slogan','','sp'),(3,'Website_Logo','','sp'),(5,'Website_Footer','','sp'),(4,'Website_Header','','sp'),(7,'Website_CSS','','sp'),(8,'System_Active_Theme','legacy-bootstrap',''),(9,'System_Previous_Theme','legacy-bootstrap',''),(10,'Website_Red_Sphere_Credit','Y','sp');
+INSERT INTO `RED_Advanced` (`RecordID`, `Item`, `Content`, `Language`) VALUES (1,'Website_Title','','sp'),(2,'Website_Slogan','','sp'),(3,'Website_Logo','','sp'),(5,'Website_Footer','','sp'),(4,'Website_Header','','sp'),(7,'Website_CSS','','sp'),(8,'System_Active_Theme','starter-reference',''),(9,'System_Previous_Theme','legacy-bootstrap',''),(10,'Website_Red_Sphere_Credit','Y','sp');
 /*!40000 ALTER TABLE `RED_Advanced` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -479,7 +479,7 @@ CREATE TABLE `RED_C_Form` (
 
 LOCK TABLES `RED_C_Form` WRITE;
 /*!40000 ALTER TABLE `RED_C_Form` DISABLE KEYS */;
-INSERT INTO `RED_C_Form` (`RecordID`, `RefID`, `Title`, `Alias`, `FormType`, `ShortDesc`, `LongDesc`, `Subject`, `Submitter`, `Destinatary`, `CC`, `BCC`, `Response`, `TableName`, `Updated`) VALUES (93039112,'459269660','Contact','contact','Contact','','#|question=|name=name|type=textfield|required=true|displayname=Enter your Full Name:|initialvalue=;\r\n#|question=|name=title|type=textfield|required=false|displayname=Enter your Title:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=Enter your e-mail:|initialvalue=;\r\n#|question=|name=telephone|type=textfield|required=true|displayname=Enter your Telephone:|initialvalue=;\r\n#|question=|name=fax|type=textfield|required=false|displayname=Enter your Fax:|initialvalue=;\r\n#|question=|name=message|type=textarea|required=false|displayname=Enter your Message:|readonly=false|initialvalue=|cols=45|rows=5;\r\n#|question=|name=Submit|type=button|displayname=submit','Demo Skeleton.red-sphere.com','root@red-sphere.com','orojas@red-sphere.com','','','','','2014-06-04 20:21:54'),(884542279,'966111194','Login','login','Login','','#|question=|name=username|type=textfield|required=true|displayname=Username:|initialvalue=;\r\n#|question=|name=password|type=password|required=true|displayname=Password:|initialvalue=;\r\n#|question=|name=Submit|type=button|displayname=submit','','','','','','','','2015-02-22 23:20:39');
+INSERT INTO `RED_C_Form` (`RecordID`, `RefID`, `Title`, `Alias`, `FormType`, `ShortDesc`, `LongDesc`, `Subject`, `Submitter`, `Destinatary`, `CC`, `BCC`, `Response`, `TableName`, `Updated`) VALUES (93039112,'459269660','Contact','contact','Contact','','#|question=|name=name|type=textfield|required=true|displayname=Enter your Full Name:|initialvalue=;\r\n#|question=|name=title|type=textfield|required=false|displayname=Enter your Title:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=Enter your e-mail:|initialvalue=;\r\n#|question=|name=telephone|type=textfield|required=true|displayname=Enter your Telephone:|initialvalue=;\r\n#|question=|name=fax|type=textfield|required=false|displayname=Enter your Fax:|initialvalue=;\r\n#|question=|name=message|type=textarea|required=false|displayname=Enter your Message:|readonly=false|initialvalue=|cols=45|rows=5;\r\n#|question=|name=Submit|type=button|displayname=submit','RED-CMS Starter','noreply@example.com','owner@example.com','','','','','2014-06-04 20:21:54'),(884542279,'966111194','Login','login','Login','','#|question=|name=username|type=textfield|required=true|displayname=Username:|initialvalue=;\r\n#|question=|name=password|type=password|required=true|displayname=Password:|initialvalue=;\r\n#|question=|name=Submit|type=button|displayname=submit','','','','','','','','2015-02-22 23:20:39');
 /*!40000 ALTER TABLE `RED_C_Form` ENABLE KEYS */;
 UNLOCK TABLES;
 
