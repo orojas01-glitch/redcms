@@ -15,6 +15,7 @@
 * THIS CLASS CONSTRUCT THE MAIN MENU. 2 LEVELS OF BUTTONS.
 **/
 require_once __DIR__ . '/../includes/public_render_helpers.php';
+require_once __DIR__ . '/../includes/public_theme_helpers.php';
 
 /*<nav class="navbar navbar-default navbar-static-top tm_navbar clearfix" role="navigation">
 	<ul class="nav sf-menu clearfix">
@@ -179,16 +180,25 @@ class main_menu
 	
 	public function cp_menu()
 	{
+		if (!red_admin_can_manage_site()) {
+			return;
+		}
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		$row = red_public_main_menu_root($db->connection);
+		$menuRows = red_public_menu_rows($db->connection);
 		$db->close();
 		$RecordID = isset($row['RecordID']) ? (int) $row['RecordID'] : 0;
 		$Title = isset($row['Title']) ? (string) $row['Title'] : '';
+		$navigation = red_public_legacy_navigation_context_from_rows($menuRows);
+		$navigationItems = isset($navigation['items']) && is_array($navigation['items'])
+			? $navigation['items']
+			: [];
+		$pageCount = $this->adminNavigationItemCount($navigationItems);
 
-		echo ('<article class="col-lg-12 col-md-12 col-sm-12">');
-		echo ('<div class="container_12 cp_padtop">');
-		echo ('<div class="wrapper">');
-		echo ('<article class="grid_12 cp_admin" style="text-align:center">');
+		echo ('<article class="col-lg-12 col-md-12 col-sm-12 red-admin-menu-shell">');
+		echo ('<div class="container_12 cp_padtop red-admin-menu-shell__container">');
+		echo ('<div class="wrapper red-admin-menu-shell__wrapper">');
+		echo ('<article class="grid_12 cp_admin red-admin-menu-quicknav">');
 		
 		//echo ('result main nav='.$result_counter.'<br/>');
 		if($Title=='')
@@ -249,9 +259,23 @@ class main_menu
 					echo '-->'. "\n";
 					echo '</script>';
 
-				echo '<form id="main_menu_'.red_public_html($Alias).'" class="form" name="main_menu_'.red_public_html($Alias).'" method="post" onSubmit="return edit_main_menu_'.$Alias.'(this);">';
+				echo '<details class="red-admin-menu-quicknav__disclosure">';
+				echo '<summary class="red-admin-menu-quicknav__summary">';
+				echo '<span class="red-admin-menu-quicknav__eyebrow">'.red_public_html($Title).'</span>';
+				echo '<strong class="red-admin-menu-quicknav__title">Navigate pages</strong>';
+				echo '<span class="red-admin-menu-quicknav__count">'.red_public_html($pageCount).' '.($pageCount === 1 ? 'page' : 'pages').'</span>';
+				echo '</summary>';
+				echo '<div class="red-admin-menu-quicknav__panel">';
+				echo '<div class="red-admin-menu-quicknav__panel-heading">Choose a page</div>';
+				echo '<nav aria-label="Quick site navigation">';
+				$this->renderAdminNavigationList($navigationItems);
+				echo '</nav>';
+				echo '</div>';
+				echo '</details>';
 
-				echo '<h7 id="cp"> '.red_public_html($Title).'</h7><br/><input type="submit" name="Edit" id="cp" value="Edit"/>';
+				echo '<form id="main_menu_'.red_public_html($Alias).'" class="form red-admin-menu-quicknav__edit" name="main_menu_'.red_public_html($Alias).'" method="post" onSubmit="return edit_main_menu_'.$Alias.'(this);">';
+
+				echo '<input type="submit" name="Edit" id="cp" value="Edit" aria-label="Edit '.red_public_html($Title).'"/>';
 				echo '<input type="hidden" name="RecordID" id="RecordID" value="'.red_public_html($RecordID).'" />';
 				echo '</form>';
 				
@@ -263,6 +287,99 @@ class main_menu
 		echo ('</div>');
 		echo ('</article>');
 		
+	}
+
+	private function adminNavigationItemCount(array $items)
+	{
+		$count = 0;
+		foreach ($items as $item) {
+			if (!is_array($item)) {
+				continue;
+			}
+			$count++;
+			$children = isset($item['children']) && is_array($item['children'])
+				? $item['children']
+				: [];
+			$count += $this->adminNavigationItemCount($children);
+		}
+
+		return $count;
+	}
+
+	private function adminNavigationPath($value)
+	{
+		$path = parse_url((string) $value, PHP_URL_PATH);
+		if (!is_string($path) || $path === '' || $path[0] !== '/') {
+			return '';
+		}
+
+		$path = '/' . trim($path, '/');
+		return strtolower($path === '/' ? '/' : rtrim($path, '/'));
+	}
+
+	private function adminNavigationLinkIsCurrent($link)
+	{
+		$currentPath = $this->adminNavigationPath($_SERVER['REQUEST_URI'] ?? '/');
+		$linkPath = $this->adminNavigationPath($link);
+
+		return $currentPath !== '' && $linkPath !== '' && $currentPath === $linkPath;
+	}
+
+	private function renderAdminNavigationList(array $items, $depth = 1)
+	{
+		if ($items === []) {
+			if ($depth === 1) {
+				echo '<p class="red-admin-menu-quicknav__empty">No active menu pages are available.</p>';
+			}
+			return;
+		}
+
+		echo '<ul class="red-admin-menu-quicknav__list red-admin-menu-quicknav__list--depth-'.red_public_html((int) $depth).'">';
+		foreach ($items as $item) {
+			if (!is_array($item)) {
+				continue;
+			}
+
+			$children = isset($item['children']) && is_array($item['children'])
+				? $item['children']
+				: [];
+			$label = trim((string) ($item['label'] ?? ''));
+			$label = $label !== '' ? $label : 'Untitled page';
+			$link = (string) ($item['link'] ?? '');
+			$target = trim((string) ($item['newWindow'] ?? ''));
+			$isCurrent = $this->adminNavigationLinkIsCurrent($link);
+			$isActiveBranch = preg_match('/(^|\\s)active(\\s|$)/', (string) ($item['itemClass'] ?? '')) === 1;
+			$itemClasses = ['red-admin-menu-quicknav__item'];
+			if ($children !== []) {
+				$itemClasses[] = 'has-children';
+			}
+			if ($isActiveBranch) {
+				$itemClasses[] = 'is-active-branch';
+			}
+			if ($isCurrent) {
+				$itemClasses[] = 'is-current';
+			}
+
+			echo '<li class="'.red_public_html(implode(' ', $itemClasses)).'">';
+			echo '<a class="red-admin-menu-quicknav__link" href="'.red_public_html($link).'"';
+			if ($target !== '') {
+				echo ' target="'.red_public_html($target).'"';
+				if (strtolower($target) === '_blank') {
+					echo ' rel="noopener noreferrer"';
+				}
+			}
+			if ($isCurrent) {
+				echo ' aria-current="page"';
+			}
+			echo '><span>'.red_public_html($label).'</span>';
+			if ($children !== []) {
+				echo '<span class="red-admin-menu-quicknav__branch-count" aria-hidden="true">'.red_public_html(count($children)).'</span>';
+			}
+			echo '</a>';
+			$this->renderAdminNavigationList($children, $depth + 1);
+			echo '</li>';
+		}
+		echo '</ul>';
 	}
 	
 }

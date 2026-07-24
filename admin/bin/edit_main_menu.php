@@ -9,354 +9,421 @@
  * Licensed under MIT licence:
  *   http://www.opensource.org/licenses/mit-license.php
 **/
-require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_require_admin();
-require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
-require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
-require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
+red_require_admin_site_manager();
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/includes/admin_menu_helpers.php';
+
+if (!function_exists('red_admin_menu_editor_item')) {
+    function red_admin_menu_editor_item($config, $linkChoices)
+    {
+        $id = red_admin_menu_scalar($config['id'] ?? '');
+        $level = max(1, min(3, (int) ($config['level'] ?? 1)));
+        $isNew = !empty($config['new']);
+        $label = red_admin_menu_scalar($config['label'] ?? '');
+        $link = red_admin_menu_scalar($config['link'] ?? '');
+        $order = red_admin_menu_scalar($config['order'] ?? '');
+        $windowChecked = red_admin_menu_new_window($config['newWindow'] ?? '') === '_blank';
+        $heading = red_admin_menu_scalar($config['heading'] ?? '');
+        $heading = $heading !== '' ? $heading : ($label !== '' ? $label : 'Untitled button');
+        $description = red_admin_menu_scalar($config['description'] ?? '');
+        $recordId = (int) ($config['recordId'] ?? 0);
+        $itemClasses = [
+            'red-admin-menu-item',
+            'red-admin-menu-item--level-' . $level,
+            $isNew ? 'red-admin-menu-item--new' : 'red-admin-menu-item--saved',
+        ];
+        ?>
+        <section class="<?php echo red_admin_menu_html(implode(' ', $itemClasses)); ?>"
+            data-menu-item data-menu-level="<?php echo $level; ?>">
+            <header class="red-admin-menu-item__header">
+                <div class="red-admin-menu-item__identity">
+                    <span class="red-admin-menu-item__level">Level <?php echo $level; ?></span>
+                    <strong><?php echo red_admin_menu_html($heading); ?></strong>
+                    <span class="red-admin-menu-item__state"><?php echo $isNew ? 'Ready to add' : 'Saved'; ?></span>
+                </div>
+                <?php if (!$isNew && $recordId > 0) : ?>
+                    <button type="button" class="red-admin-menu-item__delete"
+                        data-menu-delete="<?php echo $recordId; ?>"
+                        data-menu-delete-label="<?php echo red_admin_menu_html($heading); ?>"
+                        aria-label="Delete <?php echo red_admin_menu_html($heading); ?>">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5"></path>
+                        </svg>
+                        <span>Delete</span>
+                    </button>
+                <?php endif; ?>
+            </header>
+
+            <?php if ($description !== '') : ?>
+                <p class="red-admin-menu-item__description"><?php echo red_admin_menu_html($description); ?></p>
+            <?php endif; ?>
+
+            <div class="red-admin-menu-item__fields">
+                <label class="red-admin-menu-field red-admin-menu-field--label" for="<?php echo red_admin_menu_html($id); ?>-label">
+                    <span>Button label</span>
+                    <input id="<?php echo red_admin_menu_html($id); ?>-label"
+                        name="<?php echo red_admin_menu_html($config['labelName'] ?? ''); ?>"
+                        type="text" value="<?php echo red_admin_menu_html($label); ?>"
+                        autocomplete="off" placeholder="What visitors will see">
+                </label>
+
+                <label class="red-admin-menu-field red-admin-menu-field--order" for="<?php echo red_admin_menu_html($id); ?>-order">
+                    <span>Order</span>
+                    <input id="<?php echo red_admin_menu_html($id); ?>-order"
+                        name="<?php echo red_admin_menu_html($config['orderName'] ?? ''); ?>"
+                        type="number" min="0" step="1" inputmode="numeric"
+                        value="<?php echo red_admin_menu_html($order); ?>" placeholder="0">
+                </label>
+
+                <label class="red-admin-menu-field red-admin-menu-field--picker" for="<?php echo red_admin_menu_html($id); ?>-picker">
+                    <span>Choose an existing page</span>
+                    <select id="<?php echo red_admin_menu_html($id); ?>-picker"
+                        data-menu-link-picker aria-describedby="<?php echo red_admin_menu_html($id); ?>-route">
+                        <?php echo red_admin_main_menu_link_options_from_choices($linkChoices, $link); ?>
+                    </select>
+                </label>
+
+                <label class="red-admin-menu-field red-admin-menu-field--link" for="<?php echo red_admin_menu_html($id); ?>-link">
+                    <span>Destination</span>
+                    <input id="<?php echo red_admin_menu_html($id); ?>-link"
+                        name="<?php echo red_admin_menu_html($config['linkName'] ?? ''); ?>"
+                        type="text" value="<?php echo red_admin_menu_html($link); ?>"
+                        data-menu-link-input autocomplete="off" spellcheck="false"
+                        placeholder="/page/ or https://example.com">
+                </label>
+
+                <div class="red-admin-menu-field red-admin-menu-field--window">
+                    <span>Opening behavior</span>
+                    <input type="hidden"
+                        name="<?php echo red_admin_menu_html($config['windowName'] ?? ''); ?>" value="">
+                    <label class="red-admin-menu-switch" for="<?php echo red_admin_menu_html($id); ?>-window">
+                        <input id="<?php echo red_admin_menu_html($id); ?>-window"
+                            name="<?php echo red_admin_menu_html($config['windowName'] ?? ''); ?>"
+                            type="checkbox" value="_blank"<?php echo $windowChecked ? ' checked="checked"' : ''; ?>>
+                        <span aria-hidden="true"></span>
+                        Open in a new window
+                    </label>
+                </div>
+            </div>
+
+            <div class="red-admin-menu-item__route" id="<?php echo red_admin_menu_html($id); ?>-route">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M10 14a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1M14 10a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"></path>
+                </svg>
+                <span>Destination</span>
+                <code data-menu-link-preview><?php echo red_admin_menu_html($link !== '' ? $link : 'No destination selected'); ?></code>
+            </div>
+
+            <?php if (!$isNew && $recordId > 0) : ?>
+                <input name="<?php echo red_admin_menu_html($config['recordName'] ?? ''); ?>"
+                    type="hidden" value="<?php echo $recordId; ?>">
+            <?php endif; ?>
+            <?php if ($isNew && !empty($config['parentName'])) : ?>
+                <input name="<?php echo red_admin_menu_html($config['parentName']); ?>"
+                    type="hidden" value="<?php echo (int) ($config['parentId'] ?? 0); ?>">
+            <?php endif; ?>
+        </section>
+        <?php
+    }
+}
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $language = red_admin_menu_language();
-$csrfToken = red_csrf_token();
-$Title = red_admin_main_menu_title($db->connection, $language);
-$LinkNavigator = red_admin_main_menu_link_options($db->connection);
+$title = red_admin_main_menu_title($db->connection, $language);
+$linkChoices = red_admin_main_menu_link_choices($db->connection, $language);
 $mainMenuRows = red_admin_main_menu_items($db->connection, $language);
+$menuTree = [];
+$totalMenuItems = 0;
+
+foreach ($mainMenuRows as $mainRow) {
+    $mainRow['children'] = [];
+    $rootRecordId = (int) ($mainRow['RecordID'] ?? 0);
+    foreach (red_admin_main_menu_children($db->connection, $rootRecordId, $language, 2) as $subRow) {
+        $subRecordId = (int) ($subRow['RecordID'] ?? 0);
+        $subRow['children'] = red_admin_main_menu_children(
+            $db->connection,
+            $subRecordId,
+            $language,
+            3
+        );
+        $totalMenuItems += 1 + count($subRow['children']);
+        $mainRow['children'][] = $subRow;
+    }
+    $totalMenuItems++;
+    $menuTree[] = $mainRow;
+}
 ?>
-<script type="text/javascript">
-<!--
-$(function(){
-	$("#cp_accordion dt").click(function(){$(this).next("#cp_accordion dd").slideToggle("slow").siblings("#cp_accordion dd:visible").slideUp("slow");$(this).toggleClass("active");$(this).siblings("#cp_accordion dt").removeClass("active");return false})
-})
-//-->
-<!--
-function run_deletelabel (RecordID)
-{
-	$(document).ready(function(){
-   $('#deletelabel_'+RecordID).click(function(){
-      if(confirm("Are you sure you want to delete this Menu Label?")){
-         //alert('Successful Request!');
-		  $.ajax({
-		type: "POST",
-		url: "/admin/bin/delete_label.php",
-		data: "RecordID=" + encodeURIComponent(RecordID) + "&T=main&csrf_token=<?php echo rawurlencode($csrfToken); ?>",
-		success: function(data) {
-		//alert (data);
-		//return false;
-		if (data=='yes')
-		{
-		$('#msggbox_deletelabel').html("Main Menu Updated.")
-		.hide()
-		.fadeIn(1500, function() {
-		$('#msggbox_deletelabel');
-		window.location.reload();
-		});
-		}
-		else
-		{
-		$('#msggbox_deletelabel').html("&nbsp; Error. Please try again.")
-		.hide()
-		.fadeIn(1500, function() {
-		$('#msggbox_deletelabel');
-		});
-		}
-		}
-		});
-		return false;
-      } else {
-         //alert('Cancelled Request');
-      }
-      return false;
-   });
-});
+<div class="red-admin-menu-editor-shell">
+    <button type="button" class="red-admin-workspace-back" data-menu-return>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m15 18-6-6 6-6"></path>
+        </svg>
+        <span>Back to page content</span>
+    </button>
 
-}
-//-->
-<!--
-function run_update_main_menu (update_main_menu)
-{
-	$.ajax({
-	type: "POST",
-	url: "/admin/bin/update_main_menu.php",
-	data: $("#update_main_menu").serialize(),
-	success: function(data) {
-	/*alert (data);
-	return false;*/
-	if (data=='yes')
-	{
-	$('#msggbox_update_main_menu').html("Main Menu Updated.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_update_main_menu');
-	window.location.reload();
-	});
-	}
-	else
-	{
-	$('#msggbox_update_main_menu').html("&nbsp; Error. Please try again.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_update_main_menu');
-	});
-	}
-	}
-	});
-	return false;
-}
-//-->
-</script>
-<div class="cp_viewall"><a href="javascript:;" class="viewall" onclick="javascript:showdiv('edit_content_grid');">Show Content</a></div>
-<form id="update_main_menu" name="update_main_menu" class="cp" method="post" onSubmit="return run_update_main_menu(this);">
-<fieldset>
-<div class="container_12 cp_padtop">
-    <div class="wrapper">
-        <article class="grid_12 cp_admin">
-        <div style="padding:10px;">
-        <div class="wrapper">
-            <div>
-			<label>Menu Name: <input name="Title" type="text" id="title" value="<?php echo red_admin_menu_html($Title); ?>" /></label>
-            </div>
-        </div>
-        <label>Menu Item Manager:</label>
+    <form id="update_main_menu" name="update_main_menu"
+        class="cp red-admin-menu-editor" method="post"
+        data-red-menu-editor onSubmit="return run_update_main_menu(this);">
+        <fieldset>
+            <legend class="red-admin-visually-hidden">Edit top navigation</legend>
 
-        <div class="wrapper">
-		<div class="titleleft">
-		<label style="display:inline;">New Button:
-		  <input name="NewLabel" type="text" id="newlabel" /></label>
-		</div>
-		<div class="titleleft">
-		<label style="display:inline;">Order: <input name="NewMenuOrder" type="text" id="order" /></label>
-		</div>
-		</div>
+            <header class="red-admin-menu-editor__hero">
+                <div class="red-admin-menu-editor__hero-copy">
+                    <span class="red-admin-menu-editor__eyebrow">Navigation workspace</span>
+                    <h2>Edit top menu</h2>
+                    <p>Build up to three levels, choose a real page or enter a custom destination, and save everything together.</p>
+                </div>
+                <dl class="red-admin-menu-editor__stats" aria-label="Menu summary">
+                    <div>
+                        <dt>Buttons</dt>
+                        <dd><?php echo $totalMenuItems; ?></dd>
+                    </div>
+                    <div>
+                        <dt>Levels</dt>
+                        <dd>3</dd>
+                    </div>
+                </dl>
+            </header>
 
-        <dl id="cp_accordion">
+            <section class="red-admin-menu-panel red-admin-menu-panel--settings" aria-labelledby="red-admin-menu-settings-title">
+                <div class="red-admin-menu-panel__heading">
+                    <span class="red-admin-menu-panel__step">1</span>
+                    <div>
+                        <h3 id="red-admin-menu-settings-title">Menu settings</h3>
+                        <p>This internal name identifies the navigation set.</p>
+                    </div>
+                </div>
+                <label class="red-admin-menu-field red-admin-menu-field--title" for="red-admin-menu-title">
+                    <span>Menu name</span>
+                    <input name="Title" type="text" id="red-admin-menu-title"
+                        value="<?php echo red_admin_menu_html($title); ?>" autocomplete="off">
+                </label>
+            </section>
 
-        <?php
-		$f = 1;
-		$w = 0;
-		$z = 0;
-		foreach ($mainMenuRows as $mainRow) {
-			$RootRecordID = (int) ($mainRow['RecordID'] ?? 0);
-			$mainLabel = red_admin_menu_html($mainRow['Label'] ?? '');
-			$mainOrder = red_admin_menu_html($mainRow['MenuOrder'] ?? '');
-			$mainLink = red_admin_menu_html($mainRow['Link'] ?? '');
-			$mainChecked = red_admin_menu_new_window($mainRow['NewWindow'] ?? '') === '_blank' ? 'checked="checked"' : '';
-        ?>
-		<dt><a href="#"><?php echo $mainLabel; ?></a></dt><dd style="padding-right:10px">
-		<div class="wrapper" style="background-color:#cccccc; padding:5px 5px 5px 5px">
-		<div class="titleleft">
-		<label style="display:inline;">Level 1 Button: <input name="MainLabel[<?php echo $f; ?>][]" type="text" id="menulabel" value="<?php echo $mainLabel; ?>" /></label>
-		<input name="MainLabelRecordID[<?php echo $f; ?>][]" type="hidden" id="mainlabelrecordid" value="<?php echo $RootRecordID; ?>" />
-		</div>
-		<div class="titleleft">
-		<label style="display:inline;">Order: <input name="MainMenuOrder[<?php echo $f; ?>][]" type="text" id="order" value="<?php echo $mainOrder; ?>" /></label>
-		</div>
-		<div class="titleright">
-		<a href="#" id="deletelabel_<?php echo $RootRecordID; ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deletelabel(<?php echo $RootRecordID; ?>);" title="Delete Parent Label" style="cursor:pointer"></a>
-		</div>
-		<div class="clear"></div>
-		<div class="titleleft">
-		<label style="display:inline;">Link: <input name="MainLabelLink[<?php echo $f; ?>][]" type="text" style="width:240px;" id="mainmenulink_<?php echo $f; ?>" value="<?php echo $mainLink; ?>" /></label>
-		</div>
-		<div class="titleleft">
-		<script type="text/javascript">
-		<!--
-		$('#LinkNavigator_<?php echo $f; ?>').bind('change', function() {
-		$('#mainmenulink_<?php echo $f; ?>').val($(this).val());
-		});
-		-->
-		</script>
-		<select name="LinkNavigator" id="LinkNavigator_<?php echo $f; ?>">
-		<?php echo $LinkNavigator; ?>
-		</select>
-		</div>
-		<div class="titleleft">
-		<label style="display:inline;" title="Open New Window">Open Blank <input name="MainLabelNewWindow[<?php echo $f; ?>][]" type="checkbox" <?php echo $mainChecked; ?> value="_blank" /></label>
-		</div>
-		</div>
-		<div class="clear-cp"></div>
+            <section class="red-admin-menu-panel" aria-labelledby="red-admin-menu-new-root-title">
+                <div class="red-admin-menu-panel__heading">
+                    <span class="red-admin-menu-panel__step">2</span>
+                    <div>
+                        <h3 id="red-admin-menu-new-root-title">Add a top-level button</h3>
+                        <p>The destination can now be assigned before the button is saved for the first time.</p>
+                    </div>
+                </div>
+                <?php
+                red_admin_menu_editor_item([
+                    'id' => 'menu-new-root',
+                    'level' => 1,
+                    'new' => true,
+                    'heading' => 'New top-level button',
+                    'description' => 'Leave this card empty when you only want to update existing buttons.',
+                    'labelName' => 'NewLabel',
+                    'orderName' => 'NewMenuOrder',
+                    'linkName' => 'NewLabelLink',
+                    'windowName' => 'NewLabelNewWindow',
+                ], $linkChoices);
+                ?>
+            </section>
 
-			<?php
-			foreach (red_admin_main_menu_children($db->connection, $RootRecordID, $language, 2) as $subRow) {
-				$Root2RecordID = (int) ($subRow['RecordID'] ?? 0);
-				$SubRecordID = $Root2RecordID;
-				$subLabel = red_admin_menu_html($subRow['Label'] ?? '');
-				$subOrder = red_admin_menu_html($subRow['MenuOrder'] ?? '');
-				$subLink = red_admin_menu_html($subRow['Link'] ?? '');
-				$subChecked = red_admin_menu_new_window($subRow['NewWindow'] ?? '') === '_blank' ? 'checked="checked"' : '';
-			?>
-			<div class="wrapper2" style="margin-left:5px; padding:10px 5px 5px 28px; ">
-				<div class="titleleft">
-				<label style="display:inline;">Level 2 Button: <input name="SubLabel[<?php echo $f; ?>][]" type="text" id="menusublabel" value="<?php echo $subLabel; ?>" /></label>
-				<input name="SubLabelRecordID[<?php echo $f; ?>][]" type="hidden" id="sublabelrecordid" value="<?php echo $SubRecordID; ?>" />
-				</div>
-				<div class="titleleft">
-				<label style="display:inline;">Order: <input name="SubMenuOrder[<?php echo $f; ?>][]" type="text" id="order" value="<?php echo $subOrder; ?>" /></label>
-				</div>
-				<div class="titleright">
-				<a href="#" id="deletelabel_<?php echo $SubRecordID; ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deletelabel(<?php echo $SubRecordID; ?>);" title="Delete Parent Label" style="cursor:pointer"></a>
-				</div>
-				<div class="clear"></div>
-				<div class="titleleft">
-				<label style="display:inline;">Link: <input name="SubLabelLink[<?php echo $f; ?>][]" type="text" style="width:240px;" id="submenulink_<?php echo $f; ?>_<?php echo $w; ?>" value="<?php echo $subLink; ?>" /></label>
-				</div>
-				<div class="titleleft">
-				<script type="text/javascript">
-				<!--
-				$('#SubLinkNavigator_<?php echo $f; ?>_<?php echo $w; ?>').bind('change', function() {
-				$('#submenulink_<?php echo $f; ?>_<?php echo $w; ?>').val($(this).val());
-				});
-				-->
-				</script>
-				<select name="SubLinkNavigator" id="SubLinkNavigator_<?php echo $f; ?>_<?php echo $w; ?>">
-				<?php echo $LinkNavigator; ?>
-				</select>
-				</div>
-				<div class="titleleft">
-				<?php if ($subChecked === '') { ?>
-				<input name="SubLabelNewWindow[<?php echo $f; ?>][<?php echo $w; ?>]" type="hidden" value="" />
-				<?php } ?>
-				<label style="display:inline;" title="Open New Window">Open Blank <input name="SubLabelNewWindow[<?php echo $f; ?>][<?php echo $w; ?>]" type="checkbox" <?php echo $subChecked; ?> value="_blank" /></label>
-				</div>
-				<div class="clear"></div>
+            <section class="red-admin-menu-panel red-admin-menu-panel--structure" aria-labelledby="red-admin-menu-structure-title">
+                <div class="red-admin-menu-panel__heading">
+                    <span class="red-admin-menu-panel__step">3</span>
+                    <div>
+                        <h3 id="red-admin-menu-structure-title">Menu structure</h3>
+                        <p>Open a top-level branch to edit its button and add or update nested buttons.</p>
+                    </div>
+                </div>
 
-				<?php
-				foreach (red_admin_main_menu_children($db->connection, $SubRecordID, $language, 3) as $subSubRow) {
-					$SubSubRecordID = (int) ($subSubRow['RecordID'] ?? 0);
-					$subSubLabel = red_admin_menu_html($subSubRow['Label'] ?? '');
-					$subSubOrder = red_admin_menu_html($subSubRow['MenuOrder'] ?? '');
-					$subSubLink = red_admin_menu_html($subSubRow['Link'] ?? '');
-					$subSubChecked = red_admin_menu_new_window($subSubRow['NewWindow'] ?? '') === '_blank' ? 'checked="checked"' : '';
-				?>
-				<div class="wrapper3"  style="background-color:#F2F2F2; margin-left:5px; margin-right:5px; padding:10px 5px 5px 28px; ">
-					<div class="titleleft">
-					<label style="display:inline;">Level 3 Button: <input name="SubSubLabel[<?php echo $w; ?>][]" type="text" id="menusubsublabel" value="<?php echo $subSubLabel; ?>" /></label>
-					<input name="SubSubLabelRecordID[<?php echo $w; ?>][]" type="hidden" id="subsublabelrecordid" value="<?php echo $SubSubRecordID; ?>" />
-					</div>
-					<div class="titleleft">
-					<label style="display:inline;">Order: <input name="SubSubMenuOrder[<?php echo $w; ?>][]" type="text" id="order" value="<?php echo $subSubOrder; ?>" /></label>
-					</div>
-					<div class="titleright">
-					<a href="#" id="deletelabel_<?php echo $SubSubRecordID; ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deletelabel(<?php echo $SubSubRecordID; ?>);" title="Delete Parent Label" style="cursor:pointer"></a>
-					</div>
-					<div class="clear"></div>
-					<div class="titleleft">
-					<label style="display:inline;">Link: <input name="SubSubLabelLink[<?php echo $w; ?>][]" type="text" style="width:240px;" id="subsubmenulink_<?php echo $w; ?>_<?php echo $z; ?>" value="<?php echo $subSubLink; ?>" /></label>
-					</div>
-					<div class="titleleft">
-					<script type="text/javascript">
-					<!--
-					$('#SubSubLinkNavigator_<?php echo $w; ?>_<?php echo $z; ?>').bind('change', function() {
-					$('#subsubmenulink_<?php echo $w; ?>_<?php echo $z; ?>').val($(this).val());
-					});
-					-->
-					</script>
-					<select name="SubSubLinkNavigator" id="SubSubLinkNavigator_<?php echo $w; ?>_<?php echo $z; ?>">
-					<?php echo $LinkNavigator; ?>
-					</select>
-					</div>
-					<div class="titleleft">
-					<?php if ($subSubChecked === '') { ?>
-					<input name="SubSubLabelNewWindow[<?php echo $w; ?>][<?php echo $z; ?>]" type="hidden" value="" />
-					<?php } ?>
-					<label style="display:inline;" title="Open New Window">Open Blank <input name="SubSubLabelNewWindow[<?php echo $w; ?>][<?php echo $z; ?>]" type="checkbox" <?php echo $subSubChecked; ?> value="_blank" /></label>
-					</div>
-				</div>
-				<div class="clear-cp"></div>
-				<?php
-					$z++;
-				}
-				?>
+                <div class="red-admin-menu-tree">
+                    <?php if ($menuTree === []) : ?>
+                        <div class="red-admin-menu-empty">
+                            <strong>No saved buttons yet</strong>
+                            <p>Use the top-level card above to create the first destination in this menu.</p>
+                        </div>
+                    <?php endif; ?>
 
-				<div class="wrapper3last" style="background-color:#F2F2F2; margin-left:5px; margin-right:5px; margin-bottom:10px; padding:10px 5px 5px 28px; ">
-				<div class="titleleft">
-				<label style="display:inline;">New Level 3 Button:
-				<input name="NewSubSubLabel[<?php echo $w; ?>][]" type="text" id="menusubsublabel" /></label>
-				<input name="NewSubLabelRecordID[<?php echo $w; ?>][]" type="hidden" id="newsublabelrecordid" value="<?php echo $Root2RecordID; ?>" />
-				</div>
-				<div class="titleleft">
-				<label style="display:inline;">Order: <input name="NewSubSubMenuOrder[<?php echo $w; ?>][]" type="text" id="order" /></label>
-				</div>
-				<div class="clear"></div>
-				<div class="titleleft">
-				<label style="display:inline;">Link:
-				<input name="NewSubSubLabelLink[<?php echo $w; ?>][]" type="text" style="width:240px;" id="newsubsublabellink_<?php echo $w; ?>_<?php echo $z; ?>" /></label>
-				</div>
-				<div class="titleleft">
-				<script type="text/javascript">
-				<!--
-				$('#NewSubSubNavigator_<?php echo $w; ?>_<?php echo $z; ?>').bind('change', function() {
-				$('#newsubsublabellink_<?php echo $w; ?>_<?php echo $z; ?>').val($(this).val());
-				});
-				-->
-				</script>
-				<select name="NewSubSubNavigator" id="NewSubSubNavigator_<?php echo $w; ?>_<?php echo $z; ?>">
-				<?php echo $LinkNavigator; ?>
-				</select>
-				</div>
-				<div class="titleleft">
-				<label style="display:inline;" title="Open New Window">Open Blank <input name="NewSubSubLabelNewWindow[<?php echo $w; ?>][]" type="checkbox" value="_blank" /></label>
-				</div>
-				</div>
+                    <?php
+                    $subGroupIndex = 0;
+                    foreach ($menuTree as $rootIndex => $mainRow) :
+                        $rootGroup = $rootIndex + 1;
+                        $rootRecordId = (int) ($mainRow['RecordID'] ?? 0);
+                        $rootLabel = red_admin_menu_scalar($mainRow['Label'] ?? '');
+                        $rootLink = red_admin_menu_scalar($mainRow['Link'] ?? '');
+                        $children = is_array($mainRow['children'] ?? null) ? $mainRow['children'] : [];
+                        $descendantCount = count($children);
+                        foreach ($children as $childRow) {
+                            $descendantCount += count($childRow['children'] ?? []);
+                        }
+                    ?>
+                        <details class="red-admin-menu-branch"<?php echo $rootIndex === 0 ? ' open' : ''; ?>>
+                            <summary class="red-admin-menu-branch__summary">
+                                <span class="red-admin-menu-branch__number"><?php echo $rootGroup; ?></span>
+                                <span class="red-admin-menu-branch__identity">
+                                    <strong><?php echo red_admin_menu_html($rootLabel !== '' ? $rootLabel : 'Untitled button'); ?></strong>
+                                    <code><?php echo red_admin_menu_html($rootLink !== '' ? $rootLink : 'No destination'); ?></code>
+                                </span>
+                                <span class="red-admin-menu-branch__count">
+                                    <?php echo $descendantCount; ?> <?php echo $descendantCount === 1 ? 'nested button' : 'nested buttons'; ?>
+                                </span>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="m8 10 4 4 4-4"></path>
+                                </svg>
+                            </summary>
 
-			</div>
-			<div class="clear-cp"></div>
-			<?php
-				$w++;
-			}
-			?>
+                            <div class="red-admin-menu-branch__body">
+                                <?php
+                                red_admin_menu_editor_item([
+                                    'id' => 'menu-root-' . $rootRecordId,
+                                    'level' => 1,
+                                    'heading' => $rootLabel,
+                                    'label' => $rootLabel,
+                                    'order' => $mainRow['MenuOrder'] ?? '',
+                                    'link' => $rootLink,
+                                    'newWindow' => $mainRow['NewWindow'] ?? '',
+                                    'recordId' => $rootRecordId,
+                                    'labelName' => 'MainLabel[' . $rootGroup . '][0]',
+                                    'orderName' => 'MainMenuOrder[' . $rootGroup . '][0]',
+                                    'linkName' => 'MainLabelLink[' . $rootGroup . '][0]',
+                                    'windowName' => 'MainLabelNewWindow[' . $rootGroup . '][0]',
+                                    'recordName' => 'MainLabelRecordID[' . $rootGroup . '][0]',
+                                ], $linkChoices);
+                                ?>
 
-			<div class="wrapper2last" style="margin-left:5px; margin-bottom:10px; padding:10px 5px 5px 28px; ">
-			<div class="titleleft">
-			<label style="display:inline;">New Level 2 Button:
-			<input name="NewSubLabel[<?php echo $f; ?>][]" type="text" id="newsublabel" /></label>
-			<input name="NewMainLabelRecordID[<?php echo $f; ?>][]" type="hidden" id="newmainlabelrecordid" value="<?php echo $RootRecordID; ?>" />
-			</div>
-			<div class="titleleft">
-			<label style="display:inline;">Order: <input name="NewSubMenuOrder[<?php echo $f; ?>][]" type="text" id="order" /></label>
-			</div>
-			<div class="clear"></div>
-			<div class="titleleft">
-			<label style="display:inline;">Link:
-			<input name="NewSubLabelLink[<?php echo $f; ?>][]" type="text" style="width:240px;" id="newmenulink_<?php echo $f; ?>" /></label>
-			</div>
-			<div class="titleleft">
-			<script type="text/javascript">
-			<!--
-			$('#NewLinkNavigator_<?php echo $f; ?>').bind('change', function() {
-			$('#newmenulink_<?php echo $f; ?>').val($(this).val());
-			});
-			-->
-			</script>
-			<select name="NewLinkNavigator" id="NewLinkNavigator_<?php echo $f; ?>">
-			<?php echo $LinkNavigator; ?>
-			</select>
-			</div>
-			<div class="titleleft">
-			<label style="display:inline;" title="Open New Window">Open Blank <input name="NewSubLabelNewWindow[<?php echo $f; ?>][]" type="checkbox" value="_blank" /></label>
-			</div>
-			</div>
-		</dd>
-		<?php
-			$f++;
-		}
-		?>
+                                <div class="red-admin-menu-children">
+                                    <div class="red-admin-menu-children__heading">
+                                        <span>Level 2</span>
+                                        <strong>Buttons nested under <?php echo red_admin_menu_html($rootLabel !== '' ? $rootLabel : 'this item'); ?></strong>
+                                    </div>
 
-        </dl>
+                                    <?php foreach ($children as $subIndex => $subRow) :
+                                        $subRecordId = (int) ($subRow['RecordID'] ?? 0);
+                                        $subLabel = red_admin_menu_scalar($subRow['Label'] ?? '');
+                                        $subLink = red_admin_menu_scalar($subRow['Link'] ?? '');
+                                        $grandchildren = is_array($subRow['children'] ?? null) ? $subRow['children'] : [];
+                                    ?>
+                                        <div class="red-admin-menu-child-group">
+                                            <?php
+                                            red_admin_menu_editor_item([
+                                                'id' => 'menu-sub-' . $subRecordId,
+                                                'level' => 2,
+                                                'heading' => $subLabel,
+                                                'label' => $subLabel,
+                                                'order' => $subRow['MenuOrder'] ?? '',
+                                                'link' => $subLink,
+                                                'newWindow' => $subRow['NewWindow'] ?? '',
+                                                'recordId' => $subRecordId,
+                                                'labelName' => 'SubLabel[' . $rootGroup . '][' . $subIndex . ']',
+                                                'orderName' => 'SubMenuOrder[' . $rootGroup . '][' . $subIndex . ']',
+                                                'linkName' => 'SubLabelLink[' . $rootGroup . '][' . $subIndex . ']',
+                                                'windowName' => 'SubLabelNewWindow[' . $rootGroup . '][' . $subIndex . ']',
+                                                'recordName' => 'SubLabelRecordID[' . $rootGroup . '][' . $subIndex . ']',
+                                            ], $linkChoices);
+                                            ?>
 
+                                            <div class="red-admin-menu-grandchildren">
+                                                <div class="red-admin-menu-grandchildren__heading">
+                                                    <span>Level 3 under <?php echo red_admin_menu_html($subLabel !== '' ? $subLabel : 'this item'); ?></span>
+                                                </div>
+                                                <?php foreach ($grandchildren as $grandIndex => $grandRow) :
+                                                    $grandRecordId = (int) ($grandRow['RecordID'] ?? 0);
+                                                    $grandLabel = red_admin_menu_scalar($grandRow['Label'] ?? '');
+                                                ?>
+                                                    <?php
+                                                    red_admin_menu_editor_item([
+                                                        'id' => 'menu-subsub-' . $grandRecordId,
+                                                        'level' => 3,
+                                                        'heading' => $grandLabel,
+                                                        'label' => $grandLabel,
+                                                        'order' => $grandRow['MenuOrder'] ?? '',
+                                                        'link' => $grandRow['Link'] ?? '',
+                                                        'newWindow' => $grandRow['NewWindow'] ?? '',
+                                                        'recordId' => $grandRecordId,
+                                                        'labelName' => 'SubSubLabel[' . $subGroupIndex . '][' . $grandIndex . ']',
+                                                        'orderName' => 'SubSubMenuOrder[' . $subGroupIndex . '][' . $grandIndex . ']',
+                                                        'linkName' => 'SubSubLabelLink[' . $subGroupIndex . '][' . $grandIndex . ']',
+                                                        'windowName' => 'SubSubLabelNewWindow[' . $subGroupIndex . '][' . $grandIndex . ']',
+                                                        'recordName' => 'SubSubLabelRecordID[' . $subGroupIndex . '][' . $grandIndex . ']',
+                                                    ], $linkChoices);
+                                                    ?>
+                                                <?php endforeach; ?>
 
-        <div class="clear-cp"></div>
-        <?php echo red_csrf_input(); ?>
-        <input type="hidden" name="CurTitle" id="CurTitle" value="<?php echo red_admin_menu_html($Title); ?>" />
-        <input type="hidden" name="Language" id="Language" value="<?php echo red_admin_menu_html($language); ?>" />
-        <input type="submit" name="submit" value="Save" id="save"/>
-        <span id="msggbox_update_main_menu" style="display:none"></span>
-        <span id="msggbox_deletelabel" style="display:none"></span>
-        </div>
-        </article>
-    </div>
+                                                <details class="red-admin-menu-add-card">
+                                                    <summary>
+                                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                            <path d="M12 5v14M5 12h14"></path>
+                                                        </svg>
+                                                        Add a level 3 button under <?php echo red_admin_menu_html($subLabel !== '' ? $subLabel : 'this item'); ?>
+                                                    </summary>
+                                                    <?php
+                                                    red_admin_menu_editor_item([
+                                                        'id' => 'menu-new-subsub-' . $subGroupIndex,
+                                                        'level' => 3,
+                                                        'new' => true,
+                                                        'heading' => 'New level 3 button',
+                                                        'description' => 'This button will be nested under ' . ($subLabel !== '' ? $subLabel : 'the selected level 2 item') . '.',
+                                                        'labelName' => 'NewSubSubLabel[' . $subGroupIndex . '][0]',
+                                                        'orderName' => 'NewSubSubMenuOrder[' . $subGroupIndex . '][0]',
+                                                        'linkName' => 'NewSubSubLabelLink[' . $subGroupIndex . '][0]',
+                                                        'windowName' => 'NewSubSubLabelNewWindow[' . $subGroupIndex . '][0]',
+                                                        'parentName' => 'NewSubLabelRecordID[' . $subGroupIndex . '][0]',
+                                                        'parentId' => $subRecordId,
+                                                    ], $linkChoices);
+                                                    ?>
+                                                </details>
+                                            </div>
+                                        </div>
+                                        <?php $subGroupIndex++; ?>
+                                    <?php endforeach; ?>
+
+                                    <details class="red-admin-menu-add-card">
+                                        <summary>
+                                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M12 5v14M5 12h14"></path>
+                                            </svg>
+                                            Add a level 2 button under <?php echo red_admin_menu_html($rootLabel !== '' ? $rootLabel : 'this item'); ?>
+                                        </summary>
+                                        <?php
+                                        red_admin_menu_editor_item([
+                                            'id' => 'menu-new-sub-' . $rootRecordId,
+                                            'level' => 2,
+                                            'new' => true,
+                                            'heading' => 'New level 2 button',
+                                            'description' => 'This button will be nested under ' . ($rootLabel !== '' ? $rootLabel : 'the selected top-level item') . '.',
+                                            'labelName' => 'NewSubLabel[' . $rootGroup . '][0]',
+                                            'orderName' => 'NewSubMenuOrder[' . $rootGroup . '][0]',
+                                            'linkName' => 'NewSubLabelLink[' . $rootGroup . '][0]',
+                                            'windowName' => 'NewSubLabelNewWindow[' . $rootGroup . '][0]',
+                                            'parentName' => 'NewMainLabelRecordID[' . $rootGroup . '][0]',
+                                            'parentId' => $rootRecordId,
+                                        ], $linkChoices);
+                                        ?>
+                                    </details>
+                                </div>
+                            </div>
+                        </details>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+
+            <?php echo red_csrf_input(); ?>
+            <input type="hidden" name="CurTitle" value="<?php echo red_admin_menu_html($title); ?>">
+            <input type="hidden" name="Language" value="<?php echo red_admin_menu_html($language); ?>">
+
+            <footer class="red-admin-menu-actions">
+                <div class="red-admin-menu-actions__status" id="msggbox_update_main_menu"
+                    data-menu-status role="status" aria-live="polite">
+                    Changes are applied only when you save.
+                </div>
+                <button type="submit" name="submit" value="Save" class="red-admin-menu-save">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M5 4h12l2 2v14H5zM8 4v6h8V4M8 17h8"></path>
+                    </svg>
+                    <span>Save navigation</span>
+                </button>
+            </footer>
+        </fieldset>
+    </form>
 </div>
-</fieldset>
-</form>
 <?php
 $db->close();
 ?>

@@ -2,7 +2,7 @@
 /**
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)
- * @version: 4.0 - (2025/03/06)
+ * @version: 5.0 - (2026/07/24)
  * @requires linux v1.2.2 or later 
  * @author Oscar Rojas
  * Examples and documentation at: http://red-sphere.tv/documentation/ 
@@ -10,6 +10,30 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/theme_runtime.php';
+require_once __DIR__ . '/includes/theme_activation_helpers.php';
+
+$redThemeRequestBufferLevel = ob_get_level();
+ob_start();
+
+try {
+    $redThemeRequestedId = red_theme_activation_active_id_from_project(__DIR__);
+    $redThemeRuntime = red_theme_runtime_bootstrap(
+        $redThemeRequestedId,
+        __DIR__,
+        'legacy-bootstrap',
+        true
+    );
+    $redThemeAdapter = $redThemeRuntime['adapter'];
+} catch (Throwable $exception) {
+    while (ob_get_level() > $redThemeRequestBufferLevel) {
+        ob_end_clean();
+    }
+    error_log('RED-CMS theme bootstrap failed: ' . $exception->getMessage());
+    http_response_code(500);
+    exit('Theme rendering is temporarily unavailable.');
+}
+
 red_start_session();
 $timezone = $_SESSION['time'] ?? 'America/New_York'; // default timezone
 ?>
@@ -54,60 +78,8 @@ class_content.php: call all components.*/
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_feature_slider.php' ?>
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>
-    <?php 
-	$page=new Page_Title();
-	$page->Title();
-	?>
-    </title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width; initial-scale=1">
-    <?php 
-	$page=new Page_Metatags();
-	$page->Metatags();
-	?>
-    
-    <meta property="og:image" content="https://adrianagranobles.com/images/articles/image-adrianagranobles-facebookshare.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-
-    <meta name="author" content="Oscar Rojas">
-    <meta name = "format-detection" content = "telephone=no" />
-    
-    
-	<!--CSS-->
-    <link rel="stylesheet" href="/css/bootstrap.min.css?v=<?= time(); ?>">
-    <link rel="stylesheet" href="/css/forms.css?v=<?= time(); ?>" type="text/css" media="screen">
-	<link rel="stylesheet" href="/css/red-css.css?v=<?= time(); ?>" type="text/css" media="screen">
-    <link rel="stylesheet" href="/css/style.css?v=<?= time(); ?>" type="text/css" media="screen">
-    
-    <!--JS-->
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="/js/jquery-3.7.1.min.js"></script>
-    <script src="/js/superfish.js"></script>
-    <script src="/js/jquery.mobilemenu.js"></script>
-    <script src="/js/tm-scripts.js"></script>
-    
-    
-    <link rel="icon" href="/logoico.ico" type="image/x-icon">
-	<link rel="shortcut icon" href="/logoico.ico" type="image/x-icon">
-  
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v22.0&appId=228959903787478"></script>
-    
-    <?php
-	include $_SERVER['DOCUMENT_ROOT'].'/admin/mainnav.php' ;
-	?>
-    
-</head>
-<body>
-
-<?php include $_SERVER['DOCUMENT_ROOT'].'/includes/header.php' ?>
+<?php try { $redThemeAdapter->renderDocumentStart(); ?>
+<?php $redThemeAdapter->renderHeaderBundle(); ?>
 
 
 <!--==============================content================================-->
@@ -125,7 +97,42 @@ $page->get_page_query();
  ?>
 
 <!--==============================footer=================================-->
-<?php include $_SERVER['DOCUMENT_ROOT'].'/includes/footer.php'; ?>
+<?php $redThemeAdapter->renderFooter(); ?>
 
-</body>
-</html>
+<?php
+$redThemeAdapter->renderDocumentEnd();
+ob_end_flush();
+} catch (Throwable $exception) {
+    while (ob_get_level() > $redThemeRequestBufferLevel) {
+        ob_end_clean();
+    }
+    error_log('RED-CMS active theme render failed; using legacy-bootstrap: ' . $exception->getMessage());
+    if (($redThemeRuntime['themeId'] ?? '') === 'legacy-bootstrap') {
+        http_response_code(500);
+        exit('Theme rendering is temporarily unavailable.');
+    }
+
+    try {
+        http_response_code(200);
+        $redThemeRuntime = red_theme_runtime_bootstrap('legacy-bootstrap', __DIR__);
+        $redThemeAdapter = $redThemeRuntime['adapter'];
+        ob_start();
+        $redThemeAdapter->renderDocumentStart();
+        $redThemeAdapter->renderHeaderBundle();
+        echo "\n\n<!--==============================content================================-->\n\n";
+        $page = new Build_Page();
+        $page->get_page_query();
+        echo "\n\n<!--==============================footer=================================-->\n";
+        $redThemeAdapter->renderFooter();
+        $redThemeAdapter->renderDocumentEnd();
+        ob_end_flush();
+    } catch (Throwable $fallbackException) {
+        while (ob_get_level() > $redThemeRequestBufferLevel) {
+            ob_end_clean();
+        }
+        error_log('RED-CMS legacy theme recovery failed: ' . $fallbackException->getMessage());
+        http_response_code(500);
+        exit('Theme rendering is temporarily unavailable.');
+    }
+}
+?>

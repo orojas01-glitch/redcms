@@ -1,0 +1,501 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://red-sphere.com/schemas/theme-manifest-v1.json",
+  "title": "RED-CMS Theme Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "version",
+    "type",
+    "description",
+    "preview",
+    "compatibility",
+    "assets",
+    "regions",
+    "layouts",
+    "components",
+    "settings"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "type": {
+      "enum": ["standard", "legacy-adapter"]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "preview": {
+      "$ref": "#/$defs/relativePath"
+    },
+    "adapter": {
+      "$ref": "#/$defs/relativePath"
+    },
+    "adapterClass": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cms", "php"],
+      "properties": {
+        "cms": {
+          "type": "string",
+          "minLength": 1
+        },
+        "php": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layoutAliases": {
+          "type": "object",
+          "description": "Explicit stored-layout compatibility ids mapped to canonical layouts declared by this package.",
+          "propertyNames": {
+            "$ref": "#/$defs/assignedLayoutId"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/layoutId"
+          }
+        }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["styles", "scripts"],
+      "properties": {
+        "styles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/asset"
+          }
+        },
+        "scripts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/asset"
+          }
+        }
+      }
+    },
+    "production": {
+      "$ref": "#/$defs/production"
+    },
+    "regions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/view"
+      },
+      "required": ["document", "header", "navigation", "hero", "footer"]
+    },
+    "layouts": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/layoutId"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/layout"
+      }
+    },
+    "components": {
+      "type": "object",
+      "required": ["Article", "Form", "Gallery", "Other"],
+      "additionalProperties": false,
+      "properties": {
+        "Article": { "$ref": "#/$defs/view" },
+        "Form": { "$ref": "#/$defs/view" },
+        "Gallery": { "$ref": "#/$defs/view" },
+        "Other": { "$ref": "#/$defs/view" }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/view"
+      }
+    },
+    "settings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/setting"
+      }
+    },
+    "knownLimitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "legacy-adapter"
+          }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "required": ["adapter", "adapterClass"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "standard"
+          }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "required": ["production"]
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+    },
+    "assignedLayoutId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9_-]{0,62}[A-Za-z0-9])?$"
+    },
+    "layoutId": {
+      "type": "string",
+      "pattern": "^[a-z](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "location"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "legacySource": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "integrity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "crossorigin": {
+          "enum": ["anonymous", "use-credentials"]
+        },
+        "location": {
+          "enum": ["head", "body-end"]
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["path"]
+        },
+        {
+          "required": ["legacySource"]
+        },
+        {
+          "required": ["url"]
+        }
+      ]
+    },
+    "production": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assets", "regions", "layouts", "components"],
+      "properties": {
+        "assets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["styles", "scripts"],
+          "properties": {
+            "styles": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/asset" }
+            },
+            "scripts": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/asset" }
+            }
+          }
+        },
+        "regions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["document", "header", "navigation", "hero", "footer"],
+          "properties": {
+            "document": { "$ref": "#/$defs/productionView" },
+            "header": { "$ref": "#/$defs/productionView" },
+            "navigation": { "$ref": "#/$defs/productionView" },
+            "hero": { "$ref": "#/$defs/productionView" },
+            "footer": { "$ref": "#/$defs/productionView" }
+          }
+        },
+        "layouts": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/layoutId" },
+          "additionalProperties": { "$ref": "#/$defs/productionView" }
+        },
+        "components": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["Article", "Form", "Gallery", "Other"],
+          "properties": {
+            "Article": { "$ref": "#/$defs/productionView" },
+            "Form": { "$ref": "#/$defs/productionView" },
+            "Gallery": { "$ref": "#/$defs/productionView" },
+            "Other": { "$ref": "#/$defs/productionView" }
+          }
+        }
+      }
+    },
+    "productionView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template"],
+      "properties": {
+        "template": { "$ref": "#/$defs/relativePath" }
+      }
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "template": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "legacySource": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "renderedBy": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["template"]
+        },
+        {
+          "required": ["legacySource"]
+        }
+      ]
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "positions", "hiddenPosition"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "template": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "legacySource": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "positions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/position"
+          }
+        },
+        "adminPreview": {
+          "$ref": "#/$defs/layoutAdminPreview"
+        },
+        "hiddenPosition": {
+          "const": 0
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["template"]
+        },
+        {
+          "required": ["legacySource"]
+        }
+      ]
+    },
+    "position": {
+      "type": "object",
+      "description": "A theme-owned content position. IDs are unique integers from 1 to 99 and need not be consecutive.",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "layoutAdminPreview": {
+      "type": "object",
+      "description": "Optional admin-only desktop layout map. Every declared public position must appear exactly once; omitted previews fall back to stacked full-width rows.",
+      "additionalProperties": false,
+      "required": ["rows"],
+      "properties": {
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 99,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "$ref": "#/$defs/layoutAdminPreviewCell"
+            }
+          }
+        }
+      }
+    },
+    "layoutAdminPreviewCell": {
+      "type": "object",
+      "description": "A numbered editable position and its relative desktop width within the preview row.",
+      "additionalProperties": false,
+      "required": ["position", "weight"],
+      "properties": {
+        "position": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        }
+      }
+    },
+    "setting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "type"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "type": {
+          "enum": ["text", "textarea", "url", "image", "color", "number", "select", "checkbox", "menu"]
+        },
+        "default": {},
+        "options": {
+          "type": "array"
+        },
+        "legacyItem": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "navigation.breadcrumbs"
+              }
+            },
+            "required": ["key"]
+          },
+          "then": {
+            "properties": {
+              "type": {
+                "const": "checkbox"
+              },
+              "default": {
+                "type": "boolean"
+              }
+            },
+            "required": ["default"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "key": {
+                "const": "branding.logo"
+              }
+            },
+            "required": ["key"]
+          },
+          "then": {
+            "properties": {
+              "type": {
+                "const": "image"
+              },
+              "legacyItem": {
+                "const": "Website_Logo"
+              }
+            },
+            "required": ["legacyItem"]
+          }
+        }
+      ]
+    }
+  }
+}

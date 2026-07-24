@@ -11,7 +11,7 @@
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true);
+red_require_admin_site_manager(true);
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php';
@@ -50,8 +50,8 @@ $success = red_admin_write_transaction($connection, function () use ($connection
 			$title,
 			$newLabel,
 			0,
-			'',
-			'',
+			red_admin_menu_value($post, 'NewLabelLink'),
+			red_admin_menu_value($post, 'NewLabelNewWindow'),
 			red_admin_menu_value($post, 'NewMenuOrder'),
 			$language
 		)) {

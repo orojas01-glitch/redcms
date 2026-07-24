@@ -16,6 +16,7 @@ red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php' ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php' ?>
 <?php
 if(empty($_SESSION['alias']))
 	header('Location: http://'.BASE_URL.'');
@@ -36,6 +37,155 @@ if(empty($_SESSION['alias']))
 		$RecordID=mt_rand();
 		$ArtRecordID=mt_rand();
 		$csrfToken=red_csrf_token();
+		$authorizationDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		red_admin_require_component_selection($authorizationDb->connection, 'Gallery', $Type);
+		$authorizationDb->close();
+
+		if ($Type === 'Gallery') {
+			require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_gallery_ui_helpers.php';
+
+			$galleryDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+			$positionOptions = red_admin_article_layout_position_options($galleryDb->connection, $Layout);
+			$sectionOptions = red_admin_article_area_options($galleryDb->connection, 'RED_Sections', 'Sections', $Section);
+			$categoryOptions = red_admin_article_area_options($galleryDb->connection, 'RED_Categories', 'Categories', $Category);
+			$subCategoryOptions = red_admin_article_area_options($galleryDb->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+			$articleOptions = red_admin_article_page_options($galleryDb->connection, $Article);
+			$galleryDb->close();
+
+			$uploadUrls = [
+				'Gallery' => red_admin_gallery_ui_upload_url([
+					'RecordID' => $RecordID,
+					'ArtRecordID' => $ArtRecordID,
+					'UC' => 'Gallery',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Gallery',
+					'Language' => $Language,
+				]),
+				'BigPict' => red_admin_gallery_ui_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'BigPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Gallery',
+					'Language' => $Language,
+				]),
+				'SmallPict' => red_admin_gallery_ui_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'SmallPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Gallery',
+					'Language' => $Language,
+				]),
+			];
+
+			red_admin_render_gallery_form([
+				'mode' => 'create',
+				'returnTarget' => 'add_content_grid',
+				'submitUrl' => '/admin/bin/insert_gallery.php',
+				'positionOptions' => $positionOptions,
+				'varPosition' => $VarPosition,
+				'sectionOptions' => $sectionOptions,
+				'categoryOptions' => $categoryOptions,
+				'subCategoryOptions' => $subCategoryOptions,
+				'articleOptions' => $articleOptions,
+				'uploadUrls' => $uploadUrls,
+				'recordId' => $RecordID,
+				'artRecordId' => $ArtRecordID,
+				'language' => $Language,
+				'layout' => $Layout,
+				'editedBy' => $_SESSION['alias'] ?? '',
+				'csrfToken' => $csrfToken,
+			]);
+			exit;
+		}
+
+		if ($Type === 'Video') {
+			require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_video_ui_helpers.php';
+
+			$videoDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+			$positionOptions = red_admin_article_layout_position_options($videoDb->connection, $Layout);
+			$linkNavigatorOptions = red_admin_main_menu_link_options($videoDb->connection);
+			$sectionOptions = red_admin_article_area_options($videoDb->connection, 'RED_Sections', 'Sections', $Section);
+			$categoryOptions = red_admin_article_area_options($videoDb->connection, 'RED_Categories', 'Categories', $Category);
+			$subCategoryOptions = red_admin_article_area_options($videoDb->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+			$articleOptions = red_admin_article_page_options($videoDb->connection, $Article);
+			$videoDb->close();
+
+			$uploadUrls = [
+				'BigPict' => red_admin_video_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'BigPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Video',
+					'Language' => $Language,
+				]),
+				'SmallPict' => red_admin_video_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'SmallPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Video',
+					'Language' => $Language,
+				]),
+			];
+
+			red_admin_render_video_form([
+				'mode' => 'create',
+				'returnTarget' => 'add_content_grid',
+				'submitUrl' => '/admin/bin/insert_gallery.php',
+				'positionOptions' => $positionOptions,
+				'varPosition' => $VarPosition,
+				'linkNavigatorOptions' => $linkNavigatorOptions,
+				'sectionOptions' => $sectionOptions,
+				'categoryOptions' => $categoryOptions,
+				'subCategoryOptions' => $subCategoryOptions,
+				'articleOptions' => $articleOptions,
+				'uploadUrls' => $uploadUrls,
+				'recordId' => $RecordID,
+				'artRecordId' => $ArtRecordID,
+				'language' => $Language,
+				'layout' => $Layout,
+				'editedBy' => $_SESSION['alias'] ?? '',
+				'csrfToken' => $csrfToken,
+			]);
+			exit;
+		}
+
+		if ($Type === 'Banner') {
+			require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_banner_ui_helpers.php';
+
+			$bannerDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+			$positionOptions = red_admin_article_layout_position_options($bannerDb->connection, $Layout);
+			$linkNavigatorOptions = red_admin_main_menu_link_options($bannerDb->connection);
+			$sectionOptions = red_admin_article_area_options($bannerDb->connection, 'RED_Sections', 'Sections', $Section);
+			$categoryOptions = red_admin_article_area_options($bannerDb->connection, 'RED_Categories', 'Categories', $Category);
+			$subCategoryOptions = red_admin_article_area_options($bannerDb->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+			$articleOptions = red_admin_article_page_options($bannerDb->connection, $Article);
+			$bannerDb->close();
+
+			red_admin_render_banner_form([
+				'mode' => 'create',
+				'returnTarget' => 'add_content_grid',
+				'submitUrl' => '/admin/bin/insert_gallery.php',
+				'positionOptions' => $positionOptions,
+				'varPosition' => $VarPosition,
+				'linkNavigatorOptions' => $linkNavigatorOptions,
+				'sectionOptions' => $sectionOptions,
+				'categoryOptions' => $categoryOptions,
+				'subCategoryOptions' => $subCategoryOptions,
+				'articleOptions' => $articleOptions,
+				'recordId' => $RecordID,
+				'artRecordId' => $ArtRecordID,
+				'language' => $Language,
+				'layout' => $Layout,
+				'editedBy' => $_SESSION['alias'] ?? '',
+				'csrfToken' => $csrfToken,
+			]);
+			exit;
+		}
 
 ?>
 <!-- Our CSS stylesheet file -->
@@ -48,6 +198,18 @@ if(empty($_SESSION['alias']))
 <script src="/admin/assets/js/jquery.filedrop.js"></script>
 <script src="/admin/assets/js/jquery.filedrop2.js"></script>
 <script src="/admin/assets/js/jquery.filedrop3.js"></script>
+<script type="text/javascript">
+window.RED_GALLERY_CREATE_QUEUE_UPLOADS = true;
+window.RED_GALLERY_CREATE_CONFIG = {
+	recordId: <?php echo json_encode($RecordID); ?>,
+	articleRecordId: <?php echo json_encode($ArtRecordID); ?>,
+	galleryType: <?php echo json_encode($Type); ?>,
+	language: <?php echo json_encode($Language); ?>,
+	csrfToken: <?php echo json_encode($csrfToken); ?>,
+	maxImageBytes: 2 * 1024 * 1024,
+	allowedExtensions: ['jpg', 'jpeg', 'png', 'gif']
+};
+</script>
 
 <!-- TinyMCE -->
 <script type="text/javascript">
@@ -120,6 +282,7 @@ $(".cp_slideDown dt").click(function(){$(this).toggleClass("active").parent(".cp
 //-->
 <!--
 $(function(){
+	if (window.RED_GALLERY_CREATE_QUEUE_UPLOADS) return;
 	var dropbox = $('#dropbox'),
 		message = $('.message', dropbox);
 	
@@ -132,8 +295,8 @@ $(function(){
 		else
 		echo 'maxfiles: 10, '. "\n";
 		?>
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&ArtRecordID=<?php echo $ArtRecordID ?>&UC=Gallery&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&ArtRecordID=<?php echo $ArtRecordID ?>&UC=Gallery&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -240,6 +403,7 @@ $(function(){
 //-->
 <!--
 $(function(){
+	if (window.RED_GALLERY_CREATE_QUEUE_UPLOADS) return;
 	var dropbox2 = $('#dropbox2'),
 		message2 = $('.message2', dropbox2);
 	
@@ -247,8 +411,8 @@ $(function(){
 		// The name of the $_FILES entry:
 		paramname:'pic',
 		maxfiles: 1,
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -350,6 +514,7 @@ $(function(){
 //-->
 <!--
 $(function(){
+	if (window.RED_GALLERY_CREATE_QUEUE_UPLOADS) return;
 	var dropbox3 = $('#dropbox3'),
 		message3 = $('.message3', dropbox3);
 	
@@ -357,8 +522,8 @@ $(function(){
 		// The name of the $_FILES entry:
 		paramname:'pic',
 		maxfiles: 1,
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -461,30 +626,39 @@ $(function(){
 <!--
 function run_insert_gallery (insert_gallery)
 {
+	var saveButton = $('#save');
+	var statusBox = $('#msggbox_insert_gallery');
+	saveButton.prop('disabled', true);
+	statusBox.html('&nbsp; Saving Gallery...').show();
 	$.ajax({ 
 	type: "POST", 
 	url: "/admin/bin/insert_gallery.php", 
 	data: $("#insert_gallery").serialize(),
 	success: function(data) {
-	//alert (data);
-//	return false;
+	data = $.trim(data);
 	if (data=='yes' || data=='yesyes')
 	{
-	$('#msggbox_insert_gallery').html("&nbsp; Gallery Updated.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_insert_gallery');
-	window.location.reload();
+	statusBox.html("&nbsp; Gallery saved. Uploading queued pictures...").show();
+	var uploadQueued = window.redGalleryCreateUploadQueued || function () {
+		return Promise.resolve();
+	};
+	uploadQueued().then(function () {
+		statusBox.html("&nbsp; Gallery and pictures saved.").show();
+		window.location.reload();
+	}).catch(function (error) {
+		statusBox.text(' Gallery saved, but a picture upload failed: ' + error.message).show();
+		saveButton.prop('disabled', false);
 	});
 	}
 	else
 	{
-	$('#msggbox_insert_gallery').html("&nbsp; Error. Please try again.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_insert_gallery');
-	});
+	statusBox.html("&nbsp; Error. Please try again.").show();
+	saveButton.prop('disabled', false);
 	}
+	},
+	error: function(xhr) {
+		statusBox.text(' Gallery could not be saved (server status ' + xhr.status + ').').show();
+		saveButton.prop('disabled', false);
 	}
 	});
 	return false;
@@ -516,10 +690,10 @@ function run_insert_gallery (insert_gallery)
 	                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
 	                <?php
 					$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$Positions=red_admin_article_layout_positions($db->connection, $Layout);
-					for ($w=0; $w<=$Positions; $w++)
+					$positionOptions=red_admin_article_layout_position_options($db->connection, $Layout);
+					foreach ($positionOptions as $w => $positionLabel)
 					{
-						echo '<option value="'.$w.'">'.$w.'</option>';
+						echo '<option value="'.(int) $w.'">'.red_admin_area_html($positionLabel).' ('.(int) $w.')</option>';
 					}
 					$db->close();
 					?>
@@ -563,16 +737,6 @@ function run_insert_gallery (insert_gallery)
 				echo '</div>';
 				
 					echo ('<div class="clear-cp"></div><label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3"></textarea></label><div class="clear-cp"></div><br />');
-				
-			break;
-			///////////////
-			case 'Carrousel':
-			
-				echo '<label>Photo(s):<br />';
-				echo '</label>';
-				echo '<div id="dropbox" style="width:99%;min-height:80px;">';
-				echo '<span class="message">Drop image(s) here to upload.<br/>Image Size must be Width: 120px - Height: 107px</span>';
-				echo '</div>';
 				
 			break;
 			////////////
@@ -642,7 +806,7 @@ function run_insert_gallery (insert_gallery)
                     </div>
                     <div class="clear-cp"></div>
                     <div class="titleleft">
-                    <label style="width:75px" title="Used in Article Description or Short Articles">Small Picture:</label>
+                    <label style="width:75px" title="Used in Article Description">Small Picture:</label>
                     </div>
                     <div id="dropbox3" style="width: 150px; min-height:80px; float:left">
                         <span class="message3">Drop image <br />
@@ -723,7 +887,7 @@ function run_insert_gallery (insert_gallery)
         <input type="hidden" name="Language" id="Language" value="<?php echo red_admin_area_html($Language) ?>" />
         <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($_SESSION['alias'])?>" />
         <input type="hidden" name="Component" id="Component" value="Gallery" />
-        <input type="hidden" name="Layout" id="Layout" value="" />
+        <input type="hidden" name="Layout" id="Layout" value="<?php echo red_admin_area_html($Layout)?>" />
         <?php echo red_csrf_input(); ?>
         <input type="submit" name="submit" value="Save" id="save"/>
         <span id="msggbox_insert_gallery" style="display:none"></span>
@@ -733,6 +897,7 @@ function run_insert_gallery (insert_gallery)
 </div>
 </fieldset>
 </form>
+<script src="/admin/assets/js/gallery-create-uploads.js"></script>
 <?php
 
 		}

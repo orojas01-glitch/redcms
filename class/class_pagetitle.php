@@ -63,6 +63,10 @@ class Page_Title
                     $Title = red_public_plain_text($info['Title']);
                     echo red_public_html($Website_Title . ' | ' . ucwords($Title));
                 }
+			} else {
+				echo red_public_html(
+					$Website_Title !== '' ? $Website_Title . ' | Page not found' : 'Page not found'
+				);
 			}
 		
 			break;
@@ -73,11 +77,19 @@ class Page_Title
 			if ($info) {
 				$Title = preg_replace('/\-/',' ',$info['Title']);
 				echo red_public_html($Website_Title .' | '.ucwords($Title));
+			} else {
+				echo red_public_html(
+					$Website_Title !== '' ? $Website_Title . ' | Page not found' : 'Page not found'
+				);
 			}
 			
 			break;
 		}
 		$db->close();
+		}
+		else
+		{
+			echo 'Page not found';
 		}
 		
 	

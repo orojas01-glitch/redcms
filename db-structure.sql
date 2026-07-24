@@ -30,13 +30,15 @@ CREATE TABLE `RED_Admin` (
   `Alias` varchar(14) NOT NULL,
   `AdminType` varchar(10) NOT NULL COMMENT 'superadmin,guest',
   `AdminComponents` varchar(200) NOT NULL COMMENT 'RecordID from RED_Components',
-  `Email` varchar(50) NOT NULL,
+  `AdminTools` varchar(50) NOT NULL DEFAULT '1,2' COMMENT 'RecordID from RED_Tools',
+  `Email` varchar(254) NOT NULL,
   `Contact_Form` varchar(1) NOT NULL DEFAULT 'N',
   `Contact_Form_Pref` varchar(3) NOT NULL DEFAULT 'to' COMMENT 'to,bc,bcc',
   `Donation_Form` varchar(1) NOT NULL DEFAULT 'N',
   `Donation_Form_Pref` varchar(3) NOT NULL DEFAULT 'to' COMMENT 'to,bc,bcc',
-  PRIMARY KEY (`RecordID`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`RecordID`),
+  UNIQUE KEY `uniq_red_admin_username` (`Username`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,9 +49,48 @@ CREATE TABLE `RED_Admin` (
 
 LOCK TABLES `RED_Admin` WRITE;
 /*!40000 ALTER TABLE `RED_Admin` DISABLE KEYS */;
-INSERT INTO `RED_Admin` (`RecordID`, `Username`, `Password`, `Administrator`, `Alias`, `AdminType`, `AdminComponents`, `Email`, `Contact_Form`, `Contact_Form_Pref`, `Donation_Form`, `Donation_Form_Pref`) VALUES (1,'orojas','$2y$12$PczEdcFO0Kk3SbNsiFKfJu8AvfRNigSg3UdkCQruOFJQcAUD9uTCC','Admin','Admin','webmaster','100,102,103,104,105,117,107,111,112,116','','Y','bcc','Y','bcc'),(2,'adriana','$2y$12$hOfzqIDkD0oLQ8YAq7ZGHevqJckukLsIUKAVPNpIJ1vix1UC38Shi','Admin','Adriana','guest','100,107,116,111,112','','N','to','N','to');
+INSERT INTO `RED_Admin` (`RecordID`, `Username`, `Password`, `Administrator`, `Alias`, `AdminType`, `AdminComponents`, `AdminTools`, `Email`, `Contact_Form`, `Contact_Form_Pref`, `Donation_Form`, `Donation_Form_Pref`) VALUES (1,'orojas','$2y$12$PczEdcFO0Kk3SbNsiFKfJu8AvfRNigSg3UdkCQruOFJQcAUD9uTCC','Admin','Admin','webmaster','100,102,103,104,105,117,107,111,116','1,2','','Y','bcc','Y','bcc'),(2,'adriana','$2y$12$hOfzqIDkD0oLQ8YAq7ZGHevqJckukLsIUKAVPNpIJ1vix1UC38Shi','Admin','Adriana','guest','100,107,116,111','1,2','','N','to','N','to');
 /*!40000 ALTER TABLE `RED_Admin` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `RED_Admin_Activity_Log`
+--
+
+DROP TABLE IF EXISTS `RED_Admin_Activity_Log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Admin_Activity_Log` (
+  `RecordID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `EventName` varchar(64) NOT NULL,
+  `ActorAdminRecordID` int unsigned NOT NULL,
+  `TargetType` varchar(32) NOT NULL,
+  `TargetRecordID` bigint unsigned NOT NULL,
+  `OccurredAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_admin_activity_time` (`OccurredAt`),
+  KEY `idx_red_admin_activity_actor_time` (`ActorAdminRecordID`,`OccurredAt`),
+  KEY `idx_red_admin_activity_target_time` (`TargetType`,`TargetRecordID`,`OccurredAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `RED_Login_Attempts`
+--
+
+DROP TABLE IF EXISTS `RED_Login_Attempts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Login_Attempts` (
+  `RecordID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `UsernameHash` binary(32) NOT NULL,
+  `ClientAddress` varbinary(16) NOT NULL,
+  `AttemptedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_login_attempt_username_time` (`UsernameHash`,`AttemptedAt`),
+  KEY `idx_red_login_attempt_client_time` (`ClientAddress`,`AttemptedAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `RED_Advanced`
@@ -60,11 +101,11 @@ DROP TABLE IF EXISTS `RED_Advanced`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Advanced` (
   `RecordID` int NOT NULL AUTO_INCREMENT,
-  `Item` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Content` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Language` varchar(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `Item` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Content` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Language` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +114,7 @@ CREATE TABLE `RED_Advanced` (
 
 LOCK TABLES `RED_Advanced` WRITE;
 /*!40000 ALTER TABLE `RED_Advanced` DISABLE KEYS */;
-INSERT INTO `RED_Advanced` (`RecordID`, `Item`, `Content`, `Language`) VALUES (1,'Website_Title','','sp'),(2,'Website_Slogan','','sp'),(3,'Website_Logo','logo.png','sp'),(5,'Website_Footer','','sp'),(4,'Website_Header','','sp'),(7,'Website_CSS','','sp');
+INSERT INTO `RED_Advanced` (`RecordID`, `Item`, `Content`, `Language`) VALUES (1,'Website_Title','','sp'),(2,'Website_Slogan','','sp'),(3,'Website_Logo','','sp'),(5,'Website_Footer','','sp'),(4,'Website_Header','','sp'),(7,'Website_CSS','','sp'),(8,'System_Active_Theme','legacy-bootstrap',''),(9,'System_Previous_Theme','legacy-bootstrap',''),(10,'Website_Red_Sphere_Credit','Y','sp');
 /*!40000 ALTER TABLE `RED_Advanced` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -86,9 +127,9 @@ DROP TABLE IF EXISTS `RED_Articles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Articles` (
   `RecordID` int unsigned NOT NULL,
-  `Title` text NOT NULL,
+  `Title` mediumtext NOT NULL,
   `Component` varchar(50) NOT NULL,
-  `Alias` text NOT NULL,
+  `Alias` mediumtext NOT NULL,
   `Sections` varchar(100) NOT NULL,
   `HomePosition` int NOT NULL,
   `HomePositionOrder` int NOT NULL,
@@ -100,11 +141,11 @@ CREATE TABLE `RED_Articles` (
   `SubCategories` varchar(100) NOT NULL,
   `SubCategoryPosition` int NOT NULL,
   `SubCategoryPositionOrder` int NOT NULL,
-  `Layout` varchar(20) NOT NULL DEFAULT 'Full-Width' COMMENT 'Full-Width, Two-Columns, Three-Columns, Four-Columns, Multi-Columns1, Multi-Columns2',
+  `Layout` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Full-Width' COMMENT 'Validated theme layout id',
   `Article` varchar(255) NOT NULL,
   `PagePosition` int NOT NULL DEFAULT '1',
   `PagePositionOrder` int NOT NULL,
-  `Tags` text NOT NULL,
+  `Tags` mediumtext NOT NULL,
   `Active` varchar(1) NOT NULL DEFAULT 'Y',
   `HomeFeature` varchar(1) NOT NULL,
   `HomeFeatures` varchar(100) NOT NULL COMMENT 'slider, kwicks, wrapperblock',
@@ -119,23 +160,27 @@ CREATE TABLE `RED_Articles` (
   `StartDate` datetime NOT NULL,
   `EventDate` datetime NOT NULL,
   `ExpDate` datetime NOT NULL,
-  `ShortDesc` text NOT NULL,
-  `LongDesc` text NOT NULL,
-  `SliderDesc` text NOT NULL,
-  `Link` text NOT NULL,
+  `ShortDesc` mediumtext NOT NULL,
+  `LongDesc` mediumtext NOT NULL,
+  `SliderDesc` mediumtext NOT NULL,
+  `Link` mediumtext NOT NULL,
   `NewWindow` char(6) NOT NULL,
-  `VideoSrc` text NOT NULL,
-  `AlbumSrc` text NOT NULL,
-  `BigPict` varchar(50) NOT NULL,
-  `SmallPict` varchar(50) NOT NULL,
+  `VideoSrc` mediumtext NOT NULL,
+  `AlbumSrc` mediumtext NOT NULL,
+  `BigPict` varchar(255) NOT NULL,
+  `SmallPict` varchar(255) NOT NULL,
   `SmallPictAlign` varchar(6) NOT NULL COMMENT 'Left, Right, Top',
-  `SmallPict2` varchar(50) NOT NULL,
+  `SmallPict2` varchar(255) NOT NULL,
   `SmallPictAlign2` varchar(6) NOT NULL COMMENT 'Left, Right, Top',
   `EditedBy` varchar(10) NOT NULL,
   `Language` varchar(2) NOT NULL,
   `Updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_articles_public_route` (`Language`,`Active`,`Alias`(191),`Sections`,`Categories`,`SubCategories`),
+  KEY `idx_red_articles_section_content` (`Language`,`Active`,`Sections`,`SectionPosition`,`SectionPositionOrder`,`StartDate`),
+  KEY `idx_red_articles_category_content` (`Language`,`Active`,`Sections`,`Categories`,`CategoryPosition`,`CategoryPositionOrder`,`StartDate`),
+  KEY `idx_red_articles_subcategory_content` (`Language`,`Active`,`Sections`,`Categories`,`SubCategories`,`SubCategoryPosition`,`SubCategoryPositionOrder`,`StartDate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,6 +193,183 @@ INSERT INTO `RED_Articles` (`RecordID`, `Title`, `Component`, `Alias`, `Sections
 /*!40000 ALTER TABLE `RED_Articles` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- The clean installer excludes retired Short Article content rows.
+DELETE FROM `RED_Articles` WHERE `Component` = 'ShortArticle';
+
+-- Keep the recovered Contact form shell on the registered contacto layout.
+UPDATE `RED_Articles`
+SET `Layout` = 'index-1'
+WHERE `RecordID` = 459269660
+  AND `Component` = 'Form'
+  AND `Alias` = 'contact'
+  AND `Sections` = 'contacto'
+  AND `Layout` = 'Two-Columns';
+
+-- Keep the seeded Instructions article aligned with the available component set.
+UPDATE RED_Articles
+SET LongDesc = REPLACE(LongDesc, '&nbsp;or&nbsp;<strong>Submenu</strong>', '')
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(LongDesc, 'Top Navigation or Submenu.', 'Top Navigation.')
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(LongDesc, 'How to Edit Top Navigation or Submenu(s)', 'How to Edit Top Navigation')
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(
+  LongDesc,
+  '&nbsp;&nbsp;<strong>Submenu</strong>&nbsp;is present only in selected pages.&nbsp; Follow the instructions for both:',
+  '&nbsp; Follow these instructions:'
+)
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(
+  LongDesc,
+  '&nbsp;<br />or Locate the&nbsp;<strong>Submenu &gt; Edit</strong><br />',
+  '<br />'
+)
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(
+  LongDesc,
+  '&nbsp;&nbsp;<strong>Submenus</strong>&nbsp;include only 1 (one) level. (image 18)',
+  ''
+)
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(
+  LongDesc,
+  '\r\n<p id="instructions-img"><img src="../admin/images/red-cms-instructions-manual_files/image040.png" alt="" width="999" height="748" border="0" /></p>',
+  ''
+)
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(LongDesc, '\r\n<p id="instructions-ref">image 18</p>', '')
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(LongDesc, ', Sub-Menu(s)', '')
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+UPDATE RED_Articles
+SET LongDesc = REPLACE(LongDesc, 'SubMenus, ', '')
+WHERE Title = 'Instructions' AND Component = 'Article' AND Alias = 'instructions';
+
+--
+-- Table structure for table `RED_Content_Revisions`
+--
+
+DROP TABLE IF EXISTS `RED_Content_Revisions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Content_Revisions` (
+  `RevisionID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `ContentRecordID` int unsigned NOT NULL,
+  `ContentType` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `RevisionNumber` int unsigned NOT NULL,
+  `Operation` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ActorAdminRecordID` int unsigned NOT NULL,
+  `ActorAlias` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Snapshot` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `SnapshotHash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `RestoredFromRevisionID` bigint unsigned DEFAULT NULL,
+  `CreatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`RevisionID`),
+  UNIQUE KEY `uniq_red_content_revision_number` (`ContentRecordID`,`RevisionNumber`),
+  KEY `idx_red_content_revision_timeline` (`ContentRecordID`,`CreatedAt`,`RevisionID`),
+  KEY `idx_red_content_revision_actor_time` (`ActorAdminRecordID`,`CreatedAt`),
+  KEY `idx_red_content_revision_hash` (`ContentRecordID`,`SnapshotHash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `RED_Content_Revisions`
+--
+
+LOCK TABLES `RED_Content_Revisions` WRITE;
+/*!40000 ALTER TABLE `RED_Content_Revisions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `RED_Content_Revisions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `RED_Custom_Layouts`
+--
+
+DROP TABLE IF EXISTS `RED_Custom_Layouts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Custom_Layouts` (
+  `LayoutID` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `DraftLabel` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `DraftDefinition` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `DraftHash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `PublishedLabel` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `PublishedDefinition` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `PublishedHash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `RevisionNumber` int unsigned NOT NULL DEFAULT 1,
+  `Archived` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N',
+  `CreatedByAdminRecordID` int unsigned NOT NULL,
+  `UpdatedByAdminRecordID` int unsigned NOT NULL,
+  `CreatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `UpdatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `PublishedAt` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`LayoutID`),
+  KEY `idx_red_custom_layout_status` (`Archived`,`PublishedAt`),
+  KEY `idx_red_custom_layout_updated` (`UpdatedAt`,`LayoutID`),
+  CONSTRAINT `chk_red_custom_layout_archived` CHECK (`Archived` IN ('Y','N'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `RED_Custom_Layouts`
+--
+
+LOCK TABLES `RED_Custom_Layouts` WRITE;
+/*!40000 ALTER TABLE `RED_Custom_Layouts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `RED_Custom_Layouts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `RED_Custom_Layout_Revisions`
+--
+
+DROP TABLE IF EXISTS `RED_Custom_Layout_Revisions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Custom_Layout_Revisions` (
+  `RevisionID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `LayoutID` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `RevisionNumber` int unsigned NOT NULL,
+  `Operation` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ActorAdminRecordID` int unsigned NOT NULL,
+  `ActorAlias` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Snapshot` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `SnapshotHash` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `RestoredFromRevisionID` bigint unsigned DEFAULT NULL,
+  `CreatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`RevisionID`),
+  UNIQUE KEY `uniq_red_custom_layout_revision` (`LayoutID`,`RevisionNumber`),
+  KEY `idx_red_custom_layout_timeline` (`LayoutID`,`CreatedAt`,`RevisionID`),
+  KEY `idx_red_custom_layout_revision_actor` (`ActorAdminRecordID`,`CreatedAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `RED_Custom_Layout_Revisions`
+--
+
+LOCK TABLES `RED_Custom_Layout_Revisions` WRITE;
+/*!40000 ALTER TABLE `RED_Custom_Layout_Revisions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `RED_Custom_Layout_Revisions` ENABLE KEYS */;
+UNLOCK TABLES;
+
 --
 -- Table structure for table `RED_Categories`
 --
@@ -157,19 +379,22 @@ DROP TABLE IF EXISTS `RED_Categories`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Categories` (
   `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
-  `Categories` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Title` varchar(120) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Layout` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `QueryLimit` varchar(3) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `AccessLevel` char(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'Public',
-  `Features` varchar(150) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'slider, wrapperblock, kwicks',
-  `Active` varchar(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'N',
-  `Description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Tags` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Language` char(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `SectionRecordID` int unsigned DEFAULT NULL COMMENT 'Parent RED_Sections.RecordID',
+  `Categories` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Title` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Layout` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `QueryLimit` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `AccessLevel` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Public',
+  `Features` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'slider, wrapperblock, kwicks',
+  `Active` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N',
+  `Description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Tags` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Language` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `CreationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_categories_public_alias` (`Language`,`Active`,`Categories`),
+  KEY `idx_red_categories_parent` (`SectionRecordID`,`Language`,`Active`,`Categories`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -190,14 +415,14 @@ DROP TABLE IF EXISTS `RED_Components`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Components` (
   `RecordID` int NOT NULL AUTO_INCREMENT,
-  `UniqueName` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Layout` varchar(35) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `CompGroup` char(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `ButtonTag` varchar(35) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Template` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `ResponseTemplate` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `UniqueName` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Layout` varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `CompGroup` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ButtonTag` varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Template` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ResponseTemplate` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`RecordID`)
-) ENGINE=MyISAM AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -206,9 +431,19 @@ CREATE TABLE `RED_Components` (
 
 LOCK TABLES `RED_Components` WRITE;
 /*!40000 ALTER TABLE `RED_Components` DISABLE KEYS */;
-INSERT INTO `RED_Components` (`RecordID`, `UniqueName`, `Layout`, `CompGroup`, `ButtonTag`, `Template`, `ResponseTemplate`) VALUES (106,'Gallery','Gallery','Y','Gallery','',''),(107,'Gallery','Video','Y','Video','',''),(108,'Gallery','Banner','Y','Banner','',''),(102,'Form','Contact','Y','Form Contact','#|question=|name=name|type=textfield|required=true|displayname=Enter your Full Name:|initialvalue=;\r\n#|question=|name=title|type=textfield|required=false|displayname=Enter your Title:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=Enter your e-mail:|initialvalue=;\r\n#|question=|name=telephone|type=textfield|required=true|displayname=Enter your Telephone:|initialvalue=;\r\n#|question=|name=fax|type=textfield|required=false|displayname=Enter your Fax:|initialvalue=;\r\n#|question=|name=message|type=textarea|required=false|displayname=Enter your Message:|readonly=false|initialvalue=|cols=45|rows=5;\r\n#|question=|name=Submit|type=button|displayname=submit',''),(103,'Form','Login','Y','Form Login','#|question=|name=username|type=textfield|required=true|displayname=Enter your Username:|initialvalue=;\r\n#|question=|name=password|type=password|required=true|displayname=Enter your Password:|initialvalue=;\r\n#|question=|name=Submit|type=button|displayname=submit',''),(113,'SubMenu','Vertical','Y','SubMenu Vertical','',''),(104,'Form','Response','Y','Form Response','#|question=Register|name=full_name|type=textfield|required=true|displayname=Enter your Full Name:|initialvalue=;\r\n#|question=|name=age|type=textfield|required=true|displayname=Age:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=Enter your e-mail:|initialvalue=;\r\n#|question=Emergency Contact Info|name=emergency_contact_name|type=textfield|required=true|displayname=Enter your Emergency Contact Info:|initialvalue=;\r\n#|question=|name=home_phone|type=textfield|required=true|displayname=Enter Emergency Home Phone:|initialvalue=;\r\n#|question=|name=cell_phone|type=textfield|required=true|displayname=Enter Emergency Cell Phone:|initialvalue=;\r\n#|question=Please Select:|name=walker_runner|type=radio|required=true|displayname=select radio|value=Walking,Running;\r\n#|question=|name=t_shirt_size|type=select|required=true|displayname=T Shirt Size|value=Please select^selected,--------^disabled,XS-Youth,S-Youth,M-Youth,L-Youth,S-Adult,M-Adult,L-Adult,XL-Adult,XXL-Adult,XXXL-Adult;\r\n#|type=paragraph|paragraph=t-shirt size not guarantee after Oct. 5, 2012<br/>$10 per person. <br/>$15 registration day of the event;\r\n#|question=|name=terms_and_conditions|type=textarea|required=false|displayname=|readonly=true|initialvalue=TERMS AND CONDITIONS\r\n\r\nBy indicating your acceptance, you understand and agree with the following:\r\n\r\nI know that running and walking in a road race is a potentially hazardous activity, and I attest that I am medically able and properly trained to participate in this event.\r\n\r\nI agree to abide by any decision of a race official relative to my conduct during the race.\r\n\r\nIf I should suffer injury or illness, I authorize the officials of the race to use their discretion to have me transported to a medical facility, and I take full responsibility for this action.\r\n\r\nI know that even if protection is provided, there is likely to be traffic on or near the course.\r\n\r\nI assume all risks associated with my voluntary participation in this event, including but not limited to falls, contact with other participants, the effects of any type of weather, traffic, and the conditions on the road, with all such risks being known and appreciated by me.\r\n\r\nKnowing these facts, and in consideration of my accepted entry, I for myself, my heirs, executors, administrators or anyone else who might claim on my behalf, covenant not to sue and WAIVE, RELEASE and DISCHARGE: Touching Heart, the officers, agents, volunteers, representatives, successors, and assigns of each, as well as all sponsoring organizations and their representatives, from ANY AND ALL claims or liabilities, whether foreseen or unforeseen, for death, personal injury, theft or property damage arising out of, or in the course of, my participation in this event.\r\n\r\nI further grant full permission to the event coordinators and volunteers and/or agents authorized by them, to use any photographs, videotapes, motion pictures, recordings, or other record of the event for any reasonable purpose.\r\n\r\nI understand that my entry is non-refundable.|cols=45|rows=5;\r\n#|question=|name=I_Agree|type=checkbox|required=true|displayname=I Agree to the Terms and Conditions|checked=false|value=Yes;\r\nquestion=*type=hidden*required=true*initialvalue=value;\r\n#|question=|name=Submit|type=button|displayname=submit','<p><strong>You have registered to Kids on the Run! Good Luck!</strong></p>\r\n<form id=\"formbuy1\" action=\"https://www.paypal.com/cgi-bin/webscr\" accept-charset=\"UNKNOWN\" enctype=\"application/x-www-form-urlencoded\" method=\"post\"><input type=\"hidden\" name=\"cmd\" value=\"_xclick\"><input type=\"hidden\" name=\"item_name\" value=\"tshirt\"><input type=\"hidden\" name=\"business\" value=\"helen.yi@touchingheart.com\"> <input type=\"image\" src=\"/en/images/paynow.gif\" border=\"0\" name=\"submit\" alt=\" Paypal Button!\"><img alt=\'\' border=\'0\' src=\'https://www.paypal.com/en_US/i/scr/pixel.gif\' width=\'1\' height=\'1\'><input name=\"on0\" type=\"hidden\" value=\"Sizes\" /><input type=\"hidden\" name=\"os0\" value=\"$t_shirt_size\"><input name=\"item_number\" type=\"hidden\" value=\"$full_name\" /><input type=\"hidden\" name=\"amount\" value=\"12.00\"></form><img src=\"/en/images/logo_ccVisa.gif\" border=\"0\" alt=\"Visa\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_ccMC.gif\" border=\"0\" alt=\"MasterCard\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_ccAmex.gif\" border=\"0\" alt=\"Amex\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_ccDiscover.gif\" border=\"0\" alt=\"Discover\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_paypal.gif\" alt=\"Paypal\" width=\"33\" height=\"21\" />'),(105,'Form','Other','Y','Form Other','question=*name=name*type=textfield*required=true*displayname=Enter your Name:*initialvalue=;\r\nquestion=*name=title*type=textfield*required=false*displayname=Enter your Title:*initialvalue=;\r\nquestion=*name=email*type=textfield*required=true*displayname=Enter your e-mail:*initialvalue=;\r\nquestion=*name=telephone*type=textfield*required=true*displayname=Enter your Telephone:*initialvalue=;\r\nquestion=*name=fax*type=textfield*required=false*displayname=Enter your Fax:*initialvalue=;\r\nquestion=*name=message*type=textarea*required=false*displayname=Enter your Message:*initialvalue=*cols=45*rows=5;\r\nquestion=*name=Subscribe*type=checkbox*required=false*displayname=subscribe to newsletter*checked=false;\r\nquestion=*name=radiogroup1*type=radio*required=false*displayname=select radio*value=radio 1,radio 2,radio 3;\r\nquestion=*name=selectgroup1*type=select*required=true*displayname=select from options*value=Please select|selected,--------|disabled,select 1,select 2,select 3;\r\n#|question=|name=terms_and_conditions|type=textarea|required=false|displayname=|readonly=true|initialvalue=TERMS AND CONDITIONS.|cols=45|rows=5;\r\nquestion=*type=hidden*required=true*initialvalue=value;\r\nquestion=*name=Submit*type=button*displayname=submit',''),(110,'News','News','','News','',''),(101,'Event','Event','','Event','',''),(112,'ShortArticle','ShortArticle','','Short Article','',''),(100,'Article','Article','','Article','',''),(118,'ContentBox','ContentBox','','Content Box','',''),(111,'Other','Other','','Other','',''),(109,'Gallery','Carrousel','Y','Carrousel','',''),(115,'Testimonial','Testimonial','','Testimonial','',''),(114,'SubMenu','Horizontal','Y','SubMenu Horizontal','',''),(116,'FTP','FTP','','FTP','',''),(117,'Form','Register','Y','Form Register','#|question=|name=full_name|type=textfield|required=true|displayname=Full Name:|initialvalue=;\r\n#|question=|name=skype_account|type=textfield|required=true|displayname=Skype Account:|initialvalue=;\r\n#|question=Please Select an option:|name=skype_time|type=radio|required=true|displayname=Select number of appoinments:|value=1 Appoinment $50.00^$50,4 Appointments during 2 Months $150.00^$150;\r\n#|question=|name=telephone|type=textfield|required=true|displayname=Telephone:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=E-Mail:|initialvalue=;\r\n#|question=|name=message|type=textarea|required=false|displayname=Message (optional):|readonly=false|initialvalue=|cols=41|rows=7;\r\n#|question=|name=Submit|type=button|displayname=Continue to Pay','<p><strong>Please wait..</strong></p>\r\n<form id=\"formbuy1\" action=\"https://www.paypal.com/cgi-bin/webscr\" accept-charset=\"UNKNOWN\" enctype=\"application/x-www-form-urlencoded\" method=\"post\">\r\n<input type=\"hidden\" name=\"no_shipping\" value=\"1\">\r\n<!--<input type=\"hidden\" name=\"cancel_return\" value=\"\">\r\n<input type=\"hidden\" name=\"return\" value=\"\">-->\r\n<!--<input type=\"hidden\" name=\"image_url\" value=\"\">-->\r\n<input type=\"hidden\" name=\"no_note\" value=\"1\">\r\n<input type=\"hidden\" name=\"currency_code\" value=\"USD\">\r\n<input type=\"hidden\" name=\"tax\" value=\"0\">\r\n<input type=\"hidden\" name=\"lc\" value=\"US\">\r\n<input type=\"hidden\" name=\"item_name\" value=\"$skype_time\">\r\n<input type=\"hidden\" name=\"first_name\" value=\"$full_name\">\r\n<input type=\"hidden\" name=\"contact_phone\" value=\"$telephone\">\r\n<input type=\"hidden\" name=\"email\" value=\"$email\">\r\n<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">\r\n<input type=\"hidden\" name=\"business\" value=\"\">\r\n<input name=\"amount\" type=\"hidden\" value=\"$skype_time\" />\r\n</form>\r\n			\r\n<script type=\"text/javascript\">\r\ndocument.getElementById(\"formbuy1\").submit();\r\n</script>');
+INSERT INTO `RED_Components` (`RecordID`, `UniqueName`, `Layout`, `CompGroup`, `ButtonTag`, `Template`, `ResponseTemplate`) VALUES (106,'Gallery','Gallery','Y','Gallery','',''),(107,'Gallery','Video','Y','Video','',''),(108,'Gallery','Banner','Y','Banner','',''),(102,'Form','Contact','Y','Form Contact','#|question=|name=name|type=textfield|required=true|displayname=Enter your Full Name:|initialvalue=;\r\n#|question=|name=title|type=textfield|required=false|displayname=Enter your Title:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=Enter your e-mail:|initialvalue=;\r\n#|question=|name=telephone|type=textfield|required=true|displayname=Enter your Telephone:|initialvalue=;\r\n#|question=|name=fax|type=textfield|required=false|displayname=Enter your Fax:|initialvalue=;\r\n#|question=|name=message|type=textarea|required=false|displayname=Enter your Message:|readonly=false|initialvalue=|cols=45|rows=5;\r\n#|question=|name=Submit|type=button|displayname=submit',''),(103,'Form','Login','Y','Form Login','#|question=|name=username|type=textfield|required=true|displayname=Enter your Username:|initialvalue=;\r\n#|question=|name=password|type=password|required=true|displayname=Enter your Password:|initialvalue=;\r\n#|question=|name=Submit|type=button|displayname=submit',''),(113,'SubMenu','Vertical','Y','SubMenu Vertical','',''),(104,'Form','Response','Y','Form Response','#|question=Register|name=full_name|type=textfield|required=true|displayname=Enter your Full Name:|initialvalue=;\r\n#|question=|name=age|type=textfield|required=true|displayname=Age:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=Enter your e-mail:|initialvalue=;\r\n#|question=Emergency Contact Info|name=emergency_contact_name|type=textfield|required=true|displayname=Enter your Emergency Contact Info:|initialvalue=;\r\n#|question=|name=home_phone|type=textfield|required=true|displayname=Enter Emergency Home Phone:|initialvalue=;\r\n#|question=|name=cell_phone|type=textfield|required=true|displayname=Enter Emergency Cell Phone:|initialvalue=;\r\n#|question=Please Select:|name=walker_runner|type=radio|required=true|displayname=select radio|value=Walking,Running;\r\n#|question=|name=t_shirt_size|type=select|required=true|displayname=T Shirt Size|value=Please select^selected,--------^disabled,XS-Youth,S-Youth,M-Youth,L-Youth,S-Adult,M-Adult,L-Adult,XL-Adult,XXL-Adult,XXXL-Adult;\r\n#|type=paragraph|paragraph=t-shirt size not guarantee after Oct. 5, 2012<br/>$10 per person. <br/>$15 registration day of the event;\r\n#|question=|name=terms_and_conditions|type=textarea|required=false|displayname=|readonly=true|initialvalue=TERMS AND CONDITIONS\r\n\r\nBy indicating your acceptance, you understand and agree with the following:\r\n\r\nI know that running and walking in a road race is a potentially hazardous activity, and I attest that I am medically able and properly trained to participate in this event.\r\n\r\nI agree to abide by any decision of a race official relative to my conduct during the race.\r\n\r\nIf I should suffer injury or illness, I authorize the officials of the race to use their discretion to have me transported to a medical facility, and I take full responsibility for this action.\r\n\r\nI know that even if protection is provided, there is likely to be traffic on or near the course.\r\n\r\nI assume all risks associated with my voluntary participation in this event, including but not limited to falls, contact with other participants, the effects of any type of weather, traffic, and the conditions on the road, with all such risks being known and appreciated by me.\r\n\r\nKnowing these facts, and in consideration of my accepted entry, I for myself, my heirs, executors, administrators or anyone else who might claim on my behalf, covenant not to sue and WAIVE, RELEASE and DISCHARGE: Touching Heart, the officers, agents, volunteers, representatives, successors, and assigns of each, as well as all sponsoring organizations and their representatives, from ANY AND ALL claims or liabilities, whether foreseen or unforeseen, for death, personal injury, theft or property damage arising out of, or in the course of, my participation in this event.\r\n\r\nI further grant full permission to the event coordinators and volunteers and/or agents authorized by them, to use any photographs, videotapes, motion pictures, recordings, or other record of the event for any reasonable purpose.\r\n\r\nI understand that my entry is non-refundable.|cols=45|rows=5;\r\n#|question=|name=I_Agree|type=checkbox|required=true|displayname=I Agree to the Terms and Conditions|checked=false|value=Yes;\r\nquestion=*type=hidden*required=true*initialvalue=value;\r\n#|question=|name=Submit|type=button|displayname=submit','<p><strong>You have registered to Kids on the Run! Good Luck!</strong></p>\r\n<form id=\"formbuy1\" action=\"https://www.paypal.com/cgi-bin/webscr\" accept-charset=\"UNKNOWN\" enctype=\"application/x-www-form-urlencoded\" method=\"post\"><input type=\"hidden\" name=\"cmd\" value=\"_xclick\"><input type=\"hidden\" name=\"item_name\" value=\"tshirt\"><input type=\"hidden\" name=\"business\" value=\"helen.yi@touchingheart.com\"> <input type=\"image\" src=\"/en/images/paynow.gif\" border=\"0\" name=\"submit\" alt=\" Paypal Button!\"><img alt=\'\' border=\'0\' src=\'https://www.paypal.com/en_US/i/scr/pixel.gif\' width=\'1\' height=\'1\'><input name=\"on0\" type=\"hidden\" value=\"Sizes\" /><input type=\"hidden\" name=\"os0\" value=\"$t_shirt_size\"><input name=\"item_number\" type=\"hidden\" value=\"$full_name\" /><input type=\"hidden\" name=\"amount\" value=\"12.00\"></form><img src=\"/en/images/logo_ccVisa.gif\" border=\"0\" alt=\"Visa\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_ccMC.gif\" border=\"0\" alt=\"MasterCard\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_ccAmex.gif\" border=\"0\" alt=\"Amex\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_ccDiscover.gif\" border=\"0\" alt=\"Discover\" width=\"37\" height=\"21\" /><img src=\"/en/images/logo_paypal.gif\" alt=\"Paypal\" width=\"33\" height=\"21\" />'),(105,'Form','Other','Y','Form Other','question=*name=name*type=textfield*required=true*displayname=Enter your Name:*initialvalue=;\r\nquestion=*name=title*type=textfield*required=false*displayname=Enter your Title:*initialvalue=;\r\nquestion=*name=email*type=textfield*required=true*displayname=Enter your e-mail:*initialvalue=;\r\nquestion=*name=telephone*type=textfield*required=true*displayname=Enter your Telephone:*initialvalue=;\r\nquestion=*name=fax*type=textfield*required=false*displayname=Enter your Fax:*initialvalue=;\r\nquestion=*name=message*type=textarea*required=false*displayname=Enter your Message:*initialvalue=*cols=45*rows=5;\r\nquestion=*name=Subscribe*type=checkbox*required=false*displayname=subscribe to newsletter*checked=false;\r\nquestion=*name=radiogroup1*type=radio*required=false*displayname=select radio*value=radio 1,radio 2,radio 3;\r\nquestion=*name=selectgroup1*type=select*required=true*displayname=select from options*value=Please select|selected,--------|disabled,select 1,select 2,select 3;\r\n#|question=|name=terms_and_conditions|type=textarea|required=false|displayname=|readonly=true|initialvalue=TERMS AND CONDITIONS.|cols=45|rows=5;\r\nquestion=*type=hidden*required=true*initialvalue=value;\r\nquestion=*name=Submit*type=button*displayname=submit',''),(110,'News','News','','News','',''),(101,'Event','Event','','Event','',''),(112,'ShortArticle','ShortArticle','','Short Article','',''),(100,'Article','Article','','Article','',''),(118,'ContentBox','ContentBox','','Content Box','',''),(111,'Other','Other','','Other','',''),(115,'Testimonial','Testimonial','','Testimonial','',''),(114,'SubMenu','Horizontal','Y','SubMenu Horizontal','',''),(116,'FTP','FTP','','FTP','',''),(117,'Form','Register','Y','Form Register','#|question=|name=full_name|type=textfield|required=true|displayname=Full Name:|initialvalue=;\r\n#|question=|name=skype_account|type=textfield|required=true|displayname=Skype Account:|initialvalue=;\r\n#|question=Please Select an option:|name=skype_time|type=radio|required=true|displayname=Select number of appoinments:|value=1 Appoinment $50.00^$50,4 Appointments during 2 Months $150.00^$150;\r\n#|question=|name=telephone|type=textfield|required=true|displayname=Telephone:|initialvalue=;\r\n#|question=|name=email|type=textfield|required=true|displayname=E-Mail:|initialvalue=;\r\n#|question=|name=message|type=textarea|required=false|displayname=Message (optional):|readonly=false|initialvalue=|cols=41|rows=7;\r\n#|question=|name=Submit|type=button|displayname=Continue to Pay','<p><strong>Please wait..</strong></p>\r\n<form id=\"formbuy1\" action=\"https://www.paypal.com/cgi-bin/webscr\" accept-charset=\"UNKNOWN\" enctype=\"application/x-www-form-urlencoded\" method=\"post\">\r\n<input type=\"hidden\" name=\"no_shipping\" value=\"1\">\r\n<!--<input type=\"hidden\" name=\"cancel_return\" value=\"\">\r\n<input type=\"hidden\" name=\"return\" value=\"\">-->\r\n<!--<input type=\"hidden\" name=\"image_url\" value=\"\">-->\r\n<input type=\"hidden\" name=\"no_note\" value=\"1\">\r\n<input type=\"hidden\" name=\"currency_code\" value=\"USD\">\r\n<input type=\"hidden\" name=\"tax\" value=\"0\">\r\n<input type=\"hidden\" name=\"lc\" value=\"US\">\r\n<input type=\"hidden\" name=\"item_name\" value=\"$skype_time\">\r\n<input type=\"hidden\" name=\"first_name\" value=\"$full_name\">\r\n<input type=\"hidden\" name=\"contact_phone\" value=\"$telephone\">\r\n<input type=\"hidden\" name=\"email\" value=\"$email\">\r\n<input type=\"hidden\" name=\"cmd\" value=\"_xclick\">\r\n<input type=\"hidden\" name=\"business\" value=\"\">\r\n<input name=\"amount\" type=\"hidden\" value=\"$skype_time\" />\r\n</form>\r\n			\r\n<script type=\"text/javascript\">\r\ndocument.getElementById(\"formbuy1\").submit();\r\n</script>');
 /*!40000 ALTER TABLE `RED_Components` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- The clean installer excludes unused/non-working component choices.
+DELETE FROM `RED_Components`
+WHERE (`RecordID` = 101 AND `UniqueName` = 'Event')
+   OR (`RecordID` = 110 AND `UniqueName` = 'News')
+   OR (`RecordID` = 112 AND `UniqueName` = 'ShortArticle')
+   OR (`RecordID` = 113 AND `UniqueName` = 'SubMenu' AND `Layout` = 'Vertical')
+   OR (`RecordID` = 114 AND `UniqueName` = 'SubMenu' AND `Layout` = 'Horizontal')
+   OR (`RecordID` = 115 AND `UniqueName` = 'Testimonial')
+   OR (`RecordID` = 118 AND `UniqueName` = 'ContentBox');
 
 --
 -- Table structure for table `RED_C_Form`
@@ -220,21 +455,22 @@ DROP TABLE IF EXISTS `RED_C_Form`;
 CREATE TABLE `RED_C_Form` (
   `RecordID` int unsigned NOT NULL,
   `RefID` varchar(10) NOT NULL,
-  `Title` text NOT NULL,
-  `Alias` text NOT NULL,
+  `Title` mediumtext NOT NULL,
+  `Alias` mediumtext NOT NULL,
   `FormType` varchar(20) NOT NULL COMMENT 'contact,login',
-  `ShortDesc` text NOT NULL,
-  `LongDesc` text NOT NULL,
+  `ShortDesc` mediumtext NOT NULL,
+  `LongDesc` mediumtext NOT NULL,
   `Subject` varchar(100) NOT NULL,
-  `Submitter` tinytext NOT NULL,
-  `Destinatary` tinytext NOT NULL,
-  `CC` tinytext NOT NULL,
-  `BCC` tinytext NOT NULL,
-  `Response` text NOT NULL,
+  `Submitter` text NOT NULL,
+  `Destinatary` text NOT NULL,
+  `CC` text NOT NULL,
+  `BCC` text NOT NULL,
+  `Response` mediumtext NOT NULL,
   `TableName` varchar(64) NOT NULL,
   `Updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_c_form_refid` (`RefID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -257,16 +493,17 @@ DROP TABLE IF EXISTS `RED_C_Gallery`;
 CREATE TABLE `RED_C_Gallery` (
   `RecordID` int unsigned NOT NULL,
   `RefID` varchar(10) NOT NULL,
-  `Title` text NOT NULL,
-  `Alias` text NOT NULL,
+  `Title` mediumtext NOT NULL,
+  `Alias` mediumtext NOT NULL,
   `GalleryType` varchar(20) NOT NULL COMMENT 'Gallery, Video, Banner',
-  `ShortDesc` text NOT NULL,
-  `Link` text NOT NULL,
-  `LongDesc` text NOT NULL,
+  `ShortDesc` mediumtext NOT NULL,
+  `Link` mediumtext NOT NULL,
+  `LongDesc` mediumtext NOT NULL,
   `NewWindow` char(1) NOT NULL,
   `Updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_c_gallery_refid` (`RefID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -289,16 +526,16 @@ DROP TABLE IF EXISTS `RED_C_Menu`;
 CREATE TABLE `RED_C_Menu` (
   `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
   `RefID` int unsigned NOT NULL,
-  `RootOrder` varchar(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Title` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `MenuType` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Label` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `RootOrder` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Title` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `MenuType` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Label` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `Parent` int NOT NULL,
-  `Link` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `NewWindow` char(6) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `Link` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NewWindow` char(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `MenuOrder` int NOT NULL,
   PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -319,9 +556,9 @@ DROP TABLE IF EXISTS `RED_Features`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Features` (
   `RecordID` int NOT NULL AUTO_INCREMENT,
-  `UniqueName` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `UniqueName` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`RecordID`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -342,25 +579,26 @@ DROP TABLE IF EXISTS `RED_Layouts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Layouts` (
-  `UniqueName` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `UniqueName` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `Positions` int NOT NULL COMMENT 'number of positions in the layout',
-  `w_Pos1` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `vw_Pos1` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video width',
-  `vh_Pos1` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video height',
-  `w_Pos2` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `vw_Pos2` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video width',
-  `vh_Pos2` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video height',
-  `w_Pos3` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `vw_Pos3` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video width',
-  `vh_Pos3` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video height',
-  `w_Pos4` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `vw_Pos4` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video width',
-  `vh_Pos4` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'video height',
-  `w_div_Pos1` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `w_div_Pos2` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `w_div_Pos3` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `w_div_Pos4` varchar(4) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  `w_Pos1` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vw_Pos1` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video width',
+  `vh_Pos1` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video height',
+  `w_Pos2` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vw_Pos2` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video width',
+  `vh_Pos2` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video height',
+  `w_Pos3` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vw_Pos3` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video width',
+  `vh_Pos3` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video height',
+  `w_Pos4` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vw_Pos4` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video width',
+  `vh_Pos4` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'video height',
+  `w_div_Pos1` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `w_div_Pos2` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `w_div_Pos3` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `w_div_Pos4` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`UniqueName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -382,17 +620,18 @@ DROP TABLE IF EXISTS `RED_Menu`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Menu` (
   `RecordID` int NOT NULL AUTO_INCREMENT,
-  `RootOrder` varchar(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Title` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Label` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `RootOrder` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Label` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `Parent` int NOT NULL,
-  `Link` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `NewWindow` char(6) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `Link` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `NewWindow` char(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `MenuOrder` int NOT NULL,
-  `Active` varchar(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Language` char(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci ROW_FORMAT=DYNAMIC;
+  `Active` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Language` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_menu_public_order` (`Language`,`Active`,`MenuOrder`)
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -414,19 +653,20 @@ DROP TABLE IF EXISTS `RED_Sections`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Sections` (
   `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
-  `Sections` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Title` varchar(120) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Layout` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `QueryLimit` varchar(3) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `AccessLevel` char(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'Public',
-  `Features` varchar(150) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'slider, wrapperblock, kwicks',
-  `Active` varchar(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'N',
-  `Description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Tags` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Language` char(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `Sections` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Title` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Layout` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `QueryLimit` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `AccessLevel` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Public',
+  `Features` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'slider, wrapperblock, kwicks',
+  `Active` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N',
+  `Description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Tags` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Language` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `CreationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_sections_public_alias` (`Language`,`Active`,`Sections`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -440,6 +680,31 @@ INSERT INTO `RED_Sections` (`RecordID`, `Sections`, `Title`, `Layout`, `QueryLim
 UNLOCK TABLES;
 
 --
+-- Table structure for table `RED_Schema_Migrations`
+--
+
+DROP TABLE IF EXISTS `RED_Schema_Migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Schema_Migrations` (
+  `Migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Checksum` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `AppliedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ExecutionMs` int unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`Migration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `RED_Schema_Migrations`
+--
+
+LOCK TABLES `RED_Schema_Migrations` WRITE;
+/*!40000 ALTER TABLE `RED_Schema_Migrations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `RED_Schema_Migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `RED_SubCategories`
 --
 
@@ -448,20 +713,33 @@ DROP TABLE IF EXISTS `RED_SubCategories`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_SubCategories` (
   `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
-  `SubCategories` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Title` varchar(120) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Layout` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `QueryLimit` varchar(3) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `AccessLevel` char(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'Public',
-  `Features` varchar(150) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'slider, wrapperblock, kwicks',
-  `Active` varchar(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT 'N',
-  `Description` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Tags` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Language` char(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `CategoryRecordID` int unsigned DEFAULT NULL COMMENT 'Parent RED_Categories.RecordID',
+  `SubCategories` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Title` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Layout` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `QueryLimit` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `AccessLevel` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Public',
+  `Features` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'slider, wrapperblock, kwicks',
+  `Active` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N',
+  `Description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Tags` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Language` char(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `CreationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`RecordID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_subcategories_public_alias` (`Language`,`Active`,`SubCategories`),
+  KEY `idx_red_subcategories_parent` (`CategoryRecordID`,`Language`,`Active`,`SubCategories`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+ALTER TABLE `RED_Categories`
+  ADD CONSTRAINT `fk_red_categories_section`
+  FOREIGN KEY (`SectionRecordID`) REFERENCES `RED_Sections` (`RecordID`)
+  ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `RED_SubCategories`
+  ADD CONSTRAINT `fk_red_subcategories_category`
+  FOREIGN KEY (`CategoryRecordID`) REFERENCES `RED_Categories` (`RecordID`)
+  ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Dumping data for table `RED_SubCategories`
@@ -481,13 +759,13 @@ DROP TABLE IF EXISTS `RED_Tools`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `RED_Tools` (
   `RecordID` int NOT NULL AUTO_INCREMENT,
-  `UniqueName` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `CompGroup` char(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL COMMENT 'Content, Areas',
-  `ButtonTag` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `AltContent` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-  `Template` text CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
+  `UniqueName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `CompGroup` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Content, Areas',
+  `ButtonTag` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `AltContent` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Template` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`RecordID`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

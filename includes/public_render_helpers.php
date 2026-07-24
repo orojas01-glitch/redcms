@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/custom_layout_helpers.php';
+
 if (!function_exists('red_public_language')) {
     function red_public_language($default = 'sp')
     {
@@ -130,14 +132,48 @@ if (!function_exists('red_public_language')) {
             return null;
         }
 
-        $sql = 'SELECT ' . $columnSql . ' FROM `' . $config['table'] . '` ' .
-            'WHERE Active=\'Y\' AND Language=? AND `' . $config['column'] . '`=? LIMIT 1';
+        $language = red_public_language();
+        $types = 'ss';
+        $values = [$language, $value];
+
+        if ($table === 'Categories') {
+            $qualifiedColumns = preg_replace('/`([^`]+)`/', 'area_row.`$1`', $columnSql);
+            $sql = 'SELECT ' . $qualifiedColumns . ' FROM RED_Categories AS area_row ' .
+                'LEFT JOIN RED_Sections AS parent_section ' .
+                'ON parent_section.RecordID=area_row.SectionRecordID ' .
+                'AND parent_section.Language=area_row.Language ' .
+                'WHERE area_row.Active=\'Y\' AND area_row.Language=? AND area_row.Categories=? ' .
+                'AND (area_row.SectionRecordID IS NULL OR (' .
+                'parent_section.Active=\'Y\' AND parent_section.Sections=?)) LIMIT 1';
+            $types .= 's';
+            $values[] = red_public_route_value('section');
+        } elseif ($table === 'SubCategories') {
+            $qualifiedColumns = preg_replace('/`([^`]+)`/', 'area_row.`$1`', $columnSql);
+            $sql = 'SELECT ' . $qualifiedColumns . ' FROM RED_SubCategories AS area_row ' .
+                'LEFT JOIN RED_Categories AS parent_category ' .
+                'ON parent_category.RecordID=area_row.CategoryRecordID ' .
+                'AND parent_category.Language=area_row.Language ' .
+                'LEFT JOIN RED_Sections AS parent_section ' .
+                'ON parent_section.RecordID=parent_category.SectionRecordID ' .
+                'AND parent_section.Language=parent_category.Language ' .
+                'WHERE area_row.Active=\'Y\' AND area_row.Language=? AND area_row.SubCategories=? ' .
+                'AND (area_row.CategoryRecordID IS NULL OR (' .
+                'parent_category.Active=\'Y\' AND parent_category.Categories=? ' .
+                'AND (parent_category.SectionRecordID IS NULL OR (' .
+                'parent_section.Active=\'Y\' AND parent_section.Sections=?)))) LIMIT 1';
+            $types .= 'ss';
+            $values[] = red_public_route_value('category');
+            $values[] = red_public_route_value('section');
+        } else {
+            $sql = 'SELECT ' . $columnSql . ' FROM `' . $config['table'] . '` ' .
+                'WHERE Active=\'Y\' AND Language=? AND `' . $config['column'] . '`=? LIMIT 1';
+        }
 
         return red_public_fetch_one(
             $connection,
             $sql,
-            'ss',
-            [red_public_language(), $value],
+            $types,
+            $values,
             'Public area row lookup failed'
         );
     }
@@ -151,37 +187,64 @@ if (!function_exists('red_public_language')) {
         }
 
         $countPage = (int) red_public_route_value('countpage', 0);
-        $where = ['Active=\'Y\'', 'Language=?'];
+        $qualifiedColumns = preg_replace('/`([^`]+)`/', 'article_row.`$1`', $columnSql);
+        $from = 'RED_Articles AS article_row';
+        $joins = '';
+        $where = ['article_row.Active=\'Y\'', 'article_row.Language=?'];
         $types = 's';
         $values = [red_public_language()];
 
         if ($countPage === 2) {
-            $where[] = 'Sections=?';
+            $where[] = 'article_row.Sections=?';
             $types .= 's';
             $values[] = 'Home';
         } elseif ($countPage >= 3) {
-            $where[] = 'Sections=?';
+            $where[] = 'article_row.Sections=?';
             $types .= 's';
             $values[] = red_public_route_value('section');
         }
 
         if ($countPage >= 4) {
-            $where[] = 'Categories=?';
+            $joins .= ' LEFT JOIN RED_Categories AS route_category ' .
+                'ON route_category.Categories=article_row.Categories ' .
+                'AND route_category.Language=article_row.Language ' .
+                'LEFT JOIN RED_Sections AS route_category_section ' .
+                'ON route_category_section.RecordID=route_category.SectionRecordID ' .
+                'AND route_category_section.Language=route_category.Language';
+            $where[] = 'article_row.Categories=?';
+            $where[] = '(route_category.RecordID IS NULL OR route_category.SectionRecordID IS NULL OR (' .
+                'route_category.Active=\'Y\' AND route_category_section.Active=\'Y\' ' .
+                'AND route_category_section.Sections=article_row.Sections))';
             $types .= 's';
             $values[] = red_public_route_value('category');
         }
 
         if ($countPage >= 5) {
-            $where[] = 'SubCategories=?';
+            $joins .= ' LEFT JOIN RED_SubCategories AS route_subcategory ' .
+                'ON route_subcategory.SubCategories=article_row.SubCategories ' .
+                'AND route_subcategory.Language=article_row.Language ' .
+                'LEFT JOIN RED_Categories AS route_subcategory_parent ' .
+                'ON route_subcategory_parent.RecordID=route_subcategory.CategoryRecordID ' .
+                'AND route_subcategory_parent.Language=route_subcategory.Language ' .
+                'LEFT JOIN RED_Sections AS route_subcategory_section ' .
+                'ON route_subcategory_section.RecordID=route_subcategory_parent.SectionRecordID ' .
+                'AND route_subcategory_section.Language=route_subcategory_parent.Language';
+            $where[] = 'article_row.SubCategories=?';
+            $where[] = '(route_subcategory.RecordID IS NULL OR route_subcategory.CategoryRecordID IS NULL OR (' .
+                'route_subcategory.Active=\'Y\' AND route_subcategory_parent.Active=\'Y\' ' .
+                'AND route_subcategory_section.Active=\'Y\' ' .
+                'AND route_subcategory_parent.Categories=article_row.Categories ' .
+                'AND route_subcategory_section.Sections=article_row.Sections))';
             $types .= 's';
             $values[] = red_public_route_value('subcategory');
         }
 
-        $where[] = 'Alias=?';
+        $where[] = 'article_row.Alias=?';
         $types .= 's';
         $values[] = $article;
 
-        $sql = 'SELECT ' . $columnSql . ' FROM RED_Articles WHERE ' . implode(' AND ', $where) . ' LIMIT 1';
+        $sql = 'SELECT ' . $qualifiedColumns . ' FROM ' . $from . $joins .
+            ' WHERE ' . implode(' AND ', $where) . ' LIMIT 1';
 
         return red_public_fetch_one(
             $connection,
@@ -347,7 +410,7 @@ if (!function_exists('red_public_language')) {
 
         red_public_add_article_route_filter($where, $types, $values);
 
-        $sql = 'SELECT RecordID, Alias, Component, ExpDate, SmallPict, `' . $config['order'] . '` ' .
+        $sql = 'SELECT RecordID, Alias, Title, Component, ExpDate, SmallPict, `' . $config['order'] . '` ' .
             'FROM RED_Articles WHERE ' . implode(' AND ', $where) . ' ' .
             'ORDER BY `' . $config['order'] . '` ASC, StartDate DESC LIMIT ?';
         $types .= 'i';
@@ -553,6 +616,46 @@ if (!function_exists('red_public_language')) {
 
     function red_public_layout_dimensions($connection, $layout, $position)
     {
+        global $redThemeRuntime;
+
+        $standardLayout = null;
+        $customLayout = red_custom_layout_published_definition($connection, (string) $layout);
+        if ($customLayout !== null) {
+            $span = 12;
+            foreach (($customLayout['grid']['rows'] ?? []) as $row) {
+                foreach (($row['columns'] ?? []) as $column) {
+                    if ((int) ($column['position'] ?? 0) === (int) $position) {
+                        $span = max(1, min(12, (int) ($column['span'] ?? 12)));
+                        break 2;
+                    }
+                }
+            }
+            $width = max(1, (int) round(1200 * ($span / 12)));
+
+            return [
+                'Width' => $width,
+                'WidthDivisor' => 1,
+                'Height' => 0,
+                'vWidth' => $width,
+                'vHeight' => max(1, (int) round($width * (9 / 16))),
+            ];
+        }
+
+        if (is_array($redThemeRuntime ?? null)
+            && ($redThemeRuntime['themeType'] ?? '') === 'standard'
+            && is_array($redThemeRuntime['manifest'] ?? null)
+            && function_exists('red_theme_layout_definition')
+        ) {
+            try {
+                $standardLayout = red_theme_layout_definition(
+                    $redThemeRuntime['manifest'],
+                    (string) $layout
+                );
+            } catch (Throwable $exception) {
+                $standardLayout = null;
+            }
+        }
+
         $row = red_public_fetch_one(
             $connection,
             'SELECT w_Pos1, w_div_Pos1, vw_Pos1, vh_Pos1, ' .
@@ -566,6 +669,15 @@ if (!function_exists('red_public_language')) {
         );
 
         $slot = in_array((string) $position, ['2', '3', '4'], true) ? (string) $position : '1';
+        if ($standardLayout !== null && (!$row || (int) $position > 4)) {
+            return [
+                'Width' => 1200,
+                'WidthDivisor' => 1,
+                'Height' => 0,
+                'vWidth' => 1200,
+                'vHeight' => 675,
+            ];
+        }
         if (!$row) {
             return [
                 'Width' => 0,

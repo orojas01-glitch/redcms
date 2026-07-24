@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "migrationId": "adriana-granobles-v4-pagewise",
+  "page": {
+    "path": "/programa-cuda.html",
+    "alias": "programa-cuda",
+    "layout": "campaign-story",
+    "ownerRecordId": 3400000022,
+    "bodySha256": "a7a5c49b004c910dc9d8d98bda7736e1053f6563b04540645ab9c6882c8ae417"
+  },
+  "componentModel": {
+    "routeOwner": "Article",
+    "routeOwnerPosition": 0,
+    "visibleComponent": "Other",
+    "editableHtmlField": "ShortDesc",
+    "visibleEditor": "plain-html"
+  },
+  "positions": [
+    { "id": 1, "label": "Campaign introduction", "sectionCount": 2 },
+    { "id": 2, "label": "Story and benefits", "sectionCount": 2 },
+    { "id": 3, "label": "Media and social proof", "sectionCount": 2 },
+    { "id": 4, "label": "Journey and resources", "sectionCount": 3 },
+    { "id": 5, "label": "Closing call to action", "sectionCount": 2 }
+  ],
+  "sections": [
+    {
+      "section": 1,
+      "recordId": 3500002201,
+      "position": 1,
+      "positionOrder": 1,
+      "title": "Tu voz puede transformar el mundo",
+      "bytes": 1600,
+      "sha256": "57e0555a83a4dfcd9025f78ea2d012405117819bf0d64fa09ab2a4f85fc3a39d"
+    },
+    {
+      "section": 2,
+      "recordId": 3500002202,
+      "position": 1,
+      "positionOrder": 2,
+      "title": "Cuando la música llama, una guía clara hace toda la diferencia.",
+      "bytes": 1172,
+      "sha256": "2d1b2791ed8911e52020e625cd5461ababa06528ea5c8df45fce76b878b1a2c1"
+    },
+    {
+      "section": 3,
+      "recordId": 3500002203,
+      "position": 2,
+      "positionOrder": 1,
+      "title": "Música original creada para cantar con conciencia.",
+      "bytes": 1401,
+      "sha256": "12d4bdae6986ba30c781bd039d739034d54baae0f060a0cf60661dd7ac73a90e"
+    },
+    {
+      "section": 4,
+      "recordId": 3500002204,
+      "position": 2,
+      "positionOrder": 2,
+      "title": "Más que clases de canto: una experiencia de voz, obra y comunidad.",
+      "bytes": 2037,
+      "sha256": "22a548001d0238e2c92417ba1527447cc442f5edfdeaaf06b6d552ddd32603a4"
+    },
+    {
+      "section": 5,
+      "recordId": 3500002205,
+      "position": 3,
+      "positionOrder": 1,
+      "title": "Historias reales de cantantes CUDA.",
+      "bytes": 5372,
+      "sha256": "24146e715fa042af9b1f2e263ea87fb2917a3016c694166fdb85e86330eb4370"
+    },
+    {
+      "section": 6,
+      "recordId": 3500002206,
+      "position": 3,
+      "positionOrder": 2,
+      "title": "CUDA también vive en plataformas digitales y medios.",
+      "bytes": 3107,
+      "sha256": "d7dc3a4479c7243f1581802659c6cd195ef1885fc3481afa8e9a999612bcdd20"
+    },
+    {
+      "section": 7,
+      "recordId": 3500002207,
+      "position": 4,
+      "positionOrder": 1,
+      "title": "Un programa de cuatro meses con estructura y producción final.",
+      "bytes": 1888,
+      "sha256": "9610d2048810e20b2bba81aaf2b9dbb0057ae7c2d0b533492588d405430b94e7"
+    },
+    {
+      "section": 8,
+      "recordId": 3500002208,
+      "position": 4,
+      "positionOrder": 2,
+      "title": "Si respondes sí, CUDA puede ser tu siguiente paso.",
+      "bytes": 1377,
+      "sha256": "3c04f078b9b978fd9d3cadd8d85742af27d0177b2d60f7302cbec5e2418a991a"
+    },
+    {
+      "section": 9,
+      "recordId": 3500002209,
+      "position": 4,
+      "positionOrder": 3,
+      "title": "Agenda 30 minutos para conocer CUDA por dentro.",
+      "bytes": 1611,
+      "sha256": "876d34906587e97a1865b628cf803ed9099058e5c25c299b3948d4e702b2727b"
+    },
+    {
+      "section": 10,
+      "recordId": 3500002210,
+      "position": 5,
+      "positionOrder": 1,
+      "title": "Hay una voz esperando ser escuchada: la tuya.",
+      "bytes": 1107,
+      "sha256": "00429f0e807e5e53e0057bc3b856e3161ddab329a8a2e3c78cb3738987d252ab"
+    },
+    {
+      "section": 11,
+      "recordId": 3500002211,
+      "position": 5,
+      "positionOrder": 2,
+      "title": "Una experiencia artística para bienestar, cohesión y RSE.",
+      "bytes": 1623,
+      "sha256": "0659a1ab9d39b5dc2ae5f7c5f9f9f14f1f1cbfef8266b583da09bb19e868c7ea"
+    }
+  ]
+}

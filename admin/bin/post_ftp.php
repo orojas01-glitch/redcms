@@ -15,15 +15,17 @@ require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
 red_require_admin(true);
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
+require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/upload_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 
 function red_post_ftp_clean($value)
 {
     return preg_replace("'<[^>]+>'U", '', (string) $value);
 }
 
-$allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'doc', 'docx', 'pdf', 'xls', 'xlsx', 'pptx', 'ppt', 'pps', 'txt', 'zip'];
-$maxBytes = 10 * 1024 * 1024;
+$allowedExtensions = red_upload_ftp_allowed_extensions();
+$maxBytes = red_upload_ftp_max_bytes();
 $uploadCase = red_post_ftp_clean($_GET['UC'] ?? '');
 
 if (strtolower($_SERVER['REQUEST_METHOD']) !== 'post') {
@@ -33,6 +35,10 @@ if (strtolower($_SERVER['REQUEST_METHOD']) !== 'post') {
 if ($uploadCase !== 'FTP') {
     red_upload_status('Invalid upload target.', 400);
 }
+
+$db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+red_admin_require_component_selection($db->connection, 'FTP');
+$db->close();
 
 if (!array_key_exists('pic', $_FILES)) {
     red_upload_status('No file was uploaded.', 400);

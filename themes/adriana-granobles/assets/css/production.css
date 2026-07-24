@@ -1,0 +1,301 @@
+/* RED-CMS production bridge for the Adriana Granobles visual system. */
+.red-standard-theme--adriana-granobles .adriana-site {
+  min-height: 100vh;
+  overflow: clip;
+}
+
+.red-standard-theme--adriana-granobles.red-standard-theme--with-admin .adriana-site {
+  position: relative;
+}
+
+.red-standard-theme--adriana-granobles.red-standard-theme--with-admin .site-header,
+.red-standard-theme--adriana-granobles.red-standard-theme--with-admin .site-nav {
+  position: absolute;
+}
+
+.red-standard-theme--adriana-granobles .adriana-site img,
+.red-standard-theme--adriana-granobles .adriana-site iframe,
+.red-standard-theme--adriana-granobles .adriana-site video {
+  max-width: 100%;
+}
+
+.red-standard-theme--adriana-granobles .site-header {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.red-standard-theme--adriana-granobles .brand img {
+  width: auto;
+  max-width: 132px;
+  height: auto;
+  max-height: 64px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.red-standard-theme--adriana-granobles .site-header__custom {
+  min-width: 0;
+  color: rgba(255, 255, 255, .82);
+  font-size: 12px;
+}
+
+.red-standard-theme--adriana-granobles .site-header__custom > :last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1101px) {
+  .red-standard-theme--adriana-granobles .site-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .red-standard-theme--adriana-granobles .site-nav {
+    position: fixed;
+    z-index: 55;
+    top: 20px;
+    left: 50%;
+    max-width: calc(100vw - 360px);
+    transform: translateX(-50%);
+    transition: top var(--motion-duration-base) var(--motion-ease-out);
+  }
+
+  .red-standard-theme--adriana-granobles .site-header.is-scrolled + .site-nav {
+    top: 12px;
+  }
+}
+
+.red-standard-theme--adriana-granobles .nav-dropdown__item {
+  display: grid;
+}
+
+.red-standard-theme--adriana-granobles .nav-dropdown__nested {
+  display: grid;
+  margin: 0 0 6px 12px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(201, 169, 95, .35);
+}
+
+.red-standard-theme--adriana-granobles .nav-dropdown__nested a {
+  min-height: 36px;
+  color: rgba(255, 255, 255, .72);
+  font-size: 12px;
+}
+
+.red-standard-theme--adriana-granobles .hero--cms {
+  min-height: clamp(580px, 66vh, 720px);
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__viewport,
+.red-standard-theme--adriana-granobles .hero-slide {
+  min-height: inherit;
+}
+
+.red-standard-theme--adriana-granobles .hero-slide {
+  position: relative;
+  display: grid;
+  min-height: inherit;
+  align-items: center;
+  overflow: hidden;
+}
+
+.red-standard-theme--adriana-granobles .hero-slide[hidden] {
+  display: none;
+}
+
+.red-standard-theme--adriana-granobles .hero-slide .hero__content {
+  padding-bottom: 72px;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__controls {
+  position: absolute;
+  z-index: 12;
+  right: clamp(20px, 4vw, 64px);
+  bottom: clamp(18px, 3vw, 38px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  color: #fff;
+  background: rgba(9, 8, 13, .76);
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+}
+
+[data-adriana-hero-slider]:not([data-slider-ready]) .hero-slider__controls {
+  display: none;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__control,
+.red-standard-theme--adriana-granobles .hero-slider__dot {
+  padding: 0;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__control {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__control:hover {
+  background: rgba(255, 255, 255, .12);
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__dots {
+  display: flex;
+  gap: 7px;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__dot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, .82);
+  border-radius: 50%;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__dot.is-active {
+  background: #fff;
+}
+
+.red-standard-theme--adriana-granobles .hero-slider__status {
+  min-width: 44px;
+  margin: 0;
+  color: rgba(255, 255, 255, .82);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.red-standard-theme--adriana-granobles .hero + .adriana-layout > .breadcrumb {
+  margin-top: 0;
+}
+
+.red-standard-theme--adriana-granobles .adriana-layout__slot > .redcms-live-component + .redcms-live-component {
+  margin-top: clamp(28px, 4vw, 56px);
+}
+
+.red-standard-theme--adriana-granobles .redcms-legacy-content::after {
+  display: block;
+  clear: both;
+  content: "";
+}
+
+.red-standard-theme--adriana-granobles .redcms-legacy-content table {
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.red-standard-theme--adriana-granobles .redcms-legacy-content img,
+.red-standard-theme--adriana-granobles .redcms-legacy-content iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.red-standard-theme--adriana-granobles .cp_admin.wrapper,
+.red-standard-theme--adriana-granobles .cp .wrapper {
+  width: auto;
+  margin-inline: 0;
+}
+
+.red-standard-theme--adriana-granobles .cp_admin {
+  color: #333;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.4;
+}
+
+.red-standard-theme--adriana-granobles .red-public-not-found {
+  display: grid;
+  width: var(--wrapper);
+  min-height: clamp(520px, 68vh, 720px);
+  margin-inline: auto;
+  padding-block: 140px 80px;
+  place-items: center;
+}
+
+.red-standard-theme--adriana-granobles .red-public-not-found__panel {
+  width: min(100%, 720px);
+  padding: clamp(32px, 7vw, 72px);
+  color: var(--color-text);
+  background: #fff;
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.red-standard-theme--adriana-granobles .red-public-not-found__code {
+  margin-bottom: 12px;
+  color: var(--color-gold-text);
+  font-family: var(--font-display);
+  font-size: clamp(72px, 15vw, 150px);
+  line-height: .8;
+}
+
+.red-standard-theme--adriana-granobles .red-public-not-found h1 {
+  color: var(--color-primary-dark);
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 400;
+}
+
+.red-standard-theme--adriana-granobles .red-public-not-found__message {
+  max-width: 560px;
+  margin: 0 auto 28px;
+  color: var(--color-muted);
+}
+
+.red-standard-theme--adriana-granobles .red-public-not-found__action {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  padding: 0 28px;
+  color: #fff;
+  background: var(--color-primary);
+  font-weight: 750;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+  .red-standard-theme--adriana-granobles .site-header {
+    grid-template-columns: auto auto;
+  }
+
+  .red-standard-theme--adriana-granobles .site-header__custom {
+    display: none;
+  }
+
+  .red-standard-theme--adriana-granobles .nav-dropdown__nested {
+    margin-left: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .red-standard-theme--adriana-granobles .hero--cms,
+  .red-standard-theme--adriana-granobles .hero-slide {
+    min-height: 680px;
+  }
+
+  .red-standard-theme--adriana-granobles .hero-slide .hero__content {
+    padding-bottom: 150px;
+  }
+
+  .red-standard-theme--adriana-granobles .hero-slider__controls {
+    right: 14px;
+    bottom: 18px;
+    left: 14px;
+    justify-content: center;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .red-standard-theme--adriana-granobles .hero-slide.is-active .hero__content {
+    animation: none;
+  }
+}

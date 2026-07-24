@@ -11,7 +11,7 @@
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true);
+red_require_admin_site_manager(true);
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
@@ -21,8 +21,10 @@ $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $title = red_admin_post_text('Sections');
 $sections = red_admin_slug($title);
 $layout = red_admin_post_text('Layout');
-$queryLimit = (string) max(0, (int) red_admin_post_text('QueryLimit', '100'));
-$accessLevel = red_admin_post_text('AccessLevel');
+// Section limits remain a compatibility safeguard, not an administrator-facing setting.
+$queryLimit = '100';
+// The legacy Private value is metadata only; do not store a false protection promise.
+$accessLevel = 'Public';
 $features = red_admin_feature_list($_POST['Features'] ?? []);
 $active = red_admin_active_value(red_admin_post_text('Active', 'Y'));
 $description = red_admin_post_text('Description');

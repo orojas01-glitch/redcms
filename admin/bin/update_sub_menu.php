@@ -1,7 +1,7 @@
 <?php
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true);
+red_require_admin_site_manager(true);
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
@@ -27,7 +27,7 @@ $post = $_POST;
 $title = red_admin_menu_value($_POST, 'Title');
 $menuType = red_admin_menu_value($_POST, 'MenuType');
 
-$success = red_admin_write_transaction($connection, function () use ($connection, $post, $artRecordId, $recordId, $title, $menuType) {
+$success = red_admin_theme_contract_write_transaction($connection, function () use ($connection, $post, $artRecordId, $recordId, $title, $menuType) {
 	if (!red_admin_component_menu_record_matches($connection, $recordId, $artRecordId)) {
 		return false;
 	}
@@ -142,7 +142,9 @@ $success = red_admin_write_transaction($connection, function () use ($connection
 		}
 
 		$data = red_admin_article_collect_values($post, 'update');
-		red_admin_article_apply_home_position($data, $articleRow);
+		if (!red_admin_article_apply_home_position($connection, $data, $articleRow)) {
+			return false;
+		}
 
 		if (array_key_exists('Article', $post)) {
 			$articleList = red_admin_menu_article_list($post['Article']);

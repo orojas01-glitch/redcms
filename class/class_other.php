@@ -147,7 +147,7 @@ class cp_other
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_other" value="Edit Other"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp red-admin-component-action red-admin-component-action--other" id="cp_other" value="Edit Other"/>';
 					echo '</form>';
 				}else{
 					//echo 'ADMINISTRATOR AUTHORIZED TO UPDATE';
@@ -193,7 +193,7 @@ class cp_other
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_other" value="Edit Other"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp red-admin-component-action red-admin-component-action--other" id="cp_other" value="Edit Other"/>';
 					echo '<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
 					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.red_public_html($VarPosition).'" />';
 					echo '<input type="hidden" name="Article" id="Article" value="'.red_public_html(red_public_route_value('article')).'" />';

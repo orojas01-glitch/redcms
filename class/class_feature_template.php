@@ -9,6 +9,7 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once __DIR__ . '/../includes/public_render_helpers.php';
+require_once __DIR__ . '/../includes/admin_authorization_helpers.php';
 
 #[\AllowDynamicProperties]
 class feature_template
@@ -133,6 +134,13 @@ class feature_template
 
 		list($enabled, $rows) = $this->load_template_rows();
 		if (!$enabled) {
+			return;
+		}
+
+		$db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		$rows = red_admin_filter_authorized_articles($db->connection, $rows);
+		$db->close();
+		if (empty($rows)) {
 			return;
 		}
 

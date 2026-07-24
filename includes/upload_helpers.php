@@ -13,6 +13,35 @@ if (!function_exists('red_upload_status')) {
     }
 }
 
+if (!function_exists('red_upload_ftp_allowed_extensions')) {
+    function red_upload_ftp_allowed_extensions()
+    {
+        return [
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+            'doc',
+            'docx',
+            'pdf',
+            'xls',
+            'xlsx',
+            'pptx',
+            'ppt',
+            'pps',
+            'txt',
+            'zip',
+        ];
+    }
+}
+
+if (!function_exists('red_upload_ftp_max_bytes')) {
+    function red_upload_ftp_max_bytes()
+    {
+        return 10 * 1024 * 1024;
+    }
+}
+
 if (!function_exists('red_upload_extension')) {
     function red_upload_extension($fileName)
     {
@@ -21,7 +50,7 @@ if (!function_exists('red_upload_extension')) {
 }
 
 if (!function_exists('red_upload_clean_filename')) {
-    function red_upload_clean_filename($fileName, $prefix = '')
+    function red_upload_clean_filename($fileName, $prefix = '', $maxLength = 200)
     {
         $extension = red_upload_extension($fileName);
         $baseName = pathinfo((string) $fileName, PATHINFO_FILENAME);
@@ -33,7 +62,17 @@ if (!function_exists('red_upload_clean_filename')) {
         }
 
         $prefix = preg_replace('/[^A-Za-z0-9._-]+/', '_', (string) $prefix);
-        return $prefix . $baseName . ($extension !== '' ? '.' . $extension : '');
+        $extensionSuffix = $extension !== '' ? '.' . $extension : '';
+        $maxLength = max(strlen($extensionSuffix) + 1, min(240, (int) $maxLength));
+        $baseBudget = $maxLength - strlen($extensionSuffix);
+        $storedBaseName = substr($prefix . $baseName, 0, $baseBudget);
+        $storedBaseName = rtrim($storedBaseName, '._-');
+
+        if ($storedBaseName === '') {
+            $storedBaseName = substr('upload', 0, $baseBudget);
+        }
+
+        return $storedBaseName . $extensionSuffix;
     }
 }
 
@@ -140,16 +179,27 @@ if (!function_exists('red_upload_resolve_directory')) {
 }
 
 if (!function_exists('red_upload_unique_path')) {
-    function red_upload_unique_path($directory, $fileName)
+    function red_upload_unique_path($directory, $fileName, $maxLength = 200)
     {
         $extension = red_upload_extension($fileName);
         $baseName = pathinfo($fileName, PATHINFO_FILENAME);
-        $candidate = $fileName;
-        $counter = 1;
+        $extensionSuffix = $extension !== '' ? '.' . $extension : '';
+        $maxLength = max(strlen($extensionSuffix) + 1, min(240, (int) $maxLength));
+        $counter = 0;
 
-        while (file_exists($directory . '/' . $candidate)) {
-            $candidate = $baseName . '-' . $counter . ($extension !== '' ? '.' . $extension : '');
+        do {
+            $counterSuffix = $counter > 0 ? '-' . $counter : '';
+            $baseBudget = $maxLength - strlen($extensionSuffix) - strlen($counterSuffix);
+            $candidateBase = rtrim(substr($baseName, 0, $baseBudget), '._-');
+            if ($candidateBase === '') {
+                $candidateBase = substr('upload', 0, $baseBudget);
+            }
+            $candidate = $candidateBase . $counterSuffix . $extensionSuffix;
             $counter++;
+        } while (file_exists($directory . '/' . $candidate));
+
+        if (strlen($candidate) > $maxLength) {
+            throw new RuntimeException('Stored upload name exceeds the configured limit.');
         }
 
         return [$directory . '/' . $candidate, $candidate];

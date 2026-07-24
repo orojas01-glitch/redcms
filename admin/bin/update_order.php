@@ -4,6 +4,8 @@ red_start_session();
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_content_revision_helpers.php';
 
 red_require_admin(true);
 
@@ -17,6 +19,7 @@ if (
 }
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+red_admin_require_article_ids_access($db->connection, $_POST['RecordID']);
 $success = red_admin_article_update_order_batch(
     $db->connection,
     $_POST['RecordID'],

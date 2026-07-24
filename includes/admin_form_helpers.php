@@ -4,6 +4,8 @@
  */
 
 require_once __DIR__ . '/admin_article_helpers.php';
+require_once __DIR__ . '/public_form_helpers.php';
+require_once __DIR__ . '/public_form_operation_helpers.php';
 
 if (!function_exists('red_admin_form_scalar')) {
     function red_admin_form_scalar($value)
@@ -186,12 +188,11 @@ if (!function_exists('red_admin_form_identifier')) {
 if (!function_exists('red_admin_form_registration_table_name')) {
     function red_admin_form_registration_table_name($value, $artRecordId)
     {
-        $value = red_admin_text(red_admin_form_scalar($value));
-        if ($value === '') {
-            $value = 'RED_Register_' . (int) $artRecordId;
-        }
-
-        return red_admin_form_identifier($value);
+        // Registration storage identifiers are server-owned. The legacy
+        // administrator field is intentionally ignored so a posted value can
+        // never target an existing CMS table.
+        unset($value);
+        return red_admin_form_identifier('RED_Register_' . (int) $artRecordId);
     }
 }
 
@@ -203,11 +204,19 @@ if (!function_exists('red_admin_form_uses_registration_table')) {
 }
 
 if (!function_exists('red_admin_form_apply_table_name')) {
-    function red_admin_form_apply_table_name($post, $artRecordId, &$data)
+    function red_admin_form_apply_table_name($post, $artRecordId, &$data, $mode = 'insert')
     {
         $formType = $data['FormType'] ?? red_admin_form_clean_type($post['FormType'] ?? '');
         if (red_admin_form_uses_registration_table($formType)) {
-            $tableName = red_admin_form_registration_table_name($post['TableName'] ?? '', $artRecordId);
+            // Existing Register records may rely on a historical custom table.
+            // Updates preserve that value byte-for-byte; only creation receives
+            // the deterministic, server-generated identifier.
+            if ($mode !== 'insert') {
+                unset($data['TableName']);
+                return true;
+            }
+
+            $tableName = red_admin_form_registration_table_name('', $artRecordId);
             if ($tableName === null) {
                 return false;
             }
@@ -216,19 +225,83 @@ if (!function_exists('red_admin_form_apply_table_name')) {
             return true;
         }
 
-        if (array_key_exists('TableName', $post)) {
-            $rawTableName = red_admin_text(red_admin_form_scalar($post['TableName']));
-            if ($rawTableName === '') {
-                $data['TableName'] = '';
+        // Non-registration forms never receive a storage table, regardless of
+        // any forged legacy TableName control in the request.
+        if ($mode === 'insert') {
+            $data['TableName'] = '';
+        } else {
+            unset($data['TableName']);
+        }
+
+        return true;
+    }
+}
+
+if (!function_exists('red_admin_form_definition_has_password')) {
+    function red_admin_form_definition_has_password($definition)
+    {
+        foreach (red_admin_form_parse_definition($definition) as $field) {
+            if (strcasecmp(red_admin_form_scalar($field['type'] ?? ''), 'password') === 0) {
                 return true;
             }
+        }
 
-            $tableName = red_admin_form_identifier($rawTableName);
-            if ($tableName === null) {
+        return false;
+    }
+}
+
+if (!function_exists('red_admin_form_schema_is_locked')) {
+    function red_admin_form_schema_is_locked($formType)
+    {
+        return in_array(red_admin_form_clean_type($formType), ['Login', 'Register'], true);
+    }
+}
+
+if (!function_exists('red_admin_form_data_is_safe')) {
+    /**
+     * Validate the effective stored Form payload before an administrator write.
+     *
+     * Public operational forms share the same definition compiler and mailbox
+     * rules as their submission endpoints. Login remains the only form type
+     * permitted to contain a password field.
+     */
+    function red_admin_form_data_is_safe($data)
+    {
+        if (!is_array($data)) {
+            return false;
+        }
+
+        $formType = red_admin_form_clean_type($data['FormType'] ?? '');
+        $definition = red_admin_form_scalar($data['LongDesc'] ?? '');
+        if ($formType === '' || ($formType !== 'Login' && red_admin_form_definition_has_password($definition))) {
+            return false;
+        }
+
+        if (in_array($formType, ['Contact', 'Response', 'Register'], true)) {
+            try {
+                red_public_contact_compile_fields($definition);
+            } catch (Throwable $exception) {
                 return false;
             }
 
-            $data['TableName'] = $tableName;
+            $subject = red_admin_form_scalar($data['Subject'] ?? '');
+            if (strlen($subject) > 255 || preg_match('/[\r\n\0]/', $subject)) {
+                return false;
+            }
+
+            $fromMailboxes = red_public_contact_mailboxes(red_admin_form_scalar($data['Submitter'] ?? ''));
+            $toMailboxes = red_public_contact_mailboxes(red_admin_form_scalar($data['Destinatary'] ?? ''));
+            $ccMailboxes = red_public_contact_mailboxes(red_admin_form_scalar($data['CC'] ?? ''));
+            $bccMailboxes = red_public_contact_mailboxes(red_admin_form_scalar($data['BCC'] ?? ''));
+            if (!is_array($fromMailboxes)
+                || count($fromMailboxes) !== 1
+                || !is_array($toMailboxes)
+                || count($toMailboxes) === 0
+                || !is_array($ccMailboxes)
+                || !is_array($bccMailboxes)
+            ) {
+                return false;
+            }
         }
 
         return true;
@@ -486,21 +559,20 @@ if (!function_exists('red_admin_form_parse_definition')) {
 if (!function_exists('red_admin_form_registration_columns_sql')) {
     function red_admin_form_registration_columns_sql($connection, $definition)
     {
-        $typeLengths = [
-            'textfield' => 100,
-            'textarea' => 250,
-            'checkbox' => 100,
-            'radio' => 100,
-            'select' => 100,
-            'hidden' => 100,
-            'password' => 100,
+        $typeSql = [
+            'textfield' => 'text',
+            'textarea' => 'mediumtext',
+            'checkbox' => 'text',
+            'radio' => 'text',
+            'select' => 'text',
+            'hidden' => 'text',
         ];
 
         $columns = [];
         $seen = [];
         foreach (red_admin_form_parse_definition($definition) as $field) {
-            $fieldType = red_admin_text($field['type'] ?? '');
-            if (!isset($typeLengths[$fieldType])) {
+            $fieldType = strtolower(trim(red_admin_text($field['type'] ?? '')));
+            if (!isset($typeSql[$fieldType])) {
                 continue;
             }
 
@@ -511,7 +583,7 @@ if (!function_exists('red_admin_form_registration_columns_sql')) {
 
             $seen[$fieldName] = true;
             $comment = mysqli_real_escape_string($connection, red_admin_form_scalar($field['displayname'] ?? ''));
-            $columns[] = "`$fieldName` varchar(" . $typeLengths[$fieldType] . ") NOT NULL COMMENT '" . $comment . "'";
+            $columns[] = "`$fieldName` " . $typeSql[$fieldType] . " NOT NULL COMMENT '" . $comment . "'";
         }
 
         return $columns;
@@ -533,9 +605,63 @@ if (!function_exists('red_admin_form_create_registration_table')) {
         );
 
         try {
-            return mysqli_query($connection, 'CREATE TABLE IF NOT EXISTS `' . $tableName . '` (' . implode(', ', $columns) . ')') !== false;
+            return mysqli_query(
+                $connection,
+                'CREATE TABLE `' . $tableName . '` (' . implode(', ', $columns) . ') '
+                . 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            ) !== false;
         } catch (mysqli_sql_exception $e) {
             error_log('Registration table create failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+}
+
+if (!function_exists('red_admin_form_registration_table_exists')) {
+    function red_admin_form_registration_table_exists($connection, $tableName)
+    {
+        $tableName = red_admin_form_identifier($tableName);
+        if ($tableName === null) {
+            return null;
+        }
+
+        try {
+            $stmt = mysqli_prepare(
+                $connection,
+                'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name=?'
+            );
+            if (!$stmt) {
+                return null;
+            }
+            mysqli_stmt_bind_param($stmt, 's', $tableName);
+            if (!mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                return null;
+            }
+            mysqli_stmt_bind_result($stmt, $count);
+            $fetched = mysqli_stmt_fetch($stmt);
+            mysqli_stmt_close($stmt);
+            return $fetched ? ((int) $count > 0) : null;
+        } catch (mysqli_sql_exception $exception) {
+            error_log('Registration table existence check failed: ' . $exception->getMessage());
+            return null;
+        }
+    }
+}
+
+if (!function_exists('red_admin_form_drop_registration_table')) {
+    /** Remove only a table created by the current failed insert request. */
+    function red_admin_form_drop_registration_table($connection, $tableName)
+    {
+        $tableName = red_admin_form_identifier($tableName);
+        if ($tableName === null || strpos($tableName, 'RED_Register_') !== 0) {
+            return false;
+        }
+
+        try {
+            return mysqli_query($connection, 'DROP TABLE `' . $tableName . '`') !== false;
+        } catch (mysqli_sql_exception $exception) {
+            error_log('Registration table rollback failed: ' . $exception->getMessage());
             return false;
         }
     }

@@ -1,107 +1,122 @@
 <?php
-require_once $_SERVER["DOCUMENT_ROOT"] . "/includes/bootstrap.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/bootstrap.php';
 red_start_session();
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_operation_helpers.php';
 
-if (empty($_SESSION['contact'])) {
+if (empty($_SESSION['contact']) || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     red_public_form_redirect_home();
 }
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-$recordId = red_public_form_record_id($_POST['RecordID'] ?? 0);
-$formRecord = red_public_form_fetch_record($db->connection, $recordId);
-if ($formRecord === null) {
+try {
+    $recordId = red_public_form_record_id($_POST['RecordID'] ?? 0);
+    $resolved = red_public_operational_form_fetch_record($db->connection, $recordId, 'Register');
+    if ($resolved === null) {
+        red_public_form_redirect_home();
+    }
+
+    $form = red_public_contact_form_config([
+        'recordId' => $resolved['recordId'],
+        'articleRecordId' => $resolved['articleRecordId'],
+        'articleComponent' => $resolved['articleComponent'],
+        'alias' => $resolved['alias'],
+        'formType' => $resolved['formType'],
+        'definition' => $resolved['definition'],
+        'subject' => $resolved['subject'],
+        'submitter' => $resolved['submitter'],
+        'destinatary' => $resolved['destinatary'],
+        'cc' => $resolved['cc'],
+        'bcc' => $resolved['bcc'],
+    ], 'Register');
+    $fields = red_public_contact_compile_fields($form['definition']);
+    $payload = red_public_form_operation_contact_payload($_POST);
+    $honeypot = $payload['MySpamTrap'] !== '';
+    $values = red_public_contact_validate_submission($form, $fields, $payload, !$honeypot);
+} catch (InvalidArgumentException $exception) {
+    $db->close();
     red_public_form_redirect_home();
 }
 
-$send = red_public_form_post_value($_POST, 'MySpamTrap') === '';
-$fromEmail = (string) $formRecord['Submitter'];
-$toEmail = (string) $formRecord['Destinatary'];
-$ccEmail = (string) $formRecord['CC'];
-$bccEmail = (string) $formRecord['BCC'];
-$subjectEmail = (string) $formRecord['Subject'];
-$response = (string) $formRecord['Response'];
-$fields = red_public_form_parse_definition($formRecord['LongDesc']);
+$managedTableName = (string) $resolved['tableName'];
+$expectedTableName = 'RED_Register_' . $form['articleRecordId'];
+if (!hash_equals($expectedTableName, $managedTableName)) {
+    $db->close();
+    red_public_form_redirect_home();
+}
 
-$emailhtml = '<HTML><HEAD><TITLE>' . red_public_form_html(BASE_URL) . '</TITLE></HEAD>';
+$response = (string) $resolved['response'];
+$subject = (string) $form['subject'];
+$storageValues = [];
+$emailhtml = '<html><head><title>' . red_public_form_html(BASE_URL) . '</title>';
 $emailhtml .= '<style type="text/css">';
-$emailhtml .= 'table.standard {font-family:Verdana, Geneva, sans-serif; font-size:14px; border-width: 0px;	border-spacing:0px;	border-style: solid; border-color:#cccccc;	border-collapse: collapse;	background-color: white;}';
-$emailhtml .= 'table.standard th {	border-width: 0px;	padding:4px; border-style: inset; border-color: #cccccc; background-color: #F5F5F5;}';
-$emailhtml .= 'table.standard td {	border-width: 0px;	padding: 4px;	border-style: inset; border-color: #cccccc;	background-color: white;}';
-$emailhtml .= '</style>';
+$emailhtml .= 'table.standard {font-family:Verdana,Geneva,sans-serif;font-size:14px;border-spacing:0;border-collapse:collapse;background:#fff;}';
+$emailhtml .= 'table.standard th {padding:4px;background:#f5f5f5;}';
+$emailhtml .= 'table.standard td {padding:4px;background:#fff;}';
+$emailhtml .= '</style></head><body>';
 $emailhtml .= '<table width="100%" border="1" cellspacing="2" cellpadding="2" class="standard">';
 
 foreach ($fields as $field) {
-    $fieldName = red_public_form_identifier($field['name'] ?? '');
-    if ($fieldName === null) {
-        continue;
-    }
-
-    $value = red_public_form_post_value($_POST, $fieldName);
-    if ($fieldName === 'MySpamTrap') {
-        if ($value !== '') {
-            $send = false;
-        }
-        continue;
-    }
-
-    if (!red_public_form_is_input_type($field['type'] ?? '')) {
-        continue;
-    }
-
-    $required = ($field['required'] ?? '') !== 'false';
-    $emailhtml .= red_public_form_email_row($fieldName, $value, $required);
-
-    if ($required || $value !== '') {
+    $fieldName = $field['name'];
+    $value = red_public_form_submission_text($values[$fieldName] ?? '');
+    $storageValues[$fieldName] = $value;
+    $emailhtml .= red_public_form_email_row($fieldName, $value, $field['required']);
+    if ($field['required'] || $value !== '') {
         $response = red_public_form_replace_response_token($response, $fieldName, $value);
     }
-    $subjectEmail = red_public_form_replace_mail_token($subjectEmail, $fieldName, $value);
-    if ($required) {
-        $toEmail = red_public_form_replace_mail_token($toEmail, $fieldName, $value);
-        $fromEmail = red_public_form_replace_mail_token($fromEmail, $fieldName, $value);
-    }
+    $subject = red_public_form_replace_mail_token($subject, $fieldName, $value);
 }
 
-$emailhtml .= '<tr><th>IP</th><td>' . red_public_form_html(getRealIpAddr()) . '</td></tr>';
-$emailhtml .= '<tr><th>Ciudad, Pais</th><td>' . red_public_form_html(getlocation(getRealIpAddr())) . '</td></tr>';
-$emailhtml .= '</table></html>';
-
+$emailhtml .= '</table></body></html>';
 unset($_SESSION['contact']);
-if ($send) {
-    require 'Exception.php';
-    require 'PHPMailer.php';
+
+if ($honeypot) {
+    $db->close();
+    echo $response;
+    exit;
+}
+
+$stored = red_public_form_insert_submission($db->connection, $managedTableName, $storageValues);
+$db->close();
+if (!$stored) {
+    http_response_code(500);
+    echo 'We could not save this registration. Please try again.';
+    exit;
+}
+
+$sent = false;
+try {
+    require_once __DIR__ . '/Exception.php';
+    require_once __DIR__ . '/phpmailer.php';
 
     $mail = new PHPMailer\PHPMailer\PHPMailer();
-    $mail->Host = 'localhost';
-    $mail->Port = 25;
-
-    $fromEmailName = explode(',', $fromEmail, 2);
-    $thisFrom = trim($fromEmailName[0] ?? '');
-    $thisName = trim($fromEmailName[1] ?? '');
-    $mail->setFrom($thisFrom, $thisName);
-
-    red_public_form_add_recipients($mail, 'AddAddress', $toEmail);
-    red_public_form_add_recipients($mail, 'AddCC', $ccEmail);
-    red_public_form_add_recipients($mail, 'AddBCC', $bccEmail);
-
-    $mail->IsHTML(true);
-    $mail->Subject = red_public_form_header_value($subjectEmail);
-    $mail->Body = $emailhtml;
-
-    if (!$mail->Send()) {
-        echo "Tuvimos problemas al enviar. Por favor contáctame via WhatsApp.";
-    } else {
-        echo $response;
+    $mail->setFrom($form['fromMailbox']['email'], $form['fromMailbox']['name']);
+    foreach ($form['recipientMailboxes'] as $mailbox) {
+        $mail->addAddress($mailbox['email'], $mailbox['name']);
+    }
+    foreach ($form['ccMailboxes'] as $mailbox) {
+        $mail->addCC($mailbox['email'], $mailbox['name']);
+    }
+    foreach ($form['bccMailboxes'] as $mailbox) {
+        $mail->addBCC($mailbox['email'], $mailbox['name']);
     }
 
-    red_public_form_insert_submission(
-        $db->connection,
-        $formRecord['TableName'],
-        red_public_form_collect_submission_values($fields, $_POST)
-    );
+    $mail->CharSet = 'UTF-8';
+    $mail->isHTML(true);
+    $mail->Subject = red_public_form_header_value($subject);
+    $mail->Body = $emailhtml;
+    $mail->AltBody = 'Registration form submission';
+    $sent = (bool) $mail->send();
+} catch (Throwable $exception) {
+    error_log('Public Register PHPMailer delivery failed: ' . $exception->getMessage());
 }
 
-$db->close();
+if (!$sent) {
+    echo 'Tuvimos problemas al enviar. Por favor contáctame via WhatsApp.';
+    exit;
+}
+
+echo $response;
 ?>

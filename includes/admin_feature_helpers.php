@@ -5,6 +5,8 @@
 
 require_once __DIR__ . '/admin_area_helpers.php';
 require_once __DIR__ . '/admin_article_helpers.php';
+require_once __DIR__ . '/admin_authorization_helpers.php';
+require_once __DIR__ . '/admin_content_revision_helpers.php';
 
 if (!function_exists('red_admin_feature_columns')) {
     function red_admin_feature_columns()
@@ -25,6 +27,54 @@ if (!function_exists('red_admin_feature_order_column')) {
         $columns = red_admin_feature_columns();
 
         return $columns[$featureColumn] ?? '';
+    }
+}
+
+if (!function_exists('red_admin_feature_position_column')) {
+    function red_admin_feature_position_column($featureColumn)
+    {
+        $featureColumn = red_admin_text($featureColumn);
+        $columns = [
+            'HomeFeatures' => 'HomePosition',
+            'SectionFeatures' => 'SectionPosition',
+            'CategoryFeatures' => 'CategoryPosition',
+            'SubCategoryFeatures' => 'SubCategoryPosition',
+        ];
+
+        return $columns[$featureColumn] ?? '';
+    }
+}
+
+if (!function_exists('red_admin_feature_scope_label')) {
+    function red_admin_feature_scope_label($featureColumn)
+    {
+        $featureColumn = red_admin_text($featureColumn);
+        $labels = [
+            'HomeFeatures' => 'Home',
+            'SectionFeatures' => 'Section',
+            'CategoryFeatures' => 'Category',
+            'SubCategoryFeatures' => 'Subcategory',
+        ];
+
+        return $labels[$featureColumn] ?? 'Current page';
+    }
+}
+
+if (!function_exists('red_admin_feature_list_contains')) {
+    function red_admin_feature_list_contains($value, $featureName)
+    {
+        $featureName = red_admin_text($featureName);
+        if ($featureName === '') {
+            return false;
+        }
+
+        foreach (explode(',', (string) $value) as $feature) {
+            if (red_admin_text($feature) === $featureName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
@@ -157,6 +207,9 @@ if (!function_exists('red_admin_feature_update_batch')) {
             $attempted = false;
             foreach ($recordIds as $index => $recordId) {
                 $attempted = true;
+                if (!red_admin_content_revision_checkpoint($connection, $recordId)) {
+                    return false;
+                }
                 if (!red_admin_feature_update(
                     $connection,
                     $recordId,
@@ -165,6 +218,9 @@ if (!function_exists('red_admin_feature_update_batch')) {
                     red_admin_feature_selected($post, $selectionField, $index),
                     $post['FeatureOrder'][$index] ?? 0
                 )) {
+                    return false;
+                }
+                if (!red_admin_content_revision_record_current($connection, $recordId, 'save')) {
                     return false;
                 }
             }
@@ -230,13 +286,15 @@ if (!function_exists('red_admin_feature_fetch_all')) {
 if (!function_exists('red_admin_feature_components')) {
     function red_admin_feature_components($connection)
     {
-        return red_admin_feature_fetch_all(
+        $rows = red_admin_feature_fetch_all(
             $connection,
             'SELECT UniqueName, CompGroup FROM RED_Components ORDER BY UniqueName ASC',
             '',
             [],
             'RED_Components feature render lookup failed'
         );
+
+        return $rows;
     }
 }
 
@@ -267,13 +325,15 @@ if (!function_exists('red_admin_feature_articles')) {
 
         $componentClause = $articleOnly ? "Component='Article'" : "Component<>'SubMenu'";
 
-        return red_admin_feature_fetch_all(
+        $rows = red_admin_feature_fetch_all(
             $connection,
             "SELECT RecordID, Title, Alias, Component, SliderDesc, BigPict, `$featureColumn`, `$orderColumn` AS FeatureOrder FROM RED_Articles WHERE Active='Y' AND $componentClause AND Language=? ORDER BY Updated DESC",
             's',
             [$language],
             'RED_Articles feature render lookup failed'
         );
+
+        return red_admin_filter_authorized_articles($connection, $rows);
     }
 }
 

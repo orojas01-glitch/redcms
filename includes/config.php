@@ -1,5 +1,6 @@
 <?php 
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/public_route_compatibility_helpers.php';
 red_start_session();
 
 $redLocalConfig = [];
@@ -91,12 +92,26 @@ $URL = preg_replace("'<[^>]+>'U", "", $_SERVER['REQUEST_URI']);
 define('URL', $URL);
 define('BASE_URL', $_SERVER['HTTP_HOST']);
 
-$pagebase = explode("?", URL);
+$pagebase = explode("?", URL, 2);
+$redCanonicalThemeId = isset($redThemeRuntime['themeId'])
+    ? (string) $redThemeRuntime['themeId']
+    : '';
+$redCanonicalPath = red_public_route_legacy_canonical_path($pagebase[0], $redCanonicalThemeId);
+$redRequestMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if (is_string($redCanonicalPath)
+    && $redCanonicalPath !== ''
+    && in_array($redRequestMethod, ['GET', 'HEAD'], true)
+) {
+    $redCanonicalQuery = isset($pagebase[1]) && $pagebase[1] !== '' ? '?' . $pagebase[1] : '';
+    header('Location: ' . $redCanonicalPath . $redCanonicalQuery, true, 308);
+    exit;
+}
 $page = explode("/", $pagebase[0]);
 
 $rest = substr($pagebase[0], -1);
 if ($rest !== '/') {
-    define('article', isset($page[count($page) - 1]) ? $page[count($page) - 1] : '');
+    $redPublicArticleSegment = isset($page[count($page) - 1]) ? $page[count($page) - 1] : '';
+    define('article', red_public_route_article_alias($redPublicArticleSegment, count($page)));
     define('countpage', count($page));
 } else {
     define('article', '');

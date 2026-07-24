@@ -1,0 +1,240 @@
+{
+  "$schema": "../../docs/theme-manifest.schema.json",
+  "schemaVersion": 1,
+  "id": "starter-reference",
+  "name": "RED Portable Starter Reference",
+  "version": "1.3.1",
+  "type": "standard",
+  "description": "Activatable portable reference package with separate audited preview and production templates, local assets, all current layouts and components, and CMS-owned operational Form compatibility.",
+  "preview": "preview.svg",
+  "compatibility": {
+    "cms": ">=4.0",
+    "php": ">=8.2",
+    "layoutAliases": {
+      "Full-Width": "index-2"
+    }
+  },
+  "assets": {
+    "styles": [
+      {
+        "id": "starter-theme",
+        "path": "assets/css/theme.css",
+        "location": "head"
+      }
+    ],
+    "scripts": []
+  },
+  "production": {
+    "assets": {
+      "styles": [
+        {
+          "id": "starter-production",
+          "path": "assets/css/production.css",
+          "location": "head"
+        }
+      ],
+      "scripts": [
+        {
+          "id": "starter-navigation",
+          "path": "assets/js/navigation.js",
+          "location": "body-end"
+        },
+        {
+          "id": "starter-hero-slider",
+          "path": "assets/js/hero-slider.js",
+          "location": "body-end"
+        }
+      ]
+    },
+    "regions": {
+      "document": { "template": "templates/production-page.php" },
+      "header": { "template": "partials/production-header.php" },
+      "navigation": { "template": "partials/production-navigation.php" },
+      "hero": { "template": "partials/production-hero.php" },
+      "footer": { "template": "partials/production-footer.php" }
+    },
+    "layouts": {
+      "index": { "template": "layouts/production-index.php" },
+      "index-1": { "template": "layouts/production-index-1.php" },
+      "index-2": { "template": "layouts/production-index-2.php" },
+      "index-3": { "template": "layouts/production-index-3.php" },
+      "feature-grid": { "template": "layouts/production-feature-grid.php" }
+    },
+    "components": {
+      "Article": { "template": "components/production-article.php" },
+      "Form": { "template": "components/production-form.php" },
+      "Gallery": { "template": "components/production-gallery.php" },
+      "Other": { "template": "components/production-other.php" }
+    }
+  },
+  "regions": {
+    "document": {
+      "label": "Document shell",
+      "required": true,
+      "template": "templates/page.php"
+    },
+    "header": {
+      "label": "Website header",
+      "required": true,
+      "template": "partials/header.php"
+    },
+    "navigation": {
+      "label": "Main navigation",
+      "required": true,
+      "template": "partials/navigation.php"
+    },
+    "hero": {
+      "label": "Feature hero",
+      "required": false,
+      "template": "partials/hero.php"
+    },
+    "footer": {
+      "label": "Website footer",
+      "required": true,
+      "template": "partials/footer.php"
+    }
+  },
+  "layouts": {
+    "index": {
+      "label": "Two columns and a full-width row",
+      "template": "layouts/index.php",
+      "positions": [
+        { "id": 1, "label": "Left column" },
+        { "id": 2, "label": "Right column" },
+        { "id": 3, "label": "Full-width row" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }, { "position": 2, "weight": 1 }],
+          [{ "position": 3, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "index-1": {
+      "label": "Full-width row and three columns",
+      "template": "layouts/index-1.php",
+      "positions": [
+        { "id": 1, "label": "Full-width row" },
+        { "id": 2, "label": "Left column" },
+        { "id": 3, "label": "Center column" },
+        { "id": 4, "label": "Right column" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }],
+          [
+            { "position": 2, "weight": 1 },
+            { "position": 3, "weight": 1 },
+            { "position": 4, "weight": 1 }
+          ]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "index-2": {
+      "label": "Four stacked full-width rows",
+      "template": "layouts/index-2.php",
+      "positions": [
+        { "id": 1, "label": "Row one" },
+        { "id": 2, "label": "Row two" },
+        { "id": 3, "label": "Row three" },
+        { "id": 4, "label": "Row four" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }],
+          [{ "position": 2, "weight": 1 }],
+          [{ "position": 3, "weight": 1 }],
+          [{ "position": 4, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "index-3": {
+      "label": "Main content and right sidebar",
+      "template": "layouts/index-3.php",
+      "positions": [
+        { "id": 1, "label": "Main content" },
+        { "id": 2, "label": "Right sidebar" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 2 }, { "position": 2, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "feature-grid": {
+      "label": "Feature row, three-card grid, and closing row",
+      "template": "layouts/feature-grid.php",
+      "positions": [
+        { "id": 1, "label": "Lead feature" },
+        { "id": 2, "label": "Left card" },
+        { "id": 3, "label": "Center card" },
+        { "id": 4, "label": "Right card" },
+        { "id": 5, "label": "Closing row" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }],
+          [
+            { "position": 2, "weight": 1 },
+            { "position": 3, "weight": 1 },
+            { "position": 4, "weight": 1 }
+          ],
+          [{ "position": 5, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    }
+  },
+  "components": {
+    "Article": {
+      "label": "Article",
+      "template": "components/article.php"
+    },
+    "Form": {
+      "label": "Form",
+      "template": "components/form.php"
+    },
+    "Gallery": {
+      "label": "Gallery",
+      "template": "components/gallery.php"
+    },
+    "Other": {
+      "label": "Other",
+      "template": "components/other.php"
+    }
+  },
+  "settings": [
+    {
+      "key": "site.title",
+      "label": "Website title",
+      "type": "text",
+      "default": "RED-CMS"
+    },
+    {
+      "key": "branding.logo",
+      "label": "Website logo",
+      "type": "image",
+      "legacyItem": "Website_Logo"
+    },
+    {
+      "key": "branding.accent",
+      "label": "Accent color",
+      "type": "color",
+      "default": "#b42318"
+    },
+    {
+      "key": "navigation.primary",
+      "label": "Primary navigation",
+      "type": "menu"
+    }
+  ],
+  "knownLimitations": [
+    "The isolated preview templates remain display-only and separate from the production templates used after explicit Webmaster activation.",
+    "Production component wrappers currently preserve live Article, Form, Gallery, and Other behavior through the audited CMS compatibility views while package-owned native component rendering evolves.",
+    "Declared per-theme design settings do not yet have independent persistence or administrator controls; active/previous package ids are the only persisted theme values."
+  ]
+}

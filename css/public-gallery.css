@@ -1,0 +1,269 @@
+/* Core public Gallery presentation shared by every RED-CMS theme. */
+.red-public-gallery,
+.red-public-gallery * {
+    box-sizing: border-box;
+}
+
+.red-public-gallery {
+    --red-gallery-border: rgba(127, 127, 127, 0.3);
+    --red-gallery-surface: rgba(127, 127, 127, 0.1);
+    --red-gallery-control: #1f2933;
+    --red-gallery-control-hover: #344657;
+    --red-gallery-control-text: #fff;
+    width: 100%;
+    max-width: 100%;
+    margin: clamp(1rem, 3vw, 2rem) 0;
+    overflow: clip;
+}
+
+.red-public-gallery__items {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.red-public-gallery--stack .red-public-gallery__items {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: clamp(0.85rem, 2.4vw, 1.5rem);
+}
+
+.red-public-gallery--stack .red-public-gallery__item {
+    align-self: start;
+}
+
+.red-public-gallery--stack .red-public-gallery__figure {
+    height: auto;
+}
+
+.red-public-gallery__item,
+.red-public-gallery__figure {
+    min-width: 0;
+    margin: 0;
+}
+
+.red-public-gallery__figure {
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--red-gallery-border);
+    border-radius: clamp(0.75rem, 2vw, 1.15rem);
+    background: var(--red-gallery-surface);
+}
+
+.red-public-gallery__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    object-fit: contain;
+}
+
+.red-public-gallery__link {
+    display: block;
+    color: inherit;
+    border-radius: inherit;
+}
+
+.red-public-gallery__link:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 4px;
+}
+
+.red-public-gallery__caption {
+    display: block;
+    margin: 0;
+    padding: 0.75rem 0.9rem 0.85rem;
+    font: inherit;
+    line-height: 1.45;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.red-public-gallery--carousel {
+    position: relative;
+}
+
+.red-public-gallery--carousel .red-public-gallery__items {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(0.85rem, 2.4vw, 1.5rem);
+}
+
+.red-public-gallery--carousel.is-ready .red-public-gallery__items {
+    gap: 0;
+}
+
+.red-public-gallery--carousel.is-ready .red-public-gallery__item {
+    grid-area: 1 / 1;
+}
+
+.red-public-gallery--carousel .red-public-gallery__figure {
+    display: grid;
+    place-items: center;
+}
+
+.red-public-gallery--carousel .red-public-gallery__link {
+    width: 100%;
+}
+
+.red-public-gallery--carousel .red-public-gallery__image {
+    height: clamp(16rem, 50vw, 32rem);
+    object-fit: contain;
+}
+
+.red-public-gallery--carousel .red-public-gallery__caption {
+    width: 100%;
+}
+
+.red-public-gallery--carousel.is-ready .red-public-gallery__item:not([hidden]) {
+    animation: red-public-gallery-enter 180ms ease-out both;
+}
+
+.red-public-gallery__controls {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 2vw, 1rem);
+    width: 100%;
+    margin-top: 0.85rem;
+}
+
+.red-public-gallery--carousel.is-ready .red-public-gallery__controls {
+    display: flex;
+}
+
+.red-public-gallery__button,
+.red-public-gallery__dot {
+    appearance: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.red-public-gallery__button {
+    display: inline-grid;
+    flex: 0 0 2.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    place-items: center;
+    border: 2px solid rgba(255, 255, 255, 0.92);
+    border-radius: 999px;
+    background: var(--red-gallery-control);
+    color: var(--red-gallery-control-text);
+    box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.16);
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.red-public-gallery__button:hover {
+    background: var(--red-gallery-control-hover);
+}
+
+.red-public-gallery__dots {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    max-width: min(60vw, 24rem);
+    padding: 0.2rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.red-public-gallery__dot {
+    display: grid;
+    flex: 0 0 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    place-items: center;
+    border-radius: 999px;
+    background: transparent;
+}
+
+.red-public-gallery__dot span {
+    display: block;
+    width: 0.65rem;
+    height: 0.65rem;
+    border: 2px solid var(--red-gallery-control);
+    border-radius: inherit;
+    background: transparent;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.86);
+    transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.red-public-gallery__dot[aria-current="true"] span {
+    background: var(--red-gallery-control);
+    transform: scale(1.12);
+}
+
+.red-public-gallery__button:focus-visible,
+.red-public-gallery__dot:focus-visible,
+.red-public-gallery--carousel:focus-visible {
+    outline: 3px solid #0b78d0;
+    outline-offset: 3px;
+}
+
+.red-public-gallery__sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+@keyframes red-public-gallery-enter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 36rem) {
+    .red-public-gallery__controls {
+        gap: 0.35rem;
+    }
+
+    .red-public-gallery__button {
+        flex-basis: 2.65rem;
+        width: 2.65rem;
+        height: 2.65rem;
+    }
+
+    .red-public-gallery__dots {
+        max-width: calc(100vw - 8rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .red-public-gallery--carousel.is-ready .red-public-gallery__item:not([hidden]) {
+        animation: none;
+    }
+
+    .red-public-gallery__button,
+    .red-public-gallery__dot span {
+        transition: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .red-public-gallery__button,
+    .red-public-gallery__dot span {
+        border-color: ButtonText;
+        box-shadow: none;
+        forced-color-adjust: auto;
+    }
+}

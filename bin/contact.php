@@ -4,22 +4,18 @@ red_start_session();
 require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_operation_helpers.php';
 
-if (empty($_SESSION['contact'])) {
-    red_public_form_redirect_home();
-}
+$contactPayload = $_POST;
 
-$db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-$recordId = red_public_form_record_id($_POST['RecordID'] ?? 0);
-$formRecord = red_public_form_fetch_record($db->connection, $recordId);
-if ($formRecord === null) {
-    red_public_form_redirect_home();
-}
-
-$send = red_public_form_post_value($_POST, 'MySpamTrap') === '';
-$fields = red_public_form_parse_definition($formRecord['LongDesc']);
-
-ob_start();
+$db = null;
+$dependencies = [
+    'fetchForm' => static function ($recordId) use (&$db) {
+        $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+        return red_public_contact_fetch_record($db->connection, $recordId);
+    },
+    'buildMessage' => static function ($form, $fields, $values) {
+        ob_start();
 ?>
 <html>
 <head>
@@ -32,67 +28,105 @@ table.standard td {	border-width: 0px;	padding: 4px;	border-style: inset; border
 <body>
 <table width="100%" border="1" cellspacing="2" cellpadding="2" class="standard">
 <?php
-foreach ($fields as $field) {
-    $fieldName = red_public_form_identifier($field['name'] ?? '');
-    if ($fieldName === null) {
-        continue;
-    }
-
-    $value = red_public_form_post_value($_POST, $fieldName);
-    if ($fieldName === 'MySpamTrap') {
-        if ($value !== '') {
-            $send = false;
+        foreach ($fields as $field) {
+            $value = $values[$field['name']] ?? '';
+            $suffix = $field['required'] ? '*' : '';
+            echo '<tr><th>' . red_public_form_html($field['label']) . $suffix . '</th><td>' .
+                nl2br(red_public_form_html($value)) . '</td></tr>';
         }
-        continue;
-    }
-
-    if (!red_public_form_is_input_type($field['type'] ?? '')) {
-        continue;
-    }
-
-    $required = ($field['required'] ?? '') !== 'false';
-    echo red_public_form_email_row($fieldName, $value, $required);
-}
-
-echo '<tr><th>IP</th><td>' . red_public_form_html(getRealIpAddr()) . '</td></tr>';
-echo '<tr><th>Country</th><td>' . red_public_form_html(getlocation(getRealIpAddr())) . '</td></tr>';
 ?>
 </table>
 </body>
 </html>
 <?php
-unset($_SESSION['contact']);
-if ($send) {
-    $body = ob_get_contents();
-    require 'Exception.php';
-    require 'PHPMailer.php';
+        $message = ob_get_clean();
+        if (!is_string($message)) {
+            throw new RuntimeException('Public Contact message buffer failed.');
+        }
 
-    $mail = new PHPMailer\PHPMailer\PHPMailer();
+        return $message;
+    },
+    'consumeContactSession' => static function () {
+        unset($_SESSION['contact']);
+        return true;
+    },
+    'sendMail' => static function ($form, $values, $body) {
+        try {
+            require_once __DIR__ . '/Exception.php';
+            require_once __DIR__ . '/phpmailer.php';
 
-    $fromEmailName = explode(',', (string) $formRecord['Submitter'], 2);
-    $thisFrom = trim($fromEmailName[0] ?? '');
-    $thisName = trim($fromEmailName[1] ?? '');
-    $mail->From = $thisFrom;
-    $mail->FromName = $thisName;
+            $mail = new PHPMailer\PHPMailer\PHPMailer();
+            $mail->setFrom($form['fromMailbox']['email'], $form['fromMailbox']['name']);
+            foreach ($form['recipientMailboxes'] as $mailbox) {
+                $mail->addAddress($mailbox['email'], $mailbox['name']);
+            }
+            foreach ($form['ccMailboxes'] as $mailbox) {
+                $mail->addCC($mailbox['email'], $mailbox['name']);
+            }
+            foreach ($form['bccMailboxes'] as $mailbox) {
+                $mail->addBCC($mailbox['email'], $mailbox['name']);
+            }
 
-    red_public_form_add_recipients($mail, 'AddAddress', $formRecord['Destinatary']);
-    red_public_form_add_recipients($mail, 'AddCC', $formRecord['CC']);
-    red_public_form_add_recipients($mail, 'AddBCC', $formRecord['BCC']);
+            $mail->CharSet = 'UTF-8';
+            $mail->WordWrap = 50;
+            $mail->isHTML(true);
+            $mail->Subject = red_public_form_header_value($form['subject']);
+            $mail->Body = $body;
+            $mail->AltBody = 'Contact form submission';
 
-    $mail->WordWrap = 50;
-    $mail->IsHTML(true);
-    $mail->Subject = red_public_form_header_value($formRecord['Subject']);
-    $mail->Body = $body;
-    $mail->AltBody = "This is the text-only body";
+            return (bool) $mail->send();
+        } catch (Throwable $exception) {
+            error_log('Public Contact PHPMailer delivery failed: ' . $exception->getMessage());
+            return false;
+        }
+    },
+    'fallbackMail' => static function ($form, $values, $body) {
+        $recipient = $form['recipientMailboxes'][0]['email'] ?? '';
+        $thisFrom = $form['fromMailbox']['email'] ?? '';
+        if (filter_var($recipient, FILTER_VALIDATE_EMAIL) === false
+            || filter_var($thisFrom, FILTER_VALIDATE_EMAIL) === false
+        ) {
+            return false;
+        }
 
-    if (!$mail->Send()) {
-        $recipient = 'orojas01@gmail.com';
-        $subject = red_public_form_header_value($formRecord['Subject']) . ' failed';
-        $content = $body;
-        mail($recipient, $subject, $content, "From: mail@redsphere.tv\r\nReply-To: $thisFrom\r\nX-Mailer: DT_formmail");
-        exit;
+        $subject = red_public_form_header_value($form['subject']) . ' failed';
+        return mail(
+            $recipient,
+            $subject,
+            $body,
+            "From: $thisFrom\r\nReply-To: $thisFrom\r\nX-Mailer: DT_formmail"
+        );
+    },
+];
+
+try {
+    $result = red_public_form_operation_execute(
+        'contact',
+        [
+            'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+            'endpoint' => '/bin/contact.php',
+            'payload' => $contactPayload,
+        ],
+        [
+            'contactSession' => !empty($_SESSION['contact']),
+            'baseUrl' => (string) BASE_URL,
+        ],
+        $dependencies
+    );
+} catch (InvalidArgumentException $exception) {
+    if ($db instanceof connection) {
+        $db->close();
     }
+    red_public_form_redirect_home();
 }
 
-$db->close();
+if ($db instanceof connection) {
+    $db->close();
+}
+
+http_response_code($result['httpStatus']);
+foreach ($result['headers'] as $name => $value) {
+    header($name . ': ' . $value);
+}
+echo $result['body'];
 ?>

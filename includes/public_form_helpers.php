@@ -34,6 +34,24 @@ if (!function_exists('red_public_form_clean')) {
     }
 }
 
+if (!function_exists('red_public_form_submission_text')) {
+    function red_public_form_submission_text($value)
+    {
+        if (!is_array($value)) {
+            return red_public_form_scalar($value);
+        }
+
+        $items = [];
+        foreach ($value as $item) {
+            if (is_scalar($item)) {
+                $items[] = (string) $item;
+            }
+        }
+
+        return implode(', ', $items);
+    }
+}
+
 if (!function_exists('red_public_form_html')) {
     function red_public_form_html($value)
     {
@@ -107,6 +125,190 @@ if (!function_exists('red_public_form_fetch_record')) {
             error_log('Public form lookup failed: ' . $e->getMessage());
             return null;
         }
+    }
+}
+
+if (!function_exists('red_public_contact_fetch_record')) {
+    /**
+     * Resolve one renderable Contact form through its active Form article.
+     *
+     * This deliberately uses only fixed identifiers in SQL. The posted record
+     * id is a bound value, and the stored RefID must resolve to the joined
+     * article before the row is returned to the operational adapter.
+     */
+    function red_public_contact_fetch_record($connection, $recordId)
+    {
+        $recordId = (int) $recordId;
+        if ($recordId <= 0) {
+            return null;
+        }
+
+        try {
+            $stmt = mysqli_prepare(
+                $connection,
+                'SELECT f.RecordID, f.RefID, f.Alias, f.FormType, f.LongDesc, f.Subject, ' .
+                'f.Submitter, f.Destinatary, f.CC, f.BCC, a.RecordID AS ArticleRecordID, ' .
+                'a.Component AS ArticleComponent ' .
+                'FROM RED_C_Form AS f ' .
+                'INNER JOIN RED_Articles AS a ON CAST(f.RefID AS UNSIGNED)=a.RecordID ' .
+                "WHERE f.RecordID=? AND f.FormType='Contact' AND a.Component='Form' " .
+                "AND a.Active='Y' AND a.StartDate<=NOW() " .
+                'AND (YEAR(a.ExpDate)=0 OR a.ExpDate>NOW()) LIMIT 1'
+            );
+            if (!$stmt) {
+                return null;
+            }
+
+            mysqli_stmt_bind_param($stmt, 'i', $recordId);
+            if (!mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                return null;
+            }
+
+            $result = mysqli_stmt_get_result($stmt);
+            $row = $result ? $result->fetch_assoc() : null;
+            mysqli_stmt_close($stmt);
+            if (!is_array($row)
+                || !preg_match('/\A[1-9][0-9]{0,9}\z/', (string) ($row['RefID'] ?? ''))
+                || (int) $row['RefID'] !== (int) ($row['ArticleRecordID'] ?? 0)
+                || (string) ($row['FormType'] ?? '') !== 'Contact'
+                || (string) ($row['ArticleComponent'] ?? '') !== 'Form'
+            ) {
+                return null;
+            }
+
+            return [
+                'recordId' => (int) $row['RecordID'],
+                'articleRecordId' => (int) $row['ArticleRecordID'],
+                'articleComponent' => (string) $row['ArticleComponent'],
+                'alias' => (string) $row['Alias'],
+                'formType' => (string) $row['FormType'],
+                'definition' => (string) $row['LongDesc'],
+                'subject' => (string) $row['Subject'],
+                'submitter' => (string) $row['Submitter'],
+                'destinatary' => (string) $row['Destinatary'],
+                'cc' => (string) $row['CC'],
+                'bcc' => (string) $row['BCC'],
+            ];
+        } catch (mysqli_sql_exception $e) {
+            error_log('Public Contact form lookup failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+}
+
+if (!function_exists('red_public_operational_form_fetch_record')) {
+    /**
+     * Resolve an active, scheduled Response or Register form through its paired
+     * Form article. The type is whitelisted before it is bound as a value; all
+     * SQL identifiers remain fixed.
+     */
+    function red_public_operational_form_fetch_record($connection, $recordId, $formType)
+    {
+        $recordId = (int) $recordId;
+        $formType = is_scalar($formType) ? (string) $formType : '';
+        if ($recordId <= 0 || !in_array($formType, ['Response', 'Register'], true)) {
+            return null;
+        }
+
+        try {
+            $stmt = mysqli_prepare(
+                $connection,
+                'SELECT f.RecordID, f.RefID, f.Alias, f.FormType, f.LongDesc, f.Subject, ' .
+                'f.Submitter, f.Destinatary, f.CC, f.BCC, f.Response, f.TableName, ' .
+                'a.RecordID AS ArticleRecordID, a.Component AS ArticleComponent ' .
+                'FROM RED_C_Form AS f ' .
+                'INNER JOIN RED_Articles AS a ON CAST(f.RefID AS UNSIGNED)=a.RecordID ' .
+                "WHERE f.RecordID=? AND f.FormType=? AND a.Component='Form' " .
+                "AND a.Active='Y' AND a.StartDate<=NOW() " .
+                'AND (YEAR(a.ExpDate)=0 OR a.ExpDate>NOW()) LIMIT 1'
+            );
+            if (!$stmt) {
+                return null;
+            }
+
+            mysqli_stmt_bind_param($stmt, 'is', $recordId, $formType);
+            if (!mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                return null;
+            }
+
+            $result = mysqli_stmt_get_result($stmt);
+            $row = $result ? $result->fetch_assoc() : null;
+            mysqli_stmt_close($stmt);
+            if (!is_array($row)
+                || !preg_match('/\A[1-9][0-9]{0,9}\z/', (string) ($row['RefID'] ?? ''))
+                || (int) $row['RefID'] !== (int) ($row['ArticleRecordID'] ?? 0)
+                || (string) ($row['FormType'] ?? '') !== $formType
+                || (string) ($row['ArticleComponent'] ?? '') !== 'Form'
+            ) {
+                return null;
+            }
+
+            return [
+                'recordId' => (int) $row['RecordID'],
+                'articleRecordId' => (int) $row['ArticleRecordID'],
+                'articleComponent' => (string) $row['ArticleComponent'],
+                'alias' => (string) $row['Alias'],
+                'formType' => (string) $row['FormType'],
+                'definition' => (string) $row['LongDesc'],
+                'subject' => (string) $row['Subject'],
+                'submitter' => (string) $row['Submitter'],
+                'destinatary' => (string) $row['Destinatary'],
+                'cc' => (string) $row['CC'],
+                'bcc' => (string) $row['BCC'],
+                'response' => (string) $row['Response'],
+                'tableName' => (string) $row['TableName'],
+            ];
+        } catch (mysqli_sql_exception $exception) {
+            error_log('Public operational Form lookup failed: ' . $exception->getMessage());
+            return null;
+        }
+    }
+}
+
+if (!function_exists('red_public_contact_mailboxes')) {
+    /**
+     * Parse the legacy `email,name;email,name` storage format without allowing
+     * invalid or header-injecting mailbox values to reach either mail transport.
+     * Returns null when any configured entry is malformed.
+     */
+    function red_public_contact_mailboxes($recipients)
+    {
+        if (!is_scalar($recipients)) {
+            return null;
+        }
+
+        $recipients = (string) $recipients;
+        if (strlen($recipients) > 4096 || preg_match('/[\r\n\0]/', $recipients)) {
+            return null;
+        }
+
+        $mailboxes = [];
+        foreach (explode(';', $recipients) as $recipient) {
+            $recipient = trim($recipient);
+            if ($recipient === '') {
+                continue;
+            }
+
+            $parts = explode(',', $recipient, 2);
+            $email = trim($parts[0] ?? '');
+            $name = trim($parts[1] ?? '');
+            if ($email === ''
+                || strlen($email) > 254
+                || strlen($name) > 200
+                || filter_var($email, FILTER_VALIDATE_EMAIL) === false
+            ) {
+                return null;
+            }
+
+            $mailboxes[] = ['email' => $email, 'name' => $name];
+            if (count($mailboxes) > 50) {
+                return null;
+            }
+        }
+
+        return $mailboxes;
     }
 }
 

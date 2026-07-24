@@ -1,6 +1,6 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true); ?>
+red_require_admin_site_manager(true); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_advanced_helpers.php' ?>

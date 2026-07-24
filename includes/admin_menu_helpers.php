@@ -169,100 +169,335 @@ if (!function_exists('red_admin_menu_option')) {
     }
 }
 
-if (!function_exists('red_admin_main_menu_link_options')) {
-    function red_admin_main_menu_link_options($connection)
+if (!function_exists('red_admin_main_menu_article_path')) {
+    function red_admin_main_menu_article_path($section, $category, $subcategory, $alias)
     {
-        $options = '<option value="">Select a link from available pages of the website...</option>';
+        $alias = red_admin_menu_scalar($alias);
+        if ($alias === '') {
+            return '';
+        }
+
+        return rtrim(
+            red_admin_area_public_path($section, $category, $subcategory),
+            '/'
+        ) . '/' . rawurlencode($alias);
+    }
+}
+
+if (!function_exists('red_admin_main_menu_choice_label')) {
+    function red_admin_main_menu_choice_label($type, $title, $alias, $path)
+    {
+        $title = red_admin_menu_scalar($title);
+        $alias = red_admin_menu_scalar($alias);
+        $display = $title !== '' ? $title : $alias;
+        if ($display === '') {
+            $display = 'Untitled';
+        }
+
+        return red_admin_menu_scalar($type) . ' — ' . $display . ' · ' . red_admin_menu_scalar($path);
+    }
+}
+
+if (!function_exists('red_admin_main_menu_add_link_choice')) {
+    function red_admin_main_menu_add_link_choice(&$choices, &$seen, $group, $path, $label, $kind, $depth)
+    {
+        $path = red_admin_menu_scalar($path);
+        if ($path === '' || isset($seen[$path])) {
+            return;
+        }
+
+        $seen[$path] = true;
+        $choices[] = [
+            'group' => red_admin_menu_scalar($group),
+            'value' => $path,
+            'label' => red_admin_menu_scalar($label),
+            'kind' => red_admin_menu_scalar($kind),
+            'depth' => max(0, (int) $depth),
+        ];
+    }
+}
+
+if (!function_exists('red_admin_main_menu_link_choices')) {
+    function red_admin_main_menu_link_choices($connection, $language = '')
+    {
+        $language = substr(
+            red_admin_menu_scalar($language !== '' ? $language : red_admin_menu_language()),
+            0,
+            2
+        );
         $sections = red_admin_menu_fetch_all(
             $connection,
-            "SELECT Sections FROM RED_Sections WHERE Active='Y' ORDER BY Sections ASC",
-            '',
-            [],
+            "SELECT RecordID, Sections, Title FROM RED_Sections WHERE Active='Y' AND Language=? " .
+                "ORDER BY CASE WHEN LOWER(Sections)='home' THEN 0 ELSE 1 END, " .
+                'Title ASC, Sections ASC, RecordID ASC',
+            's',
+            [$language],
             'RED_Sections menu link lookup failed'
         );
         $categories = red_admin_menu_fetch_all(
             $connection,
-            "SELECT Categories FROM RED_Categories WHERE Active='Y' ORDER BY Categories ASC",
-            '',
-            [],
-            'RED_Categories menu link lookup failed'
+            "SELECT category_area.RecordID, category_area.Categories, category_area.Title, " .
+                'category_area.SectionRecordID, section_area.Sections AS SectionAlias ' .
+                'FROM RED_Categories AS category_area ' .
+                'JOIN RED_Sections AS section_area ON section_area.RecordID=category_area.SectionRecordID ' .
+                'AND section_area.Language=category_area.Language ' .
+                "WHERE category_area.Active='Y' AND section_area.Active='Y' " .
+                'AND category_area.Language=? ' .
+                'ORDER BY section_area.Title ASC, category_area.Title ASC, ' .
+                'category_area.Categories ASC, category_area.RecordID ASC',
+            's',
+            [$language],
+            'RED_Categories parent-aware menu link lookup failed'
         );
         $subCategories = red_admin_menu_fetch_all(
             $connection,
-            "SELECT SubCategories FROM RED_SubCategories WHERE Active='Y' ORDER BY SubCategories ASC",
-            '',
-            [],
-            'RED_SubCategories menu link lookup failed'
+            "SELECT subcategory_area.RecordID, subcategory_area.SubCategories, subcategory_area.Title, " .
+                'subcategory_area.CategoryRecordID, category_area.Categories AS CategoryAlias, ' .
+                'section_area.Sections AS SectionAlias ' .
+                'FROM RED_SubCategories AS subcategory_area ' .
+                'JOIN RED_Categories AS category_area ON category_area.RecordID=subcategory_area.CategoryRecordID ' .
+                'AND category_area.Language=subcategory_area.Language ' .
+                'JOIN RED_Sections AS section_area ON section_area.RecordID=category_area.SectionRecordID ' .
+                'AND section_area.Language=category_area.Language ' .
+                "WHERE subcategory_area.Active='Y' AND category_area.Active='Y' " .
+                "AND section_area.Active='Y' AND subcategory_area.Language=? " .
+                'ORDER BY section_area.Title ASC, category_area.Title ASC, ' .
+                'subcategory_area.Title ASC, subcategory_area.SubCategories ASC, ' .
+                'subcategory_area.RecordID ASC',
+            's',
+            [$language],
+            'RED_SubCategories parent-aware menu link lookup failed'
+        );
+        $articles = red_admin_menu_fetch_all(
+            $connection,
+            'SELECT RecordID, Title, Alias, Sections, Categories, SubCategories ' .
+                'FROM RED_Articles WHERE Language=? ' .
+                'ORDER BY Sections ASC, Categories ASC, SubCategories ASC, ' .
+                'Title ASC, Updated DESC, RecordID ASC',
+            's',
+            [$language],
+            'RED_Articles menu link lookup failed'
         );
 
+        $categoriesBySection = [];
+        foreach ($categories as $categoryRow) {
+            $categoriesBySection[(int) ($categoryRow['SectionRecordID'] ?? 0)][] = $categoryRow;
+        }
+
+        $subCategoriesByCategory = [];
+        foreach ($subCategories as $subCategoryRow) {
+            $subCategoriesByCategory[(int) ($subCategoryRow['CategoryRecordID'] ?? 0)][] = $subCategoryRow;
+        }
+
+        $articlesByRoute = [];
+        foreach ($articles as $articleRow) {
+            $routeKey = strtolower(implode('|', [
+                red_admin_menu_scalar($articleRow['Sections'] ?? ''),
+                red_admin_menu_scalar($articleRow['Categories'] ?? ''),
+                red_admin_menu_scalar($articleRow['SubCategories'] ?? ''),
+            ]));
+            $articlesByRoute[$routeKey][] = $articleRow;
+        }
+
+        $choices = [];
+        $seen = [];
         foreach ($sections as $sectionRow) {
-            $section = red_admin_text($sectionRow['Sections'] ?? '');
-            if ($section === '') {
+            $sectionId = (int) ($sectionRow['RecordID'] ?? 0);
+            $section = red_admin_menu_scalar($sectionRow['Sections'] ?? '');
+            if ($sectionId <= 0 || $section === '') {
                 continue;
             }
 
-            $sectionVal = $section === 'home' ? '' : '/' . $section;
-            $options .= red_admin_menu_option($sectionVal . '/');
+            $sectionTitle = red_admin_menu_scalar($sectionRow['Title'] ?? '');
+            $groupTitle = 'Section · ' . ($sectionTitle !== '' ? $sectionTitle : $section);
+            $sectionPath = red_admin_area_public_path($section);
+            red_admin_main_menu_add_link_choice(
+                $choices,
+                $seen,
+                $groupTitle,
+                $sectionPath,
+                red_admin_main_menu_choice_label('Section', $sectionTitle, $section, $sectionPath),
+                'section',
+                0
+            );
 
-            foreach (red_admin_menu_fetch_all(
-                $connection,
-                "SELECT Alias FROM RED_Articles WHERE Sections=? AND Categories='' AND SubCategories='' ORDER BY Updated DESC",
-                's',
-                [$section],
-                'RED_Articles section menu link lookup failed'
-            ) as $articleRow) {
-                $alias = red_admin_text($articleRow['Alias'] ?? '');
-                if ($alias !== '') {
-                    $options .= red_admin_menu_option($sectionVal . '/' . $alias);
-                }
+            $sectionArticleKey = strtolower($section . '||');
+            foreach (($articlesByRoute[$sectionArticleKey] ?? []) as $articleRow) {
+                $articlePath = red_admin_main_menu_article_path($section, '', '', $articleRow['Alias'] ?? '');
+                red_admin_main_menu_add_link_choice(
+                    $choices,
+                    $seen,
+                    $groupTitle,
+                    $articlePath,
+                    red_admin_main_menu_choice_label(
+                        'Article',
+                        $articleRow['Title'] ?? '',
+                        $articleRow['Alias'] ?? '',
+                        $articlePath
+                    ),
+                    'article',
+                    1
+                );
             }
 
-            foreach ($categories as $categoryRow) {
-                $category = red_admin_text($categoryRow['Categories'] ?? '');
-                if ($category === '') {
+            foreach (($categoriesBySection[$sectionId] ?? []) as $categoryRow) {
+                $categoryId = (int) ($categoryRow['RecordID'] ?? 0);
+                $category = red_admin_menu_scalar($categoryRow['Categories'] ?? '');
+                if ($categoryId <= 0 || $category === '') {
                     continue;
                 }
 
-                $options .= red_admin_menu_option($sectionVal . '/' . $category . '/');
+                $categoryPath = red_admin_area_public_path($section, $category);
+                red_admin_main_menu_add_link_choice(
+                    $choices,
+                    $seen,
+                    $groupTitle,
+                    $categoryPath,
+                    red_admin_main_menu_choice_label(
+                        'Category',
+                        $categoryRow['Title'] ?? '',
+                        $category,
+                        $categoryPath
+                    ),
+                    'category',
+                    1
+                );
 
-                foreach (red_admin_menu_fetch_all(
-                    $connection,
-                    "SELECT Alias FROM RED_Articles WHERE Sections=? AND Categories=? AND SubCategories='' ORDER BY Updated DESC",
-                    'ss',
-                    [$section, $category],
-                    'RED_Articles category menu link lookup failed'
-                ) as $articleRow) {
-                    $alias = red_admin_text($articleRow['Alias'] ?? '');
-                    if ($alias !== '') {
-                        $options .= red_admin_menu_option($sectionVal . '/' . $category . '/' . $alias);
-                    }
+                $categoryArticleKey = strtolower($section . '|' . $category . '|');
+                foreach (($articlesByRoute[$categoryArticleKey] ?? []) as $articleRow) {
+                    $articlePath = red_admin_main_menu_article_path(
+                        $section,
+                        $category,
+                        '',
+                        $articleRow['Alias'] ?? ''
+                    );
+                    red_admin_main_menu_add_link_choice(
+                        $choices,
+                        $seen,
+                        $groupTitle,
+                        $articlePath,
+                        red_admin_main_menu_choice_label(
+                            'Article in ' . ($categoryRow['Title'] ?? $category),
+                            $articleRow['Title'] ?? '',
+                            $articleRow['Alias'] ?? '',
+                            $articlePath
+                        ),
+                        'article',
+                        2
+                    );
                 }
 
-                foreach ($subCategories as $subCategoryRow) {
-                    $subCategory = red_admin_text($subCategoryRow['SubCategories'] ?? '');
+                foreach (($subCategoriesByCategory[$categoryId] ?? []) as $subCategoryRow) {
+                    $subCategory = red_admin_menu_scalar($subCategoryRow['SubCategories'] ?? '');
                     if ($subCategory === '') {
                         continue;
                     }
 
-                    $options .= red_admin_menu_option($sectionVal . '/' . $category . '/' . $subCategory . '/');
+                    $subCategoryPath = red_admin_area_public_path($section, $category, $subCategory);
+                    red_admin_main_menu_add_link_choice(
+                        $choices,
+                        $seen,
+                        $groupTitle,
+                        $subCategoryPath,
+                        red_admin_main_menu_choice_label(
+                            'Subcategory',
+                            $subCategoryRow['Title'] ?? '',
+                            $subCategory,
+                            $subCategoryPath
+                        ),
+                        'subcategory',
+                        2
+                    );
 
-                    foreach (red_admin_menu_fetch_all(
-                        $connection,
-                        'SELECT Alias FROM RED_Articles WHERE Sections=? AND Categories=? AND SubCategories=? ORDER BY Updated DESC',
-                        'sss',
-                        [$section, $category, $subCategory],
-                        'RED_Articles subcategory menu link lookup failed'
-                    ) as $articleRow) {
-                        $alias = red_admin_text($articleRow['Alias'] ?? '');
-                        if ($alias !== '') {
-                            $options .= red_admin_menu_option($sectionVal . '/' . $category . '/' . $subCategory . '/' . $alias);
-                        }
+                    $subCategoryArticleKey = strtolower(
+                        $section . '|' . $category . '|' . $subCategory
+                    );
+                    foreach (($articlesByRoute[$subCategoryArticleKey] ?? []) as $articleRow) {
+                        $articlePath = red_admin_main_menu_article_path(
+                            $section,
+                            $category,
+                            $subCategory,
+                            $articleRow['Alias'] ?? ''
+                        );
+                        red_admin_main_menu_add_link_choice(
+                            $choices,
+                            $seen,
+                            $groupTitle,
+                            $articlePath,
+                            red_admin_main_menu_choice_label(
+                                'Article in ' . ($subCategoryRow['Title'] ?? $subCategory),
+                                $articleRow['Title'] ?? '',
+                                $articleRow['Alias'] ?? '',
+                                $articlePath
+                            ),
+                            'article',
+                            3
+                        );
                     }
                 }
             }
         }
 
+        return $choices;
+    }
+}
+
+if (!function_exists('red_admin_main_menu_link_options_from_choices')) {
+    function red_admin_main_menu_link_options_from_choices($choices, $selected = '')
+    {
+        $selected = red_admin_menu_scalar($selected);
+        $choiceValues = [];
+        foreach ((array) $choices as $choice) {
+            if (is_array($choice)) {
+                $choiceValues[] = red_admin_menu_scalar($choice['value'] ?? '');
+            }
+        }
+        $hasSelectedChoice = $selected !== '' && in_array($selected, $choiceValues, true);
+        $options = '<option value=""' . (!$hasSelectedChoice ? ' selected="selected"' : '') .
+            '>Choose a page or keep a custom destination…</option>';
+        $openGroup = '';
+
+        foreach ((array) $choices as $choice) {
+            if (!is_array($choice)) {
+                continue;
+            }
+
+            $group = red_admin_menu_scalar($choice['group'] ?? 'Website pages');
+            $value = red_admin_menu_scalar($choice['value'] ?? '');
+            if ($value === '') {
+                continue;
+            }
+
+            if ($group !== $openGroup) {
+                if ($openGroup !== '') {
+                    $options .= '</optgroup>';
+                }
+                $options .= '<optgroup label="' . red_admin_menu_html($group) . '">';
+                $openGroup = $group;
+            }
+
+            $options .= '<option value="' . red_admin_menu_html($value) . '" data-kind="' .
+                red_admin_menu_html($choice['kind'] ?? '') . '" data-depth="' .
+                red_admin_menu_html($choice['depth'] ?? 0) . '"' .
+                ($selected === $value ? ' selected="selected"' : '') . '>' .
+                red_admin_menu_html($choice['label'] ?? $value) . '</option>';
+        }
+
+        if ($openGroup !== '') {
+            $options .= '</optgroup>';
+        }
+
         return $options;
+    }
+}
+
+if (!function_exists('red_admin_main_menu_link_options')) {
+    function red_admin_main_menu_link_options($connection, $language = '', $selected = '')
+    {
+        return red_admin_main_menu_link_options_from_choices(
+            red_admin_main_menu_link_choices($connection, $language),
+            $selected
+        );
     }
 }
 

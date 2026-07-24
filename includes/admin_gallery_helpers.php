@@ -4,6 +4,7 @@
  */
 
 require_once __DIR__ . '/admin_article_helpers.php';
+require_once __DIR__ . '/video_url_helpers.php';
 
 if (!function_exists('red_admin_gallery_scalar')) {
     function red_admin_gallery_scalar($value)
@@ -106,6 +107,7 @@ if (!function_exists('red_admin_gallery_has_payload')) {
             'Title' => true,
             'Alias' => true,
             'GalleryType' => true,
+            'GalleryPresentation' => true,
             'ShortDesc' => true,
             'Link' => true,
             'LongDesc' => true,
@@ -131,11 +133,68 @@ if (!function_exists('red_admin_gallery_has_payload')) {
     }
 }
 
+if (!function_exists('red_admin_gallery_clean_presentation')) {
+    function red_admin_gallery_clean_presentation($value)
+    {
+        return red_admin_gallery_scalar($value) === 'carousel' ? 'carousel' : 'stack';
+    }
+}
+
 if (!function_exists('red_admin_gallery_clean_type')) {
     function red_admin_gallery_clean_type($value)
     {
         $value = red_admin_text(red_admin_gallery_scalar($value));
-        return in_array($value, ['Gallery', 'Carrousel', 'Video', 'Banner'], true) ? $value : '';
+        return in_array($value, ['Gallery', 'Video', 'Banner'], true) ? $value : '';
+    }
+}
+
+if (!function_exists('red_admin_gallery_insert_reuse_allowed')) {
+    function red_admin_gallery_insert_reuse_allowed($existingType, $postedType)
+    {
+        $existingType = red_admin_text(red_admin_gallery_scalar($existingType));
+        $postedType = red_admin_gallery_clean_type($postedType);
+
+        return $postedType !== '' && ($existingType === '' || $existingType === $postedType);
+    }
+}
+
+if (!function_exists('red_admin_gallery_insert_target_allowed')) {
+    function red_admin_gallery_insert_target_allowed($existingArticle, $existingGallery, $postedType)
+    {
+        $postedType = red_admin_gallery_clean_type($postedType);
+        if ($postedType === '') {
+            return false;
+        }
+
+        $hasArticle = is_array($existingArticle);
+        $hasGallery = is_array($existingGallery);
+        $existingGalleryType = $hasGallery
+            ? red_admin_text($existingGallery['GalleryType'] ?? '')
+            : '';
+
+        // A file upload may reserve a blank child row before the paired article
+        // exists. No populated orphan child is safe to promote implicitly.
+        if (!$hasArticle) {
+            return !$hasGallery || $existingGalleryType === '';
+        }
+
+        // RED_C_Gallery subtypes are paired only with the generic Gallery
+        // article component. Never let insert/upsert mutate another component.
+        if (red_admin_article_clean_value('Component', $existingArticle['Component'] ?? '') !== 'Gallery') {
+            return false;
+        }
+
+        // Article-picture uploads can create a tightly constrained placeholder.
+        // It may be promoted with no child or the blank child reserved by a
+        // gallery upload, but never over a populated child record.
+        if (red_admin_article_is_upload_placeholder($existingArticle)) {
+            return !$hasGallery || $existingGalleryType === '';
+        }
+
+        // Every other existing article is a retry, not a create. It must have
+        // the exact paired child and subtype; the endpoint separately enforces
+        // the current administrator's access to that article.
+        return $hasGallery && $existingGalleryType === $postedType;
     }
 }
 
@@ -143,6 +202,7 @@ if (!function_exists('red_admin_gallery_collect_values')) {
     function red_admin_gallery_collect_values($post, $mode, $recordId, $artRecordId)
     {
         $data = [];
+        $postedGalleryType = '';
         if ($mode === 'insert') {
             $data['RecordID'] = $recordId;
             $data['RefID'] = (string) $artRecordId;
@@ -160,7 +220,18 @@ if (!function_exists('red_admin_gallery_collect_values')) {
         }
 
         if (array_key_exists('GalleryType', $post)) {
-            $data['GalleryType'] = red_admin_gallery_clean_type($post['GalleryType']);
+            $postedGalleryType = red_admin_gallery_clean_type($post['GalleryType']);
+            $data['GalleryType'] = $postedGalleryType;
+        }
+
+        // RED_C_Gallery.NewWindow is unused by the public Gallery subtype. Keep
+        // the legacy one-character column as a compatibility-safe binary
+        // presentation flag: empty means photo stack and Y means carousel.
+        // Video and Banner continue to use their existing NewWindow behavior.
+        if ($postedGalleryType === 'Gallery' && array_key_exists('GalleryPresentation', $post)) {
+            $data['NewWindow'] = red_admin_gallery_clean_presentation($post['GalleryPresentation']) === 'carousel'
+                ? 'Y'
+                : '';
         }
 
         foreach (['ShortDesc', 'Link'] as $fieldName) {
@@ -180,7 +251,13 @@ if (!function_exists('red_admin_gallery_collect_values')) {
             $data['LongDesc'] = '';
         }
 
-        if (red_admin_gallery_has_payload($post)) {
+        $preserveGalleryPresentation = $mode === 'update'
+            && $postedGalleryType === 'Gallery'
+            && !array_key_exists('GalleryPresentation', $post);
+        if (red_admin_gallery_has_payload($post)
+            && !array_key_exists('NewWindow', $data)
+            && !$preserveGalleryPresentation
+        ) {
             $data['NewWindow'] = isset($post['NewWindow']) && red_admin_gallery_scalar($post['NewWindow']) === 'Y' ? 'Y' : '';
         }
 

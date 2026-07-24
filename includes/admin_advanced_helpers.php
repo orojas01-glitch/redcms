@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/admin_area_helpers.php';
 require_once __DIR__ . '/admin_transaction_helpers.php';
+require_once __DIR__ . '/theme_activation_helpers.php';
 
 if (!function_exists('red_admin_advanced_scalar')) {
     function red_admin_advanced_scalar($value)
@@ -29,6 +30,7 @@ if (!function_exists('red_admin_advanced_insert_items')) {
             'Website_Slogan' => '',
             'Website_Logo' => '',
             'Website_Footer' => '',
+            'Website_Red_Sphere_Credit' => 'Y',
             'Website_Header' => null,
             'Website_CSS' => '',
         ];
@@ -149,27 +151,86 @@ if (!function_exists('red_admin_advanced_content_from_post')) {
     }
 }
 
+if (!function_exists('red_admin_advanced_row_is_mutable')) {
+    function red_admin_advanced_row_is_mutable($row, $expectedItem)
+    {
+        if (!is_array($row) || !is_string($expectedItem) || $expectedItem === '') {
+            return false;
+        }
+
+        $item = (string) ($row['Item'] ?? '');
+        $language = red_admin_advanced_language($row['Language'] ?? '');
+        return $item === $expectedItem
+            && $language !== ''
+            && array_key_exists($item, red_admin_advanced_insert_items());
+    }
+}
+
 if (!function_exists('red_admin_advanced_update_content')) {
-    function red_admin_advanced_update_content($connection, $recordId, $content)
+    function red_admin_advanced_update_content($connection, $recordId, $expectedItem, $content)
     {
         $recordId = (int) $recordId;
-        if ($recordId <= 0 || $content === null) {
+        $expectedItem = red_admin_text(red_admin_advanced_scalar($expectedItem));
+        if ($recordId <= 0 || $expectedItem === '' || $content === null) {
+            return false;
+        }
+
+        $row = red_admin_advanced_record($connection, $recordId);
+        if (!red_admin_advanced_row_is_mutable($row, $expectedItem)) {
             return false;
         }
 
         try {
-            $stmt = mysqli_prepare($connection, 'UPDATE RED_Advanced SET Content=? WHERE RecordID=?');
+            $stmt = mysqli_prepare(
+                $connection,
+                "UPDATE RED_Advanced SET Content=? WHERE RecordID=? AND Item=? AND Language<>''"
+            );
             if (!$stmt) {
                 return false;
             }
 
-            mysqli_stmt_bind_param($stmt, 'si', $content, $recordId);
+            mysqli_stmt_bind_param($stmt, 'sis', $content, $recordId, $expectedItem);
             $success = mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
 
             return $success;
         } catch (mysqli_sql_exception $e) {
             error_log('RED_Advanced content update failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+}
+
+if (!function_exists('red_admin_advanced_update_logo')) {
+    function red_admin_advanced_update_logo($connection, $recordId, $storedName)
+    {
+        $recordId = (int) $recordId;
+        $storedName = red_admin_advanced_scalar($storedName);
+        if ($recordId <= 0 || $storedName === '') {
+            return false;
+        }
+
+        $row = red_admin_advanced_record($connection, $recordId);
+        if (!red_admin_advanced_row_is_mutable($row, 'Website_Logo')) {
+            return false;
+        }
+
+        try {
+            $stmt = mysqli_prepare(
+                $connection,
+                "UPDATE RED_Advanced SET Content=? " .
+                    "WHERE RecordID=? AND Item='Website_Logo' AND Language<>''"
+            );
+            if (!$stmt) {
+                return false;
+            }
+            mysqli_stmt_bind_param($stmt, 'si', $storedName, $recordId);
+            $success = mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+
+            return $success;
+        } catch (mysqli_sql_exception $exception) {
+            error_log('RED_Advanced logo update failed: ' . $exception->getMessage());
             return false;
         }
     }
@@ -282,6 +343,215 @@ if (!function_exists('red_admin_advanced_css_files')) {
 
         sort($files, SORT_NATURAL | SORT_FLAG_CASE);
         return $files;
+    }
+}
+
+if (!function_exists('red_admin_advanced_css_target_from_validation')) {
+    /**
+     * Resolve the one local stylesheet exposed by Advanced > Website CSS.
+     *
+     * The caller supplies a validated, production-supported theme package.
+     * Standard themes use the first local top-level stylesheet so the author
+     * can intentionally place the editor-facing cascade before production
+     * compatibility styles. The current legacy adapter retains style.css.
+     */
+    function red_admin_advanced_css_target_from_validation(array $validation, $projectRoot = null)
+    {
+        if (empty($validation['valid']) || !is_array($validation['manifest'] ?? null)) {
+            return null;
+        }
+
+        $projectRoot = red_theme_project_root($projectRoot);
+        $manifest = $validation['manifest'];
+        $themeId = (string) ($manifest['id'] ?? '');
+        $themeType = (string) ($manifest['type'] ?? '');
+        if (!red_theme_valid_id($themeId) || !in_array($themeType, ['standard', 'legacy-adapter'], true)) {
+            return null;
+        }
+
+        $themeDirectory = realpath((string) ($validation['path'] ?? ''));
+        if ($themeDirectory === false || !is_dir($themeDirectory)) {
+            return null;
+        }
+
+        $styleGroups = [];
+        if (is_array($manifest['assets']['styles'] ?? null)) {
+            $styleGroups[] = $manifest['assets']['styles'];
+        }
+        if ($themeType === 'standard' && is_array($manifest['production']['assets']['styles'] ?? null)) {
+            $styleGroups[] = $manifest['production']['assets']['styles'];
+        }
+
+        $fileField = $themeType === 'legacy-adapter' ? 'legacySource' : 'path';
+        $baseDirectory = $themeType === 'legacy-adapter' ? $projectRoot : $themeDirectory;
+        $candidates = [];
+        foreach ($styleGroups as $groupIndex => $styles) {
+            foreach ($styles as $styleIndex => $style) {
+                if (!is_array($style)
+                    || !isset($style[$fileField])
+                    || !is_string($style[$fileField])
+                    || strtolower(pathinfo($style[$fileField], PATHINFO_EXTENSION)) !== 'css'
+                ) {
+                    continue;
+                }
+
+                $path = red_theme_existing_path($baseDirectory, $style[$fileField]);
+                if ($path === null
+                    || !is_file($path)
+                    || strtolower(pathinfo($path, PATHINFO_EXTENSION)) !== 'css'
+                ) {
+                    continue;
+                }
+
+                $candidates[] = [
+                    'assetId' => (string) ($style['id'] ?? ''),
+                    'relativePath' => str_replace('\\', '/', $style[$fileField]),
+                    'absolutePath' => $path,
+                    'groupIndex' => $groupIndex,
+                    'styleIndex' => $styleIndex,
+                ];
+            }
+        }
+
+        if ($candidates === []) {
+            return null;
+        }
+
+        $candidate = $candidates[0];
+        if ($themeType === 'legacy-adapter') {
+            foreach ($candidates as $legacyCandidate) {
+                if ($legacyCandidate['assetId'] === 'theme-style'
+                    || $legacyCandidate['relativePath'] === 'css/style.css'
+                ) {
+                    $candidate = $legacyCandidate;
+                    break;
+                }
+            }
+        }
+
+        $displayPath = $themeType === 'standard'
+            ? 'themes/' . $themeId . '/' . $candidate['relativePath']
+            : $candidate['relativePath'];
+
+        return [
+            'themeId' => $themeId,
+            'themeName' => (string) ($manifest['name'] ?? $themeId),
+            'themeType' => $themeType,
+            'assetId' => $candidate['assetId'],
+            'relativePath' => $candidate['relativePath'],
+            'displayPath' => $displayPath,
+            'absolutePath' => $candidate['absolutePath'],
+        ];
+    }
+}
+
+if (!function_exists('red_admin_advanced_active_css_target')) {
+    /**
+     * Resolve the effective public theme before exposing an editable file.
+     * Invalid or unavailable activation state follows the public runtime's
+     * hard legacy fallback instead of accepting a path from the browser.
+     */
+    function red_admin_advanced_active_css_target($connection, $projectRoot = null)
+    {
+        $projectRoot = red_theme_project_root($projectRoot);
+        $requestedThemeId = 'legacy-bootstrap';
+        $usedFallback = false;
+
+        try {
+            $state = red_theme_activation_read_state($connection, false, true);
+            if (!empty($state['persisted'])) {
+                $requestedThemeId = (string) $state['activeThemeId'];
+            }
+            $validation = red_theme_activation_validate_candidate($requestedThemeId, $projectRoot);
+        } catch (Throwable $exception) {
+            $usedFallback = true;
+            error_log(
+                'RED-CMS active Website CSS target fell back to legacy-bootstrap: ' .
+                $exception->getMessage()
+            );
+            try {
+                $validation = red_theme_activation_validate_candidate('legacy-bootstrap', $projectRoot);
+            } catch (Throwable $fallbackException) {
+                error_log(
+                    'RED-CMS legacy Website CSS target is unavailable: ' .
+                    $fallbackException->getMessage()
+                );
+                return null;
+            }
+        }
+
+        $target = red_admin_advanced_css_target_from_validation($validation, $projectRoot);
+        if ($target === null) {
+            return null;
+        }
+
+        $target['requestedThemeId'] = $requestedThemeId;
+        $target['usedFallback'] = $usedFallback;
+        return $target;
+    }
+}
+
+if (!function_exists('red_admin_advanced_css_target_token')) {
+    /**
+     * Bind a form to both the active target and the exact bytes it displayed.
+     * This prevents an old editor tab from writing after activation or another
+     * CSS edit has changed the server-side target.
+     */
+    function red_admin_advanced_css_target_token(array $target)
+    {
+        $path = (string) ($target['absolutePath'] ?? '');
+        $themeId = (string) ($target['themeId'] ?? '');
+        $relativePath = (string) ($target['relativePath'] ?? '');
+        if ($path === '' || $themeId === '' || $relativePath === '' || !is_file($path)) {
+            return '';
+        }
+
+        $contentHash = hash_file('sha256', $path);
+        if (!is_string($contentHash) || $contentHash === '') {
+            return '';
+        }
+
+        return hash('sha256', $themeId . "\n" . $relativePath . "\n" . $contentHash);
+    }
+}
+
+if (!function_exists('red_admin_advanced_css_read')) {
+    function red_admin_advanced_css_read(array $target)
+    {
+        $path = (string) ($target['absolutePath'] ?? '');
+        if ($path === '' || !is_file($path) || !is_readable($path)) {
+            return null;
+        }
+
+        $content = file_get_contents($path);
+        return $content === false ? null : $content;
+    }
+}
+
+if (!function_exists('red_admin_advanced_css_write')) {
+    /**
+     * Return yes, stale, or no so the admin UI can distinguish a safe retry.
+     */
+    function red_admin_advanced_css_write(array $target, $expectedToken, $css)
+    {
+        if (is_array($css)) {
+            return 'no';
+        }
+
+        $expectedToken = red_admin_advanced_scalar($expectedToken);
+        $currentToken = red_admin_advanced_css_target_token($target);
+        if ($expectedToken === '' || $currentToken === '' || !hash_equals($currentToken, $expectedToken)) {
+            return 'stale';
+        }
+
+        $path = (string) ($target['absolutePath'] ?? '');
+        if ($path === '' || !is_file($path) || !is_writable($path)) {
+            return 'no';
+        }
+
+        $css = red_admin_advanced_scalar($css);
+        $written = file_put_contents($path, $css, LOCK_EX);
+        return is_int($written) && $written === strlen($css) ? 'yes' : 'no';
     }
 }
 

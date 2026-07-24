@@ -1,0 +1,98 @@
+/*
+ * RED-CMS visual Layout Builder public grid.
+ *
+ * The contract is deliberately theme-neutral and fully scoped. Theme packages
+ * continue to own component typography, color, and content presentation.
+ */
+
+.red-custom-layout {
+	box-sizing: border-box;
+	display: block;
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+.red-custom-layout *,
+.red-custom-layout *::before,
+.red-custom-layout *::after {
+	box-sizing: border-box;
+}
+
+.red-custom-layout__breadcrumb,
+.red-custom-layout__container {
+	inline-size: min(100% - clamp(24px, 5vw, 72px), 1200px);
+	margin-inline: auto;
+}
+
+.red-custom-layout__breadcrumb {
+	padding-block: clamp(12px, 2vw, 24px);
+	overflow-x: auto;
+}
+
+.red-custom-layout__breadcrumb ol {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-inline-size: max-content;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.red-custom-layout__breadcrumb li {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.red-custom-layout__breadcrumb li + li::before {
+	content: "/";
+	opacity: 0.48;
+}
+
+.red-custom-layout__container {
+	display: grid;
+	gap: clamp(18px, 2.6vw, 36px);
+	padding-block: clamp(28px, 5vw, 72px);
+}
+
+.red-custom-layout__row {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: clamp(14px, 2vw, 28px);
+	min-inline-size: 0;
+}
+
+.red-custom-layout__slot {
+	grid-column: span var(--red-custom-layout-span, 12);
+	min-inline-size: 0;
+}
+
+.red-custom-layout__slot > :first-child {
+	margin-block-start: 0;
+}
+
+.red-custom-layout__slot > :last-child {
+	margin-block-end: 0;
+}
+
+@media (max-width: 767px) {
+	.red-custom-layout__breadcrumb,
+	.red-custom-layout__container {
+		inline-size: min(100% - 28px, 1200px);
+	}
+
+	.red-custom-layout__container {
+		gap: 20px;
+		padding-block: 28px 40px;
+	}
+
+	.red-custom-layout__row {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 20px;
+	}
+
+	.red-custom-layout__slot {
+		grid-column: 1 / -1;
+	}
+}

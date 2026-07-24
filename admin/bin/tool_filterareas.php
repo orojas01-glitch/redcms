@@ -1,6 +1,7 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(); ?>
+red_require_admin();
+red_require_admin_tool(2); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_tool_helpers.php' ?>
@@ -71,6 +72,7 @@ red_require_admin(); ?>
 		}
 		$Layout=red_admin_tool_area_layout($db->connection, $cparea, $SelectedArea);
 		$Positions=red_admin_tool_layout_positions($db->connection, $Layout);
+		$PositionOptions=red_admin_tool_layout_position_options($db->connection, $Layout, true);
 		$Articles=red_admin_tool_filter_articles($db->connection, $cparea, $SelectedArea, $SortBy);
 		$Counter=count($Articles);
 		$AdminComponentIDs=red_admin_tool_admin_component_ids($_SESSION['AdminComponents'] ?? '');
@@ -330,6 +332,9 @@ input[type='checkbox']{float:left}
 									$Access=red_admin_tool_component_access($db->connection, $Component, $AdminComponentIDs, $RecordID);
 									$CompGroup=$Access['comp_group'];
 									$CRecordID=(int)$Access['component_record_id'];
+									if (!$Access['authorized']) {
+										continue;
+									}
                                     
                                     if(!$Access['authorized']){
                                         //echo ' ADMINISTRATOR NOT AUTHORIZED TO UPDATE<br />';
@@ -356,8 +361,7 @@ input[type='checkbox']{float:left}
 										echo '<input type="hidden" name="RecordID['.$w.']" value="'.$RecordID.'" />';
 										echo '</div>';
 										echo '<div class="grid_1" style="text-align:center; margin-left:0px; margin-right:0px;">';
-										settype($Positions, "integer");
-										if($This->Position > $Positions){
+										if(!array_key_exists((int) $This->Position, $PositionOptions)){
 											echo '<font color="purple">';
 											echo $This->Position;
 											echo '<sup>&#8224;</sup>';
@@ -368,7 +372,7 @@ input[type='checkbox']{float:left}
 										echo '<div class="grid_1 comp" style="text-align:center;margin-left:0px; margin-right:0px;">'.$ComponentHtml.'&nbsp;</div>';
 										 echo '<div class="grid_2" style="text-align:center; margin-left:0px">';
 											if ($cparea==='Sections'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+											if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/">'.$This->Sections.'</a>';
 														else
@@ -380,7 +384,7 @@ input[type='checkbox']{float:left}
 										echo '&nbsp;</div>';
 										 echo '<div class="grid_2" style="text-align:center; margin-left:0px">';
 											if ($cparea==='Categories'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+											if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/'.$This->Categories.'/">'.$This->Categories.'</a>';
 														else
@@ -392,7 +396,7 @@ input[type='checkbox']{float:left}
 										echo '&nbsp;</div>';
 										echo '<div class="grid_1" style="text-align:center; margin-left:0px">';
 											if ($cparea==='SubCategories'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+											if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/'.$This->Categories.'/'.$This->SubCategories.'/">'.$This->SubCategories.'</a>';
 														else
@@ -472,8 +476,7 @@ input[type='checkbox']{float:left}
 											echo '<input type="hidden" name="VarPosition" value="'.$This->Position.'" />';
 											echo '</div>';
 											echo '<div class="grid_1" style="text-align:center; margin-left:0px; margin-right:0px;">';
-											settype($Positions, "integer");
-											if($This->Position > $Positions){
+											if(!array_key_exists((int) $This->Position, $PositionOptions)){
 												echo '<font color="purple">';
 												echo $This->Position;
 												echo '<sup>&#8224;</sup>';
@@ -484,7 +487,7 @@ input[type='checkbox']{float:left}
 											echo '<div class="grid_1 comp" style="text-align:center;margin-left:0px; margin-right:0px;">'.$ComponentHtml.'&nbsp;</div>';
 											echo '<div class="grid_2" style="text-align:center; margin-left:0px">';
 												if ($cparea==='Sections'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+												if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/">'.$This->Sections.'</a>';
 														else
@@ -498,7 +501,7 @@ input[type='checkbox']{float:left}
 											echo '<div class="grid_2" style="text-align:center; margin-left:0px">';
 												
 												if ($cparea==='Categories'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+												if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/'.$This->Categories.'/">'.$This->Categories.'</a>';
 														else
@@ -512,7 +515,7 @@ input[type='checkbox']{float:left}
 											echo '<div class="grid_1" style="text-align:center; margin-left:0px">';
 											
 												if ($cparea==='SubCategories'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+												if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/'.$This->Categories.'/'.$This->SubCategories.'/">'.$This->SubCategories.'</a>';
 														else
@@ -592,8 +595,7 @@ input[type='checkbox']{float:left}
 											echo '<input type="hidden" name="VarPosition" value="'.$This->Position.'" />';
 											echo '</div>';
 											echo '<div class="grid_1" style="text-align:center; margin-left:0px; margin-right:0px;">';
-											settype($Positions, "integer");
-											if($This->Position > $Positions){
+											if(!array_key_exists((int) $This->Position, $PositionOptions)){
 												echo '<font color="purple">';
 												echo $This->Position;
 												echo '<sup>&#8224;</sup>';
@@ -604,7 +606,7 @@ input[type='checkbox']{float:left}
 												echo '<div class="grid_1 comp" style="text-align:center;margin-left:0px; margin-right:0px;">'.$ComponentHtml.'&nbsp;</div>';
 											 echo '<div class="grid_2" style="text-align:center; margin-left:0px">';
 												if ($cparea==='Sections'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+												if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/">'.$This->Sections.'</a>';
 														else
@@ -616,7 +618,7 @@ input[type='checkbox']{float:left}
 											echo '&nbsp;</div>';
 											 echo '<div class="grid_2" style="text-align:center; margin-left:0px">';
 												if ($cparea==='Categories'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+												if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/'.$This->Categories.'/">'.$This->Categories.'</a>';
 														else
@@ -628,7 +630,7 @@ input[type='checkbox']{float:left}
 											echo '&nbsp;</div>';
 											echo '<div class="grid_1" style="text-align:center; margin-left:0px">';
 												if ($cparea==='SubCategories'){
-													if(($This->Position <> 0) and  ($This->Position <= $Positions)){
+												if(((int) $This->Position !== 0) && array_key_exists((int) $This->Position, $PositionOptions)){
 														if ($This->Sections==='home')
 														echo '<a href="/'.$This->Categories.'/'.$This->SubCategories.'/">'.$This->SubCategories.'</a>';
 														else

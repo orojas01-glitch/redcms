@@ -11,7 +11,7 @@
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true);
+red_require_admin_site_manager(true);
 
 $payloadFields = array_diff(array_keys($_POST), ['csrf_token', 'RecordID', 'CurrentSubCategory']);
 if (empty($payloadFields) || empty($_POST['RecordID'])) {
@@ -26,18 +26,21 @@ require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 
 $recordId = (int) red_admin_post_text('RecordID');
-$currentSubCategory = strtolower(red_admin_post_text('CurrentSubCategory'));
-$data = red_admin_area_update_payload($_POST, 'SubCategories');
+$data = red_admin_area_update_payload($_POST, 'SubCategories', 'RED_SubCategories');
 $newSubCategory = $data['SubCategories'] ?? '';
 $language = red_admin_area_language();
+$existing = red_admin_area_record($db->connection, 'RED_SubCategories', $recordId);
+$currentSubCategory = strtolower(red_admin_text($existing['SubCategories'] ?? ''));
 
-if ($recordId <= 0) {
+if ($recordId <= 0 || !$existing || (int) ($data['CategoryRecordID'] ?? 0) <= 0) {
     echo 'no';
     $db->close();
     exit;
 }
 
-$renaming = array_key_exists('SubCategories', $data) && $newSubCategory !== '' && $newSubCategory !== $currentSubCategory;
+$renaming = array_key_exists('SubCategories', $data)
+    && $newSubCategory !== ''
+    && $newSubCategory !== $currentSubCategory;
 if ($renaming) {
     $conflict = red_admin_area_alias_conflict($db->connection, $language, $newSubCategory);
     if ($conflict !== '') {
@@ -46,20 +49,25 @@ if ($renaming) {
         exit;
     }
 
-    $response = red_admin_area_rename(
-        $db->connection,
-        'RED_SubCategories',
-        'SubCategories',
-        $recordId,
-        $data,
-        $currentSubCategory,
-        $newSubCategory,
-        $language
-    );
-    echo $response !== false ? $response : 'no';
+}
+
+$result = red_admin_area_save_existing(
+    $db->connection,
+    'RED_SubCategories',
+    'SubCategories',
+    $recordId,
+    $data
+);
+if (is_array($result)) {
+    if ($renaming) {
+        header('X-RED-Canonical-Alias: ' . rawurlencode((string) $result['alias']));
+    }
+    if (!empty($result['routeChanged']) && !empty($result['path'])) {
+        header('X-RED-Canonical-Path: ' . rawurlencode((string) $result['path']));
+    }
+    echo (string) ($result['response'] ?? 'yes');
 } else {
-    $areaRows = red_admin_update_area($db->connection, 'RED_SubCategories', 'SubCategories', $recordId, $data);
-    echo ($areaRows !== false && $areaRows > 0) ? 'yes' : 'no';
+    echo 'no';
 }
 
 $db->close();

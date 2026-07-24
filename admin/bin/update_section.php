@@ -11,7 +11,7 @@
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true);
+red_require_admin_site_manager(true);
 
 $payloadFields = array_diff(array_keys($_POST), ['csrf_token', 'RecordID', 'CurrentSection']);
 if (empty($payloadFields) || empty($_POST['RecordID'])) {
@@ -56,7 +56,12 @@ if ($renaming) {
         $newSection,
         $language
     );
-    echo $response !== false ? $response : 'no';
+    if ($response !== false) {
+        header('X-RED-Canonical-Alias: ' . rawurlencode($newSection));
+        echo $response;
+    } else {
+        echo 'no';
+    }
 } else {
     $areaRows = red_admin_update_area($db->connection, 'RED_Sections', 'Sections', $recordId, $data);
     echo ($areaRows !== false && $areaRows > 0) ? 'yes' : 'no';

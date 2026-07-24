@@ -1,5 +1,6 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_tool_helpers.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_list_ui_helpers.php";
 red_start_session();
 red_require_admin(); ?>
 <?php
@@ -8,18 +9,6 @@ class edit_inactive_article
 {
 	public function inactive_article_form($layout)
 	{
-		echo '<div class="container_12 cp_padtop"><div class="wrapper"><article class="grid_12 cp_admin"><div class="scroll"><div style="padding:10px;">';
-		echo '<form id="edit_inactive_article" name="edit_inactive_article" class="cp"><fieldset>';
-		echo '<div class="header">';
-		echo '<div class="titleleft longtitle"><strong>Article Title</strong>';
-		echo '</div>';
-		echo '<div class="titleleft component"><strong>Component</strong>';
-		echo '</div>';
-		echo '<div class="titleright editico"><strong>Edit</strong>';
-		echo '</div>';
-		echo '</div>';
-		echo '<div class="clear-cp"></div>';
-		
         $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
         $adminComponentIds = red_admin_tool_admin_component_ids($_SESSION['AdminComponents'] ?? '');
         $articles = red_admin_tool_fetch_all(
@@ -29,59 +18,99 @@ class edit_inactive_article
             [red_admin_area_language()],
             'RED_Articles inactive admin list lookup failed'
         );
+        $visibleArticles = [];
 
         foreach($articles as $article)
         {
             $RecordID=(int) ($article['RecordID'] ?? 0);
             $Alias=red_admin_tool_js_suffix($article['Alias'] ?? '', $RecordID);
-			$Title=red_admin_tool_html(preg_replace('/<[^>]*>/', '', $article['Title'] ?? ''));
+			$TitleText=red_admin_tool_text(preg_replace('/<[^>]*>/', '', $article['Title'] ?? ''));
+			if ($TitleText === '') {
+				$TitleText = 'Untitled article';
+			}
             $Component=red_admin_tool_identifier($article['Component'] ?? '');
-            $ComponentLabel=red_admin_tool_html($article['Component'] ?? '');
 
             $access = $Component !== ''
                 ? red_admin_tool_component_access($db->connection, $Component, $adminComponentIds, $RecordID)
-                : ['authorized' => false, 'comp_group' => '', 'component_record_id' => 0];
+                : ['authorized' => false, 'comp_group' => '', 'component_record_id' => 0, 'subtype' => ''];
 
             if (!$access['authorized']) {
-                $this->render_unauthorized_row($Alias, $Title, $ComponentLabel);
                 continue;
             }
+
+			$Subtype = red_admin_tool_text($access['subtype'] ?? '');
+			$SubtypeKey = strtolower($Subtype);
+			$ComponentKey = strtolower($Component);
+			$ComponentLabel = $Component;
+
+			if ($Component === 'Gallery') {
+				$ComponentKey = in_array($SubtypeKey, ['banner', 'gallery', 'video'], true) ? $SubtypeKey : 'gallery';
+				$ComponentLabel = ucfirst($ComponentKey);
+			} elseif ($Component === 'Form') {
+				$ComponentKey = $SubtypeKey === 'login' ? 'form-login' : 'form-builder';
+				$ComponentLabel = $SubtypeKey === 'login'
+					? 'Admin Login'
+					: 'Form'.($Subtype !== '' ? ' · '.$Subtype : '');
+			} elseif (!in_array($ComponentKey, ['article', 'other'], true)) {
+				$ComponentKey = 'default';
+			}
 
             if ($access['comp_group'] === 'Y') {
                 $CRecordID = (int) $access['component_record_id'];
                 if ($CRecordID <= 0) {
-                    $this->render_unauthorized_row($Alias, $Title, $ComponentLabel);
                     continue;
                 }
 
                 $this->render_edit_script($Alias, $Component, $layout, true);
-                $this->render_row($Alias, $Title, $ComponentLabel, 'javascript:showdiv(\'editcontent\'); edit_inactive_article_'.$Alias.'(' .$RecordID . ','.$CRecordID.');');
+				$visibleArticles[] = [
+					'title' => $TitleText,
+					'component' => $ComponentLabel,
+					'key' => $ComponentKey,
+					'onclick' => 'showdiv(\'editcontent\'); edit_inactive_article_'.$Alias.'('.$RecordID.','.$CRecordID.');',
+				];
                 continue;
             }
 
             $this->render_edit_script($Alias, $Component, $layout, false);
-            $this->render_row($Alias, $Title, $ComponentLabel, 'javascript:showdiv(\'editcontent\'); edit_inactive_article_'.$Alias.'(' .$RecordID . ');');
+			$visibleArticles[] = [
+				'title' => $TitleText,
+				'component' => $ComponentLabel,
+				'key' => $ComponentKey,
+				'onclick' => 'showdiv(\'editcontent\'); edit_inactive_article_'.$Alias.'('.$RecordID.');',
+			];
         }
         $db->close();
-		
-		echo '</fieldset></form>';
-		echo '</div></div></article></div></div>';
-       
-	}
 
-    private function render_unauthorized_row($Alias, $Title, $ComponentLabel)
-    {
-        echo '<script type="text/javascript">'. "\n";
-        echo '<!--' ."\n";
-        echo 'function edit_inactive_article_'.$Alias.' (){'. "\n";
-        echo '$(\'#msggbox_edit_inactive_article\').html("You\'re not authorized to edit this content.")'. "\n";
-        echo '.fadeIn(1500, function() {'. "\n";
-        echo '});'. "\n";
-        echo 'return false;'. "\n";
-        echo '}'. "\n";
-        echo '-->'. "\n";
-        echo '</script>';
-        $this->render_row($Alias, $Title, $ComponentLabel, 'edit_inactive_article_'.$Alias.'();');
+		echo '<div class="container_12 cp_padtop red-admin-area-list-container"><div class="wrapper"><article class="grid_12 cp_admin"><div class="red-admin-area-list-shell">';
+		echo '<form id="edit_inactive_article" name="edit_inactive_article" class="cp red-admin-area-list-form"><fieldset>';
+		echo '<div class="red-admin-area-list red-admin-area-list--inactive" data-red-admin-list="inactive-articles" role="table" aria-label="Inactive articles">';
+		echo '<div class="red-admin-area-list__header" role="row">';
+		echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--primary" role="columnheader">Inactive article <span class="red-admin-area-list__count">'.red_admin_list_ui_html(red_admin_list_ui_item_count(count($visibleArticles))).'</span></div>';
+		echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--layout" role="columnheader">Component</div>';
+		echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--status" role="columnheader">Status</div>';
+		echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--action" role="columnheader">Action</div>';
+		echo '</div>';
+
+		if (count($visibleArticles) === 0) {
+			echo '<div class="red-admin-area-list__empty" role="row"><div role="cell"><strong>No inactive articles</strong><span>Content marked inactive will appear here when it needs review.</span></div></div>';
+		}
+
+		foreach ($visibleArticles as $visibleArticle) {
+			$Title = red_admin_list_ui_html($visibleArticle['title']);
+			$ComponentLabel = red_admin_list_ui_html($visibleArticle['component']);
+			$ComponentKey = preg_replace('/[^a-z0-9-]+/', '-', (string) $visibleArticle['key']);
+			$EditLabel = 'Edit inactive '.$visibleArticle['component'].': '.$visibleArticle['title'];
+
+			echo '<div class="red-admin-area-list__row red-admin-area-list__row--'.$ComponentKey.'" role="row">';
+			echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--primary" role="cell"><span class="red-admin-area-list__title">'.$Title.'</span></div>';
+			echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--layout" role="cell" data-label="Component"><span class="red-admin-area-list__component">'.$ComponentLabel.'</span></div>';
+			echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--status" role="cell" data-label="Status">'.red_admin_list_ui_status('N').'</div>';
+			echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--action" role="cell">'.red_admin_list_ui_action_button($visibleArticle['onclick'], $EditLabel).'</div>';
+			echo '</div>';
+		}
+
+		echo '</div></fieldset></form>';
+		echo '</div></article></div></div>';
     }
 
     private function render_edit_script($Alias, $Component, $layout, $isGroup)
@@ -123,20 +152,4 @@ class edit_inactive_article
         echo '</script>';
     }
 
-    private function render_row($Alias, $Title, $ComponentLabel, $onClick)
-    {
-        echo '<div class="wrapper row2">';
-        echo '<label style="display:inline;">';
-        echo '<div class="titleleft longtitle">';
-        echo '<strong>'.$Title.'</strong>';
-        echo '</div>';
-        echo '<div class="titleleft component">';
-        echo $ComponentLabel;
-        echo '</div>';
-        echo '<div class="titleright editico">';
-        echo '<img src="/admin/images/ico_edit.png" onClick="'.$onClick.'" title="Edit" style="cursor:pointer">';
-        echo '</div>';
-        echo '</label>';
-        echo '</div>';
-    }
 }
