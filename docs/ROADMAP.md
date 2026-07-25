@@ -16,7 +16,7 @@ databases, and media are separate deliverables.
 
 Planned work includes:
 
-- Member-only directories and account lifecycle
+- Member Access / Protected Content for private Sections and account lifecycle
 - Payment-assisted access, including regional provider integrations
 - Expanded roles and permissions
 - Draft, review, approval, and publish workflow
@@ -29,6 +29,28 @@ Planned work includes:
 These items are product direction, not active Version 5.0 features. Each
 requires its own security, data-migration, privacy, accessibility, and rollback
 design before implementation.
+
+### Adaptable Add-On Platform
+
+RED-CMS should support separately installed client capabilities rather than
+bundle every business vertical into the core. The first planned content
+packages, in order of importance, are:
+
+1. Store Lite
+2. Events Calendar
+3. Appointments
+4. Donations
+5. Restaurant Ordering
+
+Member Access / Protected Content is a cross-cutting security package required
+before private Sections or protected downloads can become operational. It is
+not a public listing-directory component. Public business or location
+directories would be a separate future Listing component and search service.
+
+See [`ADD-ON-CONTRACT.md`](ADD-ON-CONTRACT.md) for the package types, manifest,
+runtime registration, lifecycle, permission, migration, theme, client
+isolation, prioritized-package, and acceptance contracts. These packages are
+direction only; none is active in RED-CMS 5.0.
 
 ### Version 5.1 Compatibility Work
 

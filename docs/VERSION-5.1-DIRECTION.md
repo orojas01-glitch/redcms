@@ -4,11 +4,11 @@ Status: product direction only. These features are not part of RED-CMS 5.0 and m
 
 ## Product Goal
 
-Version 5.1 should extend the 5.0 authoring foundation for organizations that need member access, formal publishing operations, clearer accountability, and optional integrations. New capabilities should be modular, permission-aware, migration-backed, auditable, and removable without breaking public content.
+Version 5.1 should extend the 5.0 authoring foundation for organizations that need member access, formal publishing operations, clearer accountability, and optional integrations. RED-CMS should remain a reusable core that can be adapted to different client types through separately installed components, services, and provider adapters. New capabilities should be modular, permission-aware, migration-backed, auditable, and removable without breaking public content.
 
-## 1. Members, Paid Access, And Secure Directories
+## 1. Members, Paid Access, And Protected Content
 
-Protected content should use a dedicated member identity and entitlement system, never the administrator account table or a client-side hidden folder. A visitor may register, sign in, receive a manual entitlement, or purchase access through a payment adapter.
+Private Sections and protected downloads should use a dedicated Member Access / Protected Content package with member identity, sessions, entitlements, and route enforcement. They must never rely on the administrator account table, a client-side hidden folder, or the stored `AccessLevel` value alone. A visitor may register, sign in, receive a manual entitlement, or purchase access through a payment adapter.
 
 - Enforce access before protected content is queried or rendered.
 - Keep public administrators and public members in separate identity stores.
@@ -17,7 +17,8 @@ Protected content should use a dedicated member identity and entitlement system,
 - Keep payment credentials outside RED-CMS.
 - Begin with PayPal sandbox support; add Nequi after merchant onboarding and certified server-side callback testing.
 
-The detailed security and delivery model is in `docs/MEMBER-ACCESS-DIRECTION.md`.
+This use of protected content is different from a public listing directory. The
+detailed security and delivery model is in `docs/MEMBER-ACCESS-DIRECTION.md`.
 
 ## 2. Roles And Permissions
 
@@ -64,9 +65,19 @@ Each important record should answer:
 - Who approved it?
 - When is follow-up due?
 
-## 6. Installable Tools And Social Publishing APIs
+## 6. Controlled Add-Ons And Social Publishing APIs
 
-Add a controlled extension catalog rather than arbitrary uploaded PHP. A tool package should declare its identifier, version, compatibility range, permissions, settings schema, migrations, background jobs, outbound hosts, and uninstall behavior.
+Add a controlled extension catalog rather than arbitrary uploaded PHP. A
+package may provide placeable components, business services, administrator
+tools, or external-provider adapters. It should declare its identifier,
+version, compatibility range, permissions, settings schema, migrations,
+background jobs, outbound hosts, dependencies, and uninstall behavior.
+
+The first planned client content packages are Store Lite, Events Calendar,
+Appointments, Donations, and Restaurant Ordering, in that order. Member Access
+/ Protected Content is a separate cross-cutting package required before private
+content is enabled. The full boundary is defined in
+`docs/ADD-ON-CONTRACT.md`.
 
 Social publishing should be an optional adapter layer:
 
@@ -79,6 +90,11 @@ Social publishing should be an optional adapter layer:
 
 Initial research can cover major providers, but implementation should begin with one well-supported API and a reusable adapter contract.
 
+The first implementation should use trusted filesystem-deployed first-party
+packages. Package discovery must not execute code, and the administrator must
+not upload arbitrary PHP. Installation and activation remain separate,
+owner-authorized actions scoped to one client database.
+
 ## Suggested Delivery Order
 
 1. Role and permission model
@@ -87,7 +103,12 @@ Initial research can cover major providers, but implementation should begin with
 4. Internal notifications and reminders
 5. Member identity and free/manual entitlements
 6. PayPal sandbox, then Nequi
-7. Signed extension manifests and one first-party tool
+7. Add-on manifest, registry, lifecycle, and Store Lite first-party package
 8. One audited social publishing adapter
 
 Each phase requires its own migration, rollback path, authorization tests, disposable-database acceptance coverage, and desktop/mobile administrator verification.
+
+Within the add-on track, the prioritized vertical order is Store Lite, Events
+Calendar, Appointments, Donations, and Restaurant Ordering. If private folders
+are scheduled for activation, Member Access must pass its route-enforcement and
+leakage gates before the administrator exposes an operational private setting.
