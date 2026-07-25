@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/public_render_helpers.php'; ?>
 <!--<header>
     <div class="menuBox clearfix">
         <div class="container">
@@ -30,16 +31,12 @@
                 <div class="col-lg-4 col-md-4 col-sm-4">
                     
 				<?php
-                $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                $result = $db->query("SELECT * FROM RED_Advanced WHERE Language='".language."' AND Item='Website_Header'");
-                //echo ($result->num_rows);
-                $result_counter = $result->num_rows;
-                
-                if($result->num_rows > 0) 
-                {
-                    $info = mysqli_fetch_assoc($result); 
+                $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+                $info = red_public_advanced_item($db->connection, 'Website_Header');
+                if ($info) {
                     echo $info['Content'];
                 }
+                $db->close();
                 ?>
                 </div>
                 <div class="col-lg-8 col-md-8 col-sm-8">
@@ -90,7 +87,6 @@
                 ?>
             
    			
-
 
 
 

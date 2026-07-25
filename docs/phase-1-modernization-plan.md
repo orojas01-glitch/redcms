@@ -95,6 +95,16 @@ Manual smoke test list after deploying to a dev copy:
 
 No URL or database table-name changes have been made.
 
+## Phase 1 Closeout — 2026-07-10
+
+Status: Complete.
+
+The closeout audit passed PHP 8.5 lint/runtime checks, complete admin guard/CSRF inventory, active SQL/request-pattern scans, transaction and upload-compensation smokes, fresh installer plus migration imports, migration reruns, normalized live/clean schema comparison, relationship audits, public routes, authenticated admin overlay, add/edit rendering, password-hash upgrade, order guard, and logout checks.
+
+One clean-installer syntax defect in the sanitized `RED_Admin` seed was found and corrected during acceptance. The final disposable clean installation contained the canonical 14 tables and expected cleaned content, with zero Audio Player/Store remnants or missing article/form/gallery/section relationships.
+
+Phase 2 has not started and requires an explicit user decision. Remaining credential rotation, production runtime confirmation, and GitHub authentication/push are separate Phase 0 operational tasks.
+
 ## 2026-07-02 Code Batch 1
 
 Completed:

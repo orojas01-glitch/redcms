@@ -10,54 +10,299 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_gallery_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_banner_ui_helpers.php' ?>
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-		$RecordID=preg_replace ( "'<[^>]+>'U", "", $_POST['RecordID']);
-		$ArtRecordID=preg_replace ( "'<[^>]+>'U", "", $_POST['ArtRecordID']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$Layout=preg_replace ( "'<[^>]+>'U", "", $_POST['Layout']);
-        $ArticleSel=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
-				
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		//echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-		$result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='".$ArtRecordID."'");
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
-		{
-		$ActiveValue=$row['Active'];
-		$VarPositionValue=$row[$VarPosition];
-		$StartDate=$row['StartDate'];
-		//$StartDate=substr($StartDate, 0, 10);
-		$ExpDate=$row['ExpDate'];
-		//$ExpDate=substr($ExpDate, 0, 10);
-		$PosOrder=$row[$VarPosition.'Order'];
-		$Section=$row['Sections'];
-		//echo 'Section:'.$Section.'<br/>';
-		$Category=$row['Categories'];
-		//echo 'Category:'.$Category.'<br/>';
-		$SubCategory=$row['SubCategories'];
-		//echo 'SubCategory:'.$SubCategory.'<br/>';
-		$Article=$row['Article'];
-		$HomeFeature=$row['HomeFeature'];
-		$BigPict=$row['BigPict'];
-		$SmallPict=$row['SmallPict'];
-		$Language=$row['Language'];
-		$SmallPictAlign=$row['SmallPictAlign'];
-		$Tags=$row['Tags'];
-            
-		}
-		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		//echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-		$result = $db->query("SELECT * FROM RED_C_Gallery WHERE RecordID='".$RecordID."'");
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
-		{
+$RecordID = (int) ($_POST['RecordID'] ?? 0);
+$ArtRecordID = (int) ($_POST['ArtRecordID'] ?? 0);
+$VarPosition = red_admin_article_position_column($_POST['VarPosition'] ?? '');
+if ($RecordID <= 0 || $ArtRecordID <= 0 || $VarPosition === null) {
+	echo 'no';
+	exit;
+}
+
+$Layout = red_admin_text($_POST['Layout'] ?? '');
+$ArticleSel = red_admin_text($_POST['Article'] ?? '');
+
+$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+red_admin_require_article_access($db->connection, $ArtRecordID);
+$articleRow = red_admin_article_full_record($db->connection, $ArtRecordID);
+$row = red_admin_gallery_render_record($db->connection, $RecordID, $ArtRecordID);
+if (!$articleRow || !$row) {
+	$db->close();
+	echo 'no';
+	exit;
+}
+
+if ($Layout === '') {
+	$Layout = red_admin_text($articleRow['Layout'] ?? '');
+}
+
+$ActiveValue=$articleRow['Active'];
+$VarPositionValue=(int) ($articleRow[$VarPosition] ?? 0);
+$StartDate=$articleRow['StartDate'];
+//$StartDate=substr($StartDate, 0, 10);
+$ExpDate=$articleRow['ExpDate'];
+//$ExpDate=substr($ExpDate, 0, 10);
+$PosOrder=(int) ($articleRow[$VarPosition.'Order'] ?? 0);
+$Section=$articleRow['Sections'];
+//echo 'Section:'.$Section.'<br/>';
+$Category=$articleRow['Categories'];
+//echo 'Category:'.$Category.'<br/>';
+$SubCategory=$articleRow['SubCategories'];
+//echo 'SubCategory:'.$SubCategory.'<br/>';
+$Article=$articleRow['Article'];
+$HomeFeature=$articleRow['HomeFeature'];
+$BigPict=$articleRow['BigPict'];
+$SmallPict=$articleRow['SmallPict'];
+$Language=$articleRow['Language'];
+$SmallPictAlign=$articleRow['SmallPictAlign'];
+$Tags=$articleRow['Tags'];
+$csrfToken=red_csrf_token();
+
+if (($row['GalleryType'] ?? '') === 'Gallery') {
+	require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_gallery_ui_helpers.php';
+
+	$positionOptions = red_admin_article_layout_position_options($db->connection, $Layout);
+	if (!array_key_exists($VarPositionValue, $positionOptions)) {
+		$positionOptions = [$VarPositionValue => 'Unavailable; preserved'] + $positionOptions;
+	}
+
+	$sectionOptions = red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
+	$categoryOptions = red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
+	$subCategoryOptions = red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+	$articleOptions = red_admin_article_page_options($db->connection, $Article);
+	$sectionOptions = red_admin_gallery_ui_preserve_option($sectionOptions, $Section);
+	$categoryOptions = red_admin_gallery_ui_preserve_option($categoryOptions, $Category);
+	$subCategoryOptions = red_admin_gallery_ui_preserve_option($subCategoryOptions, $SubCategory);
+	$articleOptions = red_admin_gallery_ui_preserve_option($articleOptions, $Article);
+
+	$uploadUrls = [
+		'Gallery' => red_admin_gallery_ui_upload_url([
+			'RecordID' => $RecordID,
+			'ArtRecordID' => $ArtRecordID,
+			'UC' => 'Gallery',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Gallery',
+			'Language' => $Language,
+		]),
+		'BigPict' => red_admin_gallery_ui_upload_url([
+			'RecordID' => $ArtRecordID,
+			'UC' => 'BigPict',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Gallery',
+			'Language' => $Language,
+		]),
+		'SmallPict' => red_admin_gallery_ui_upload_url([
+			'RecordID' => $ArtRecordID,
+			'UC' => 'SmallPict',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Gallery',
+			'Language' => $Language,
+		]),
+	];
+
+	$db->close();
+	red_admin_render_gallery_form([
+		'mode' => 'edit',
+		'returnTarget' => 'edit_content_grid',
+		'submitUrl' => '/admin/bin/update_gallery.php',
+		'deleteUrl' => '/admin/bin/delete_label.php',
+		'title' => red_admin_text($row['Title'] ?? ''),
+		'alias' => red_admin_text($row['Alias'] ?? ''),
+		'tags' => red_admin_text($Tags),
+		'active' => red_admin_text($ActiveValue),
+		'homeFeature' => red_admin_text($HomeFeature),
+		'position' => $VarPositionValue,
+		'positionOrder' => $PosOrder,
+		'positionOptions' => $positionOptions,
+		'varPosition' => $VarPosition,
+		'presentation' => red_admin_gallery_ui_presentation($row['NewWindow'] ?? ''),
+		'photos' => red_admin_gallery_ui_photo_entries($row['LongDesc'] ?? '', $row['ShortDesc'] ?? ''),
+		'sectionOptions' => $sectionOptions,
+		'categoryOptions' => $categoryOptions,
+		'subCategoryOptions' => $subCategoryOptions,
+		'articleOptions' => $articleOptions,
+		'startDateMeta' => red_admin_gallery_ui_date_meta($StartDate, '1970-01-01'),
+		'expirationDateMeta' => red_admin_gallery_ui_date_meta($ExpDate, '9999-12-31'),
+		'bigPict' => red_admin_text($BigPict),
+		'smallPict' => red_admin_text($SmallPict),
+		'smallPictAlign' => red_admin_text($SmallPictAlign),
+		'uploadUrls' => $uploadUrls,
+		'recordId' => $RecordID,
+		'artRecordId' => $ArtRecordID,
+		'editedBy' => $_SESSION['alias'] ?? '',
+		'csrfToken' => $csrfToken,
+	]);
+	exit;
+}
+
+if (($row['GalleryType'] ?? '') === 'Video') {
+	require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_video_ui_helpers.php';
+
+	$positionOptions = red_admin_article_layout_position_options($db->connection, $Layout);
+	if (!array_key_exists($VarPositionValue, $positionOptions)) {
+		$positionOptions = [$VarPositionValue => 'Unavailable; preserved'] + $positionOptions;
+	}
+
+	$linkNavigatorOptions = red_admin_main_menu_link_options($db->connection);
+	$sectionOptions = red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
+	$categoryOptions = red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
+	$subCategoryOptions = red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+	$articleOptions = red_admin_article_page_options($db->connection, $Article);
+	$sectionOptions = red_admin_video_preserve_option($sectionOptions, $Section);
+	$categoryOptions = red_admin_video_preserve_option($categoryOptions, $Category);
+	$subCategoryOptions = red_admin_video_preserve_option($subCategoryOptions, $SubCategory);
+	$articleOptions = red_admin_video_preserve_option($articleOptions, $Article);
+
+	$uploadUrls = [
+		'BigPict' => red_admin_video_upload_url([
+			'RecordID' => $ArtRecordID,
+			'UC' => 'BigPict',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Video',
+			'Language' => $Language,
+		]),
+		'SmallPict' => red_admin_video_upload_url([
+			'RecordID' => $ArtRecordID,
+			'UC' => 'SmallPict',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Video',
+			'Language' => $Language,
+		]),
+	];
+
+	$db->close();
+	red_admin_render_video_form([
+		'mode' => 'edit',
+		'returnTarget' => 'edit_content_grid',
+		'submitUrl' => '/admin/bin/update_gallery.php',
+		'deleteUrl' => '/admin/bin/delete_label.php',
+		'title' => red_admin_text($row['Title'] ?? ''),
+		'alias' => red_admin_text($row['Alias'] ?? ''),
+		'tags' => red_admin_text($Tags),
+		'active' => red_admin_text($ActiveValue),
+		'homeFeature' => red_admin_text($HomeFeature),
+		'position' => $VarPositionValue,
+		'positionOrder' => $PosOrder,
+		'positionOptions' => $positionOptions,
+		'varPosition' => $VarPosition,
+		'videoUrl' => red_admin_text($row['LongDesc'] ?? ''),
+		'description' => red_admin_text($row['ShortDesc'] ?? ''),
+		'link' => red_admin_text($row['Link'] ?? ''),
+		'newWindow' => red_admin_text($row['NewWindow'] ?? ''),
+		'linkNavigatorOptions' => $linkNavigatorOptions,
+		'sectionOptions' => $sectionOptions,
+		'categoryOptions' => $categoryOptions,
+		'subCategoryOptions' => $subCategoryOptions,
+		'articleOptions' => $articleOptions,
+		'startDateMeta' => red_admin_video_date_meta($StartDate, '1970-01-01'),
+		'expirationDateMeta' => red_admin_video_date_meta($ExpDate, '9999-12-31'),
+		'bigPict' => red_admin_text($BigPict),
+		'smallPict' => red_admin_text($SmallPict),
+		'smallPictAlign' => red_admin_text($SmallPictAlign),
+		'uploadUrls' => $uploadUrls,
+		'recordId' => $RecordID,
+		'artRecordId' => $ArtRecordID,
+		'editedBy' => $_SESSION['alias'] ?? '',
+		'csrfToken' => $csrfToken,
+	]);
+	exit;
+}
+
+if (($row['GalleryType'] ?? '') === 'Banner') {
+	$positionOptions = red_admin_article_layout_position_options($db->connection, $Layout);
+	if (!array_key_exists($VarPositionValue, $positionOptions)) {
+		$positionOptions = [$VarPositionValue => 'Unavailable; preserved'] + $positionOptions;
+	}
+
+	$linkNavigatorOptions = red_admin_main_menu_link_options($db->connection);
+	$sectionOptions = red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
+	$categoryOptions = red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
+	$subCategoryOptions = red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+	$articleOptions = red_admin_article_page_options($db->connection, $Article);
+	$sectionOptions = red_admin_banner_preserve_option($sectionOptions, $Section);
+	$categoryOptions = red_admin_banner_preserve_option($categoryOptions, $Category);
+	$subCategoryOptions = red_admin_banner_preserve_option($subCategoryOptions, $SubCategory);
+	$articleOptions = red_admin_banner_preserve_option($articleOptions, $Article);
+
+	$uploadUrls = [
+		'Gallery' => red_admin_banner_upload_url([
+			'RecordID' => $RecordID,
+			'ArtRecordID' => $ArtRecordID,
+			'UC' => 'Gallery',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Banner',
+			'Language' => $Language,
+			'csrf_token' => $csrfToken,
+		]),
+		'BigPict' => red_admin_banner_upload_url([
+			'RecordID' => $ArtRecordID,
+			'UC' => 'BigPict',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Banner',
+			'Language' => $Language,
+			'csrf_token' => $csrfToken,
+		]),
+		'SmallPict' => red_admin_banner_upload_url([
+			'RecordID' => $ArtRecordID,
+			'UC' => 'SmallPict',
+			'Insert' => 'false',
+			'AuthComponent' => 'Gallery',
+			'AuthSubtype' => 'Banner',
+			'Language' => $Language,
+			'csrf_token' => $csrfToken,
+		]),
+	];
+
+	$db->close();
+	red_admin_render_banner_form([
+		'mode' => 'edit',
+		'returnTarget' => 'edit_content_grid',
+		'submitUrl' => '/admin/bin/update_gallery.php',
+		'deleteUrl' => '/admin/bin/delete_label.php',
+		'title' => red_admin_text($row['Title'] ?? ''),
+		'alias' => red_admin_text($row['Alias'] ?? ''),
+		'tags' => red_admin_text($Tags),
+		'active' => red_admin_text($ActiveValue),
+		'homeFeature' => red_admin_text($HomeFeature),
+		'position' => $VarPositionValue,
+		'positionOrder' => $PosOrder,
+		'positionOptions' => $positionOptions,
+		'varPosition' => $VarPosition,
+		'link' => red_admin_text($row['Link'] ?? ''),
+		'newWindow' => red_admin_text($row['NewWindow'] ?? ''),
+		'linkNavigatorOptions' => $linkNavigatorOptions,
+		'sectionOptions' => $sectionOptions,
+		'categoryOptions' => $categoryOptions,
+		'subCategoryOptions' => $subCategoryOptions,
+		'articleOptions' => $articleOptions,
+		'startDateMeta' => red_admin_banner_date_meta($StartDate, '1970-01-01'),
+		'expirationDateMeta' => red_admin_banner_date_meta($ExpDate, '9999-12-31'),
+		'photos' => red_admin_banner_photo_names($row['LongDesc'] ?? ''),
+		'bigPict' => red_admin_text($BigPict),
+		'smallPict' => red_admin_text($SmallPict),
+		'smallPictAlign' => red_admin_text($SmallPictAlign),
+		'uploadUrls' => $uploadUrls,
+		'recordId' => $RecordID,
+		'artRecordId' => $ArtRecordID,
+		'editedBy' => $_SESSION['alias'] ?? '',
+		'csrfToken' => $csrfToken,
+	]);
+	exit;
+}
 		
 ?>
 
@@ -155,8 +400,8 @@ $(function(){
 		else
 		echo 'maxfiles: 10, '. "\n";
 		?>
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=Gallery&Language=<?php echo $Language?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=Gallery&Language=<?php echo rawurlencode($Language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -270,8 +515,8 @@ $(function(){
 		// The name of the $_FILES entry:
 		paramname:'pic',
 		maxfiles: 1,
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Language=<?php echo $Language?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Language=<?php echo rawurlencode($Language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -380,8 +625,8 @@ $(function(){
 		// The name of the $_FILES entry:
 		paramname:'pic',
 		maxfiles: 1,
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Language=<?php echo $Language?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Language=<?php echo rawurlencode($Language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -492,7 +737,7 @@ function run_update_gallery (update_gallery)
 	success: function(data) {
 /*	alert (data);
 	return false;*/
-	if (data=='yesyes' || data=='noyes' || data=='yesno')
+	if (data=='yes' || data=='yesyes' || data=='noyes' || data=='yesno')
 	{
 	$('#msggbox_update_gallery').html("&nbsp; Gallery Updated.")
 	.hide()
@@ -524,7 +769,7 @@ function run_deleterecord (RecordID,ArtRecordID)
 		  $.ajax({ 
 		type: "POST", 
 		url: "/admin/bin/delete_label.php", 
-		data: "RecordID=" + RecordID + "&ArtRecordID=" + ArtRecordID + "&T=gal",
+		data: {RecordID: RecordID, ArtRecordID: ArtRecordID, T: "gal", csrf_token: <?php echo json_encode($csrfToken); ?>},
 		success: function(data) {
 		/*alert (data);
 		return false;*/
@@ -558,7 +803,7 @@ function run_deleterecord (RecordID,ArtRecordID)
 }
 //-->
 </script>
-<div class="cp_viewall"><a href="javascript:;" class="viewall" onclick="javascript:showdiv('edit_content_grid');">Show Content</a> | Edit <?php echo $row['GalleryType']?></div>
+<div class="cp_viewall"><a href="javascript:;" class="viewall" onclick="javascript:showdiv('edit_content_grid');">Show Content</a> | Edit <?php echo red_admin_area_html($row['GalleryType'])?></div>
 <form id="update_gallery" name="update_gallery" class="cp" method="post" onSubmit="return run_update_gallery(this);">
 <fieldset>
 <div class="container_12 cp_padtop">
@@ -567,10 +812,10 @@ function run_deleterecord (RecordID,ArtRecordID)
         <div style="padding:10px;">
          <div class="wrapper">
             <div class="titleleft">
-            	<label>Title: <input name="Title" type="text" id="title" value="<?php echo $row['Title']?>" /></label>
+                <label>Title: <input name="Title" type="text" id="title" value="<?php echo red_admin_area_html($row['Title'])?>" /></label>
             </div>
             <div class="titleleft">
-            	<label>Alias: <input name="Alias" type="text" id="alias" value="<?php echo $row['Alias']?>" /></label>
+                <label>Alias: <input name="Alias" type="text" id="alias" value="<?php echo red_admin_area_html($row['Alias'])?>" /></label>
             </div>
             <div class="titleright">
             	<a href="#" id="deleterecord_<?php echo $RecordID ?>"><img src="/admin/images/ico_trashcan.png" onClick="run_deleterecord(<?php echo $RecordID ?>,<?php echo $ArtRecordID ?>);" title="Delete Record" style="cursor:pointer"></a>
@@ -589,31 +834,26 @@ function run_deleterecord (RecordID,ArtRecordID)
                 </label>
             </div>
             <div class="titleright">
-            <label style="display:inline;" title="Position Order">Position Order: <input name="<?php echo $VarPosition.'Order'?>" type="text" id="order" value="<?php echo $PosOrder ?>" /></label>
+            <label style="display:inline;" title="Position Order">Position Order: <input name="<?php echo red_admin_area_html($VarPosition.'Order')?>" type="text" id="order" value="<?php echo $PosOrder ?>" /></label>
             </div>
             <div class="titleright">
-                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
+                <label title="Layout Position">Layout Position: <select name="<?php echo red_admin_area_html($VarPosition) ?>">
                 <?php
 				 //echo $Layout;
 				$ThisPosition=$VarPositionValue;
 				settype($ThisPosition, "integer");
-				echo $ThisPosition;
 				 //echo '<option value="'.$row[$VarPosition].'">'.$row[$VarPosition].'</option>';
-				 $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-				//echo ($resultC->num_rows);
-				while($row4 = mysqli_fetch_assoc($resultC))
-				{
-					$Positions=$row4['Positions'];
+				$positionOptions = red_admin_article_layout_position_options($db->connection, $Layout);
+				if (!array_key_exists($ThisPosition, $positionOptions)) {
+					$positionOptions = [$ThisPosition => 'Unavailable; preserved'] + $positionOptions;
 				}
-				//echo $Positions;
-				for ($w=0; $w<=$Positions; $w++)
+				foreach ($positionOptions as $w => $positionLabel)
 				{
 					//echo $w;
 					if (intval($ThisPosition)===intval($w))
-					echo '<option value="'.$w.'" selected="selected">'.$w.'</option>';
+					echo '<option value="'.(int) $w.'" selected="selected">'.red_admin_area_html($positionLabel).' ('.(int) $w.')</option>';
 					else
-					echo '<option value="'.$w.'">'.$w.'</option>';
+					echo '<option value="'.(int) $w.'">'.red_admin_area_html($positionLabel).' ('.(int) $w.')</option>';
 					
 				}
 				?>
@@ -624,7 +864,7 @@ function run_deleterecord (RecordID,ArtRecordID)
         </div>
         <div class="wrapper">
         	<div class="titleleft">
-            	<label>Tags SEO: <input name="Tags" type="text" id="title" value="<?php echo $Tags ?>" /></label>
+                <label>Tags SEO: <input name="Tags" type="text" id="title" value="<?php echo red_admin_area_html($Tags) ?>" /></label>
            		</div>
             <div class="titleright">
             	<label style="display:inline;"><input name="HomeFeature" type="checkbox" value="Y" <?php if ($HomeFeature==='Y') echo 'checked="checked"' ?> />Home Featured</label>
@@ -650,9 +890,13 @@ function run_deleterecord (RecordID,ArtRecordID)
 				
 					for ($t=0; $t<count($photo); $t++)
 					{
+						$photoName=red_admin_text($photo[$t]);
+						if ($photoName==='') {
+							continue;
+						}
 						echo '<div style="float:left; padding-right:5px; margin-right:5px;">';
-						echo '<input name="Photo'.$t.'" type="hidden" value="'.$photo[$t].'" />';
-						echo '<label><img src="/images/resize.php?w=60&h=45&amp;img=/images/gallery/'.$photo[$t].'" alt=""><br/>';
+						echo '<input name="Photo'.$t.'" type="hidden" value="'.red_admin_area_html($photoName).'" />';
+						echo '<label><img src="/images/resize.php?w=60&h=45&amp;img=/images/gallery/'.rawurlencode($photoName).'" alt=""><br/>';
 						echo '<input name="Delete'.$t.'" type="checkbox" value="Y">Delete</label>';
 						echo '</div>';
 					}
@@ -662,29 +906,7 @@ function run_deleterecord (RecordID,ArtRecordID)
 				echo '<span class="message">Drop image(s) here to upload.</span>';
 				echo '</div>';
 				
-				echo ('<label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.$row['ShortDesc'].'</textarea></label><div class="clear-cp"></div><br />');
-				
-			break;
-			///////////////
-			case 'Carrousel':
-			
-				echo '<label>Photo(s):<br />';
-				if ($row['LongDesc']!=''){
-				$photo=explode(',', $row['LongDesc']);
-				
-					for ($t=0; $t<count($photo); $t++)
-					{
-						echo '<div style="float:left; padding-right:5px; margin-right:5px;">';
-						echo '<input name="Photo'.$t.'" type="hidden" value="'.$photo[$t].'" />';
-						echo '<label><img src="/images/resize.php?w=60&h=45&amp;img=/images/gallery/'.$photo[$t].'" alt=""><br/>';
-						echo '<input name="Delete'.$t.'" type="checkbox" value="Y">Delete</label>';
-						echo '</div>';
-					}
-				}
-				echo '</label>';
-				echo '<div id="dropbox" style="width:99%;min-height:80px;">';
-				echo '<span class="message">Drop image(s) here to upload.<br/>Image Size must be Width: 120px - Height: 107px</span>';
-				echo '</div>';
+				echo ('<label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.red_admin_area_html($row['ShortDesc']).'</textarea></label><div class="clear-cp"></div><br />');
 				
 			break;
 			////////////
@@ -692,7 +914,7 @@ function run_deleterecord (RecordID,ArtRecordID)
 			
 				echo ('<div class="wrapper">');
 				echo ('<div class="titleleft">');
-				echo '<label style="display:inline;">Video URL: <input name="LongDesc" type="text" id="gal_video" value="'.$row['LongDesc'].'">';
+				echo '<label style="display:inline;">Video URL: <input name="LongDesc" type="text" id="gal_video" value="'.red_admin_area_html($row['LongDesc']).'">';
 				echo '</label>';
 				echo ('</div>');
 				echo ('</div>');
@@ -714,9 +936,13 @@ function run_deleterecord (RecordID,ArtRecordID)
 				
 					for ($t=0; $t<count($photo); $t++)
 					{
+						$photoName=red_admin_text($photo[$t]);
+						if ($photoName==='') {
+							continue;
+						}
 						echo '<div style="float:left; padding-right:5px; margin-right:5px;">';
-						echo '<input name="Photo'.$t.'" type="hidden" value="'.$photo[$t].'" />';
-						echo '<label><img src="/images/resize.php?w=60&h=45&amp;img=/images/gallery/'.$photo[$t].'" alt=""><br/>';
+						echo '<input name="Photo'.$t.'" type="hidden" value="'.red_admin_area_html($photoName).'" />';
+						echo '<label><img src="/images/resize.php?w=60&h=45&amp;img=/images/gallery/'.rawurlencode($photoName).'" alt=""><br/>';
 						echo '<input name="Delete'.$t.'" type="checkbox" value="Y">Delete</label>';
 						echo '</div>';
 					}
@@ -734,87 +960,12 @@ function run_deleterecord (RecordID,ArtRecordID)
 				echo ('</div>');
 				
 				echo ('<div class="wrapper">');
-				/*//CREATE LINKNAVIGATOR LINKS
-                    $LinkNavigator = ('<option value="">Select a link from available pages of the website...</option>');
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $resultNav0 = $db->query("SELECT * FROM RED_Sections WHERE Active='Y' AND Sections <> 'administrator' ORDER BY Sections ASC");
-                    $resultNav0_counter = $resultNav0->num_rows;
-                    while($rowNav0 = mysqli_fetch_assoc($resultNav0))
-                    {
-                        $This->Section=$rowNav0['Sections'];
-                        if ($This->Section=='home')
-                        $This->SectionVal='';
-                        else
-                        $This->SectionVal='/'.$This->Section;
-                        $LinkNavigator = $LinkNavigator . ('<option value="'.$This->SectionVal.'/">'.$This->SectionVal.'/</option>');
-                        
-                        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                        $resultNav1 = $db->query("SELECT * FROM RED_Articles WHERE Sections='".$This->Section."' AND Categories='' AND SubCategories='' ORDER BY Updated DESC");
-                        $resultNav1_counter = $resultNav1->num_rows;
-                        while($rowNav1 = mysqli_fetch_assoc($resultNav1))
-                        {
-                            $This->Alias=$rowNav1['Alias'];
-                            $LinkNavigator = $LinkNavigator . ('<option value="'.$This->SectionVal.'/'.$This->Alias.'">'.$This->SectionVal.'/'.$This->Alias.'</option>');
-                        }
-                        
-                        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                        $resultNav3 = $db->query("SELECT * FROM RED_Categories WHERE Active='Y' ORDER BY Categories ASC");
-                        $resultNav3_counter = $resultNav3->num_rows;
-                        while($rowNav3 = mysqli_fetch_assoc($resultNav3))
-                        {
-                            $This->Category=$rowNav3['Categories'];
-                            $LinkNavigator = $LinkNavigator . ('<option value="'.$This->SectionVal.'/'.$This->Category.'/">'.$This->SectionVal.'/'.$This->Category.'/</option>');
-                            
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $resultNav4 = $db->query("SELECT * FROM RED_Articles WHERE Sections='".$This->Section."' AND Categories='".$This->Category."' AND SubCategories='' ORDER BY Updated DESC");
-                            $resultNav4_counter = $resultNav4->num_rows;
-                            while($rowNav4 = mysqli_fetch_assoc($resultNav4))
-                            {
-                                $This->Alias=$rowNav4['Alias'];
-                                $LinkNavigator = $LinkNavigator . ('<option value="'.$This->SectionVal.'/'.$This->Category.'/'.$This->Alias.'">'.$This->SectionVal.'/'.$This->Category.'/'.$This->Alias.'</option>');
-                            }
-                            
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $resultNav5 = $db->query("SELECT * FROM RED_SubCategories WHERE Active='Y' ORDER BY SubCategories ASC");
-                            $resultNav5_counter = $resultNav5->num_rows;
-                            while($rowNav5 = mysqli_fetch_assoc($resultNav5))
-                            {
-                                $This->SubCategory=$rowNav5['SubCategories'];
-                                $LinkNavigator = $LinkNavigator . ('<option value="'.$This->SectionVal.'/'.$This->Category.'/'.$This->SubCategory.'/">'.$This->SectionVal.'/'.$This->Category.'/'.$This->SubCategory.'/</option>');
-                                
-                                $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                                $resultNav6 = $db->query("SELECT * FROM RED_Articles WHERE Sections='".$This->Section."' AND Categories='".$This->Category."' AND SubCategories='".$This->SubCategory."' ORDER BY Updated DESC");
-                                $resultNav6_counter = $resultNav6->num_rows;
-                                while($rowNav6 = mysqli_fetch_assoc($resultNav6))
-                                {
-                                    $This->Alias=$rowNav6['Alias'];
-                                    $LinkNavigator = $LinkNavigator . ('<option value="'.$This->SectionVal.'/'.$This->Category.'/'.$This->SubCategory.'/'.$This->Alias.'">'.$This->SectionVal.'/'.$This->Category.'/'.$This->SubCategory.'/'.$This->Alias.'</option>');	
-                                }
-                                
-                            }
-                            
-                        }
-                        
-                    }
-                    //END LINKNAVIGATOR LINKS*/
-					
-					echo('<div class="titleleft"><label style="display:inline;">Link: <input name="Link" type="text" id="Link" value="' . $row['Link'] . '" /></label>');
+					echo('<div class="titleleft"><label style="display:inline;">Link: <input name="Link" type="text" id="Link" value="' . red_admin_area_html($row['Link']) . '" /></label>');
 					echo ('</div>'); 
-					/*echo ('<div class="titleleft">');
-					echo '<script type="text/javascript">'. "\n";
-					echo '<!--' ."\n";
-					echo '$(\'#LinkNavigator\').bind(\'change\', function() {'. "\n";
-					echo '$(\'#Link\').val($(this).val());'. "\n";
-					echo '});'. "\n";
-					echo '-->'. "\n";
-					echo '</script>';
-					echo('<select name="LinkNavigator" id="LinkNavigator">');
-					echo ($LinkNavigator);
-					echo('</select>');
-					echo ('</div>');*/
 					
                 echo ('<div class="titleleft">');
-					echo ('<label style="display:inline;" title="Open New Window">Open Blank <input name="NewWindow" type="checkbox" value="Y" /></label>'); 
+					$newWindowChecked = ($row['NewWindow'] ?? '') === 'Y' ? ' checked="checked"' : '';
+					echo ('<label style="display:inline;" title="Open New Window">Open Blank <input name="NewWindow" type="checkbox"'.$newWindowChecked.' value="Y" /></label>');
                 echo ('</div>');
 				echo ('</div>');
 				
@@ -840,8 +991,8 @@ function run_deleterecord (RecordID,ArtRecordID)
                         if ($BigPict<>''){
                             ?>
                         
-                            <input name="BigPict" type="hidden" value="<?php echo $BigPict ?>" />
-                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo $BigPict ?>" alt=""><br/>
+                            <input name="BigPict" type="hidden" value="<?php echo red_admin_area_html($BigPict) ?>" />
+                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo rawurlencode($BigPict) ?>" alt=""><br/>
                             <label><input name="Delete_BigPict" type="checkbox" value="Y">Delete</label>
                         
                         <?php
@@ -855,13 +1006,13 @@ function run_deleterecord (RecordID,ArtRecordID)
                     </div>
                     <div class="clear-cp"></div>
                     <div class="titleleft">
-                    <label style="width:75px" title="Used in Article Description or Short Articles">Small Picture:</label>
+                    <label style="width:75px" title="Used in Article Description">Small Picture:</label>
                         <?php
                         if ($SmallPict<>''){
                             ?>
                         
-                            <input name="SmallPict" type="hidden" value="<?php echo $SmallPict ?>" />
-                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo $SmallPict ?>" alt=""><br/>
+                            <input name="SmallPict" type="hidden" value="<?php echo red_admin_area_html($SmallPict) ?>" />
+                            <img src="/images/resize.php?w=60&h=45&amp;img=/images/articles/<?php echo rawurlencode($SmallPict) ?>" alt=""><br/>
                             <label><input name="Delete_SmallPict" type="checkbox" value="Y">Delete</label>
                         
                         <?php
@@ -885,20 +1036,11 @@ function run_deleterecord (RecordID,ArtRecordID)
                 </div>
                 
                 <div class="titleright"  style="text-align:right">
-                    <label><?php echo $row['GalleryType']?> Location:</label>
+                    <label><?php echo red_admin_area_html($row['GalleryType'])?> Location:</label>
                     <label>Section: <select name="Sections">
                     <option value="">- null -</option>
                     <?php 
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Sections FROM RED_Sections WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Sections']==$Section)    
-                            echo '<option value="' . $row3['Sections'] . '" selected="selected">' . $row3['Sections'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Sections'] . '">' . $row3['Sections'] . '</option>';
-                        }
-                    }
+                    echo red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
                     
                     ?>
                     </select>
@@ -908,16 +1050,7 @@ function run_deleterecord (RecordID,ArtRecordID)
                     <label>Category: <select name="Categories">
                     <option value="">- null -</option>
                     <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Categories FROM RED_Categories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Categories']==$Category)    
-                            echo '<option value="' . $row3['Categories'] . '" selected="selected">' . $row3['Categories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Categories'] . '">' . $row3['Categories'] . '</option>';
-                        }
-                    }
+                    echo red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
                     
                     ?>
                     </select>
@@ -927,16 +1060,7 @@ function run_deleterecord (RecordID,ArtRecordID)
                     <label>Sub Category: <select name="SubCategories">
                     <option value="">- null -</option>
                     <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT SubCategories FROM RED_SubCategories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['SubCategories']==$SubCategory)    
-                            echo '<option value="' . $row3['SubCategories'] . '" selected="selected">' . $row3['SubCategories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['SubCategories'] . '">' . $row3['SubCategories'] . '</option>';
-                        }
-                    }
+                    echo red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
                     
                     ?>
                     </select>
@@ -946,25 +1070,14 @@ function run_deleterecord (RecordID,ArtRecordID)
                     <option value="">- null -</option>
                     <?php
                     
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$result3 = $db->query("SELECT Title, Alias FROM RED_Articles WHERE Active = 'Y' AND Component='Article' ORDER BY Updated DESC");
-					
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-						$thisalias=$row3['Alias'];
-
-						if (strtolower($thisalias)==strtolower($Article))
-						echo '<option value="'.$row3['Alias'].'" selected="selected">'.$row3['Alias'].'</option>';
-						else
-						echo '<option value="'.$row3['Alias'].'">'.$row3['Alias'].'</option>';
-                    }
+					echo red_admin_article_page_options($db->connection, $Article);
                     
                     ?>
                     </select>
                     </label>
                     <div class="clear-cp"></div>
-                    <label title="yyyy-mm-dd hh:mm:ss" >Start Date: <input name="StartDate" type="text" id="date" value="<?php echo $StartDate ?>" /></label>
-                    <label title="yyyy-mm-dd hh:mm:ss">Exp Date: <input name="ExpDate" type="text" id="date" value="<?php echo $ExpDate ?>" /></label>
+                    <label title="yyyy-mm-dd hh:mm:ss" >Start Date: <input name="StartDate" type="text" id="date" value="<?php echo red_admin_area_html($StartDate) ?>" /></label>
+                    <label title="yyyy-mm-dd hh:mm:ss">Exp Date: <input name="ExpDate" type="text" id="date" value="<?php echo red_admin_area_html($ExpDate) ?>" /></label>
                 </div>
             </div>
             <!--<div class="wrapper">
@@ -976,9 +1089,10 @@ function run_deleterecord (RecordID,ArtRecordID)
              <br />-->
         </dd>
         </dl>
+        <?php echo red_csrf_input(); ?>
         <input type="hidden" name="ArtRecordID" id="ArtRecordID" value="<?php echo $ArtRecordID ?>" />
         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
-        <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo $_SESSION['alias']?>" />
+        <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($_SESSION['alias'] ?? '')?>" />
         <input type="submit" name="submit" value="Save" id="save"/>
         <span id="msggbox_update_gallery" style="display:none"></span>
         </div>
@@ -988,7 +1102,5 @@ function run_deleterecord (RecordID,ArtRecordID)
 </fieldset>
 </form>
 <?php
-		}
 		$db->close();
-		}
 ?>

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "theme": "starter-reference",
+  "document": {
+    "language": "en",
+    "title": "RED Portable Starter — Fixture Preview",
+    "description": "An isolated, deterministic preview of the RED-CMS portable starter theme contract."
+  },
+  "regions": {
+    "header": {
+      "siteTitle": "RED Portable Starter",
+      "homeUrl": "#preview-content"
+    },
+    "navigation": {
+      "items": [
+        {
+          "label": "Overview",
+          "url": "#overview",
+          "current": true
+        },
+        {
+          "label": "Form",
+          "url": "#preview-form",
+          "current": false
+        },
+        {
+          "label": "Gallery",
+          "url": "#preview-gallery",
+          "current": false
+        },
+        {
+          "label": "Notes",
+          "url": "#preview-notes",
+          "current": false
+        }
+      ]
+    },
+    "hero": {
+      "title": "A portable theme, safely previewed.",
+      "summary": "This file renders only audited starter templates with strict fixture data. It never reads the CMS database, opens a session, or changes the active website.",
+      "action": {
+        "label": "Explore the contract",
+        "url": "#preview-content"
+      }
+    },
+    "footer": {
+      "copyright": "RED-CMS portable starter fixture preview"
+    }
+  },
+  "page": {
+    "layout": "index-1",
+    "breadcrumb": [
+      {
+        "label": "Themes",
+        "url": "#"
+      },
+      {
+        "label": "Starter reference",
+        "url": ""
+      }
+    ],
+    "slots": {
+      "1": [
+        {
+          "component": "Article",
+          "data": {
+            "title": "One contract from document to component",
+            "summary": "Core validates the fixture, resolves only manifest-declared files, renders component views into numbered slots, and passes rendered strings into the selected layout and document shell.",
+            "url": "#preview-notes",
+            "linkLabel": "Read the preview notes"
+          }
+        }
+      ],
+      "2": [
+        {
+          "component": "Form",
+          "data": {
+            "title": "Form view example",
+            "fields": [
+              {
+                "name": "name",
+                "label": "Name",
+                "type": "text",
+                "autocomplete": "name",
+                "required": true
+              },
+              {
+                "name": "email",
+                "label": "Email",
+                "type": "email",
+                "autocomplete": "email",
+                "required": true
+              },
+              {
+                "name": "message",
+                "label": "Message",
+                "type": "textarea",
+                "autocomplete": "",
+                "required": false
+              }
+            ],
+            "submitLabel": "Preview only"
+          }
+        }
+      ],
+      "3": [
+        {
+          "component": "Gallery",
+          "data": {
+            "title": "Gallery view example",
+            "items": [
+              {
+                "image": "assets/images/preview-one.svg",
+                "caption": "Structured regions and numbered slots"
+              },
+              {
+                "image": "assets/images/preview-two.svg",
+                "caption": "Strict data and local package assets"
+              }
+            ]
+          }
+        }
+      ],
+      "4": [
+        {
+          "component": "Other",
+          "data": {
+            "title": "What this preview cannot do",
+            "text": "It cannot activate a theme, persist settings, read live content, create preview sessions, open administrator tools, or alter public rendering. Those remain separate verified batches."
+          }
+        }
+      ]
+    }
+  }
+}

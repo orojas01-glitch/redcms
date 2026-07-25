@@ -1,5 +1,6 @@
 <?php 
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/public_route_compatibility_helpers.php';
 red_start_session();
 
 $redLocalConfig = [];
@@ -91,12 +92,13 @@ $URL = preg_replace("'<[^>]+>'U", "", $_SERVER['REQUEST_URI']);
 define('URL', $URL);
 define('BASE_URL', $_SERVER['HTTP_HOST']);
 
-$pagebase = explode("?", URL);
+$pagebase = explode("?", URL, 2);
 $page = explode("/", $pagebase[0]);
 
 $rest = substr($pagebase[0], -1);
 if ($rest !== '/') {
-    define('article', isset($page[count($page) - 1]) ? $page[count($page) - 1] : '');
+    $redPublicArticleSegment = isset($page[count($page) - 1]) ? $page[count($page) - 1] : '';
+    define('article', red_public_route_article_alias($redPublicArticleSegment, count($page)));
     define('countpage', count($page));
 } else {
     define('article', '');

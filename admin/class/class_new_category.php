@@ -1,155 +1,211 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+red_start_session();
+red_require_admin(); ?>
 <?php
 #[\AllowDynamicProperties]
 class newcategory
 {
-	public function category_form($language)
-	{
-		?>
-        <!-- The main script file -->
+    public function category_form($language)
+    {
+        $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+        $layoutOptions = red_admin_area_layout_options($db->connection);
+        $featureOptions = red_admin_area_features($db->connection);
+        $parentOptions = red_admin_area_parent_options($db->connection, 'RED_Categories', $language);
+        ?>
 <script type="text/javascript">
 <!--
 function run_insert_category (insert_category)
 {
-	$.ajax({ 
-	type: "POST", 
-	url: "/admin/bin/insert_category.php", 
-	data: $("#insert_category").serialize(),
-	success: function(data) {
-	//alert (data);
-	//return false;
-	if (data=='yes')
-	{
-	$('#msggbox_insert_category').html("Category Added.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_insert_category');
-	window.location.reload();
-	});
-	}
-	else if(data=='error')
-	{
-	alert ('There is a Section using the same name.  Please enter a different Category Name.');	
-	}
-	else if(data=='error2')
-	{
-	alert ('There is a Category using the same name.  Please enter a different Category Name.');	
-	}
-	else if(data=='error3')
-	{
-	alert ('There is a SubCategory using the same name.  Please enter a different Category Name.');	
-	}	
-	else
-	{
-	$('#msggbox_insert_category').html("Error. Please try again.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_insert_category');
-	});
-	}
-	}
-	});
-	return false;
+    $.ajax({
+        type: "POST",
+        url: "/admin/bin/insert_category.php",
+        data: $("#insert_category").serialize(),
+        success: function(data) {
+            var status = $.trim(data);
+            if (status === 'yes') {
+                $('#msggbox_insert_category').removeClass('has-error').addClass('is-success').html("Category added.")
+                    .hide()
+                    .fadeIn(200, function() {
+                        window.location.reload();
+                    });
+            } else if (status === 'error') {
+                alert('There is a Section using the same name. Please enter a different Category name.');
+            } else if (status === 'error2') {
+                alert('There is a Category using the same name. Please enter a different Category name.');
+            } else if (status === 'error3') {
+                alert('There is a Subcategory using the same name. Please enter a different Category name.');
+            } else {
+                $('#msggbox_insert_category').removeClass('is-success').addClass('has-error').html("The category could not be saved. Please review the fields and try again.")
+                    .hide()
+                    .fadeIn(200);
+            }
+        }
+    });
+    return false;
+}
+
+function redAdminCategoryPreview()
+{
+    var input = document.getElementById('category-name');
+    var parent = document.getElementById('category-parent-section');
+    var value = input && input.value ? input.value : '';
+    var slug = value;
+    if (slug.normalize) {
+        slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    slug = slug.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    var preview = document.querySelector('[data-red-category-url-preview]');
+    if (preview) {
+        var selected = parent && parent.options[parent.selectedIndex];
+        var section = selected && selected.dataset ? selected.dataset.sectionAlias : '';
+        preview.textContent = slug && section
+            ? '/' + encodeURIComponent(section) + '/' + encodeURIComponent(slug) + '/'
+            : 'Choose a parent Section and enter a name';
+    }
 }
 //-->
 </script>
-<form id="insert_category" name="insert_category" class="cp" method="post" onSubmit="return run_insert_category(this);">
+<form id="insert_category" name="insert_category" class="cp red-admin-section-form red-admin-area-form--category" method="post" onSubmit="return run_insert_category(this);" data-red-area-form="category-create">
 <fieldset>
-<div class="container_12 cp_padtop">
-    <div class="wrapper">
-        <article class="grid_12 cp_admin">
-        <div style="padding:10px;">
-        <div class="wrapper">
-            <div class="titleleft">
-            	<label>Category: <input name="Categories" type="text" id="title" value="" /></label>
-            </div>
-            <div class="titleright">
-            	<label style="display:inline;">Active: <select name="Active">
-                <option value="Y">Y</option>
-                <option value="N">N</option>
-                </select>
-                </label>
-            </div>
+<?php echo red_csrf_input(); ?>
+<div class="red-admin-section-shell">
+    <header class="red-admin-section-header">
+        <span class="red-admin-section-header__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
+        </span>
+        <div class="red-admin-section-header__copy">
+            <span class="red-admin-section-header__eyebrow">Content organization</span>
+            <h2>Create a category</h2>
+            <p>Add a reusable topic destination and choose how its articles will be arranged.</p>
         </div>
-        <div class="wrapper">
-            <div class="titleleft">
-                <label style="display:inline;">Layout:
-                
-                <?php
-                echo '<select name="Layout" id="layout">';
-                //$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//                $result = $db->query("SELECT UniqueName FROM RED_Layouts");
-//                while($row2 = mysqli_fetch_assoc($result))
-//                {
-//                    $This->layout=$row2['UniqueName'];
-//                    echo '<option value="'.$This->layout.'">'.$This->layout.'</option>';
-//                }
-//                $db->close();
-                $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                $result = $db->query("SELECT UniqueName FROM RED_Layouts");
-                if ($result) {
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        // Correct the use of $this (lowercase) for object context and escape output to prevent XSS
-                        $this->layout = htmlspecialchars($row['UniqueName']);
-                        echo '<option value="' . $this->layout . '">' . $this->layout . '</option>';
-                    }
-                } else {
-                    // Handle query error, e.g., log it or display an error message
-                }
-                $db->close();
-                
-                echo '</select>';
-				?>
-                </label>  
-            </div>
-            <div class="titleright">
-                <label style="display:inline;" title="Articles Limit">Articles Limit: <input name="QueryLimit" type="text" id="limit" value="100" /></label>
-            </div>
-            
+        <span class="red-admin-section-header__badge">New category</span>
+    </header>
+
+    <section class="red-admin-section-panel" aria-labelledby="red-category-basics-title">
+        <div class="red-admin-section-panel__heading">
+            <div><span class="red-admin-section-panel__step">1</span><h3 id="red-category-basics-title">Category basics</h3></div>
+            <p>Name, visibility, and page structure</p>
         </div>
-        <div class="wrapper">
-            <div class="titleleft">
-            	<label>Features:
-                    <select name="Features[]" size="3" multiple>
-                    <?php
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT UniqueName FROM RED_Features");
-                    $result_counter = $result3->num_rows;
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-                        echo '<option value="'.$row3['UniqueName'].'">'.$row3['UniqueName'].'</option>';
-                    $selected='';
-                    $result_counter = ($result_counter - 1);
-                    }
+        <div class="red-admin-section-grid red-admin-section-grid--basics">
+            <div class="red-admin-section-field red-admin-section-field--name">
+                <label for="category-name">Category name <span aria-hidden="true">*</span></label>
+                <input name="Categories" type="text" id="category-name" value="" maxlength="120" required autocomplete="off" oninput="redAdminCategoryPreview()" />
+                <small>Its complete route will be <strong data-red-category-url-preview>Choose a parent Section and enter a name</strong>.</small>
+            </div>
+            <div class="red-admin-section-field">
+                <label for="category-parent-section">Parent Section <span aria-hidden="true">*</span></label>
+                <select name="SectionRecordID" id="category-parent-section" required onchange="redAdminCategoryPreview()">
+                    <option value=""><?php echo empty($parentOptions) ? 'Create a Section first' : 'Choose a parent Section…'; ?></option>
+                    <?php foreach ($parentOptions as $parentOption) {
+                        $parentRecordId = (int) ($parentOption['ParentRecordID'] ?? 0);
+                        $parentAlias = red_admin_text($parentOption['ParentAlias'] ?? '');
+                        $parentTitle = red_admin_text($parentOption['ParentTitle'] ?? $parentAlias);
                     ?>
-                    </select>
-                </label>
-            </div>
-			<div class="titleright">
-            	<label style="display:inline;">Access Level: <select name="AccessLevel">
-                <option value="Public">Public</option>
-                <option value="Private">Private</option>
+                        <option value="<?php echo $parentRecordId; ?>" data-section-alias="<?php echo red_admin_area_html($parentAlias); ?>"><?php echo red_admin_area_html($parentTitle); ?> — <?php echo red_admin_area_html($parentAlias); ?></option>
+                    <?php } ?>
                 </select>
-                </label> 
+                <small>Every Category belongs to one Section. Changing it later also updates its owned Article paths.</small>
+            </div>
+            <div class="red-admin-section-field">
+                <label for="category-layout">Layout <span aria-hidden="true">*</span></label>
+                <select name="Layout" id="category-layout" required>
+                    <?php foreach ($layoutOptions as $layoutOption => $layoutLabel) { ?>
+                        <option value="<?php echo red_admin_area_html($layoutOption); ?>"><?php echo red_admin_area_html($layoutLabel); ?> (<?php echo red_admin_area_html($layoutOption); ?>)</option>
+                    <?php } ?>
+                </select>
+                <small>You can change the layout later when its assigned positions are compatible.</small>
+            </div>
+            <div class="red-admin-section-field">
+                <label for="category-active">Publishing status</label>
+                <select name="Active" id="category-active">
+                    <option value="Y">Active — visible on the site</option>
+                    <option value="N">Draft — hidden from visitors</option>
+                </select>
+                <small>Draft categories remain available in the administrator workspace.</small>
             </div>
         </div>
-         
-         <label>Tags:
-        <input name="Tags" type="text" id="tags" value="" /></label>
-                 
-        <label>Long Description:
-        <textarea name="Description" id="ShortDesc" cols="" rows="4"></textarea></label>
-		
-        <input type="submit" name="submit" value="Save" id="save"/> <span id="msggbox_insert_category" style="display:none"></span>
+    </section>
+
+    <section class="red-admin-section-panel" aria-labelledby="red-category-presentation-title">
+        <div class="red-admin-section-panel__heading">
+            <div><span class="red-admin-section-panel__step">2</span><h3 id="red-category-presentation-title">Presentation</h3></div>
+            <p>Optional discovery and feature settings</p>
         </div>
-        </article>
+        <div class="red-admin-section-grid red-admin-section-grid--content">
+            <div class="red-admin-section-field">
+                <span class="red-admin-section-field__label">Features</span>
+                <?php if (empty($featureOptions)) { ?>
+                    <div class="red-admin-section-empty">No optional category features are installed.</div>
+                <?php } else { ?>
+                    <div class="red-admin-section-feature-list">
+                    <?php foreach ($featureOptions as $featureOption) {
+                        $featureValue = red_admin_area_html($featureOption);
+                        $featureLabel = red_admin_area_html(red_admin_area_feature_label($featureOption));
+                        $featureDescription = red_admin_area_html(red_admin_area_feature_description($featureOption));
+                    ?>
+                        <label class="red-admin-section-feature">
+                            <input type="checkbox" name="Features[]" value="<?php echo $featureValue; ?>" />
+                            <span>
+                                <strong><?php echo $featureLabel; ?></strong>
+                                <?php if ($featureDescription !== '') { ?><small><?php echo $featureDescription; ?></small><?php } ?>
+                            </span>
+                        </label>
+                    <?php } ?>
+                    </div>
+                <?php } ?>
+                <small>Features enhance the category but are not required.</small>
+            </div>
+            <div class="red-admin-section-field">
+                <label for="category-tags">Search tags</label>
+                <input name="Tags" type="text" id="category-tags" value="" placeholder="music, lessons, events" />
+                <small>Use a few comma-separated phrases that describe this category.</small>
+            </div>
+            <div class="red-admin-section-field red-admin-section-field--wide">
+                <label for="category-description">Category description</label>
+                <textarea name="Description" id="category-description" rows="4" placeholder="A concise summary for visitors and search previews."></textarea>
+                <small>Keep this clear and specific; the public template decides where it appears.</small>
+            </div>
+        </div>
+    </section>
+
+    <section class="red-admin-section-panel red-admin-section-panel--access" aria-labelledby="red-category-access-title">
+        <div class="red-admin-section-panel__heading">
+            <div><span class="red-admin-section-panel__step">3</span><h3 id="red-category-access-title">Visitor access</h3></div>
+            <p>Public now; member access is a protected follow-up</p>
+        </div>
+        <div class="red-admin-section-access-grid">
+            <label class="red-admin-section-access is-selected">
+                <input type="radio" name="AccessLevel" value="Public" checked />
+                <span class="red-admin-section-access__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.5 12h17M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span>
+                <span><strong>Public</strong><small>Anyone can open this category.</small></span>
+            </label>
+            <div class="red-admin-section-access is-planned" aria-disabled="true">
+                <span class="red-admin-section-access__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                <span><strong>Members only <em>Planned</em></strong><small>Requires member identity, entitlements, and route checks before it can safely protect content.</small></span>
+            </div>
+        </div>
+        <div class="red-admin-section-notice">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg>
+            <p>The legacy Private value was never enforced by public rendering. It is intentionally unavailable until access protection is implemented end to end.</p>
+        </div>
+    </section>
+
+    <div class="red-admin-section-actions">
+        <span id="msggbox_insert_category" class="red-admin-section-status" role="status" aria-live="polite" style="display:none"></span>
+        <button type="submit" name="submit" value="Save" id="save-category" class="red-admin-section-submit" <?php if (empty($parentOptions)) echo 'disabled'; ?>>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>
+            Create category
+        </button>
     </div>
 </div>
+<input type="hidden" name="Language" id="category-language" value="<?php echo red_admin_area_html($language); ?>" />
 </fieldset>
-<input type="hidden" name="Language" id="Language" value="<?php echo $language?>" />
 </form>
 <?php
-	}
+        $db->close();
+    }
 }
 ?>

@@ -44,6 +44,14 @@ Migration file:
 
 `database/migrations/2026-07-02-red-admin-password-hash.sql`
 
+Administrator Users now creates and resets passwords with `password_hash()` only. The manager never renders stored password values. Password resets invalidate existing sessions for that account on its next protected admin request.
+
+Only accounts whose `AdminType` is `webmaster` or `superadmin` can open or submit Administrator Users actions. Self-deletion and deletion of the final manager are rejected. Component permissions come from `AdminComponents`; utility-tool permissions come from `AdminTools` after applying:
+
+`database/migrations/2026-07-10-red-admin-user-tools.sql`
+
+Administrator email is required for every create/update request and duplicate non-empty email values are rejected by the application. The migration widens `RED_Admin.Email` to `varchar(254)`. Existing blank legacy emails are shown as repair rows in Edit User and must be completed before those accounts can be saved.
+
 ## Seed Data Warning
 
 The current `db-structure.sql` includes data rows from an existing site. Before using it as a reusable installer artifact:
@@ -53,8 +61,56 @@ The current `db-structure.sql` includes data rows from an existing site. Before 
 - Remove site-specific content if the dump will be distributed.
 - Rotate any credentials that have been shared in documents or dumps.
 
+## Database Backup Security
+
+Full database dumps contain administrator hashes, email addresses, site content, and configuration data stored in tables. Keep backups outside the public web root with access limited to the operator, record their SHA-256 checksums, use encrypted storage for production copies, and remove expired archives according to the site's retention policy.
+
+Use `scripts/db-backup.sh` and `scripts/db-restore.sh` as documented in `docs/DATABASE-MIGRATIONS.md`. The restore command protects the configured primary database and nonempty targets by default.
+
+## Multi-User Authorization
+
+Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.
+
+- `AdminComponents` controls content creation, rendering of edit controls, updates, deletes, ordering, feature assignment, content uploads, and bulk-tool record selection.
+- Group components resolve the exact child subtype through `RED_C_Form.FormType` or `RED_C_Gallery.GalleryType`. A user assigned Video cannot operate Gallery or Banner records.
+- `AdminTools` controls both the render and write endpoints for each utility tool.
+- Webmaster is the assignable site-manager role. Layout, navigation, sections, categories, subcategories, advanced settings, and administrator-account management are denied to Guest accounts at the endpoint. Legacy `superadmin` database values remain recognized as managers for compatibility but cannot be newly assigned.
+- Add User and Edit User expose an allowlisted `AdminType` selector with only Guest and Webmaster. The signed-in manager cannot change their own role, and the final manager cannot be changed to Guest.
+- Submitted component changes and subtype changes are reauthorized before a write. Mismatched parent/child component inserts are rejected.
+- Authorization failures return HTTP 403 `no` and write a minimal denial entry to the server error log.
+
+The shared contracts live in:
+
+- `includes/bootstrap.php`
+- `includes/admin_authorization_helpers.php`
+
+## Failed Login Throttling
+
+`database/migrations/2026-07-12-login-attempt-throttling.sql` adds `RED_Login_Attempts`, and `includes/login_throttle_helpers.php` applies the policy from `bin/login.php`.
+
+- Only failed administrator login attempts are stored here. Successful login history is intentionally not stored by the minimal activity-audit batch; its initial scope is successful Administrator Users mutations only.
+- Stored fields are a lowercase/trimmed username SHA-256 digest, the packed client network address supplied by `REMOTE_ADDR`, and the failure timestamp. Passwords, password hashes, submitted usernames, session IDs, CSRF tokens, and content are not stored.
+- The application deliberately ignores client-supplied `X-Forwarded-For`. A reverse proxy must normalize the trusted client address at the web-server boundary before PHP if per-client throttling is required behind that proxy.
+- Within a rolling 15-minute window, a new login is temporarily blocked after five failures for the same username/client pair, 15 failures for the same username across clients, or 30 failures from one client across usernames.
+- Blocked and failed requests preserve the existing generic HTTP 200 `no` response so account existence and lock state are not exposed through a new response contract.
+- A successful login clears failures for that normalized username. It does not erase failures for other usernames from the same client and does not invalidate already-authenticated sessions.
+- Failed attempts older than 24 hours are removed in indexed batches of up to 500 during login traffic. The table is InnoDB so rollback behavior remains available.
+
+## Administrator Activity Audit
+
+`database/migrations/2026-07-12-administrator-activity-audit.sql` adds `RED_Admin_Activity_Log`, and `includes/admin_audit_helpers.php` writes the allowlisted events from `admin/bin/update_admin_users.php`.
+
+- Initial events are only successful `administrator.created`, `administrator.updated`, and `administrator.deleted` operations.
+- Each row contains the event name, numeric actor administrator ID, target type, numeric target record ID, and timestamp. No foreign key is used so a deletion event remains attributable after the target account is removed.
+- The table does not contain usernames, aliases, emails, IP addresses, passwords or password hashes, session IDs, CSRF tokens, request bodies, component/tool permission lists, or content bodies.
+- The administrator mutation and its audit insertion share one InnoDB transaction. If audit persistence fails, the user mutation rolls back and the existing endpoint returns `no`.
+- Events older than 180 days are removed during audited writes in indexed batches of up to 500. Production retention requirements should be reviewed before deployment if a longer legal or operational history is required.
+- Login/logout history and general content, layout, navigation, upload, and tool actions are outside this minimal first scope. Expand coverage only through separately reviewed, allowlisted event batches.
+
 ## Next Security Work
 
-- Continue moving remaining admin AJAX write endpoints onto centralized admin-session and CSRF checks.
-- Continue upload hardening review beyond `admin/bin/post_file.php` and `admin/bin/post_ftp.php`.
-- Move more queries to prepared statements, continuing with admin write endpoints.
+- Review whether additional allowlisted activity categories are needed after the repeatable acceptance suite is established; do not add request payload logging.
+- Optionally replace immediate account/password creation with single-use, expiring email invitations.
+- Rotate real production credentials and confirm production PHP/MySQL versions before deployment.
+
+The active milestone order is maintained in `docs/ROADMAP.md`.

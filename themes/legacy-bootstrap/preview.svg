@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">RED Legacy Bootstrap theme preview</title>
+  <desc id="description">A structural preview showing the legacy header, hero, two-column content layout, and footer.</desc>
+  <rect width="1200" height="800" fill="#f3f4f6"/>
+  <rect x="48" y="48" width="1104" height="92" rx="8" fill="#20242a"/>
+  <rect x="80" y="76" width="210" height="36" rx="4" fill="#d52b2f"/>
+  <rect x="684" y="82" width="104" height="24" rx="4" fill="#f9fafb" opacity=".82"/>
+  <rect x="812" y="82" width="104" height="24" rx="4" fill="#f9fafb" opacity=".82"/>
+  <rect x="940" y="82" width="164" height="24" rx="4" fill="#f9fafb" opacity=".82"/>
+  <rect x="48" y="164" width="1104" height="214" rx="8" fill="#cfd4da"/>
+  <circle cx="934" cy="271" r="70" fill="#d52b2f" opacity=".88"/>
+  <rect x="90" y="222" width="430" height="34" rx="4" fill="#20242a"/>
+  <rect x="90" y="274" width="320" height="18" rx="3" fill="#6b7280"/>
+  <rect x="90" y="308" width="132" height="38" rx="4" fill="#d52b2f"/>
+  <rect x="48" y="402" width="535" height="238" rx="8" fill="#ffffff"/>
+  <rect x="617" y="402" width="535" height="238" rx="8" fill="#ffffff"/>
+  <rect x="82" y="438" width="250" height="28" rx="4" fill="#20242a"/>
+  <rect x="82" y="490" width="445" height="14" rx="3" fill="#9ca3af"/>
+  <rect x="82" y="520" width="392" height="14" rx="3" fill="#9ca3af"/>
+  <rect x="651" y="438" width="250" height="28" rx="4" fill="#20242a"/>
+  <rect x="651" y="490" width="445" height="14" rx="3" fill="#9ca3af"/>
+  <rect x="651" y="520" width="392" height="14" rx="3" fill="#9ca3af"/>
+  <rect x="48" y="664" width="1104" height="88" rx="8" fill="#20242a"/>
+  <text x="80" y="718" fill="#f9fafb" font-family="Arial, sans-serif" font-size="24">RED Legacy Bootstrap</text>
+</svg>
+

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title description">
+  <title id="title">Structured regions and numbered slots</title>
+  <desc id="description">Abstract blocks showing a document shell, header, hero, and three numbered content positions.</desc>
+  <rect width="800" height="520" rx="32" fill="#f1ede6"/>
+  <rect x="56" y="48" width="688" height="424" rx="24" fill="#fff" stroke="#d8d2c7" stroke-width="3"/>
+  <rect x="88" y="80" width="624" height="52" rx="14" fill="#24211d"/>
+  <circle cx="120" cy="106" r="12" fill="#d5a49f"/>
+  <rect x="146" y="96" width="150" height="20" rx="8" fill="#fff"/>
+  <rect x="88" y="156" width="624" height="112" rx="18" fill="#ead7d3"/>
+  <rect x="118" y="184" width="294" height="24" rx="9" fill="#24211d"/>
+  <rect x="118" y="222" width="220" height="14" rx="7" fill="#8c736f"/>
+  <g font-family="system-ui, sans-serif" font-size="28" font-weight="700" text-anchor="middle">
+    <rect x="88" y="292" width="196" height="144" rx="18" fill="#b42318"/>
+    <text x="186" y="374" fill="#fff">1</text>
+    <rect x="302" y="292" width="196" height="144" rx="18" fill="#d8d2c7"/>
+    <text x="400" y="374" fill="#24211d">2</text>
+    <rect x="516" y="292" width="196" height="144" rx="18" fill="#24211d"/>
+    <text x="614" y="374" fill="#fff">3</text>
+  </g>
+</svg>

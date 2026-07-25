@@ -1,0 +1,237 @@
+{
+  "$schema": "../../docs/theme-manifest.schema.json",
+  "schemaVersion": 1,
+  "id": "legacy-bootstrap",
+  "name": "RED Legacy Bootstrap",
+  "version": "2.5.0",
+  "type": "legacy-adapter",
+  "description": "Compatibility package for the current RED-CMS Bootstrap 5 public renderer.",
+  "preview": "preview.svg",
+  "adapter": "adapter.php",
+  "adapterClass": "RedLegacyBootstrapThemeAdapter",
+  "compatibility": {
+    "cms": ">=4.0",
+    "php": ">=8.2",
+    "layoutAliases": {
+      "Full-Width": "index-2"
+    }
+  },
+  "assets": {
+    "styles": [
+      {
+        "id": "bootstrap",
+        "legacySource": "css/bootstrap.min.css",
+        "location": "head"
+      },
+      {
+        "id": "forms",
+        "legacySource": "css/forms.css",
+        "location": "head"
+      },
+      {
+        "id": "red-css",
+        "legacySource": "css/red-css.css",
+        "location": "head"
+      },
+      {
+        "id": "theme-style",
+        "legacySource": "css/style.css",
+        "location": "head"
+      }
+    ],
+    "scripts": [
+      {
+        "id": "bootstrap",
+        "legacySource": "js/bootstrap.min.js",
+        "location": "head"
+      },
+      {
+        "id": "popper",
+        "url": "https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js",
+        "integrity": "sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r",
+        "crossorigin": "anonymous",
+        "location": "head"
+      },
+      {
+        "id": "jquery",
+        "legacySource": "js/jquery-3.7.1.min.js",
+        "location": "head"
+      },
+      {
+        "id": "superfish",
+        "legacySource": "js/superfish.js",
+        "location": "head"
+      },
+      {
+        "id": "mobile-menu",
+        "legacySource": "js/jquery.mobilemenu.js",
+        "location": "head"
+      },
+      {
+        "id": "theme-scripts",
+        "legacySource": "js/tm-scripts.js",
+        "location": "head"
+      }
+    ]
+  },
+  "regions": {
+    "document": {
+      "label": "Document shell",
+      "required": true,
+      "legacySource": "themes/legacy-bootstrap/document.php"
+    },
+    "header": {
+      "label": "Website header",
+      "required": true,
+      "legacySource": "themes/legacy-bootstrap/partials/header.php"
+    },
+    "navigation": {
+      "label": "Main navigation",
+      "required": true,
+      "legacySource": "themes/legacy-bootstrap/partials/navigation.php",
+      "renderedBy": "header"
+    },
+    "hero": {
+      "label": "Feature hero",
+      "required": false,
+      "legacySource": "themes/legacy-bootstrap/partials/hero.php",
+      "renderedBy": "header"
+    },
+    "footer": {
+      "label": "Website footer",
+      "required": true,
+      "legacySource": "themes/legacy-bootstrap/partials/footer.php"
+    }
+  },
+  "layouts": {
+    "index": {
+      "label": "Two columns and a full-width row",
+      "legacySource": "themes/legacy-bootstrap/layouts/index.php",
+      "positions": [
+        { "id": 1, "label": "Left column" },
+        { "id": 2, "label": "Right column" },
+        { "id": 3, "label": "Full-width row" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }, { "position": 2, "weight": 1 }],
+          [{ "position": 3, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "index-1": {
+      "label": "Full-width row and three columns",
+      "legacySource": "themes/legacy-bootstrap/layouts/index-1.php",
+      "positions": [
+        { "id": 1, "label": "Full-width row" },
+        { "id": 2, "label": "Left column" },
+        { "id": 3, "label": "Center column" },
+        { "id": 4, "label": "Right column" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }],
+          [
+            { "position": 2, "weight": 1 },
+            { "position": 3, "weight": 1 },
+            { "position": 4, "weight": 1 }
+          ]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "index-2": {
+      "label": "Four stacked full-width rows",
+      "legacySource": "themes/legacy-bootstrap/layouts/index-2.php",
+      "positions": [
+        { "id": 1, "label": "Row one" },
+        { "id": 2, "label": "Row two" },
+        { "id": 3, "label": "Row three" },
+        { "id": 4, "label": "Row four" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 1 }],
+          [{ "position": 2, "weight": 1 }],
+          [{ "position": 3, "weight": 1 }],
+          [{ "position": 4, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    },
+    "index-3": {
+      "label": "Main content and right sidebar",
+      "legacySource": "themes/legacy-bootstrap/layouts/index-3.php",
+      "positions": [
+        { "id": 1, "label": "Main content" },
+        { "id": 2, "label": "Right sidebar" }
+      ],
+      "adminPreview": {
+        "rows": [
+          [{ "position": 1, "weight": 2 }, { "position": 2, "weight": 1 }]
+        ]
+      },
+      "hiddenPosition": 0
+    }
+  },
+  "components": {
+    "Article": {
+      "label": "Article",
+      "legacySource": "themes/legacy-bootstrap/components/article.php"
+    },
+    "Form": {
+      "label": "Form",
+      "legacySource": "themes/legacy-bootstrap/components/form.php"
+    },
+    "Gallery": {
+      "label": "Gallery",
+      "legacySource": "themes/legacy-bootstrap/components/gallery.php"
+    },
+    "Other": {
+      "label": "Other",
+      "legacySource": "themes/legacy-bootstrap/components/other.php"
+    }
+  },
+  "features": {
+    "slider": {
+      "label": "Hero slider",
+      "legacySource": "class/class_feature_slider.php"
+    },
+    "template": {
+      "label": "Feature template",
+      "legacySource": "class/class_feature_template.php"
+    }
+  },
+  "settings": [
+    {
+      "key": "site.title",
+      "label": "Website title",
+      "type": "text",
+      "legacyItem": "Website_Title"
+    },
+    {
+      "key": "branding.logo",
+      "label": "Website logo",
+      "type": "image",
+      "legacyItem": "Website_Logo"
+    },
+    {
+      "key": "header.custom-html",
+      "label": "Legacy header HTML",
+      "type": "textarea",
+      "legacyItem": "Website_Header"
+    },
+    {
+      "key": "footer.custom-html",
+      "label": "Legacy footer HTML",
+      "type": "textarea",
+      "legacyItem": "Website_Footer"
+    }
+  ],
+  "knownLimitations": [
+    "The legacy adapter remains non-portable; public layout HTML is theme-owned, while control-panel wrappers remain in class/class_page_layout.php and both modes use the core-owned slot boundary.",
+    "The current RED_Layouts registry reports three positions for index-1 while the renderer exposes four.",
+    "Public component inputs are prepared by a non-executable contract and dispatched by a fixed core-owned registry; all four public component entries now receive core-prepared data in manifest-declared compatibility views, while the legacy classes remain available as rollback and control-panel anchors."
+  ]
+}

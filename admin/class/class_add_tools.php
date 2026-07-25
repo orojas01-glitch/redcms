@@ -1,5 +1,7 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); 
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_tool_helpers.php";
+red_start_session();
+red_require_admin();
 
 /**
  * Red Sphere - Unique php CMS
@@ -22,6 +24,41 @@ red_start_session();
 #[\AllowDynamicProperties]
 class add_tools
 {
+	private function tool_card_key($uniqueName)
+	{
+		$uniqueName = strtolower(red_admin_tool_identifier($uniqueName));
+		if ($uniqueName === 'movecontent') {
+			return 'move';
+		}
+		if ($uniqueName === 'filterareas') {
+			return 'filter';
+		}
+
+		return 'tool-default';
+	}
+
+	private function tool_card_description($cardKey, $fallback)
+	{
+		$descriptions = [
+			'move' => 'Move content between site areas',
+			'filter' => 'Filter content by site area',
+		];
+
+		$fallback = red_admin_tool_text($fallback);
+		return $descriptions[$cardKey] ?? ($fallback !== '' ? $fallback : 'Open this content tool');
+	}
+
+	private function tool_card_icon($cardKey)
+	{
+		$icons = [
+			'move' => '<svg viewBox="0 0 24 24" focusable="false"><rect x="3.5" y="5.5" width="6" height="13" rx="1.5"/><rect x="14.5" y="5.5" width="6" height="13" rx="1.5"/><path d="M8 9h8M13.5 6.5 16 9l-2.5 2.5M16 15H8M10.5 12.5 8 15l2.5 2.5"/></svg>',
+			'filter' => '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 5h16l-6.5 7.5V19l-3 1v-7.5z"/><path d="M15.5 16.5h5M18 14v5"/></svg>',
+			'tool-default' => '<svg viewBox="0 0 24 24" focusable="false"><path d="M14.5 6.5a4 4 0 0 0-5 5L4 17l3 3 5.5-5.5a4 4 0 0 0 5-5l-2.5 2.5-3-3z"/></svg>',
+		];
+
+		return $icons[$cardKey] ?? $icons['tool-default'];
+	}
+
 	public function add_tools_grid($countpage,$Section,$Category,$SubCategory,$Article,$VarPosition,$Language,$layout,$compgroup,$cparea)
 	{
 /*		echo 'countpage='.$countpage.'<br/>';
@@ -31,33 +68,64 @@ class add_tools
 		echo 'Article='.$Article.'<br/>';
 		echo 'VarPosition='.$VarPosition.'<br/>'; 
 		echo 'Language='.$Language.'<br/>'; */
-		$cpareastyle=strtolower($cparea);
-		
-	
-?>
-<div class="container_12 cp_padtop">
-    <div class="wrapper">
-    	<?php
-        // READ SESSION 'AdminComponents'
-        // FOR EACH COMPONENT ADD BUTTON.
-        
-        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $resultC = $db->query("SELECT * FROM RED_Tools WHERE CompGroup = '".$compgroup."'");
-        //echo ($resultC->num_rows);
-		while($row = mysqli_fetch_assoc($resultC))
+		$cpareastyle=strtolower(red_admin_tool_identifier($cparea));
+		if ($cpareastyle === '') {
+			$cpareastyle = 'content';
+		}
+		// READ SESSION 'AdminTools' AND KEEP THE RENDERED ORDER HUMAN-FRIENDLY.
+		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		$tools = red_admin_tool_rows_by_group($db->connection, $compgroup, red_admin_session_id_list('AdminTools'));
+		usort($tools, function ($left, $right) {
+			return strnatcasecmp(
+				red_admin_tool_text($left['ButtonTag'] ?? ''),
+				red_admin_tool_text($right['ButtonTag'] ?? '')
+			);
+		});
+		$toolCount = count($tools);
+		$db->close();
+	?>
+	<div class="red-admin-card-chooser">
+	<div class="container_12 red-admin-add-content red-admin-tools-content">
+	    <div class="red-admin-add-content__header">
+	        <div>
+	            <span class="red-admin-add-content__eyebrow">Tools</span>
+	            <h2 class="red-admin-add-content__title">Choose a tool</h2>
+	        </div>
+	        <span class="red-admin-add-content__count" aria-label="<?php echo (int) $toolCount; ?> tools available"><?php echo (int) $toolCount; ?> <?php echo $toolCount === 1 ? 'option' : 'options'; ?></span>
+	    </div>
+	    <?php if ($toolCount === 0): ?>
+	        <p class="red-admin-add-content__empty">No tools are available for this account.</p>
+	    <?php else: ?>
+	    <div class="wrapper red-admin-add-content__grid" role="list" aria-label="Available tools">
+	    <?php
+		$cardNumber = 0;
+		foreach($tools as $row)
 		{
-			$UniqueName=$row['UniqueName'];
-			//$Layout=$row['Layout'];
-			$ButtonTag=$row['ButtonTag'];
-			$AltContent=$row['AltContent'];
-			
+			$UniqueName=red_admin_tool_identifier($row['UniqueName'] ?? '');
+			if ($UniqueName === '') {
+				continue;
+			}
+			$UniqueNameLower=strtolower($UniqueName);
+			$ButtonLabel=red_admin_tool_text($row['ButtonTag'] ?? '');
+			if ($ButtonLabel === '') {
+				$ButtonLabel=$UniqueName;
+			}
+			$AltContentText=red_admin_tool_text($row['AltContent'] ?? '');
+			$ButtonTag=red_admin_tool_html($ButtonLabel);
+			$AltContent=red_admin_tool_html($AltContentText);
+			$CardKey=$this->tool_card_key($UniqueName);
+			$CardDescription=$this->tool_card_description($CardKey, $AltContentText);
+			$CardIcon=$this->tool_card_icon($CardKey);
+			$CardId='cp_tool-'.$CardKey.'-'.$cardNumber;
+			$buttonOnClick = 'add_'.$UniqueNameLower.'_'.$cpareastyle.'('.json_encode(red_admin_tool_text($layout)).');';
+
 			echo '<script language="JavaScript" type="text/javascript">'. "\n";
 			echo '<!--' ."\n";
-			echo 'function add_'.strtolower($UniqueName).'_'.$cpareastyle.' (contenttype){'. "\n";
+			echo 'function add_'.$UniqueNameLower.'_'.$cpareastyle.' (contenttype){'. "\n";
 			echo '$.ajax({'. "\n";
 			echo 'type: "POST", '. "\n";
-			echo 'url: "/admin/bin/tool_'.strtolower($UniqueName).'.php", '. "\n";
-			echo 'data: "Type=" + contenttype + "&CountPage='.countpage.'&Section='.$Section.'&Category='.$Category.'&SubCategory='.$SubCategory.'&Article='.$Article.'&VarPosition='.$VarPosition .'&Language='.$Language.'&cparea='.$cparea.'&compgroup='.$compgroup.'&Layout='.$layout.'", '. "\n";
+			echo 'url: "/admin/bin/tool_'.$UniqueNameLower.'.php", '. "\n";
+			echo 'data: {Type: contenttype, CountPage: '.json_encode(red_admin_tool_scalar($countpage)).', Section: '.json_encode(red_admin_tool_text($Section)).', Category: '.json_encode(red_admin_tool_text($Category)).', SubCategory: '.json_encode(red_admin_tool_text($SubCategory)).', Article: '.json_encode(red_admin_tool_text($Article)).', VarPosition: '.json_encode(red_admin_tool_text($VarPosition)).', Language: '.json_encode(red_admin_tool_text($Language)).', cparea: '.json_encode(red_admin_tool_text($cparea)).', compgroup: '.json_encode(red_admin_tool_text($compgroup)).', Layout: '.json_encode(red_admin_tool_text($layout)).'}, '. "\n";
 			echo 'success: function(data) { '. "\n";
 			echo '/*alert (data);'. "\n";
 			echo 'return false;*/'. "\n";
@@ -84,14 +152,19 @@ class add_tools
 			echo '}'. "\n";
 			echo '-->'. "\n";
 			echo '</script>';
-			echo '<div class="cp_addcontent" id="cp_tools"><a href="#cp_'.$cpareastyle.'" onClick="add_'.strtolower($UniqueName).'_'.$cpareastyle.'(\''.$layout.'\');" title="'.$AltContent.'" class="cp_addcontent_button">'.$ButtonTag.'</a></div>';
-
-		$db->close();
+			echo '<div class="cp_addcontent red-admin-add-card red-admin-add-card--'.red_admin_tool_html($CardKey).'" id="'.red_admin_tool_html($CardId).'" role="listitem" data-tool="'.red_admin_tool_html($UniqueName).'">';
+			echo '<a href="#cp_'.$cpareastyle.'" onClick="'.red_admin_tool_html($buttonOnClick).'" title="'.$AltContent.'" class="cp_addcontent_button red-admin-add-card__link" aria-label="Open '.$ButtonTag.' tool">';
+			echo '<span class="red-admin-add-card__icon" aria-hidden="true">'.$CardIcon.'</span>';
+			echo '<span class="red-admin-add-card__copy"><span class="red-admin-add-card__label">'.$ButtonTag.'</span><span class="red-admin-add-card__description">'.red_admin_tool_html($CardDescription).'</span></span>';
+			echo '<span class="red-admin-add-card__action" aria-hidden="true">→</span>';
+			echo '</a></div>';
+			$cardNumber++;
 		}
 		?>
-        
-    </div>
-</div> 
+	    </div>
+	    <?php endif; ?>
+	</div>
+	</div>
 <?php
 	}
 }

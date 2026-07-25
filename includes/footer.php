@@ -10,27 +10,20 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 ?>
+<?php require_once __DIR__ . '/public_render_helpers.php'; ?>
+<?php require_once __DIR__ . '/public_theme_helpers.php'; ?>
+<?php $redThemeFooterContext = red_public_legacy_footer_context(); ?>
 <!--footer-->
 <footer>
     <div class="container">
         <div class="row">
 		<?php
-        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-        $result = $db->query("SELECT * FROM RED_Advanced WHERE Language='".language."' AND Item='Website_Footer'");
-        //echo ($result->num_rows);
-        $result_counter = $result->num_rows;
-        
-        if($result->num_rows > 0) 
-        {
-            $info = mysqli_fetch_assoc($result); 
-            echo $info['Content'];
-        }
+        echo $redThemeFooterContext['customHtml'];
         ?>
         </div>
-        <p align="center" style="font-size:10px; padding:20px"><a href="http://www.red-sphere.com" target="_blank" style="text-decoration:none"><font color="#CCCCCC">web by</font><br /><img src="/admin/images/red-tm.png" /><br /><font color="#CC0000">Red </font> <font color="#CCCCCC">Sphere</font></a></p><br />
-<br />
         </div>
     </div>
+    <?php red_public_render_red_sphere_credit($redThemeFooterContext); ?>
   <!-- {%FOOTER_LINK} -->
 </footer>
 <button onclick="topFunction()" id="myBtn" title="Go to top">Top</button> 

@@ -1,95 +1,67 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true); ?>
+red_require_admin_site_manager(true); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_advanced_helpers.php' ?>
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-	$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-	
-	$x = 0;
-	foreach($_POST as $name => $value)
-	{
-		//
-		$name = preg_replace ( "'<[^>]+>'U", "", $name);
-		
-		switch ($name)
-		{
-			case 'RecordID':
-				$RecordID=mysqli_real_escape_string($db->connection,$value);
-			break;
-			case 'CSS':
-				$CSS=$value;
-			break;
-			case 'jumpCSS':
-				$jumpCSS=$value;
-			break;
-			case 'Item':
-				$Item=mysqli_real_escape_string($db->connection,$value);
-			break;
-			case 'ShortLine':
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = "Content='".$value."'";
-				else
-				$queryset = $queryset . ", Content='".$value."'";
-				$x++;
-			break;
-			default:
-				$value = mysqli_real_escape_string($db->connection,$value);
-				if ($x===0)
-				$queryset = $name . "='".$value."'";
-				else
-				$queryset = $queryset . ", ".$name . "='".$value."'";
-				$x++;
-			break;
-		}
-	
-	}
+$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+$RecordID = isset($_POST['RecordID']) ? (int) red_admin_advanced_scalar($_POST['RecordID']) : 0;
+$Item = red_admin_text(red_admin_advanced_scalar($_POST['Item'] ?? ''));
 
-	if (empty($Item)) {
-		echo 'no';
-		$db->close();
-		exit;
-	}
-	
-	switch ($Item)
-	{
-		case 'Website_CSS':
-			if (empty($jumpCSS)) {
-				echo 'no';
-				$db->close();
-				exit;
-			}
-			file_put_contents('../../css/'.$jumpCSS, $CSS);
-			echo 'yes';
-		break;
-		case 'Reload':
-			if (empty($jumpCSS)) {
-				echo 'no';
-				$db->close();
-				exit;
-			}
-			$CSS = file_get_contents('../../css/'.$jumpCSS, true);
-			echo $CSS;
-		break;
-		default:
-			if (empty($RecordID) || empty($queryset)) {
-				echo 'no';
-				$db->close();
-				exit;
-			}
-			//echo "UPDATE RED_Advanced SET ".$queryset." WHERE RecordID='".$RecordID."'";
-			if ($result = $db->update("UPDATE RED_Advanced SET ".$queryset." WHERE RecordID='".$RecordID."'"))
-				echo 'yes';
-			else
-				echo 'no';
-			$db->close();
-		break;
-	}
-	
-	
+if ($Item === '') {
+	echo 'no';
+	$db->close();
+	exit;
 }
+
+switch ($Item)
+{
+	case 'Website_CSS':
+		$row = red_admin_advanced_record($db->connection, $RecordID);
+		$cssTarget = red_admin_advanced_active_css_target($db->connection, $_SERVER['DOCUMENT_ROOT']);
+		if (!$row
+			|| (string) $row['Item'] !== 'Website_CSS'
+			|| $cssTarget === null
+			|| !array_key_exists('CSS', $_POST)
+			|| is_array($_POST['CSS'])
+		) {
+			echo 'no';
+			$db->close();
+			exit;
+		}
+
+		echo red_admin_advanced_css_write(
+			$cssTarget,
+			$_POST['css_target_token'] ?? '',
+			$_POST['CSS'] ?? ''
+		);
+	break;
+	case 'Website_Red_Sphere_Credit':
+		$content = red_admin_advanced_scalar($_POST['ShortLine'] ?? '');
+		if ($RecordID <= 0 || !in_array($content, ['Y', 'N'], true)) {
+			echo 'no';
+			$db->close();
+			exit;
+		}
+		echo red_admin_advanced_update_content(
+			$db->connection,
+			$RecordID,
+			$Item,
+			$content
+		) ? 'yes' : 'no';
+	break;
+	default:
+		$content = red_admin_advanced_content_from_post($_POST);
+		if ($RecordID <= 0 || $content === null) {
+			echo 'no';
+			$db->close();
+			exit;
+		}
+
+		echo red_admin_advanced_update_content($db->connection, $RecordID, $Item, $content) ? 'yes' : 'no';
+	break;
+}
+
+$db->close();
 ?>

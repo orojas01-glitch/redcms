@@ -49,6 +49,11 @@ class connection
 			error_log('Database connection failed: ' . mysqli_connect_error());
 			die('Database connection failed.');
 		}
+		if (!mysqli_set_charset($this->connection, 'utf8mb4')) {
+			error_log('Database charset initialization failed: ' . mysqli_error($this->connection));
+			mysqli_close($this->connection);
+			die('Database connection failed.');
+		}
 		// Check connection
 		/*if (mysqli_connect_errno())
 		  {

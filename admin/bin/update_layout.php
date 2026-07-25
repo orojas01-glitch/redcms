@@ -13,63 +13,21 @@
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 red_start_session();
-red_require_admin(true); ?>
+red_require_admin_site_manager(true); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
-<?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_build_query.php' ?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_tool_helpers.php' ?>
 <?php
-if(empty($_SESSION['alias']))
-	header('Location: http://'.BASE_URL.'');
-	else {
-	
-	$article=preg_replace ( "'<[^>]+>'U", "", $_POST['article']);
-	switch ($article)
-	{
-		case '':
-			//echo 'no article. UPDATE layout from Categories or Section.';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			
-			$layout=mysqli_real_escape_string($db->connection,$_POST['Layout']);
-			$countpage=mysqli_real_escape_string($db->connection,$_POST['countpage']);
-			//echo $countpage;
-			$section=mysqli_real_escape_string($db->connection,$_POST['sections']);
-			$category=mysqli_real_escape_string($db->connection,$_POST['categories']);
-			$subcategory=mysqli_real_escape_string($db->connection,$_POST['subcategories']);
-			//$articleselected=mysqli_real_escape_string($db->connection,$_POST['articleselected']);
-			$tquery = new Build_Query();
-			$rquery = $tquery->cp_get_query($countpage, $section, $category, $subcategory, $article);
-			$metaquery=$rquery[3];
-			$table=$rquery[4];
-			
-			//echo "UPDATE RED_".$table." SET Layout='".$layout."' WHERE Active='Y' ".$metaquery."";
-			if ($result = $db->update("UPDATE RED_".$table." SET Layout='".$layout."' WHERE Active='Y' ".$metaquery.""))
-				echo 'yes';
-			else
-				echo 'no';
-		break;
-		default:
-			//echo 'article. UPDATE layout from Articles.';
-			$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			
-			$layout=mysqli_real_escape_string($db->connection,$_POST['Layout']);
-			$countpage=mysqli_real_escape_string($db->connection,$_POST['countpage']);
-			//echo $countpage;
-			$section=mysqli_real_escape_string($db->connection,$_POST['sections']);
-			$category=mysqli_real_escape_string($db->connection,$_POST['categories']);
-			$subcategory=mysqli_real_escape_string($db->connection,$_POST['subcategories']);
-			//$articleselected=mysqli_real_escape_string($db->connection,$_POST['articleselected']);
-			$tquery = new Build_Query();
-			$rquery = $tquery->cp_get_query($countpage, $section, $category, $subcategory, $article);
-			$articlequery=$rquery[0];
-			$table=$rquery[4];
-			
-			//echo "UPDATE RED_".$table." SET Layout='".$layout."' WHERE Active='Y' ".$articlequery."";
-			if ($result = $db->update("UPDATE RED_".$table." SET Layout='".$layout."' WHERE Active='Y' ".$articlequery.""))
-				echo 'yes';
-			else
-				echo 'no';
-		break;
-	}
+	$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	$success = red_admin_tool_update_layout(
+		$db->connection,
+		$_POST['countpage'] ?? '',
+		$_POST['sections'] ?? '',
+		$_POST['categories'] ?? '',
+		$_POST['subcategories'] ?? '',
+		$_POST['article'] ?? '',
+		$_POST['Layout'] ?? ''
+	);
+	echo $success ? 'yes' : 'no';
 	$db->close();
-}
 ?>

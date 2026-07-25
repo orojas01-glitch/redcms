@@ -28,6 +28,7 @@
 * $position - 5 options: 1. 2. 3. 4. null. 
 * $layout - Full-Width. Two-Columns. Three-Columns. Four-Columns. Multi-Columns1. Multi-Columns2.
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
 
 #[\AllowDynamicProperties]
 class Article
@@ -36,58 +37,17 @@ class Article
 	public function Article($recordid,$layout,$article,$position)
 	{
 		global $URL;
-//		*
-//		* READ THE SPECIFIED IMAGES WIDTH FOR THE LAYOUT
-//		*
-		
-//		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//		$result = $db->query("SELECT * FROM RED_Layouts WHERE UniqueName='".$layout."'");
-//		//echo "SELECT * FROM RED_Layouts WHERE UniqueName='" . $layout . "'";
-//		while($row = mysqli_fetch_assoc($result))
-//		{
-//			
-//			switch ($position)
-//			{
-//				case '':
-//				$This->Width=$row['w_Pos1'];
-//				$This->WidthDivisor=$row['w_div_Pos1'];
-//				$This->Height=$row['h_Pos1'];
-//				break;
-//				case '1':
-//				$This->Width=$row['w_Pos1'];
-//				$This->WidthDivisor=$row['w_div_Pos1'];
-//				$This->Height=$row['h_Pos1'];
-//				break;
-//				case '2':
-//				$This->Width=$row['w_Pos2'];
-//				$This->WidthDivisor=$row['w_div_Pos2'];
-//				$This->Height=$row['h_Pos2'];
-//				break;
-//				case '3':
-//				$This->Width=$row['w_Pos3'];
-//				$This->WidthDivisor=$row['w_div_Pos3'];
-//				$This->Height=$row['h_Pos3'];
-//				break;
-//				case '4':
-//				$This->Width=$row['w_Pos4'];
-//				$This->WidthDivisor=$row['w_div_Pos4'];
-//				$This->Height=$row['h_Pos4'];
-//				break;
-//				
-//			}
-//		}
-		
-//		*
-//		* END
-//		*
-		
 		//echo $this->query;
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		$dimensions = red_public_layout_dimensions($db->connection, $layout, $position);
+		$this->Width = $dimensions['Width'];
+		$this->WidthDivisor = $dimensions['WidthDivisor'];
+		$this->Height = $dimensions['Height'];
+		$This = $this;
 		// display all active records. Position is Required.
-		$result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'");
-		//echo "SELECT * FROM RED_Articles WHERE RecordID='".$recordid."'";
-		$result_counter = $result->num_rows;
-		while($row = mysqli_fetch_assoc($result))
+		$rows = red_public_article_render_rows($db->connection, $recordid);
+		$result_counter = count($rows);
+		foreach($rows as $row)
 		{
             
 			//echo 'ini'. $result_counter;
@@ -116,7 +76,7 @@ class Article
 				    if ($row['NewWindow']==='Y')
 				    $targetAttr='_blank';
 					
-					$closeline='<a href="'.$Link.'" target="'.$targetAttr.'" class="btn-default btn5">Leer m&aacute;s</a><div class="clear-1"></div>';
+					$closeline='<a href="'.red_public_html($Link).'" target="'.red_public_html($targetAttr).'" class="btn-default btn5">Leer m&aacute;s</a><div class="clear-1"></div>';
                    
 				}else
 					$closeline='<div class="clear-1"></div>';
@@ -130,19 +90,19 @@ class Article
 				
 				
 				if ($article===$row['Alias']){ 
-					$title='<h2>'.$row['Title'].'</h2>';
+					$title='<h2>'.red_public_display_text($row['Title']).'</h2>';
                     
 					//$image='<img src="/images/resize.php?w='.$This->Width.'&amp;img=/images/articles/'.$row['SmallPict2'].'" align="'.$row['SmallPictAlign2'].'" title="'.$row['Title'].'" class="SmallPict_'.$row['SmallPictAlign2'].'">';
-					$image='<figure><img src="/images/articles/'.$row['SmallPict2'].'" align="'.$row['SmallPictAlign2'].'" title="'.$row['Title'].'" class="SmallPict_'.$row['SmallPictAlign2'].'"></figure>';
+					$image='<figure><img src="/images/articles/'.red_public_html($row['SmallPict2']).'" align="'.red_public_html($row['SmallPictAlign2']).'" title="'.red_public_display_text($row['Title']).'" class="SmallPict_'.red_public_html($row['SmallPictAlign2']).'"></figure>';
 				}else{
                    
 					if ($row['LongDesc']!='' || $row['Link']!='' || $row['Component']=='Article'){
-						$title='<h2><a href="'.$Link.'" target="'.$targetAttr.'" class="link-article">'.$row['Title'].'</a></h2>';
-						$image='<figure><a href="'.$Link.'" target="'.$targetAttr.'"><img src="/images/articles/'.$row['SmallPict'].'" align="'.$row['SmallPictAlign'].'" title="'.$row['Title'].'" class="SmallPict_'.$row['SmallPictAlign'].'" border="0" style="margin-bottom:20px;"></a></figure>';
+						$title='<h2><a href="'.red_public_html($Link).'" target="'.red_public_html($targetAttr).'" class="link-article">'.red_public_display_text($row['Title']).'</a></h2>';
+						$image='<figure><a href="'.red_public_html($Link).'" target="'.red_public_html($targetAttr).'"><img src="/images/articles/'.red_public_html($row['SmallPict']).'" align="'.red_public_html($row['SmallPictAlign']).'" title="'.red_public_display_text($row['Title']).'" class="SmallPict_'.red_public_html($row['SmallPictAlign']).'" border="0" style="margin-bottom:20px;"></a></figure>';
                         
 					}else{
-						$title='<h2>'.$row['Title'].'</h2>';
-						$image='<figure><img src="/images/resize.php?w='.$This->Width.'&amp;img=/images/articles/'.$row['SmallPict'].'" align="'.$row['SmallPictAlign'].'" title="'.$row['Title'].'" class="SmallPict_'.$row['SmallPictAlign'].'" border="0"></figure>';
+						$title='<h2>'.red_public_display_text($row['Title']).'</h2>';
+						$image='<figure><img src="/images/resize.php?w='.$This->Width.'&amp;img=/images/articles/'.red_public_html($row['SmallPict']).'" align="'.red_public_html($row['SmallPictAlign']).'" title="'.red_public_display_text($row['Title']).'" class="SmallPict_'.red_public_html($row['SmallPictAlign']).'" border="0"></figure>';
                         
 					}
 				}
@@ -208,20 +168,18 @@ class cp_Article
 	{
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		// display all active records. Position is Required.
-		if ($position === '0') {
-    $result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='" . $recordid . "' ORDER BY Updated ASC");
-} else {
-    $result = $db->query("SELECT * FROM RED_Articles WHERE RecordID='" . $recordid . "'");
-}
+		$rows = red_public_article_render_rows($db->connection, $recordid, $position === '0');
 		
 		//echo ($result->num_rows);
-		$result_counter = $result->num_rows;
+		$result_counter = count($rows);
+		$adminComponentIds = red_public_admin_component_ids($_SESSION['AdminComponents'] ?? '');
+		$canEditArticle = red_public_admin_component_authorized($db->connection, 'Article', $adminComponentIds);
 		
-		while($row = mysqli_fetch_assoc($result))
+		foreach($rows as $row)
 		{
 			$RecordID=$row['RecordID'];
-			$Alias=$row['Alias'];
-			$Alias=preg_replace('/-/','_',$Alias);
+			$Alias=red_public_js_identifier($row['Alias']);
+			$Title=red_public_display_text($row['Title']);
 			
 			if ($position==='0'){
             	echo '<div style="float:left; padding-right:5px; margin-right:5px;">';
@@ -229,14 +187,7 @@ class cp_Article
 			
 				// COMPARE SESSION 'AdminComponents' WITH RED_COMPONENTS.
 				// IF VALUE EXIST THEN SHOW UPDATE BUTTON. IF NOT, DISPLAY MESSAGE FOR "ADMIN NOT AUTHORIZED TO UPDATE".
-				$AdminComponents = explode(",", $_SESSION['AdminComponents']);
-				//echo($_SESSION['AdminComponents'].'='.count($AdminComponents.'<br/>'));
-				for ($w=0; $w<=count($AdminComponents); $w++)
-				{
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT RecordID FROM RED_Components WHERE RecordID='".$AdminComponents[$w]."' AND UniqueName='Article'");
-				//echo ($resultC->num_rows);
-				if(($resultC->num_rows==0)&&($w==count($AdminComponents))){
+				if(!$canEditArticle){
 					//echo 'ADMINISTRATOR NOT AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -250,10 +201,9 @@ class cp_Article
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_article" value="Edit Article"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp red-admin-component-action red-admin-component-action--article" id="cp_article" value="Edit Article"/>';
 					echo '</form>';
-				}elseif(($resultC->num_rows==0));
-				else{
+				}else{
 					//echo 'ADMINISTRATOR AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -297,17 +247,15 @@ class cp_Article
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_article" value="Edit Article"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp red-admin-component-action red-admin-component-action--article" id="cp_article" value="Edit Article"/>';
 					echo '<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
-					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.$VarPosition.'" />';
-					echo '<input type="hidden" name="Article" id="Article" value="'.article.'" />';
-					echo '<input type="hidden" name="Layout" id="Layout" value="'.$layout.'" />';
+					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.red_public_html($VarPosition).'" />';
+					echo '<input type="hidden" name="Article" id="Article" value="'.red_public_html(red_public_route_value('article')).'" />';
+					echo '<input type="hidden" name="Layout" id="Layout" value="'.red_public_html($layout).'" />';
 					echo '</form>';
 				//END "ADMIN AUTHORIZED TO UPDATE".
-				break;
 				}
 				
-				}				
 				//END COMPARE SESSION
 				echo '<hr id="cp">';
 				//

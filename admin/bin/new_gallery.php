@@ -10,24 +10,182 @@
  *   http://www.opensource.org/licenses/mit-license.php
 **/
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php' ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php' ?>
 <?php
 if(empty($_SESSION['alias']))
 	header('Location: http://'.BASE_URL.'');
 	else {
-		$Type=preg_replace ( "'<[^>]+>'U", "", $_POST['Type']);
-		$CountPage=preg_replace ( "'<[^>]+>'U", "", $_POST['CountPage']);
-		$Section=preg_replace ( "'<[^>]+>'U", "", $_POST['Section']);
-		$Category=preg_replace ( "'<[^>]+>'U", "", $_POST['Category']);
-		$SubCategory=preg_replace ( "'<[^>]+>'U", "", $_POST['SubCategory']);
-		$Article=preg_replace ( "'<[^>]+>'U", "", $_POST['Article']);
-		$VarPosition=preg_replace ( "'<[^>]+>'U", "", $_POST['VarPosition']);
-		$Language=preg_replace ( "'<[^>]+>'U", "", $_POST['Language']);
-		$Layout=preg_replace ( "'<[^>]+>'U", "", $_POST['Layout']);
+		$Type=red_admin_post_text('Type');
+		$CountPage=red_admin_post_text('CountPage');
+		$Section=red_admin_post_text('Section');
+		$Category=red_admin_post_text('Category');
+		$SubCategory=red_admin_post_text('SubCategory');
+		$Article=red_admin_post_text('Article');
+		$VarPosition=red_admin_article_position_column($_POST['VarPosition'] ?? '', 'PagePosition');
+		if ($VarPosition === null) {
+			echo 'no';
+			exit;
+		}
+		$Language=substr(red_admin_post_text('Language'), 0, 2);
+		$Layout=red_admin_post_text('Layout');
 		$RecordID=mt_rand();
 		$ArtRecordID=mt_rand();
+		$csrfToken=red_csrf_token();
+		$authorizationDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		red_admin_require_component_selection($authorizationDb->connection, 'Gallery', $Type);
+		$authorizationDb->close();
+
+		if ($Type === 'Gallery') {
+			require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_gallery_ui_helpers.php';
+
+			$galleryDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+			$positionOptions = red_admin_article_layout_position_options($galleryDb->connection, $Layout);
+			$sectionOptions = red_admin_article_area_options($galleryDb->connection, 'RED_Sections', 'Sections', $Section);
+			$categoryOptions = red_admin_article_area_options($galleryDb->connection, 'RED_Categories', 'Categories', $Category);
+			$subCategoryOptions = red_admin_article_area_options($galleryDb->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+			$articleOptions = red_admin_article_page_options($galleryDb->connection, $Article);
+			$galleryDb->close();
+
+			$uploadUrls = [
+				'Gallery' => red_admin_gallery_ui_upload_url([
+					'RecordID' => $RecordID,
+					'ArtRecordID' => $ArtRecordID,
+					'UC' => 'Gallery',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Gallery',
+					'Language' => $Language,
+				]),
+				'BigPict' => red_admin_gallery_ui_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'BigPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Gallery',
+					'Language' => $Language,
+				]),
+				'SmallPict' => red_admin_gallery_ui_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'SmallPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Gallery',
+					'Language' => $Language,
+				]),
+			];
+
+			red_admin_render_gallery_form([
+				'mode' => 'create',
+				'returnTarget' => 'add_content_grid',
+				'submitUrl' => '/admin/bin/insert_gallery.php',
+				'positionOptions' => $positionOptions,
+				'varPosition' => $VarPosition,
+				'sectionOptions' => $sectionOptions,
+				'categoryOptions' => $categoryOptions,
+				'subCategoryOptions' => $subCategoryOptions,
+				'articleOptions' => $articleOptions,
+				'uploadUrls' => $uploadUrls,
+				'recordId' => $RecordID,
+				'artRecordId' => $ArtRecordID,
+				'language' => $Language,
+				'layout' => $Layout,
+				'editedBy' => $_SESSION['alias'] ?? '',
+				'csrfToken' => $csrfToken,
+			]);
+			exit;
+		}
+
+		if ($Type === 'Video') {
+			require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_video_ui_helpers.php';
+
+			$videoDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+			$positionOptions = red_admin_article_layout_position_options($videoDb->connection, $Layout);
+			$linkNavigatorOptions = red_admin_main_menu_link_options($videoDb->connection);
+			$sectionOptions = red_admin_article_area_options($videoDb->connection, 'RED_Sections', 'Sections', $Section);
+			$categoryOptions = red_admin_article_area_options($videoDb->connection, 'RED_Categories', 'Categories', $Category);
+			$subCategoryOptions = red_admin_article_area_options($videoDb->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+			$articleOptions = red_admin_article_page_options($videoDb->connection, $Article);
+			$videoDb->close();
+
+			$uploadUrls = [
+				'BigPict' => red_admin_video_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'BigPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Video',
+					'Language' => $Language,
+				]),
+				'SmallPict' => red_admin_video_upload_url([
+					'RecordID' => $ArtRecordID,
+					'UC' => 'SmallPict',
+					'Insert' => 'false',
+					'AuthComponent' => 'Gallery',
+					'AuthSubtype' => 'Video',
+					'Language' => $Language,
+				]),
+			];
+
+			red_admin_render_video_form([
+				'mode' => 'create',
+				'returnTarget' => 'add_content_grid',
+				'submitUrl' => '/admin/bin/insert_gallery.php',
+				'positionOptions' => $positionOptions,
+				'varPosition' => $VarPosition,
+				'linkNavigatorOptions' => $linkNavigatorOptions,
+				'sectionOptions' => $sectionOptions,
+				'categoryOptions' => $categoryOptions,
+				'subCategoryOptions' => $subCategoryOptions,
+				'articleOptions' => $articleOptions,
+				'uploadUrls' => $uploadUrls,
+				'recordId' => $RecordID,
+				'artRecordId' => $ArtRecordID,
+				'language' => $Language,
+				'layout' => $Layout,
+				'editedBy' => $_SESSION['alias'] ?? '',
+				'csrfToken' => $csrfToken,
+			]);
+			exit;
+		}
+
+		if ($Type === 'Banner') {
+			require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_banner_ui_helpers.php';
+
+			$bannerDb = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+			$positionOptions = red_admin_article_layout_position_options($bannerDb->connection, $Layout);
+			$linkNavigatorOptions = red_admin_main_menu_link_options($bannerDb->connection);
+			$sectionOptions = red_admin_article_area_options($bannerDb->connection, 'RED_Sections', 'Sections', $Section);
+			$categoryOptions = red_admin_article_area_options($bannerDb->connection, 'RED_Categories', 'Categories', $Category);
+			$subCategoryOptions = red_admin_article_area_options($bannerDb->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+			$articleOptions = red_admin_article_page_options($bannerDb->connection, $Article);
+			$bannerDb->close();
+
+			red_admin_render_banner_form([
+				'mode' => 'create',
+				'returnTarget' => 'add_content_grid',
+				'submitUrl' => '/admin/bin/insert_gallery.php',
+				'positionOptions' => $positionOptions,
+				'varPosition' => $VarPosition,
+				'linkNavigatorOptions' => $linkNavigatorOptions,
+				'sectionOptions' => $sectionOptions,
+				'categoryOptions' => $categoryOptions,
+				'subCategoryOptions' => $subCategoryOptions,
+				'articleOptions' => $articleOptions,
+				'recordId' => $RecordID,
+				'artRecordId' => $ArtRecordID,
+				'language' => $Language,
+				'layout' => $Layout,
+				'editedBy' => $_SESSION['alias'] ?? '',
+				'csrfToken' => $csrfToken,
+			]);
+			exit;
+		}
 
 ?>
 <!-- Our CSS stylesheet file -->
@@ -40,6 +198,18 @@ if(empty($_SESSION['alias']))
 <script src="/admin/assets/js/jquery.filedrop.js"></script>
 <script src="/admin/assets/js/jquery.filedrop2.js"></script>
 <script src="/admin/assets/js/jquery.filedrop3.js"></script>
+<script type="text/javascript">
+window.RED_GALLERY_CREATE_QUEUE_UPLOADS = true;
+window.RED_GALLERY_CREATE_CONFIG = {
+	recordId: <?php echo json_encode($RecordID); ?>,
+	articleRecordId: <?php echo json_encode($ArtRecordID); ?>,
+	galleryType: <?php echo json_encode($Type); ?>,
+	language: <?php echo json_encode($Language); ?>,
+	csrfToken: <?php echo json_encode($csrfToken); ?>,
+	maxImageBytes: 2 * 1024 * 1024,
+	allowedExtensions: ['jpg', 'jpeg', 'png', 'gif']
+};
+</script>
 
 <!-- TinyMCE -->
 <script type="text/javascript">
@@ -112,6 +282,7 @@ $(".cp_slideDown dt").click(function(){$(this).toggleClass("active").parent(".cp
 //-->
 <!--
 $(function(){
+	if (window.RED_GALLERY_CREATE_QUEUE_UPLOADS) return;
 	var dropbox = $('#dropbox'),
 		message = $('.message', dropbox);
 	
@@ -124,8 +295,8 @@ $(function(){
 		else
 		echo 'maxfiles: 10, '. "\n";
 		?>
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&ArtRecordID=<?php echo $ArtRecordID ?>&UC=Gallery&Insert=true&Language=<?php echo $Language ?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&ArtRecordID=<?php echo $ArtRecordID ?>&UC=Gallery&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -232,6 +403,7 @@ $(function(){
 //-->
 <!--
 $(function(){
+	if (window.RED_GALLERY_CREATE_QUEUE_UPLOADS) return;
 	var dropbox2 = $('#dropbox2'),
 		message2 = $('.message2', dropbox2);
 	
@@ -239,8 +411,8 @@ $(function(){
 		// The name of the $_FILES entry:
 		paramname:'pic',
 		maxfiles: 1,
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&Language=<?php echo $Language?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -342,6 +514,7 @@ $(function(){
 //-->
 <!--
 $(function(){
+	if (window.RED_GALLERY_CREATE_QUEUE_UPLOADS) return;
 	var dropbox3 = $('#dropbox3'),
 		message3 = $('.message3', dropbox3);
 	
@@ -349,8 +522,8 @@ $(function(){
 		// The name of the $_FILES entry:
 		paramname:'pic',
 		maxfiles: 1,
-    	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&Language=<?php echo $Language?>',
+		maxfilesize: 2,
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -453,30 +626,39 @@ $(function(){
 <!--
 function run_insert_gallery (insert_gallery)
 {
+	var saveButton = $('#save');
+	var statusBox = $('#msggbox_insert_gallery');
+	saveButton.prop('disabled', true);
+	statusBox.html('&nbsp; Saving Gallery...').show();
 	$.ajax({ 
 	type: "POST", 
 	url: "/admin/bin/insert_gallery.php", 
 	data: $("#insert_gallery").serialize(),
 	success: function(data) {
-	//alert (data);
-//	return false;
+	data = $.trim(data);
 	if (data=='yes' || data=='yesyes')
 	{
-	$('#msggbox_insert_gallery').html("&nbsp; Gallery Updated.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_insert_gallery');
-	window.location.reload();
+	statusBox.html("&nbsp; Gallery saved. Uploading queued pictures...").show();
+	var uploadQueued = window.redGalleryCreateUploadQueued || function () {
+		return Promise.resolve();
+	};
+	uploadQueued().then(function () {
+		statusBox.html("&nbsp; Gallery and pictures saved.").show();
+		window.location.reload();
+	}).catch(function (error) {
+		statusBox.text(' Gallery saved, but a picture upload failed: ' + error.message).show();
+		saveButton.prop('disabled', false);
 	});
 	}
 	else
 	{
-	$('#msggbox_insert_gallery').html("&nbsp; Error. Please try again.")
-	.hide()
-	.fadeIn(1500, function() {
-	$('#msggbox_insert_gallery');
-	});
+	statusBox.html("&nbsp; Error. Please try again.").show();
+	saveButton.prop('disabled', false);
 	}
+	},
+	error: function(xhr) {
+		statusBox.text(' Gallery could not be saved (server status ' + xhr.status + ').').show();
+		saveButton.prop('disabled', false);
 	}
 	});
 	return false;
@@ -504,48 +686,30 @@ function run_insert_gallery (insert_gallery)
             <div class="titleright">
             <label style="display:inline;" title="Position Order">Position Order: <input name="<?php echo $VarPosition.'Order'?>" type="text" id="order" value="" /></label>
             </div>
-            <div class="titleright">
-                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
-                <?php
-				 //echo $Layout;
-				 $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT Positions FROM RED_Layouts WHERE UniqueName='".$Layout."'");
-				//echo ($resultC->num_rows);
-				while($row = mysqli_fetch_assoc($resultC))
-				{
-					$Positions=$row['Positions'];
-				}
-				//echo $Positions;
-				for ($w=0; $w<=$Positions; $w++)
-				{
-					echo '<option value="'.$w.'">'.$w.'</option>';
-				}
-				?>
+	            <div class="titleright">
+	                <label title="Layout Position">Layout Position: <select name="<?php echo $VarPosition ?>">
+	                <?php
+					$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+					$positionOptions=red_admin_article_layout_position_options($db->connection, $Layout);
+					foreach ($positionOptions as $w => $positionLabel)
+					{
+						echo '<option value="'.(int) $w.'">'.red_admin_area_html($positionLabel).' ('.(int) $w.')</option>';
+					}
+					$db->close();
+					?>
                  </select>
                 </label>
             </div>
             
         </div>
         <div class="wrapper">
-        	<div class="titleright">
-                <label style="display:inline;">Gallery Type: <select name="GalleryType">
-                    <?php
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result4 = $db->query("SELECT Layout FROM RED_Components WHERE UniqueName='Gallery'");
-        if ($result4) {
-                    while($row4 = mysqli_fetch_assoc($result4))
-                    {
-                                            
-                      if ($row4['Layout']==$Type)    
-                            echo '<option value="' . $row4['Layout'] . '" selected="selected">' . $row4['Layout'] . '</option>';
-                        else
-                            echo '<option value="' . $row4['Layout'] . '">' . $row4['Layout'] . '</option>';
-                         
-                        
-                    }
-        }
-					$db->close();
-                    ?>
+	            <div class="titleright">
+	                <label style="display:inline;">Gallery Type: <select name="GalleryType">
+	                    <?php
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_gallery_type_options($db->connection, $Type);
+						$db->close();
+	                    ?>
                     
                     
                     
@@ -572,17 +736,7 @@ function run_insert_gallery (insert_gallery)
 				echo '<span class="message">Drop image(s) here to upload.</span>';
 				echo '</div>';
 				
-				echo ('<div class="clear-cp"></div><label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.$row['ShortDesc'].'</textarea></label><div class="clear-cp"></div><br />');
-				
-			break;
-			///////////////
-			case 'Carrousel':
-			
-				echo '<label>Photo(s):<br />';
-				echo '</label>';
-				echo '<div id="dropbox" style="width:99%;min-height:80px;">';
-				echo '<span class="message">Drop image(s) here to upload.<br/>Image Size must be Width: 120px - Height: 107px</span>';
-				echo '</div>';
+					echo ('<div class="clear-cp"></div><label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3"></textarea></label><div class="clear-cp"></div><br />');
 				
 			break;
 			////////////
@@ -593,10 +747,8 @@ function run_insert_gallery (insert_gallery)
 				echo '<label style="display:inline;">Video URL: <input name="LongDesc" type="text" id="gal_video" value="">';
 				echo '</label>';
 				echo ('</div>');
-				echo ('</div>');
-				
-				//echo ('<div class="clear-cp"></div><label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.$row['ShortDesc'].'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').show();return false;">[Show]</a><a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div><br />');
-			
+					echo ('</div>');
+
 			break;
 			/////////////
 			case 'Banner':
@@ -605,75 +757,14 @@ function run_insert_gallery (insert_gallery)
 				echo '<label>Banner:<br /></label>';
 				echo '<div id="dropbox" style="width:99%;min-height:80px;">';
 				echo '<span class="message">Drop Banner here to upload.</span>';
-				echo '</div>';				
+					echo '</div>';
 
-				
-				echo ('<div class="wrapper">');
-				
-                    //CREATE LINKNAVIGATOR LINKS
-                    $LinkNavigator = ('<option value="">Select a link from available pages of the website...</option>');
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $resultNav0 = $db->query("SELECT * FROM RED_Sections WHERE Active='Y' AND Sections <> 'administrator' ORDER BY Sections ASC");
-                    $resultNav0_counter = $resultNav0->num_rows;
-                    while($rowNav0 = mysqli_fetch_assoc($resultNav0))
-                    {
-                        $thissection=$rowNav0['Sections'];
-                        if ($thissection=='home')
-                        $thissectionVal='';
-                        else
-                        $thissectionVal='/'.$thissection;
-                        $LinkNavigator = $LinkNavigator . ('<option value="'.$thissectionVal.'/">'.$thissectionVal.'/</option>');
-                        
-                        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                        $resultNav1 = $db->query("SELECT * FROM RED_Articles WHERE Sections='".$thissection."' AND Categories='' AND SubCategories='' ORDER BY Updated DESC");
-                        $resultNav1_counter = $resultNav1->num_rows;
-                        while($rowNav1 = mysqli_fetch_assoc($resultNav1))
-                        {
-                            $thisalias=$rowNav1['Alias'];
-                            $LinkNavigator = $LinkNavigator . ('<option value="'.$thissectionVal.'/'.$thisalias.'">'.$thissectionVal.'/'.$thisalias.'</option>');
-                        }
-                        
-                        $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                        $resultNav3 = $db->query("SELECT * FROM RED_Categories WHERE Active='Y' ORDER BY Categories ASC");
-                        $resultNav3_counter = $resultNav3->num_rows;
-                        while($rowNav3 = mysqli_fetch_assoc($resultNav3))
-                        {
-                            $thiscategory=$rowNav3['Categories'];
-                            $LinkNavigator = $LinkNavigator . ('<option value="'.$thissectionVal.'/'.$thiscategory.'/">'.$thissectionVal.'/'.$thiscategory.'/</option>');
-                            
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $resultNav4 = $db->query("SELECT * FROM RED_Articles WHERE Sections='".$thissection."' AND Categories='".$thiscategory."' AND SubCategories='' ORDER BY Updated DESC");
-                            $resultNav4_counter = $resultNav4->num_rows;
-                            while($rowNav4 = mysqli_fetch_assoc($resultNav4))
-                            {
-                                $thisalias=$rowNav4['Alias'];
-                                $LinkNavigator = $LinkNavigator . ('<option value="'.$thissectionVal.'/'.$thiscategory.'/'.$thisalias.'">'.$thissectionVal.'/'.$thiscategory.'/'.$thisalias.'</option>');
-                            }
-                            
-                            $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                            $resultNav5 = $db->query("SELECT * FROM RED_SubCategories WHERE Active='Y' ORDER BY SubCategories ASC");
-                            $resultNav5_counter = $resultNav5->num_rows;
-                            while($rowNav5 = mysqli_fetch_assoc($resultNav5))
-                            {
-                                $thissubcategory=$rowNav5['SubCategories'];
-                                $LinkNavigator = $LinkNavigator . ('<option value="'.$thissectionVal.'/'.$thiscategory.'/'.$thissubcategory.'/">'.$thissectionVal.'/'.$thiscategory.'/'.$thissubcategory.'/</option>');
-                                
-                                $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                                $resultNav6 = $db->query("SELECT * FROM RED_Articles WHERE Sections='".$thissection."' AND Categories='".$thiscategory."' AND SubCategories='".$thissubcategory."' ORDER BY Updated DESC");
-                                $resultNav6_counter = $resultNav6->num_rows;
-                                while($rowNav6 = mysqli_fetch_assoc($resultNav6))
-                                {
-                                    $thisalias=$rowNav6['Alias'];
-                                    $LinkNavigator = $LinkNavigator . ('<option value="'.$thissectionVal.'/'.$thiscategory.'/'.$thissubcategory.'/'.$thisalias.'">'.$thissectionVal.'/'.$thiscategory.'/'.$thissubcategory.'/'.$thisalias.'</option>');	
-                                }
-                                
-                            }
-                            
-                        }
-                        
-                    }
-                    //END LINKNAVIGATOR LINKS
-					
+					echo ('<div class="wrapper">');
+
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    $LinkNavigator = red_admin_main_menu_link_options($db->connection);
+		                    $db->close();
+
 					echo('<div class="titleleft"><label style="display:inline;">Link: <input name="Link" type="text" id="Link" value="" /></label>');
 					echo ('</div>'); 
 					echo ('<div class="titleleft">');
@@ -692,9 +783,7 @@ function run_insert_gallery (insert_gallery)
                 echo ('<div class="titleleft">');
 					echo ('<label style="display:inline;" title="Open New Window">Open Blank <input name="NewWindow" type="checkbox" value="Y" /></label>'); 
                 echo ('</div>');
-				echo ('</div>');
-				
-				//echo ('<div class="clear-cp"></div><label>Short Description: <br /><textarea name="ShortDesc" id="ShortDesc" cols="" rows="3">'.$row['ShortDesc'].'</textarea><a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').show();return false;">[Show]</a><a href="javascript:;" onclick="tinyMCE.get(\'ShortDesc\').hide();return false;">[Hide]</a></label><div class="clear-cp"></div><br />');
+					echo ('</div>');
 			break;
 			
 		}
@@ -717,7 +806,7 @@ function run_insert_gallery (insert_gallery)
                     </div>
                     <div class="clear-cp"></div>
                     <div class="titleleft">
-                    <label style="width:75px" title="Used in Article Description or Short Articles">Small Picture:</label>
+                    <label style="width:75px" title="Used in Article Description">Small Picture:</label>
                     </div>
                     <div id="dropbox3" style="width: 150px; min-height:80px; float:left">
                         <span class="message3">Drop image <br />
@@ -737,79 +826,46 @@ function run_insert_gallery (insert_gallery)
                 
                 <div class="titleright"  style="text-align:right">
                     <label>Article Location:</label>
-                    <label>Section: <select name="Sections">
-                    <option value="">- null -</option>
-                    <?php 
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Sections FROM RED_Sections WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Sections']==$Section)    
-                            echo '<option value="' . $row3['Sections'] . '" selected="selected">' . $row3['Sections'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Sections'] . '">' . $row3['Sections'] . '</option>';
-                        }
-                    }
-                    $db->close();
-                    ?>
+	                    <label>Section: <select name="Sections">
+	                    <option value="">- null -</option>
+		                    <?php
+	                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_Sections', 'Sections', $Section);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     
                     <label>Category: <select name="Categories">
                     <option value="">- null -</option>
-                    <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT Categories FROM RED_Categories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['Categories']==$Category)    
-                            echo '<option value="' . $row3['Categories'] . '" selected="selected">' . $row3['Categories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['Categories'] . '">' . $row3['Categories'] . '</option>';
-                        }
-                    }
-                    $db->close();
-                    ?>
+	                    <?php
+	                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     
                     <label>Sub Category: <select name="SubCategories">
                     <option value="">- null -</option>
-                    <?php
-                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-                    $result3 = $db->query("SELECT SubCategories FROM RED_SubCategories WHERE Active='Y'");
-                    if ($result3) {
-                    while ($row3 = mysqli_fetch_assoc($result3)) {
-                        if ($row3['SubCategories']==$SubCategory)    
-                            echo '<option value="' . $row3['SubCategories'] . '" selected="selected">' . $row3['SubCategories'] . '</option>';
-                        else
-                            echo '<option value="' . $row3['SubCategories'] . '">' . $row3['SubCategories'] . '</option>';
-                        }
-                    }
-                    $db->close();
-                    ?>
+	                    <?php
+	                    $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+	                    echo red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     
                     <label>Article: <select name="Article">
                     <option value="">- null -</option>
-                    <?php
-                    
-                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-					$result3 = $db->query("SELECT Title, Alias FROM RED_Articles WHERE Active = 'Y' AND Component='Article' ORDER BY Updated DESC");
-					
-                    while($row3 = mysqli_fetch_assoc($result3))
-                    {
-						$thisalias=$row3['Alias'];
+	                    <?php
 
-						if (strtolower($thisalias)==strtolower($Article))
-						echo '<option value="'.$row3['Alias'].'" selected="selected">'.$row3['Alias'].'</option>';
-						else
-						echo '<option value="'.$row3['Alias'].'">'.$row3['Alias'].'</option>';
-                    }
-                    ?>
+	                    $db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+						echo red_admin_article_page_options($db->connection, $Article);
+	                    $db->close();
+	                    ?>
                     </select>
                     </label>
                     <div class="clear-cp"></div>
@@ -828,10 +884,11 @@ function run_insert_gallery (insert_gallery)
          </dl>
         <input type="hidden" name="ArtRecordID" id="ArtRecordID" value="<?php echo $ArtRecordID ?>" />
         <input type="hidden" name="RecordID" id="RecordID" value="<?php echo $RecordID ?>" />
-        <input type="hidden" name="Language" id="Language" value="<?php echo $Language ?>" />
-        <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo $_SESSION['alias']?>" />
+        <input type="hidden" name="Language" id="Language" value="<?php echo red_admin_area_html($Language) ?>" />
+        <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($_SESSION['alias'])?>" />
         <input type="hidden" name="Component" id="Component" value="Gallery" />
-        <input type="hidden" name="Layout" id="Layout" value="" />
+        <input type="hidden" name="Layout" id="Layout" value="<?php echo red_admin_area_html($Layout)?>" />
+        <?php echo red_csrf_input(); ?>
         <input type="submit" name="submit" value="Save" id="save"/>
         <span id="msggbox_insert_gallery" style="display:none"></span>
         </div>
@@ -840,6 +897,7 @@ function run_insert_gallery (insert_gallery)
 </div>
 </fieldset>
 </form>
+<script src="/admin/assets/js/gallery-create-uploads.js"></script>
 <?php
 
 		}

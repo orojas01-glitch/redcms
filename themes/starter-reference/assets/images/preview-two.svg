@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title description">
+  <title id="title">Strict data and local package assets</title>
+  <desc id="description">Abstract diagram showing validated data flowing into local templates, styles, and images.</desc>
+  <rect width="800" height="520" rx="32" fill="#24211d"/>
+  <g font-family="ui-monospace, monospace" font-size="18">
+    <rect x="58" y="66" width="252" height="388" rx="22" fill="#fff"/>
+    <circle cx="92" cy="104" r="10" fill="#b42318"/>
+    <rect x="116" y="94" width="142" height="18" rx="7" fill="#24211d"/>
+    <text x="86" y="164" fill="#b42318">{</text>
+    <text x="110" y="202" fill="#6b645c">"layout": "index-1",</text>
+    <text x="110" y="240" fill="#6b645c">"slots": [1,2,3,4],</text>
+    <text x="110" y="278" fill="#6b645c">"database": false</text>
+    <text x="86" y="316" fill="#b42318">}</text>
+    <rect x="350" y="66" width="392" height="110" rx="22" fill="#ead7d3"/>
+    <rect x="382" y="98" width="180" height="20" rx="8" fill="#24211d"/>
+    <rect x="382" y="136" width="286" height="12" rx="6" fill="#8c736f"/>
+    <rect x="350" y="198" width="186" height="110" rx="22" fill="#f1ede6"/>
+    <rect x="382" y="232" width="122" height="18" rx="7" fill="#b42318"/>
+    <rect x="382" y="270" width="88" height="10" rx="5" fill="#8a8278"/>
+    <rect x="556" y="198" width="186" height="110" rx="22" fill="#f1ede6"/>
+    <rect x="588" y="232" width="122" height="18" rx="7" fill="#b42318"/>
+    <rect x="588" y="270" width="88" height="10" rx="5" fill="#8a8278"/>
+    <rect x="350" y="330" width="392" height="124" rx="22" fill="#b42318"/>
+    <text x="546" y="402" fill="#fff" text-anchor="middle">LOCAL + DETERMINISTIC</text>
+  </g>
+</svg>

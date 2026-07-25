@@ -47,6 +47,10 @@
 			error: function(err, file, i){alert(err);},
 			uploadStarted: empty,
 			uploadFinished: empty,
+			uploadFailed: function(i, file, response, timeDiff, xhr) {
+				var message = response && response.status ? response.status : 'Upload failed';
+				alert(file.name + ': ' + message + (xhr && xhr.status ? ' (server status ' + xhr.status + ')' : ''));
+			},
 			progressUpdated: empty,
 			speedUpdated: empty
 		},
@@ -220,17 +224,37 @@
 			
 			opts.uploadStarted(index, file, files_count);  
 			
-			xhr.onload = function() { 
-			    if (xhr.responseText) {
+			xhr.onload = function() {
 				var now = new Date().getTime(),
-				    timeDiff = now - start_time,
-				    result = opts.uploadFinished(index, file, jQuery.parseJSON(xhr.responseText), timeDiff);
-					filesDone++;
-					if (filesDone == files_count - filesRejected) {
-						afterAll();
-					}
-			    if (result === false) stop_loop = true;
-			    }
+					timeDiff = now - start_time,
+					response = null,
+					result;
+
+				try {
+					response = xhr.responseText ? jQuery.parseJSON(xhr.responseText) : {};
+				} catch (error) {
+					response = {status: xhr.responseText || 'The upload server returned an invalid response.'};
+				}
+
+				if (xhr.status >= 200 && xhr.status < 300) {
+					result = opts.uploadFinished(index, file, response, timeDiff);
+				} else {
+					result = opts.uploadFailed(index, file, response, timeDiff, xhr);
+				}
+
+				filesDone++;
+				if (filesDone == files_count - filesRejected) {
+					afterAll();
+				}
+				if (result === false) stop_loop = true;
+			};
+			xhr.onerror = function() {
+				var response = {status: 'The upload could not reach the server.'};
+				opts.uploadFailed(index, file, response, new Date().getTime() - start_time, xhr);
+				filesDone++;
+				if (filesDone == files_count - filesRejected) {
+					afterAll();
+				}
 			};
 		}
 	}

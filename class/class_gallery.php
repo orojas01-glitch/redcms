@@ -9,6 +9,8 @@
  * Licensed under MIT licence:
  *   http://www.opensource.org/licenses/mit-license.php
 **/
+require_once __DIR__ . '/../includes/public_render_helpers.php';
+require_once __DIR__ . '/../includes/legacy_component_helpers.php';
 
 #[\AllowDynamicProperties]
 class gallery
@@ -26,141 +28,51 @@ class gallery
     public $vHeight;
 	public function album($position, $recordid, $layout, $SmallPict)
 	{	
-		/**
-		* READ THE SPECIFIED IMAGES WIDTH FOR THE LAYOUT
-		**/
-		
-		//$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-//		$result = $db->query("SELECT * FROM RED_Layouts WHERE UniqueName='" . $layout . "'");
-//		
-//		while($row = mysqli_fetch_assoc($result))
-//		{
-//			
-//			switch ($position)
-//			{
-//				case '':
-//				$This->Width=$row['w_Pos1'];
-//				$This->Height=$row['h_Pos1'];
-//				$This->WidthDivisor=$row['w_div_Pos1'];
-//				$This->vWidth=$row['vw_Pos1'];
-//				$This->vHeight=$row['vh_Pos1'];
-//				break;
-//				case '1':
-//				$This->Width=$row['w_Pos1'];
-//				$This->Height=$row['h_Pos1'];
-//				$This->WidthDivisor=$row['w_div_Pos1'];
-//				$This->vWidth=$row['vw_Pos1'];
-//				$This->vHeight=$row['vh_Pos1'];
-//				break;
-//				case '2':
-//				$This->Width=$row['w_Pos2'];
-//				$This->Height=$row['h_Pos2'];
-//				$This->WidthDivisor=$row['w_div_Pos2'];
-//				$This->vWidth=$row['vw_Pos2'];
-//				$This->vHeight=$row['vh_Pos2'];
-//				break;
-//				case '3':
-//				$This->Width=$row['w_Pos3'];
-//				$This->Height=$row['h_Pos3'];
-//				$This->WidthDivisor=$row['w_div_Pos3'];
-//				$This->vWidth=$row['vw_Pos3'];
-//				$This->vHeight=$row['vh_Pos3'];
-//				break;
-//				case '4':
-//				$This->Width=$row['w_Pos4'];
-//				$This->Height=$row['h_Pos4'];
-//				$This->WidthDivisor=$row['w_div_Pos4'];
-//				$This->vWidth=$row['vw_Pos4'];
-//				$This->vHeight=$row['vh_Pos4'];
-//				break;
-//				
-//			}
-//		}
-//		
-		
-		
-		/**
-		* END
-		**/
-		
-		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_C_Gallery WHERE RefID='".$recordid."'");
-		//echo ('start'.$result->num_rows.'<br/>');
-		$result_counter = $result->num_rows;
+		$context = red_legacy_public_gallery_context_validate(
+			red_legacy_public_gallery_context($recordid, $layout, $position)
+		);
+		$dimensions = $context['dimensions'];
+		$this->Width = $dimensions['Width'];
+		$this->Height = $dimensions['Height'];
+		$this->WidthDivisor = $dimensions['WidthDivisor'];
+		$this->vWidth = $dimensions['vWidth'];
+		$this->vHeight = $dimensions['vHeight'];
 		//
-		while($row = mysqli_fetch_assoc($result))
+		foreach($context['rows'] as $preparedRow)
 		{
-		
+			$row = $preparedRow['record'];
 			$GalleryType=$row['GalleryType'];
-			if ($row['NewWindow']==='Y')
-			$target='_blank';
+			$target=$preparedRow['link']['target'];
 			
 			switch($GalleryType)
 			{
 				//////////////////////////////////////////////
 				case 'Gallery':
 				
-					$Photos=$row['LongDesc'];
-					$This->Width=$This->Width/$This->WidthDivisor;
-					$photo=explode(',', $Photos);
-					$Descriptions=$row['ShortDesc'];
-					$tag=explode(',', $Descriptions);
-					if ($Photos!=''){
-						for ($t=0; $t<count($photo); $t++)
+					$this->Width=$preparedRow['gallery']['width'];
+					if ($preparedRow['gallery']['photos']){
+						foreach ($preparedRow['gallery']['photos'] as $photo)
 						{
-							$Description=explode(';',$tag[$t]);
-							$tagtitle=$Description[0];
-							$tagurl=$Description[1];
+							$tagtitle=$photo['title'];
+							$tagurl=$photo['url'];
 							
 							if ($tagurl!='')
-								echo '<figure class="img-indent" style="text-align:center"><!--<a class="hover-image" data-gal="prettyPhoto[1]" title="" href="/images/gallery/'.$photo[$t].'">--><img src="/images/resize.php?w='.$This->Width.'&amp;img=/images/gallery/'.$photo[$t].'"><!--</a>--><br/><span class="img-indent-description"><!--<a href="'.$tagurl.'" target="_blank">-->'.$tagtitle.'<!--</a>--></span></figure>';
+								echo '<figure class="img-indent" style="text-align:center"><!--<a class="hover-image" data-gal="prettyPhoto[1]" title="" href="/images/gallery/'.red_public_html($photo['file']).'">--><img class="red-gallery-image" src="/images/resize.php?w='.$this->Width.'&amp;img=/images/gallery/'.red_public_html($photo['file']).'"><!--</a>--><br/><span class="img-indent-description"><!--<a href="'.red_public_html($tagurl).'" target="_blank">-->'.red_public_display_text($tagtitle).'<!--</a>--></span></figure>';
 							else
-								echo '<figure class="img-indent" style="text-align:center"><!--<a class="hover-image" data-gal="prettyPhoto[1]" title="" href="/images/gallery/'.$photo[$t].'">--><img src="/images/resize.php?w='.$This->Width.'&amp;img=/images/gallery/'.$photo[$t].'"><!--</a>--><br/><span class="img-indent-description">'.$tagtitle.'</span></figure>';
+								echo '<figure class="img-indent" style="text-align:center"><!--<a class="hover-image" data-gal="prettyPhoto[1]" title="" href="/images/gallery/'.red_public_html($photo['file']).'">--><img class="red-gallery-image" src="/images/resize.php?w='.$this->Width.'&amp;img=/images/gallery/'.red_public_html($photo['file']).'"><!--</a>--><br/><span class="img-indent-description">'.red_public_display_text($tagtitle).'</span></figure>';
 							
 						}
 					}
 				break;
 				
 				//////////////////////////////////////////////
-				case 'Carrousel':
-					echo '<ul id="carousel" class="jcarousel-skin-tango">';
-					$Photos=$row['LongDesc'];
-					$This->Width=$This->Width/$This->WidthDivisor;
-					$photo=explode(',', $Photos);
-					$Descriptions=$row['ShortDesc'];
-					$tag=explode(',', $Descriptions);
-					
-					
-					for ($t=0; $t<count($photo); $t++)
-					{
-					$Description=explode(';',$tag[$t]);
-					$tagtitle=$Description[0];
-					$tagurl=$Description[1];
-					
-					if ($tagurl!='')
-					echo '<li><figure><img src="/images/resize.php?w=120&amp;img=/images/gallery/'.$photo[$t].'"></figure><a href="'.$tagurl.'" target="_blank">'.$tagtitle.'</a></li>';
-					else
-					echo '<li><figure><img src="/images/resize.php?w=120&amp;img=/images/gallery/'.$photo[$t].'"></figure><span>'.$tagtitle.'</span></li>';
-					}
-					echo '</ul><div class="clear-1"></div>';
-				
-				break;
-				
-				//////////////////////////////////////////////
 				case 'Video':
 					
 					if($row['Title']<>'')
-					echo('<h3>'.$row['Title'].'</h3>');
+					echo('<h3>'.red_public_display_text($row['Title']).'</h3>');
 					
-					$source=explode('/', $row['LongDesc']);
-                    if (isset($source[2]) && isset($source[3])) {
-					$VideoSrc = $source[2]; // youtube or vimeo
-					$VideoID = $source[3]; // video unique id
-                    }else{
-                    $VideoSrc = '';
-                    $VideoID  = '';
-                    }
+					$VideoSrc = $preparedRow['video']['provider']; // youtube or vimeo
+					$VideoID = $preparedRow['video']['id']; // video unique id
 					
 					/*echo 'VideoSrc='.$VideoSrc.'<br/>';
 					echo 'VideoID='.$VideoID.'<br/>';*/
@@ -173,14 +85,7 @@ class gallery
 					{
 						echo $v.'='.$VideoIDVar[$v].'<br/>';
 					}*/
-					$VideoIDVar = explode('=',$VideoID);
-					//echo 'count='.(count($VideoIDVar));
-					if (count($VideoIDVar)>1){// video unique id is the long version. apply to youtube links
-					$VideoID=explode('&',$VideoIDVar[1]);
-					$VideoID=$VideoID[0];	
-					}
-					
-					switch (strtolower($VideoSrc))
+					switch ($VideoSrc)
 					{
 							case 'vimeo.com':
 							$player='<iframe src="https://player.vimeo.com/video/'.$VideoID.'" width="'.$this->vWidth.'" height="'.$this->vHeight.'" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
@@ -213,7 +118,7 @@ class gallery
 					echo $row['ShortDesc'];
 					
 					if ($row['Link']<>''){
-					$link='href="'.$row['Link'].'" target="'.$target.'"';
+					$link='href="'.red_public_html($preparedRow['link']['href']).'" target="'.red_public_html($target).'"';
 					echo '<a '.$link.' class="link-1">Read More</a><div class="clear-1"></div>';
 					}
 				
@@ -223,10 +128,10 @@ class gallery
 				case 'Banner':
 					
 					if ($row['Link']<>''){
-					$link='href="'.$row['Link'].'" target="'.$target.'"';
-					echo '<figure class="img-indent"><a '.$link.' title=""><img src="/images/gallery/'.$row['LongDesc'].'" alt=""></a></figure>';
+					$link='href="'.red_public_html($preparedRow['link']['href']).'" target="'.red_public_html($target).'"';
+					echo '<figure class="img-indent"><a '.$link.' title=""><img class="red-gallery-image" src="/images/gallery/'.red_public_html($preparedRow['banner']['image']).'" alt=""></a></figure>';
                     }else{
-                       echo '<figure class="img-indent"><img src="/images/gallery/'.$row['LongDesc'].'" alt=""></figure>'; 
+                       echo '<figure class="img-indent"><img class="red-gallery-image" src="/images/gallery/'.red_public_html($preparedRow['banner']['image']).'" alt=""></figure>';
                     }
 				break;
 				
@@ -248,14 +153,16 @@ class gallery
 	{	
 		
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-		$result = $db->query("SELECT * FROM RED_C_Gallery WHERE RefID='".$recordid."'");
+		$rows = red_public_gallery_rows($db->connection, $recordid);
 		
 		//echo ('start'.$result->num_rows.'<br/>');
-		$result_counter = $result->num_rows;
+		$result_counter = count($rows);
+		$adminComponentIds = red_public_admin_component_ids($_SESSION['AdminComponents'] ?? '');
+		$canEditGallery = red_public_admin_component_authorized($db->connection, 'Gallery', $adminComponentIds);
 		//
-		while($row = mysqli_fetch_assoc($result))
+		foreach($rows as $row)
 		{
-			$Title=$row['Title'];
+			$Title=red_public_display_text($row['Title']);
 //			switch ($VarFeatured)
 //			{
 //			case '':
@@ -266,19 +173,16 @@ class gallery
 //			}
 			
 			$RecordID=$row['RecordID'];
-			$Alias=$row['Alias'];
-			$Alias=preg_replace('/-/','_',$Alias);
+			$Alias=red_public_js_identifier($row['Alias']);
+			$GalleryType=red_public_html($row['GalleryType']);
+			$GalleryActionKey=strtolower((string) ($row['GalleryType'] ?? ''));
+			if (!in_array($GalleryActionKey, ['banner', 'gallery', 'video'], true)) {
+				$GalleryActionKey='gallery';
+			}
 
 				/// COMPARE SESSION 'AdminComponents' WITH RED_COMPONENTS.
 				// IF VALUE EXIST THEN SHOW UPDATE BUTTON. IF NOT, DISPLAY MESSAGE FOR "ADMIN NOT AUTHORIZED TO UPDATE".
-				$AdminComponents = explode(",", $_SESSION['AdminComponents']);
-				//echo($_SESSION['AdminComponents'].'='.count($AdminComponents.'<br/>'));
-				for ($w=0; $w<=count($AdminComponents); $w++)
-				{
-				$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-				$resultC = $db->query("SELECT RecordID FROM RED_Components WHERE RecordID='".$AdminComponents[$w]."' AND UniqueName='Gallery'");
-				//echo ($resultC->num_rows);
-				if(($resultC->num_rows==0)&&($w==count($AdminComponents))){
+				if(!$canEditGallery){
 					//echo 'ADMINISTRATOR NOT AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -292,10 +196,9 @@ class gallery
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="content_'.$Alias.'_'.$RecordID.'" class="form" name="content_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_content_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_gallery" value="Edit '.$row['GalleryType'].'"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp red-admin-component-action red-admin-component-action--'.$GalleryActionKey.'" id="cp_gallery" value="Edit '.$GalleryType.'"/>';
 					echo '</form>';
-				}elseif(($resultC->num_rows==0));
-				else{
+				}else{
 					//echo 'ADMINISTRATOR AUTHORIZED TO UPDATE';
 					echo '<script type="text/javascript">'. "\n";
 					echo '<!--' ."\n";
@@ -339,19 +242,17 @@ class gallery
 					echo '-->'. "\n";
 					echo '</script>';
 					echo '<form id="gallery_'.$Alias.'_'.$RecordID.'" class="form" name="gallery_'.$Alias.'_'.$RecordID.'" method="post" onSubmit="return edit_gallery_'.$Alias.'_'.$RecordID.'(this);">';
-					echo '<h7 id="cp"> '.$row['Title'].'</h7><br/><input type="submit" name="Edit" class="cp" id="cp_gallery" value="Edit '.$row['GalleryType'].'"/>';
+					echo '<h7 id="cp"> '.$Title.'</h7><br/><input type="submit" name="Edit" class="cp red-admin-component-action red-admin-component-action--'.$GalleryActionKey.'" id="cp_gallery" value="Edit '.$GalleryType.'"/>';
 					echo '<input type="hidden" name="RecordID" id="RecordID" value="'.$RecordID.'" />';
 					echo '<input type="hidden" name="ArtRecordID" id="RecordID" value="'.$recordid.'" />';
-					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.$VarPosition.'" />';
-                    echo '<input type="hidden" name="Article" id="Article" value="'.article.'" />';
-					echo '<input type="hidden" name="Layout" id="Layout" value="'.$layout.'" />';
+					echo '<input type="hidden" name="VarPosition" id="VarPosition" value="'.red_public_html($VarPosition).'" />';
+                    echo '<input type="hidden" name="Article" id="Article" value="'.red_public_html(red_public_route_value('article')).'" />';
+					echo '<input type="hidden" name="Layout" id="Layout" value="'.red_public_html($layout).'" />';
                     
 					echo '</form>';
 					//END "ADMIN AUTHORIZED TO UPDATE".
-				break;
 				}
 				
-				}
 				//END COMPARE SESSION
 					echo '<hr id="cp">';
 				

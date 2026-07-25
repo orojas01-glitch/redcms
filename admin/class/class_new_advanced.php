@@ -1,5 +1,6 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
-red_start_session(); ?>
+red_start_session();
+red_require_admin(); ?>
 <?php
 #[\AllowDynamicProperties]
 class newadvanced
@@ -19,7 +20,7 @@ function run_insert_advanced (insert_advanced)
 	success: function(data) {
 	/*alert (data);
 	return false;*/
-	if (data=='yesyesyesyesyesyesyes')
+	if (data=='yes' || data=='yesyesyesyesyesyes' || data=='yesyesyesyesyesyesyes')
 	{
 	$('#msggbox_insert_advanced').html("Language Items Added.")
 	.hide()
@@ -62,6 +63,7 @@ function run_insert_advanced (insert_advanced)
     </div>
 </div>
 </fieldset>
+<?php echo red_csrf_input(); ?>
 </form>
 <?php
 	}
