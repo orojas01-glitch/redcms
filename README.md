@@ -6,7 +6,9 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
-RED-CMS 5.0 and Milestone 5 are implementation-complete on the release branch. The complete checkpoint is under review in [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2) before it is merged into `main`.
+RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
+checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
+on July 25, 2026.
 
 Version 5.1 is documented as product direction only. Payment, member access, editorial workflow, notifications, expanded roles, installable tools, and social publishing integrations are not active 5.0 features.
 
@@ -63,6 +65,12 @@ Detailed setup notes:
 
 ## Verification
 
+Verify that the tracked package contains only portable starter defaults:
+
+```bash
+php scripts/clean-starter-boundary-self-test.php
+```
+
 Run PHP syntax checks:
 
 ```bash
@@ -82,6 +90,8 @@ scripts/dev-acceptance.sh
 ```
 
 The acceptance runner creates a uniquely named temporary database, refuses the configured primary database, exercises migrations and representative CMS operations, and removes only its exact temporary database, grant, server, media, and fixture artifacts.
+It runs the clean-starter boundary check before creating any disposable
+database.
 
 ## Documentation
 

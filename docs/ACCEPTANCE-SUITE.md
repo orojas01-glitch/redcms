@@ -1,12 +1,17 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-07-24
+Date: 2026-07-25
 
 ## Purpose
 
 `scripts/dev-acceptance.sh` creates and removes a disposable local database to prove that the checked-in installer and every migration still produce the expected RED-CMS schema.
 
 This is a local development and controlled staging tool. It is not a HostGator deployment script and should not be uploaded into or run from the public web root.
+
+Before it creates a database or grant, the runner executes
+`scripts/clean-starter-boundary-self-test.php`. That dependency-free check
+requires the portable theme set, generic installer presets, server-local
+outbound-mail configuration, and deployment-neutral Apache rules.
 
 ## Current Coverage
 
@@ -76,7 +81,7 @@ The current compatibility foundation performs these checks through one command:
 62. Scan the isolated server log for PHP/runtime error markers.
 63. Stop the isolated server, clean authentication/permission/Section-delete/Article/Form/Gallery/upload/rollback fixtures, remove the temporary response/cookie directory, revoke and verify removal of the temporary grant, and drop the disposable database through an exit trap on success, failure, `INT`, or `TERM`.
 
-Representative behavior coverage is complete through the Milestone 5 content-version, direct page-structure, and custom Layout Builder foundations. Registration-table DDL remains intentionally outside this suite. The latest 2026-07-24 run imported the 20-table installer, applied all 31 migrations with zero pending/drifted files, completed the 29-assertion content-revision, 21-assertion layout-distribution, and 36-assertion custom-layout lifecycles plus every authentication/permission/Move-Content/Section-archive/Article-new-and-edit-upload/CRUD/Gallery-upload/rollback lifecycle with clean logs, and removed its fixtures, server, database, and grant.
+Representative behavior coverage is complete through the Milestone 5 content-version, direct page-structure, and custom Layout Builder foundations. Registration-table DDL remains intentionally outside this suite. The latest 2026-07-25 run first passed the 19-assertion clean-starter boundary, imported the 20-table installer, applied all 31 migrations with zero pending/drifted files, completed the 29-assertion content-revision, 21-assertion layout-distribution, and 36-assertion custom-layout lifecycles plus every authentication/permission/Move-Content/Section-archive/Article-new-and-edit-upload/CRUD/Gallery-upload/rollback lifecycle with clean logs, preserved the tracked empty-media manifests, and removed its fixtures, server, database, and grant.
 
 ## Requirements
 
@@ -123,6 +128,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - The isolated server receives the disposable database name through environment configuration and is stopped before database/grant removal.
 - Route checks require content markers, not HTTP status alone.
 - Theme-contract serialization uses two disposable-database connections, writes no content, requires a blocked connection's callback not to run, verifies exception-safe mutex release, and proves forged generic Advanced/logo writes leave the paired theme rows unchanged.
+- The theme contract self-test requires the core-owned page-layout ellipsis menu to reset active-theme `details` and `summary` element styles while retaining its 32-by-30-pixel desktop geometry.
 - Authentication uses only hard-coded disposable fixture credentials inside the disposable database; it never reads or changes a real administrator password.
 - The cookie jar and every authentication response live inside the suite's temporary response directory, which cleanup removes and verifies absent.
 - Authentication fixture cleanup is safe to rerun and executes before grant/database removal after successful and injected-failure paths.

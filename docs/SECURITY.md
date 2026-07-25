@@ -1,6 +1,6 @@
 # RED-CMS Security Notes
 
-Date: 2026-07-02
+Date: 2026-07-25
 
 ## Configuration Secrets
 
@@ -22,6 +22,11 @@ Supported environment variables:
 - `RED_DB_PASS`
 - `RED_DB_NAME`
 - `RED_IPSTACK_ACCESS_KEY`
+- `RED_LEGACY_MAIL_OWNER`
+- `RED_PAYPAL_PDT_HOSTNAME`
+- `RED_PAYPAL_PDT_AUTH_TOKEN`
+- `RED_PAYPAL_CONFIRMATION_FROM_EMAIL`
+- `RED_PAYPAL_CONFIRMATION_FROM_NAME`
 
 The existing constants `DBHOST`, `DBUSER`, `DBPASS`, and `DBNAME` are preserved so current CMS classes continue to work.
 
@@ -52,14 +57,40 @@ Only accounts whose `AdminType` is `webmaster` or `superadmin` can open or submi
 
 Administrator email is required for every create/update request and duplicate non-empty email values are rejected by the application. The migration widens `RED_Admin.Email` to `varchar(254)`. Existing blank legacy emails are shown as repair rows in Edit User and must be completed before those accounts can be saved.
 
-## Seed Data Warning
+## Portable Starter Data
 
-The current `db-structure.sql` includes data rows from an existing site. Before using it as a reusable installer artifact:
+The tracked `db-structure.sql` is the portable starter installer. Its
+administrator rows use unavailable password hashes and generic identities; its
+Form presets contain no retained client identity, legal copy, recipient, or
+payment form.
 
-- Redact or replace admin users.
-- Replace all passwords.
-- Remove site-specific content if the dump will be distributed.
-- Rotate any credentials that have been shared in documents or dumps.
+Client database exports must never replace this file. Keep every client
+database, theme, media archive, local configuration, and rollback point outside
+the starter repository. Before distribution, run:
+
+```bash
+php scripts/clean-starter-boundary-self-test.php
+```
+
+The same dependency-free check runs before `scripts/dev-acceptance.sh` creates
+its disposable database.
+
+## Legacy Mail And Payment Configuration
+
+The CMS-owned Contact, Response, and Register behavior remains governed by
+`docs/OPERATIONAL-FORM-BOUNDARY.md`.
+
+The compatibility paths `/bin/MailHandler.php` and `/bat/MailHandler.php`
+retain their URLs but send only to `RED_LEGACY_MAIL_OWNER` or the matching
+server-local configuration value. With no valid configured owner, they return
+`mail failed` and invoke no mail transport. The obsolete ASP.NET handler is
+inert.
+
+`/bin/paypal_response.php` remains default-inert. It requires a server-local PDT
+token and a valid `RED_PAYPAL_CONFIRMATION_FROM_EMAIL` before contacting
+PayPal. Confirmation mail uses only that configured sender and the verified
+payer address; it has no fixed BCC or fallback recipient. This compatibility
+route does not activate the Version 5.1 member, entitlement, or payment model.
 
 ## Database Backup Security
 

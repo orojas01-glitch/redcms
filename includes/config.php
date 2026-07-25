@@ -1,42 +1,8 @@
 <?php 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/public_route_compatibility_helpers.php';
+require_once __DIR__ . '/runtime_config_helpers.php';
 red_start_session();
-
-$redLocalConfig = [];
-$redLocalConfigFile = __DIR__ . '/config.local.php';
-if (is_file($redLocalConfigFile)) {
-    $loadedConfig = require $redLocalConfigFile;
-    if (is_array($loadedConfig)) {
-        $redLocalConfig = $loadedConfig;
-    }
-}
-
-if (!function_exists('red_config_value')) {
-    function red_config_value($localKey, $envKeys, $default = '')
-    {
-        global $redLocalConfig;
-
-        foreach ((array) $envKeys as $envKey) {
-            $envValue = getenv($envKey);
-            if ($envValue !== false && $envValue !== '') {
-                return $envValue;
-            }
-            if (isset($_ENV[$envKey]) && $_ENV[$envKey] !== '') {
-                return $_ENV[$envKey];
-            }
-            if (isset($_SERVER[$envKey]) && $_SERVER[$envKey] !== '') {
-                return $_SERVER[$envKey];
-            }
-        }
-
-        if (array_key_exists($localKey, $redLocalConfig)) {
-            return $redLocalConfig[$localKey];
-        }
-
-        return $default;
-    }
-}
 
 /**
  * Red Sphere - Unique php CMS

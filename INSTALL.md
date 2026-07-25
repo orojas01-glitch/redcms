@@ -19,6 +19,8 @@ client database.
    `includes/config.local.php`.
 4. Enter the database host, port, database name, user, and password in the
    local configuration file.
+   Leave the optional legacy mail and PayPal values empty unless that
+   compatibility path is deliberately configured for this installation.
 5. Run the pending migrations described in
    `docs/DATABASE-MIGRATIONS.md`.
 6. Replace the disabled starter administrator password hashes before the first
@@ -30,11 +32,21 @@ client database.
 `includes/config.local.php` is ignored by Git and must never be included in a
 release archive.
 
+The package includes empty `images/articles` and `images/gallery` boundaries.
+Keep their local `.gitignore` files in place so installation-owned uploads do
+not enter a starter release.
+
+The tracked `.htaccess` contains portable routing and configuration-file
+protection only. Add domain redirects, hosting-account PHP handlers, and other
+provider-specific rules in the individual installation; do not commit them to
+the starter distribution.
+
 ## Verify
 
 From the project root:
 
 ```bash
+php scripts/clean-starter-boundary-self-test.php
 scripts/dev-php-lint.sh
 php scripts/theme-contract-self-test.php
 scripts/dev-acceptance.sh

@@ -4082,6 +4082,17 @@ try {
             && str_contains($controlPanelCss, '.red-admin-layout-item__menu-panel select'),
         'Drag, keyboard/touch fallback, undo, conflict feedback, responsive styling, and shell loading stay connected'
     );
+    red_theme_test_assert(
+        preg_match(
+            '/#advanced \[data-red-editor-workspace="page-layout"\] \.red-admin-layout-item__menu\s*\{[^}]*margin:\s*0;[^}]*padding:\s*0;[^}]*border:\s*0;[^}]*background:\s*transparent;[^}]*\}/s',
+            $controlPanelCss
+        ) === 1
+            && preg_match(
+                '/#advanced \[data-red-editor-workspace="page-layout"\] \.red-admin-layout-item__menu > summary\s*\{[^}]*margin:\s*0;[^}]*min-height:\s*0;[^}]*width:\s*32px;[^}]*height:\s*30px;[^}]*\}/s',
+                $controlPanelCss
+            ) === 1,
+        'Page-layout details and summary controls reset active-theme element styles while retaining the desktop 32 by 30 pixel menu contract'
+    );
     echo 'Theme contract self-test passed: ' . $assertionCount . ' assertions.' . PHP_EOL;
 } finally {
     red_theme_test_remove_tree($projectRoot);
