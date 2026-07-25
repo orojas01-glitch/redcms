@@ -128,6 +128,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - The isolated server receives the disposable database name through environment configuration and is stopped before database/grant removal.
 - Route checks require content markers, not HTTP status alone.
 - Theme-contract serialization uses two disposable-database connections, writes no content, requires a blocked connection's callback not to run, verifies exception-safe mutex release, and proves forged generic Advanced/logo writes leave the paired theme rows unchanged.
+- The theme contract self-test requires the core-owned page-layout ellipsis menu to reset active-theme `details` and `summary` element styles while retaining its 32-by-30-pixel desktop geometry.
 - Authentication uses only hard-coded disposable fixture credentials inside the disposable database; it never reads or changes a real administrator password.
 - The cookie jar and every authentication response live inside the suite's temporary response directory, which cleanup removes and verifies absent.
 - Authentication fixture cleanup is safe to rerun and executes before grant/database removal after successful and injected-failure paths.

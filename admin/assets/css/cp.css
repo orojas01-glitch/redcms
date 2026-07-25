@@ -258,11 +258,17 @@ h7#layout{color:#FFF}
 #advanced [data-red-editor-workspace="page-layout"] .red-admin-layout-item__menu {
 	position: relative;
 	flex: 0 0 auto;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
 }
 
 #advanced [data-red-editor-workspace="page-layout"] .red-admin-layout-item__menu > summary {
 	display: grid;
 	place-items: center;
+	margin: 0;
+	min-height: 0;
 	width: 32px;
 	height: 30px;
 	padding: 0;
