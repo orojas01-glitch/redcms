@@ -31,6 +31,26 @@ The Form Builder may present the experience, but Member registration, Member log
 
 An optional **Continue with Google** path can use Google Identity Services to sign up or sign in. RED-CMS must validate the returned ID token on the server, bind the immutable Google subject to `RED_Member_Identities`, and then create its own revocable member session. Google authentication must not be confused with permission to access a Section; the same entitlement check still applies.
 
+## Add-On And Content-Package Boundary
+
+Member Access / Protected Content is an optional cross-cutting package under
+the Version 5.1 add-on contract. It is not a public listing directory.
+
+- A public listing directory would present searchable people, businesses,
+  locations, or similar records through a Listing component and search
+  service.
+- Member Access owns public member identities, sessions, entitlements, route
+  checks, locked access forms, protected-content gates, and secure-download
+  authorization.
+- Themes may present the sign-in, teaser, and denial states, but they never
+  decide whether protected content can be queried.
+- Store Lite, Appointments, or another package may optionally request an
+  entitlement after a verified transaction, but payment providers never own
+  authorization.
+
+See `docs/ADD-ON-CONTRACT.md` for package discovery, lifecycle, dependency,
+permission, migration, client-isolation, and acceptance requirements.
+
 ## Route And Search Requirements
 
 - Enforce access before layout rendering and before protected Article/Form/Gallery queries.

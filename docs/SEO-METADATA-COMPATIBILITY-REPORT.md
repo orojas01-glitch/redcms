@@ -2,8 +2,9 @@
 
 - Status: Confirmed compatibility gap
 - Target: RED-CMS 5.1
-- Priority: High
+- Priority: P1 — first Version 5.1 implementation milestone
 - Severity: Medium
+- Launch dependency: Adriana Granobles 28-page migration
 
 Area: Public rendering, content migration, page editing, SEO and social sharing
 
@@ -22,6 +23,10 @@ an imported title. During the 28-page Adriana Granobles migration, this changed
 This is a migration compatibility problem even when the visible page content
 renders correctly. Search result titles, canonical consolidation, social-card
 previews, and structured-data meaning can all change or disappear.
+
+This compatibility work is the first Version 5.1 delivery priority. Its
+generic migration, editor, rendering, fallback, and acceptance contracts must
+pass before optional business-vertical add-ons are scheduled.
 
 ## Current Behavior And Evidence
 
