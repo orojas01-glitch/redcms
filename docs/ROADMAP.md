@@ -36,3 +36,9 @@ design before implementation.
   and `summary` spacing, borders, backgrounds, and minimum height inside the
   core-owned editor workspace. Active themes can style public disclosure
   elements without changing the administrator card geometry.
+- Per-page SEO metadata is a confirmed migration compatibility gap. The current
+  renderer reconstructs document titles and cannot represent canonical URLs,
+  complete Open Graph and X/Twitter metadata, or typed JSON-LD. See
+  [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
+  for evidence, the proposed 5.1 model, migration requirements, and acceptance
+  criteria.
