@@ -4,9 +4,34 @@ Status: product direction only. These features are not part of RED-CMS 5.0 and m
 
 ## Product Goal
 
-Version 5.1 should extend the 5.0 authoring foundation for organizations that need member access, formal publishing operations, clearer accountability, and optional integrations. RED-CMS should remain a reusable core that can be adapted to different client types through separately installed components, services, and provider adapters. New capabilities should be modular, permission-aware, migration-backed, auditable, and removable without breaking public content.
+Version 5.1 should first close the per-page SEO metadata compatibility gap
+blocking the isolated Adriana launch. Later work may extend the 5.0 authoring
+foundation with member access, formal publishing operations, clearer
+accountability, and optional integrations. RED-CMS should remain a reusable
+core that can be adapted to different client types through separately
+installed components, services, and provider adapters. New capabilities
+should be modular, permission-aware, migration-backed, auditable, and
+removable without breaking public content.
 
-## 1. Members, Paid Access, And Protected Content
+## 1. Per-Page SEO Metadata Compatibility
+
+The first implementation milestone is a generic, compatibility-preserving SEO
+model for public routes:
+
+- Store an exact SEO title independently from the visible page title.
+- Support canonical, robots, Open Graph, X/Twitter, and typed JSON-LD data.
+- Generate safe fallback values without requiring duplicate editor entry.
+- Keep new storage nullable so upgraded installations retain existing output
+  until an override is populated.
+- Report imported, derived, skipped, invalid, and non-representable metadata.
+- Validate generic fixtures and all 28 Adriana routes in the separate client
+  installation without copying client data into the starter.
+
+The complete evidence, field model, fallback rules, migration requirements,
+and acceptance criteria are in
+`docs/SEO-METADATA-COMPATIBILITY-REPORT.md`.
+
+## 2. Members, Paid Access, And Protected Content
 
 Private Sections and protected downloads should use a dedicated Member Access / Protected Content package with member identity, sessions, entitlements, and route enforcement. They must never rely on the administrator account table, a client-side hidden folder, or the stored `AccessLevel` value alone. A visitor may register, sign in, receive a manual entitlement, or purchase access through a payment adapter.
 
@@ -20,7 +45,7 @@ Private Sections and protected downloads should use a dedicated Member Access / 
 This use of protected content is different from a public listing directory. The
 detailed security and delivery model is in `docs/MEMBER-ACCESS-DIRECTION.md`.
 
-## 2. Roles And Permissions
+## 3. Roles And Permissions
 
 Replace the current component-access model with composable roles and scoped permissions while preserving a protected owner account.
 
@@ -35,7 +60,7 @@ Suggested starting roles:
 
 Permissions should describe actions such as view, create, edit own, edit any, review, approve, publish, manage users, manage payments, manage themes, and install tools. Scopes may later restrict access by Section or site.
 
-## 3. Publishing Workflow
+## 4. Publishing Workflow
 
 Introduce an explicit lifecycle:
 
@@ -43,7 +68,7 @@ Introduce an explicit lifecycle:
 
 Publishing state should be independent from version history. Every transition needs permission checks, an actor, timestamp, optional note, and a stable revision reference. Rejection should return content to Draft without destroying the review record. Existing installations should continue to behave as immediate-publish sites until workflow is deliberately enabled.
 
-## 4. Notifications And Reminders
+## 5. Notifications And Reminders
 
 Create an internal notification center before adding external channels. Useful events include review requests, approvals, rejections, scheduled publication, approaching expiration, failed publication, payment exceptions, and assigned follow-up work.
 
@@ -52,7 +77,7 @@ Create an internal notification center before adding external channels. Useful e
 - Deliver email only through a configured queue or transport.
 - Deduplicate retryable events and keep delivery failures visible.
 
-## 5. Ownership And Change Accountability
+## 6. Ownership And Change Accountability
 
 Content should record a responsible owner separately from the administrator who performed the most recent change. Version history and the administrator activity log already provide useful foundations, but 5.1 should make ownership, assignment, and change attribution visible in the workspace.
 
@@ -65,7 +90,7 @@ Each important record should answer:
 - Who approved it?
 - When is follow-up due?
 
-## 6. Controlled Add-Ons And Social Publishing APIs
+## 7. Controlled Add-Ons And Social Publishing APIs
 
 Add a controlled extension catalog rather than arbitrary uploaded PHP. A
 package may provide placeable components, business services, administrator
@@ -73,11 +98,12 @@ tools, or external-provider adapters. It should declare its identifier,
 version, compatibility range, permissions, settings schema, migrations,
 background jobs, outbound hosts, dependencies, and uninstall behavior.
 
-The first planned client content packages are Store Lite, Events Calendar,
-Appointments, Donations, and Restaurant Ordering, in that order. Member Access
-/ Protected Content is a separate cross-cutting package required before private
-content is enabled. The full boundary is defined in
-`docs/ADD-ON-CONTRACT.md`.
+Optional future package examples are Store Lite, Events Calendar,
+Appointments, Donations, and Restaurant Ordering, in that priority order if
+separately approved. They are not core features or required Version 5.1
+deliverables. Member Access / Protected Content is a separate cross-cutting
+package required before private content is enabled. The full boundary is
+defined in `docs/ADD-ON-CONTRACT.md`.
 
 Social publishing should be an optional adapter layer:
 
@@ -97,18 +123,22 @@ owner-authorized actions scoped to one client database.
 
 ## Suggested Delivery Order
 
-1. Role and permission model
-2. Ownership and assignment
-3. Draft/review/approval/publish workflow
-4. Internal notifications and reminders
-5. Member identity and free/manual entitlements
-6. PayPal sandbox, then Nequi
-7. Add-on manifest, registry, lifecycle, and Store Lite first-party package
-8. One audited social publishing adapter
+1. Implement the generic per-page SEO storage, editor, rendering, fallback,
+   validation, and migration-reporting contracts.
+2. Pass the SEO acceptance suite using generic clean-starter fixtures.
+3. Import and verify the 28 Adriana routes in its separate installation and
+   database.
+4. Complete Adriana launch readiness without copying its theme, data, media,
+   metadata, or settings into the starter.
 
-Each phase requires its own migration, rollback path, authorization tests, disposable-database acceptance coverage, and desktop/mobile administrator verification.
+Each phase requires its own migration, rollback path, relevant authorization
+tests, disposable-database acceptance coverage, and desktop/mobile
+administrator verification.
 
-Within the add-on track, the prioritized vertical order is Store Lite, Events
-Calendar, Appointments, Donations, and Restaurant Ordering. If private folders
-are scheduled for activation, Member Access must pass its route-enforcement and
-leakage gates before the administrator exposes an operational private setting.
+After the SEO launch gate, later tracks can be approved independently: roles
+and publishing workflow, Member Access, notifications, social adapters, or the
+add-on platform. The five example vertical packages remain optional. If that
+track is approved, its order is Store Lite, Events Calendar, Appointments,
+Donations, and Restaurant Ordering. If private folders are scheduled for
+activation, Member Access must pass its route-enforcement and leakage gates
+before the administrator exposes an operational private setting.

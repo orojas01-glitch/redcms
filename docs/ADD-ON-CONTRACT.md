@@ -20,7 +20,8 @@ business records, members, orders, appointments, donations, media, settings,
 secrets, and database migrations belong only to that client's separate
 installation and database.
 
-The first planned vertical packages, in order of importance, are:
+The current optional package examples, in priority order if their individual
+work is later approved, are:
 
 1. Store Lite
 2. Events Calendar
@@ -32,6 +33,11 @@ Member Access / Protected Content is a separate cross-cutting package. It is
 required before RED-CMS can safely activate private Sections or protected
 downloads, but it is not a public listing directory and is not one of the five
 business verticals above.
+
+These packages are examples of the kinds of client adaptation the contract
+should eventually support. They are not core features or committed Version 5.1
+deliverables. Per-page SEO metadata compatibility and the isolated Adriana
+launch gate take implementation priority over this add-on track.
 
 ## Terms
 
@@ -354,7 +360,7 @@ the administrator does not delete executable package code.
   paths, SQL, secrets, or administrator controls.
 - Disabling an add-on must not silently delete or rewrite its content.
 
-## Prioritized Content Packages
+## Optional Future Content Package Examples
 
 ### 1. Store Lite
 
@@ -498,20 +504,24 @@ responses, or structured data.
 
 ## Initial Delivery Sequence
 
-1. Approve this architecture contract.
-2. Implement the Version 5.1 role and package-lifecycle permissions.
-3. Add the manifest schema, filesystem discovery, read-only validation, and
+1. Complete the Version 5.1 per-page SEO metadata compatibility work and the
+   isolated Adriana launch acceptance gate.
+2. Approve this architecture contract as a separate future implementation
+   track.
+3. Implement the role and package-lifecycle permissions required by that
+   approved track.
+4. Add the manifest schema, filesystem discovery, read-only validation, and
    dependency preflight.
-4. Add per-client installed/enabled state and immutable migration tracking.
-5. Implement and distribute Store Lite separately as the first complete
+5. Add per-client installed/enabled state and immutable migration tracking.
+6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
-6. If private folders are scheduled for activation, implement and pass Member
+7. If private folders are scheduled for activation, implement and pass Member
    Access before exposing an operational private setting.
-7. Implement Events Calendar as the second independent proof that a new
+8. Implement Events Calendar as the second independent proof that a new
    component no longer requires core dispatcher edits.
-8. Implement Appointments.
-9. Implement Donations.
-10. Implement Restaurant Ordering.
+9. Implement Appointments.
+10. Implement Donations.
+11. Implement Restaurant Ordering.
 
 Each implementation remains a separate reviewed batch with its own rollback
 path, migration evidence, acceptance fixtures, and client-specific activation
@@ -527,6 +537,7 @@ The first add-on platform will not provide:
 - Automatic enablement
 - Business-vertical packages bundled into the core or activated by the starter
 - Automatic changes to a retained primary database
-- One monolithic schema for stores, events, appointments, and donations
+- One monolithic schema for stores, events, appointments, donations, and
+  restaurant ordering
 - Theme-owned authorization, payments, identity, or persistence
 - Client business data or enabled add-ons in the clean starter
