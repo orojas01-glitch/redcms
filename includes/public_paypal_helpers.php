@@ -50,7 +50,7 @@ if (!function_exists('red_public_paypal_parse_pdt')) {
 if (!function_exists('red_public_paypal_confirmation_body')) {
     function red_public_paypal_confirmation_body($itemName, $amount, $txnId)
     {
-        return '<HTML><HEAD><TITLE>Roland Kalt</TITLE></HEAD>' .
+        return '<!doctype html><html><head><meta charset="utf-8"><title>Payment confirmation</title></head><body>' .
             '<style type="text/css">' .
             'table.standard {font-family:Verdana, Geneva, sans-serif; font-size:14px; border-width: 0px;	border-spacing:0px;	border-style: solid; border-color:#cccccc;	border-collapse: collapse;	background-color: white;}' .
             'table.standard th {	border-width: 0px;	padding:4px; border-style: inset; border-color: #cccccc; background-color: #F5F5F5;}' .
@@ -60,55 +60,57 @@ if (!function_exists('red_public_paypal_confirmation_body')) {
             '<tr><th>Item:</th><td>' . red_public_paypal_html($itemName) . '</td></tr>' .
             '<tr><th>Amount:</th><td>' . red_public_paypal_html($amount) . '</td></tr>' .
             '<tr><th>Confirmation #:</th><td>' . red_public_paypal_html($txnId) . '</td></tr>' .
-            '</table></html>';
+            '</table></body></html>';
     }
 }
 
 if (!function_exists('red_public_paypal_send_confirmation')) {
-    function red_public_paypal_send_confirmation($payerEmail, $firstName, $lastName, $body)
+    function red_public_paypal_send_confirmation(
+        $payerEmail,
+        $firstName,
+        $lastName,
+        $body,
+        $fromEmail = '',
+        $fromName = 'RED-CMS'
+    )
     {
+        $payerEmail = red_public_paypal_header_value($payerEmail);
+        $fromEmail = red_public_paypal_header_value($fromEmail);
+        $fromName = red_public_paypal_header_value($fromName);
+        if (
+            !filter_var($payerEmail, FILTER_VALIDATE_EMAIL)
+            || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)
+        ) {
+            return false;
+        }
+        if ($fromName === '') {
+            $fromName = 'RED-CMS';
+        }
+
         require_once __DIR__ . '/../bin/Exception.php';
         require_once __DIR__ . '/../bin/phpmailer.php';
 
-        $payerEmail = red_public_paypal_header_value($payerEmail);
-        if ($payerEmail === '') {
-            return false;
-        }
-
         $mail = new PHPMailer\PHPMailer\PHPMailer();
-        $mail->From = 'info@rolandkalt.com';
-        $mail->FromName = 'Roland Kalt';
+        $mail->From = $fromEmail;
+        $mail->FromName = $fromName;
         $mail->AddAddress($payerEmail, trim(red_public_paypal_header_value($firstName . ' ' . $lastName)));
-        $mail->AddBCC('redspheredevelopment@gmail.com', 'debug');
         $mail->WordWrap = 50;
         $mail->IsHTML(true);
 
         switch (language) {
             case 'en':
-                $mail->Subject = "Roland Kalt - Payment Confirmation";
+                $mail->Subject = $fromName . ' - Payment Confirmation';
                 break;
             case 'sp':
             default:
-                $mail->Subject = "Roland Kalt - Confirmacion de pago";
+                $mail->Subject = $fromName . ' - Confirmacion de pago';
                 break;
         }
 
         $mail->Body = $body;
         $mail->AltBody = "This is the text-only body";
 
-        if ($mail->Send()) {
-            return true;
-        }
-
-        $subject = red_public_paypal_header_value($mail->Subject . ' failed');
-        mail(
-            'redspheredevelopment@gmail.com',
-            $subject,
-            $body,
-            "From: mail@red-sphere.com\r\nReply-To: " . $payerEmail . "\r\nX-Mailer: DT_formmail"
-        );
-
-        return false;
+        return $mail->Send();
     }
 }
 

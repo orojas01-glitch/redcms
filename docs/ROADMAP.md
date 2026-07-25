@@ -2,7 +2,7 @@
 
 ## Version 5.0 — Bonsai
 
-Milestones 1 through 5 are implementation-complete on the release branch.
+Milestones 1 through 5 are complete on `main` through pull request #2.
 Version 5.0 delivers the compatibility-first PHP/MySQL modernization,
 administrator security and transaction boundaries, the polished authoring
 workspace, reusable standard themes, visual layouts and Layout Builder,

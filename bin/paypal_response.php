@@ -7,9 +7,23 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_paypal_helpers.php';
 
 $ppHostname = red_config_value('PAYPAL_PDT_HOSTNAME', ['RED_PAYPAL_PDT_HOSTNAME', 'PAYPAL_PDT_HOSTNAME'], 'www.paypal.com');
 $authToken = red_config_value('PAYPAL_PDT_AUTH_TOKEN', ['RED_PAYPAL_PDT_AUTH_TOKEN', 'PAYPAL_PDT_AUTH_TOKEN'], '');
+$confirmationFromEmail = red_config_value(
+    'PAYPAL_CONFIRMATION_FROM_EMAIL',
+    ['RED_PAYPAL_CONFIRMATION_FROM_EMAIL', 'PAYPAL_CONFIRMATION_FROM_EMAIL'],
+    ''
+);
+$confirmationFromName = red_config_value(
+    'PAYPAL_CONFIRMATION_FROM_NAME',
+    ['RED_PAYPAL_CONFIRMATION_FROM_NAME', 'PAYPAL_CONFIRMATION_FROM_NAME'],
+    'RED-CMS'
+);
 $txToken = red_public_paypal_scalar($_GET['tx'] ?? '');
 
-if ($authToken === '' || $txToken === '') {
+if (
+    $authToken === ''
+    || $txToken === ''
+    || !filter_var($confirmationFromEmail, FILTER_VALIDATE_EMAIL)
+) {
     exit;
 }
 
@@ -46,7 +60,14 @@ $payerEmail = $payment['payer_email'] ?? '';
 $firstName = $payment['first_name'] ?? '';
 $lastName = $payment['last_name'] ?? '';
 $emailBody = red_public_paypal_confirmation_body($itemName, $amount, $txnId);
-red_public_paypal_send_confirmation($payerEmail, $firstName, $lastName, $emailBody);
+red_public_paypal_send_confirmation(
+    $payerEmail,
+    $firstName,
+    $lastName,
+    $emailBody,
+    $confirmationFromEmail,
+    $confirmationFromName
+);
 
 header('Location: http://' . BASE_URL . '/');
 exit;

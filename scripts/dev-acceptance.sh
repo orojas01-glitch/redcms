@@ -43,6 +43,7 @@ if [[ ! -s "$INSTALLER_FILE" ]]; then
     printf 'Installer SQL is missing or empty: %s\n' "$INSTALLER_FILE" >&2
     exit 66
 fi
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 if [[ ! -x "$FRANKENPHP_BIN" ]]; then
     printf 'FrankenPHP is missing or not executable: %s\n' "$FRANKENPHP_BIN" >&2
