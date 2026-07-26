@@ -27,10 +27,10 @@ The current compatibility foundation performs these checks through one command:
 3. Refuse the configured primary database, unsafe names, or any database that already exists.
 4. Create the disposable database and grant the existing application database account access only to it.
 5. Import `db-structure.sql`.
-6. Verify 22 InnoDB tables, utf8mb4 collations, an empty migration ledger, sanitized administrator seed placeholders, and empty administrator role/capability tables.
+6. Verify 24 InnoDB tables, utf8mb4 collations, an empty migration ledger, sanitized administrator seed placeholders, empty administrator role/capability tables, and empty add-on installation/migration registries.
 7. Apply every checked-in migration and require the ledger count to match the migration-file count.
-8. Run migrations again and require `No pending migrations.` plus zero checksum drift, then run the 16-assertion Owner authorization lifecycle for empty-by-default storage, guarded one-time bootstrap, the exact six lifecycle capabilities, persisted session refresh, revocation, protected Owner accounts, atomic audit rollback, and zero residual authorization rows. Run the 33-assertion disposable SEO lifecycle for exact Article metadata, revision capture, invalid-value refusal, transactional cleanup, Section/Category/Subcategory creation and update, forced rollback, and zero residual rows. Run the 29-assertion content-revision lifecycle for Article, paired Banner, paired Form, non-destructive restore, stale-state rejection, deduplication, retained delete history, strict-SQL legacy-date compatibility, and a single unambiguous current-version marker. Run the 21-assertion page-layout distribution lifecycle for exact legacy order values, atomic ordering and cross-position moves, Hidden content, revision operations, stale-state rejection, no-op writes, and inverse Undo. Run the 36-assertion custom-layout lifecycle for strict 12-unit definitions, draft/publish separation, catalog integration, assignment and public rendering, stale-write rejection, immutable restore, occupied-position refusal, assigned-layout archival refusal, exact cleanup, and migration no-op behavior.
-9. Verify the final 23-table InnoDB/utf8mb4 state, canonical clean-installer row counts including zero SEO, administrator-role, and administrator-capability rows, and zero Form, Gallery, area, layout, and component relationship errors, then run the 14-assertion two-connection theme-contract suite against the disposable database. That suite proves database-scoped locking, reentrancy, cross-connection exclusion, exception-safe release, effective-theme agreement, safe inactive upload placeholders, and reserved active/previous theme rows.
+8. Run migrations again and require `No pending migrations.` plus zero checksum drift, then run the 16-assertion Owner authorization lifecycle for empty-by-default storage, guarded one-time bootstrap, the exact six lifecycle capabilities, persisted session refresh, revocation, protected Owner accounts, atomic audit rollback, and zero residual authorization rows. Run the 14-assertion add-on registry lifecycle for empty storage, deterministic package snapshots, exact capability mapping, pending/checksum/version/missing-code failure states, unavailable runtime, immutable migration identity, protected history, and exact cleanup without package execution. Run the 33-assertion disposable SEO lifecycle for exact Article metadata, revision capture, invalid-value refusal, transactional cleanup, Section/Category/Subcategory creation and update, forced rollback, and zero residual rows. Run the 29-assertion content-revision lifecycle for Article, paired Banner, paired Form, non-destructive restore, stale-state rejection, deduplication, retained delete history, strict-SQL legacy-date compatibility, and a single unambiguous current-version marker. Run the 21-assertion page-layout distribution lifecycle for exact legacy order values, atomic ordering and cross-position moves, Hidden content, revision operations, stale-state rejection, no-op writes, and inverse Undo. Run the 36-assertion custom-layout lifecycle for strict 12-unit definitions, draft/publish separation, catalog integration, assignment and public rendering, stale-write rejection, immutable restore, occupied-position refusal, assigned-layout archival refusal, exact cleanup, and migration no-op behavior.
+9. Verify the final 25-table InnoDB/utf8mb4 state, canonical clean-installer row counts including zero SEO, administrator authorization, add-on installation, and add-on migration rows, and zero Form, Gallery, area, layout, and component relationship errors, then run the 14-assertion two-connection theme-contract suite against the disposable database. That suite proves database-scoped locking, reentrancy, cross-connection exclusion, exception-safe release, effective-theme agreement, safe inactive upload placeholders, and reserved active/previous theme rows.
 10. Compare a normalized table/column/index manifest with the configured primary schema while ignoring data and auto-increment counters.
 11. Confirm the primary isolation snapshot is unchanged.
 12. Select an unused high local port while explicitly reserving port `8055` for the normal development site.
@@ -45,7 +45,7 @@ The current compatibility foundation performs these checks through one command:
 21. Insert and log in one narrowly assigned Guest with only Article component `#100` and Move Content tool `#1`.
 22. Require the Guest to render the assigned Article form and Move Content tool with their expected form/CSRF markers.
 23. Require HTTP 403 `no` for a valid-CSRF site-layout write, Administrator Users, unassigned Video component `#107`, and unassigned Filter Areas tool `#2`.
-24. Compare full checksums for all 23 tables before and after the allowed/denied permission requests and require no data changes.
+24. Compare full checksums for all 25 tables before and after the allowed/denied permission requests and require no data changes.
 25. Require Guest logout and account deletion to independently invalidate the formerly allowed Article render, then remove and verify zero Guest administrator, throttle, and activity rows.
 26. Insert and authenticate one separate disposable Webmaster plus one disposable active Section for the Section-delete lifecycle, upgrade its fixture password to bcrypt, and extract its valid CSRF token.
 27. Create one active and one already-inactive Article through the real protected endpoint, both assigned to that Section, and require exact relationship/count state.
@@ -79,8 +79,8 @@ The current compatibility foundation performs these checks through one command:
 55. Delete the paired metadata through `delete_label.php`, remove only the exact acceptance-owned image, require the public route to stop rendering it, and require the complete pre-existing Gallery media manifest to match its starting state.
 56. Remove and verify zero upload-lifecycle administrator, parent Article, child Gallery, failed-login, activity-audit, generated-source, and uploaded-file artifacts.
 57. Insert and authenticate one final disposable Webmaster, then create an exact subtype `#107` Video Gallery parent/child fixture through the real protected endpoint.
-58. Capture checksums for all 23 tables, install a `BEFORE UPDATE` trigger only in the disposable database, and submit a real protected Gallery update whose parent write is attempted before the trigger rejects the later child write.
-59. Require HTTP 200 with the legacy response `no`, remove the trigger, require the complete 23-table checksum snapshot to match, require the exact initial parent/child values to remain, and require zero updated aliases.
+58. Capture checksums for all 25 tables, install a `BEFORE UPDATE` trigger only in the disposable database, and submit a real protected Gallery update whose parent write is attempted before the trigger rejects the later child write.
+59. Require HTTP 200 with the legacy response `no`, remove the trigger, require the complete 25-table checksum snapshot to match, require the exact initial parent/child values to remain, and require zero updated aliases.
 60. Submit the same protected update after trigger removal and require `yes` plus exact updated parent/child values, then delete the pair through `delete_label.php` and restore canonical counts.
 61. Remove and verify zero rollback-lifecycle administrator, parent Article, child Gallery, failed-login, activity-audit, and trigger artifacts. An injected failure immediately after trigger creation must also remove the trigger, fixtures, isolated server, scoped grant, and database.
 62. Scan the isolated server log for PHP/runtime error markers.
@@ -91,16 +91,17 @@ SEO, read-only add-on trust, and persisted Owner-authorization foundations,
 Milestone 5 content-version, direct page-structure, and custom Layout Builder
 foundations. Add-on package registry and lifecycle-execution DDL remain
 intentionally outside this suite. The latest 2026-07-25 run passed the
-21-assertion clean starter boundary, 59-assertion SEO contract, 14-assertion SEO
+22-assertion clean starter boundary, 59-assertion SEO contract, 14-assertion SEO
 migration contract, and 40-assertion add-on trust contract, imported the
-22-table installer, applied all 33 migrations to the expected 23-table schema
+24-table installer, applied all 34 migrations to the expected 25-table schema
 with zero pending or drifted files, and completed the 16-assertion Owner
-authorization, 33-assertion SEO database, 29-assertion content-revision,
-21-assertion layout-distribution, and 36-assertion custom-layout lifecycles. It
-also passed every authentication, permission, Move Content, Section archive,
-Article upload/CRUD, Form CRUD, Gallery CRUD/upload, and forced-rollback
-lifecycle with clean logs, preserved the tracked empty-media manifests, and
-removed its fixtures, server, databases, grants, and authorization rows.
+authorization, 14-assertion add-on registry, 33-assertion SEO database,
+29-assertion content-revision, 21-assertion layout-distribution, and
+36-assertion custom-layout lifecycles. It also passed every authentication,
+permission, Move Content, Section archive, Article upload/CRUD, Form CRUD,
+Gallery CRUD/upload, and forced-rollback lifecycle with clean logs, preserved
+the tracked empty-media manifests, and removed its fixtures, server, databases,
+grants, authorization rows, and registry rows.
 
 ## Requirements
 
@@ -131,7 +132,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on registry reconciliation, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -153,7 +154,8 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Authentication fixture cleanup is safe to rerun and executes before grant/database removal after successful and injected-failure paths.
 - Guest permission checks use only disposable account data and target the disposable database. The potentially mutating layout request uses a valid CSRF token but must be denied by the Guest role before any write.
 - Owner authorization acceptance runs only in the uniquely named disposable database. It requires empty default storage, a manager-only one-time bootstrap under a database advisory lock, the exact six fixed capabilities, one allowlisted audit row, database-backed session refresh, refusal of a second Owner, refusal of Owner demotion/deletion, transactional rollback after an injected audit failure, CLI confirmation guards, and exact cleanup.
-- A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 23 tables unchanged.
+- Add-on registry acceptance runs only in the uniquely named disposable database and executes no package PHP or SQL. It requires empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, non-loadable recorded enablement, immutable migration identity, protected ledger ownership, and exact cleanup.
+- A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 25 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.
 - The Section-delete lifecycle uses a disposable Webmaster, Section, and two Articles only inside the disposable database. It requires count-aware confirmation, CSRF refusal with unchanged state, one transaction that archives every related Article before deleting the Section, exact response reporting, recovery through **Inactive Articles**, an active-theme 404 at the old route, and zero targeted artifacts. Form/Gallery child rows and media are deliberately left attached to their preserved parent Articles.
 - The Article lifecycle uses a hard-coded disposable Webmaster, Article ID, aliases, and body markers only inside the disposable database. Create, update, and delete must pass through the real protected CSRF endpoints; direct SQL is used only to install and remove the temporary administrator and as a cleanup backstop.
@@ -165,7 +167,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - The upload lifecycle uses Gallery subtype `#106` and a database-specific filename under `images/gallery`. It refuses to overwrite any existing path and will remove only the exact regular file whose name is returned by the protected upload endpoint.
 - Upload acceptance requires a valid generated PNG, matching source/stored/served hashes, exact database persistence, protected-editor and public-route markers, paired metadata deletion, zero targeted database/file artifacts, and an unchanged manifest for every pre-existing Gallery image.
 - The forced-rollback lifecycle uses hard-coded disposable IDs and Video subtype `#107`. Its trigger is created by the administrative test connection only after schema comparison and exists only in the uniquely named disposable database; the protected endpoint still runs under the normal application account.
-- Rollback acceptance requires the legacy `no` response, removal of the trigger, identical pre/post checksums across all 23 tables, exact initial parent/child values, a successful control update after trigger removal, canonical count restoration, and zero targeted database/trigger artifacts.
+- Rollback acceptance requires the legacy `no` response, removal of the trigger, identical pre/post checksums across all 25 tables, exact initial parent/child values, a successful control update after trigger removal, canonical count restoration, and zero targeted database/trigger artifacts.
 - Cleanup failure converts an otherwise successful run into a failure.
 - Cleanup re-reads the application account's grants after revoke/drop and fails if the disposable database grant is still present.
 - The primary database is re-read after cleanup and must match its starting isolation snapshot.

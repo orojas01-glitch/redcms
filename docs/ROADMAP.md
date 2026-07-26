@@ -74,12 +74,13 @@ core features or committed Version 5.1 scope; none is active in RED-CMS 5.0.
 
 ### Add-On Trust And Authorization Foundation
 
-The first extension-framework foundation is implemented without activating any
+The extension-framework foundation is implemented without activating any
 package. It adds a closed manifest schema, safe two-level filesystem discovery,
 exact file-integrity verification, compatibility and dependency preflight,
-reserved route/CSRF validation, and database-backed Owner authorization.
-Discovery never includes `addon.php`, touches a database, or exposes
-install/enable controls.
+reserved route/CSRF validation, database-backed Owner authorization, empty
+per-client installation/migration registries, and read-only registry
+reconciliation. Discovery never includes `addon.php` or exposes install/enable
+controls.
 
 Each client database has empty normalized role/capability tables. No legacy
 account is promoted automatically. A server operator can perform one explicit,
@@ -88,7 +89,14 @@ protected sessions then refresh the six bounded lifecycle grants from that
 client database. The clean starter ships no Owner assignment and no client
 add-on directory.
 
-Package installation state, enablement, package migrations, runtime
+The registry records a stable package id, version, type, raw-manifest hash,
+deterministic file-inventory hash, lifecycle state, actor ids, and immutable
+migration id/path/checksum evidence. The starter tables remain empty. A
+read-only CLI reports valid discovery, pending migrations, recorded drift,
+missing code, and the intentionally unavailable runtime without changing the
+database.
+
+Package installation, lifecycle-state mutation, package SQL execution, runtime
 registration, Member Access, Store Lite, and the other optional verticals
 remain later reviewed batches.
 

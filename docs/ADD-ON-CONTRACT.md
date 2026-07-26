@@ -1,8 +1,9 @@
 # RED-CMS Add-On Contract
 
-Status: Version 5.1 trust validation and Owner authorization foundations are
-implemented. RED-CMS does not install, enable, execute, upgrade, disable,
-uninstall, or purge packages through this contract yet.
+Status: Version 5.1 trust validation, Owner authorization, and read-only
+registry reconciliation foundations are implemented. RED-CMS does not install,
+enable, execute, upgrade, disable, uninstall, or purge packages through this
+contract yet.
 
 ## Implemented Trust Boundary
 
@@ -23,14 +24,17 @@ The first foundation batch provides:
 - database-backed login and protected-request authorization refresh;
 - one explicit, audited, server-local first-Owner bootstrap with exact target
   confirmations;
+- empty per-client installation and immutable migration-ledger tables;
+- deterministic manifest/inventory snapshots and fail-closed comparison of
+  validated files with recorded state;
 - adversarial dependency-free tests and a read-only CLI report.
 
-The clean starter contains no `addons/` package directory. A client or operator
-may deploy package files separately later, but discovery alone never installs,
-enables, loads, or migrates them. No Guest, Webmaster, or legacy Superadmin
-receives package lifecycle authority automatically. An account receives it
-only after a client-specific Owner row and exact grants are deliberately
-bootstrapped.
+The clean starter contains no `addons/` package directory and no registry or
+migration rows. A client or operator may deploy package files separately
+later, but discovery and registry reconciliation never install, enable, load,
+or migrate them. No Guest, Webmaster, or legacy Superadmin receives package
+lifecycle authority automatically. An account receives it only after a
+client-specific Owner row and exact grants are deliberately bootstrapped.
 
 ## Product Objective
 
@@ -272,6 +276,22 @@ entry point.
 The existing Article, Form, Gallery, and Other runtime remains intact. Add-on
 registration must be additive and must not reinterpret legacy
 `RED_Components` rows as executable packages.
+
+The current registry foundation creates empty `RED_Addon_Installations` and
+`RED_Addon_Migrations` tables in each client database. Installation rows are
+keyed by the stable package id and record version, type, raw-manifest SHA-256,
+deterministic declared-file inventory SHA-256, lifecycle state, actor ids, and
+timestamps. Migration rows are keyed by package id plus immutable migration id,
+uniquely bind each migration path, and record its declared checksum, actor,
+timestamp, and execution duration.
+
+`includes/addon_registry_helpers.php` and
+`scripts/addon-registry-status.php` reconcile those rows with packages that
+have already passed the non-executing trust gate. They report uninstalled
+discovery, pending migrations, identity/checksum drift, orphaned migrations,
+missing deployed code, and recorded enabled state while the runtime is
+unavailable. The result is never loadable in this batch. These helpers perform
+no registry write, package SQL execution, or `addon.php` inclusion.
 
 ## Component Contract
 
@@ -582,6 +602,9 @@ responses, or structured data.
    required by that approved track. This authorization foundation is
    implemented without adding a package lifecycle endpoint.
 5. Add per-client installed/enabled state and immutable migration tracking.
+   Empty storage and read-only fail-closed reconciliation are implemented;
+   lifecycle mutation and package migration execution remain a separate
+   reviewed batch.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 7. If private folders are scheduled for activation, implement and pass Member
