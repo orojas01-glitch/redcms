@@ -94,14 +94,14 @@ class content
 				$componentInputs=$componentContext['inputs'];
 				$this->recordid=$componentInputs['recordId'];
 				$comp=new cp_Article();
-				$comp->cp_Article($componentInputs['position'], $this->recordid, $componentInputs['varPosition'], $componentInputs['layout']);
+				$comp->cp_Article($componentInputs['position'], $this->recordid, $componentInputs['varPosition'], $componentInputs['layout'], true);
 				break;
 
 			case 'Other':
 				$componentInputs=$componentContext['inputs'];
 				$this->recordid=$componentInputs['recordId'];
 				$comp=new cp_other();
-				$comp->cp_other($componentInputs['position'], $this->recordid, $componentInputs['varPosition'], $componentInputs['layout']);
+				$comp->cp_other($componentInputs['position'], $this->recordid, $componentInputs['varPosition'], $componentInputs['layout'], true);
 				break;
 
 			case 'Form':
