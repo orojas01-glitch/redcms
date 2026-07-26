@@ -1,10 +1,11 @@
 # RED-CMS 5.1 Direction
 
 Status: implementation in progress. Per-page SEO compatibility, non-executing
-add-on trust validation, persisted Owner authorization, and empty per-client
-registry/migration-ledger storage with read-only reconciliation are
-implemented; package lifecycle execution, member access, publishing, payment,
-and integration controls remain inactive.
+add-on trust validation, persisted Owner authorization, per-client
+registry/migration-ledger storage, read-only reconciliation, and guarded
+server-local installation into a disabled state are implemented. Package
+enablement/runtime, upgrades, disable/uninstall/purge, member access,
+publishing, payment, and integration controls remain inactive.
 
 ## Product Goal
 
@@ -142,9 +143,19 @@ installation and immutable migration-ledger tables now exist per client
 database, and read-only reconciliation reports package identity drift, pending
 or changed migrations, missing code, and unavailable runtime state. Owner
 authorization is persisted per client database, but no account is promoted
-automatically. No lifecycle UI, registry mutation command, package migration
-runner, or package runtime exists, and no lifecycle action consumes those
-grants yet.
+automatically.
+
+The first lifecycle consumer is a server-local install command gated by the
+exact persisted Owner `addons.install` capability. It dry-runs a deterministic
+plan, requires exact target/plan/backup/disabled-state confirmations, rechecks
+trust and required enabled dependencies under a database-scoped advisory lock,
+applies checksum-verified `RED_Addon_*` migration SQL, records immutable
+migration evidence and bounded audit events, and finishes
+`installed_disabled`. It never includes `addon.php`. Because MySQL DDL can
+commit implicitly, partial failures remain visible as `installation_failed`
+with an explicit resumable ledger rather than a false rollback claim. No
+lifecycle UI, enablement/runtime loader, upgrade, disable, uninstall, or purge
+command exists.
 
 ## Suggested Delivery Order
 

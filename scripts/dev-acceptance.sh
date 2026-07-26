@@ -210,6 +210,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, PackageVersion, PackageType, ManifestSHA256, InventorySHA256, LifecycleState, InstalledByAdminRecordID, InstalledAt, UpdatedByAdminRecordID, UpdatedAt))), 0) FROM RED_Addon_Installations),
             (SELECT COUNT(*) FROM RED_Addon_Migrations),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, MigrationID, MigrationPath, Checksum, AppliedByAdminRecordID, AppliedAt, ExecutionMs))), 0) FROM RED_Addon_Migrations),
+            (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, EventName, PackageID, PackageVersion, ActorAdminRecordID, Result, DetailCode, OccurredAt))), 0) FROM RED_Addon_Activity_Log),
             (SELECT COUNT(*) FROM RED_Articles),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, Title, Component, Alias, Sections, Categories, SubCategories, Layout, Active, Updated))), 0) FROM RED_Articles)
         );
@@ -753,6 +755,7 @@ red_acceptance_all_table_checksums() {
             RED_Advanced,
             RED_Addon_Installations,
             RED_Addon_Migrations,
+            RED_Addon_Activity_Log,
             RED_Articles,
             RED_C_Form,
             RED_C_Gallery,
@@ -4223,8 +4226,8 @@ installer_admin_seed="$(red_acceptance_app_mysql --execute="
     SELECT CONCAT_WS(':', COUNT(*), SUM(CHAR_LENGTH(Password)=60), SUM(Email='')) FROM RED_Admin;
 ")"
 
-red_acceptance_assert_equals 'installer table count' '24' "$installer_table_count"
-red_acceptance_assert_equals 'installer InnoDB table count' '24' "$installer_innodb_count"
+red_acceptance_assert_equals 'installer table count' '25' "$installer_table_count"
+red_acceptance_assert_equals 'installer InnoDB table count' '25' "$installer_innodb_count"
 red_acceptance_assert_equals 'installer non-utf8mb4 character columns' '0' "$installer_non_utf8_count"
 red_acceptance_assert_equals 'installer migration ledger count' '0' "$installer_migration_count"
 red_acceptance_assert_equals 'installer sanitized administrator seeds' '2:2:2' "$installer_admin_seed"
@@ -4259,6 +4262,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running read-only add-on registry reconciliation checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-registry-self-test.php"
 
+printf '%s\n' 'Running Owner-authorized disabled add-on install and recovery checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-install-self-test.php"
+
 printf '%s\n' 'Running SEO metadata persistence, revision, area, and rollback checks.'
 RED_SEO_TEST_DATABASE="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/seo-metadata-database-self-test.php"
 
@@ -4290,6 +4296,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Admin_Capabilities),
         (SELECT COUNT(*) FROM RED_Addon_Installations),
         (SELECT COUNT(*) FROM RED_Addon_Migrations),
+        (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
         (SELECT COUNT(*) FROM RED_Advanced),
         (SELECT COUNT(*) FROM RED_Articles),
         (SELECT COUNT(*) FROM RED_C_Form),
@@ -4352,10 +4359,10 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
       AND CONSTRAINT_NAME='fk_red_addon_migrations_installation';
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '25:25:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '26:26:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
@@ -4428,4 +4435,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on registry reconciliation, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on registry reconciliation, disabled add-on installation/recovery, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

@@ -121,8 +121,9 @@ add-on packages without executing them.
   install, enable, disable, upgrade, uninstall, or purge capability.
 
 This is not a PHP sandbox and does not authorize untrusted packages. There is
-no package upload, extraction, installation, enablement, database registry, or
-runtime loader in this batch.
+no package upload, extraction, web installer, enablement, or runtime loader.
+The separate server-local installer accepts only packages that pass this
+operator-reviewed first-party trust boundary.
 
 ### Add-On Owner Authorization
 
@@ -151,9 +152,10 @@ accounts cannot be demoted to Guest or deleted through Administrator Users.
 
 Login and every protected administrator request reload the Owner role and
 grants from the current client database. Unknown capability values are ignored,
-and a capability row without the Owner role authorizes nothing. These grants
-remain dormant because no add-on lifecycle endpoint, registry mutation,
-package migration runner, or runtime loader exists.
+and a capability row without the Owner role authorizes nothing. Only
+`addons.install` currently has a lifecycle consumer, and that consumer is a
+server-local CLI. The other grants remain dormant because no enable, disable,
+upgrade, uninstall, purge, or runtime implementation exists.
 
 ### Add-On Registry Reconciliation
 
@@ -180,11 +182,42 @@ The registry foundation is read-only:
   filesystem packages but never includes `addon.php`, executes package SQL, or
   changes registry rows.
 
-The six Owner capabilities are mapped to future lifecycle transitions, but no
-current command consumes them to mutate package state. Installation, upgrade,
-enablement, disablement, uninstall, and purge require separate reviewed
-implementations with transaction, backup, rollback, dependency, and live-data
-gates.
+### Guarded Add-On Installation
+
+Migration `2026-07-26-addon-install-activity-audit.sql` adds an empty bounded
+`RED_Addon_Activity_Log` to each client database. The portable starter contains
+no add-on activity rows.
+
+`scripts/admin-addon-install.php` is dry-run-first and CLI-only. Apply requires:
+
+- a database-backed Owner with the exact `addons.install` grant;
+- exact database, package id, version, deterministic plan SHA-256, nonzero
+  SHA-256 from a separately verified backup, and `installed_disabled`
+  confirmations;
+- a database-scoped advisory lock and a second trust/catalog preflight;
+- all required dependencies to be installed, compatible, current, and enabled;
+  and
+- checksum-revalidated migrations confined to reviewed package files and
+  package-owned `RED_Addon_*` tables.
+
+The SQL guard refuses oversized/binary files, explicit transaction controls,
+database/user/privilege/plugin/routine/trigger/event changes, file I/O, system
+schemas, core or registry tables, and obvious unnamespaced table writes. It is
+defense-in-depth for reviewed first-party SQL, not a complete SQL parser or an
+untrusted-code sandbox.
+
+MySQL DDL may commit implicitly. The installer therefore never promises a
+rollback for DDL that the server already applied. It records each completed
+migration immediately; a later failure records `installation_failed` plus a
+bounded audit event and leaves the package non-loadable. Recovery requires
+`--resume-failed`, a new dry run and plan digest, and all exact apply
+confirmations. Successful installation ends `installed_disabled` and never
+includes `addon.php`.
+
+No web endpoint consumes the installer. Enablement, runtime loading, upgrades,
+disablement, uninstall, purge, and client business packages require separate
+reviewed implementations with backup, dependency, live-data, and rollback or
+recovery gates.
 
 ## Multi-User Authorization
 

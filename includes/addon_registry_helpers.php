@@ -14,6 +14,8 @@ if (!function_exists('red_addon_registry_lifecycle_states')) {
     function red_addon_registry_lifecycle_states()
     {
         return [
+            'installing',
+            'installation_failed',
             'installed_disabled',
             'enabled',
             'uninstalled',
@@ -402,6 +404,12 @@ if (!function_exists('red_addon_registry_package_report')) {
         sort($report['orphanedMigrations'], SORT_STRING);
         if ($report['errors'] !== []) {
             $report['status'] = 'registry_drift';
+        } elseif ($report['lifecycleState'] === 'installing') {
+            $report['status'] = 'installation_incomplete';
+            $report['warnings'][] = 'Installation has not reached its disabled completion state.';
+        } elseif ($report['lifecycleState'] === 'installation_failed') {
+            $report['status'] = 'installation_failed';
+            $report['warnings'][] = 'Installation failed and requires an exact reviewed resume.';
         } elseif ($report['pendingMigrations'] !== []) {
             $report['status'] = 'migration_pending';
         } elseif ($report['lifecycleState'] === 'installed_disabled') {

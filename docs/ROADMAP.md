@@ -78,9 +78,10 @@ The extension-framework foundation is implemented without activating any
 package. It adds a closed manifest schema, safe two-level filesystem discovery,
 exact file-integrity verification, compatibility and dependency preflight,
 reserved route/CSRF validation, database-backed Owner authorization, empty
-per-client installation/migration registries, and read-only registry
-reconciliation. Discovery never includes `addon.php` or exposes install/enable
-controls.
+per-client installation/migration registries, bounded lifecycle audit storage,
+read-only registry reconciliation, and one server-local Owner-authorized
+installation command. Discovery and installation never include `addon.php`, and
+there is no web install or enable control.
 
 Each client database has empty normalized role/capability tables. No legacy
 account is promoted automatically. A server operator can perform one explicit,
@@ -96,9 +97,18 @@ read-only CLI reports valid discovery, pending migrations, recorded drift,
 missing code, and the intentionally unavailable runtime without changing the
 database.
 
-Package installation, lifecycle-state mutation, package SQL execution, runtime
-registration, Member Access, Store Lite, and the other optional verticals
-remain later reviewed batches.
+The guarded install CLI dry-runs an exact database/package/migration plan,
+requires explicit database, version, plan, disabled-state, and separately
+verified-backup SHA-256 confirmations, takes a database-scoped package lock,
+revalidates trust and required enabled dependencies, applies only reviewed
+namespaced package SQL, records immutable migration evidence, and finishes
+`installed_disabled`.
+Recoverable partial MySQL DDL failure is recorded as `installation_failed` and
+requires an exact reviewed resume.
+
+Enablement and runtime registration, upgrades, disable/uninstall/purge, Member
+Access, Store Lite, and the other optional verticals remain later reviewed
+batches.
 
 ### Version 5.1 Compatibility Work
 
