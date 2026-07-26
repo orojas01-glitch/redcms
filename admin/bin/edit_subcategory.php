@@ -15,6 +15,7 @@ red_require_admin_site_manager();
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $recordId = (int) red_admin_post_text('RecordID');
 if ($recordId <= 0) {
@@ -41,6 +42,7 @@ $routeContext = red_admin_area_record_route_context($db->connection, 'RED_SubCat
 $currentPath = red_admin_text($routeContext['path'] ?? '');
 $relatedCount = red_admin_area_related_article_count($db->connection, 'SubCategories', $row['SubCategories']);
 $storedAccessLevel = red_admin_text($row['AccessLevel'] ?? 'Public');
+$seoValues = red_admin_seo_values($db->connection, 'subcategory', $RecordID);
 $csrfToken = red_csrf_token();
 $deletePrompt = $relatedCount > 0
     ? 'Delete this Subcategory? ' . $relatedCount . ' related Article' . ($relatedCount === 1 ? '' : 's') . ' will keep their content and subcategory text, but this Subcategory record cannot be recovered.'
@@ -250,6 +252,8 @@ function redAdminEditSubcategoryPreview()
             </div>
         </div>
     </section>
+
+    <?php echo red_admin_seo_fields_html($seoValues, 'subcategory-seo'); ?>
 
     <section class="red-admin-section-panel red-admin-section-panel--access" aria-labelledby="red-edit-subcategory-access-title">
         <div class="red-admin-section-panel__heading">

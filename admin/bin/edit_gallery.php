@@ -17,6 +17,7 @@ red_require_admin(); ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php' ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php' ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_banner_ui_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php' ?>
 <?php
 $RecordID = (int) ($_POST['RecordID'] ?? 0);
 $ArtRecordID = (int) ($_POST['ArtRecordID'] ?? 0);
@@ -63,6 +64,7 @@ $SmallPict=$articleRow['SmallPict'];
 $Language=$articleRow['Language'];
 $SmallPictAlign=$articleRow['SmallPictAlign'];
 $Tags=$articleRow['Tags'];
+$seoValues=red_admin_seo_values($db->connection, 'article', $ArtRecordID);
 $csrfToken=red_csrf_token();
 
 if (($row['GalleryType'] ?? '') === 'Gallery') {
@@ -141,6 +143,7 @@ if (($row['GalleryType'] ?? '') === 'Gallery') {
 		'artRecordId' => $ArtRecordID,
 		'editedBy' => $_SESSION['alias'] ?? '',
 		'csrfToken' => $csrfToken,
+		'seoValues' => $seoValues,
 	]);
 	exit;
 }
@@ -216,6 +219,7 @@ if (($row['GalleryType'] ?? '') === 'Video') {
 		'artRecordId' => $ArtRecordID,
 		'editedBy' => $_SESSION['alias'] ?? '',
 		'csrfToken' => $csrfToken,
+		'seoValues' => $seoValues,
 	]);
 	exit;
 }
@@ -300,6 +304,7 @@ if (($row['GalleryType'] ?? '') === 'Banner') {
 		'artRecordId' => $ArtRecordID,
 		'editedBy' => $_SESSION['alias'] ?? '',
 		'csrfToken' => $csrfToken,
+		'seoValues' => $seoValues,
 	]);
 	exit;
 }

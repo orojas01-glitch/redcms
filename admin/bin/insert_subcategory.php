@@ -15,6 +15,7 @@ red_require_admin_site_manager(true);
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 
@@ -31,8 +32,14 @@ $description = red_admin_post_text('Description');
 $tags = red_admin_tag_list($_POST['Tags'] ?? '');
 $language = red_admin_post_text('Language', defined('language') ? language : 'sp');
 $categoryRecordId = (int) red_admin_post_text('CategoryRecordID');
+$seoInput = red_admin_seo_collect_post($_POST);
 
-if ($title === '' || $subcategories === '' || $language === '' || $categoryRecordId <= 0) {
+if ($title === ''
+    || $subcategories === ''
+    || $language === ''
+    || $categoryRecordId <= 0
+    || !$seoInput['valid']
+) {
     echo 'no';
     $db->close();
     exit;
@@ -45,7 +52,7 @@ if ($conflict !== '') {
     exit;
 }
 
-if (red_admin_insert_area(
+if (red_admin_seo_insert_area(
     $db->connection,
     'RED_SubCategories',
     'SubCategories',
@@ -59,7 +66,8 @@ if (red_admin_insert_area(
     $description,
     $tags,
     $language,
-    $categoryRecordId
+    $categoryRecordId,
+    $seoInput['values']
 )) {
     echo 'yes';
 } else {

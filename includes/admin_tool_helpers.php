@@ -1698,10 +1698,14 @@ if (!function_exists('red_admin_tool_delete_component_article')) {
             function () use ($connection, $table, $recordId, $articleId) {
                 $componentDeleted = red_admin_tool_delete_by_id($connection, $table, $recordId);
                 $articleDeleted = red_admin_tool_delete_by_id($connection, 'RED_Articles', $articleId);
+                $seoDeleted = red_seo_delete_metadata($connection, 'article', $articleId);
 
-                return $componentDeleted && $articleDeleted;
+                return $componentDeleted && $articleDeleted && $seoDeleted;
             },
-            [$table, 'RED_Articles']
+            array_merge(
+                [$table, 'RED_Articles'],
+                red_seo_table_available($connection) ? ['RED_Page_SEO'] : []
+            )
         );
     }
 }

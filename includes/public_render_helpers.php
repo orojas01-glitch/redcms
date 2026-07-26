@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/custom_layout_helpers.php';
+require_once __DIR__ . '/seo_metadata_helpers.php';
+require_once __DIR__ . '/site_logo_helpers.php';
 
 if (!function_exists('red_public_language')) {
     function red_public_language($default = 'sp')
@@ -81,10 +83,10 @@ if (!function_exists('red_public_language')) {
     {
         $columns = [
             'RED_Advanced' => ['Item', 'Content', 'Language'],
-            'RED_Articles' => ['Title', 'Layout', 'ShortDesc', 'Tags', 'Sections', 'Categories', 'SubCategories', 'Alias', 'Language', 'Active'],
-            'RED_Sections' => ['Sections', 'Title', 'Layout', 'QueryLimit', 'Description', 'Tags', 'Features', 'Language', 'Active'],
-            'RED_Categories' => ['Categories', 'Title', 'Layout', 'QueryLimit', 'Description', 'Tags', 'Features', 'Language', 'Active'],
-            'RED_SubCategories' => ['SubCategories', 'Title', 'Layout', 'QueryLimit', 'Description', 'Tags', 'Features', 'Language', 'Active'],
+            'RED_Articles' => ['RecordID', 'Title', 'Layout', 'ShortDesc', 'Tags', 'Sections', 'Categories', 'SubCategories', 'Alias', 'Language', 'Active', 'BigPict', 'SmallPict', 'SmallPict2'],
+            'RED_Sections' => ['RecordID', 'Sections', 'Title', 'Layout', 'QueryLimit', 'Description', 'Tags', 'Features', 'Language', 'Active'],
+            'RED_Categories' => ['RecordID', 'Categories', 'Title', 'Layout', 'QueryLimit', 'Description', 'Tags', 'Features', 'Language', 'Active'],
+            'RED_SubCategories' => ['RecordID', 'SubCategories', 'Title', 'Layout', 'QueryLimit', 'Description', 'Tags', 'Features', 'Language', 'Active'],
         ];
         return $columns[$table] ?? [];
     }
@@ -735,6 +737,347 @@ if (!function_exists('red_public_language')) {
         }
 
         return false;
+    }
+
+    function red_public_seo_origin()
+    {
+        $host = trim((string) ($_SERVER['HTTP_HOST'] ?? ''));
+        if ($host === ''
+            || preg_match('/\A(?:[A-Za-z0-9.-]+|\[[A-Fa-f0-9:]+\])(?::[0-9]{1,5})?\z/', $host) !== 1
+        ) {
+            return '';
+        }
+        $forwardedProtocol = strtolower(trim((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')));
+        $https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+            || $forwardedProtocol === 'https';
+
+        return ($https ? 'https' : 'http') . '://' . $host;
+    }
+
+    function red_public_seo_current_url($origin)
+    {
+        $origin = rtrim((string) $origin, '/');
+        $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
+        if ($origin === '' || !is_string($path) || !red_seo_valid_root_path($path)) {
+            return '';
+        }
+
+        return $origin . $path;
+    }
+
+    function red_public_seo_default_locale($language)
+    {
+        $language = strtolower(trim((string) $language));
+        $known = [
+            'sp' => 'es_ES',
+            'es' => 'es_ES',
+            'en' => 'en_US',
+            'fr' => 'fr_FR',
+            'pt' => 'pt_BR',
+        ];
+        return $known[$language] ?? 'en_US';
+    }
+
+    function red_public_seo_local_image_fact($reference, $origin)
+    {
+        $url = red_seo_absolute_reference($reference, $origin);
+        $fact = [
+            'url' => $url,
+            'mime' => '',
+            'width' => 0,
+            'height' => 0,
+        ];
+        if ($url === '') {
+            return $fact;
+        }
+
+        $urlParts = parse_url($url);
+        $originParts = parse_url((string) $origin);
+        if (!is_array($urlParts)
+            || !is_array($originParts)
+            || strcasecmp((string) ($urlParts['host'] ?? ''), (string) ($originParts['host'] ?? '')) !== 0
+            || (int) ($urlParts['port'] ?? 0) !== (int) ($originParts['port'] ?? 0)
+            || strcasecmp((string) ($urlParts['scheme'] ?? ''), (string) ($originParts['scheme'] ?? '')) !== 0
+        ) {
+            return $fact;
+        }
+
+        $path = rawurldecode((string) ($urlParts['path'] ?? ''));
+        if (!red_seo_valid_root_path($path)) {
+            return $fact;
+        }
+        $projectRoot = realpath(dirname(__DIR__));
+        $candidate = $projectRoot !== false ? realpath($projectRoot . $path) : false;
+        if ($projectRoot === false
+            || $candidate === false
+            || !is_file($candidate)
+            || strpos($candidate, $projectRoot . DIRECTORY_SEPARATOR) !== 0
+        ) {
+            return $fact;
+        }
+
+        $dimensions = @getimagesize($candidate);
+        if (!is_array($dimensions) || empty($dimensions[0]) || empty($dimensions[1])) {
+            return $fact;
+        }
+        $fact['mime'] = (string) ($dimensions['mime'] ?? '');
+        $fact['width'] = (int) $dimensions[0];
+        $fact['height'] = (int) $dimensions[1];
+        return $fact;
+    }
+
+    function red_public_seo_article_image_reference(array $row)
+    {
+        foreach (['BigPict', 'SmallPict', 'SmallPict2'] as $field) {
+            $filename = trim((string) ($row[$field] ?? ''));
+            if ($filename !== ''
+                && basename($filename) === $filename
+                && preg_match('/\A[A-Za-z0-9][A-Za-z0-9._-]{0,254}\z/', $filename) === 1
+            ) {
+                return '/images/articles/' . rawurlencode($filename);
+            }
+        }
+        return '';
+    }
+
+    function red_public_seo_route_context($connection, $table)
+    {
+        $table = (string) $table;
+        $advanced = red_public_advanced_items(
+            $connection,
+            ['Website_Title', 'Website_Slogan', 'Website_Logo']
+        );
+        $websiteTitle = red_public_plain_text($advanced['Website_Title'] ?? '');
+        $websiteSlogan = red_public_plain_text($advanced['Website_Slogan'] ?? '');
+        $article = red_public_route_value('article');
+        $ownerType = '';
+        $ownerAlias = '';
+        $row = null;
+        $description = '';
+        $tags = '';
+        $legacyTitle = '';
+        $pageImage = '';
+
+        if ($article !== '') {
+            $ownerType = 'article';
+            $row = red_public_article_route_row(
+                $connection,
+                [
+                    'RecordID',
+                    'Title',
+                    'ShortDesc',
+                    'Tags',
+                    'Alias',
+                    'Language',
+                    'BigPict',
+                    'SmallPict',
+                    'SmallPict2',
+                ]
+            );
+            if ($row) {
+                $ownerAlias = (string) ($row['Alias'] ?? '');
+                $visibleTitle = red_public_plain_text($row['Title'] ?? '');
+                $legacyArticleTitle = preg_replace('/-/', ' ', (string) ($row['Title'] ?? ''));
+                $legacyTitle = $websiteTitle . ' | ' . ucwords($legacyArticleTitle);
+                $description = red_public_plain_text($row['ShortDesc'] ?? '');
+                $tags = (string) ($row['Tags'] ?? '');
+                $pageImage = red_public_seo_article_image_reference($row);
+            }
+        } else {
+            $map = [
+                'Sections' => ['owner' => 'section', 'alias' => 'Sections'],
+                'Categories' => ['owner' => 'category', 'alias' => 'Categories'],
+                'SubCategories' => ['owner' => 'subcategory', 'alias' => 'SubCategories'],
+            ];
+            if (isset($map[$table])) {
+                $ownerType = $map[$table]['owner'];
+                $aliasColumn = $map[$table]['alias'];
+                $row = red_public_area_row(
+                    $connection,
+                    $table,
+                    ['RecordID', $aliasColumn, 'Title', 'Description', 'Tags', 'Language']
+                );
+                if ($row) {
+                    $ownerAlias = (string) ($row[$aliasColumn] ?? '');
+                    $visibleTitle = red_public_plain_text($row['Title'] ?? '');
+                    $legacyTitle = strtolower($ownerAlias) === 'home'
+                        ? $websiteTitle . ' | ' . $websiteSlogan
+                        : $websiteTitle . ' | ' . ucwords($visibleTitle);
+                    $description = (string) ($row['Description'] ?? '');
+                    $tags = (string) ($row['Tags'] ?? '');
+                }
+            }
+        }
+
+        if (!$row) {
+            $notFound = $websiteTitle !== '' ? $websiteTitle . ' | Page not found' : 'Page not found';
+            return [
+                'found' => false,
+                'legacyTitle' => $table !== '' ? $notFound : 'Page not found',
+                'rich' => false,
+            ];
+        }
+
+        $seo = red_seo_metadata_row($connection, $ownerType, (int) ($row['RecordID'] ?? 0));
+        $rich = is_array($seo) && red_seo_has_overrides($seo);
+        $origin = red_public_seo_origin();
+        $currentUrl = red_public_seo_current_url($origin);
+        $canonical = $rich && red_seo_valid_absolute_url($seo['CanonicalURL'] ?? '')
+            ? (string) $seo['CanonicalURL']
+            : $currentUrl;
+        $seoTitle = $rich ? trim((string) ($seo['SEO_Title'] ?? '')) : '';
+        $effectiveTitle = $seoTitle !== '' ? $seoTitle : $legacyTitle;
+        $metaDescription = $rich && trim((string) ($seo['MetaDescription'] ?? '')) !== ''
+            ? trim((string) $seo['MetaDescription'])
+            : red_public_plain_text($description);
+        $ogTitle = $rich && trim((string) ($seo['OGTitle'] ?? '')) !== ''
+            ? trim((string) $seo['OGTitle'])
+            : $effectiveTitle;
+        $ogDescription = $rich && trim((string) ($seo['OGDescription'] ?? '')) !== ''
+            ? trim((string) $seo['OGDescription'])
+            : $metaDescription;
+        $ogImageReference = $rich && trim((string) ($seo['OGImage'] ?? '')) !== ''
+            ? trim((string) $seo['OGImage'])
+            : $pageImage;
+        if ($ogImageReference === '' && trim((string) ($advanced['Website_Logo'] ?? '')) !== '') {
+            $logo = red_site_logo_public_context(dirname(__DIR__), $advanced['Website_Logo']);
+            $ogImageReference = is_array($logo) ? (string) ($logo['url'] ?? '') : '';
+        }
+        $ogImage = red_public_seo_local_image_fact($ogImageReference, $origin);
+        $xImageReference = $rich && trim((string) ($seo['XImage'] ?? '')) !== ''
+            ? trim((string) $seo['XImage'])
+            : $ogImageReference;
+        $xImage = red_public_seo_local_image_fact($xImageReference, $origin);
+        $language = (string) ($row['Language'] ?? red_public_language());
+        $isHome = $ownerType === 'section' && strtolower($ownerAlias) === 'home';
+
+        return [
+            'found' => true,
+            'rich' => $rich,
+            'ownerType' => $ownerType,
+            'ownerRecordId' => (int) ($row['RecordID'] ?? 0),
+            'ownerAlias' => $ownerAlias,
+            'isHome' => $isHome,
+            'legacyTitle' => $legacyTitle,
+            'title' => $effectiveTitle,
+            'visibleTitle' => $visibleTitle ?? '',
+            'description' => $metaDescription,
+            'tags' => $tags,
+            'canonical' => $canonical,
+            'robots' => [
+                'index' => ($seo['RobotsIndex'] ?? '') === 'N' ? 'noindex' : 'index',
+                'follow' => ($seo['RobotsFollow'] ?? '') === 'N' ? 'nofollow' : 'follow',
+            ],
+            'og' => [
+                'locale' => trim((string) ($seo['OGLocale'] ?? '')) ?: red_public_seo_default_locale($language),
+                'type' => trim((string) ($seo['OGType'] ?? '')) ?: ($isHome ? 'website' : 'article'),
+                'title' => $ogTitle,
+                'description' => $ogDescription,
+                'url' => $canonical,
+                'image' => $ogImage,
+                'imageAlt' => trim((string) ($seo['OGImageAlt'] ?? '')) ?: ($visibleTitle ?? ''),
+            ],
+            'x' => [
+                'card' => trim((string) ($seo['XCard'] ?? '')) ?: ($xImage['url'] !== '' ? 'summary_large_image' : 'summary'),
+                'title' => trim((string) ($seo['XTitle'] ?? '')) ?: $ogTitle,
+                'description' => trim((string) ($seo['XDescription'] ?? '')) ?: $ogDescription,
+                'image' => $xImage,
+            ],
+            'schemaType' => trim((string) ($seo['SchemaType'] ?? '')) ?: ($isHome ? 'WebSite' : 'WebPage'),
+            'websiteTitle' => $websiteTitle,
+        ];
+    }
+
+    function red_public_seo_meta_tag($attribute, $name, $content)
+    {
+        $content = trim((string) $content);
+        return $content === ''
+            ? ''
+            : '<meta ' . $attribute . '="' . red_public_html($name) . '" content="' .
+                red_public_html($content) . '">' . "\n";
+    }
+
+    function red_public_seo_schema(array $context)
+    {
+        $type = (string) ($context['schemaType'] ?? 'WebPage');
+        if (!in_array($type, ['WebPage', 'WebSite', 'Course', 'Service'], true)) {
+            $type = 'WebPage';
+        }
+        $schema = [
+            '@context' => 'https://schema.org',
+            '@type' => $type,
+            'name' => (string) ($context['title'] ?? ''),
+            'url' => (string) ($context['canonical'] ?? ''),
+        ];
+        if (trim((string) ($context['description'] ?? '')) !== '') {
+            $schema['description'] = (string) $context['description'];
+        }
+        $imageUrl = (string) ($context['og']['image']['url'] ?? '');
+        if ($imageUrl !== '') {
+            $schema['image'] = $imageUrl;
+        }
+        if ($type === 'WebPage' && trim((string) ($context['websiteTitle'] ?? '')) !== '') {
+            $schema['isPartOf'] = [
+                '@type' => 'WebSite',
+                'name' => (string) $context['websiteTitle'],
+                'url' => red_public_seo_origin() . '/',
+            ];
+        }
+
+        return $schema;
+    }
+
+    function red_public_seo_rich_meta_html(array $context)
+    {
+        $html = red_public_seo_meta_tag('name', 'description', $context['description'] ?? '');
+        $html .= red_public_seo_meta_tag('name', 'keywords', $context['tags'] ?? '');
+        $html .= red_public_seo_meta_tag(
+            'name',
+            'robots',
+            ($context['robots']['index'] ?? 'index') . ', ' . ($context['robots']['follow'] ?? 'follow')
+        );
+        if (!empty($context['canonical'])) {
+            $html .= '<link rel="canonical" href="' . red_public_html($context['canonical']) . '">' . "\n";
+        }
+
+        foreach ([
+            'og:locale' => $context['og']['locale'] ?? '',
+            'og:type' => $context['og']['type'] ?? '',
+            'og:title' => $context['og']['title'] ?? '',
+            'og:description' => $context['og']['description'] ?? '',
+            'og:url' => $context['og']['url'] ?? '',
+            'og:image' => $context['og']['image']['url'] ?? '',
+            'og:image:alt' => $context['og']['imageAlt'] ?? '',
+            'og:image:type' => $context['og']['image']['mime'] ?? '',
+            'og:image:width' => $context['og']['image']['width'] ?? '',
+            'og:image:height' => $context['og']['image']['height'] ?? '',
+        ] as $property => $content) {
+            $html .= red_public_seo_meta_tag('property', $property, $content);
+        }
+        foreach ([
+            'twitter:card' => $context['x']['card'] ?? '',
+            'twitter:title' => $context['x']['title'] ?? '',
+            'twitter:description' => $context['x']['description'] ?? '',
+            'twitter:image' => $context['x']['image']['url'] ?? '',
+            'twitter:image:alt' => $context['og']['imageAlt'] ?? '',
+        ] as $name => $content) {
+            $html .= red_public_seo_meta_tag('name', $name, $content);
+        }
+
+        $schemaJson = json_encode(
+            red_public_seo_schema($context),
+            JSON_UNESCAPED_SLASHES |
+            JSON_UNESCAPED_UNICODE |
+            JSON_HEX_TAG |
+            JSON_HEX_AMP |
+            JSON_HEX_APOS |
+            JSON_HEX_QUOT
+        );
+        if (is_string($schemaJson) && $schemaJson !== '') {
+            $html .= '<script type="application/ld+json">' . $schemaJson . '</script>' . "\n";
+        }
+
+        return $html;
     }
 }
 ?>

@@ -15,6 +15,7 @@ red_require_admin_site_manager(true);
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 
@@ -30,8 +31,9 @@ $active = red_admin_active_value(red_admin_post_text('Active', 'Y'));
 $description = red_admin_post_text('Description');
 $tags = red_admin_tag_list($_POST['Tags'] ?? '');
 $language = red_admin_post_text('Language', defined('language') ? language : 'sp');
+$seoInput = red_admin_seo_collect_post($_POST);
 
-if ($title === '' || $sections === '' || $language === '') {
+if ($title === '' || $sections === '' || $language === '' || !$seoInput['valid']) {
     echo 'no';
     $db->close();
     exit;
@@ -44,7 +46,23 @@ if ($conflict !== '') {
     exit;
 }
 
-if (red_admin_insert_area($db->connection, 'RED_Sections', 'Sections', $title, $sections, $layout, $queryLimit, $accessLevel, $features, $active, $description, $tags, $language)) {
+if (red_admin_seo_insert_area(
+    $db->connection,
+    'RED_Sections',
+    'Sections',
+    $title,
+    $sections,
+    $layout,
+    $queryLimit,
+    $accessLevel,
+    $features,
+    $active,
+    $description,
+    $tags,
+    $language,
+    0,
+    $seoInput['values']
+)) {
     echo 'yes';
 } else {
     echo 'no';

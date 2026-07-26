@@ -22,6 +22,7 @@ if (empty($payloadFields) || empty($_POST['RecordID'])) {
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 
@@ -31,8 +32,13 @@ $newSubCategory = $data['SubCategories'] ?? '';
 $language = red_admin_area_language();
 $existing = red_admin_area_record($db->connection, 'RED_SubCategories', $recordId);
 $currentSubCategory = strtolower(red_admin_text($existing['SubCategories'] ?? ''));
+$seoInput = red_admin_seo_collect_post($_POST);
 
-if ($recordId <= 0 || !$existing || (int) ($data['CategoryRecordID'] ?? 0) <= 0) {
+if ($recordId <= 0
+    || !$existing
+    || (int) ($data['CategoryRecordID'] ?? 0) <= 0
+    || !$seoInput['valid']
+) {
     echo 'no';
     $db->close();
     exit;
@@ -51,12 +57,22 @@ if ($renaming) {
 
 }
 
+$afterSave = $seoInput['present']
+    ? red_admin_seo_area_save_callback(
+        $db->connection,
+        'subcategory',
+        $recordId,
+        $seoInput['values']
+    )
+    : null;
 $result = red_admin_area_save_existing(
     $db->connection,
     'RED_SubCategories',
     'SubCategories',
     $recordId,
-    $data
+    $data,
+    $afterSave,
+    $seoInput['present'] ? ['RED_Page_SEO'] : []
 );
 if (is_array($result)) {
     if ($renaming) {

@@ -93,9 +93,13 @@ red_require_admin(true);
 				$db->connection,
 				$RecordID,
 				function () use ($db, $RecordID) {
-					return red_admin_tool_delete_by_id($db->connection, 'RED_Articles', $RecordID);
+					return red_admin_tool_delete_by_id($db->connection, 'RED_Articles', $RecordID)
+						&& red_seo_delete_metadata($db->connection, 'article', $RecordID);
 				},
-				['RED_Articles']
+				array_merge(
+					['RED_Articles'],
+					red_seo_table_available($db->connection) ? ['RED_Page_SEO'] : []
+				)
 			) ? 'yes' : 'no';
 		break;
 		

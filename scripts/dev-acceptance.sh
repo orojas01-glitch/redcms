@@ -44,6 +44,8 @@ if [[ ! -s "$INSTALLER_FILE" ]]; then
     exit 66
 fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-migration-self-test.php"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 if [[ ! -x "$FRANKENPHP_BIN" ]]; then
     printf 'FrankenPHP is missing or not executable: %s\n' "$FRANKENPHP_BIN" >&2
@@ -751,6 +753,7 @@ red_acceptance_all_table_checksums() {
             RED_Layouts,
             RED_Login_Attempts,
             RED_Menu,
+            RED_Page_SEO,
             RED_Schema_Migrations,
             RED_Sections,
             RED_SubCategories,
@@ -971,7 +974,7 @@ red_acceptance_run_guest_permissions() {
         printf '%s\n' 'FAIL: Guest permission render/denial requests changed disposable database data.' >&2
         return 1
     fi
-    printf '%s\n' 'PASS: allowed and denied Guest permission requests left all 20 tables unchanged.'
+    printf '%s\n' 'PASS: allowed and denied Guest permission requests left all disposable tables unchanged.'
 
     metrics="$(curl -sS --max-time 10 \
         -b "$ACCEPTANCE_COOKIE_JAR" \
@@ -4237,6 +4240,9 @@ red_acceptance_assert_equals \
     "Summary: $MIGRATION_FILE_COUNT applied, 0 pending, 0 drifted" \
     "$status_summary"
 
+printf '%s\n' 'Running SEO metadata persistence, revision, area, and rollback checks.'
+RED_SEO_TEST_DATABASE="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/seo-metadata-database-self-test.php"
+
 printf '%s\n' 'Running content revision lifecycle checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/content-revisions-self-test.php"
 
@@ -4278,7 +4284,8 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Admin_Activity_Log),
         (SELECT COUNT(*) FROM RED_Content_Revisions),
         (SELECT COUNT(*) FROM RED_Custom_Layouts),
-        (SELECT COUNT(*) FROM RED_Custom_Layout_Revisions)
+        (SELECT COUNT(*) FROM RED_Custom_Layout_Revisions),
+        (SELECT COUNT(*) FROM RED_Page_SEO)
     );
 ")"
 relationship_errors="$(red_acceptance_app_mysql --execute="
@@ -4307,10 +4314,10 @@ area_parent_foreign_keys="$(red_acceptance_app_mysql --execute="
       AND CONSTRAINT_NAME IN ('fk_red_categories_section','fk_red_subcategories_category');
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '20:20:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '21:21:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0' \
+    '2:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"

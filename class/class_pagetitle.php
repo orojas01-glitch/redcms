@@ -30,70 +30,23 @@ class Page_Title
 	
 	public function Title()
 	{
-				
 		$tquery = new Build_Query();
 		$rquery=$tquery->get_query();
-		
-		//$this->articlequery=$rquery[0];
-		//$this->VarPosition=$rquery[1];
-		//$this->VarFeatured=$rquery[2];
 		$this->Table=$rquery[4];
-		
-		//echo $this->Table;
-		
-		if ($this->Table!='')
-		{
-		
-		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
-			$advanced = red_public_advanced_items($db->connection, ['Website_Title', 'Website_Slogan']);
-			$Website_Title = red_public_plain_text($advanced['Website_Title'] ?? '');
-			$Website_Slogan = red_public_plain_text($advanced['Website_Slogan'] ?? '');
-			
-		switch (article)
-		{
-			case '':
-			
-			
-			//echo 'no article. select metatags from other table:'.$this->Table;
-			$info = red_public_area_row($db->connection, $this->Table, [$this->Table, 'Title']);
-			if ($info) {
-				if (isset($info[$this->Table]) && strtolower($info[$this->Table]) === 'home') {
-                    echo red_public_html($Website_Title . ' | ' . $Website_Slogan);
-                } else {
-                    $Title = red_public_plain_text($info['Title']);
-                    echo red_public_html($Website_Title . ' | ' . ucwords($Title));
-                }
-			} else {
-				echo red_public_html(
-					$Website_Title !== '' ? $Website_Title . ' | Page not found' : 'Page not found'
-				);
-			}
-		
-			break;
-			
-			default:
-			//echo 'article. select metatags from article.';
-			$info = red_public_article_route_row($db->connection, ['Title']);
-			if ($info) {
-				$Title = preg_replace('/\-/',' ',$info['Title']);
-				echo red_public_html($Website_Title .' | '.ucwords($Title));
-			} else {
-				echo red_public_html(
-					$Website_Title !== '' ? $Website_Title . ' | Page not found' : 'Page not found'
-				);
-			}
-			
-			break;
-		}
-		$db->close();
-		}
-		else
-		{
+
+		if ($this->Table === '') {
 			echo 'Page not found';
+			return;
 		}
-		
-	
+
+		$db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
+		$context = red_public_seo_route_context($db->connection, $this->Table);
+		$db->close();
+
+		$title = !empty($context['rich'])
+			? (string) ($context['title'] ?? '')
+			: (string) ($context['legacyTitle'] ?? 'Page not found');
+		echo red_public_html($title);
 	}
-	
 }
 ?>

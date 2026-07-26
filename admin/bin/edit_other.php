@@ -10,6 +10,7 @@ require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_other_ui_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $RecordID = (int) ($_POST['RecordID'] ?? 0);
 $VarPosition = red_admin_article_position_column($_POST['VarPosition'] ?? '');
@@ -63,6 +64,7 @@ $articleOptions = red_admin_other_preserve_option(
     red_admin_article_page_options($db->connection, $Article),
     $Article
 );
+$seoValues = red_admin_seo_values($db->connection, 'article', $RecordID);
 $db->close();
 
 $csrfToken = red_csrf_token();
@@ -122,4 +124,5 @@ red_admin_render_other_form([
     'recordId' => $RecordID,
     'editedBy' => red_admin_text($_SESSION['alias'] ?? ''),
     'csrfToken' => $csrfToken,
+    'seoValues' => $seoValues,
 ]);

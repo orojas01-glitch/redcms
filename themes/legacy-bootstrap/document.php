@@ -31,10 +31,11 @@ if ($redThemeDocumentPhase === 'end') {
 	$page=new Page_Metatags();
 	$page->Metatags();
 	?>
-    
+    <?php if (!$page->hasRichMetadata()) { ?>
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <?php } ?>
 
     <meta name="author" content="Oscar Rojas">
     <meta name = "format-detection" content = "telephone=no" />

@@ -17,6 +17,7 @@ require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 if (empty($_SESSION['alias'])) {
     header('Location: http://'.BASE_URL.'');
@@ -49,6 +50,7 @@ $categoryOptions = red_admin_article_area_options($db->connection, 'RED_Categori
 $subCategoryOptions = red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
 $articleOptions = red_admin_article_page_options($db->connection, $Article);
 $db->close();
+$seoValues = red_seo_empty_values();
 
 $uploadUrls = [];
 foreach (['BigPict', 'SmallPict', 'SmallPict2'] as $uploadCase) {
@@ -247,6 +249,8 @@ $articleFormScriptVersion = filemtime($_SERVER['DOCUMENT_ROOT'].$articleFormScri
                             <span>Open this link in a new tab</span>
                         </label>
                     </section>
+
+                    <?php echo red_admin_seo_fields_html($seoValues, 'article-seo'); ?>
 
                     <section class="red-admin-optional-card" aria-labelledby="article-location-title">
                         <div class="red-admin-optional-card__heading">
