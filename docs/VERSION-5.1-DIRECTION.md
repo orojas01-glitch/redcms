@@ -154,8 +154,19 @@ migration evidence and bounded audit events, and finishes
 `installed_disabled`. It never includes `addon.php`. Because MySQL DDL can
 commit implicitly, partial failures remain visible as `installation_failed`
 with an explicit resumable ledger rather than a false rollback claim. No
-lifecycle UI, enablement/runtime loader, upgrade, disable, uninstall, or purge
-command exists.
+lifecycle UI, enabled-state transition, runtime loader, upgrade, disable,
+uninstall, or purge command exists.
+
+The next lifecycle boundary is a separate server-local, read-only enablement
+preflight gated by the exact persisted Owner `addons.enable` capability. It
+accepts only an exact current `installed_disabled` package, reconciles the full
+package registry, binds currently enabled dependency/package identities, and
+reports provided-capability, route-id, and route-method ownership conflicts in
+one deterministic plan. It has no apply mode, performs no database or audit
+write, and never includes `addon.php`. The plan always reports activation,
+state mutation, and runtime loading unavailable until the theme, settings,
+live-data, runtime-registration, atomic transition, and rollback contracts are
+implemented in later reviewed batches.
 
 ## Suggested Delivery Order
 
