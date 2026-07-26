@@ -1,6 +1,9 @@
 # RED-CMS 5.1 Direction
 
-Status: product direction only. These features are not part of RED-CMS 5.0 and must not be treated as active security, publishing, payment, or integration controls.
+Status: implementation in progress. Per-page SEO compatibility, non-executing
+add-on trust validation, and persisted Owner authorization are implemented;
+package lifecycle, member access, publishing, payment, and integration controls
+remain inactive.
 
 ## Product Goal
 
@@ -59,6 +62,15 @@ Suggested starting roles:
 - Member-support or billing operator
 
 Permissions should describe actions such as view, create, edit own, edit any, review, approve, publish, manage users, manage payments, manage themes, and install tools. Scopes may later restrict access by Section or site.
+
+The first additive role slice is now implemented specifically for the future
+add-on lifecycle. `RED_Admin_Roles` and `RED_Admin_Capabilities` remain empty
+after migration, preserving every legacy account. An explicit server-local
+bootstrap may assign one protected Owner and the six fixed add-on lifecycle
+capabilities in one audited transaction. Login and protected requests refresh
+those grants from the current client database. Broader Administrator,
+Publisher, Editor, Contributor, and scoped-content permissions remain future
+work.
 
 ## 4. Publishing Workflow
 
@@ -120,6 +132,14 @@ The first implementation should use trusted filesystem-deployed first-party
 packages. Package discovery must not execute code, and the administrator must
 not upload arbitrary PHP. Installation and activation remain separate,
 owner-authorized actions scoped to one client database.
+
+The read-only trust foundation now validates a closed `addon.json`, fixed
+vendor/package paths, compatibility ranges, dependencies, reserved routes,
+settings, outbound hosts, and an exact SHA-256 package inventory. It rejects
+unsafe or incomplete packages without executing `addon.php`. No lifecycle UI,
+package registry, package migration runner, or package runtime exists. Owner
+authorization is now persisted per client database, but no account is promoted
+automatically and no lifecycle action consumes those grants yet.
 
 ## Suggested Delivery Order
 

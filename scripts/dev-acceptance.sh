@@ -46,6 +46,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-migration-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-trust-self-test.php"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 if [[ ! -x "$FRANKENPHP_BIN" ]]; then
     printf 'FrankenPHP is missing or not executable: %s\n' "$FRANKENPHP_BIN" >&2
@@ -201,6 +202,10 @@ red_acceptance_primary_snapshot() {
             (SELECT COUNT(*) FROM RED_Schema_Migrations),
             (SELECT COUNT(*) FROM RED_Admin),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, Username, Password, Alias, AdminType, AdminComponents, AdminTools, Email))), 0) FROM RED_Admin),
+            (SELECT COUNT(*) FROM RED_Admin_Roles),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', AdminRecordID, RoleName, AssignedByAdminRecordID, AssignedAt))), 0) FROM RED_Admin_Roles),
+            (SELECT COUNT(*) FROM RED_Admin_Capabilities),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', AdminRecordID, Capability, GrantedByAdminRecordID, GrantedAt))), 0) FROM RED_Admin_Capabilities),
             (SELECT COUNT(*) FROM RED_Articles),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, Title, Component, Alias, Sections, Categories, SubCategories, Layout, Active, Updated))), 0) FROM RED_Articles)
         );
@@ -739,6 +744,8 @@ red_acceptance_all_table_checksums() {
         CHECKSUM TABLE
             RED_Admin,
             RED_Admin_Activity_Log,
+            RED_Admin_Capabilities,
+            RED_Admin_Roles,
             RED_Advanced,
             RED_Articles,
             RED_C_Form,
@@ -4210,8 +4217,8 @@ installer_admin_seed="$(red_acceptance_app_mysql --execute="
     SELECT CONCAT_WS(':', COUNT(*), SUM(CHAR_LENGTH(Password)=60), SUM(Email='')) FROM RED_Admin;
 ")"
 
-red_acceptance_assert_equals 'installer table count' '20' "$installer_table_count"
-red_acceptance_assert_equals 'installer InnoDB table count' '20' "$installer_innodb_count"
+red_acceptance_assert_equals 'installer table count' '22' "$installer_table_count"
+red_acceptance_assert_equals 'installer InnoDB table count' '22' "$installer_innodb_count"
 red_acceptance_assert_equals 'installer non-utf8mb4 character columns' '0' "$installer_non_utf8_count"
 red_acceptance_assert_equals 'installer migration ledger count' '0' "$installer_migration_count"
 red_acceptance_assert_equals 'installer sanitized administrator seeds' '2:2:2' "$installer_admin_seed"
@@ -4240,6 +4247,9 @@ red_acceptance_assert_equals \
     "Summary: $MIGRATION_FILE_COUNT applied, 0 pending, 0 drifted" \
     "$status_summary"
 
+printf '%s\n' 'Running persisted Owner lifecycle authorization checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-owner-authorization-self-test.php"
+
 printf '%s\n' 'Running SEO metadata persistence, revision, area, and rollback checks.'
 RED_SEO_TEST_DATABASE="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/seo-metadata-database-self-test.php"
 
@@ -4267,6 +4277,8 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
     SELECT CONCAT_WS(
         ':',
         (SELECT COUNT(*) FROM RED_Admin),
+        (SELECT COUNT(*) FROM RED_Admin_Roles),
+        (SELECT COUNT(*) FROM RED_Admin_Capabilities),
         (SELECT COUNT(*) FROM RED_Advanced),
         (SELECT COUNT(*) FROM RED_Articles),
         (SELECT COUNT(*) FROM RED_C_Form),
@@ -4313,14 +4325,24 @@ area_parent_foreign_keys="$(red_acceptance_app_mysql --execute="
     WHERE CONSTRAINT_SCHEMA=DATABASE()
       AND CONSTRAINT_NAME IN ('fk_red_categories_section','fk_red_subcategories_category');
 ")"
+admin_authorization_foreign_keys="$(red_acceptance_app_mysql --execute="
+    SELECT COUNT(*)
+    FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA=DATABASE()
+      AND CONSTRAINT_NAME IN (
+        'fk_red_admin_roles_admin',
+        'fk_red_admin_capabilities_admin'
+      );
+")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '21:21:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '23:23:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
+red_acceptance_assert_equals 'administrator authorization foreign keys' '2' "$admin_authorization_foreign_keys"
 
 printf '%s\n' 'Running disposable theme contract serialization checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$SCRIPT_DIR/theme-contract-lock-self-test.sh"
@@ -4388,4 +4410,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

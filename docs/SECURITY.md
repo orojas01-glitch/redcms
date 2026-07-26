@@ -98,6 +98,63 @@ Full database dumps contain administrator hashes, email addresses, site content,
 
 Use `scripts/db-backup.sh` and `scripts/db-restore.sh` as documented in `docs/DATABASE-MIGRATIONS.md`. The restore command protects the configured primary database and nonempty targets by default.
 
+## Add-On Trust Boundary
+
+The Version 5.1 trust foundation can inspect separately deployed first-party
+add-on packages without executing them.
+
+- Discovery reads only `addon.json` beneath a fixed `addons/vendor/package`
+  path.
+- Package, vendor, manifest, and declared file symbolic links are rejected.
+- Every package file except `addon.json` must appear in one exact SHA-256
+  inventory; undeclared, missing, or changed files invalidate the package.
+- Package-supplied SHA-256 values prove internal inventory consistency, not
+  publisher identity. This filesystem-deployed phase depends on
+  operator-reviewed provenance and does not claim signed-package verification.
+- The fixed `addon.php` entry point must be declared but is never included by
+  discovery or validation.
+- Manifest fields cannot select PHP files, classes, methods, callbacks, or SQL
+  text.
+- Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
+  migrations, assets, and outbound hosts fail closed.
+- Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
+  install, enable, disable, upgrade, uninstall, or purge capability.
+
+This is not a PHP sandbox and does not authorize untrusted packages. There is
+no package upload, extraction, installation, enablement, database registry, or
+runtime loader in this batch.
+
+### Add-On Owner Authorization
+
+Migration `2026-07-25-admin-addon-owner-authorization.sql` adds empty
+`RED_Admin_Roles` and `RED_Admin_Capabilities` tables to each client database.
+The migration assigns no Owner and grants no capability. The portable starter
+also contains no authorization rows.
+
+The first Owner is a server-operator bootstrap, not an administrator web form:
+
+```bash
+php scripts/admin-addon-owner.php --status
+php scripts/admin-addon-owner.php \
+  --bootstrap-owner=ADMIN_ID \
+  --actor-admin=ADMIN_ID \
+  --confirm-database=CLIENT_DATABASE \
+  --confirm-username=EXACT_USERNAME
+```
+
+The second command is a dry run unless `--apply` is added. The target and
+recorded actor must already be a Webmaster or legacy Superadmin, the database
+and username confirmations must match exactly, and bootstrap refuses once any
+Owner exists. The role, six fixed lifecycle grants, and
+`administrator.owner_bootstrapped` audit event commit atomically. Owner
+accounts cannot be demoted to Guest or deleted through Administrator Users.
+
+Login and every protected administrator request reload the Owner role and
+grants from the current client database. Unknown capability values are ignored,
+and a capability row without the Owner role authorizes nothing. These grants
+remain dormant because no add-on lifecycle endpoint, registry, package
+migration runner, or runtime loader exists.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.
@@ -129,9 +186,13 @@ The shared contracts live in:
 
 ## Administrator Activity Audit
 
-`database/migrations/2026-07-12-administrator-activity-audit.sql` adds `RED_Admin_Activity_Log`, and `includes/admin_audit_helpers.php` writes the allowlisted events from `admin/bin/update_admin_users.php`.
+`database/migrations/2026-07-12-administrator-activity-audit.sql` adds
+`RED_Admin_Activity_Log`, and `includes/admin_audit_helpers.php` writes only
+explicitly allowlisted administrator events.
 
-- Initial events are only successful `administrator.created`, `administrator.updated`, and `administrator.deleted` operations.
+- Events are successful `administrator.created`, `administrator.updated`, and
+  `administrator.deleted` operations plus the server-local
+  `administrator.owner_bootstrapped` event.
 - Each row contains the event name, numeric actor administrator ID, target type, numeric target record ID, and timestamp. No foreign key is used so a deletion event remains attributable after the target account is removed.
 - The table does not contain usernames, aliases, emails, IP addresses, passwords or password hashes, session IDs, CSRF tokens, request bodies, component/tool permission lists, or content bodies.
 - The administrator mutation and its audit insertion share one InnoDB transaction. If audit persistence fails, the user mutation rolls back and the existing endpoint returns `no`.

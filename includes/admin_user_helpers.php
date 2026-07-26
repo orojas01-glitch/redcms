@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/admin_addon_authorization_helpers.php';
+
 if (!function_exists('red_admin_user_scalar')) {
     function red_admin_user_scalar($value)
     {
@@ -449,6 +451,12 @@ if (!function_exists('red_admin_user_update')) {
             return 'self_role';
         }
         if (
+            red_admin_addon_is_owner($connection, $recordId)
+            && !red_admin_user_is_manager_type($adminType)
+        ) {
+            return 'owner_protected';
+        }
+        if (
             red_admin_user_is_manager_type($currentType)
             && !red_admin_user_is_manager_type($adminType)
             && red_admin_user_manager_count($connection) <= 1
@@ -532,6 +540,10 @@ if (!function_exists('red_admin_user_delete')) {
         $target = red_admin_user_lookup($connection, $recordId);
         if (!$target) {
             return 'invalid';
+        }
+
+        if (red_admin_addon_is_owner($connection, $recordId)) {
+            return 'owner_protected';
         }
 
         if (red_admin_user_is_manager_type($target['AdminType'] ?? '')) {
