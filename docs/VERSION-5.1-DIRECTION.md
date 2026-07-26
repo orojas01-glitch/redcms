@@ -1,9 +1,10 @@
 # RED-CMS 5.1 Direction
 
 Status: implementation in progress. Per-page SEO compatibility, non-executing
-add-on trust validation, and persisted Owner authorization are implemented;
-package lifecycle, member access, publishing, payment, and integration controls
-remain inactive.
+add-on trust validation, persisted Owner authorization, and empty per-client
+registry/migration-ledger storage with read-only reconciliation are
+implemented; package lifecycle execution, member access, publishing, payment,
+and integration controls remain inactive.
 
 ## Product Goal
 
@@ -136,10 +137,14 @@ owner-authorized actions scoped to one client database.
 The read-only trust foundation now validates a closed `addon.json`, fixed
 vendor/package paths, compatibility ranges, dependencies, reserved routes,
 settings, outbound hosts, and an exact SHA-256 package inventory. It rejects
-unsafe or incomplete packages without executing `addon.php`. No lifecycle UI,
-package registry, package migration runner, or package runtime exists. Owner
-authorization is now persisted per client database, but no account is promoted
-automatically and no lifecycle action consumes those grants yet.
+unsafe or incomplete packages without executing `addon.php`. Empty generic
+installation and immutable migration-ledger tables now exist per client
+database, and read-only reconciliation reports package identity drift, pending
+or changed migrations, missing code, and unavailable runtime state. Owner
+authorization is persisted per client database, but no account is promoted
+automatically. No lifecycle UI, registry mutation command, package migration
+runner, or package runtime exists, and no lifecycle action consumes those
+grants yet.
 
 ## Suggested Delivery Order
 

@@ -10,9 +10,10 @@ RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
 on July 25, 2026.
 
-Version 5.1 development has begun with merged per-page SEO compatibility,
-non-executing add-on trust validation, and persisted Owner authorization for
-future add-on lifecycle actions. Add-on installation/activation, payment,
+Version 5.1 development includes per-page SEO compatibility,
+non-executing add-on trust validation, persisted Owner authorization, and
+empty per-client package registry/migration-ledger storage with read-only drift
+reporting. Add-on installation/activation, package SQL execution, payment,
 member access, editorial workflow, notifications, the broader role model, and
 social publishing integrations are not active features.
 
@@ -31,6 +32,7 @@ social publishing integrations are not active features.
 - Migration ledger, guarded backup/restore tools, and disposable acceptance testing
 - Read-only add-on manifest, path, compatibility, dependency, and integrity validation
 - Per-client Owner role and exact future add-on lifecycle capability grants
+- Empty per-client add-on installation/migration registries with fail-closed reconciliation
 
 ## Portable Starter Distribution
 
@@ -95,6 +97,7 @@ Run the non-executing add-on trust gate:
 php scripts/addon-trust-self-test.php
 php scripts/addon-validate.php --all
 php scripts/admin-addon-owner.php --status
+php scripts/addon-registry-status.php --all
 ```
 
 Run the complete guarded acceptance lifecycle:

@@ -90,6 +90,50 @@ CREATE TABLE `RED_Admin_Capabilities` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Installations`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Installations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Installations` (
+  `PackageID` varchar(127) NOT NULL,
+  `PackageVersion` varchar(120) NOT NULL,
+  `PackageType` varchar(32) NOT NULL,
+  `ManifestSHA256` char(64) NOT NULL,
+  `InventorySHA256` char(64) NOT NULL,
+  `LifecycleState` varchar(32) NOT NULL,
+  `InstalledByAdminRecordID` int unsigned NOT NULL,
+  `InstalledAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `UpdatedByAdminRecordID` int unsigned NOT NULL,
+  `UpdatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`PackageID`),
+  KEY `idx_red_addon_installations_state` (`LifecycleState`,`PackageID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `RED_Addon_Migrations`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Migrations` (
+  `PackageID` varchar(127) NOT NULL,
+  `MigrationID` varchar(120) NOT NULL,
+  `MigrationPath` varchar(255) NOT NULL,
+  `Checksum` char(64) NOT NULL,
+  `AppliedByAdminRecordID` int unsigned NOT NULL,
+  `AppliedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ExecutionMs` int unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`PackageID`,`MigrationID`),
+  UNIQUE KEY `uq_red_addon_migrations_path` (`PackageID`,`MigrationPath`),
+  CONSTRAINT `fk_red_addon_migrations_installation` FOREIGN KEY (`PackageID`) REFERENCES `RED_Addon_Installations` (`PackageID`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Admin_Activity_Log`
 --
 

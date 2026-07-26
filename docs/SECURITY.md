@@ -152,8 +152,39 @@ accounts cannot be demoted to Guest or deleted through Administrator Users.
 Login and every protected administrator request reload the Owner role and
 grants from the current client database. Unknown capability values are ignored,
 and a capability row without the Owner role authorizes nothing. These grants
-remain dormant because no add-on lifecycle endpoint, registry, package
-migration runner, or runtime loader exists.
+remain dormant because no add-on lifecycle endpoint, registry mutation,
+package migration runner, or runtime loader exists.
+
+### Add-On Registry Reconciliation
+
+Migration `2026-07-26-addon-registry-foundation.sql` adds empty
+`RED_Addon_Installations` and `RED_Addon_Migrations` tables to each client
+database. The portable starter contains no installed package, lifecycle state,
+or applied package migration row.
+
+The registry foundation is read-only:
+
+- Package identity records use only the validated stable id, semantic version,
+  type, raw-manifest SHA-256, deterministic declared-file inventory SHA-256,
+  actor ids, timestamps, and a closed lifecycle-state vocabulary.
+- Migration evidence binds each package migration id and path to the exact
+  manifest checksum. Duplicate ids and duplicate paths are rejected.
+- Applied migration history prevents silent deletion of its installation
+  record.
+- Reconciliation fails closed on invalid packages, unknown lifecycle states,
+  changed identity hashes, pending or changed migrations, orphaned migration
+  rows, and installed packages whose deployed code is missing.
+- A recorded `enabled` state is still reported as non-loadable because no
+  package runtime exists.
+- The read-only status command opens the current client database and validated
+  filesystem packages but never includes `addon.php`, executes package SQL, or
+  changes registry rows.
+
+The six Owner capabilities are mapped to future lifecycle transitions, but no
+current command consumes them to mutate package state. Installation, upgrade,
+enablement, disablement, uninstall, and purge require separate reviewed
+implementations with transaction, backup, rollback, dependency, and live-data
+gates.
 
 ## Multi-User Authorization
 

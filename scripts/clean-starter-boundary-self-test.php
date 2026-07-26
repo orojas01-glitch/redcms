@@ -98,6 +98,15 @@ try {
             && !preg_match('/INSERT\\s+INTO\\s+`?RED_Admin_(?:Roles|Capabilities)`?/i', $installer),
         'starter ships empty Owner authorization tables with no assigned role or capability'
     );
+    red_clean_starter_test_assert(
+        str_contains($installer, 'CREATE TABLE `RED_Addon_Installations`')
+            && str_contains($installer, 'CREATE TABLE `RED_Addon_Migrations`')
+            && !preg_match(
+                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations)`?/i',
+                $installer
+            ),
+        'starter ships empty generic add-on registry tables with no package state or migration history'
+    );
 
     $productionFiles = array_merge(
         glob($repositoryRoot . '/bin/*.php') ?: [],
