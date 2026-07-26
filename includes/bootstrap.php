@@ -7,6 +7,8 @@ if (!defined('RED_CMS_VERSION')) {
     define('RED_CMS_VERSION', '5.0');
 }
 
+require_once __DIR__ . '/admin_addon_authorization_helpers.php';
+
 if (!function_exists('red_start_session')) {
     function red_start_session()
     {
@@ -119,10 +121,10 @@ if (!function_exists('red_require_admin')) {
             $result = mysqli_stmt_get_result($stmt);
             $admin = $result ? mysqli_fetch_assoc($result) : null;
             mysqli_stmt_close($stmt);
-            mysqli_close($connection);
 
             $fingerprint = $admin ? hash('sha256', (string) ($admin['Password'] ?? '')) : '';
             if (!$admin || !hash_equals((string) $_SESSION['AdminPasswordFingerprint'], $fingerprint)) {
+                mysqli_close($connection);
                 unset(
                     $_SESSION['alias'],
                     $_SESSION['AdminRecordID'],
@@ -130,6 +132,8 @@ if (!function_exists('red_require_admin')) {
                     $_SESSION['AdminType'],
                     $_SESSION['AdminComponents'],
                     $_SESSION['AdminTools'],
+                    $_SESSION['AdminRole'],
+                    $_SESSION['AdminCapabilities'],
                     $_SESSION['AdminPasswordFingerprint']
                 );
                 http_response_code(403);
@@ -141,6 +145,8 @@ if (!function_exists('red_require_admin')) {
             $_SESSION['AdminType'] = (string) $admin['AdminType'];
             $_SESSION['AdminComponents'] = (string) $admin['AdminComponents'];
             $_SESSION['AdminTools'] = (string) $admin['AdminTools'];
+            red_admin_addon_refresh_session_authorization($connection, $recordId);
+            mysqli_close($connection);
             $validatedAdminSession = true;
         }
 

@@ -60,6 +60,11 @@ try {
         );
     }
 
+    red_clean_starter_test_assert(
+        !file_exists($repositoryRoot . '/addons'),
+        'portable starter ships no client add-on package directory or executable package code'
+    );
+
     $gitignore = red_clean_starter_test_source($repositoryRoot, '.gitignore');
     red_clean_starter_test_assert(
         preg_match('~^includes/config\.local\.php$~m', $gitignore) === 1,
@@ -86,6 +91,12 @@ try {
             && str_contains($installer, 'Thank you. Your response has been received.')
             && str_contains($installer, 'Thank you. Your registration has been received.'),
         'installer retains generic starter theme state and Form presets'
+    );
+    red_clean_starter_test_assert(
+        str_contains($installer, 'CREATE TABLE `RED_Admin_Roles`')
+            && str_contains($installer, 'CREATE TABLE `RED_Admin_Capabilities`')
+            && !preg_match('/INSERT\\s+INTO\\s+`?RED_Admin_(?:Roles|Capabilities)`?/i', $installer),
+        'starter ships empty Owner authorization tables with no assigned role or capability'
     );
 
     $productionFiles = array_merge(

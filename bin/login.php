@@ -128,6 +128,10 @@ $dependencies = [
 				$_SESSION['AdminType'] = $info['AdminType'];
 				$_SESSION['AdminComponents'] = $info['AdminComponents'];
 				$_SESSION['AdminTools'] = $info['AdminTools'];
+				red_admin_addon_refresh_session_authorization(
+					$db->connection,
+					(int) $info['RecordID']
+				);
 				$_SESSION['AdminPasswordFingerprint'] = hash('sha256', $storedPassword);
 				red_login_clear_username_failures($db->connection, $usernameHash);
 				mysqli_stmt_close($stmt);

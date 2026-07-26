@@ -1,0 +1,430 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://red-sphere.com/schemas/addon-manifest-v1.json",
+  "title": "RED-CMS Add-On Manifest v1",
+  "description": "Data-only trust manifest. Reading or validating this document must never execute package PHP.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "description",
+    "version",
+    "type",
+    "compatibility",
+    "provides",
+    "dependencies",
+    "permissions",
+    "settings",
+    "migrations",
+    "routes",
+    "jobs",
+    "outboundHosts",
+    "assets",
+    "integrity",
+    "uninstall"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://red-sphere.com/schemas/addon-manifest-v1.json"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "#/$defs/packageId"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "version": {
+      "$ref": "#/$defs/semanticVersion"
+    },
+    "type": {
+      "enum": [
+        "component",
+        "service",
+        "adapter",
+        "content-package",
+        "cross-cutting"
+      ]
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cms", "php"],
+      "properties": {
+        "cms": {
+          "$ref": "#/$defs/versionRange"
+        },
+        "php": {
+          "$ref": "#/$defs/versionRange"
+        }
+      }
+    },
+    "provides": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["components", "services", "adminTools", "adapters"],
+      "properties": {
+        "components": {
+          "$ref": "#/$defs/capabilityList"
+        },
+        "services": {
+          "$ref": "#/$defs/capabilityList"
+        },
+        "adminTools": {
+          "$ref": "#/$defs/capabilityList"
+        },
+        "adapters": {
+          "$ref": "#/$defs/capabilityList"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "optional"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        },
+        "optional": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "maxItems": 200,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/permission"
+      }
+    },
+    "settings": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/setting"
+      }
+    },
+    "migrations": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/migration"
+      }
+    },
+    "routes": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/route"
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/job"
+      }
+    },
+    "outboundHosts": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/hostname"
+      }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["public", "admin"],
+      "properties": {
+        "public": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/$defs/asset"
+          }
+        },
+        "admin": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/$defs/asset"
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entrypoint", "files"],
+      "properties": {
+        "entrypoint": {
+          "const": "addon.php"
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2048,
+          "items": {
+            "$ref": "#/$defs/file"
+          }
+        }
+      }
+    },
+    "uninstall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaultDataAction", "allowExplicitPurge"],
+      "properties": {
+        "defaultDataAction": {
+          "const": "retain"
+        },
+        "allowExplicitPurge": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+    },
+    "packageId": {
+      "type": "string",
+      "maxLength": 127,
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?\\.[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$"
+    },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "versionRange": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^(?:(?:>=|<=|>|<|==|=)?[0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)(?: (?:(?:>=|<=|>|<|==|=)?[0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?))*$"
+    },
+    "capability": {
+      "type": "string",
+      "maxLength": 160,
+      "pattern": "^[a-z0-9][a-z0-9.-]*(?:/[a-z0-9][a-z0-9.-]*)?$"
+    },
+    "capabilityList": {
+      "type": "array",
+      "maxItems": 200,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    },
+    "permission": {
+      "type": "string",
+      "maxLength": 160,
+      "pattern": "^[a-z0-9][a-z0-9.-]*$"
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/packageId"
+        },
+        "version": {
+          "$ref": "#/$defs/versionRange"
+        }
+      }
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^(?!/)(?![A-Za-z]:/)(?!.*(?:^|/)\\.\\.?(/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "setting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "type", "secret"],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/permission"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "type": {
+          "enum": [
+            "text",
+            "boolean",
+            "integer",
+            "select",
+            "url",
+            "email",
+            "secret-reference"
+          ]
+        },
+        "secret": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": ["string", "integer", "boolean", "null"]
+        },
+        "options": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "sha256"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 120,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9][a-z0-9-]*$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^migrations/[A-Za-z0-9_.-]+\\.sql$"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "path",
+        "methods",
+        "authentication",
+        "csrf"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/capability"
+        },
+        "scope": {
+          "enum": ["public", "admin"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "pattern": "^/(?!\\.{1,2}(?:/|$))[A-Za-z0-9_{}.-]+(?:/(?!\\.{1,2}(?:/|$))[A-Za-z0-9_{}.-]+)*$"
+        },
+        "methods": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+          }
+        },
+        "authentication": {
+          "enum": ["public", "admin", "member"]
+        },
+        "csrf": {
+          "enum": ["required", "not-applicable"]
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "maxAttempts", "backoffSeconds"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/capability"
+        },
+        "maxAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 25
+        },
+        "backoffSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+    },
+    "hostname": {
+      "type": "string",
+      "maxLength": 253,
+      "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$"
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "location"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "location": {
+          "enum": ["head", "body-end"]
+        }
+      }
+    }
+  }
+}

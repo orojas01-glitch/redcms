@@ -1,7 +1,36 @@
 # RED-CMS Add-On Contract
 
-Status: Version 5.1 architecture direction only. RED-CMS 5.0 does not discover,
-install, enable, execute, upgrade, or uninstall packages through this contract.
+Status: Version 5.1 trust validation and Owner authorization foundations are
+implemented. RED-CMS does not install, enable, execute, upgrade, disable,
+uninstall, or purge packages through this contract yet.
+
+## Implemented Trust Boundary
+
+The first foundation batch provides:
+
+- a closed data-only `addon.json` schema;
+- fixed `addons/vendor/package` discovery beneath a server-owned root;
+- path, manifest, RED-CMS/PHP compatibility, route, CSRF, settings, dependency,
+  and outbound-host validation;
+- an exact SHA-256 inventory for every package file except the self-referential
+  manifest;
+- required declaration and verification of the fixed `addon.php` entry point
+  without including or executing it;
+- rejection of traversal, absolute paths, symbolic links, undeclared files,
+  missing files, checksum mismatches, dependency cycles, and incompatible
+  required dependencies;
+- normalized per-client Owner role and exact lifecycle capability grants;
+- database-backed login and protected-request authorization refresh;
+- one explicit, audited, server-local first-Owner bootstrap with exact target
+  confirmations;
+- adversarial dependency-free tests and a read-only CLI report.
+
+The clean starter contains no `addons/` package directory. A client or operator
+may deploy package files separately later, but discovery alone never installs,
+enables, loads, or migrates them. No Guest, Webmaster, or legacy Superadmin
+receives package lifecycle authority automatically. An account receives it
+only after a client-specific Owner row and exact grants are deliberately
+bootstrapped.
 
 ## Product Objective
 
@@ -118,6 +147,10 @@ addons/
   validation.
 - Package paths must resolve beneath the discovered package root. Absolute
   paths, traversal, symlink escape, and remote includes fail validation.
+- The SHA-256 inventory detects undeclared or changed files after deployment,
+  but a self-declared checksum does not authenticate a publisher. This first
+  filesystem-deployed phase relies on operator-reviewed package provenance;
+  signed distribution would be a separate future trust layer.
 - Version 5.1 should begin with trusted, separately distributed,
   filesystem-deployed first-party packages. "First-party" describes project
   provenance and maintenance; it does not mean built into core or included as
@@ -146,17 +179,19 @@ Every package declares:
 - Background jobs and retry policy
 - Exact outbound network hosts
 - Public/admin assets and their loading locations
-- Disable restrictions
 - Uninstall and data-retention behavior
 
 An illustrative manifest shape is:
 
 ```json
 {
+  "$schema": "https://red-sphere.com/schemas/addon-manifest-v1.json",
   "schemaVersion": 1,
   "id": "redcms.store-lite",
   "name": "RED-CMS Store Lite",
+  "description": "Optional product catalog, cart, and order capability.",
   "version": "0.1.0",
+  "type": "content-package",
   "compatibility": {
     "cms": ">=5.1 <6.0",
     "php": ">=8.2"
@@ -164,11 +199,17 @@ An illustrative manifest shape is:
   "provides": {
     "components": ["redcms.store-lite/product"],
     "services": ["commerce.catalog", "commerce.cart", "commerce.orders"],
+    "adminTools": ["redcms.store-lite/orders"],
     "adapters": []
   },
   "dependencies": {
     "required": [],
-    "optional": ["redcms.paypal"]
+    "optional": [
+      {
+        "id": "redcms.paypal",
+        "version": ">=0.1 <1.0"
+      }
+    ]
   },
   "permissions": [
     "store.products.manage",
@@ -176,11 +217,24 @@ An illustrative manifest shape is:
     "store.orders.manage",
     "store.settings.manage"
   ],
+  "settings": [],
   "migrations": [],
   "routes": [],
   "jobs": [],
   "outboundHosts": [],
-  "settings": [],
+  "assets": {
+    "public": [],
+    "admin": []
+  },
+  "integrity": {
+    "entrypoint": "addon.php",
+    "files": [
+      {
+        "path": "addon.php",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
   "uninstall": {
     "defaultDataAction": "retain",
     "allowExplicitPurge": true
@@ -188,9 +242,13 @@ An illustrative manifest shape is:
 }
 ```
 
-The exact JSON schema and PHP interfaces require a separate implementation
-batch. The shape above establishes the required responsibilities; it is not an
-active loader contract.
+The zero checksum above is illustrative and must be replaced by the exact
+SHA-256 of the deployed `addon.php`.
+
+The exact Version 1 schema is
+`docs/addon-manifest.schema.json`; the read-only PHP validation contract is
+`includes/addon_manifest_helpers.php`. This remains a trust-inspection contract,
+not an active loader contract.
 
 ## Core Registry And Execution
 
@@ -315,6 +373,15 @@ identity behavior.
 Package installation, migration, enablement, disablement, and data purge are
 owner-level actions. The Version 5.1 role model must provide composable package
 permissions rather than extend the legacy comma-separated component list.
+
+The first authorization slice stores one additive `owner` role in
+`RED_Admin_Roles` and individual grants in `RED_Admin_Capabilities`. It does not
+reinterpret `AdminType`. The fixed grant vocabulary is `addons.install`,
+`addons.enable`, `addons.disable`, `addons.upgrade`, `addons.uninstall`, and
+`addons.purge`. Both the Owner role and the exact grant are required. Unknown
+database values are ignored, revoked grants disappear on the next protected
+session refresh, and Administrator Users cannot demote or delete the protected
+Owner.
 
 Each package declares its permissions, but core owns authorization enforcement.
 An add-on cannot grant permissions to itself.
@@ -505,13 +572,15 @@ responses, or structured data.
 ## Initial Delivery Sequence
 
 1. Complete the Version 5.1 per-page SEO metadata compatibility work and the
-   isolated Adriana launch acceptance gate.
+   isolated Adriana launch acceptance gate. The compatibility work is
+   implemented; launch QA remains an isolated client decision.
 2. Approve this architecture contract as a separate future implementation
-   track.
-3. Implement the role and package-lifecycle permissions required by that
-   approved track.
-4. Add the manifest schema, filesystem discovery, read-only validation, and
-   dependency preflight.
+   track. The contract is now documented.
+3. Add the manifest schema, filesystem discovery, read-only validation, and
+   dependency preflight. This non-executing trust foundation is implemented.
+4. Implement the persisted Owner role and package-lifecycle permissions
+   required by that approved track. This authorization foundation is
+   implemented without adding a package lifecycle endpoint.
 5. Add per-client installed/enabled state and immutable migration tracking.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.

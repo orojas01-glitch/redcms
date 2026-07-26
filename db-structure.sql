@@ -54,6 +54,42 @@ INSERT INTO `RED_Admin` (`RecordID`, `Username`, `Password`, `Administrator`, `A
 UNLOCK TABLES;
 
 --
+-- Table structure for table `RED_Admin_Roles`
+--
+
+DROP TABLE IF EXISTS `RED_Admin_Roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Admin_Roles` (
+  `AdminRecordID` int unsigned NOT NULL,
+  `RoleName` varchar(32) NOT NULL,
+  `AssignedByAdminRecordID` int unsigned NOT NULL,
+  `AssignedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`AdminRecordID`),
+  KEY `idx_red_admin_roles_name` (`RoleName`,`AdminRecordID`),
+  CONSTRAINT `fk_red_admin_roles_admin` FOREIGN KEY (`AdminRecordID`) REFERENCES `RED_Admin` (`RecordID`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `RED_Admin_Capabilities`
+--
+
+DROP TABLE IF EXISTS `RED_Admin_Capabilities`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Admin_Capabilities` (
+  `AdminRecordID` int unsigned NOT NULL,
+  `Capability` varchar(64) NOT NULL,
+  `GrantedByAdminRecordID` int unsigned NOT NULL,
+  `GrantedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`AdminRecordID`,`Capability`),
+  KEY `idx_red_admin_capabilities_capability` (`Capability`,`AdminRecordID`),
+  CONSTRAINT `fk_red_admin_capabilities_admin` FOREIGN KEY (`AdminRecordID`) REFERENCES `RED_Admin` (`RecordID`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Admin_Activity_Log`
 --
 

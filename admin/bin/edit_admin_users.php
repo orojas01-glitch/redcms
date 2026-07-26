@@ -116,6 +116,7 @@ function redAdminUserResultMessage(status) {
         self: 'You cannot delete the account currently in use.',
         self_role: 'Use another Webmaster account to change the current account type.',
         last_manager: 'The final site manager cannot be deleted or changed to Guest.',
+        owner_protected: 'The protected Owner cannot be deleted or changed to Guest.',
         csrf: 'Your security token expired. Reload the page and try again.'
     };
     return messages[status] || 'The administrator account could not be saved.';

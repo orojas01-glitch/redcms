@@ -14,6 +14,7 @@ if (!function_exists('red_admin_audit_event_allowed')) {
             'administrator.created',
             'administrator.updated',
             'administrator.deleted',
+            'administrator.owner_bootstrapped',
         ], true);
     }
 }
