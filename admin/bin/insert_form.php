@@ -7,15 +7,18 @@ require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_form_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_content_revision_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $artRecordId = isset($_POST['ArtRecordID']) ? (int) $_POST['ArtRecordID'] : 0;
 $recordId = isset($_POST['RecordID']) ? (int) $_POST['RecordID'] : 0;
+$seoInput = red_admin_seo_collect_post($_POST);
 
 if (
 	$artRecordId <= 0
 	|| $recordId <= 0
 	|| red_admin_authorization_scalar($_POST['Component'] ?? '') !== 'Form'
 	|| !red_admin_form_has_payload($_POST)
+	|| !$seoInput['valid']
 ) {
 	echo 'no';
 	exit;
@@ -97,7 +100,7 @@ $connection = $db->connection;
 $success = red_admin_content_revision_create_transaction(
 	$connection,
 	$artRecordId,
-	function () use ($connection, $existingArticle, $artRecordId, $articleData, $recordId, $formData) {
+	function () use ($connection, $existingArticle, $artRecordId, $articleData, $recordId, $formData, $seoInput) {
 		if ($existingArticle) {
 			$articleSuccess = empty($articleData) ? true : red_admin_article_update($connection, $artRecordId, $articleData);
 		} else {
@@ -108,9 +111,13 @@ $success = red_admin_content_revision_create_transaction(
 			? red_admin_form_save($connection, $recordId, $artRecordId, $formData)
 			: $articleSuccess;
 
-		return $articleSuccess && $formSuccess;
+		$seoSuccess = $formSuccess && $seoInput['present']
+			? red_admin_seo_save($connection, 'article', $artRecordId, $seoInput['values'])
+			: $formSuccess;
+
+		return $articleSuccess && $formSuccess && $seoSuccess;
 	},
-	['RED_Articles', 'RED_C_Form']
+	['RED_Articles', 'RED_C_Form', 'RED_Page_SEO']
 );
 
 if (!$success && $registrationTableCreated) {

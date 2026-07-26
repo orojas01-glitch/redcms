@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/admin_transaction_helpers.php';
 require_once __DIR__ . '/theme_helpers.php';
+require_once __DIR__ . '/seo_metadata_helpers.php';
 
 if (!function_exists('red_admin_scalar')) {
     function red_admin_scalar($value)
@@ -842,6 +843,10 @@ if (!function_exists('red_admin_section_archive_and_delete')) {
         }
 
         $archivedArticleCount = 0;
+        $tables = ['RED_Sections', 'RED_Articles'];
+        if (red_seo_table_available($connection)) {
+            $tables[] = 'RED_Page_SEO';
+        }
         $success = red_admin_theme_contract_write_transaction(
             $connection,
             function () use ($connection, $recordId, &$archivedArticleCount) {
@@ -917,9 +922,10 @@ if (!function_exists('red_admin_section_archive_and_delete')) {
                     && mysqli_stmt_affected_rows($deleteStmt) === 1;
                 mysqli_stmt_close($deleteStmt);
 
-                return $deleteSuccess;
+                return $deleteSuccess
+                    && red_seo_delete_metadata($connection, 'section', $recordId);
             },
-            ['RED_Sections', 'RED_Articles']
+            $tables
         );
 
         return $success
@@ -1245,10 +1251,21 @@ if (!function_exists('red_admin_area_update_owned_route')) {
 }
 
 if (!function_exists('red_admin_area_save_existing')) {
-    function red_admin_area_save_existing($connection, $table, $aliasColumn, $recordId, array $data)
+    function red_admin_area_save_existing(
+        $connection,
+        $table,
+        $aliasColumn,
+        $recordId,
+        array $data,
+        $afterSave = null,
+        array $extraTables = []
+    )
     {
         $allowedTables = red_admin_area_tables();
-        if (!isset($allowedTables[$table]) || $allowedTables[$table] !== $aliasColumn) {
+        if (!isset($allowedTables[$table])
+            || $allowedTables[$table] !== $aliasColumn
+            || ($afterSave !== null && !is_callable($afterSave))
+        ) {
             return false;
         }
 
@@ -1320,6 +1337,7 @@ if (!function_exists('red_admin_area_save_existing')) {
                 $routeChanged,
                 $oldPath,
                 $newPath,
+                $afterSave,
                 &$response
             ) {
                 if ($routeChanged && is_array($parentContext)) {
@@ -1393,9 +1411,16 @@ if (!function_exists('red_admin_area_save_existing')) {
                     $data
                 );
 
-                return $areaRows !== false;
+                if ($areaRows === false) {
+                    return false;
+                }
+
+                return $afterSave === null || (bool) call_user_func($afterSave);
             },
-            [$table, 'RED_Articles', 'RED_Menu', 'RED_C_Menu']
+            array_values(array_unique(array_merge(
+                [$table, 'RED_Articles', 'RED_Menu', 'RED_C_Menu'],
+                $extraTables
+            )))
         );
 
         if (!$success) {
@@ -1424,9 +1449,14 @@ if (!function_exists('red_admin_area_delete_record')) {
             return false;
         }
 
+        $ownerType = $table === 'RED_Categories' ? 'category' : 'subcategory';
+        $tables = [$table];
+        if (red_seo_table_available($connection)) {
+            $tables[] = 'RED_Page_SEO';
+        }
         return red_admin_theme_contract_write_transaction(
             $connection,
-            function () use ($connection, $table, $recordId) {
+            function () use ($connection, $table, $recordId, $ownerType) {
                 try {
                     $stmt = mysqli_prepare(
                         $connection,
@@ -1439,13 +1469,14 @@ if (!function_exists('red_admin_area_delete_record')) {
                     $deleted = mysqli_stmt_execute($stmt)
                         && mysqli_stmt_affected_rows($stmt) === 1;
                     mysqli_stmt_close($stmt);
-                    return $deleted;
+                    return $deleted
+                        && red_seo_delete_metadata($connection, $ownerType, $recordId);
                 } catch (mysqli_sql_exception $exception) {
                     error_log($table . ' protected area delete failed: ' . $exception->getMessage());
                     return false;
                 }
             },
-            [$table]
+            $tables
         );
     }
 }

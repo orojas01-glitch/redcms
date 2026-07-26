@@ -1,5 +1,6 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_seo_helpers.php";
 red_start_session();
 red_require_admin(); ?>
 <?php
@@ -11,6 +12,7 @@ class newsection
         $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 	        $layoutOptions = red_admin_area_layout_options($db->connection);
         $featureOptions = red_admin_area_features($db->connection);
+        $seoValues = red_seo_empty_values();
 		?>
         <!-- The main script file -->
 <script type="text/javascript">
@@ -162,6 +164,8 @@ function redAdminSectionPreview(input)
             </div>
         </div>
     </section>
+
+    <?php echo red_admin_seo_fields_html($seoValues, 'section-seo'); ?>
 
     <section class="red-admin-section-panel red-admin-section-panel--access" aria-labelledby="red-section-access-title">
         <div class="red-admin-section-panel__heading">

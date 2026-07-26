@@ -1,5 +1,6 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_area_helpers.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_seo_helpers.php";
 red_start_session();
 red_require_admin(); ?>
 <?php
@@ -12,6 +13,7 @@ class newsubcategory
         $layoutOptions = red_admin_area_layout_options($db->connection);
         $featureOptions = red_admin_area_features($db->connection);
         $parentOptions = red_admin_area_parent_options($db->connection, 'RED_SubCategories', $language);
+        $seoValues = red_seo_empty_values();
         ?>
 <script type="text/javascript">
 <!--
@@ -173,6 +175,8 @@ function redAdminSubcategoryPreview()
             </div>
         </div>
     </section>
+
+    <?php echo red_admin_seo_fields_html($seoValues, 'subcategory-seo'); ?>
 
     <section class="red-admin-section-panel red-admin-section-panel--access" aria-labelledby="red-subcategory-access-title">
         <div class="red-admin-section-panel__heading">

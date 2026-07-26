@@ -18,6 +18,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_menu_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_content_revision_ui_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $RecordID = (int) ($_POST['RecordID'] ?? 0);
 $VarPosition = red_admin_article_position_column($_POST['VarPosition'] ?? '');
@@ -61,6 +62,7 @@ $sectionOptions = red_admin_article_area_options($db->connection, 'RED_Sections'
 $categoryOptions = red_admin_article_area_options($db->connection, 'RED_Categories', 'Categories', $Category);
 $subCategoryOptions = red_admin_article_area_options($db->connection, 'RED_SubCategories', 'SubCategories', $SubCategory);
 $articleOptions = red_admin_article_page_options($db->connection, $Article);
+$seoValues = red_admin_seo_values($db->connection, 'article', $RecordID);
 
 $preserveUnavailableOption = static function ($options, $selected) {
     $selected = red_admin_text($selected);
@@ -401,6 +403,8 @@ $articleFormScriptVersion = filemtime($_SERVER['DOCUMENT_ROOT'].$articleFormScri
                             <span>Open this link in a new tab</span>
                         </label>
                     </section>
+
+                    <?php echo red_admin_seo_fields_html($seoValues, 'article-seo'); ?>
 
                     <section class="red-admin-optional-card" aria-labelledby="article-location-title">
                         <div class="red-admin-optional-card__heading">

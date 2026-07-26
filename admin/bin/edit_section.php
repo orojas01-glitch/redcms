@@ -15,6 +15,7 @@ red_require_admin_site_manager();
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $recordId = (int) red_admin_post_text('RecordID');
 if ($recordId <= 0) {
@@ -43,6 +44,7 @@ $relatedCount = red_admin_area_related_article_count(
 );
 $childCategoryCount = red_admin_area_child_count($db->connection, 'RED_Sections', $RecordID);
 $storedAccessLevel = red_admin_text($row['AccessLevel'] ?? 'Public');
+$seoValues = red_admin_seo_values($db->connection, 'section', $RecordID);
 $csrfToken = red_csrf_token();
 $deletePrompt = $childCategoryCount > 0
     ? 'This Section cannot be deleted until its ' . $childCategoryCount . ' child Categor' . ($childCategoryCount === 1 ? 'y is' : 'ies are') . ' reassigned or deleted.'
@@ -224,6 +226,8 @@ function run_delete_section_record (RecordID)
             </div>
         </div>
     </section>
+
+    <?php echo red_admin_seo_fields_html($seoValues, 'section-seo'); ?>
 
     <section class="red-admin-section-panel red-admin-section-panel--access" aria-labelledby="red-edit-section-access-title">
         <div class="red-admin-section-panel__heading">

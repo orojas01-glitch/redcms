@@ -15,6 +15,7 @@ red_require_admin_site_manager();
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $recordId = (int) red_admin_post_text('RecordID');
 if ($recordId <= 0) {
@@ -42,6 +43,7 @@ $currentPath = red_admin_text($routeContext['path'] ?? '');
 $relatedCount = red_admin_area_related_article_count($db->connection, 'Categories', $row['Categories']);
 $childCount = red_admin_area_child_count($db->connection, 'RED_Categories', $RecordID);
 $storedAccessLevel = red_admin_text($row['AccessLevel'] ?? 'Public');
+$seoValues = red_admin_seo_values($db->connection, 'category', $RecordID);
 $csrfToken = red_csrf_token();
 $deletePrompt = $childCount > 0
     ? 'This Category cannot be deleted until its ' . $childCount . ' child Subcategor' . ($childCount === 1 ? 'y is' : 'ies are') . ' reassigned or deleted.'
@@ -254,6 +256,8 @@ function redAdminEditCategoryPreview()
             </div>
         </div>
     </section>
+
+    <?php echo red_admin_seo_fields_html($seoValues, 'category-seo'); ?>
 
     <section class="red-admin-section-panel red-admin-section-panel--access" aria-labelledby="red-edit-category-access-title">
         <div class="red-admin-section-panel__heading">

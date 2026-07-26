@@ -40,8 +40,12 @@ canonical URLs, complete Open Graph and X/Twitter metadata, typed JSON-LD,
 migration reporting, and compatibility-preserving public rendering.
 
 The generic RED-CMS acceptance fixtures and the client-isolated Adriana
-28-route verification must pass before optional business-vertical add-ons are
-scheduled. See
+28-route verification have passed. The client QA applied 28 SEO records without
+missing owners or conflicts, reproduced an unchanged idempotent dry run, passed
+56 desktop/mobile route checks and 28 legacy redirects, and matched the exact
+28-URL sitemap. Production deployment remains separate, and 87 explicitly
+reported unsupported JSON-LD property occurrences require a launch decision
+before this priority is closed. See
 [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
 for the confirmed cause, proposed model, migration requirements, and
 acceptance criteria.
@@ -75,8 +79,11 @@ core features or committed Version 5.1 scope; none is active in RED-CMS 5.0.
   core-owned editor workspace. Active themes can style public disclosure
   elements without changing the administrator card geometry.
 - Per-page SEO metadata is the first Version 5.1 implementation priority. The
-  current renderer reconstructs document titles and cannot represent canonical
-  URLs, complete Open Graph and X/Twitter metadata, or typed JSON-LD. See
+  Version 5.1 core now provides nullable page-owner metadata, canonical URLs,
+  complete Open Graph and X/Twitter output, typed JSON-LD, a guarded migration
+  reporter/importer, and client-isolated browser QA. The Adriana 28-route QA
+  passes; production deployment and the reported unsupported JSON-LD decision
+  remain. See
   [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
   for evidence, the proposed 5.1 model, migration requirements, and acceptance
   criteria.

@@ -138,6 +138,7 @@ try {
 
     $pageLayoutSource = file_get_contents($repositoryRoot . '/class/class_page_layout.php');
     $pageTitleSource = file_get_contents($repositoryRoot . '/class/class_pagetitle.php');
+    $publicRenderSource = file_get_contents($repositoryRoot . '/includes/public_render_helpers.php');
     $helperSource = file_get_contents($repositoryRoot . '/includes/public_route_fallback_helpers.php');
     red_public_route_fallback_test_assert(
         is_string($pageLayoutSource)
@@ -167,9 +168,19 @@ try {
     );
     red_public_route_fallback_test_assert(
         is_string($pageTitleSource)
-            && substr_count($pageTitleSource, '$Website_Title . \' | Page not found\'') === 2
-            && substr_count($pageTitleSource, "echo 'Page not found';") === 1,
-        'document title identifies unmatched area, article, and unsupported route shapes'
+            && is_string($publicRenderSource)
+            && substr_count($pageTitleSource, 'red_public_seo_route_context(') === 1
+            && strpos($pageTitleSource, "\$context['legacyTitle'] ?? 'Page not found'") !== false
+            && substr_count($pageTitleSource, "echo 'Page not found';") === 1
+            && strpos(
+                $publicRenderSource,
+                "\$websiteTitle !== '' ? \$websiteTitle . ' | Page not found' : 'Page not found'"
+            ) !== false
+            && strpos(
+                $publicRenderSource,
+                "'legacyTitle' => \$table !== '' ? \$notFound : 'Page not found'"
+            ) !== false,
+        'shared SEO route context preserves unmatched area, article, and unsupported title fallbacks'
     );
     red_public_route_fallback_test_assert(
         is_string($helperSource)

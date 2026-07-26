@@ -9,6 +9,7 @@
 
 require_once __DIR__.'/admin_form_helpers.php';
 require_once __DIR__.'/admin_content_revision_ui_helpers.php';
+require_once __DIR__.'/admin_seo_helpers.php';
 
 if (!function_exists('red_admin_form_ui_date_meta')) {
     function red_admin_form_ui_date_meta($value, $sentinel)
@@ -195,6 +196,7 @@ if (!function_exists('red_admin_render_form_workspace')) {
             'layout' => '',
             'editedBy' => '',
             'csrfToken' => '',
+            'seoValues' => red_seo_empty_values(),
         ];
         $context = array_merge($defaults, $context);
         $isEdit = $context['mode'] === 'edit';
@@ -476,6 +478,8 @@ if (!function_exists('red_admin_render_form_workspace')) {
                             <div class="red-admin-field"><label for="form-expiration-date">Expiration date</label><?php if ($isEdit) { ?><input type="date" id="form-expiration-date" value="<?php echo red_admin_area_html($context['expirationDateMeta']['display']); ?>" data-form-date="expiration" data-original-date="<?php echo red_admin_area_html($context['expirationDateMeta']['display']); ?>" /><input name="ExpDate" type="hidden" value="" data-date-payload disabled /><?php } else { ?><input name="ExpDate" type="date" id="form-expiration-date" data-form-date="expiration" /><?php } ?><span class="red-admin-field__help">Leave blank to keep the form available.</span></div>
                         </div>
                     </section>
+
+                    <?php echo red_admin_seo_fields_html($context['seoValues'], 'form-seo'); ?>
 
                     <section class="red-admin-optional-card" aria-labelledby="form-location-title">
                         <div class="red-admin-optional-card__heading"><span class="red-admin-optional-card__icon red-admin-optional-card__icon--location" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 10-12 0c0 5.8 6 11 6 11z"></path><circle cx="12" cy="10" r="2"></circle></svg></span><div><h4 id="form-location-title">Content location</h4><p>Connect the form to the relevant site hierarchy.</p></div></div>

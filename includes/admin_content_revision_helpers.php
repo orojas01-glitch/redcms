@@ -10,6 +10,7 @@
 require_once __DIR__ . '/admin_article_helpers.php';
 require_once __DIR__ . '/admin_gallery_helpers.php';
 require_once __DIR__ . '/admin_form_helpers.php';
+require_once __DIR__ . '/admin_seo_helpers.php';
 
 if (!function_exists('red_admin_content_revision_scalar')) {
     function red_admin_content_revision_scalar($value)
@@ -153,8 +154,9 @@ if (!function_exists('red_admin_content_revision_capture')) {
             $childRow = red_admin_content_revision_child_row($connection, $childTable, $contentRecordId);
         }
 
-        return [
-            'schema' => 1,
+        $seoAvailable = red_seo_table_available($connection);
+        $snapshot = [
+            'schema' => $seoAvailable ? 2 : 1,
             'contentRecordId' => (string) $contentRecordId,
             'type' => red_admin_content_revision_type($article, $childTable, $childRow),
             'article' => $article,
@@ -163,6 +165,12 @@ if (!function_exists('red_admin_content_revision_capture')) {
                 'row' => $childRow,
             ],
         ];
+        if ($seoAvailable) {
+            $seo = red_seo_metadata_row($connection, 'article', $contentRecordId);
+            $snapshot['seo'] = $seo ? array_merge(red_seo_empty_values(), $seo) : null;
+        }
+
+        return $snapshot;
     }
 }
 
@@ -472,7 +480,7 @@ if (!function_exists('red_admin_content_revision_decode')) {
     {
         $snapshot = json_decode(red_admin_content_revision_scalar($json), true);
         if (!is_array($snapshot)
-            || (int) ($snapshot['schema'] ?? 0) !== 1
+            || !in_array((int) ($snapshot['schema'] ?? 0), [1, 2], true)
             || !is_array($snapshot['article'] ?? null)
         ) {
             return null;
@@ -570,6 +578,15 @@ if (!function_exists('red_admin_content_revision_apply')) {
             return false;
         }
 
+        if ((int) ($target['schema'] ?? 1) >= 2) {
+            $targetSeo = is_array($target['seo'] ?? null)
+                ? array_merge(red_seo_empty_values(), $target['seo'])
+                : red_seo_empty_values();
+            if (!red_admin_seo_save($connection, 'article', $contentRecordId, $targetSeo)) {
+                return false;
+            }
+        }
+
         $child = $target['child'] ?? null;
         if ($child === null) {
             return true;
@@ -642,6 +659,9 @@ if (!function_exists('red_admin_content_revision_restore')) {
         if (is_array($current['child'] ?? null)) {
             $tables[] = (string) $current['child']['table'];
         }
+        if (red_seo_table_available($connection)) {
+            $tables[] = 'RED_Page_SEO';
+        }
         $success = red_admin_theme_contract_write_transaction(
             $connection,
             function () use ($connection, $contentRecordId, $revisionId, $target, $expectedCurrentHash) {
@@ -697,6 +717,14 @@ if (!function_exists('red_admin_content_revision_flatten')) {
                 }
             }
         }
+        $seo = $snapshot['seo'] ?? null;
+        if (is_array($seo)) {
+            foreach (array_keys(red_seo_field_definitions()) as $key) {
+                if (array_key_exists($key, $seo)) {
+                    $flat['seo.' . $key] = red_admin_content_revision_scalar($seo[$key]);
+                }
+            }
+        }
         return $flat;
     }
 }
@@ -704,7 +732,7 @@ if (!function_exists('red_admin_content_revision_flatten')) {
 if (!function_exists('red_admin_content_revision_field_label')) {
     function red_admin_content_revision_field_label($field)
     {
-        $field = preg_replace('/^(article|child)\./', '', (string) $field);
+        $field = preg_replace('/^(article|child|seo)\./', '', (string) $field);
         $labels = [
             'Title' => 'title',
             'Alias' => 'page address',
@@ -740,6 +768,22 @@ if (!function_exists('red_admin_content_revision_field_label')) {
             'Response' => 'response content',
             'HomeFeature' => 'home feature',
             'EditedBy' => 'editor',
+            'SEO_Title' => 'SEO title',
+            'MetaDescription' => 'meta description',
+            'CanonicalURL' => 'canonical URL',
+            'RobotsIndex' => 'robots indexing',
+            'RobotsFollow' => 'robots following',
+            'OGTitle' => 'Open Graph title',
+            'OGDescription' => 'Open Graph description',
+            'OGImage' => 'Open Graph image',
+            'OGImageAlt' => 'Open Graph image description',
+            'OGType' => 'Open Graph type',
+            'OGLocale' => 'Open Graph locale',
+            'XCard' => 'X card type',
+            'XTitle' => 'X title',
+            'XDescription' => 'X description',
+            'XImage' => 'X image',
+            'SchemaType' => 'structured data type',
         ];
         return $labels[$field] ?? strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $field));
     }

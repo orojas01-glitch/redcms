@@ -22,16 +22,19 @@ if (empty($payloadFields) || empty($_POST['RecordID'])) {
 require $_SERVER['DOCUMENT_ROOT'].'/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_area_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 
 $recordId = (int) red_admin_post_text('RecordID');
-$currentSection = strtolower(red_admin_post_text('CurrentSection'));
 $data = red_admin_area_update_payload($_POST, 'Sections');
 $newSection = $data['Sections'] ?? '';
 $language = red_admin_area_language();
+$existing = red_admin_area_record($db->connection, 'RED_Sections', $recordId);
+$currentSection = strtolower(red_admin_text($existing['Sections'] ?? ''));
+$seoInput = red_admin_seo_collect_post($_POST);
 
-if ($recordId <= 0) {
+if ($recordId <= 0 || !$existing || !$seoInput['valid']) {
     echo 'no';
     $db->close();
     exit;
@@ -46,25 +49,32 @@ if ($renaming) {
         exit;
     }
 
-    $response = red_admin_area_rename(
+}
+
+$afterSave = $seoInput['present']
+    ? red_admin_seo_area_save_callback(
         $db->connection,
-        'RED_Sections',
-        'Sections',
+        'section',
         $recordId,
-        $data,
-        $currentSection,
-        $newSection,
-        $language
-    );
-    if ($response !== false) {
-        header('X-RED-Canonical-Alias: ' . rawurlencode($newSection));
-        echo $response;
-    } else {
-        echo 'no';
+        $seoInput['values']
+    )
+    : null;
+$result = red_admin_area_save_existing(
+    $db->connection,
+    'RED_Sections',
+    'Sections',
+    $recordId,
+    $data,
+    $afterSave,
+    $seoInput['present'] ? ['RED_Page_SEO'] : []
+);
+if (is_array($result)) {
+    if (!empty($result['routeChanged'])) {
+        header('X-RED-Canonical-Alias: ' . rawurlencode((string) $result['alias']));
     }
+    echo (string) ($result['response'] ?? 'yes');
 } else {
-    $areaRows = red_admin_update_area($db->connection, 'RED_Sections', 'Sections', $recordId, $data);
-    echo ($areaRows !== false && $areaRows > 0) ? 'yes' : 'no';
+    echo 'no';
 }
 
 $db->close();

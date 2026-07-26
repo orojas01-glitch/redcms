@@ -10,6 +10,7 @@ require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_form_ui_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $RecordID = (int) ($_POST['RecordID'] ?? 0);
 $ArtRecordID = (int) ($_POST['ArtRecordID'] ?? 0);
@@ -61,6 +62,7 @@ $articleOptions = red_admin_form_ui_preserve_option(
     red_admin_article_page_options($db->connection, $Article),
     $Article
 );
+$seoValues = red_admin_seo_values($db->connection, 'article', $ArtRecordID);
 $db->close();
 
 $Language = substr(red_admin_text($articleRow['Language'] ?? ''), 0, 2);
@@ -116,4 +118,5 @@ red_admin_render_form_workspace([
     'layout' => $Layout,
     'editedBy' => red_admin_text($_SESSION['alias'] ?? ''),
     'csrfToken' => $csrfToken,
+    'seoValues' => $seoValues,
 ]);

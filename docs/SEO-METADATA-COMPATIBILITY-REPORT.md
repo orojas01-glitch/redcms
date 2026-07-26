@@ -1,6 +1,6 @@
 # RED-CMS 5.1 Bug Report: Per-Page SEO Metadata Is Not Preserved
 
-- Status: Confirmed compatibility gap
+- Status: Generic core and isolated Adriana 28-route QA passed; production launch decision remains
 - Target: RED-CMS 5.1
 - Priority: P1 — first Version 5.1 implementation milestone
 - Severity: Medium
@@ -8,31 +8,71 @@
 
 Area: Public rendering, content migration, page editing, SEO and social sharing
 
+## Implementation Progress
+
+The generic core implementation now provides:
+
+- an empty, nullable `RED_Page_SEO` migration keyed to stable Article, Section,
+  Category, or Subcategory owner records;
+- shared validation, storage, deletion, public fallback, Open Graph,
+  X/Twitter, canonical, and typed JSON-LD helpers;
+- one shared administrator field contract in the Article, Form, Gallery,
+  Video, Banner, and Other content workspaces;
+- the same field contract in Section, Category, and Subcategory create/edit
+  workspaces;
+- transactional SEO persistence for every routed content component without
+  changing its existing component table;
+- route-aware, atomic area creation and update with rollback-safe SEO
+  persistence;
+- Article revision capture/restore for SEO values and atomic SEO cleanup when
+  routed content is deleted;
+- a fail-closed, client-neutral import manifest and CLI migration report with
+  dry-run, exact-database confirmation, transactional apply, conflict refusal,
+  and idempotency checks;
+- a desktop/mobile browser gate for exact metadata, typed JSON-LD, redirects,
+  crawl controls, images, overflow, console errors, and same-origin failures;
+- dependency-free contract checks plus guarded disposable-database persistence,
+  revision, validation, cleanup, and rollback tests integrated into the main
+  acceptance runner.
+
+The clean generic acceptance gate passes with 59 dependency-free SEO
+assertions, 14 migration-contract assertions, 33 disposable-database SEO
+assertions, 32 applied migrations, and the expected 21-table schema.
+
+The separate Adriana 5.1 QA installation also passed its migration and public
+browser gate: 28 owners resolved without conflicts, 28 SEO rows were applied,
+the idempotent rerun was unchanged, and all 56 desktop/mobile route checks plus
+all 28 legacy redirects passed. The clean starter and original Adriana 5.0
+installation/database remained separate and unchanged. Production deployment
+has not been performed, and 87 unsupported source JSON-LD property occurrences
+remain explicitly reported for a launch decision.
+
 ## Summary
 
-RED-CMS cannot currently preserve a source page's complete search and social
+RED-CMS 5.0 cannot preserve a source page's complete search and social
 metadata during migration. The administrator exposes page titles,
 descriptions, tags, and content images, but it does not provide a separate
 per-page SEO title, canonical override, complete Open Graph data, X/Twitter
 Card data, or typed JSON-LD data.
 
-The public renderer also reconstructs the document title instead of preserving
-an imported title. During the 28-page Adriana Granobles migration, this changed
-27 of the 28 source `<title>` values.
+The Version 5.0 public renderer also reconstructs the document title instead of
+preserving an imported title. During the original 28-page Adriana Granobles
+comparison, this changed 27 of the 28 source `<title>` values.
 
 This is a migration compatibility problem even when the visible page content
 renders correctly. Search result titles, canonical consolidation, social-card
 previews, and structured-data meaning can all change or disappear.
 
 This compatibility work is the first Version 5.1 delivery priority. Its
-generic migration, editor, rendering, fallback, and acceptance contracts must
-pass before optional business-vertical add-ons are scheduled.
+generic migration, editor, rendering, fallback, acceptance, and isolated
+client-QA contracts have now passed before optional business-vertical add-ons
+are scheduled.
 
-## Current Behavior And Evidence
+## Version 5.0 Behavior And Evidence
 
 ### Document title
 
-`class/class_pagetitle.php` builds the title from the shared
+In Version 5.0, `class/class_pagetitle.php` builds the title from the shared
 `Website_Title` and the visible area or Article title. It applies `ucwords()`
 and, for Article routes, replaces hyphens before rendering.
 
@@ -45,17 +85,18 @@ Consequences:
 
 ### Metadata
 
-`class/class_metatags.php` currently renders:
+In Version 5.0, `class/class_metatags.php` renders:
 
 - `meta name="description"`;
 - `meta name="keywords"`;
 - `meta property="og:description"`.
 
-`themes/legacy-bootstrap/document.php` contains static Open Graph image type
-and dimension declarations, but it does not render a page-specific
+The Version 5.0 `themes/legacy-bootstrap/document.php` contains static Open
+Graph image type and dimension declarations, but it does not render a page-specific
 `og:image` URL.
 
-There is no complete public-rendering path or per-page editor model for:
+There is no complete Version 5.0 public-rendering path or per-page editor model
+for:
 
 - canonical URLs;
 - `og:locale`, `og:type`, `og:title`, `og:url`, and page-specific `og:image`;
@@ -71,10 +112,10 @@ The reference 28-page migration contains:
 - 1 `Service` object;
 - 1 `WebSite` object.
 
-These objects can be copied into a theme template as fixed markup, but they
-cannot currently be represented as CMS-owned, per-page metadata. Fixed theme
-markup would not be a valid general solution because the values would drift
-when editors change page content or routes.
+These objects could be copied into a Version 5.0 theme template as fixed
+markup, but they could not be represented as CMS-owned, per-page metadata.
+Fixed theme markup would not be a valid general solution because the values
+would drift when editors change page content or routes.
 
 ## Reference Migration Evidence Method
 
@@ -108,6 +149,42 @@ clean starter repository. RED-CMS acceptance should reproduce the fallback and
 override contracts with generic fixtures; each client migration should retain
 its own complete import report and route-level evidence.
 
+## Isolated Adriana 5.1 Verification
+
+The completed client-only QA used:
+
+- the approved 28-route source inventory;
+- 24 Article owners and 4 Section owners in a separately cloned client
+  database;
+- a manifest SHA-256 of
+  `9628c4d1b297aff9ab4a52474a6f5d5242bc85404d49f6e0f70a56630d46b7c9`;
+- a dry run, guarded transactional apply, and idempotent post-apply dry run;
+- Chrome at 1512 × 699 and 390 × 844 for every route.
+
+| Verification | Result |
+| --- | ---: |
+| Owners ready / missing / conflicting | 28 / 0 / 0 |
+| Imported fields | 335 |
+| Safely derived values | 169 |
+| Skipped values | 0 |
+| Explicitly non-importable JSON-LD properties | 87 |
+| Distinct SEO titles / canonical URLs | 28 / 28 |
+| Desktop/mobile checks passed | 56 / 56 |
+| Legacy redirects passed | 28 / 28 |
+| Sitemap URLs | 28 exact; 0 missing; 0 unexpected |
+| Console, page, or same-origin request failures | 0 |
+| Full-page screenshots | 56 |
+
+The 87 non-importable values are property occurrences, not silently dropped
+pages. Most are `inLanguage`, `about`, and `isPartOf`; the report also retains
+the smaller Course and Service property set for an explicit product decision.
+The supported typed output still covers `WebPage`, `Course`, `Service`, and the
+homepage `WebSite` object.
+
+The detailed manifest, import reports, crawl-control copies, machine-readable
+browser report, and screenshots live with the isolated client QA installation,
+not in the generic distribution.
+
 ## Steps To Reproduce
 
 1. Start with a static page that has an exact `<title>`, canonical URL,
@@ -117,7 +194,7 @@ its own complete import report and route-level evidence.
 3. Render the resulting RED-CMS public route.
 4. Inspect the `<head>` and compare it with the source page.
 
-## Actual Result
+## Version 5.0 Actual Result
 
 - The `<title>` is reconstructed and may have different capitalization,
   wording, and site-name placement.
@@ -128,7 +205,7 @@ its own complete import report and route-level evidence.
 - The migration has no structured way to report metadata that was not
   imported.
 
-## Expected Result
+## Version 5.1 Expected Result
 
 RED-CMS should preserve an explicit per-page SEO title exactly as entered and
 should support all relevant metadata through a combination of nullable editor

@@ -9,6 +9,7 @@
 
 require_once __DIR__.'/admin_article_helpers.php';
 require_once __DIR__.'/admin_content_revision_ui_helpers.php';
+require_once __DIR__.'/admin_seo_helpers.php';
 
 if (!function_exists('red_admin_banner_date_meta')) {
     function red_admin_banner_date_meta($value, $sentinel)
@@ -100,6 +101,7 @@ if (!function_exists('red_admin_render_banner_form')) {
             'layout' => '',
             'editedBy' => '',
             'csrfToken' => '',
+            'seoValues' => red_seo_empty_values(),
         ];
         $context = array_merge($defaults, $context);
         $isEdit = $context['mode'] === 'edit';
@@ -385,6 +387,8 @@ window.RED_GALLERY_CREATE_CONFIG = {
                             </div>
                         </div>
                     </section>
+
+                    <?php echo red_admin_seo_fields_html($context['seoValues'], 'banner-seo'); ?>
 
                     <section class="red-admin-optional-card" aria-labelledby="banner-location-title">
                         <div class="red-admin-optional-card__heading">
