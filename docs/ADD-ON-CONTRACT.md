@@ -328,6 +328,33 @@ the runner does not claim transaction rollback for an already applied DDL
 statement. It records `installation_failed`, preserves the exact completed
 ledger, and requires `--resume-failed` plus a newly reviewed plan to continue.
 
+`includes/addon_enable_preflight_helpers.php` and
+`scripts/admin-addon-enable-preflight.php` implement the next read-only
+enablement inspection boundary. The command:
+
+- is CLI-only and exposes no `--apply` path;
+- requires the database-backed Owner role plus `addons.enable`;
+- accepts only an exact `installed_disabled_current` package with matching
+  code, manifest, inventory, and migration evidence;
+- fails closed if any recorded package is missing, invalid, or drifted;
+- requires every declared dependency to be installed, compatible, current,
+  and recorded enabled;
+- detects provided-component, service, administrator-tool, adapter, route-id,
+  and overlapping route-method ownership conflicts against currently enabled
+  packages;
+- inventories runtime declarations and binds the current database, actor,
+  target package, enabled-package snapshots, dependencies, gates, and blockers
+  into one deterministic plan SHA-256; and
+- never writes registry or audit state, never includes `addon.php`, and never
+  loads package code.
+
+A valid diagnostic plan is deliberately not an activation authorization.
+`enableReady`, `activationSupported`, `stateMutation`, and `runtimeLoad` remain
+false, and `runtime_contract_unavailable` remains an explicit blocker. Theme,
+settings, live-data, runtime-registration, atomic state-transition, and
+rollback behavior still require separate reviewed implementation. No package
+can move to `enabled` through this preflight command.
+
 ## Component Contract
 
 A placeable add-on component must provide:
@@ -640,7 +667,11 @@ responses, or structured data.
 5. Add per-client installed/enabled state and immutable migration tracking.
    Empty storage, read-only fail-closed reconciliation, bounded lifecycle audit,
    and guarded installation/migration execution into `installed_disabled` are
-   implemented. Enablement/runtime and every later lifecycle transition remain
+   implemented. A separate Owner-authorized read-only enablement preflight now
+   proves exact installed-disabled state, dependency evidence, enabled-package
+   identity, and capability/route collision reporting without executing code or
+   mutating state. Runtime registration, the remaining enablement gates, the
+   atomic `enabled` transition, and every later lifecycle transition remain
    separate reviewed batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
