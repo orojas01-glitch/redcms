@@ -116,6 +116,13 @@ batches.
   and `summary` spacing, borders, backgrounds, and minimum height inside the
   core-owned editor workspace. Active themes can style public disclosure
   elements without changing the administrator card geometry.
+- The Version 5.1 core now contains position-`0` Article and Other controls
+  inside the structured Hidden content tray while preserving the retained
+  float wrapper for non-structured compatibility. The structured hidden grid
+  remains active, all six supported component presentations stay contained at
+  desktop and mobile widths, and public rendering is unchanged. See
+  [`BUG-POSITION-0-HIDDEN-CONTENT-LAYOUT.md`](BUG-POSITION-0-HIDDEN-CONTENT-LAYOUT.md)
+  for reproduction evidence, cause, repair boundary, and verification.
 - Per-page SEO metadata is the first Version 5.1 implementation priority. The
   Version 5.1 core now provides nullable page-owner metadata, canonical URLs,
   complete Open Graph and X/Twitter output, typed JSON-LD, a guarded migration

@@ -1,6 +1,6 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-07-25
+Date: 2026-07-26
 
 ## Purpose
 
@@ -91,7 +91,7 @@ SEO, read-only add-on trust, persisted Owner authorization, read-only registry,
 guarded disabled-install/recovery, and read-only enablement-preflight
 foundations, plus Milestone 5 content-version, direct page-structure, and
 custom Layout Builder foundations.
-The latest 2026-07-25 run passed the
+The latest 2026-07-26 run passed the
 22-assertion clean starter boundary, 59-assertion SEO contract, 14-assertion SEO
 migration contract, and 40-assertion add-on trust contract, imported the
 25-table installer, applied all 35 migrations to the expected 26-table schema
@@ -154,6 +154,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Route checks require content markers, not HTTP status alone.
 - Theme-contract serialization uses two disposable-database connections, writes no content, requires a blocked connection's callback not to run, verifies exception-safe mutex release, and proves forged generic Advanced/logo writes leave the paired theme rows unchanged.
 - The theme contract self-test requires the core-owned page-layout ellipsis menu to reset active-theme `details` and `summary` element styles while retaining its 32-by-30-pixel desktop geometry.
+- The theme contract self-test requires structured position-`0` Article and Other cards to omit their retained legacy float wrappers, establishes a scoped editor flow context, and keeps the Hidden content grid out of the later visible-position block override.
 - Authentication uses only hard-coded disposable fixture credentials inside the disposable database; it never reads or changes a real administrator password.
 - The cookie jar and every authentication response live inside the suite's temporary response directory, which cleanup removes and verifies absent.
 - Authentication fixture cleanup is safe to rerun and executes before grant/database removal after successful and injected-failure paths.

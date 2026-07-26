@@ -110,7 +110,7 @@ class other
 #[\AllowDynamicProperties]
 class cp_other
 {
-	public function cp_other($position, $recordid, $VarPosition, $layout)
+	public function cp_other($position, $recordid, $VarPosition, $layout, $structuredEditor = false)
 	{
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		// display all active records. Position is Required.
@@ -127,7 +127,7 @@ class cp_other
 			$Alias=red_public_js_identifier($row['Alias']);
 			$Title=red_public_display_text($row['Title']);
 			
-			if ($position==='0'){
+			if ($position==='0' && !$structuredEditor){
             	echo '<div style="float:left; padding-right:5px; margin-right:5px;">';
 			}
 			
@@ -207,7 +207,7 @@ class cp_other
 				//
 				
 			
-			if ($position==='0'){
+			if ($position==='0' && !$structuredEditor){
 				echo '</div>';
 			}
 			

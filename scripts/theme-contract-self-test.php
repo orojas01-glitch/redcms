@@ -4093,6 +4093,34 @@ try {
             ) === 1,
         'Page-layout details and summary controls reset active-theme element styles while retaining the desktop 32 by 30 pixel menu contract'
     );
+    red_theme_test_assert(
+        str_contains(
+            $controlPanelContentSource,
+            "->cp_Article(\$componentInputs['position'], \$this->recordid, \$componentInputs['varPosition'], \$componentInputs['layout'], true)"
+        )
+            && str_contains(
+                $controlPanelContentSource,
+                "->cp_other(\$componentInputs['position'], \$this->recordid, \$componentInputs['varPosition'], \$componentInputs['layout'], true)"
+            )
+            && is_string($articleComponentSource)
+            && str_contains($articleComponentSource, '$layout, $structuredEditor = false)')
+            && substr_count($articleComponentSource, "\$position==='0' && !\$structuredEditor") === 2
+            && str_contains($articleComponentSource, 'float:left; padding-right:5px; margin-right:5px;')
+            && is_string($otherComponentSource)
+            && str_contains($otherComponentSource, '$layout, $structuredEditor = false)')
+            && substr_count($otherComponentSource, "\$position==='0' && !\$structuredEditor") === 2
+            && str_contains($otherComponentSource, 'float:left; padding-right:5px; margin-right:5px;')
+            && str_contains($controlPanelContentSource, "'float:left; padding-right:5px; margin-right:5px;'")
+            && preg_match(
+                '/#advanced \[data-red-editor-workspace="page-layout"\] \.red-admin-layout-item__editor\s*\{[^}]*display:\s*flow-root;[^}]*min-width:\s*0;[^}]*\}/s',
+                $controlPanelCss
+            ) === 1
+            && str_contains(
+                $controlPanelCss,
+                '.red-admin-position__controls.cp_admin:not(.red-admin-position__controls--hidden)'
+            ),
+        'Structured hidden Article and Other editors stay in normal flow while legacy non-structured position 0 wrappers remain available'
+    );
     echo 'Theme contract self-test passed: ' . $assertionCount . ' assertions.' . PHP_EOL;
 } finally {
     red_theme_test_remove_tree($projectRoot);
