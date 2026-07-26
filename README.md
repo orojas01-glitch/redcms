@@ -12,10 +12,13 @@ on July 25, 2026.
 
 Version 5.1 development includes per-page SEO compatibility,
 non-executing add-on trust validation, persisted Owner authorization, and
-empty per-client package registry/migration-ledger storage with read-only drift
-reporting. Add-on installation/activation, package SQL execution, payment,
-member access, editorial workflow, notifications, the broader role model, and
-social publishing integrations are not active features.
+per-client package registry/migration-ledger storage with read-only drift
+reporting. A server-local Owner-authorized installer can apply reviewed,
+checksum-verified package migrations and always records the package as
+`installed_disabled`; it never executes package PHP. Add-on activation/runtime,
+upgrade, disable/uninstall/purge, payment, member access, editorial workflow,
+notifications, the broader role model, and social publishing integrations are
+not active features.
 
 ## Highlights
 
@@ -33,6 +36,7 @@ social publishing integrations are not active features.
 - Read-only add-on manifest, path, compatibility, dependency, and integrity validation
 - Per-client Owner role and exact future add-on lifecycle capability grants
 - Empty per-client add-on installation/migration registries with fail-closed reconciliation
+- Owner-authorized server-local package installation that remains disabled and unloaded
 
 ## Portable Starter Distribution
 
@@ -98,7 +102,14 @@ php scripts/addon-trust-self-test.php
 php scripts/addon-validate.php --all
 php scripts/admin-addon-owner.php --status
 php scripts/addon-registry-status.php --all
+php scripts/admin-addon-install.php --package=vendor.package --actor-admin=ID
 ```
+
+The install command is a dry run by default. Apply requires the exact database,
+package, version, plan digest, SHA-256 from a separately verified backup, and
+`installed_disabled` confirmations printed by the dry run. Package files are
+deployed separately per client; the clean starter intentionally contains no
+`addons/` directory.
 
 Run the complete guarded acceptance lifecycle:
 

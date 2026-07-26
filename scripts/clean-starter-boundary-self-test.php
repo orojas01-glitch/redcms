@@ -101,11 +101,12 @@ try {
     red_clean_starter_test_assert(
         str_contains($installer, 'CREATE TABLE `RED_Addon_Installations`')
             && str_contains($installer, 'CREATE TABLE `RED_Addon_Migrations`')
+            && str_contains($installer, 'CREATE TABLE `RED_Addon_Activity_Log`')
             && !preg_match(
-                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations)`?/i',
+                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations|Activity_Log)`?/i',
                 $installer
             ),
-        'starter ships empty generic add-on registry tables with no package state or migration history'
+        'starter ships empty add-on registry and audit tables with no package state, migration history, or lifecycle event'
     );
 
     $productionFiles = array_merge(

@@ -1,9 +1,10 @@
 # RED-CMS Add-On Contract
 
-Status: Version 5.1 trust validation, Owner authorization, and read-only
-registry reconciliation foundations are implemented. RED-CMS does not install,
-enable, execute, upgrade, disable, uninstall, or purge packages through this
-contract yet.
+Status: Version 5.1 trust validation, Owner authorization, read-only registry
+reconciliation, and guarded server-local installation are implemented.
+Installation applies reviewed migrations, records exact evidence, and always
+finishes disabled without executing package PHP. RED-CMS does not enable, load,
+upgrade, disable, uninstall, or purge packages through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -25,14 +26,20 @@ The first foundation batch provides:
 - one explicit, audited, server-local first-Owner bootstrap with exact target
   confirmations;
 - empty per-client installation and immutable migration-ledger tables;
+- empty bounded add-on lifecycle audit storage;
 - deterministic manifest/inventory snapshots and fail-closed comparison of
   validated files with recorded state;
-- adversarial dependency-free tests and a read-only CLI report.
+- a dry-run-first, Owner-authorized, server-local install command that applies
+  reviewed package migrations, records failure/resume evidence, and remains
+  disabled and unloaded;
+- adversarial dependency-free tests, installation/recovery tests, and a
+  read-only CLI report.
 
-The clean starter contains no `addons/` package directory and no registry or
-migration rows. A client or operator may deploy package files separately
-later, but discovery and registry reconciliation never install, enable, load,
-or migrate them. No Guest, Webmaster, or legacy Superadmin receives package
+The clean starter contains no `addons/` package directory and no registry,
+migration, or add-on audit rows. A client or operator deploys trusted package
+files separately. Discovery and registry reconciliation remain read-only; the
+separate install command can apply reviewed migrations but cannot enable or
+load the package. No Guest, Webmaster, or legacy Superadmin receives package
 lifecycle authority automatically. An account receives it only after a
 client-specific Owner row and exact grants are deliberately bootstrapped.
 
@@ -162,8 +169,8 @@ addons/
 - Core must not provide arbitrary PHP upload or browser-based package
   extraction.
 - PHP add-ons run in the RED-CMS process and are not a security sandbox.
-  Manifest validation and signatures establish provenance and compatibility;
-  they do not make untrusted PHP safe.
+  Operator-reviewed provenance and manifest validation establish the current
+  trust decision; they do not make untrusted PHP safe.
 
 ## Manifest Contract
 
@@ -293,6 +300,34 @@ missing deployed code, and recorded enabled state while the runtime is
 unavailable. The result is never loadable in this batch. These helpers perform
 no registry write, package SQL execution, or `addon.php` inclusion.
 
+`includes/addon_install_helpers.php` and
+`scripts/admin-addon-install.php` implement the separate install transition.
+The command:
+
+- is CLI-only and dry-runs by default;
+- requires the database-backed Owner role plus `addons.install`;
+- locks the package id within the current client database;
+- revalidates the complete package catalog, exact package inventory, migration
+  checksums, and required installed/current/enabled dependencies;
+- requires exact database, package, version, plan SHA-256, nonzero verified
+  backup SHA-256 supplied from the separate backup procedure, and
+  `installed_disabled` confirmations before apply;
+- limits each migration file to 2 MiB, refuses privilege/database/user/plugin,
+  routine/trigger/event, file-I/O, explicit transaction, registry-table,
+  core-table, and obvious unnamespaced-table SQL, and permits package-owned
+  `RED_Addon_*` table work only;
+- records each completed migration by immutable id, path, and checksum;
+- writes bounded start/completion/failure audit facts without SQL, paths,
+  secrets, settings, or request bodies; and
+- never includes `addon.php`, never enables runtime, and always completes as
+  `installed_disabled`.
+
+The SQL checks are defense-in-depth for operator-reviewed first-party packages,
+not a parser or sandbox for untrusted SQL. MySQL DDL may commit implicitly, so
+the runner does not claim transaction rollback for an already applied DDL
+statement. It records `installation_failed`, preserves the exact completed
+ledger, and requires `--resume-failed` plus a newly reviewed plan to continue.
+
 ## Component Contract
 
 A placeable add-on component must provide:
@@ -377,8 +412,9 @@ reviewed compatibility route maps an existing URL.
 - Dependencies use exact package ids and compatible version ranges.
 - Circular dependencies fail validation.
 - Installing a package does not silently install or enable another package.
-- Required dependencies must be installed, compatible, and enabled before the
-  dependent package can be enabled.
+- Required dependencies must be installed, compatible, current, and enabled
+  before the dependent package can be installed, and must still pass those
+  checks before later enablement.
 - Optional adapters remain disabled until explicitly configured.
 - A package cannot be disabled or removed while another enabled package
   requires it.
@@ -602,9 +638,10 @@ responses, or structured data.
    required by that approved track. This authorization foundation is
    implemented without adding a package lifecycle endpoint.
 5. Add per-client installed/enabled state and immutable migration tracking.
-   Empty storage and read-only fail-closed reconciliation are implemented;
-   lifecycle mutation and package migration execution remain a separate
-   reviewed batch.
+   Empty storage, read-only fail-closed reconciliation, bounded lifecycle audit,
+   and guarded installation/migration execution into `installed_disabled` are
+   implemented. Enablement/runtime and every later lifecycle transition remain
+   separate reviewed batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 7. If private folders are scheduled for activation, implement and pass Member

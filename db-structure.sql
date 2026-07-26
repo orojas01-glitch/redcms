@@ -134,6 +134,29 @@ CREATE TABLE `RED_Addon_Migrations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Activity_Log`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Activity_Log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Activity_Log` (
+  `RecordID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `EventName` varchar(64) NOT NULL,
+  `PackageID` varchar(127) NOT NULL,
+  `PackageVersion` varchar(120) NOT NULL,
+  `ActorAdminRecordID` int unsigned NOT NULL,
+  `Result` varchar(16) NOT NULL,
+  `DetailCode` varchar(64) NOT NULL,
+  `OccurredAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`RecordID`),
+  KEY `idx_red_addon_activity_package` (`PackageID`,`OccurredAt`,`RecordID`),
+  KEY `idx_red_addon_activity_event` (`EventName`,`OccurredAt`,`RecordID`),
+  KEY `idx_red_addon_activity_actor` (`ActorAdminRecordID`,`OccurredAt`,`RecordID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Admin_Activity_Log`
 --
 
