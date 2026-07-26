@@ -67,7 +67,7 @@ $normalized = red_seo_import_manifest(json_encode($manifest, JSON_THROW_ON_ERROR
 $assert($normalized['migrationId'] === 'generic-seo-fixture', 'migration identifier changed');
 $assert(count($normalized['entries']) === 1, 'entry count changed');
 $assert($normalized['entries'][0]['metadata']['SEO_Title'] === 'Exact Home Title', 'title changed');
-$assert(count($normalized['entries'][0]['metadata']) === 16, 'nullable metadata fields are incomplete');
+$assert(count($normalized['entries'][0]['metadata']) === 26, 'nullable metadata fields are incomplete');
 $assert(red_seo_import_values_equal(
     $normalized['entries'][0]['metadata'],
     $normalized['entries'][0]['metadata']
@@ -78,6 +78,23 @@ $assert(!red_seo_import_values_equal(
     $normalized['entries'][0]['metadata'],
     $changed
 ), 'different metadata must not compare equal');
+$additive = $normalized['entries'][0]['metadata'];
+$additive['SchemaIdentityType'] = 'Person';
+$additive['SchemaIdentityName'] = 'Visible subject';
+$assert(
+    red_seo_import_values_additive($normalized['entries'][0]['metadata'], $additive),
+    'empty metadata fields must allow additive migration values'
+);
+$assert(
+    !red_seo_import_values_additive($normalized['entries'][0]['metadata'], $changed),
+    'an additive migration must not overwrite an existing value'
+);
+$cleared = $normalized['entries'][0]['metadata'];
+$cleared['SEO_Title'] = '';
+$assert(
+    !red_seo_import_values_additive($normalized['entries'][0]['metadata'], $cleared),
+    'an additive migration must not clear an existing value'
+);
 $counts = red_seo_import_decision_counts($normalized['entries']);
 $assert($counts === [
     'importedFields' => 4,

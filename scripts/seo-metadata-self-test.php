@@ -59,6 +59,14 @@ $payload = red_seo_collect_input([
     'MetaDescription' => 'A precise page description.',
     'SchemaType' => 'Course',
     'OGLocale' => 'es_CO',
+    'SchemaIdentityType' => 'Person',
+    'SchemaIdentityName' => 'Example Educator',
+    'SchemaIdentityURL' => 'https://example.com/',
+    'SchemaEducationalLevel' => 'Beginner to Intermediate',
+    'SchemaCourseMode' => 'online',
+    'SchemaCourseWorkload' => 'PT32H',
+    'SchemaInstructorName' => 'Example Educator',
+    'SchemaTeaches' => "Melodía\nArmonía\nLetra y poesía",
 ]);
 $assert($payload['present'] && $payload['valid'], 'valid SEO input must be accepted');
 $assert(red_seo_has_overrides($payload['values']), 'non-empty SEO input must activate rich metadata');
@@ -74,6 +82,42 @@ $assert(
         || $invalidPayload['errors'] === ['SchemaType', 'OGLocale'],
     'invalid fields must be reported'
 );
+
+$invalidIdentity = red_seo_collect_input([
+    'SchemaIdentityURL' => 'https://example.com/provider/',
+]);
+$assert(!$invalidIdentity['valid'], 'an identity URL without a type and name must be rejected');
+$assert(
+    in_array('SchemaIdentityType', $invalidIdentity['errors'], true)
+        && in_array('SchemaIdentityName', $invalidIdentity['errors'], true),
+    'incomplete identity errors must identify both required fields'
+);
+
+$invalidSchemaDetails = red_seo_collect_input([
+    'SchemaType' => 'Course',
+    'SchemaCourseWorkload' => '32 hours',
+    'SchemaServiceType' => 'Mismatched service',
+    'SchemaMainEntityName' => 'Mismatched main entity',
+]);
+$assert(!$invalidSchemaDetails['valid'], 'invalid or schema-mismatched details must be rejected');
+foreach ([
+    'SchemaCourseWorkload',
+    'SchemaServiceType',
+    'SchemaMainEntityName',
+] as $invalidDetailField) {
+    $assert(
+        in_array($invalidDetailField, $invalidSchemaDetails['errors'], true),
+        'structured-data validation must identify ' . $invalidDetailField
+    );
+}
+
+$servicePayload = red_seo_collect_input([
+    'SchemaType' => 'Service',
+    'SchemaIdentityType' => 'Organization',
+    'SchemaIdentityName' => 'Example Studio',
+    'SchemaServiceType' => 'Recording service',
+]);
+$assert($servicePayload['valid'], 'matching Service details must be accepted');
 
 $context = [
     'title' => $exactTitle,
@@ -102,6 +146,19 @@ $context = [
         'image' => ['url' => 'https://example.com/images/cuda.jpg'],
     ],
     'schemaType' => 'Course',
+    'schemaLanguage' => 'es',
+    'schema' => [
+        'identityType' => 'Person',
+        'identityName' => 'Example Educator',
+        'identityUrl' => 'https://example.com/',
+        'mainEntityName' => '',
+        'educationalLevel' => 'Beginner to Intermediate',
+        'courseMode' => 'online',
+        'courseWorkload' => 'PT32H',
+        'instructorName' => 'Example Educator',
+        'teaches' => "Melodía\nArmonía\nMelodía\nLetra y poesía",
+        'serviceType' => 'Must not leak from a Course',
+    ],
     'websiteTitle' => 'Example',
 ];
 $html = red_public_seo_rich_meta_html($context);
@@ -111,7 +168,66 @@ $assert(substr_count($html, 'name="twitter:card"') === 1, 'rich metadata must em
 $assert(substr_count($html, 'name="twitter:image:alt"') === 1, 'rich metadata must emit X/Twitter image alt text');
 $assert(strpos($html, 'content="Safe &lt;script&gt;alert(1)&lt;/script&gt; description"') !== false, 'metadata values must be HTML escaped');
 $assert(strpos($html, '"@type":"Course"') !== false, 'the selected constrained schema type must render');
+$assert(strpos($html, '"inLanguage":"es"') !== false, 'schema language must render');
+$assert(strpos($html, '"provider":{"@type":"Person","name":"Example Educator","url":"https://example.com/"}') !== false, 'typed provider must render');
+$assert(strpos($html, '"educationalLevel":"Beginner to Intermediate"') !== false, 'typed educational level must render');
+$assert(strpos($html, '"courseMode":"online"') !== false, 'typed Course instance must render');
+$assert(strpos($html, '"courseWorkload":"PT32H"') !== false, 'ISO Course workload must render');
+$assert(strpos($html, '"teaches":["Melodía","Armonía","Letra y poesía"]') !== false, 'Course topics must render as a deduplicated JSON-LD array');
+$assert(strpos($html, '"serviceType"') === false, 'Service details must not leak into Course JSON-LD');
 $assert(strpos($html, '</script> description') === false, 'JSON-LD must not contain an executable closing script sequence');
+
+$webPageContext = $context;
+$webPageContext['schemaType'] = 'WebPage';
+$webPageContext['canonical'] = 'https://www.example.com/path/';
+$webPageContext['schema']['mainEntityName'] = 'Elige tu camino musical';
+$webPageSchema = red_public_seo_schema($webPageContext);
+$assert(
+    ($webPageSchema['isPartOf']['url'] ?? '') === 'https://www.example.com/',
+    'WebPage isPartOf must use the canonical website origin'
+);
+$assert(
+    ($webPageSchema['about']['name'] ?? '') === 'Example Educator',
+    'WebPage about must use the constrained identity'
+);
+$assert(
+    ($webPageSchema['mainEntity']['name'] ?? '') === 'Elige tu camino musical',
+    'WebPage mainEntity must render a named Course'
+);
+$assert(
+    !isset($webPageSchema['educationalLevel'])
+        && !isset($webPageSchema['hasCourseInstance'])
+        && !isset($webPageSchema['teaches']),
+    'Course-only details must not leak into WebPage JSON-LD'
+);
+
+$serviceContext = $context;
+$serviceContext['schemaType'] = 'Service';
+$serviceContext['schema']['identityType'] = 'Organization';
+$serviceContext['schema']['identityName'] = 'Example Studio';
+$serviceContext['schema']['identityUrl'] = 'https://example.com/studio/';
+$serviceContext['schema']['serviceType'] = 'Recording service';
+$serviceSchema = red_public_seo_schema($serviceContext);
+$assert(
+    ($serviceSchema['provider']['@type'] ?? '') === 'Organization'
+        && ($serviceSchema['serviceType'] ?? '') === 'Recording service',
+    'Service provider and type must render from constrained values'
+);
+$assert(
+    !isset($serviceSchema['educationalLevel'])
+        && !isset($serviceSchema['hasCourseInstance'])
+        && !isset($serviceSchema['teaches'])
+        && !isset($serviceSchema['inLanguage']),
+    'Course-only details and CreativeWork language must not leak into Service JSON-LD'
+);
+
+$websiteContext = $webPageContext;
+$websiteContext['schemaType'] = 'WebSite';
+$websiteSchema = red_public_seo_schema($websiteContext);
+$assert(
+    isset($websiteSchema['about']) && !isset($websiteSchema['isPartOf']),
+    'WebSite may identify its subject but must not point to itself with isPartOf'
+);
 
 $adminHtml = red_admin_seo_fields_html($payload['values'], 'test-seo');
 foreach ([
@@ -121,6 +237,16 @@ foreach ([
     'name="OGImage"',
     'name="XCard"',
     'name="SchemaType"',
+    'name="SchemaIdentityType"',
+    'name="SchemaIdentityName"',
+    'name="SchemaIdentityURL"',
+    'name="SchemaMainEntityName"',
+    'name="SchemaEducationalLevel"',
+    'name="SchemaCourseMode"',
+    'name="SchemaCourseWorkload"',
+    'name="SchemaInstructorName"',
+    'name="SchemaTeaches"',
+    'name="SchemaServiceType"',
 ] as $fieldMarker) {
     $assert(strpos($adminHtml, $fieldMarker) !== false, 'administrator SEO form field is missing: ' . $fieldMarker);
 }
@@ -135,6 +261,22 @@ $migration = file_get_contents(
 $assert(is_string($migration) && strpos($migration, 'CREATE TABLE IF NOT EXISTS `RED_Page_SEO`') !== false, 'SEO migration must create the nullable table');
 $assert(stripos($migration, 'INSERT INTO `RED_Page_SEO`') === false, 'SEO migration must not seed client metadata');
 $assert(strpos($migration, 'UNIQUE KEY `uniq_red_page_seo_owner`') !== false, 'SEO owners must be unique');
+$schemaDetailsMigration = file_get_contents(
+    $repositoryRoot . '/database/migrations/2026-07-26-seo-schema-details.sql'
+);
+$assert(
+    is_string($schemaDetailsMigration)
+        && strpos($schemaDetailsMigration, 'ADD COLUMN `SchemaIdentityType`') !== false
+        && strpos($schemaDetailsMigration, 'ADD COLUMN `SchemaCourseWorkload`') !== false
+        && strpos($schemaDetailsMigration, 'ADD COLUMN `SchemaServiceType`') !== false,
+    'typed structured-data migration must add the constrained detail columns'
+);
+$assert(
+    stripos((string) $schemaDetailsMigration, 'INSERT INTO `RED_Page_SEO`') === false
+        && strpos((string) $schemaDetailsMigration, 'SchemaCourseCode') === false
+        && strpos((string) $schemaDetailsMigration, 'AggregateRating') === false,
+    'typed migration must remain nullable, client-neutral, and inside the approved field boundary'
+);
 
 $editorFiles = [
     'Article create editor' => 'admin/bin/new_article.php',

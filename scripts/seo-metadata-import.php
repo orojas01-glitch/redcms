@@ -161,6 +161,8 @@ try {
                 $action = 'create';
             } elseif (red_seo_import_values_equal($existing, $entry['metadata'])) {
                 $action = 'unchanged';
+            } elseif (red_seo_import_values_additive($existing, $entry['metadata'])) {
+                $action = 'update';
             } else {
                 $action = 'conflict';
             }
@@ -230,7 +232,7 @@ try {
     $summary = array_merge([
         'routes' => count($routes),
         'ready' => count(array_filter($routes, static function ($route) {
-            return in_array($route['action'], ['create', 'unchanged', 'applied'], true);
+            return in_array($route['action'], ['create', 'update', 'unchanged', 'applied'], true);
         })),
         'missingOwners' => count(array_filter($routes, static function ($route) {
             return $route['action'] === 'missing-owner';

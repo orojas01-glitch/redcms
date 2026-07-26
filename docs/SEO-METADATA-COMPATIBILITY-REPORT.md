@@ -1,6 +1,6 @@
 # RED-CMS 5.1 Bug Report: Per-Page SEO Metadata Is Not Preserved
 
-- Status: Generic core and isolated Adriana 28-route QA passed; production launch decision remains
+- Status: Constrained JSON-LD core, fresh isolated Adriana verification, and hosted Schema.org validation complete; production deployment remains
 - Target: RED-CMS 5.1
 - Priority: P1 — first Version 5.1 implementation milestone
 - Severity: Medium
@@ -35,17 +35,26 @@ The generic core implementation now provides:
   revision, validation, cleanup, and rollback tests integrated into the main
   acceptance runner.
 
-The clean generic acceptance gate passes with 59 dependency-free SEO
-assertions, 14 migration-contract assertions, 33 disposable-database SEO
-assertions, 32 applied migrations, and the expected 21-table schema.
+The clean generic acceptance gate passes with 92 dependency-free SEO
+assertions, 17 migration-contract assertions, 38 disposable-database SEO
+assertions, 36 applied migrations, and the expected 26-table schema.
 
 The separate Adriana 5.1 QA installation also passed its migration and public
 browser gate: 28 owners resolved without conflicts, 28 SEO rows were applied,
 the idempotent rerun was unchanged, and all 56 desktop/mobile route checks plus
 all 28 legacy redirects passed. The clean starter and original Adriana 5.0
 installation/database remained separate and unchanged. Production deployment
-has not been performed, and 87 unsupported source JSON-LD property occurrences
-remain explicitly reported for a launch decision.
+has not been performed.
+
+The 87 unsupported source JSON-LD property occurrences are now classified.
+The launch decision is to represent visible content with generated
+relationships and constrained typed fields, normalize one redundant homepage
+self-reference, deliberately exclude the visitor-invisible Course code and
+rating, and provide no arbitrary custom JSON-LD input. The constrained generic
+implementation, clean-starter acceptance, and fresh isolated client QA now
+pass. All 28 public renders also pass the hosted Schema.org Markup Validator
+with zero errors and zero warnings. Production deployment remains. See
+[`SEO-JSONLD-LAUNCH-DECISION.md`](SEO-JSONLD-LAUNCH-DECISION.md).
 
 ## Summary
 
@@ -172,14 +181,39 @@ The completed client-only QA used:
 | Desktop/mobile checks passed | 56 / 56 |
 | Legacy redirects passed | 28 / 28 |
 | Sitemap URLs | 28 exact; 0 missing; 0 unexpected |
+| Hosted Schema.org validation | 28 / 28; 0 errors; 0 warnings |
 | Console, page, or same-origin request failures | 0 |
 | Full-page screenshots | 56 |
 
 The 87 non-importable values are property occurrences, not silently dropped
 pages. Most are `inLanguage`, `about`, and `isPartOf`; the report also retains
-the smaller Course and Service property set for an explicit product decision.
-The supported typed output still covers `WebPage`, `Course`, `Service`, and the
-homepage `WebSite` object.
+the smaller Course and Service property set.
+
+The completed classification assigns 51 occurrences to generated output, 33
+to constrained typed fields, one redundant homepage `WebSite` self-reference
+to safe normalization, and two visitor-invisible claims to deliberate
+exclusion. No occurrence requires arbitrary custom JSON-LD. The implemented
+typed output covers `WebPage`, `Course`, `Service`, and the homepage `WebSite`
+object, including the approved generated relationships and constrained
+type-specific details.
+
+The fresh 2026-07-26 verification rebuilt the client data on a clean current
+36-migration schema without rewriting the preserved backup's historical
+checksum ledger. The 28-route manifest applied as 28 additive updates and
+reran as 28 unchanged rows, with zero missing owners or conflicts and exactly
+the two deliberate exclusions. All 56 desktop/mobile route checks, all 28
+legacy redirects, the exact sitemap and robots contracts, and local validation
+against the official current Schema.org vocabulary passed. The local
+vocabulary check also corrected `inLanguage` so it renders on the 27
+CreativeWork-derived objects but not the single `Service`.
+
+With explicit authorization, the 28 unauthenticated public route renders were
+submitted individually to `https://validator.schema.org/validate`. Every
+hosted request returned HTTP 200, and the aggregate result was 28 parsed
+top-level objects with zero errors and zero warnings: 24 `WebPage`, two
+`Course`, one `Service`, and one `WebSite`. No administrator HTML, cookies,
+credentials, or private configuration were submitted. Production deployment
+remains a separate operation.
 
 The detailed manifest, import reports, crawl-control copies, machine-readable
 browser report, and screenshots live with the isolated client QA installation,

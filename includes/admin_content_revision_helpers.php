@@ -784,6 +784,16 @@ if (!function_exists('red_admin_content_revision_field_label')) {
             'XDescription' => 'X description',
             'XImage' => 'X image',
             'SchemaType' => 'structured data type',
+            'SchemaIdentityType' => 'structured data identity type',
+            'SchemaIdentityName' => 'structured data identity name',
+            'SchemaIdentityURL' => 'structured data identity URL',
+            'SchemaMainEntityName' => 'main Course name',
+            'SchemaEducationalLevel' => 'Course educational level',
+            'SchemaCourseMode' => 'Course delivery mode',
+            'SchemaCourseWorkload' => 'Course workload',
+            'SchemaInstructorName' => 'Course instructor',
+            'SchemaTeaches' => 'Course topics',
+            'SchemaServiceType' => 'Service type',
         ];
         return $labels[$field] ?? strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $field));
     }
