@@ -110,6 +110,20 @@ function expectedSchemaType(entry) {
   return entry.routePath === '/' ? 'WebSite' : 'WebPage';
 }
 
+function expectedSchemaIdentity(metadata) {
+  if (!metadata.SchemaIdentityType || !metadata.SchemaIdentityName) return undefined;
+  const identity = {
+    '@type': metadata.SchemaIdentityType,
+    name: metadata.SchemaIdentityName,
+  };
+  if (metadata.SchemaIdentityURL) identity.url = metadata.SchemaIdentityURL;
+  return identity;
+}
+
+function equalJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 async function warmPage(page) {
   await page.evaluate(async () => {
     await document.fonts?.ready?.catch(() => {});
@@ -236,7 +250,8 @@ function evaluateRoute(entry, document, runtime, baseUrl) {
     failures.push({ code: 'jsonld-count-or-parse', actual: document.schemas });
   } else {
     const schema = document.schemas[0].value;
-    if (schema['@type'] !== expectedSchemaType(entry)
+    const schemaType = expectedSchemaType(entry);
+    if (schema['@type'] !== schemaType
       || schema.name !== metadata.SEO_Title
       || schema.url !== metadata.CanonicalURL
       || schema.description !== metadata.MetaDescription) {
@@ -250,6 +265,98 @@ function evaluateRoute(entry, document, runtime, baseUrl) {
         },
         actual: schema,
       });
+    }
+    const expectedLanguage = (metadata.OGLocale || 'es_ES').split('_')[0];
+    if (schemaType !== 'Service' && schema.inLanguage !== expectedLanguage) {
+      failures.push({ code: 'jsonld-language', expected: expectedLanguage, actual: schema.inLanguage });
+    } else if (schemaType === 'Service' && schema.inLanguage !== undefined) {
+      failures.push({ code: 'jsonld-service-language-leakage', actual: schema.inLanguage });
+    }
+
+    if (schemaType === 'WebPage') {
+      const expectedWebsiteUrl = `${new URL(metadata.CanonicalURL).origin}/`;
+      if (schema.isPartOf?.['@type'] !== 'WebSite' || schema.isPartOf?.url !== expectedWebsiteUrl) {
+        failures.push({
+          code: 'jsonld-is-part-of',
+          expected: { type: 'WebSite', url: expectedWebsiteUrl },
+          actual: schema.isPartOf,
+        });
+      }
+    } else if (schemaType === 'WebSite' && schema.isPartOf !== undefined) {
+      failures.push({ code: 'jsonld-website-self-reference', actual: schema.isPartOf });
+    }
+
+    const identity = expectedSchemaIdentity(metadata);
+    if (identity && ['WebPage', 'WebSite'].includes(schemaType) && !equalJson(schema.about, identity)) {
+      failures.push({ code: 'jsonld-about', expected: identity, actual: schema.about });
+    }
+    if (identity && ['Course', 'Service'].includes(schemaType) && !equalJson(schema.provider, identity)) {
+      failures.push({ code: 'jsonld-provider', expected: identity, actual: schema.provider });
+    }
+
+    if (metadata.SchemaMainEntityName) {
+      const expectedMainEntity = {
+        '@type': 'Course',
+        name: metadata.SchemaMainEntityName,
+      };
+      if (identity) expectedMainEntity.provider = identity;
+      if (!equalJson(schema.mainEntity, expectedMainEntity)) {
+        failures.push({ code: 'jsonld-main-entity', expected: expectedMainEntity, actual: schema.mainEntity });
+      }
+    }
+
+    if (schemaType === 'Course') {
+      if (metadata.SchemaEducationalLevel
+        && schema.educationalLevel !== metadata.SchemaEducationalLevel) {
+        failures.push({
+          code: 'jsonld-educational-level',
+          expected: metadata.SchemaEducationalLevel,
+          actual: schema.educationalLevel,
+        });
+      }
+      if (metadata.SchemaTeaches) {
+        const expectedTeaches = [...new Set(metadata.SchemaTeaches
+          .split(/\r?\n/gu)
+          .map((value) => value.trim())
+          .filter(Boolean))];
+        if (!equalJson(schema.teaches, expectedTeaches)) {
+          failures.push({ code: 'jsonld-teaches', expected: expectedTeaches, actual: schema.teaches });
+        }
+      }
+      if (metadata.SchemaCourseMode || metadata.SchemaCourseWorkload || metadata.SchemaInstructorName) {
+        const expectedInstance = { '@type': 'CourseInstance' };
+        if (metadata.SchemaCourseMode) expectedInstance.courseMode = metadata.SchemaCourseMode;
+        if (metadata.SchemaCourseWorkload) expectedInstance.courseWorkload = metadata.SchemaCourseWorkload;
+        if (metadata.SchemaInstructorName) {
+          expectedInstance.instructor = {
+            '@type': 'Person',
+            name: metadata.SchemaInstructorName,
+          };
+        }
+        if (!equalJson(schema.hasCourseInstance, expectedInstance)) {
+          failures.push({
+            code: 'jsonld-course-instance',
+            expected: expectedInstance,
+            actual: schema.hasCourseInstance,
+          });
+        }
+      }
+    } else if (schema.educationalLevel !== undefined
+      || schema.teaches !== undefined
+      || schema.hasCourseInstance !== undefined) {
+      failures.push({ code: 'jsonld-course-detail-leakage', actual: schema });
+    }
+
+    if (schemaType === 'Service'
+      && metadata.SchemaServiceType
+      && schema.serviceType !== metadata.SchemaServiceType) {
+      failures.push({
+        code: 'jsonld-service-type',
+        expected: metadata.SchemaServiceType,
+        actual: schema.serviceType,
+      });
+    } else if (schemaType !== 'Service' && schema.serviceType !== undefined) {
+      failures.push({ code: 'jsonld-service-detail-leakage', actual: schema.serviceType });
     }
   }
   if (document.h1Count !== 1) failures.push({ code: 'h1-count', actual: document.h1Count });

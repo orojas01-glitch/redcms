@@ -1,11 +1,14 @@
 # RED-CMS 5.1 Direction
 
-Status: implementation in progress. Per-page SEO compatibility, non-executing
-add-on trust validation, persisted Owner authorization, per-client
-registry/migration-ledger storage, read-only reconciliation, and guarded
-server-local installation into a disabled state are implemented. Package
-enablement/runtime, upgrades, disable/uninstall/purge, member access,
-publishing, payment, and integration controls remain inactive.
+Status: implementation in progress. Per-page SEO compatibility, including the
+approved constrained JSON-LD core, non-executing add-on trust validation,
+persisted Owner authorization, per-client registry/migration-ledger storage,
+read-only reconciliation, and guarded server-local installation into a
+disabled state are implemented. Fresh isolated Adriana JSON-LD verification
+and hosted Schema.org validation also pass. Production deployment remains.
+Package enablement/runtime, upgrades,
+disable/uninstall/purge, member access, publishing, payment, and integration
+controls remain inactive.
 
 ## Product Goal
 
@@ -34,7 +37,15 @@ model for public routes:
 
 The complete evidence, field model, fallback rules, migration requirements,
 and acceptance criteria are in
-`docs/SEO-METADATA-COMPATIBILITY-REPORT.md`.
+`docs/SEO-METADATA-COMPATIBILITY-REPORT.md`. The reported Adriana JSON-LD
+inventory is classified in `docs/SEO-JSONLD-LAUNCH-DECISION.md`: use generated
+relationships and constrained typed fields for visible content, normalize the
+redundant homepage self-reference, exclude the visitor-invisible Course code
+and rating, and do not add arbitrary custom JSON-LD. That generic contract, its
+clean-starter acceptance gate, and the fresh isolated 28-route Adriana
+verification now pass. All 28 public renders also pass the hosted Schema.org
+Markup Validator with zero errors and zero warnings. Production remains a
+separate approval gate.
 
 ## 2. Members, Paid Access, And Protected Content
 
@@ -168,15 +179,19 @@ state mutation, and runtime loading unavailable until the theme, settings,
 live-data, runtime-registration, atomic transition, and rollback contracts are
 implemented in later reviewed batches.
 
-## Suggested Delivery Order
+## Delivery Order
 
-1. Implement the generic per-page SEO storage, editor, rendering, fallback,
-   validation, and migration-reporting contracts.
-2. Pass the SEO acceptance suite using generic clean-starter fixtures.
-3. Import and verify the 28 Adriana routes in its separate installation and
-   database.
-4. Complete Adriana launch readiness without copying its theme, data, media,
-   metadata, or settings into the starter.
+1. Completed: implement the generic per-page SEO storage, editor, rendering,
+   fallback, validation, and migration-reporting contracts.
+2. Completed: pass the SEO acceptance suite using generic clean-starter
+   fixtures.
+3. Completed: import and verify the constrained JSON-LD values for all 28
+   Adriana routes in a fresh separate installation and database.
+4. Completed: submit only the 28 public rendered routes to the hosted
+   Schema.org Markup Validator; all passed with zero errors and zero warnings.
+5. Next: complete the separately approved Adriana production backup,
+   migration, smoke-test, and rollback operation without copying its theme,
+   data, media, metadata, or settings into the starter.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

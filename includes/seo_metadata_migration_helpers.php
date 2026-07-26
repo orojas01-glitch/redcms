@@ -189,6 +189,22 @@ if (!function_exists('red_seo_import_manifest')) {
         return true;
     }
 
+    function red_seo_import_values_additive(array $existing, array $desired)
+    {
+        foreach (array_keys(red_seo_field_definitions()) as $field) {
+            $existingValue = red_seo_scalar($existing[$field] ?? '');
+            $desiredValue = red_seo_scalar($desired[$field] ?? '');
+            if ($existingValue === $desiredValue) {
+                continue;
+            }
+            if ($existingValue === '' && $desiredValue !== '') {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
     function red_seo_import_decision_counts(array $entries)
     {
         $counts = [

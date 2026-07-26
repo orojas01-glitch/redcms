@@ -42,6 +42,22 @@ if (!function_exists('red_seo_owner_types')) {
                 'kind' => 'choice',
                 'choices' => ['', 'WebPage', 'Course', 'Service'],
             ],
+            'SchemaIdentityType' => [
+                'kind' => 'choice',
+                'choices' => ['', 'Person', 'Organization'],
+            ],
+            'SchemaIdentityName' => ['kind' => 'text', 'limit' => 255],
+            'SchemaIdentityURL' => ['kind' => 'absolute_url', 'limit' => 2048],
+            'SchemaMainEntityName' => ['kind' => 'text', 'limit' => 255],
+            'SchemaEducationalLevel' => ['kind' => 'text', 'limit' => 255],
+            'SchemaCourseMode' => [
+                'kind' => 'choice',
+                'choices' => ['', 'online', 'onsite', 'blended'],
+            ],
+            'SchemaCourseWorkload' => ['kind' => 'duration', 'limit' => 50],
+            'SchemaInstructorName' => ['kind' => 'text', 'limit' => 255],
+            'SchemaTeaches' => ['kind' => 'text', 'limit' => 2000],
+            'SchemaServiceType' => ['kind' => 'text', 'limit' => 255],
         ];
     }
 
@@ -148,6 +164,14 @@ if (!function_exists('red_seo_owner_types')) {
             $valid = preg_match('/\A[a-z]{2}(?:_[A-Z]{2})?\z/', $normalized) === 1;
             return $valid ? $normalized : '';
         }
+        if ($kind === 'duration') {
+            $valid = preg_match(
+                '/\AP(?=\d|T\d)(?:\d+Y)?(?:\d+M)?(?:\d+W)?(?:\d+D)?' .
+                '(?:T(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?)?\z/',
+                $normalized
+            ) === 1;
+            return $valid ? $normalized : '';
+        }
 
         return '';
     }
@@ -169,6 +193,37 @@ if (!function_exists('red_seo_owner_types')) {
                 $errors[] = $field;
             }
         }
+
+        $identityPresent = trim($values['SchemaIdentityType']) !== ''
+            || trim($values['SchemaIdentityName']) !== ''
+            || trim($values['SchemaIdentityURL']) !== '';
+        if ($identityPresent && trim($values['SchemaIdentityType']) === '') {
+            $errors[] = 'SchemaIdentityType';
+        }
+        if ($identityPresent && trim($values['SchemaIdentityName']) === '') {
+            $errors[] = 'SchemaIdentityName';
+        }
+
+        $schemaType = trim($values['SchemaType']);
+        if ($schemaType !== 'WebPage' && trim($values['SchemaMainEntityName']) !== '') {
+            $errors[] = 'SchemaMainEntityName';
+        }
+        foreach ([
+            'SchemaEducationalLevel',
+            'SchemaCourseMode',
+            'SchemaCourseWorkload',
+            'SchemaInstructorName',
+            'SchemaTeaches',
+        ] as $courseField) {
+            if ($schemaType !== 'Course' && trim($values[$courseField]) !== '') {
+                $errors[] = $courseField;
+            }
+        }
+        if ($schemaType !== 'Service' && trim($values['SchemaServiceType']) !== '') {
+            $errors[] = 'SchemaServiceType';
+        }
+
+        $errors = array_values(array_unique($errors));
 
         return [
             'present' => $present,
@@ -280,14 +335,11 @@ if (!function_exists('red_seo_owner_types')) {
             return false;
         }
 
-        $normalized = red_seo_empty_values();
-        foreach ($normalized as $field => $unused) {
-            $valid = false;
-            $normalized[$field] = red_seo_normalize_field($field, $values[$field] ?? '', $valid);
-            if (!$valid) {
-                return false;
-            }
+        $input = red_seo_collect_input(array_merge(red_seo_empty_values(), $values));
+        if (!$input['valid']) {
+            return false;
         }
+        $normalized = $input['values'];
 
         try {
             if (!red_seo_has_overrides($normalized)) {

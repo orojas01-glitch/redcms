@@ -43,12 +43,22 @@ The generic RED-CMS acceptance fixtures and the client-isolated Adriana
 28-route verification have passed. The client QA applied 28 SEO records without
 missing owners or conflicts, reproduced an unchanged idempotent dry run, passed
 56 desktop/mobile route checks and 28 legacy redirects, and matched the exact
-28-URL sitemap. Production deployment remains separate, and 87 explicitly
-reported unsupported JSON-LD property occurrences require a launch decision
-before this priority is closed. See
+28-URL sitemap. All 28 unauthenticated public renders also passed the hosted
+Schema.org Markup Validator with zero errors and zero warnings. Production
+deployment remains separate.
+
+The 87 explicitly reported JSON-LD property occurrences are now classified:
+84 should be emitted through generated relationships or constrained typed
+fields, one redundant homepage self-reference should be normalized away, and
+the visitor-invisible Course code and rating should remain explicit
+exclusions. The constrained generic fields pass clean-starter acceptance, and
+the fresh isolated 28-route Adriana JSON-LD QA and hosted Schema.org validation
+also pass. Production deployment remains before this priority can close. See
 [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
 for the confirmed cause, proposed model, migration requirements, and
-acceptance criteria.
+acceptance criteria, and
+[`SEO-JSONLD-LAUNCH-DECISION.md`](SEO-JSONLD-LAUNCH-DECISION.md) for the
+property classification and implementation boundary.
 
 ### Adaptable Add-On Platform
 
@@ -127,8 +137,12 @@ batches.
   Version 5.1 core now provides nullable page-owner metadata, canonical URLs,
   complete Open Graph and X/Twitter output, typed JSON-LD, a guarded migration
   reporter/importer, and client-isolated browser QA. The Adriana 28-route QA
-  passes; production deployment and the reported unsupported JSON-LD decision
-  remain. See
+  passes. The unsupported JSON-LD inventory is classified, and its constrained
+  generic implementation passes clean-starter acceptance. Fresh isolated
+  verification and hosted Schema.org validation also pass; production
+  deployment remains. See
   [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
   for evidence, the proposed 5.1 model, migration requirements, and acceptance
-  criteria.
+  criteria, and
+  [`SEO-JSONLD-LAUNCH-DECISION.md`](SEO-JSONLD-LAUNCH-DECISION.md) for the
+  approved property-level boundary.

@@ -272,7 +272,7 @@ if (!function_exists('red_admin_seo_post_present')) {
                     <label for="<?php echo red_admin_area_html($idPrefix); ?>-schema-type">Structured-data type</label>
                     <select name="SchemaType" id="<?php echo red_admin_area_html($idPrefix); ?>-schema-type">
                         <?php echo red_admin_seo_select_options($values['SchemaType'] ?? '', [
-                            '' => 'Automatic WebPage',
+                            '' => 'Automatic by route',
                             'WebPage' => 'WebPage',
                             'Course' => 'Course',
                             'Service' => 'Service',
@@ -284,6 +284,82 @@ if (!function_exists('red_admin_seo_post_present')) {
                     <label for="<?php echo red_admin_area_html($idPrefix); ?>-x-description">X/Twitter description</label>
                     <textarea name="XDescription" id="<?php echo red_admin_area_html($idPrefix); ?>-x-description" rows="3" maxlength="1000"><?php echo red_admin_seo_field_value($values, 'XDescription'); ?></textarea>
                     <span class="red-admin-field__help">Blank falls back through the Open Graph and meta descriptions.</span>
+                </div>
+            </div>
+
+            <div class="red-admin-optional-card__heading">
+                <span class="red-admin-optional-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M6 4h12v16H6zM9 8h6M9 12h6M9 16h4"></path></svg>
+                </span>
+                <div>
+                    <h5>Structured-data details</h5>
+                    <p>Use only facts that visitors can verify in the visible page content.</p>
+                </div>
+            </div>
+
+            <div class="red-admin-field-grid red-admin-field-grid--identity">
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-identity-type">Page subject or provider type</label>
+                    <select name="SchemaIdentityType" id="<?php echo red_admin_area_html($idPrefix); ?>-identity-type">
+                        <?php echo red_admin_seo_select_options($values['SchemaIdentityType'] ?? '', [
+                            '' => 'Not specified',
+                            'Person' => 'Person',
+                            'Organization' => 'Organization',
+                        ]); ?>
+                    </select>
+                    <span class="red-admin-field__help">Used as “about” on pages and “provider” on Course or Service records.</span>
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-identity-name">Page subject or provider name</label>
+                    <input name="SchemaIdentityName" type="text" id="<?php echo red_admin_area_html($idPrefix); ?>-identity-name" maxlength="255" value="<?php echo red_admin_seo_field_value($values, 'SchemaIdentityName'); ?>" autocomplete="off" />
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-identity-url">Page subject or provider URL</label>
+                    <input name="SchemaIdentityURL" type="url" id="<?php echo red_admin_area_html($idPrefix); ?>-identity-url" maxlength="2048" value="<?php echo red_admin_seo_field_value($values, 'SchemaIdentityURL'); ?>" placeholder="https://example.com/" inputmode="url" />
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-main-entity">Main Course name</label>
+                    <input name="SchemaMainEntityName" type="text" id="<?php echo red_admin_area_html($idPrefix); ?>-main-entity" maxlength="255" value="<?php echo red_admin_seo_field_value($values, 'SchemaMainEntityName'); ?>" autocomplete="off" />
+                    <span class="red-admin-field__help">Available only when the structured-data type is explicitly WebPage.</span>
+                </div>
+            </div>
+
+            <div class="red-admin-field-grid red-admin-field-grid--identity">
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-education-level">Educational level</label>
+                    <input name="SchemaEducationalLevel" type="text" id="<?php echo red_admin_area_html($idPrefix); ?>-education-level" maxlength="255" value="<?php echo red_admin_seo_field_value($values, 'SchemaEducationalLevel'); ?>" autocomplete="off" />
+                    <span class="red-admin-field__help">Course only.</span>
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-course-mode">Course delivery mode</label>
+                    <select name="SchemaCourseMode" id="<?php echo red_admin_area_html($idPrefix); ?>-course-mode">
+                        <?php echo red_admin_seo_select_options($values['SchemaCourseMode'] ?? '', [
+                            '' => 'Not specified',
+                            'online' => 'Online',
+                            'onsite' => 'On site',
+                            'blended' => 'Blended',
+                        ]); ?>
+                    </select>
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-course-workload">Course workload</label>
+                    <input name="SchemaCourseWorkload" type="text" id="<?php echo red_admin_area_html($idPrefix); ?>-course-workload" maxlength="50" value="<?php echo red_admin_seo_field_value($values, 'SchemaCourseWorkload'); ?>" placeholder="PT32H" pattern="P[A-Z0-9.]+"/>
+                    <span class="red-admin-field__help">Course-only ISO 8601 duration, such as PT32H.</span>
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-instructor-name">Instructor name</label>
+                    <input name="SchemaInstructorName" type="text" id="<?php echo red_admin_area_html($idPrefix); ?>-instructor-name" maxlength="255" value="<?php echo red_admin_seo_field_value($values, 'SchemaInstructorName'); ?>" autocomplete="off" />
+                    <span class="red-admin-field__help">Course only.</span>
+                </div>
+                <div class="red-admin-field">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-service-type">Service type</label>
+                    <input name="SchemaServiceType" type="text" id="<?php echo red_admin_area_html($idPrefix); ?>-service-type" maxlength="255" value="<?php echo red_admin_seo_field_value($values, 'SchemaServiceType'); ?>" autocomplete="off" />
+                    <span class="red-admin-field__help">Service only.</span>
+                </div>
+                <div class="red-admin-field red-admin-field--wide">
+                    <label for="<?php echo red_admin_area_html($idPrefix); ?>-teaches">Course topics</label>
+                    <textarea name="SchemaTeaches" id="<?php echo red_admin_area_html($idPrefix); ?>-teaches" rows="6" maxlength="2000" placeholder="One visible topic per line"><?php echo red_admin_seo_field_value($values, 'SchemaTeaches'); ?></textarea>
+                    <span class="red-admin-field__help">Course only. One visible topic per line; RED-CMS generates the JSON-LD array.</span>
                 </div>
             </div>
         </section>

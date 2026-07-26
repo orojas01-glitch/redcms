@@ -950,6 +950,11 @@ if (!function_exists('red_public_language')) {
         $xImage = red_public_seo_local_image_fact($xImageReference, $origin);
         $language = (string) ($row['Language'] ?? red_public_language());
         $isHome = $ownerType === 'section' && strtolower($ownerAlias) === 'home';
+        $ogLocale = trim((string) ($seo['OGLocale'] ?? ''))
+            ?: red_public_seo_default_locale($language);
+        $schemaLanguage = preg_match('/\A[a-z]{2}/', $ogLocale, $languageMatch) === 1
+            ? (string) $languageMatch[0]
+            : '';
 
         return [
             'found' => true,
@@ -969,7 +974,7 @@ if (!function_exists('red_public_language')) {
                 'follow' => ($seo['RobotsFollow'] ?? '') === 'N' ? 'nofollow' : 'follow',
             ],
             'og' => [
-                'locale' => trim((string) ($seo['OGLocale'] ?? '')) ?: red_public_seo_default_locale($language),
+                'locale' => $ogLocale,
                 'type' => trim((string) ($seo['OGType'] ?? '')) ?: ($isHome ? 'website' : 'article'),
                 'title' => $ogTitle,
                 'description' => $ogDescription,
@@ -984,6 +989,19 @@ if (!function_exists('red_public_language')) {
                 'image' => $xImage,
             ],
             'schemaType' => trim((string) ($seo['SchemaType'] ?? '')) ?: ($isHome ? 'WebSite' : 'WebPage'),
+            'schemaLanguage' => $schemaLanguage,
+            'schema' => [
+                'identityType' => trim((string) ($seo['SchemaIdentityType'] ?? '')),
+                'identityName' => trim((string) ($seo['SchemaIdentityName'] ?? '')),
+                'identityUrl' => trim((string) ($seo['SchemaIdentityURL'] ?? '')),
+                'mainEntityName' => trim((string) ($seo['SchemaMainEntityName'] ?? '')),
+                'educationalLevel' => trim((string) ($seo['SchemaEducationalLevel'] ?? '')),
+                'courseMode' => trim((string) ($seo['SchemaCourseMode'] ?? '')),
+                'courseWorkload' => trim((string) ($seo['SchemaCourseWorkload'] ?? '')),
+                'instructorName' => trim((string) ($seo['SchemaInstructorName'] ?? '')),
+                'teaches' => trim((string) ($seo['SchemaTeaches'] ?? '')),
+                'serviceType' => trim((string) ($seo['SchemaServiceType'] ?? '')),
+            ],
             'websiteTitle' => $websiteTitle,
         ];
     }
@@ -1016,12 +1034,107 @@ if (!function_exists('red_public_language')) {
         if ($imageUrl !== '') {
             $schema['image'] = $imageUrl;
         }
+        $language = trim((string) ($context['schemaLanguage'] ?? ''));
+        if (in_array($type, ['WebPage', 'WebSite', 'Course'], true)
+            && preg_match('/\A[a-z]{2}\z/', $language) === 1
+        ) {
+            $schema['inLanguage'] = $language;
+        }
+        $details = is_array($context['schema'] ?? null) ? $context['schema'] : [];
+        $identityType = (string) ($details['identityType'] ?? '');
+        $identityName = trim((string) ($details['identityName'] ?? ''));
+        $identity = null;
+        if (in_array($identityType, ['Person', 'Organization'], true) && $identityName !== '') {
+            $identity = [
+                '@type' => $identityType,
+                'name' => $identityName,
+            ];
+            $identityUrl = trim((string) ($details['identityUrl'] ?? ''));
+            if (red_seo_valid_absolute_url($identityUrl)) {
+                $identity['url'] = $identityUrl;
+            }
+        }
         if ($type === 'WebPage' && trim((string) ($context['websiteTitle'] ?? '')) !== '') {
+            $websiteUrl = red_public_seo_origin() . '/';
+            $canonicalParts = parse_url((string) ($context['canonical'] ?? ''));
+            $canonicalScheme = is_array($canonicalParts)
+                ? strtolower((string) ($canonicalParts['scheme'] ?? ''))
+                : '';
+            if (is_array($canonicalParts)
+                && in_array($canonicalScheme, ['http', 'https'], true)
+                && trim((string) ($canonicalParts['host'] ?? '')) !== ''
+            ) {
+                $websiteUrl = $canonicalScheme . '://' .
+                    (string) $canonicalParts['host'] .
+                    (isset($canonicalParts['port']) ? ':' . (int) $canonicalParts['port'] : '') . '/';
+            }
             $schema['isPartOf'] = [
                 '@type' => 'WebSite',
                 'name' => (string) $context['websiteTitle'],
-                'url' => red_public_seo_origin() . '/',
+                'url' => $websiteUrl,
             ];
+        }
+        if (in_array($type, ['WebPage', 'WebSite'], true) && is_array($identity)) {
+            $schema['about'] = $identity;
+        }
+        if (in_array($type, ['Course', 'Service'], true) && is_array($identity)) {
+            $schema['provider'] = $identity;
+        }
+
+        $mainEntityName = trim((string) ($details['mainEntityName'] ?? ''));
+        if ($type === 'WebPage' && $mainEntityName !== '') {
+            $schema['mainEntity'] = [
+                '@type' => 'Course',
+                'name' => $mainEntityName,
+            ];
+            if (is_array($identity)) {
+                $schema['mainEntity']['provider'] = $identity;
+            }
+        }
+
+        if ($type === 'Course') {
+            $educationalLevel = trim((string) ($details['educationalLevel'] ?? ''));
+            if ($educationalLevel !== '') {
+                $schema['educationalLevel'] = $educationalLevel;
+            }
+
+            $teaches = preg_split('/\R/u', (string) ($details['teaches'] ?? ''));
+            $teaches = array_values(array_unique(array_filter(array_map(
+                static function ($value) {
+                    return trim((string) $value);
+                },
+                is_array($teaches) ? $teaches : []
+            ))));
+            if ($teaches !== []) {
+                $schema['teaches'] = $teaches;
+            }
+
+            $courseMode = trim((string) ($details['courseMode'] ?? ''));
+            $courseWorkload = trim((string) ($details['courseWorkload'] ?? ''));
+            $instructorName = trim((string) ($details['instructorName'] ?? ''));
+            if ($courseMode !== '' || $courseWorkload !== '' || $instructorName !== '') {
+                $instance = ['@type' => 'CourseInstance'];
+                if ($courseMode !== '') {
+                    $instance['courseMode'] = $courseMode;
+                }
+                if ($courseWorkload !== '') {
+                    $instance['courseWorkload'] = $courseWorkload;
+                }
+                if ($instructorName !== '') {
+                    $instance['instructor'] = [
+                        '@type' => 'Person',
+                        'name' => $instructorName,
+                    ];
+                }
+                $schema['hasCourseInstance'] = $instance;
+            }
+        }
+
+        if ($type === 'Service') {
+            $serviceType = trim((string) ($details['serviceType'] ?? ''));
+            if ($serviceType !== '') {
+                $schema['serviceType'] = $serviceType;
+            }
         }
 
         return $schema;

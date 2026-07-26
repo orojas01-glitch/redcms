@@ -46,6 +46,23 @@ try {
     );
     $assert(red_seo_table_available($connection), 'SEO metadata table is unavailable after migration');
 
+    $schemaColumnResult = mysqli_query(
+        $connection,
+        "SELECT COUNT(*) AS column_count FROM information_schema.COLUMNS " .
+        "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='RED_Page_SEO' AND COLUMN_NAME IN (" .
+        "'SchemaIdentityType','SchemaIdentityName','SchemaIdentityURL','SchemaMainEntityName'," .
+        "'SchemaEducationalLevel','SchemaCourseMode','SchemaCourseWorkload'," .
+        "'SchemaInstructorName','SchemaTeaches','SchemaServiceType')"
+    );
+    $schemaColumnRow = $schemaColumnResult ? mysqli_fetch_assoc($schemaColumnResult) : null;
+    if ($schemaColumnResult) {
+        mysqli_free_result($schemaColumnResult);
+    }
+    $assert(
+        (int) ($schemaColumnRow['column_count'] ?? 0) === 10,
+        'typed structured-data columns are incomplete after migration'
+    );
+
     $countResult = mysqli_query($connection, 'SELECT COUNT(*) AS row_count FROM RED_Page_SEO');
     $countRow = $countResult ? mysqli_fetch_assoc($countResult) : null;
     if ($countResult) {
@@ -79,6 +96,14 @@ try {
         'OGLocale' => 'es_CO',
         'XCard' => 'summary_large_image',
         'SchemaType' => 'Course',
+        'SchemaIdentityType' => 'Person',
+        'SchemaIdentityName' => 'Example Educator',
+        'SchemaIdentityURL' => 'https://example.com/',
+        'SchemaEducationalLevel' => 'Beginner to Intermediate',
+        'SchemaCourseMode' => 'online',
+        'SchemaCourseWorkload' => 'PT32H',
+        'SchemaInstructorName' => 'Example Educator',
+        'SchemaTeaches' => "Melodía\nArmonía",
     ]);
     $saved = red_admin_write_transaction(
         $connection,
@@ -93,6 +118,8 @@ try {
     $assert(is_array($stored), 'saved SEO row is unavailable');
     $assert(($stored['SEO_Title'] ?? '') === 'Exact CUDA Title | Adriana', 'exact SEO title changed during persistence');
     $assert(($stored['SchemaType'] ?? '') === 'Course', 'schema type changed during persistence');
+    $assert(($stored['SchemaCourseWorkload'] ?? '') === 'PT32H', 'Course workload changed during persistence');
+    $assert(($stored['SchemaIdentityName'] ?? '') === 'Example Educator', 'schema identity changed during persistence');
 
     $snapshot = red_admin_content_revision_capture($connection, $articleId);
     $assert((int) ($snapshot['schema'] ?? 0) === 2, 'content revision did not use the SEO-aware schema');
@@ -108,6 +135,26 @@ try {
     $assert(
         ($afterInvalid['CanonicalURL'] ?? '') === 'https://example.com/instructions',
         'invalid save changed the stored canonical URL'
+    );
+
+    $invalidSchemaDetails = $values;
+    $invalidSchemaDetails['SchemaType'] = 'Service';
+    $invalidSchemaDetails['SchemaServiceType'] = 'Recording service';
+    $assert(
+        !red_seo_save_metadata(
+            $connection,
+            'article',
+            $articleId,
+            $invalidSchemaDetails,
+            999
+        ),
+        'schema-mismatched Course details were persisted as a Service'
+    );
+    $afterInvalidSchema = red_seo_metadata_row($connection, 'article', $articleId);
+    $assert(
+        ($afterInvalidSchema['SchemaType'] ?? '') === 'Course'
+            && ($afterInvalidSchema['SchemaServiceType'] ?? '') === '',
+        'invalid schema-detail save changed the stored typed metadata'
     );
 
     $deleted = red_admin_write_transaction(

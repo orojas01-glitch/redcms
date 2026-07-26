@@ -10,14 +10,17 @@ RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
 on July 25, 2026.
 
-Version 5.1 development includes per-page SEO compatibility,
-non-executing add-on trust validation, persisted Owner authorization, and
-per-client package registry/migration-ledger storage with read-only drift
-reporting. A server-local Owner-authorized installer can apply reviewed,
-checksum-verified package migrations and always records the package as
-`installed_disabled`; it never executes package PHP. A separate read-only
-Owner-authorized preflight can inspect that disabled package's dependency,
-capability, and route readiness without changing state or loading code. Add-on
+Version 5.1 development includes per-page SEO compatibility with nullable
+overrides, generated fallbacks, and constrained typed JSON-LD; non-executing
+add-on trust validation; persisted Owner authorization; and per-client package
+registry/migration-ledger storage with read-only drift reporting. A
+server-local Owner-authorized installer can apply reviewed, checksum-verified
+package migrations and always records the package as `installed_disabled`; it
+never executes package PHP. A separate read-only Owner-authorized preflight can
+inspect that disabled package's dependency, capability, and route readiness
+without changing state or loading code. Fresh isolated Adriana JSON-LD
+verification and hosted Schema.org validation pass; production deployment
+remains separate. Add-on
 activation/runtime, upgrade, disable/uninstall/purge, payment, member access,
 editorial workflow, notifications, the broader role model, and social
 publishing integrations are not active features.
@@ -35,6 +38,7 @@ publishing integrations are not active features.
 - Standard theme contract with validation, preview, activation, and rollback
 - Prepared database operations, CSRF enforcement, scoped permissions, and transactional writes
 - Migration ledger, guarded backup/restore tools, and disposable acceptance testing
+- Per-page canonical, Open Graph, X/Twitter, and constrained typed JSON-LD metadata
 - Read-only add-on manifest, path, compatibility, dependency, and integrity validation
 - Per-client Owner role and exact future add-on lifecycle capability grants
 - Empty per-client add-on installation/migration registries with fail-closed reconciliation
