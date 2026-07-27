@@ -122,6 +122,16 @@ batches.
 
 ### Version 5.1 Compatibility Work
 
+- The Adriana production replacement exposed a Contact-form migration and mail
+  transport gap: the approved package preserved unrelated sender/recipient
+  values, the browser success state does not prove delivery, and the current
+  PHPMailer path relies on unauthenticated native `mail()`. The client has an
+  administrator-only recovery path, while the generic 5.1 work requires guarded
+  routing migration, private authenticated SMTP configuration, truthful
+  delivery states, visitor Reply-To handling, and privacy-safe diagnostics. See
+  [`BUG-CONTACT-FORM-MAIL-ROUTING-AND-TRANSPORT.md`](BUG-CONTACT-FORM-MAIL-ROUTING-AND-TRANSPORT.md)
+  for evidence, the immediate correction, repair boundary, and acceptance
+  criteria.
 - The authenticated page-layout ellipsis menu now resets inherited `details`
   and `summary` spacing, borders, backgrounds, and minimum height inside the
   core-owned editor workspace. Active themes can style public disclosure
