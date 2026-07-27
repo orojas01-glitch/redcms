@@ -3,16 +3,18 @@
 ## Status
 
 - Confirmed against the Adriana production replacement package on 2026-07-26.
-- Immediate client correction is available through the existing Form editor.
+- The Adriana production routing was corrected through the existing Form
+  editor. A controlled submission reached the approved mailbox, and the client
+  confirmed receipt.
 - Confirmed a separate HostGator human-verification/AJAX incompatibility on
   2026-07-26; an Adriana-only theme compatibility correction is deployed.
 - A generic RED-CMS 5.1 repair is not yet implemented.
 
 ## Impact
 
-The imported Adriana contact form renders and validates, but its delivery
-settings do not match the production form that was backed up. The replacement
-form currently uses:
+The imported Adriana contact form rendered and validated, but its original
+replacement-package delivery settings did not match the production form that
+was backed up. Before the production correction, the replacement package used:
 
 - Subject: `Contact RedCMS Support`
 - From: an unrelated external-domain sender

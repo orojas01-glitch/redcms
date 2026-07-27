@@ -5,10 +5,11 @@ approved constrained JSON-LD core, non-executing add-on trust validation,
 persisted Owner authorization, per-client registry/migration-ledger storage,
 read-only reconciliation, and guarded server-local installation into a
 disabled state are implemented. Fresh isolated Adriana JSON-LD verification
-and hosted Schema.org validation also pass. Production deployment remains.
-Package enablement/runtime, upgrades,
-disable/uninstall/purge, member access, publishing, payment, and integration
-controls remain inactive.
+and hosted Schema.org validation also pass. The separate Adriana production
+backup, migration, launch verification, and rollback gate are complete without
+copying client assets or data into the starter. Package enablement/runtime,
+upgrades, disable/uninstall/purge, member access, publishing, payment, and
+integration controls remain inactive.
 
 ## Product Goal
 
@@ -44,8 +45,8 @@ redundant homepage self-reference, exclude the visitor-invisible Course code
 and rating, and do not add arbitrary custom JSON-LD. That generic contract, its
 clean-starter acceptance gate, and the fresh isolated 28-route Adriana
 verification now pass. All 28 public renders also pass the hosted Schema.org
-Markup Validator with zero errors and zero warnings. Production remains a
-separate approval gate.
+Markup Validator with zero errors and zero warnings. The separate Adriana
+production approval, deployment, smoke-test, and rollback gate is complete.
 
 ## 2. Members, Paid Access, And Protected Content
 
@@ -189,9 +190,12 @@ implemented in later reviewed batches.
    Adriana routes in a fresh separate installation and database.
 4. Completed: submit only the 28 public rendered routes to the hosted
    Schema.org Markup Validator; all passed with zero errors and zero warnings.
-5. Next: complete the separately approved Adriana production backup,
+5. Completed: complete the separately approved Adriana production backup,
    migration, smoke-test, and rollback operation without copying its theme,
    data, media, metadata, or settings into the starter.
+6. Next: implement the separately reviewed add-on runtime-registration and
+   enablement foundation without bundling or activating a client package in the
+   clean starter.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
