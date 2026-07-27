@@ -126,6 +126,16 @@ batches.
 
 ### Version 5.1 Compatibility Work
 
+- Site-wide Analytics, Tag Manager, Jotform, consent, and similar client
+  integrations currently require theme-file edits because the legacy
+  `Website_Header` setting is a visible theme-header region rather than the
+  document `<head>`. Version 5.1 should add database-managed, revision-backed
+  Global Integration records with explicit `head`, `body-start`, and `body-end`
+  placements, guarded administrator controls, CSP compatibility, audit history,
+  theme-independent rendering, and conflict-refusing client migration. See
+  [`BUG-DATABASE-MANAGED-GLOBAL-INTEGRATION-SLOTS.md`](BUG-DATABASE-MANAGED-GLOBAL-INTEGRATION-SLOTS.md)
+  for the proposed model, security boundary, migration behavior, and acceptance
+  criteria.
 - The Adriana production replacement exposed a Contact-form migration and mail
   transport gap: the approved package preserved unrelated sender/recipient
   values, the browser success state does not prove delivery, and the current
