@@ -44,8 +44,11 @@ The generic RED-CMS acceptance fixtures and the client-isolated Adriana
 missing owners or conflicts, reproduced an unchanged idempotent dry run, passed
 56 desktop/mobile route checks and 28 legacy redirects, and matched the exact
 28-URL sitemap. All 28 unauthenticated public renders also passed the hosted
-Schema.org Markup Validator with zero errors and zero warnings. Production
-deployment remains separate.
+Schema.org Markup Validator with zero errors and zero warnings. The separate
+Adriana production backup, migration, public and administrator smoke tests,
+rollback verification, and post-launch hardening are complete. Client data,
+theme, media, configuration, and deployment evidence remain outside the clean
+starter repository.
 
 The 87 explicitly reported JSON-LD property occurrences are now classified:
 84 should be emitted through generated relationships or constrained typed
@@ -53,7 +56,8 @@ fields, one redundant homepage self-reference should be normalized away, and
 the visitor-invisible Course code and rating should remain explicit
 exclusions. The constrained generic fields pass clean-starter acceptance, and
 the fresh isolated 28-route Adriana JSON-LD QA and hosted Schema.org validation
-also pass. Production deployment remains before this priority can close. See
+also pass. The isolated production deployment is complete, so this launch
+priority is closed. See
 [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
 for the confirmed cause, proposed model, migration requirements, and
 acceptance criteria, and
@@ -122,6 +126,16 @@ batches.
 
 ### Version 5.1 Compatibility Work
 
+- The Adriana production replacement exposed a Contact-form migration and mail
+  transport gap: the approved package preserved unrelated sender/recipient
+  values, the browser success state does not prove delivery, and the current
+  PHPMailer path relies on unauthenticated native `mail()`. The client has an
+  administrator-only recovery path, while the generic 5.1 work requires guarded
+  routing migration, private authenticated SMTP configuration, truthful
+  delivery states, visitor Reply-To handling, and privacy-safe diagnostics. See
+  [`BUG-CONTACT-FORM-MAIL-ROUTING-AND-TRANSPORT.md`](BUG-CONTACT-FORM-MAIL-ROUTING-AND-TRANSPORT.md)
+  for evidence, the immediate correction, repair boundary, and acceptance
+  criteria.
 - The authenticated page-layout ellipsis menu now resets inherited `details`
   and `summary` spacing, borders, backgrounds, and minimum height inside the
   core-owned editor workspace. Active themes can style public disclosure
@@ -139,8 +153,8 @@ batches.
   reporter/importer, and client-isolated browser QA. The Adriana 28-route QA
   passes. The unsupported JSON-LD inventory is classified, and its constrained
   generic implementation passes clean-starter acceptance. Fresh isolated
-  verification and hosted Schema.org validation also pass; production
-  deployment remains. See
+  verification, hosted Schema.org validation, and the separate Adriana
+  production launch also pass. See
   [`SEO-METADATA-COMPATIBILITY-REPORT.md`](SEO-METADATA-COMPATIBILITY-REPORT.md)
   for evidence, the proposed 5.1 model, migration requirements, and acceptance
   criteria, and
