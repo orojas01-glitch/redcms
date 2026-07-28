@@ -102,10 +102,11 @@ Run the theme and administrator contract suite:
 php scripts/theme-contract-self-test.php
 ```
 
-Run the non-executing add-on trust gate:
+Run the non-executing add-on trust gate and isolated runtime-contract check:
 
 ```bash
 php scripts/addon-trust-self-test.php
+php scripts/addon-runtime-self-test.php
 php scripts/addon-validate.php --all
 php scripts/admin-addon-owner.php --status
 php scripts/addon-registry-status.php --all
@@ -120,7 +121,11 @@ deployed separately per client; the clean starter intentionally contains no
 `addons/` directory. The enablement preflight is always read-only: it has no
 apply mode, keeps `enableReady` false while runtime registration is unavailable,
 does not change the package's `installed_disabled` state, and does not execute
-package PHP.
+package PHP. The runtime-contract self-test executes only a temporary
+first-party fixture outside the starter. It rechecks the fixed `addon.php`
+checksum, requires exact manifest registration, orders required dependencies
+first, and rejects output or registration ambiguity. No package can move to
+`enabled` yet.
 
 Run the complete guarded acceptance lifecycle:
 

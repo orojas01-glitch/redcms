@@ -17,6 +17,9 @@ editor, validation, rendering, and cleanup contract, and a fail-closed
 migration manifest with explicit reporting and transaction guards. They also
 require closed, non-executing add-on discovery with exact path, compatibility,
 dependency, route, settings, and SHA-256 inventory validation.
+The runner also executes a temporary first-party runtime fixture that proves
+fixed-entrypoint integrity, exact manifest registration, dependency ordering,
+and fail-closed output or registration ambiguity without enabling a package.
 
 ## Current Coverage
 
