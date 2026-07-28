@@ -3,8 +3,10 @@
 Status: Version 5.1 trust validation, Owner authorization, read-only registry
 reconciliation, and guarded server-local installation are implemented.
 Installation applies reviewed migrations, records exact evidence, and always
-finishes disabled without executing package PHP. RED-CMS does not enable, load,
-upgrade, disable, uninstall, or purge packages through this contract yet.
+finishes disabled without executing package PHP. A fixed runtime-registration
+contract is implemented and tested only with temporary first-party fixtures.
+RED-CMS does not enable, request-load, upgrade, disable, uninstall, or purge
+packages through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -354,6 +356,26 @@ false, and `runtime_contract_unavailable` remains an explicit blocker. Theme,
 settings, live-data, runtime-registration, atomic state-transition, and
 rollback behavior still require separate reviewed implementation. No package
 can move to `enabled` through this preflight command.
+
+`includes/addon_runtime_helpers.php` establishes the first executable contract
+without connecting it to a lifecycle transition or request bootstrap:
+
+- core may include only the fixed, real, non-symlinked `addon.php` whose
+  checksum still matches the validated manifest immediately before inclusion;
+- the entry point must return exactly one registrar callable; neither inclusion
+  nor registrar invocation may emit output, and the registrar must return null;
+- registration accepts only manifest-declared component, service,
+  administrator-tool, adapter, and route identifiers;
+- every declared runtime identifier must register exactly once;
+- required enabled dependencies are ordered before their dependents; and
+- missing, changed, incomplete, duplicated, or undeclared runtime evidence
+  fails closed.
+
+The contract still assumes operator-reviewed first-party PHP and is not a
+sandbox. `scripts/addon-runtime-self-test.php` executes only a temporary
+fixture outside the clean starter. Production request loading and the
+Owner-authorized `installed_disabled` to `enabled` transition remain separate
+reviewed work.
 
 ## Component Contract
 

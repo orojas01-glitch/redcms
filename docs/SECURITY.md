@@ -219,6 +219,27 @@ disablement, uninstall, purge, and client business packages require separate
 reviewed implementations with backup, dependency, live-data, and rollback or
 recovery gates.
 
+### Add-On Runtime Registration Contract
+
+The first runtime-registration helper is implemented without a lifecycle apply
+command or production request bootstrap. It may execute only the fixed
+`addon.php` entry point of an already validated first-party package.
+
+- Core rechecks the real path, symlink boundary, and declared `addon.php`
+  checksum immediately before inclusion.
+- The entry point must return one registrar callable. Neither inclusion nor
+  registrar invocation may emit output, and the registrar must return null.
+- The registrar can bind only identifiers declared by the validated manifest,
+  and every declared runtime identifier must bind exactly once.
+- Required enabled dependencies load before dependents.
+- Missing code, checksum drift, undeclared or duplicate registration, output,
+  and incomplete registration fail closed.
+
+This remains trusted in-process PHP, not a sandbox. The current self-test
+executes only temporary fixtures outside the starter. No package is enabled or
+loaded during a RED-CMS request until the separate Owner-authorized lifecycle,
+settings, theme, live-data, and recovery gates are implemented.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.
