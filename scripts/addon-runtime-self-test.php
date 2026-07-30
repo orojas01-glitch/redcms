@@ -291,6 +291,88 @@ PHP;
         'a required runtime dependency cycle fails closed'
     );
 
+    $secondManifest = $manifest;
+    $secondManifest['provides']['services'] = ['runtime.second'];
+    $secondRegistry = new RED_Addon_Runtime_Registry(
+        'redcms.runtime-second',
+        $secondManifest
+    );
+    $secondRegistry->registerService(
+        'runtime.second',
+        static function (): string {
+            return 'runtime-second-ok';
+        }
+    );
+    $context = new RED_Addon_Runtime_Context(
+        ['redcms.runtime-fixture', 'redcms.runtime-second'],
+        [
+            'redcms.runtime-fixture' => $registry,
+            'redcms.runtime-second' => $secondRegistry,
+        ]
+    );
+    red_addon_runtime_test_assert(
+        $context->order() === [
+            'redcms.runtime-fixture',
+            'redcms.runtime-second',
+        ]
+            && $context->owner('services', 'runtime.fixture')
+                === 'redcms.runtime-fixture'
+            && $context->owner('services', 'runtime.second')
+                === 'redcms.runtime-second',
+        'the aggregate request context preserves load order and exact handler ownership'
+    );
+    $secondHandler = $context->handler('services', 'runtime.second');
+    red_addon_runtime_test_assert(
+        is_callable($secondHandler) && $secondHandler() === 'runtime-second-ok',
+        'core can look up a registered handler without invoking it during bootstrap'
+    );
+
+    $namespaceCatalog = [
+        'packages' => [
+            'redcms.runtime-a' => [
+                'manifest' => [
+                    'provides' => [
+                        'components' => [],
+                        'services' => ['runtime.shared'],
+                        'adminTools' => [],
+                        'adapters' => [],
+                    ],
+                    'routes' => [],
+                ],
+            ],
+            'redcms.runtime-b' => [
+                'manifest' => [
+                    'provides' => [
+                        'components' => [],
+                        'services' => ['runtime.shared'],
+                        'adminTools' => [],
+                        'adapters' => [],
+                    ],
+                    'routes' => [],
+                ],
+            ],
+        ],
+    ];
+    red_addon_runtime_test_assert(
+        red_addon_runtime_namespace_errors(
+            $namespaceCatalog,
+            ['redcms.runtime-a', 'redcms.runtime-b']
+        ) === [
+            'enabled_runtime_capability_conflict:services:runtime.shared',
+        ],
+        'enabled namespace conflicts fail before any package entry point executes'
+    );
+
+    $legacyProject = $root . '/legacy-project';
+    mkdir($legacyProject, 0700);
+    $emptyContext = red_addon_runtime_request_bootstrap(null, $legacyProject);
+    red_addon_runtime_test_assert(
+        $emptyContext->isEmpty()
+            && red_addon_runtime_current_context() === $emptyContext
+            && red_addon_runtime_handler('services', 'runtime.fixture') === null,
+        'a legacy installation with no add-on root remains an empty request runtime'
+    );
+
     echo "Add-on runtime contract passed $assertions assertions.\n";
 } finally {
     @unlink($packagePath . '/addon.php');
@@ -298,5 +380,6 @@ PHP;
     @rmdir($packagePath);
     @rmdir(dirname($packagePath));
     @rmdir(dirname(dirname($packagePath)));
+    @rmdir($root . '/legacy-project');
     @rmdir($root);
 }

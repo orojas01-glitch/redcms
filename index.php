@@ -77,6 +77,44 @@ class_content.php: call all components.*/
 
 <?php require $_SERVER['DOCUMENT_ROOT'].'/class/class_feature_slider.php' ?>
 
+<?php
+require_once __DIR__ . '/includes/addon_runtime_helpers.php';
+
+$redAddonRuntimeConnection = null;
+try {
+    $redAddonRuntimeConnection = mysqli_connect(
+        DBHOST,
+        DBUSER,
+        DBPASS,
+        DBNAME
+    );
+    if (!$redAddonRuntimeConnection
+        || !mysqli_set_charset($redAddonRuntimeConnection, 'utf8mb4')
+    ) {
+        throw new RuntimeException(
+            'The add-on runtime database connection is unavailable.'
+        );
+    }
+    $redAddonRuntimeContext = red_addon_runtime_request_bootstrap(
+        $redAddonRuntimeConnection,
+        __DIR__
+    );
+} catch (Throwable $exception) {
+    while (ob_get_level() > $redThemeRequestBufferLevel) {
+        ob_end_clean();
+    }
+    error_log(
+        'RED-CMS add-on request bootstrap failed: ' .
+        $exception->getMessage()
+    );
+    http_response_code(503);
+    exit('Site extensions are temporarily unavailable.');
+} finally {
+    if ($redAddonRuntimeConnection instanceof mysqli) {
+        mysqli_close($redAddonRuntimeConnection);
+    }
+}
+?>
 
 <?php try { $redThemeAdapter->renderDocumentStart(); ?>
 <?php $redThemeAdapter->renderHeaderBundle(); ?>

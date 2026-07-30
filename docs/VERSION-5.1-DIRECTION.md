@@ -7,9 +7,11 @@ read-only reconciliation, and guarded server-local installation into a
 disabled state are implemented. Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
 backup, migration, launch verification, and rollback gate are complete without
-copying client assets or data into the starter. Package enablement/runtime,
-upgrades, disable/uninstall/purge, member access, publishing, payment, and
-integration controls remain inactive.
+copying client assets or data into the starter. Fixed add-on registration and
+fail-closed page-request loading are implemented for already-recorded enabled
+packages, while the Owner enable transition, handler dispatch, upgrades,
+disable/uninstall/purge, member access, publishing, payment, and integration
+controls remain inactive.
 
 ## Product Goal
 
@@ -153,7 +155,7 @@ settings, outbound hosts, and an exact SHA-256 package inventory. It rejects
 unsafe or incomplete packages without executing `addon.php`. Empty generic
 installation and immutable migration-ledger tables now exist per client
 database, and read-only reconciliation reports package identity drift, pending
-or changed migrations, missing code, and unavailable runtime state. Owner
+or changed migrations, and missing code. Owner
 authorization is persisted per client database, but no account is promoted
 automatically.
 
@@ -166,8 +168,8 @@ migration evidence and bounded audit events, and finishes
 `installed_disabled`. It never includes `addon.php`. Because MySQL DDL can
 commit implicitly, partial failures remain visible as `installation_failed`
 with an explicit resumable ledger rather than a false rollback claim. No
-lifecycle UI, enabled-state transition, runtime loader, upgrade, disable,
-uninstall, or purge command exists.
+lifecycle UI, enabled-state transition, upgrade, disable, uninstall, or purge
+command exists.
 
 The next lifecycle boundary is a separate server-local, read-only enablement
 preflight gated by the exact persisted Owner `addons.enable` capability. It
@@ -176,9 +178,19 @@ package registry, binds currently enabled dependency/package identities, and
 reports provided-capability, route-id, and route-method ownership conflicts in
 one deterministic plan. It has no apply mode, performs no database or audit
 write, and never includes `addon.php`. The plan always reports activation,
-state mutation, and runtime loading unavailable until the theme, settings,
-live-data, runtime-registration, atomic transition, and rollback contracts are
-implemented in later reviewed batches.
+state mutation, and package loading unavailable. Runtime registration is now
+an available core contract, but theme, settings, live-data, atomic transition,
+and rollback gates remain explicit blockers.
+
+Front-controller page requests, public or authenticated, now reconcile the
+complete package catalog and per-client registry before executing any package
+code. Only already-recorded `enabled`
+packages with current identity, migration, dependency, namespace, path, and
+checksum evidence may return their fixed registrars. Required dependencies
+register first, disabled packages never execute, and the resulting handlers
+are exposed through a core lookup context without being invoked automatically.
+Any enabled drift or missing code fails before public rendering. Lifecycle
+CLIs remain outside this request bootstrap.
 
 ## Delivery Order
 
@@ -193,9 +205,11 @@ implemented in later reviewed batches.
 5. Completed: complete the separately approved Adriana production backup,
    migration, smoke-test, and rollback operation without copying its theme,
    data, media, metadata, or settings into the starter.
-6. Next: implement the separately reviewed add-on runtime-registration and
-   enablement foundation without bundling or activating a client package in the
+6. Completed: implement fixed add-on runtime registration and fail-closed
+   request bootstrap without bundling or activating a client package in the
    clean starter.
+7. Next: implement the remaining theme, settings, live-data, atomic-transition,
+   and rollback gates required for the Owner-authorized enable command.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

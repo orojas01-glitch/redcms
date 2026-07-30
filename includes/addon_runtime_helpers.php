@@ -123,6 +123,93 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
     }
 }
 
+if (!class_exists('RED_Addon_Runtime_Context', false)) {
+    final class RED_Addon_Runtime_Context
+    {
+        private array $order;
+        private array $packages;
+        private array $handlers = [];
+        private array $owners = [];
+
+        public function __construct(array $order, array $packages)
+        {
+            $this->order = array_values($order);
+            $this->packages = $packages;
+            foreach (
+                ['components', 'services', 'adminTools', 'adapters', 'routes']
+                as $type
+            ) {
+                $this->handlers[$type] = [];
+                $this->owners[$type] = [];
+            }
+
+            foreach ($this->order as $packageId) {
+                $registry = $this->packages[$packageId] ?? null;
+                if (!$registry instanceof RED_Addon_Runtime_Registry
+                    || $registry->packageId() !== $packageId
+                ) {
+                    throw new LogicException(
+                        'Runtime context package evidence is invalid: ' .
+                        $packageId
+                    );
+                }
+                foreach ($registry->snapshot()['registrations'] as $type => $ids) {
+                    foreach ($ids as $id) {
+                        if (isset($this->owners[$type][$id])) {
+                            throw new LogicException(
+                                'Runtime context registration is duplicated: ' .
+                                $type . ':' . $id
+                            );
+                        }
+                        $handler = $registry->handler($type, $id);
+                        if (!is_callable($handler)) {
+                            throw new LogicException(
+                                'Runtime context handler is unavailable: ' .
+                                $type . ':' . $id
+                            );
+                        }
+                        $this->handlers[$type][$id] = $handler;
+                        $this->owners[$type][$id] = $packageId;
+                    }
+                }
+            }
+        }
+
+        public function order(): array
+        {
+            return $this->order;
+        }
+
+        public function isEmpty(): bool
+        {
+            return $this->order === [];
+        }
+
+        public function handler(string $type, string $id): ?callable
+        {
+            return $this->handlers[$type][$id] ?? null;
+        }
+
+        public function owner(string $type, string $id): ?string
+        {
+            return $this->owners[$type][$id] ?? null;
+        }
+
+        public function snapshot(): array
+        {
+            $registrations = [];
+            foreach ($this->owners as $type => $owners) {
+                ksort($owners, SORT_STRING);
+                $registrations[$type] = $owners;
+            }
+            return [
+                'order' => $this->order,
+                'registrations' => $registrations,
+            ];
+        }
+    }
+}
+
 if (!function_exists('red_addon_runtime_entrypoint')) {
     function red_addon_runtime_entrypoint(array $package)
     {
@@ -266,6 +353,68 @@ if (!function_exists('red_addon_runtime_load_order')) {
     }
 }
 
+if (!function_exists('red_addon_runtime_namespace_errors')) {
+    function red_addon_runtime_namespace_errors(
+        array $catalog,
+        array $enabledPackageIds
+    ) {
+        $errors = [];
+        $owners = [];
+        $routeMethods = [];
+        $packageIds = array_values(array_unique($enabledPackageIds));
+        sort($packageIds, SORT_STRING);
+
+        foreach ($packageIds as $packageId) {
+            $manifest = $catalog['packages'][$packageId]['manifest'] ?? null;
+            if (!is_array($manifest)) {
+                $errors[] = 'enabled_runtime_manifest_missing:' . $packageId;
+                continue;
+            }
+            foreach (
+                ['components', 'services', 'adminTools', 'adapters']
+                as $type
+            ) {
+                foreach ($manifest['provides'][$type] ?? [] as $id) {
+                    $ownerKey = $type . "\0" . $id;
+                    if (isset($owners[$ownerKey])) {
+                        $errors[] = 'enabled_runtime_capability_conflict:' .
+                            $type . ':' . $id;
+                        continue;
+                    }
+                    $owners[$ownerKey] = $packageId;
+                }
+            }
+            foreach ($manifest['routes'] ?? [] as $route) {
+                if (!is_array($route)) {
+                    continue;
+                }
+                $routeId = (string) ($route['id'] ?? '');
+                $routeOwnerKey = 'routes' . "\0" . $routeId;
+                if (isset($owners[$routeOwnerKey])) {
+                    $errors[] = 'enabled_runtime_route_id_conflict:' . $routeId;
+                } else {
+                    $owners[$routeOwnerKey] = $packageId;
+                }
+                $scope = (string) ($route['scope'] ?? '');
+                $path = (string) ($route['path'] ?? '');
+                foreach ($route['methods'] ?? [] as $method) {
+                    $methodKey = $scope . "\0" . $path . "\0" . $method;
+                    if (isset($routeMethods[$methodKey])) {
+                        $errors[] = 'enabled_runtime_route_method_conflict:' .
+                            $routeId . ':' . $method;
+                        continue;
+                    }
+                    $routeMethods[$methodKey] = $packageId;
+                }
+            }
+        }
+
+        $errors = array_values(array_unique($errors));
+        sort($errors, SORT_STRING);
+        return $errors;
+    }
+}
+
 if (!function_exists('red_addon_runtime_bootstrap')) {
     function red_addon_runtime_bootstrap($connection, $projectRoot)
     {
@@ -295,13 +444,23 @@ if (!function_exists('red_addon_runtime_bootstrap')) {
             );
         }
 
-        $registries = [];
+        $namespaceErrors = red_addon_runtime_namespace_errors(
+            $catalog,
+            $enabledIds
+        );
+        if ($namespaceErrors !== []) {
+            throw new RuntimeException(
+                'Add-on runtime namespace check failed: ' .
+                implode(', ', $namespaceErrors)
+            );
+        }
+
         foreach ($order as $packageId) {
             $report = red_addon_registry_package_report(
                 $connection,
                 $catalog['packages'][$packageId]
             );
-            if (($report['status'] ?? '') !== 'enabled_runtime_unavailable'
+            if (($report['status'] ?? '') !== 'enabled_current'
                 || !empty($report['errors'])
             ) {
                 throw new RuntimeException(
@@ -309,14 +468,90 @@ if (!function_exists('red_addon_runtime_bootstrap')) {
                     $packageId
                 );
             }
+        }
+
+        $registries = [];
+        foreach ($order as $packageId) {
             $registries[$packageId] = red_addon_runtime_register_package(
                 $catalog['packages'][$packageId]
             );
         }
+        $context = new RED_Addon_Runtime_Context($order, $registries);
         return [
             'order' => $order,
             'packages' => $registries,
+            'context' => $context,
         ];
+    }
+}
+
+if (!function_exists('red_addon_runtime_set_request_context')) {
+    function red_addon_runtime_set_request_context(
+        RED_Addon_Runtime_Context $context
+    ) {
+        $key = 'RED_ADDON_RUNTIME_CONTEXT';
+        $existing = $GLOBALS[$key] ?? null;
+        if ($existing instanceof RED_Addon_Runtime_Context) {
+            if ($existing->snapshot() !== $context->snapshot()) {
+                throw new LogicException(
+                    'Add-on runtime request context is already initialized.'
+                );
+            }
+            return $existing;
+        }
+        $GLOBALS[$key] = $context;
+        return $context;
+    }
+}
+
+if (!function_exists('red_addon_runtime_request_bootstrap')) {
+    function red_addon_runtime_request_bootstrap($connection, $projectRoot)
+    {
+        $existing = $GLOBALS['RED_ADDON_RUNTIME_CONTEXT'] ?? null;
+        if ($existing instanceof RED_Addon_Runtime_Context) {
+            return $existing;
+        }
+        $projectRoot = red_addon_project_root($projectRoot);
+        $addonRoot = red_addon_root($projectRoot);
+        if (!red_addon_registry_storage_available($connection)
+            && !file_exists($addonRoot)
+        ) {
+            return red_addon_runtime_set_request_context(
+                new RED_Addon_Runtime_Context([], [])
+            );
+        }
+        $runtime = red_addon_runtime_bootstrap($connection, $projectRoot);
+        return red_addon_runtime_set_request_context($runtime['context']);
+    }
+}
+
+if (!function_exists('red_addon_runtime_current_context')) {
+    function red_addon_runtime_current_context()
+    {
+        $context = $GLOBALS['RED_ADDON_RUNTIME_CONTEXT'] ?? null;
+        return $context instanceof RED_Addon_Runtime_Context
+            ? $context
+            : null;
+    }
+}
+
+if (!function_exists('red_addon_runtime_handler')) {
+    function red_addon_runtime_handler($type, $id)
+    {
+        $context = red_addon_runtime_current_context();
+        return $context instanceof RED_Addon_Runtime_Context
+            ? $context->handler((string) $type, (string) $id)
+            : null;
+    }
+}
+
+if (!function_exists('red_addon_runtime_owner')) {
+    function red_addon_runtime_owner($type, $id)
+    {
+        $context = red_addon_runtime_current_context();
+        return $context instanceof RED_Addon_Runtime_Context
+            ? $context->owner((string) $type, (string) $id)
+            : null;
     }
 }
 

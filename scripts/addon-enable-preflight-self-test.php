@@ -519,12 +519,19 @@ try {
                 true
             )
             && in_array(
-                'runtime_contract_unavailable',
+                'activation_transition_unavailable',
                 $disabledBlockerCodes,
                 true
             )
+            && in_array(
+                'theme_contract_unavailable',
+                $disabledBlockerCodes,
+                true
+            )
+            && $disabledDependencyPlan['gates']['runtimeRegistration']
+                === 'available'
             && $disabledDependencyPlan['gates']['dependencies'] === 'blocked',
-        'disabled required dependency and unavailable runtime remain explicit blockers'
+        'disabled dependency and remaining activation contracts stay explicit blockers'
     );
 
     $repeatDisabledDependencyPlan = red_addon_enable_preflight_plan(

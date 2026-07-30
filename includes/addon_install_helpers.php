@@ -370,7 +370,7 @@ if (!function_exists('red_addon_install_dependency_evidence')) {
                 $connection,
                 $dependencyPackage
             );
-            if (($report['status'] ?? '') !== 'enabled_runtime_unavailable'
+            if (($report['status'] ?? '') !== 'enabled_current'
                 || ($report['lifecycleState'] ?? '') !== 'enabled'
                 || !empty($report['errors'])
                 || !empty($report['pendingMigrations'])

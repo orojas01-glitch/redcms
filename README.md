@@ -18,10 +18,13 @@ server-local Owner-authorized installer can apply reviewed, checksum-verified
 package migrations and always records the package as `installed_disabled`; it
 never executes package PHP. A separate read-only Owner-authorized preflight can
 inspect that disabled package's dependency, capability, and route readiness
-without changing state or loading code. Fresh isolated Adriana JSON-LD
+without changing state or loading code. Front-controller page requests now bootstrap
+only already-recorded `enabled` packages whose complete registry, dependency,
+namespace, and integrity evidence remains current; the clean starter has none.
+Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Add-on
-activation/runtime, upgrade, disable/uninstall/purge, payment, member access,
+enablement, handler dispatch, upgrade, disable/uninstall/purge, payment, member access,
 editorial workflow, notifications, the broader role model, and social
 publishing integrations are not active features.
 
@@ -44,6 +47,7 @@ publishing integrations are not active features.
 - Empty per-client add-on installation/migration registries with fail-closed reconciliation
 - Owner-authorized server-local package installation that remains disabled and unloaded
 - Deterministic read-only enablement preflight with dependency and namespace conflict reporting
+- Fail-closed request bootstrap and lookup context for already-enabled first-party packages
 
 ## Portable Starter Distribution
 
@@ -119,13 +123,17 @@ package, version, plan digest, SHA-256 from a separately verified backup, and
 `installed_disabled` confirmations printed by the dry run. Package files are
 deployed separately per client; the clean starter intentionally contains no
 `addons/` directory. The enablement preflight is always read-only: it has no
-apply mode, keeps `enableReady` false while runtime registration is unavailable,
-does not change the package's `installed_disabled` state, and does not execute
-package PHP. The runtime-contract self-test executes only a temporary
+apply mode, keeps `enableReady` false while theme, settings, live-data, and
+atomic-transition contracts remain unavailable, does not change the package's
+`installed_disabled` state, and does not execute package PHP. The
+runtime-contract self-test executes only a temporary
 first-party fixture outside the starter. It rechecks the fixed `addon.php`
 checksum, requires exact manifest registration, orders required dependencies
-first, and rejects output or registration ambiguity. No package can move to
-`enabled` yet.
+first, and rejects output or registration ambiguity. The database-backed
+acceptance suite additionally proves that request bootstrap ignores
+uninstalled and disabled packages, loads only exact current enabled packages,
+performs no registry write, and fails before execution on drift, missing code,
+or disabled dependencies. No core command can move a package to `enabled` yet.
 
 Run the complete guarded acceptance lifecycle:
 
