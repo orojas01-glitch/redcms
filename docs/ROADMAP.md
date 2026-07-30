@@ -123,8 +123,11 @@ The fixed runtime-registration contract and front-controller page-request bootst
 implemented. They load only already-recorded `enabled` packages after complete
 catalog, registry, dependency, namespace, and integrity reconciliation, expose
 registered handlers through a core lookup context, and fail before rendering
-when enabled evidence is unsafe. The clean starter has no package directory or
-enabled package state.
+when enabled evidence is unsafe. An enabled manifest-declared component can
+now receive only a bounded placement context and return a text-only view model
+that core escapes into its default public renderer; all other handler types
+remain non-dispatched. The clean starter has no package directory or enabled
+package state.
 
 The read-only enablement plan now resolves declarative theme, settings, and
 live-data gates for one deliberately constrained profile: a registration-only service package
