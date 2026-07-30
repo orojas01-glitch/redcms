@@ -4266,6 +4266,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running enabled add-on request bootstrap checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-request-bootstrap-self-test.php"
 
+printf '%s\n' 'Running safe add-on component dispatch checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-dispatch-self-test.php"
+
 printf '%s\n' 'Running Owner-authorized disabled add-on install and recovery checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-install-self-test.php"
 

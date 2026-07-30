@@ -8,10 +8,12 @@ state, and constrained Owner-authorized atomic registration-only enablement
 are implemented. Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
 backup, migration, launch verification, and rollback gate are complete without
-copying client assets or data into the starter. Fixed add-on registration and
-fail-closed page-request loading are implemented for already-recorded enabled
-packages, while handler dispatch, upgrades, disable/uninstall/purge, member
-access, publishing, payment, and integration controls remain inactive.
+copying client assets or data into the starter. Fixed add-on registration,
+fail-closed page-request loading, and safe core-owned default dispatch for an
+enabled manifest-declared component are implemented for already-recorded
+enabled packages. Service, route, adapter, and administrator-tool dispatch,
+upgrades, disable/uninstall/purge, member access, publishing, payment, and
+integration controls remain inactive.
 
 ## Product Goal
 

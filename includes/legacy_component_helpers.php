@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/video_url_helpers.php';
+require_once __DIR__ . '/addon_component_render_helpers.php';
 /**
  * Prepared inputs and fixed core dispatch for the legacy public components.
  *
@@ -31,7 +32,14 @@ if (!function_exists('red_legacy_public_component_context')) {
         $component = isset($row['Component']) ? (string) $row['Component'] : '';
         $inventory = red_legacy_public_component_input_inventory();
         if (!isset($inventory[$component])) {
-            return null;
+            return red_addon_public_component_context(
+                $component,
+                array_key_exists('RecordID', $row) ? $row['RecordID'] : null,
+                $layout,
+                $article,
+                $position,
+                (bool) $active
+            );
         }
 
         $availableInputs = [
@@ -832,9 +840,13 @@ if (!function_exists('red_legacy_render_public_component')) {
 
         $inventory = red_legacy_public_component_input_inventory();
         $component = $context['component'];
-        if (!isset($inventory[$component])
-            || array_keys($context['inputs']) !== $inventory[$component]
-        ) {
+        if (!isset($inventory[$component])) {
+            if ($renderer !== null) {
+                throw new InvalidArgumentException('Add-on public components use the core renderer.');
+            }
+            return red_addon_public_component_render($context);
+        }
+        if (array_keys($context['inputs']) !== $inventory[$component]) {
             throw new InvalidArgumentException('Unsupported legacy public component context.');
         }
         if (!$context['active']) {

@@ -391,12 +391,14 @@ The contract still assumes operator-reviewed first-party PHP and is not a
 sandbox. `scripts/addon-runtime-self-test.php` and
 `scripts/addon-request-bootstrap-self-test.php` execute only temporary fixtures
 outside the clean starter. Uninstalled and disabled packages remain
-unexecuted. Current enabled registrars run once in dependency order and expose
-handlers through the request-local context, but core does not automatically
-invoke those handlers in this batch. Request failure returns a generic
-temporary-unavailability response while detailed evidence remains in the
-server log. The Owner-authorized `installed_disabled` to `enabled` transition
-remains separate reviewed work.
+unexecuted. Current enabled registrars run once in dependency order. Core
+invokes only an enabled manifest-declared component through its fixed public
+placement context and core-owned default renderer; service, route, adapter,
+and administrator-tool handlers remain non-dispatched. Request failure returns
+a generic temporary-unavailability response while detailed evidence remains in
+the server log. Owner-authorized enablement is a separate reviewed lifecycle step.
+It must revalidate the approved plan and registrar under the package lock
+before its atomic state transition.
 
 ## Component Contract
 
@@ -423,6 +425,16 @@ article. Parent and child writes must share one transaction.
 
 Add-on components must not be implemented by adding another hard-coded switch
 to `class_content.php`. The add-on registry is the only new dispatcher.
+
+The first public-dispatch slice passes an enabled component only a fixed,
+non-executable placement context (`component`, numeric `recordId` and
+`position`, plus bounded `layout` and `article` strings). The registered
+handler returns exactly a text-only `title` and `summary` view model; core
+escapes and renders that model using the accessible default view. Handler
+output, malformed view models, and handler failures render only the static
+unavailable-content fallback and never fall through to legacy component
+rendering. This is a foundation for future component persistence and editor
+contracts, not permission to add Store Lite data or templates to core.
 
 ## Theme And CSS Boundary
 
@@ -716,8 +728,8 @@ responses, or structured data.
    proves exact installed-disabled state, dependency evidence, enabled-package
    identity, and capability/route collision reporting without executing code or
    mutating state. Fixed runtime registration and fail-closed front-controller
-   page-request bootstrap are implemented without enabling a package or
-   invoking its handlers. The read-only plan now clears only declarative gates
+   page-request bootstrap and safe enabled-component public dispatch are
+   implemented without bundling a package or business data. The read-only plan now clears only declarative gates
    for a registration-only service profile and blocks every richer surface.
    The registrar-validating atomic `enabled` transition for that constrained
    profile is implemented. Every richer package surface and every later
