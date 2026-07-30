@@ -751,6 +751,37 @@ try {
         'same-scope path registration detects only overlapping HTTP methods'
     );
 
+    $defaultComponentProfile =
+        red_addon_enable_preflight_activation_profile([
+            'provides' => [
+                'components' => ['redcms.synthetic/component'],
+                'services' => [],
+                'adminTools' => [],
+                'adapters' => [],
+            ],
+            'settings' => [],
+            'migrations' => [],
+            'routes' => [],
+            'jobs' => [],
+            'outboundHosts' => [],
+            'assets' => [
+                'public' => [],
+                'admin' => [],
+            ],
+        ]);
+    red_addon_enable_test_assert(
+        !empty($defaultComponentProfile['eligible'])
+            && $defaultComponentProfile['id']
+                === 'default_public_component'
+            && $defaultComponentProfile['gates'] === [
+                'themeCompatibility' => 'passed',
+                'settings' => 'passed',
+                'liveData' => 'not_applicable',
+            ]
+            && $defaultComponentProfile['blockers'] === [],
+        'a component with only the core default renderer clears declarative gates'
+    );
+
     $expandedProfile = red_addon_enable_preflight_activation_profile([
         'provides' => [
             'components' => ['redcms.synthetic/component'],
@@ -779,8 +810,8 @@ try {
             ]
             && array_column($expandedProfile['blockers'], 'code') === [
                 'live_data_contract_required',
-                'registration_only_service_required',
                 'settings_configuration_required',
+                'supported_activation_profile_required',
                 'theme_contract_required',
             ],
         'components, configuration, and operational surfaces fail closed with exact gate evidence'

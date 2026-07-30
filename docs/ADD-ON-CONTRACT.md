@@ -357,16 +357,21 @@ enablement inspection boundary. The command:
 A valid diagnostic plan is deliberately not an activation authorization.
 `enableReady`, `activationSupported`, `stateMutation`, and `runtimeLoad` remain
 false. Runtime registration is reported available. Declarative theme,
-settings, and live-data gates may clear only for the constrained
-`registration_only_service` profile: at least one declared service and no
-component, route, job, adapter, public/admin asset, administrator tool,
-outbound host, or setting. Every richer surface remains explicitly blocked.
-The package registrar remains unexecuted. The separate CLI-only enable command
-must revalidate and execute that registrar before its state change. It accepts
-only this profile, takes the package lock, requires exact target, plan, backup,
-and disabled-state confirmations, then commits its compare-and-swap state
-change and bounded success audit fact in one transaction. No package can move
-to `enabled` through this preflight command.
+settings, and live-data gates may clear only for these constrained profiles:
+
+- `registration_only_service`: at least one declared service and no component;
+- `default_public_component`: at least one declared component and no service,
+  with theme compatibility supplied only by core's escaped default renderer.
+
+Both profiles exclude migrations, settings, routes, jobs, public or
+administrator assets, administrator tools, adapters, and outbound hosts.
+Every richer surface remains explicitly blocked. The package registrar remains
+unexecuted. The separate CLI-only enable command must revalidate and execute
+that registrar before its state change. It accepts only these profiles, takes
+the package lock, requires exact target, plan, backup, and disabled-state
+confirmations, then commits its compare-and-swap state change and bounded
+success audit fact in one transaction. No package can move to `enabled`
+through this preflight command.
 
 `includes/addon_runtime_helpers.php` establishes the executable registration
 contract and `index.php` connects it only to front-controller page requests,
@@ -729,10 +734,12 @@ responses, or structured data.
    identity, and capability/route collision reporting without executing code or
    mutating state. Fixed runtime registration and fail-closed front-controller
    page-request bootstrap and safe enabled-component public dispatch are
-   implemented without bundling a package or business data. The read-only plan now clears only declarative gates
-   for a registration-only service profile and blocks every richer surface.
-   The registrar-validating atomic `enabled` transition for that constrained
-   profile is implemented. Every richer package surface and every later
+   implemented without bundling a package or business data. The read-only plan
+   now clears declarative gates only for the registration-only service and
+   core-rendered default public component profiles. The registrar-validating
+   atomic `enabled` transition for those constrained profiles is implemented.
+   The component profile adds no editor, persistence, package assets, business
+   data, or client package. Every richer package surface and every later
    lifecycle transition remain separate reviewed batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.

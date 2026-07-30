@@ -130,14 +130,18 @@ remain non-dispatched. The clean starter has no package directory or enabled
 package state.
 
 The read-only enablement plan now resolves declarative theme, settings, and
-live-data gates for one deliberately constrained profile: a registration-only service package
-with no component, route, job, adapter, asset, administrator-tool,
-outbound-host, or settings surface. Any richer package remains blocked behind
-its explicit contracts. The separate Owner-authorized enable command now
-revalidates that exact plan under the package lock, validates the fixed
-registrar, and atomically records `enabled` with its bounded audit fact.
-Handler dispatch, upgrades, disable/uninstall/purge, Member Access, Store Lite,
-and the other optional verticals remain later reviewed batches.
+live-data gates for two deliberately constrained profiles: a registration-only
+service package and a core-rendered default public component package. The
+service profile has no component, and the component profile has no service;
+both exclude migrations, settings, routes, jobs, public or administrator
+assets, administrator tools, adapters, and outbound hosts. Any richer package
+remains blocked behind its explicit contracts. The separate Owner-authorized
+enable command revalidates that exact plan under the package lock, validates
+the fixed registrar, and atomically records `enabled` with its bounded audit
+fact. Safe default component dispatch is implemented. Service, route, adapter,
+and administrator-tool dispatch, upgrades, disable/uninstall/purge, Member
+Access, Store Lite, and the other optional verticals remain later reviewed
+batches.
 
 ### Version 5.1 Compatibility Work
 

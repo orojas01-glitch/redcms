@@ -222,6 +222,11 @@ if (!function_exists('red_addon_enable_preflight_runtime_inventory')) {
                     ? $manifest['settings']
                     : []
             ),
+            'migrations' => count(
+                is_array($manifest['migrations'] ?? null)
+                    ? $manifest['migrations']
+                    : []
+            ),
             'routes' => count(
                 is_array($manifest['routes'] ?? null)
                     ? $manifest['routes']
@@ -261,7 +266,8 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
             'publicAssets' => $inventory['publicAssets'],
         ];
         $liveDataSurface = [
-            'components' => $provides['components'],
+            'services' => $provides['services'],
+            'migrations' => $inventory['migrations'],
             'adminTools' => $provides['adminTools'],
             'adapters' => $provides['adapters'],
             'routes' => $inventory['routes'],
@@ -269,14 +275,25 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
             'adminAssets' => $inventory['adminAssets'],
             'outboundHosts' => $inventory['outboundHosts'],
         ];
-        $themeRequired = array_sum($themeSurface) > 0;
+        $hasComponents = $provides['components'] > 0;
+        $hasServices = $provides['services'] > 0;
+        $themeRequired = $inventory['publicAssets'] > 0;
         $settingsRequired = $inventory['settings'] > 0;
-        $liveDataRequired = array_sum($liveDataSurface) > 0;
-        $serviceRegistration = $provides['services'] > 0;
-        $registrationOnly = $serviceRegistration
+        $operationalSurface = $liveDataSurface;
+        $operationalSurface['services'] = 0;
+        $liveDataRequired = array_sum($operationalSurface) > 0
+            || ($hasComponents && $hasServices);
+        $registrationOnly = $hasServices
+            && !$hasComponents
             && !$themeRequired
             && !$settingsRequired
             && !$liveDataRequired;
+        $defaultPublicComponent = $hasComponents
+            && !$hasServices
+            && !$themeRequired
+            && !$settingsRequired
+            && !$liveDataRequired;
+        $eligible = $registrationOnly || $defaultPublicComponent;
         $blockers = [];
 
         if ($themeRequired) {
@@ -297,9 +314,9 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
                 'surface' => $liveDataSurface,
             ];
         }
-        if (!$serviceRegistration) {
+        if (!$eligible) {
             $blockers[] = [
-                'code' => 'registration_only_service_required',
+                'code' => 'supported_activation_profile_required',
             ];
         }
         red_addon_enable_preflight_sort_records($blockers);
@@ -307,12 +324,16 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
         return [
             'id' => $registrationOnly
                 ? 'registration_only_service'
-                : 'expanded_contract_required',
-            'eligible' => $registrationOnly,
+                : (
+                    $defaultPublicComponent
+                        ? 'default_public_component'
+                        : 'expanded_contract_required'
+                ),
+            'eligible' => $eligible,
             'gates' => [
                 'themeCompatibility' => $themeRequired
                     ? 'blocked'
-                    : 'not_applicable',
+                    : ($hasComponents ? 'passed' : 'not_applicable'),
                 'settings' => $settingsRequired ? 'blocked' : 'passed',
                 'liveData' => $liveDataRequired
                     ? 'blocked'

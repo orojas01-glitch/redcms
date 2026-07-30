@@ -153,9 +153,10 @@ accounts cannot be demoted to Guest or deleted through Administrator Users.
 Login and every protected administrator request reload the Owner role and
 grants from the current client database. Unknown capability values are ignored,
 and a capability row without the Owner role authorizes nothing. Only
-`addons.install` has a server-local lifecycle consumer, and `addons.enable`
-gates a read-only preflight. The other grants remain dormant because no enable,
-disable, upgrade, uninstall, or purge transition exists.
+`addons.install` has a server-local lifecycle consumer. `addons.enable` gates
+both the read-only enablement preflight and the separate dry-run-first atomic
+enable command. The other grants remain dormant because no disable, upgrade,
+uninstall, or purge transition exists.
 
 ### Add-On Registry Reconciliation
 
@@ -217,21 +218,25 @@ includes `addon.php`.
 
 The separate Owner-authorized enablement preflight remains CLI-only and
 read-only. It never includes package PHP and has no apply mode. Its activation
-gate evaluator supports only a registration-only service profile with no
-component, route, job, adapter, asset, administrator-tool, outbound-host, or
-settings surface. That profile may report only its declarative gates ready.
-Every richer surface fails closed with explicit theme, settings, or live-data
-evidence. The package registrar remains unexecuted during preflight.
+gate evaluator supports only two constrained profiles: a registration-only
+service with no component, and a default public component with no service.
+Both exclude migrations, settings, routes, jobs, public or administrator
+assets, administrator tools, adapters, and outbound hosts. The component
+profile clears theme compatibility only because core owns its escaped default
+renderer. Every richer surface fails closed with explicit theme, settings, or
+live-data evidence. The package registrar remains unexecuted during preflight.
 `enableReady`, state mutation, and runtime loading remain false there. The
 separate CLI-only Owner enable command requires exact plan and backup
 confirmations, revalidates under the per-client package lock, validates the
 fixed registrar, and commits the state compare-and-swap plus bounded audit fact
 in one transaction. It accepts no richer package surface.
 
-No web endpoint consumes the installer or enable command. Handler dispatch,
-upgrades, disablement, uninstall, purge, and client business packages require
-separate reviewed implementations with backup, dependency, live-data, and
-rollback or recovery gates.
+No web endpoint consumes the installer or enable command. Component dispatch
+is limited to the bounded core-rendered contract described below. Service,
+administrator-tool, adapter, and route dispatch, upgrades, disablement,
+uninstall, purge, and client business packages require separate reviewed
+implementations with backup, dependency, live-data, and rollback or recovery
+gates.
 
 ### Add-On Runtime Registration Contract
 
@@ -256,11 +261,15 @@ as enabled in the current client database.
 This remains trusted in-process PHP, not a sandbox. The current self-test
 executes only temporary fixtures outside the starter. Uninstalled and disabled
 packages never execute. Current enabled packages register into a request-local
-lookup context, but core does not yet invoke component, service,
-administrator-tool, adapter, or route handlers. The clean starter contains no
-package directory or enabled state. The only implemented enable command accepts
-the constrained registration-only service profile; settings, theme, live-data,
-recovery, and every richer lifecycle gate remain separate work.
+lookup context. Core may invoke an enabled manifest-declared component only
+through its fixed text view model and escaped default renderer; malformed
+values, emitted output, handler exceptions, and output-buffer tampering fail
+closed to static fallback content. Service, administrator-tool, adapter, and
+route handlers remain lookup-only. The clean starter contains no package
+directory or enabled state. The implemented enable command accepts only the
+constrained registration-only service and default public component profiles;
+settings, package assets, migrations, live data, recovery, and every richer
+lifecycle gate remain separate work.
 
 ## Multi-User Authorization
 

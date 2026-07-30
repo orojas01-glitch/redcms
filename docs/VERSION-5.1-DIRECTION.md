@@ -4,8 +4,9 @@ Status: implementation in progress. Per-page SEO compatibility, including the
 approved constrained JSON-LD core, non-executing add-on trust validation,
 persisted Owner authorization, per-client registry/migration-ledger storage,
 read-only reconciliation, guarded server-local installation into a disabled
-state, and constrained Owner-authorized atomic registration-only enablement
-are implemented. Fresh isolated Adriana JSON-LD verification
+state, and constrained Owner-authorized atomic enablement for registration-only
+service and core-rendered default public component profiles are implemented.
+Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
 backup, migration, launch verification, and rollback gate are complete without
 copying client assets or data into the starter. Fixed add-on registration,
@@ -181,14 +182,18 @@ one deterministic plan. It has no apply mode, performs no database or audit
 write, and never includes `addon.php`. The plan always reports activation,
 state mutation, and package loading unavailable. Runtime registration is now
 an available core contract. The read-only plan clears declarative theme,
-settings, and live-data gates only for a registration-only service package with no component,
-route, job, adapter, asset, administrator-tool, outbound-host, or settings
-surface. Packages with any richer surface retain exact contract blockers. The
-specific registrar remains unexecuted until the separate apply command
-revalidates it under the package lock. That command accepts only this profile,
-requires exact target, plan, backup, and disabled-state confirmations, then
-commits the state compare-and-swap plus bounded audit fact atomically. It does
-not add handler dispatch or support richer package surfaces.
+settings, and live-data gates only for a registration-only service package
+with no component or a default public component package with no service. Both
+exclude migrations, settings, routes, jobs, public or administrator assets,
+administrator tools, adapters, and outbound hosts. The component profile
+clears theme compatibility only through core's escaped default renderer.
+Packages with any richer surface retain exact contract blockers. The specific
+registrar remains unexecuted until the separate apply command revalidates it
+under the package lock. That command accepts only these profiles, requires
+exact target, plan, backup, and disabled-state confirmations, then commits the
+state compare-and-swap plus bounded audit fact atomically. It does not add
+service, route, adapter, or administrator-tool dispatch or support richer
+package surfaces.
 
 Front-controller page requests, public or authenticated, now reconcile the
 complete package catalog and per-client registry before executing any package
@@ -217,11 +222,13 @@ CLIs remain outside this request bootstrap.
    request bootstrap without bundling or activating a client package in the
    clean starter.
 7. Completed foundation: resolve declarative theme, settings, and live-data
-   readiness for the constrained registration-only service profile while
-   leaving all package registrars and richer surfaces blocked and unexecuted.
+   readiness for constrained registration-only service and core-rendered
+   default public component profiles while leaving all package registrars and
+   richer surfaces blocked and unexecuted.
 8. Completed: implement the Owner-authorized atomic enable transition and
-   rollback proof for that constrained profile without broadening it to Store
-   Lite or other client-facing packages.
+   rollback proof for those constrained profiles, including lifecycle reach to
+   the safe default component renderer, without bundling Store Lite or another
+   client-facing package.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
