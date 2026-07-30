@@ -242,6 +242,83 @@ if (!function_exists('red_addon_enable_preflight_runtime_inventory')) {
                     ? $assets['admin']
                     : []
             ),
+            'outboundHosts' => count(
+                is_array($manifest['outboundHosts'] ?? null)
+                    ? $manifest['outboundHosts']
+                    : []
+            ),
+        ];
+    }
+}
+
+if (!function_exists('red_addon_enable_preflight_activation_profile')) {
+    function red_addon_enable_preflight_activation_profile(array $manifest)
+    {
+        $inventory = red_addon_enable_preflight_runtime_inventory($manifest);
+        $provides = $inventory['provides'];
+        $themeSurface = [
+            'components' => $provides['components'],
+            'publicAssets' => $inventory['publicAssets'],
+        ];
+        $liveDataSurface = [
+            'components' => $provides['components'],
+            'adminTools' => $provides['adminTools'],
+            'adapters' => $provides['adapters'],
+            'routes' => $inventory['routes'],
+            'jobs' => $inventory['jobs'],
+            'adminAssets' => $inventory['adminAssets'],
+            'outboundHosts' => $inventory['outboundHosts'],
+        ];
+        $themeRequired = array_sum($themeSurface) > 0;
+        $settingsRequired = $inventory['settings'] > 0;
+        $liveDataRequired = array_sum($liveDataSurface) > 0;
+        $serviceRegistration = $provides['services'] > 0;
+        $registrationOnly = $serviceRegistration
+            && !$themeRequired
+            && !$settingsRequired
+            && !$liveDataRequired;
+        $blockers = [];
+
+        if ($themeRequired) {
+            $blockers[] = [
+                'code' => 'theme_contract_required',
+                'surface' => $themeSurface,
+            ];
+        }
+        if ($settingsRequired) {
+            $blockers[] = [
+                'code' => 'settings_configuration_required',
+                'settings' => $inventory['settings'],
+            ];
+        }
+        if ($liveDataRequired) {
+            $blockers[] = [
+                'code' => 'live_data_contract_required',
+                'surface' => $liveDataSurface,
+            ];
+        }
+        if (!$serviceRegistration) {
+            $blockers[] = [
+                'code' => 'registration_only_service_required',
+            ];
+        }
+        red_addon_enable_preflight_sort_records($blockers);
+
+        return [
+            'id' => $registrationOnly
+                ? 'registration_only_service'
+                : 'expanded_contract_required',
+            'eligible' => $registrationOnly,
+            'gates' => [
+                'themeCompatibility' => $themeRequired
+                    ? 'blocked'
+                    : 'not_applicable',
+                'settings' => $settingsRequired ? 'blocked' : 'passed',
+                'liveData' => $liveDataRequired
+                    ? 'blocked'
+                    : 'not_applicable',
+            ],
+            'blockers' => $blockers,
         ];
     }
 }
@@ -257,6 +334,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
         $plan = [
             'valid' => false,
             'enableReady' => false,
+            'declarativeGatesReady' => false,
             'activationSupported' => false,
             'database' => red_addon_enable_preflight_database_name($connection),
             'packageId' => isset($package['id']) && is_string($package['id'])
@@ -273,6 +351,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             'capabilityConflicts' => [],
             'routeConflicts' => [],
             'runtimeInventory' => [],
+            'activationProfile' => [],
             'gates' => [
                 'authorization' => 'not_checked',
                 'trust' => 'not_checked',
@@ -502,18 +581,23 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
 
         $plan['runtimeInventory'] =
             red_addon_enable_preflight_runtime_inventory($manifest);
-        foreach (
-            [
-                'activation_transition_unavailable',
-                'live_data_contract_unavailable',
-                'settings_contract_unavailable',
-                'theme_contract_unavailable',
-            ]
-            as $blockerCode
-        ) {
-            $plan['blockers'][] = ['code' => $blockerCode];
+        $plan['activationProfile'] =
+            red_addon_enable_preflight_activation_profile($manifest);
+        foreach ($plan['activationProfile']['gates'] as $gate => $status) {
+            $plan['gates'][$gate] = $status;
         }
+        foreach ($plan['activationProfile']['blockers'] as $blocker) {
+            $plan['blockers'][] = $blocker;
+        }
+        $plan['blockers'][] = [
+            'code' => 'activation_transition_unavailable',
+        ];
         red_addon_enable_preflight_sort_records($plan['blockers']);
+        $plan['declarativeGatesReady'] =
+            !empty($plan['activationProfile']['eligible'])
+            && $plan['gates']['dependencies'] === 'passed'
+            && $plan['gates']['capabilityNamespace'] === 'passed'
+            && $plan['gates']['routeNamespace'] === 'passed';
 
         $planMaterial = [
             'database' => $plan['database'],
@@ -533,8 +617,10 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             'capabilityConflicts' => $plan['capabilityConflicts'],
             'routeConflicts' => $plan['routeConflicts'],
             'runtimeInventory' => $plan['runtimeInventory'],
+            'activationProfile' => $plan['activationProfile'],
             'gates' => $plan['gates'],
             'blockers' => $plan['blockers'],
+            'declarativeGatesReady' => $plan['declarativeGatesReady'],
             'stateMutation' => false,
             'runtimeLoad' => false,
         ];

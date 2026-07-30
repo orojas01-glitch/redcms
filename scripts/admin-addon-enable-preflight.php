@@ -123,6 +123,10 @@ printf(
     count($plan['capabilityConflicts'])
 );
 printf("Route conflicts: %d\n", count($plan['routeConflicts']));
+printf(
+    "Activation profile: %s\n",
+    (string) ($plan['activationProfile']['id'] ?? 'unavailable')
+);
 echo 'Gates:' . PHP_EOL;
 foreach ($plan['gates'] as $gate => $status) {
     printf("  %s: %s\n", $gate, $status);
@@ -134,12 +138,14 @@ foreach ($plan['blockers'] as $blocker) {
         JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
     ) . PHP_EOL;
 }
+echo 'Declarative gates ready: ' .
+    ($plan['declarativeGatesReady'] ? 'yes' : 'no') . PHP_EOL;
 echo 'Enable ready: no' . PHP_EOL;
 echo 'Activation supported: no' . PHP_EOL;
 echo 'State mutation: no' . PHP_EOL;
 echo 'Runtime load: no' . PHP_EOL;
 echo 'Plan SHA-256: ' . $plan['planSha256'] . PHP_EOL;
 echo "READ ONLY: no database changes or package code execution occurred.\n";
-echo "Runtime registration, remaining enablement gates, and an atomic state transition require separate reviewed work.\n";
+echo "The Owner-authorized atomic state transition remains separate reviewed work.\n";
 $db->close();
 exit(0);

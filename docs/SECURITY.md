@@ -215,6 +215,16 @@ bounded audit event and leaves the package non-loadable. Recovery requires
 confirmations. Successful installation ends `installed_disabled` and never
 includes `addon.php`.
 
+The separate Owner-authorized enablement preflight remains CLI-only and
+read-only. It never includes package PHP and has no apply mode. Its activation
+gate evaluator supports only a registration-only service profile with no
+component, route, job, adapter, asset, administrator-tool, outbound-host, or
+settings surface. That profile may report only its declarative gates ready.
+Every richer surface fails closed with explicit theme, settings, or live-data
+evidence. The package registrar remains unexecuted. `enableReady`, state
+mutation, and runtime loading remain false until the separately reviewed
+atomic transition validates that registrar.
+
 No web endpoint consumes the installer. Enablement, handler dispatch,
 upgrades, disablement, uninstall, purge, and client business packages require
 separate reviewed implementations with backup, dependency, live-data, and

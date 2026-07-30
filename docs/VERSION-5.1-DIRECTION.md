@@ -179,8 +179,12 @@ reports provided-capability, route-id, and route-method ownership conflicts in
 one deterministic plan. It has no apply mode, performs no database or audit
 write, and never includes `addon.php`. The plan always reports activation,
 state mutation, and package loading unavailable. Runtime registration is now
-an available core contract, but theme, settings, live-data, atomic transition,
-and rollback gates remain explicit blockers.
+an available core contract. The read-only plan clears declarative theme,
+settings, and live-data gates only for a registration-only service package with no component,
+route, job, adapter, asset, administrator-tool, outbound-host, or settings
+surface. Packages with any richer surface retain exact contract blockers. The
+specific registrar remains unexecuted until a later atomic transition
+revalidates it, so the state transition remains unavailable.
 
 Front-controller page requests, public or authenticated, now reconcile the
 complete package catalog and per-client registry before executing any package
@@ -208,8 +212,12 @@ CLIs remain outside this request bootstrap.
 6. Completed: implement fixed add-on runtime registration and fail-closed
    request bootstrap without bundling or activating a client package in the
    clean starter.
-7. Next: implement the remaining theme, settings, live-data, atomic-transition,
-   and rollback gates required for the Owner-authorized enable command.
+7. Completed foundation: resolve declarative theme, settings, and live-data
+   readiness for the constrained registration-only service profile while
+   leaving all package registrars and richer surfaces blocked and unexecuted.
+8. Next: implement the Owner-authorized atomic enable transition and rollback
+   proof for that constrained profile without broadening it to Store Lite or
+   other client-facing packages.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
