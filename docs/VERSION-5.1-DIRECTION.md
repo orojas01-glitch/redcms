@@ -15,7 +15,9 @@ fail-closed page-request loading, and safe core-owned default dispatch for an
 enabled manifest-declared component are implemented for already-recorded
 enabled packages. Service, route, adapter, and administrator-tool dispatch,
 upgrades, uninstall/purge, member access, publishing, payment, and integration
-controls remain inactive.
+controls remain inactive. The Store Lite product and security boundary is
+defined, but its package code and the richer generic contracts it requires
+have not started.
 
 ## Product Goal
 
@@ -135,7 +137,10 @@ Appointments, Donations, and Restaurant Ordering, in that priority order if
 separately approved. They are not core features or required Version 5.1
 deliverables. Member Access / Protected Content is a separate cross-cutting
 package required before private content is enabled. The full boundary is
-defined in `docs/ADD-ON-CONTRACT.md`.
+defined in `docs/ADD-ON-CONTRACT.md`. The first optional package's component,
+commerce-service, persistence, payment-adapter, lifecycle, and acceptance
+contract is defined in `docs/STORE-LITE-DIRECTION.md`. Store Lite remains
+separately distributed and is not bundled with the clean starter.
 
 Social publishing should be an optional adapter layer:
 
@@ -244,6 +249,11 @@ request bootstrap excludes the disabled package.
 9. Completed: implement the Owner-authorized atomic disable transition with a
    shared lifecycle lock, enabled-dependent refusal, rollback proof, and
    later-request unload behavior without package execution or data deletion.
+10. Completed direction: define Store Lite as a separate optional
+    Product-component plus commerce-service package, including client-owned
+    storage, payment-adapter isolation, lifecycle behavior, and acceptance
+    gates. Implementation remains blocked until the required generic richer
+    package contracts pass with disposable fixtures.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
