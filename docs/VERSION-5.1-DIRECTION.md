@@ -5,7 +5,8 @@ approved constrained JSON-LD core, non-executing add-on trust validation,
 persisted Owner authorization, per-client registry/migration-ledger storage,
 read-only reconciliation, guarded server-local installation into a disabled
 state, and constrained Owner-authorized atomic enablement for registration-only
-service and core-rendered default public component profiles are implemented.
+service, core-rendered default public component, and combined default-component
+plus registration-only-service profiles are implemented.
 Owner-authorized non-executing atomic disablement with enabled-dependent
 refusal is also implemented. Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
@@ -188,18 +189,19 @@ one deterministic plan. It has no apply mode, performs no database or audit
 write, and never includes `addon.php`. The plan always reports activation,
 state mutation, and package loading unavailable. Runtime registration is now
 an available core contract. The read-only plan clears declarative theme,
-settings, and live-data gates only for a registration-only service package
-with no component or a default public component package with no service. Both
-exclude migrations, settings, routes, jobs, public or administrator assets,
-administrator tools, adapters, and outbound hosts. The component profile
-clears theme compatibility only through core's escaped default renderer.
-Packages with any richer surface retain exact contract blockers. The specific
-registrar remains unexecuted until the separate apply command revalidates it
-under the shared lifecycle lock and target package lock. That command accepts
-only these profiles, requires exact target, plan, backup, and disabled-state
-confirmations, then commits the state compare-and-swap plus bounded audit fact
-atomically. It does not add service, route, adapter, or administrator-tool
-dispatch or support richer package surfaces.
+settings, and live-data gates only for a registration-only service package, a
+default public component package, or a default public component combined with
+registration-only services. All exclude migrations, settings, routes, jobs,
+public or administrator assets, administrator tools, adapters, and outbound
+hosts. Either component profile clears theme compatibility only through core's
+escaped default renderer. Packages with any richer surface retain exact
+contract blockers. The specific registrar remains unexecuted until the
+separate apply command revalidates it under the shared lifecycle lock and
+target package lock. That command accepts only these profiles, requires exact
+target, plan, backup, and disabled-state confirmations, then commits the state
+compare-and-swap plus bounded audit fact atomically. It does not add service,
+route, adapter, or administrator-tool dispatch or support richer package
+surfaces.
 
 Front-controller page requests, public or authenticated, now reconcile the
 complete package catalog and per-client registry before executing any package
@@ -254,6 +256,12 @@ request bootstrap excludes the disabled package.
     storage, payment-adapter isolation, lifecycle behavior, and acceptance
     gates. Implementation remains blocked until the required generic richer
     package contracts pass with disposable fixtures.
+11. Completed foundation: accept a constrained default public component plus
+    registration-only services as one package, with non-executing preflight,
+    atomic Owner enablement, later request registration and default rendering,
+    non-executing disablement, and exact disposable cleanup. Persistence,
+    editor, typed service invocation, routes, administrator tools, settings,
+    assets, and live-data behavior remain blocked.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

@@ -137,7 +137,8 @@ function red_addon_disable_test_package(
     $project,
     $packageId,
     $marker,
-    $requiredPackageId = ''
+    $requiredPackageId = '',
+    $withComponent = false
 ) {
     $parts = explode('.', $packageId, 2);
     $directory = $project . '/addons/' . $parts[0] . '/' . $parts[1];
@@ -145,6 +146,15 @@ function red_addon_disable_test_package(
         throw new RuntimeException('Could not create disable fixture.');
     }
     $serviceId = $packageId . '/service';
+    $componentId = $packageId . '/component';
+    $componentRegistration = $withComponent
+        ? '    $runtime->registerComponent(' .
+            var_export($componentId, true) .
+            ", static function (array \$context): array {\n" .
+            "        return ['title' => 'Combined disable fixture', " .
+            "'summary' => 'Lifecycle data remains retained.'];\n" .
+            "    });\n"
+        : '';
     $entrypoint = "<?php\n" .
         "return static function (RED_Addon_Runtime_Registry \$runtime): void {\n" .
         '    file_put_contents(' .
@@ -155,6 +165,7 @@ function red_addon_disable_test_package(
         '    $runtime->registerService(' .
         var_export($serviceId, true) .
         ", static function (): string { return 'ok'; });\n" .
+        $componentRegistration .
         "};\n";
     file_put_contents($directory . '/addon.php', $entrypoint);
     $required = $requiredPackageId === ''
@@ -170,13 +181,13 @@ function red_addon_disable_test_package(
         'name' => 'Atomic Disable Fixture',
         'description' => 'Disposable atomic disablement fixture.',
         'version' => '1.0.0',
-        'type' => 'service',
+        'type' => $withComponent ? 'content-package' : 'service',
         'compatibility' => [
             'cms' => '>=5.1 <6.0',
             'php' => '>=8.2 <9.0',
         ],
         'provides' => [
-            'components' => [],
+            'components' => $withComponent ? [$componentId] : [],
             'services' => [$serviceId],
             'adminTools' => [],
             'adapters' => [],
@@ -335,7 +346,9 @@ try {
     red_addon_disable_test_package(
         $fixtureProject,
         $targetPackageId,
-        $executionMarker
+        $executionMarker,
+        '',
+        true
     );
     red_addon_disable_test_package(
         $fixtureProject,
@@ -394,6 +407,10 @@ try {
             'services',
             $targetPackageId . '/service'
         ) !== null
+            && $runtimeBefore['context']->handler(
+                'components',
+                $targetPackageId . '/component'
+            ) !== null
             && $runtimeBefore['context']->handler(
                 'services',
                 $dependentPackageId . '/service'
@@ -612,13 +629,17 @@ try {
             $targetPackageId . '/service'
         ) === null
             && $runtimeAfter['context']->handler(
+                'components',
+                $targetPackageId . '/component'
+            ) === null
+            && $runtimeAfter['context']->handler(
                 'services',
                 $dependentPackageId . '/service'
             ) !== null
             && !str_contains($afterExecution, $targetPackageId)
             && str_contains($afterExecution, $basePackageId)
             && str_contains($afterExecution, $dependentPackageId),
-        'later request bootstrap excludes the disabled package'
+        'later request bootstrap excludes every disabled combined-package registration'
     );
     unlink($executionMarker);
 

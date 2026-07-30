@@ -133,16 +133,17 @@ remain non-dispatched. The clean starter has no package directory or enabled
 package state.
 
 The read-only enablement plan now resolves declarative theme, settings, and
-live-data gates for two deliberately constrained profiles: a registration-only
-service package and a core-rendered default public component package. The
-service profile has no component, and the component profile has no service;
-both exclude migrations, settings, routes, jobs, public or administrator
-assets, administrator tools, adapters, and outbound hosts. Any richer package
-remains blocked behind its explicit contracts. The separate Owner-authorized
-enable command revalidates that exact plan under the shared lifecycle lock and
-target package lock, validates the fixed registrar, and atomically records
-`enabled` with its bounded audit fact. Safe default component dispatch is
-implemented. The Owner-authorized disable command now serializes with
+live-data gates for three deliberately constrained profiles: a
+registration-only service package, a core-rendered default public component
+package, and a default public component combined with registration-only
+services. All exclude migrations, settings, routes, jobs, public or
+administrator assets, administrator tools, adapters, and outbound hosts. Any
+richer package remains blocked behind its explicit contracts. The separate
+Owner-authorized enable command revalidates that exact plan under the shared
+lifecycle lock and target package lock, validates the fixed registrar, and
+atomically records `enabled` with its bounded audit fact. Safe default
+component dispatch is implemented; services remain lookup-only and are not
+automatically invoked. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,
 migrations, settings, media, or business data. Service, route, adapter, and
@@ -150,11 +151,12 @@ administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
 The Store Lite product and security direction is now defined without adding
-commerce behavior or data to core. Its combined component-plus-service shape
-remains intentionally blocked by the current minimal activation profiles.
-Generic persistence, editor, service, route, administrator-tool, settings,
-asset, and live-data contracts must be implemented and accepted with disposable
-fixtures before the separately distributed package can be enabled.
+commerce behavior or data to core. Its generic component-plus-service
+registration shape is accepted, but the complete Store Lite manifest remains
+blocked. Generic persistence, editor, typed-service invocation, route,
+administrator-tool, settings, asset, and live-data contracts must be
+implemented and accepted with disposable fixtures before the separately
+distributed package can be enabled.
 
 ### Version 5.1 Compatibility Work
 
