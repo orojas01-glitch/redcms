@@ -136,12 +136,15 @@ service profile has no component, and the component profile has no service;
 both exclude migrations, settings, routes, jobs, public or administrator
 assets, administrator tools, adapters, and outbound hosts. Any richer package
 remains blocked behind its explicit contracts. The separate Owner-authorized
-enable command revalidates that exact plan under the package lock, validates
-the fixed registrar, and atomically records `enabled` with its bounded audit
-fact. Safe default component dispatch is implemented. Service, route, adapter,
-and administrator-tool dispatch, upgrades, disable/uninstall/purge, Member
-Access, Store Lite, and the other optional verticals remain later reviewed
-batches.
+enable command revalidates that exact plan under the shared lifecycle lock and
+target package lock, validates the fixed registrar, and atomically records
+`enabled` with its bounded audit fact. Safe default component dispatch is
+implemented. The Owner-authorized disable command now serializes with
+enablement, refuses enabled dependents, and atomically returns a package to
+`installed_disabled` without executing package PHP or deleting package code,
+migrations, settings, media, or business data. Service, route, adapter, and
+administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
+Lite, and the other optional verticals remain later reviewed batches.
 
 ### Version 5.1 Compatibility Work
 

@@ -41,6 +41,7 @@ if (!function_exists('red_addon_install_audit_event_allowed')) {
             'addon.install.completed',
             'addon.install.failed',
             'addon.enable.completed',
+            'addon.disable.completed',
         ], true);
     }
 }
@@ -219,6 +220,24 @@ if (!function_exists('red_addon_install_unlock')) {
             error_log('RED-CMS add-on install unlock failed: ' . $throwable->getMessage());
             return false;
         }
+    }
+}
+
+if (!function_exists('red_addon_lifecycle_lock')) {
+    function red_addon_lifecycle_lock($connection, $timeoutSeconds = 10)
+    {
+        return red_addon_install_lock(
+            $connection,
+            'redcms.lifecycle',
+            $timeoutSeconds
+        );
+    }
+}
+
+if (!function_exists('red_addon_lifecycle_unlock')) {
+    function red_addon_lifecycle_unlock($connection)
+    {
+        return red_addon_install_unlock($connection, 'redcms.lifecycle');
     }
 }
 

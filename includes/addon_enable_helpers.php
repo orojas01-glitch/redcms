@@ -184,104 +184,120 @@ if (!function_exists('red_addon_enable_package')) {
         ) {
             return $result;
         }
-        if (!red_addon_install_lock($connection, $packageId)) {
+        if (!red_addon_lifecycle_lock($connection)) {
             $result['status'] = 'locked';
             return $result;
         }
 
         try {
-            $catalog = red_addon_discover($projectRoot, [
-                'cmsVersion' => '5.1.0',
-                'phpVersion' => PHP_VERSION,
-            ]);
-            if (empty($catalog['valid'])
-                || !isset($catalog['packages'][$packageId])
-            ) {
-                $result['status'] = 'package_invalid';
-                return $result;
-            }
-            $package = $catalog['packages'][$packageId];
-            $snapshot = red_addon_registry_snapshot($package);
-            if ($snapshot === null) {
-                $result['status'] = 'package_invalid';
-                return $result;
-            }
-            $result['version'] = $snapshot['version'];
-            $plan = red_addon_enable_transition_plan(
-                $connection,
-                $package,
-                $actorAdminRecordId,
-                $catalog
-            );
-            if (empty($plan['valid'])) {
-                $result['status'] = $plan['errors'][0] ?? 'plan_invalid';
-                return $result;
-            }
-            if (!hash_equals($expectedPlanSha256, $plan['planSha256'])) {
-                $result['status'] = 'plan_changed';
+            if (!red_addon_install_lock($connection, $packageId)) {
+                $result['status'] = 'locked';
                 return $result;
             }
 
             try {
-                $registry = $registrarExecutor($package);
-                if (!$registry instanceof RED_Addon_Runtime_Registry
-                    || $registry->packageId() !== $snapshot['id']
+                $catalog = red_addon_discover($projectRoot, [
+                    'cmsVersion' => '5.1.0',
+                    'phpVersion' => PHP_VERSION,
+                ]);
+                if (empty($catalog['valid'])
+                    || !isset($catalog['packages'][$packageId])
                 ) {
+                    $result['status'] = 'package_invalid';
+                    return $result;
+                }
+                $package = $catalog['packages'][$packageId];
+                $snapshot = red_addon_registry_snapshot($package);
+                if ($snapshot === null) {
+                    $result['status'] = 'package_invalid';
+                    return $result;
+                }
+                $result['version'] = $snapshot['version'];
+                $plan = red_addon_enable_transition_plan(
+                    $connection,
+                    $package,
+                    $actorAdminRecordId,
+                    $catalog
+                );
+                if (empty($plan['valid'])) {
+                    $result['status'] = $plan['errors'][0] ?? 'plan_invalid';
+                    return $result;
+                }
+                if (!hash_equals(
+                    $expectedPlanSha256,
+                    $plan['planSha256']
+                )) {
+                    $result['status'] = 'plan_changed';
+                    return $result;
+                }
+
+                try {
+                    $registry = $registrarExecutor($package);
+                    if (!$registry instanceof RED_Addon_Runtime_Registry
+                        || $registry->packageId() !== $snapshot['id']
+                    ) {
+                        $result['status'] = 'registrar_validation_failed';
+                        return $result;
+                    }
+                    $result['runtimeRegistrations'] = $registry->snapshot();
+                } catch (Throwable $throwable) {
+                    error_log(
+                        'RED-CMS add-on enable registrar validation failed for ' .
+                        $packageId . ': ' . $throwable->getMessage()
+                    );
                     $result['status'] = 'registrar_validation_failed';
                     return $result;
                 }
-                $result['runtimeRegistrations'] = $registry->snapshot();
-            } catch (Throwable $throwable) {
-                error_log(
-                    'RED-CMS add-on enable registrar validation failed for ' .
-                    $packageId . ': ' . $throwable->getMessage()
-                );
-                $result['status'] = 'registrar_validation_failed';
-                return $result;
-            }
 
-            if (!mysqli_begin_transaction($connection)) {
-                $result['status'] = 'transaction_failed';
-                return $result;
-            }
-            try {
-                if (!red_addon_enable_update_state(
-                    $connection,
-                    $snapshot,
-                    $actorAdminRecordId
-                )) {
-                    throw new RuntimeException('state_compare_and_swap_failed');
+                if (!mysqli_begin_transaction($connection)) {
+                    $result['status'] = 'transaction_failed';
+                    return $result;
                 }
-                if ($afterStateUpdate !== null) {
-                    $afterStateUpdate($connection, $snapshot);
+                try {
+                    if (!red_addon_enable_update_state(
+                        $connection,
+                        $snapshot,
+                        $actorAdminRecordId
+                    )) {
+                        throw new RuntimeException(
+                            'state_compare_and_swap_failed'
+                        );
+                    }
+                    if ($afterStateUpdate !== null) {
+                        $afterStateUpdate($connection, $snapshot);
+                    }
+                    if (!$auditRecorder(
+                        $connection,
+                        'addon.enable.completed',
+                        $snapshot['id'],
+                        $snapshot['version'],
+                        $actorAdminRecordId,
+                        'succeeded',
+                        'enabled'
+                    )) {
+                        throw new RuntimeException('audit_completion_failed');
+                    }
+                    if (!mysqli_commit($connection)) {
+                        throw new RuntimeException(
+                            'completion_commit_failed'
+                        );
+                    }
+                } catch (Throwable $throwable) {
+                    mysqli_rollback($connection);
+                    $result['status'] = $throwable->getMessage()
+                        === 'state_compare_and_swap_failed'
+                        ? 'state_changed'
+                        : 'enable_transaction_failed';
+                    return $result;
                 }
-                if (!$auditRecorder(
-                    $connection,
-                    'addon.enable.completed',
-                    $snapshot['id'],
-                    $snapshot['version'],
-                    $actorAdminRecordId,
-                    'succeeded',
-                    'enabled'
-                )) {
-                    throw new RuntimeException('audit_completion_failed');
-                }
-                if (!mysqli_commit($connection)) {
-                    throw new RuntimeException('completion_commit_failed');
-                }
-            } catch (Throwable $throwable) {
-                mysqli_rollback($connection);
-                $result['status'] = $throwable->getMessage()
-                    === 'state_compare_and_swap_failed'
-                    ? 'state_changed'
-                    : 'enable_transaction_failed';
-                return $result;
-            }
 
-            $result['status'] = 'enabled';
-            return $result;
+                $result['status'] = 'enabled';
+                return $result;
+            } finally {
+                red_addon_install_unlock($connection, $packageId);
+            }
         } finally {
-            red_addon_install_unlock($connection, $packageId);
+            red_addon_lifecycle_unlock($connection);
         }
     }
 }

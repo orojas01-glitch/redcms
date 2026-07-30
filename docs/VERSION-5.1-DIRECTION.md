@@ -6,15 +6,16 @@ persisted Owner authorization, per-client registry/migration-ledger storage,
 read-only reconciliation, guarded server-local installation into a disabled
 state, and constrained Owner-authorized atomic enablement for registration-only
 service and core-rendered default public component profiles are implemented.
-Fresh isolated Adriana JSON-LD verification
+Owner-authorized non-executing atomic disablement with enabled-dependent
+refusal is also implemented. Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
 backup, migration, launch verification, and rollback gate are complete without
 copying client assets or data into the starter. Fixed add-on registration,
 fail-closed page-request loading, and safe core-owned default dispatch for an
 enabled manifest-declared component are implemented for already-recorded
 enabled packages. Service, route, adapter, and administrator-tool dispatch,
-upgrades, disable/uninstall/purge, member access, publishing, payment, and
-integration controls remain inactive.
+upgrades, uninstall/purge, member access, publishing, payment, and integration
+controls remain inactive.
 
 ## Product Goal
 
@@ -171,7 +172,7 @@ migration evidence and bounded audit events, and finishes
 `installed_disabled`. It never includes `addon.php`. Because MySQL DDL can
 commit implicitly, partial failures remain visible as `installation_failed`
 with an explicit resumable ledger rather than a false rollback claim. No
-lifecycle UI, upgrade, disable, uninstall, or purge command exists.
+lifecycle UI, upgrade, uninstall, or purge command exists.
 
 The next lifecycle boundary is a separate server-local, read-only enablement
 preflight gated by the exact persisted Owner `addons.enable` capability. It
@@ -189,11 +190,11 @@ administrator tools, adapters, and outbound hosts. The component profile
 clears theme compatibility only through core's escaped default renderer.
 Packages with any richer surface retain exact contract blockers. The specific
 registrar remains unexecuted until the separate apply command revalidates it
-under the package lock. That command accepts only these profiles, requires
-exact target, plan, backup, and disabled-state confirmations, then commits the
-state compare-and-swap plus bounded audit fact atomically. It does not add
-service, route, adapter, or administrator-tool dispatch or support richer
-package surfaces.
+under the shared lifecycle lock and target package lock. That command accepts
+only these profiles, requires exact target, plan, backup, and disabled-state
+confirmations, then commits the state compare-and-swap plus bounded audit fact
+atomically. It does not add service, route, adapter, or administrator-tool
+dispatch or support richer package surfaces.
 
 Front-controller page requests, public or authenticated, now reconcile the
 complete package catalog and per-client registry before executing any package
@@ -204,6 +205,17 @@ register first, disabled packages never execute, and the resulting handlers
 are exposed through a core lookup context without being invoked automatically.
 Any enabled drift or missing code fails before public rendering. Lifecycle
 CLIs remain outside this request bootstrap.
+
+The Owner-authorized disable command provides the reverse
+`enabled` to `installed_disabled` transition. Its deterministic dry run binds
+the exact current package, complete registry, and every other enabled package
+without including package PHP. Apply serializes with enablement under one
+database-wide lifecycle lock, takes the target package lock, refuses any
+enabled required dependent, and requires exact target, plan, nonzero backup
+SHA-256, and enabled-state confirmations. State and the bounded
+`addon.disable.completed` audit fact commit atomically. Package code,
+migrations, settings, media, and business data remain untouched, and later
+request bootstrap excludes the disabled package.
 
 ## Delivery Order
 
@@ -229,6 +241,9 @@ CLIs remain outside this request bootstrap.
    rollback proof for those constrained profiles, including lifecycle reach to
    the safe default component renderer, without bundling Store Lite or another
    client-facing package.
+9. Completed: implement the Owner-authorized atomic disable transition with a
+   shared lifecycle lock, enabled-dependent refusal, rollback proof, and
+   later-request unload behavior without package execution or data deletion.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
