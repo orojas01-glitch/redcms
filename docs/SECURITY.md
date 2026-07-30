@@ -286,6 +286,14 @@ current enabled package with no enabled dependent. Settings, package assets,
 migrations, live data, recovery, and every richer enablement gate remain
 separate work.
 
+`docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
+boundary. It does not activate commerce. Store Lite remains blocked until
+generic component persistence, typed service invocation, routes,
+administrator tools, settings, assets, live-data compatibility, and
+component-plus-service enablement pass separate disposable-fixture reviews.
+Client-submitted totals and browser payment redirects are never authoritative,
+and Store Lite data must remain package-owned in the current client's database.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

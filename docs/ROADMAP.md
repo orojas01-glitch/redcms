@@ -81,10 +81,13 @@ before private Sections or protected downloads can become operational. It is
 not a public listing-directory component. Public business or location
 directories would be a separate future Listing component and search service.
 
-See [`ADD-ON-CONTRACT.md`](ADD-ON-CONTRACT.md) for the package types, manifest,
-runtime registration, lifecycle, permission, migration, theme, client
-isolation, example-package, and acceptance contracts. These packages are not
-core features or committed Version 5.1 scope; none is active in RED-CMS 5.0.
+See [`ADD-ON-CONTRACT.md`](ADD-ON-CONTRACT.md) for the generic package types,
+manifest, runtime registration, lifecycle, permission, migration, theme,
+client-isolation, and acceptance contracts. The first optional package is
+specified in [`STORE-LITE-DIRECTION.md`](STORE-LITE-DIRECTION.md), including
+its component/service split, data ownership, payment boundary, lifecycle, and
+release gates. These packages are not core features or bundled starter
+capabilities.
 
 ### Add-On Trust And Authorization Foundation
 
@@ -145,6 +148,13 @@ enablement, refuses enabled dependents, and atomically returns a package to
 migrations, settings, media, or business data. Service, route, adapter, and
 administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
+
+The Store Lite product and security direction is now defined without adding
+commerce behavior or data to core. Its combined component-plus-service shape
+remains intentionally blocked by the current minimal activation profiles.
+Generic persistence, editor, service, route, administrator-tool, settings,
+asset, and live-data contracts must be implemented and accepted with disposable
+fixtures before the separately distributed package can be enabled.
 
 ### Version 5.1 Compatibility Work
 

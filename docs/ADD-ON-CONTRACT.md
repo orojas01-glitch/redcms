@@ -4,10 +4,12 @@ Status: Version 5.1 trust validation, Owner authorization, read-only registry
 reconciliation, and guarded server-local installation are implemented.
 Installation applies reviewed migrations, records exact evidence, and always
 finishes disabled without executing package PHP. A fixed runtime-registration
-contract and fail-closed front-controller page-request bootstrap are implemented and
-tested only with temporary first-party fixtures. RED-CMS does not enable,
-automatically invoke registered handlers, upgrade, disable, uninstall, or
-purge packages through this contract yet.
+contract, fail-closed front-controller page-request bootstrap, constrained
+atomic enablement, safe default component dispatch, and non-executing atomic
+disablement are implemented and tested only with temporary first-party
+fixtures. RED-CMS does not dispatch services, routes, adapters, or
+administrator tools, and does not upgrade, uninstall, or purge packages
+through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -591,6 +593,11 @@ the administrator does not delete executable package code.
 ### 1. Store Lite
 
 Store Lite is the first complete proof of the extension contract.
+Its product, security, persistence, service, payment-adapter, lifecycle, and
+acceptance boundary is defined in
+[`STORE-LITE-DIRECTION.md`](STORE-LITE-DIRECTION.md). That direction is
+the staged implementation boundary, but Store Lite remains a separately
+distributed optional package and is not present in the clean starter.
 
 Initial scope:
 
@@ -759,15 +766,21 @@ responses, or structured data.
    also implemented with enabled-dependent refusal and later-request unload
    proof. Every richer package surface and every later lifecycle transition
    remain separate reviewed batches.
-6. Implement and distribute Store Lite separately as the first complete
+6. Define the Store Lite package, data, service, payment, lifecycle, and
+   acceptance boundary without adding commerce behavior to core. This
+   direction is documented in `docs/STORE-LITE-DIRECTION.md`.
+7. Implement the remaining generic component-plus-service, persistence,
+   editor, route, administrator-tool, settings, asset, and live-data contracts
+   as separate disposable-fixture batches.
+8. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
-7. If private folders are scheduled for activation, implement and pass Member
+9. If private folders are scheduled for activation, implement and pass Member
    Access before exposing an operational private setting.
-8. Implement Events Calendar as the second independent proof that a new
+10. Implement Events Calendar as the second independent proof that a new
    component no longer requires core dispatcher edits.
-9. Implement Appointments.
-10. Implement Donations.
-11. Implement Restaurant Ordering.
+11. Implement Appointments.
+12. Implement Donations.
+13. Implement Restaurant Ordering.
 
 Each implementation remains a separate reviewed batch with its own rollback
 path, migration evidence, acceptance fixtures, and client-specific activation

@@ -183,6 +183,7 @@ database.
 - [Operational Form Boundary](docs/OPERATIONAL-FORM-BOUNDARY.md)
 - [Member Access Direction](docs/MEMBER-ACCESS-DIRECTION.md)
 - [Version 5.1 Add-On Contract](docs/ADD-ON-CONTRACT.md)
+- [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
 - [Version 5.1 Direction](docs/VERSION-5.1-DIRECTION.md)
 - [Security Notes](docs/SECURITY.md)
 
