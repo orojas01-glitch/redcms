@@ -46,7 +46,7 @@ publishing integrations are not active features.
 - Per-client Owner role and exact future add-on lifecycle capability grants
 - Empty per-client add-on installation/migration registries with fail-closed reconciliation
 - Owner-authorized server-local package installation that remains disabled and unloaded
-- Deterministic read-only enablement preflight with dependency and namespace conflict reporting
+- Deterministic read-only enablement preflight with dependency, namespace, and constrained activation-gate reporting
 - Fail-closed request bootstrap and lookup context for already-enabled first-party packages
 
 ## Portable Starter Distribution
@@ -123,9 +123,13 @@ package, version, plan digest, SHA-256 from a separately verified backup, and
 `installed_disabled` confirmations printed by the dry run. Package files are
 deployed separately per client; the clean starter intentionally contains no
 `addons/` directory. The enablement preflight is always read-only: it has no
-apply mode, keeps `enableReady` false while theme, settings, live-data, and
-atomic-transition contracts remain unavailable, does not change the package's
-`installed_disabled` state, and does not execute package PHP. The
+apply mode, keeps `enableReady` false while the atomic transition remains
+unavailable, does not change the package's `installed_disabled` state, and
+does not execute package PHP. It can identify a registration-only service
+package with no component, settings, route, job, adapter, asset, administrator
+tool, or outbound-host surface as declaratively eligible for later transition
+validation. Packages with any richer surface remain blocked behind their
+explicit theme, settings, or live-data contract. The
 runtime-contract self-test executes only a temporary
 first-party fixture outside the starter. It rechecks the fixed `addon.php`
 checksum, requires exact manifest registration, orders required dependencies

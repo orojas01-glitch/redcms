@@ -31,7 +31,12 @@ $assertions = 0;
 $actorId = 2147000930;
 $targetPackageId = 'redcms.enable-target';
 $basePackageId = 'redcms.enable-base';
-$fixturePackageIds = [$targetPackageId, $basePackageId];
+$readyPackageId = 'redcms.enable-ready';
+$fixturePackageIds = [
+    $targetPackageId,
+    $basePackageId,
+    $readyPackageId,
+];
 $temporaryRoot = sys_get_temp_dir() .
     '/redcms-addon-enable-' . bin2hex(random_bytes(8));
 $executionMarker = $temporaryRoot . '/addon-executed';
@@ -129,7 +134,8 @@ function red_addon_enable_test_package(
     array $requiredDependencies,
     $sharedCapability,
     $routeId,
-    $withMigration = false
+    $withMigration = false,
+    $withRoute = true
 ) {
     $parts = explode('.', $packageId, 2);
     $directory = $project . '/addons/' . $parts[0] . '/' . $parts[1];
@@ -137,9 +143,21 @@ function red_addon_enable_test_package(
         throw new RuntimeException('Could not create enablement package fixture.');
     }
 
+    $registrations =
+        "\n    \$runtime->registerService(" .
+        var_export($sharedCapability, true) .
+        ", static function (): string { return 'ok'; });";
+    if ($withRoute) {
+        $registrations .=
+            "\n    \$runtime->registerRoute(" .
+            var_export($routeId, true) .
+            ", static function (): string { return 'ok'; });";
+    }
     $entrypoint = "<?php\nfile_put_contents(" .
         var_export($executionMarker, true) .
-        ", 'executed');\n";
+        ", 'executed');\nreturn static function (" .
+        "RED_Addon_Runtime_Registry \$runtime): void {" .
+        $registrations . "\n};\n";
     $files = [
         'addon.php' => $entrypoint,
     ];
@@ -209,15 +227,15 @@ function red_addon_enable_test_package(
         'permissions' => [$packageId . '.settings.manage'],
         'settings' => [],
         'migrations' => $migrations,
-        'routes' => [[
-            'id' => $routeId,
-            'scope' => 'admin',
-            'path' => '/admin/addons/' . $parts[0] . '/' .
-                $parts[1] . '/manage',
-            'methods' => ['GET'],
-            'authentication' => 'admin',
-            'csrf' => 'not-applicable',
-        ]],
+        'routes' => $withRoute ? [[
+                'id' => $routeId,
+                'scope' => 'admin',
+                'path' => '/admin/addons/' . $parts[0] . '/' .
+                    $parts[1] . '/manage',
+                'methods' => ['GET'],
+                'authentication' => 'admin',
+                'csrf' => 'not-applicable',
+            ]] : [],
         'jobs' => [],
         'outboundHosts' => [],
         'assets' => [
@@ -436,6 +454,16 @@ try {
         $sharedRouteId,
         true
     );
+    red_addon_enable_test_package(
+        $fixtureProject,
+        $readyPackageId,
+        $executionMarker,
+        [],
+        'redcms.enable-ready/service',
+        'redcms.enable-ready/unused-route',
+        false,
+        false
+    );
 
     $catalog = red_addon_discover($fixtureProject, [
         'cmsVersion' => '5.1.0',
@@ -443,12 +471,14 @@ try {
     ]);
     $targetPackage = $catalog['packages'][$targetPackageId] ?? [];
     $basePackage = $catalog['packages'][$basePackageId] ?? [];
+    $readyPackage = $catalog['packages'][$readyPackageId] ?? [];
     red_addon_enable_test_assert(
         !empty($catalog['valid'])
             && !empty($targetPackage['valid'])
             && !empty($basePackage['valid'])
+            && !empty($readyPackage['valid'])
             && !file_exists($executionMarker),
-        'trusted fixture discovery validates both packages without executing addon.php'
+        'trusted fixture discovery validates every package without executing addon.php'
     );
 
     $deniedPlan = red_addon_enable_preflight_plan(
@@ -489,9 +519,53 @@ try {
         $basePackage,
         $actorId,
         'installed_disabled'
+    ) || !red_addon_enable_test_record_installation(
+        $connection,
+        $readyPackage,
+        $actorId,
+        'installed_disabled'
     )) {
         throw new RuntimeException('Could not record enablement fixtures.');
     }
+
+    $readyFingerprint = red_addon_enable_test_fingerprint(
+        $connection,
+        $fixturePackageIds,
+        $actorId
+    );
+    $readyPlan = red_addon_enable_preflight_plan(
+        $connection,
+        $readyPackage,
+        $actorId,
+        $catalog
+    );
+    red_addon_enable_test_assert(
+        !empty($readyPlan['valid'])
+            && $readyPlan['declarativeGatesReady']
+            && !$readyPlan['enableReady']
+            && !$readyPlan['activationSupported']
+            && $readyPlan['activationProfile']['id']
+                === 'registration_only_service'
+            && $readyPlan['gates']['themeCompatibility']
+                === 'not_applicable'
+            && $readyPlan['gates']['settings'] === 'passed'
+            && $readyPlan['gates']['liveData'] === 'not_applicable'
+            && array_column($readyPlan['blockers'], 'code') === [
+                'activation_transition_unavailable',
+            ],
+        'a registration-only service clears every declarative activation gate'
+    );
+    red_addon_enable_test_assert(
+        hash_equals(
+            $readyFingerprint,
+            red_addon_enable_test_fingerprint(
+                $connection,
+                $fixturePackageIds,
+                $actorId
+            )
+        ) && !file_exists($executionMarker),
+        'registration-only readiness remains database-read-only and non-executing'
+    );
 
     $beforeDisabledDependencyPlan = red_addon_enable_test_fingerprint(
         $connection,
@@ -524,14 +598,19 @@ try {
                 true
             )
             && in_array(
-                'theme_contract_unavailable',
+                'live_data_contract_required',
                 $disabledBlockerCodes,
                 true
             )
+            && $disabledDependencyPlan['gates']['themeCompatibility']
+                === 'not_applicable'
+            && $disabledDependencyPlan['gates']['settings'] === 'passed'
+            && $disabledDependencyPlan['gates']['liveData'] === 'blocked'
+            && !$disabledDependencyPlan['declarativeGatesReady']
             && $disabledDependencyPlan['gates']['runtimeRegistration']
                 === 'available'
             && $disabledDependencyPlan['gates']['dependencies'] === 'blocked',
-        'disabled dependency and remaining activation contracts stay explicit blockers'
+        'disabled dependency and exposed live-data surface stay explicit blockers'
     );
 
     $repeatDisabledDependencyPlan = red_addon_enable_preflight_plan(
@@ -672,6 +751,41 @@ try {
         'same-scope path registration detects only overlapping HTTP methods'
     );
 
+    $expandedProfile = red_addon_enable_preflight_activation_profile([
+        'provides' => [
+            'components' => ['redcms.synthetic/component'],
+            'services' => [],
+            'adminTools' => ['redcms.synthetic/tool'],
+            'adapters' => ['redcms.synthetic/adapter'],
+        ],
+        'settings' => [[
+            'key' => 'synthetic.setting',
+        ]],
+        'routes' => [['id' => 'redcms.synthetic/route']],
+        'jobs' => [['id' => 'redcms.synthetic/job']],
+        'outboundHosts' => ['api.example.test'],
+        'assets' => [
+            'public' => [['path' => 'public.css']],
+            'admin' => [['path' => 'admin.css']],
+        ],
+    ]);
+    red_addon_enable_test_assert(
+        empty($expandedProfile['eligible'])
+            && $expandedProfile['id'] === 'expanded_contract_required'
+            && $expandedProfile['gates'] === [
+                'themeCompatibility' => 'blocked',
+                'settings' => 'blocked',
+                'liveData' => 'blocked',
+            ]
+            && array_column($expandedProfile['blockers'], 'code') === [
+                'live_data_contract_required',
+                'registration_only_service_required',
+                'settings_configuration_required',
+                'theme_contract_required',
+            ],
+        'components, configuration, and operational surfaces fail closed with exact gate evidence'
+    );
+
     $targetSnapshot = red_addon_registry_snapshot($targetPackage);
     mysqli_query(
         $connection,
@@ -719,6 +833,7 @@ try {
         str_contains($cliSource, "PHP_SAPI !== 'cli'")
             && str_contains($cliSource, 'State mutation: no')
             && str_contains($cliSource, 'Runtime load: no')
+            && str_contains($cliSource, 'Declarative gates ready:')
             && !str_contains($cliSource, '--apply')
             && preg_match(
                 '/\\b(?:require|include)(?:_once)?\\b\\s*\\(?[^;\\n]*addon\\.php/',
@@ -743,15 +858,18 @@ try {
             "SELECT CONCAT_WS(':',
                 (SELECT COUNT(*) FROM RED_Addon_Installations
                  WHERE PackageID IN (
-                    'redcms.enable-target','redcms.enable-base'
+                    'redcms.enable-target','redcms.enable-base',
+                    'redcms.enable-ready'
                  )),
                 (SELECT COUNT(*) FROM RED_Addon_Migrations
                  WHERE PackageID IN (
-                    'redcms.enable-target','redcms.enable-base'
+                    'redcms.enable-target','redcms.enable-base',
+                    'redcms.enable-ready'
                  )),
                 (SELECT COUNT(*) FROM RED_Addon_Activity_Log
                  WHERE PackageID IN (
-                    'redcms.enable-target','redcms.enable-base'
+                    'redcms.enable-target','redcms.enable-base',
+                    'redcms.enable-ready'
                  )),
                 (SELECT COUNT(*) FROM RED_Admin WHERE RecordID=$actorId)
              )"

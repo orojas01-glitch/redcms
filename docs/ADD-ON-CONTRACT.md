@@ -356,10 +356,14 @@ enablement inspection boundary. The command:
 
 A valid diagnostic plan is deliberately not an activation authorization.
 `enableReady`, `activationSupported`, `stateMutation`, and `runtimeLoad` remain
-false. Runtime registration is now reported available, while theme, settings,
-live-data, and atomic-transition contracts remain explicit blockers. Rollback
-behavior still requires separate reviewed implementation. No package can move
-to `enabled` through this preflight command.
+false. Runtime registration is reported available. Declarative theme,
+settings, and live-data gates may clear only for the constrained
+`registration_only_service` profile: at least one declared service and no
+component, route, job, adapter, public/admin asset, administrator tool,
+outbound host, or setting. Every richer surface remains explicitly blocked.
+The package registrar remains unexecuted. The atomic transition must revalidate
+and execute that registrar before its rollback proof and state change. No
+package can move to `enabled` through this preflight command.
 
 `includes/addon_runtime_helpers.php` establishes the executable registration
 contract and `index.php` connects it only to front-controller page requests,
@@ -710,9 +714,10 @@ responses, or structured data.
    identity, and capability/route collision reporting without executing code or
    mutating state. Fixed runtime registration and fail-closed front-controller
    page-request bootstrap are implemented without enabling a package or
-   invoking its handlers. The remaining enablement gates, the atomic `enabled`
-   transition, and every later lifecycle transition remain separate reviewed
-   batches.
+   invoking its handlers. The read-only plan now clears only declarative gates
+   for a registration-only service profile and blocks every richer surface.
+   The registrar-validating atomic `enabled` transition and every later
+   lifecycle transition remain separate reviewed batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 7. If private folders are scheduled for activation, implement and pass Member

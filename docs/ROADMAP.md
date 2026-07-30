@@ -126,9 +126,14 @@ registered handlers through a core lookup context, and fail before rendering
 when enabled evidence is unsafe. The clean starter has no package directory or
 enabled package state.
 
-The Owner-authorized enable transition, handler dispatch, upgrades,
-disable/uninstall/purge, Member Access, Store Lite, and the other optional
-verticals remain later reviewed batches.
+The read-only enablement plan now resolves declarative theme, settings, and
+live-data gates for one deliberately constrained profile: a registration-only service package
+with no component, route, job, adapter, asset, administrator-tool,
+outbound-host, or settings surface. Any richer package remains blocked behind
+its explicit contracts. The Owner-authorized atomic enable transition must
+still execute and verify the specific registrar before changing state. Handler
+dispatch, upgrades, disable/uninstall/purge, Member Access, Store Lite, and the
+other optional verticals remain later reviewed batches.
 
 ### Version 5.1 Compatibility Work
 
