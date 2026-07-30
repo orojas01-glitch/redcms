@@ -782,6 +782,40 @@ try {
         'a component with only the core default renderer clears declarative gates'
     );
 
+    $defaultComponentWithServicesProfile =
+        red_addon_enable_preflight_activation_profile([
+            'provides' => [
+                'components' => ['redcms.synthetic/component'],
+                'services' => [
+                    'redcms.synthetic/catalog',
+                    'redcms.synthetic/cart',
+                ],
+                'adminTools' => [],
+                'adapters' => [],
+            ],
+            'settings' => [],
+            'migrations' => [],
+            'routes' => [],
+            'jobs' => [],
+            'outboundHosts' => [],
+            'assets' => [
+                'public' => [],
+                'admin' => [],
+            ],
+        ]);
+    red_addon_enable_test_assert(
+        !empty($defaultComponentWithServicesProfile['eligible'])
+            && $defaultComponentWithServicesProfile['id']
+                === 'default_public_component_with_services'
+            && $defaultComponentWithServicesProfile['gates'] === [
+                'themeCompatibility' => 'passed',
+                'settings' => 'passed',
+                'liveData' => 'not_applicable',
+            ]
+            && $defaultComponentWithServicesProfile['blockers'] === [],
+        'a default public component plus registration-only services clears declarative gates'
+    );
+
     $expandedProfile = red_addon_enable_preflight_activation_profile([
         'provides' => [
             'components' => ['redcms.synthetic/component'],

@@ -281,8 +281,7 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
         $settingsRequired = $inventory['settings'] > 0;
         $operationalSurface = $liveDataSurface;
         $operationalSurface['services'] = 0;
-        $liveDataRequired = array_sum($operationalSurface) > 0
-            || ($hasComponents && $hasServices);
+        $liveDataRequired = array_sum($operationalSurface) > 0;
         $registrationOnly = $hasServices
             && !$hasComponents
             && !$themeRequired
@@ -293,7 +292,14 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
             && !$themeRequired
             && !$settingsRequired
             && !$liveDataRequired;
-        $eligible = $registrationOnly || $defaultPublicComponent;
+        $defaultPublicComponentWithServices = $hasComponents
+            && $hasServices
+            && !$themeRequired
+            && !$settingsRequired
+            && !$liveDataRequired;
+        $eligible = $registrationOnly
+            || $defaultPublicComponent
+            || $defaultPublicComponentWithServices;
         $blockers = [];
 
         if ($themeRequired) {
@@ -327,7 +333,11 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
                 : (
                     $defaultPublicComponent
                         ? 'default_public_component'
-                        : 'expanded_contract_required'
+                        : (
+                            $defaultPublicComponentWithServices
+                                ? 'default_public_component_with_services'
+                                : 'expanded_contract_required'
+                        )
                 ),
             'eligible' => $eligible,
             'gates' => [

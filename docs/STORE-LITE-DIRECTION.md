@@ -73,12 +73,11 @@ Its initial manifest contract should declare:
   and
 - retained data as the default uninstall behavior.
 
-The current Version 5.1 activation profile intentionally cannot enable this
-manifest. Core currently supports either a registration-only service or a
-core-rendered default public component, not a package that combines a
-component, services, administrator tools, persistence, routes, or assets.
-Store Lite must remain blocked until each richer generic surface below is
-implemented and accepted independently.
+The current Version 5.1 lifecycle can enable a constrained default component
+combined with registration-only services. It still cannot enable the complete
+Store Lite manifest because that package needs administrator tools,
+persistence, routes, settings, and assets. Store Lite must remain blocked until
+each richer generic surface below is implemented and accepted independently.
 
 ## Component Contract
 
@@ -231,10 +230,10 @@ follow the generic add-on lifecycle:
 6. Disablement refuses enabled dependents, records `installed_disabled`
    atomically, unloads the package on later requests, and retains data.
 
-Store Lite cannot use the current minimal enablement profile. Before its first
-release, RED-CMS needs separate reviewed core batches for:
+Store Lite still cannot use the current minimal enablement profile. Generic
+combined component-plus-service registration is complete, but before Store
+Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- combined component-plus-service activation;
 - package-owned component persistence and editor contracts;
 - typed service invocation;
 - declared public and administrator routes;
@@ -276,8 +275,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 ## Delivery Sequence
 
 1. Approve this Store Lite product and security boundary.
-2. Implement the generic combined-package activation contract with disposable
-   component-plus-service fixtures.
+2. Completed: implement the generic combined-package activation contract with
+   disposable component-plus-service fixtures.
 3. Implement generic package component persistence and bounded editor/public
    view contracts.
 4. Implement generic typed service, route, administrator-tool, settings, and

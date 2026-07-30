@@ -363,9 +363,12 @@ settings, and live-data gates may clear only for these constrained profiles:
 
 - `registration_only_service`: at least one declared service and no component;
 - `default_public_component`: at least one declared component and no service,
-  with theme compatibility supplied only by core's escaped default renderer.
+  with theme compatibility supplied only by core's escaped default renderer;
+- `default_public_component_with_services`: at least one component and one
+  service, with the same core-owned default component renderer and no automatic
+  service invocation.
 
-Both profiles exclude migrations, settings, routes, jobs, public or
+All three profiles exclude migrations, settings, routes, jobs, public or
 administrator assets, administrator tools, adapters, and outbound hosts.
 Every richer surface remains explicitly blocked. The package registrar remains
 unexecuted. The separate CLI-only enable command must revalidate and execute
@@ -758,29 +761,34 @@ responses, or structured data.
    mutating state. Fixed runtime registration and fail-closed front-controller
    page-request bootstrap and safe enabled-component public dispatch are
    implemented without bundling a package or business data. The read-only plan
-   now clears declarative gates only for the registration-only service and
-   core-rendered default public component profiles. The registrar-validating
-   atomic `enabled` transition for those constrained profiles is implemented.
-   The component profile adds no editor, persistence, package assets, business
-   data, or client package. Non-executing, data-retaining atomic disablement is
-   also implemented with enabled-dependent refusal and later-request unload
-   proof. Every richer package surface and every later lifecycle transition
-   remain separate reviewed batches.
+   now clears declarative gates only for registration-only service,
+   core-rendered default public component, and combined default-component plus
+   registration-only-service profiles. The registrar-validating atomic
+   `enabled` transition for those constrained profiles is implemented. The
+   component profiles add no editor, persistence, package assets, business
+   data, or client package, and services remain lookup-only. Non-executing,
+   data-retaining atomic disablement is also implemented with
+   enabled-dependent refusal and later-request unload proof. Every richer
+   package surface and every later lifecycle transition remain separate
+   reviewed batches.
 6. Define the Store Lite package, data, service, payment, lifecycle, and
    acceptance boundary without adding commerce behavior to core. This
    direction is documented in `docs/STORE-LITE-DIRECTION.md`.
-7. Implement the remaining generic component-plus-service, persistence,
-   editor, route, administrator-tool, settings, asset, and live-data contracts
-   as separate disposable-fixture batches.
-8. Implement and distribute Store Lite separately as the first complete
+7. Implement generic combined default-component plus registration-only-service
+   activation. This constrained profile is implemented with disposable
+   preflight, enablement, runtime-render, disablement, and cleanup evidence.
+8. Implement the remaining generic persistence, editor, typed-service, route,
+   administrator-tool, settings, asset, and live-data contracts as separate
+   disposable-fixture batches.
+9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
-9. If private folders are scheduled for activation, implement and pass Member
+10. If private folders are scheduled for activation, implement and pass Member
    Access before exposing an operational private setting.
-10. Implement Events Calendar as the second independent proof that a new
+11. Implement Events Calendar as the second independent proof that a new
    component no longer requires core dispatcher edits.
-11. Implement Appointments.
-12. Implement Donations.
-13. Implement Restaurant Ordering.
+12. Implement Appointments.
+13. Implement Donations.
+14. Implement Restaurant Ordering.
 
 Each implementation remains a separate reviewed batch with its own rollback
 path, migration evidence, acceptance fixtures, and client-specific activation

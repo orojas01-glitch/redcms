@@ -220,13 +220,14 @@ includes `addon.php`.
 
 The separate Owner-authorized enablement preflight remains CLI-only and
 read-only. It never includes package PHP and has no apply mode. Its activation
-gate evaluator supports only two constrained profiles: a registration-only
-service with no component, and a default public component with no service.
-Both exclude migrations, settings, routes, jobs, public or administrator
-assets, administrator tools, adapters, and outbound hosts. The component
-profile clears theme compatibility only because core owns its escaped default
-renderer. Every richer surface fails closed with explicit theme, settings, or
-live-data evidence. The package registrar remains unexecuted during preflight.
+gate evaluator supports only three constrained profiles: a registration-only
+service, a default public component, or a default public component combined
+with registration-only services. All exclude migrations, settings, routes,
+jobs, public or administrator assets, administrator tools, adapters, and
+outbound hosts. Either component profile clears theme compatibility only
+because core owns its escaped default renderer. Every richer surface fails
+closed with explicit theme, settings, or live-data evidence. The package
+registrar remains unexecuted during preflight.
 `enableReady`, state mutation, and runtime loading remain false there. The
 separate CLI-only Owner enable command requires exact plan and backup
 confirmations, revalidates under the database-wide lifecycle lock and
@@ -280,17 +281,19 @@ values, emitted output, handler exceptions, and output-buffer tampering fail
 closed to static fallback content. Service, administrator-tool, adapter, and
 route handlers remain lookup-only. The clean starter contains no package
 directory or enabled state. The implemented enable command accepts only the
-constrained registration-only service and default public component profiles.
+constrained registration-only service, default public component, and combined
+default-component plus registration-only-service profiles.
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Settings, package assets,
 migrations, live data, recovery, and every richer enablement gate remain
 separate work.
 
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
-boundary. It does not activate commerce. Store Lite remains blocked until
-generic component persistence, typed service invocation, routes,
-administrator tools, settings, assets, live-data compatibility, and
-component-plus-service enablement pass separate disposable-fixture reviews.
+boundary. It does not activate commerce. Combined component-plus-service
+registration is implemented, but Store Lite remains blocked until generic
+component persistence, typed service invocation, routes, administrator tools,
+settings, assets, and live-data compatibility pass separate
+disposable-fixture reviews.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
 
