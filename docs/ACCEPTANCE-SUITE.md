@@ -36,7 +36,7 @@ The current compatibility foundation performs these checks through one command:
 5. Import `db-structure.sql`.
 6. Verify 25 InnoDB tables, utf8mb4 collations, an empty migration ledger, sanitized administrator seed placeholders, empty administrator role/capability tables, and empty add-on installation/migration/audit storage.
 7. Apply every checked-in migration and require the ledger count to match the migration-file count.
-8. Run migrations again and require `No pending migrations.` plus zero checksum drift. Then run the 16-assertion Owner authorization lifecycle, 14-assertion add-on registry lifecycle, 11-assertion request-bootstrap lifecycle, 19-assertion install lifecycle, and 20-assertion read-only enablement-preflight lifecycle. Enablement preflight requires exact Owner authority, current installed-disabled evidence, deterministic plans, dependency and namespace checks, registration-only declarative readiness, explicit richer-surface blockers, zero state mutation or package execution, CLI-only boundaries, drift refusal, and exact cleanup. Then run the 38-assertion disposable SEO lifecycle, 29-assertion content-revision lifecycle, 21-assertion page-layout distribution lifecycle, and 36-assertion custom-layout lifecycle with their existing rollback and cleanup requirements.
+8. Run migrations again and require `No pending migrations.` plus zero checksum drift. Then run the 16-assertion Owner authorization lifecycle, 14-assertion add-on registry lifecycle, 11-assertion request-bootstrap lifecycle, 19-assertion install lifecycle, 20-assertion read-only enablement-preflight lifecycle, and 15-assertion atomic-enable lifecycle. Enablement preflight requires exact Owner authority, current installed-disabled evidence, deterministic plans, dependency and namespace checks, registration-only declarative readiness, explicit richer-surface blockers, zero state mutation or package execution, CLI-only boundaries, drift refusal, and exact cleanup. Atomic enablement separately requires exact Owner authority and plan evidence, registrar validation under the package lock, atomic compare-and-swap state plus audit, injected-failure rollback, later runtime loading, repeat refusal, and exact cleanup. Then run the 38-assertion disposable SEO lifecycle, 29-assertion content-revision lifecycle, 21-assertion page-layout distribution lifecycle, and 36-assertion custom-layout lifecycle with their existing rollback and cleanup requirements.
 9. Verify the final 26-table InnoDB/utf8mb4 state, canonical clean-installer row counts including zero SEO, administrator authorization, add-on installation, migration, and lifecycle-audit rows, and zero Form, Gallery, area, layout, and component relationship errors, then run the 14-assertion two-connection theme-contract suite against the disposable database. That suite proves database-scoped locking, reentrancy, cross-connection exclusion, exception-safe release, effective-theme agreement, safe inactive upload placeholders, and reserved active/previous theme rows.
 10. Compare a normalized table/column/index manifest with the configured primary schema while ignoring data and auto-increment counters.
 11. Confirm the primary isolation snapshot is unchanged.
@@ -95,9 +95,10 @@ The current compatibility foundation performs these checks through one command:
 
 Representative behavior coverage is complete through the generic Version 5.1
 SEO, read-only add-on trust, persisted Owner authorization, read-only registry,
-guarded disabled-install/recovery, and read-only enablement-preflight
-foundations, fail-closed enabled-package request bootstrap, plus Milestone 5
-content-version, direct page-structure, and custom Layout Builder foundations.
+guarded disabled-install/recovery, read-only enablement-preflight, and atomic
+registration-only enablement foundations, fail-closed enabled-package request
+bootstrap, plus Milestone 5 content-version, direct page-structure, and custom
+Layout Builder foundations.
 The latest complete 2026-07-29 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 migration contract, and 40-assertion add-on trust contract, imported the
@@ -105,7 +106,7 @@ migration contract, and 40-assertion add-on trust contract, imported the
 with zero pending or drifted files, and completed the 16-assertion Owner
 authorization, 14-assertion add-on registry, 19-assertion disabled
 installation/recovery, 20-assertion read-only enablement preflight,
-11-assertion enabled-package request bootstrap,
+15-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 38-assertion SEO database, 29-assertion content-revision, 21-assertion
 layout-distribution, and 36-assertion custom-layout lifecycles. The normalized
 schema matched signature
@@ -145,7 +146,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -172,6 +173,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Add-on request-bootstrap acceptance runs only in the uniquely named disposable database and uses temporary first-party packages outside the clean starter. It proves uninstalled and disabled packages never execute, enabled dependencies register first, exact handlers and owners remain lookup-only, lifecycle CLIs do not request-load packages, bootstrap writes no registry or audit state, drift and missing dependencies/code fail before execution, and every package/database/filesystem fixture is removed.
 - Add-on install acceptance runs only in the uniquely named disposable database and uses a temporary validated first-party fixture outside the clean starter. It proves exact Owner authorization and dependency state, stale-plan and audit fail-closed behavior before SQL, resumable partial DDL, immutable migration evidence, bounded audit data, disabled/unloaded completion, local-only confirmations, and zero residual package, SQL, authorization, audit, or code-execution artifacts.
 - Add-on enablement-preflight acceptance runs only in the uniquely named disposable database and uses temporary validated packages outside the clean starter. It requires exact Owner `addons.enable` authority, exact installed-disabled/current registry evidence, deterministic client-bound plans, required enabled dependencies, capability and route conflict reporting, a registration-only service profile that clears its declarative gates, exact richer-surface theme/settings/live-data blockers, no apply path, identical pre/post registry and authorization fingerprints, no package execution, and exact cleanup.
+- Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, an atomic enabled-state and bounded-audit commit, later runtime loading, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 26 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.
 - The Section-delete lifecycle uses a disposable Webmaster, Section, and two Articles only inside the disposable database. It requires count-aware confirmation, CSRF refusal with unchanged state, one transaction that archives every related Article before deleting the Section, exact response reporting, recovery through **Inactive Articles**, an active-theme 404 at the old route, and zero targeted artifacts. Form/Gallery child rows and media are deliberately left attached to their preserved parent Articles.

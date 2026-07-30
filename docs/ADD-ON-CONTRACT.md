@@ -361,9 +361,12 @@ settings, and live-data gates may clear only for the constrained
 `registration_only_service` profile: at least one declared service and no
 component, route, job, adapter, public/admin asset, administrator tool,
 outbound host, or setting. Every richer surface remains explicitly blocked.
-The package registrar remains unexecuted. The atomic transition must revalidate
-and execute that registrar before its rollback proof and state change. No
-package can move to `enabled` through this preflight command.
+The package registrar remains unexecuted. The separate CLI-only enable command
+must revalidate and execute that registrar before its state change. It accepts
+only this profile, takes the package lock, requires exact target, plan, backup,
+and disabled-state confirmations, then commits its compare-and-swap state
+change and bounded success audit fact in one transaction. No package can move
+to `enabled` through this preflight command.
 
 `includes/addon_runtime_helpers.php` establishes the executable registration
 contract and `index.php` connects it only to front-controller page requests,
@@ -716,7 +719,8 @@ responses, or structured data.
    page-request bootstrap are implemented without enabling a package or
    invoking its handlers. The read-only plan now clears only declarative gates
    for a registration-only service profile and blocks every richer surface.
-   The registrar-validating atomic `enabled` transition and every later
+   The registrar-validating atomic `enabled` transition for that constrained
+   profile is implemented. Every richer package surface and every later
    lifecycle transition remain separate reviewed batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.

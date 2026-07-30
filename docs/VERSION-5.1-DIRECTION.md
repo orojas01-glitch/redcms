@@ -3,15 +3,15 @@
 Status: implementation in progress. Per-page SEO compatibility, including the
 approved constrained JSON-LD core, non-executing add-on trust validation,
 persisted Owner authorization, per-client registry/migration-ledger storage,
-read-only reconciliation, and guarded server-local installation into a
-disabled state are implemented. Fresh isolated Adriana JSON-LD verification
+read-only reconciliation, guarded server-local installation into a disabled
+state, and constrained Owner-authorized atomic registration-only enablement
+are implemented. Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
 backup, migration, launch verification, and rollback gate are complete without
 copying client assets or data into the starter. Fixed add-on registration and
 fail-closed page-request loading are implemented for already-recorded enabled
-packages, while the Owner enable transition, handler dispatch, upgrades,
-disable/uninstall/purge, member access, publishing, payment, and integration
-controls remain inactive.
+packages, while handler dispatch, upgrades, disable/uninstall/purge, member
+access, publishing, payment, and integration controls remain inactive.
 
 ## Product Goal
 
@@ -168,8 +168,7 @@ migration evidence and bounded audit events, and finishes
 `installed_disabled`. It never includes `addon.php`. Because MySQL DDL can
 commit implicitly, partial failures remain visible as `installation_failed`
 with an explicit resumable ledger rather than a false rollback claim. No
-lifecycle UI, enabled-state transition, upgrade, disable, uninstall, or purge
-command exists.
+lifecycle UI, upgrade, disable, uninstall, or purge command exists.
 
 The next lifecycle boundary is a separate server-local, read-only enablement
 preflight gated by the exact persisted Owner `addons.enable` capability. It
@@ -183,8 +182,11 @@ an available core contract. The read-only plan clears declarative theme,
 settings, and live-data gates only for a registration-only service package with no component,
 route, job, adapter, asset, administrator-tool, outbound-host, or settings
 surface. Packages with any richer surface retain exact contract blockers. The
-specific registrar remains unexecuted until a later atomic transition
-revalidates it, so the state transition remains unavailable.
+specific registrar remains unexecuted until the separate apply command
+revalidates it under the package lock. That command accepts only this profile,
+requires exact target, plan, backup, and disabled-state confirmations, then
+commits the state compare-and-swap plus bounded audit fact atomically. It does
+not add handler dispatch or support richer package surfaces.
 
 Front-controller page requests, public or authenticated, now reconcile the
 complete package catalog and per-client registry before executing any package
@@ -215,9 +217,9 @@ CLIs remain outside this request bootstrap.
 7. Completed foundation: resolve declarative theme, settings, and live-data
    readiness for the constrained registration-only service profile while
    leaving all package registrars and richer surfaces blocked and unexecuted.
-8. Next: implement the Owner-authorized atomic enable transition and rollback
-   proof for that constrained profile without broadening it to Store Lite or
-   other client-facing packages.
+8. Completed: implement the Owner-authorized atomic enable transition and
+   rollback proof for that constrained profile without broadening it to Store
+   Lite or other client-facing packages.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

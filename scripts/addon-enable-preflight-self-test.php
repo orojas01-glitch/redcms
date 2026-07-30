@@ -551,7 +551,7 @@ try {
             && $readyPlan['gates']['settings'] === 'passed'
             && $readyPlan['gates']['liveData'] === 'not_applicable'
             && array_column($readyPlan['blockers'], 'code') === [
-                'activation_transition_unavailable',
+                'registrar_validation_required',
             ],
         'a registration-only service clears every declarative activation gate'
     );
@@ -593,7 +593,7 @@ try {
                 true
             )
             && in_array(
-                'activation_transition_unavailable',
+                'registrar_validation_required',
                 $disabledBlockerCodes,
                 true
             )

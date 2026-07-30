@@ -4272,6 +4272,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running read-only Owner-authorized add-on enablement preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-enable-preflight-self-test.php"
 
+printf '%s\n' 'Running Owner-authorized atomic add-on enablement checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-enable-self-test.php"
+
 printf '%s\n' 'Running SEO metadata persistence, revision, area, and rollback checks.'
 RED_SEO_TEST_DATABASE="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/seo-metadata-database-self-test.php"
 
@@ -4442,4 +4445,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
