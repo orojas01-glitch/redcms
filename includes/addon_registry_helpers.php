@@ -417,8 +417,8 @@ if (!function_exists('red_addon_registry_package_report')) {
         } elseif ($report['lifecycleState'] === 'uninstalled') {
             $report['status'] = 'uninstalled_current';
         } elseif ($report['lifecycleState'] === 'enabled') {
-            $report['status'] = 'enabled_runtime_unavailable';
-            $report['warnings'][] = 'Enabled state is recorded, but no package runtime loader exists.';
+            $report['status'] = 'enabled_current';
+            $report['loadable'] = true;
         }
 
         return $report;

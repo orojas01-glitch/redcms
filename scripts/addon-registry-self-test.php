@@ -378,10 +378,10 @@ try {
 
     $enabledReport = red_addon_registry_package_report($connection, $package);
     red_addon_registry_test_assert(
-        $enabledReport['status'] === 'enabled_runtime_unavailable'
-            && !$enabledReport['loadable']
-            && count($enabledReport['warnings']) === 1,
-        'recorded enabled state still cannot load code before a runtime exists'
+        $enabledReport['status'] === 'enabled_current'
+            && $enabledReport['loadable']
+            && $enabledReport['warnings'] === [],
+        'recorded enabled state with current evidence is eligible for runtime loading'
     );
 
     red_addon_registry_test_remove_tree($temporaryRoot . '/project');

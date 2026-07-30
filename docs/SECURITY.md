@@ -121,9 +121,9 @@ add-on packages without executing them.
   install, enable, disable, upgrade, uninstall, or purge capability.
 
 This is not a PHP sandbox and does not authorize untrusted packages. There is
-no package upload, extraction, web installer, enablement, or runtime loader.
-The separate server-local installer accepts only packages that pass this
-operator-reviewed first-party trust boundary.
+no package upload, extraction, web installer, or enable transition. The
+separate server-local installer and request loader accept only packages that
+pass this operator-reviewed first-party trust boundary.
 
 ### Add-On Owner Authorization
 
@@ -153,9 +153,9 @@ accounts cannot be demoted to Guest or deleted through Administrator Users.
 Login and every protected administrator request reload the Owner role and
 grants from the current client database. Unknown capability values are ignored,
 and a capability row without the Owner role authorizes nothing. Only
-`addons.install` currently has a lifecycle consumer, and that consumer is a
-server-local CLI. The other grants remain dormant because no enable, disable,
-upgrade, uninstall, purge, or runtime implementation exists.
+`addons.install` has a server-local lifecycle consumer, and `addons.enable`
+gates a read-only preflight. The other grants remain dormant because no enable,
+disable, upgrade, uninstall, or purge transition exists.
 
 ### Add-On Registry Reconciliation
 
@@ -176,8 +176,9 @@ The registry foundation is read-only:
 - Reconciliation fails closed on invalid packages, unknown lifecycle states,
   changed identity hashes, pending or changed migrations, orphaned migration
   rows, and installed packages whose deployed code is missing.
-- A recorded `enabled` state is still reported as non-loadable because no
-  package runtime exists.
+- A recorded `enabled` state with exact current evidence is eligible for the
+  request loader; runtime registration still performs its own fail-closed
+  checks before package execution.
 - The read-only status command opens the current client database and validated
   filesystem packages but never includes `addon.php`, executes package SQL, or
   changes registry rows.
@@ -214,16 +215,18 @@ bounded audit event and leaves the package non-loadable. Recovery requires
 confirmations. Successful installation ends `installed_disabled` and never
 includes `addon.php`.
 
-No web endpoint consumes the installer. Enablement, runtime loading, upgrades,
-disablement, uninstall, purge, and client business packages require separate
-reviewed implementations with backup, dependency, live-data, and rollback or
-recovery gates.
+No web endpoint consumes the installer. Enablement, handler dispatch,
+upgrades, disablement, uninstall, purge, and client business packages require
+separate reviewed implementations with backup, dependency, live-data, and
+rollback or recovery gates.
 
 ### Add-On Runtime Registration Contract
 
-The first runtime-registration helper is implemented without a lifecycle apply
-command or production request bootstrap. It may execute only the fixed
-`addon.php` entry point of an already validated first-party package.
+The runtime-registration helper is connected only to the front-controller page
+request bootstrap, public or authenticated, not to a lifecycle apply command.
+It may execute only the fixed
+`addon.php` entry point of an already validated first-party package recorded
+as enabled in the current client database.
 
 - Core rechecks the real path, symlink boundary, and declared `addon.php`
   checksum immediately before inclusion.
@@ -232,13 +235,19 @@ command or production request bootstrap. It may execute only the fixed
 - The registrar can bind only identifiers declared by the validated manifest,
   and every declared runtime identifier must bind exactly once.
 - Required enabled dependencies load before dependents.
+- All enabled registry evidence and namespace ownership is checked before the
+  first package executes.
 - Missing code, checksum drift, undeclared or duplicate registration, output,
   and incomplete registration fail closed.
 
 This remains trusted in-process PHP, not a sandbox. The current self-test
-executes only temporary fixtures outside the starter. No package is enabled or
-loaded during a RED-CMS request until the separate Owner-authorized lifecycle,
-settings, theme, live-data, and recovery gates are implemented.
+executes only temporary fixtures outside the starter. Uninstalled and disabled
+packages never execute. Current enabled packages register into a request-local
+lookup context, but core does not yet invoke component, service,
+administrator-tool, adapter, or route handlers. The clean starter contains no
+package directory or enabled state, and no core command can enable a package
+until the separate Owner-authorized lifecycle, settings, theme, live-data, and
+recovery gates are implemented.
 
 ## Multi-User Authorization
 

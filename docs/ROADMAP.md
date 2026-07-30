@@ -108,8 +108,7 @@ The registry records a stable package id, version, type, raw-manifest hash,
 deterministic file-inventory hash, lifecycle state, actor ids, and immutable
 migration id/path/checksum evidence. The starter tables remain empty. A
 read-only CLI reports valid discovery, pending migrations, recorded drift,
-missing code, and the intentionally unavailable runtime without changing the
-database.
+and missing code without changing the database.
 
 The guarded install CLI dry-runs an exact database/package/migration plan,
 requires explicit database, version, plan, disabled-state, and separately
@@ -120,9 +119,16 @@ namespaced package SQL, records immutable migration evidence, and finishes
 Recoverable partial MySQL DDL failure is recorded as `installation_failed` and
 requires an exact reviewed resume.
 
-Enablement and runtime registration, upgrades, disable/uninstall/purge, Member
-Access, Store Lite, and the other optional verticals remain later reviewed
-batches.
+The fixed runtime-registration contract and front-controller page-request bootstrap are
+implemented. They load only already-recorded `enabled` packages after complete
+catalog, registry, dependency, namespace, and integrity reconciliation, expose
+registered handlers through a core lookup context, and fail before rendering
+when enabled evidence is unsafe. The clean starter has no package directory or
+enabled package state.
+
+The Owner-authorized enable transition, handler dispatch, upgrades,
+disable/uninstall/purge, Member Access, Store Lite, and the other optional
+verticals remain later reviewed batches.
 
 ### Version 5.1 Compatibility Work
 

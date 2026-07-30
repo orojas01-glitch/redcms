@@ -2,13 +2,14 @@
 /**
  * Read-only readiness planning for a future add-on enable transition.
  *
- * This helper never includes package PHP, mutates registry state, or claims
- * that runtime activation is available. It builds deterministic evidence for
- * an installed-disabled package and fails closed on authorization, trust,
- * registry, dependency, capability, or route ambiguity.
+ * This helper never includes package PHP or mutates registry state. It builds
+ * deterministic evidence for an installed-disabled package and fails closed
+ * on authorization, trust, registry, dependency, capability, or route
+ * ambiguity. Request-time registration availability does not authorize the
+ * still-unimplemented enable transition.
  */
 
-require_once __DIR__ . '/addon_registry_helpers.php';
+require_once __DIR__ . '/addon_runtime_helpers.php';
 
 if (!function_exists('red_addon_enable_preflight_database_name')) {
     function red_addon_enable_preflight_database_name($connection)
@@ -282,7 +283,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
                 'themeCompatibility' => 'not_implemented',
                 'settings' => 'not_implemented',
                 'liveData' => 'not_implemented',
-                'runtimeRegistration' => 'unavailable',
+                'runtimeRegistration' => 'available',
             ],
             'blockers' => [],
             'planSha256' => '',
@@ -387,7 +388,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             ) {
                 continue;
             }
-            if (($packageReport['status'] ?? '') !== 'enabled_runtime_unavailable'
+            if (($packageReport['status'] ?? '') !== 'enabled_current'
                 || !isset($catalog['packages'][$packageId])
                 || !is_array($catalog['packages'][$packageId])
             ) {
@@ -447,7 +448,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             }
             if (!is_array($dependencyReport)
                 || ($dependencyReport['status'] ?? '')
-                    !== 'enabled_runtime_unavailable'
+                    !== 'enabled_current'
                 || ($dependencyReport['lifecycleState'] ?? '') !== 'enabled'
             ) {
                 $plan['blockers'][] = [
@@ -501,9 +502,17 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
 
         $plan['runtimeInventory'] =
             red_addon_enable_preflight_runtime_inventory($manifest);
-        $plan['blockers'][] = [
-            'code' => 'runtime_contract_unavailable',
-        ];
+        foreach (
+            [
+                'activation_transition_unavailable',
+                'live_data_contract_unavailable',
+                'settings_contract_unavailable',
+                'theme_contract_unavailable',
+            ]
+            as $blockerCode
+        ) {
+            $plan['blockers'][] = ['code' => $blockerCode];
+        }
         red_addon_enable_preflight_sort_records($plan['blockers']);
 
         $planMaterial = [

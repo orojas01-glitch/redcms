@@ -4,9 +4,10 @@ Status: Version 5.1 trust validation, Owner authorization, read-only registry
 reconciliation, and guarded server-local installation are implemented.
 Installation applies reviewed migrations, records exact evidence, and always
 finishes disabled without executing package PHP. A fixed runtime-registration
-contract is implemented and tested only with temporary first-party fixtures.
-RED-CMS does not enable, request-load, upgrade, disable, uninstall, or purge
-packages through this contract yet.
+contract and fail-closed front-controller page-request bootstrap are implemented and
+tested only with temporary first-party fixtures. RED-CMS does not enable,
+automatically invoke registered handlers, upgrade, disable, uninstall, or
+purge packages through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -34,8 +35,11 @@ The first foundation batch provides:
 - a dry-run-first, Owner-authorized, server-local install command that applies
   reviewed package migrations, records failure/resume evidence, and remains
   disabled and unloaded;
+- a page-request loader that reconciles all enabled evidence before execution,
+  registers required dependencies first, and exposes exact handler ownership
+  through a request-local lookup context; and
 - adversarial dependency-free tests, installation/recovery tests, and a
-  read-only CLI report.
+  read-only CLI report plus disposable request-bootstrap acceptance.
 
 The clean starter contains no `addons/` package directory and no registry,
 migration, or add-on audit rows. A client or operator deploys trusted package
@@ -298,9 +302,9 @@ timestamp, and execution duration.
 `scripts/addon-registry-status.php` reconcile those rows with packages that
 have already passed the non-executing trust gate. They report uninstalled
 discovery, pending migrations, identity/checksum drift, orphaned migrations,
-missing deployed code, and recorded enabled state while the runtime is
-unavailable. The result is never loadable in this batch. These helpers perform
-no registry write, package SQL execution, or `addon.php` inclusion.
+missing deployed code, and whether recorded enabled state has exact current
+evidence eligible for request loading. These helpers perform no registry write,
+package SQL execution, or `addon.php` inclusion.
 
 `includes/addon_install_helpers.php` and
 `scripts/admin-addon-install.php` implement the separate install transition.
@@ -352,13 +356,15 @@ enablement inspection boundary. The command:
 
 A valid diagnostic plan is deliberately not an activation authorization.
 `enableReady`, `activationSupported`, `stateMutation`, and `runtimeLoad` remain
-false, and `runtime_contract_unavailable` remains an explicit blocker. Theme,
-settings, live-data, runtime-registration, atomic state-transition, and
-rollback behavior still require separate reviewed implementation. No package
-can move to `enabled` through this preflight command.
+false. Runtime registration is now reported available, while theme, settings,
+live-data, and atomic-transition contracts remain explicit blockers. Rollback
+behavior still requires separate reviewed implementation. No package can move
+to `enabled` through this preflight command.
 
-`includes/addon_runtime_helpers.php` establishes the first executable contract
-without connecting it to a lifecycle transition or request bootstrap:
+`includes/addon_runtime_helpers.php` establishes the executable registration
+contract and `index.php` connects it only to front-controller page requests,
+public or authenticated, not to a
+lifecycle transition or lifecycle CLI:
 
 - core may include only the fixed, real, non-symlinked `addon.php` whose
   checksum still matches the validated manifest immediately before inclusion;
@@ -367,15 +373,23 @@ without connecting it to a lifecycle transition or request bootstrap:
 - registration accepts only manifest-declared component, service,
   administrator-tool, adapter, and route identifiers;
 - every declared runtime identifier must register exactly once;
-- required enabled dependencies are ordered before their dependents; and
+- required enabled dependencies are ordered before their dependents;
+- every enabled registry row, package identity, migration ledger, dependency,
+  capability namespace, and route namespace is reconciled before the first
+  package executes; and
 - missing, changed, incomplete, duplicated, or undeclared runtime evidence
   fails closed.
 
 The contract still assumes operator-reviewed first-party PHP and is not a
-sandbox. `scripts/addon-runtime-self-test.php` executes only a temporary
-fixture outside the clean starter. Production request loading and the
-Owner-authorized `installed_disabled` to `enabled` transition remain separate
-reviewed work.
+sandbox. `scripts/addon-runtime-self-test.php` and
+`scripts/addon-request-bootstrap-self-test.php` execute only temporary fixtures
+outside the clean starter. Uninstalled and disabled packages remain
+unexecuted. Current enabled registrars run once in dependency order and expose
+handlers through the request-local context, but core does not automatically
+invoke those handlers in this batch. Request failure returns a generic
+temporary-unavailability response while detailed evidence remains in the
+server log. The Owner-authorized `installed_disabled` to `enabled` transition
+remains separate reviewed work.
 
 ## Component Contract
 
@@ -652,6 +666,8 @@ Every package must prove, in a disposable isolated installation:
 - Manifest, path, compatibility, integrity, and dependency validation
 - Zero execution during discovery and validation
 - Installation leaves the package disabled
+- Request bootstrap ignores uninstalled/disabled packages and fails before
+  rendering on unsafe enabled evidence
 - Migration apply, checksum, upgrade, rollback/failure, and cleanup behavior
 - Owner-only lifecycle actions and scoped package permissions
 - CSRF, request validation, prepared operations, and transactional writes
@@ -692,9 +708,11 @@ responses, or structured data.
    implemented. A separate Owner-authorized read-only enablement preflight now
    proves exact installed-disabled state, dependency evidence, enabled-package
    identity, and capability/route collision reporting without executing code or
-   mutating state. Runtime registration, the remaining enablement gates, the
-   atomic `enabled` transition, and every later lifecycle transition remain
-   separate reviewed batches.
+   mutating state. Fixed runtime registration and fail-closed front-controller
+   page-request bootstrap are implemented without enabling a package or
+   invoking its handlers. The remaining enablement gates, the atomic `enabled`
+   transition, and every later lifecycle transition remain separate reviewed
+   batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 7. If private folders are scheduled for activation, implement and pass Member
