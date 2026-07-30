@@ -23,10 +23,10 @@ only already-recorded `enabled` packages whose complete registry, dependency,
 namespace, and integrity evidence remains current; the clean starter has none.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
-remains separate. Add-on
-handler dispatch, upgrade, disable/uninstall/purge, payment, member access,
-editorial workflow, notifications, the broader role model, and social
-publishing integrations are not active features.
+remains separate. Service, route, adapter, and administrator-tool dispatch,
+upgrade, uninstall/purge, payment, member access, editorial workflow,
+notifications, the broader role model, and social publishing integrations are
+not active features.
 
 ## Highlights
 
@@ -49,6 +49,8 @@ publishing integrations are not active features.
 - Deterministic read-only enablement preflight with dependency, namespace, and constrained activation-gate reporting
 - Owner-authorized atomic enablement for constrained registration-only service
   and core-rendered default public component profiles
+- Owner-authorized atomic disablement with enabled-dependent refusal and no
+  package execution or data deletion
 - Fail-closed request bootstrap and lookup context for already-enabled first-party packages
 
 ## Portable Starter Distribution
@@ -119,6 +121,7 @@ php scripts/addon-registry-status.php --all
 php scripts/admin-addon-install.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-enable-preflight.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-enable.php --package=vendor.package --actor-admin=ID
+php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
 The install command is a dry run by default. Apply requires the exact database,
@@ -141,7 +144,15 @@ and requires exact database, package, version, plan, backup SHA-256, and
 installed-disabled confirmations before it validates the fixed registrar and
 atomically records `enabled` plus its bounded audit fact. Packages with any
 richer surface remain blocked behind their explicit theme, settings, or
-live-data contract. The
+live-data contract. The disable command is likewise CLI-only and dry-run
+first. It requires the exact Owner `addons.disable` capability, current
+enabled package evidence, plan and nonzero backup checksums, and
+`enabled`-state confirmation. Enable and disable transitions share one
+database-wide lifecycle lock. Disablement refuses an enabled dependent, never
+includes package PHP or runs migrations, and atomically returns the package to
+`installed_disabled` with one bounded audit fact. Package code, migration
+evidence, settings, and data remain in place, while later request bootstrap no
+longer loads the disabled package. The
 runtime-contract self-test executes only a temporary
 first-party fixture outside the starter. It rechecks the fixed `addon.php`
 checksum, requires exact manifest registration, orders required dependencies

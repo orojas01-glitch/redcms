@@ -121,9 +121,10 @@ add-on packages without executing them.
   install, enable, disable, upgrade, uninstall, or purge capability.
 
 This is not a PHP sandbox and does not authorize untrusted packages. There is
-no package upload, extraction, web installer, or web enable transition. The
-separate server-local installer, enable command, and request loader accept
-only packages that pass this operator-reviewed first-party trust boundary.
+no package upload, extraction, web installer, or web enable/disable
+transition. The separate server-local installer, enable/disable commands, and
+request loader accept only packages that pass this operator-reviewed
+first-party trust boundary.
 
 ### Add-On Owner Authorization
 
@@ -155,8 +156,9 @@ grants from the current client database. Unknown capability values are ignored,
 and a capability row without the Owner role authorizes nothing. Only
 `addons.install` has a server-local lifecycle consumer. `addons.enable` gates
 both the read-only enablement preflight and the separate dry-run-first atomic
-enable command. The other grants remain dormant because no disable, upgrade,
-uninstall, or purge transition exists.
+enable command. `addons.disable` gates the dry-run-first atomic disable
+command. The other grants remain dormant because no upgrade, uninstall, or
+purge transition exists.
 
 ### Add-On Registry Reconciliation
 
@@ -227,16 +229,27 @@ renderer. Every richer surface fails closed with explicit theme, settings, or
 live-data evidence. The package registrar remains unexecuted during preflight.
 `enableReady`, state mutation, and runtime loading remain false there. The
 separate CLI-only Owner enable command requires exact plan and backup
-confirmations, revalidates under the per-client package lock, validates the
-fixed registrar, and commits the state compare-and-swap plus bounded audit fact
-in one transaction. It accepts no richer package surface.
+confirmations, revalidates under the database-wide lifecycle lock and
+per-client package lock, validates the fixed registrar, and commits the state
+compare-and-swap plus bounded audit fact in one transaction. It accepts no
+richer package surface.
 
-No web endpoint consumes the installer or enable command. Component dispatch
-is limited to the bounded core-rendered contract described below. Service,
-administrator-tool, adapter, and route dispatch, upgrades, disablement,
-uninstall, purge, and client business packages require separate reviewed
-implementations with backup, dependency, live-data, and rollback or recovery
-gates.
+The separate CLI-only Owner disable command is also dry-run first. It requires
+the exact `addons.disable` capability, current `enabled` package and registry
+evidence, a deterministic plan, a nonzero verified-backup SHA-256, and exact
+enabled-state confirmations. Under the same lifecycle and package locks it
+rechecks every enabled package and refuses the transition when one declares
+the target as a required dependency. It never includes `addon.php`, runs a
+migration, removes code, or deletes settings, media, or package data. The
+`enabled` to `installed_disabled` compare-and-swap and
+`addon.disable.completed` audit fact commit in one transaction. Later request
+bootstrap excludes the disabled package.
+
+No web endpoint consumes the installer, enable, or disable command. Component
+dispatch is limited to the bounded core-rendered contract described below.
+Service, administrator-tool, adapter, and route dispatch, upgrades, uninstall,
+purge, and client business packages require separate reviewed implementations
+with backup, dependency, live-data, and rollback or recovery gates.
 
 ### Add-On Runtime Registration Contract
 
@@ -267,9 +280,11 @@ values, emitted output, handler exceptions, and output-buffer tampering fail
 closed to static fallback content. Service, administrator-tool, adapter, and
 route handlers remain lookup-only. The clean starter contains no package
 directory or enabled state. The implemented enable command accepts only the
-constrained registration-only service and default public component profiles;
-settings, package assets, migrations, live data, recovery, and every richer
-lifecycle gate remain separate work.
+constrained registration-only service and default public component profiles.
+The implemented disable command is non-executing and data-retaining for any
+current enabled package with no enabled dependent. Settings, package assets,
+migrations, live data, recovery, and every richer enablement gate remain
+separate work.
 
 ## Multi-User Authorization
 

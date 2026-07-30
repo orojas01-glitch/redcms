@@ -368,10 +368,23 @@ administrator assets, administrator tools, adapters, and outbound hosts.
 Every richer surface remains explicitly blocked. The package registrar remains
 unexecuted. The separate CLI-only enable command must revalidate and execute
 that registrar before its state change. It accepts only these profiles, takes
-the package lock, requires exact target, plan, backup, and disabled-state
-confirmations, then commits its compare-and-swap state change and bounded
-success audit fact in one transaction. No package can move to `enabled`
-through this preflight command.
+the database-wide lifecycle lock and package lock, requires exact target,
+plan, backup, and disabled-state confirmations, then commits its
+compare-and-swap state change and bounded success audit fact in one
+transaction. No package can move to `enabled` through this preflight command.
+
+`includes/addon_disable_helpers.php` and
+`scripts/admin-addon-disable.php` implement the reverse non-destructive
+transition. Its dry run requires the database-backed Owner role plus
+`addons.disable`, exact current `enabled` package and registry evidence, and a
+deterministic inventory of every other enabled package. It reports and refuses
+any enabled package whose required dependency list names the target. Apply
+recreates that exact plan under the shared lifecycle lock and target package
+lock, requires exact target, plan, nonzero backup SHA-256, and enabled-state
+confirmations, then atomically records `installed_disabled` plus
+`addon.disable.completed`. It never includes package PHP, invokes a registrar,
+runs migrations, removes package files, or deletes package settings, media,
+migration evidence, or business data.
 
 `includes/addon_runtime_helpers.php` establishes the executable registration
 contract and `index.php` connects it only to front-controller page requests,
@@ -401,9 +414,9 @@ invokes only an enabled manifest-declared component through its fixed public
 placement context and core-owned default renderer; service, route, adapter,
 and administrator-tool handlers remain non-dispatched. Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
-the server log. Owner-authorized enablement is a separate reviewed lifecycle step.
-It must revalidate the approved plan and registrar under the package lock
-before its atomic state transition.
+the server log. Owner-authorized enablement is a separate reviewed lifecycle
+step. It must revalidate the approved plan and registrar under the shared
+lifecycle lock and target package lock before its atomic state transition.
 
 ## Component Contract
 
@@ -538,9 +551,9 @@ payment credentials, passwords, or protected content.
 
 The lifecycle is:
 
-`Discovered → Validated → Installed/Disabled → Enabled`
+`Discovered → Validated → Installed/Disabled ⇄ Enabled`
 
-Upgrades, disablement, and uninstall are explicit transitions.
+Upgrades and uninstall remain later explicit transitions.
 
 - **Validate:** read-only checks; no package execution or database writes.
 - **Install:** apply reviewed migrations and record the installed version;
@@ -549,7 +562,10 @@ Upgrades, disablement, and uninstall are explicit transitions.
   preflight, then persist the enabled state atomically.
 - **Disable:** stop new execution without deleting package data. Refuse when
   required by another enabled package or when active public assignments would
-  become unsafe without an approved fallback.
+  become unsafe without an approved fallback. The first implementation
+  enforces enabled-dependent refusal; persisted add-on assignments remain
+  outside the supported minimal profile because component editor and
+  persistence contracts are not implemented.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
@@ -739,8 +755,10 @@ responses, or structured data.
    core-rendered default public component profiles. The registrar-validating
    atomic `enabled` transition for those constrained profiles is implemented.
    The component profile adds no editor, persistence, package assets, business
-   data, or client package. Every richer package surface and every later
-   lifecycle transition remain separate reviewed batches.
+   data, or client package. Non-executing, data-retaining atomic disablement is
+   also implemented with enabled-dependent refusal and later-request unload
+   proof. Every richer package surface and every later lifecycle transition
+   remain separate reviewed batches.
 6. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 7. If private folders are scheduled for activation, implement and pass Member
