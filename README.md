@@ -47,7 +47,8 @@ publishing integrations are not active features.
 - Empty per-client add-on installation/migration registries with fail-closed reconciliation
 - Owner-authorized server-local package installation that remains disabled and unloaded
 - Deterministic read-only enablement preflight with dependency, namespace, and constrained activation-gate reporting
-- Owner-authorized atomic enablement for the registration-only service profile
+- Owner-authorized atomic enablement for constrained registration-only service
+  and core-rendered default public component profiles
 - Fail-closed request bootstrap and lookup context for already-enabled first-party packages
 
 ## Portable Starter Distribution
@@ -127,15 +128,20 @@ deployed separately per client; the clean starter intentionally contains no
 `addons/` directory. The enablement preflight is always read-only: it has no
 apply mode, keeps `enableReady` false because it does not validate the
 registrar, does not change the package's `installed_disabled` state, and
-does not execute package PHP. It can identify a registration-only service
-package with no component, settings, route, job, adapter, asset, administrator
-tool, or outbound-host surface as declaratively eligible for later transition
-validation. The separate enable command is also dry-run first. It accepts only
-that constrained profile and requires exact database, package, version, plan,
-backup SHA-256, and installed-disabled confirmations before it validates the
-fixed registrar and atomically records `enabled` plus its bounded audit fact.
-Packages with any richer surface remain blocked behind their explicit theme,
-settings, or live-data contract. The
+does not execute package PHP. It can identify either a registration-only
+service package or a default public component package as declaratively
+eligible for later transition validation. The service profile declares at
+least one service and no component; the component profile declares at least
+one component and no service. Both profiles exclude migrations, settings,
+routes, jobs, public or administrator assets, administrator tools, adapters,
+and outbound hosts. Core's escaped default component renderer is the complete
+theme-compatibility contract for the component profile. The separate enable
+command is also dry-run first. It accepts only those two constrained profiles
+and requires exact database, package, version, plan, backup SHA-256, and
+installed-disabled confirmations before it validates the fixed registrar and
+atomically records `enabled` plus its bounded audit fact. Packages with any
+richer surface remain blocked behind their explicit theme, settings, or
+live-data contract. The
 runtime-contract self-test executes only a temporary
 first-party fixture outside the starter. It rechecks the fixed `addon.php`
 checksum, requires exact manifest registration, orders required dependencies

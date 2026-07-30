@@ -14,6 +14,7 @@ $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot . '/includes/addon_enable_helpers.php';
+require_once $projectRoot . '/includes/addon_component_render_helpers.php';
 
 if (!preg_match('/\Aredcms_(?:acceptance|addon_enable)_[A-Za-z0-9_]+\z/', (string) DBNAME)) {
     fwrite(STDERR, 'Add-on enable self-test refused non-disposable database: ' . DBNAME . "\n");
@@ -23,8 +24,9 @@ if (!preg_match('/\Aredcms_(?:acceptance|addon_enable)_[A-Za-z0-9_]+\z/', (strin
 $assertions = 0;
 $actorId = 2147000931;
 $readyPackageId = 'redcms.atomic-ready';
+$componentPackageId = 'redcms.atomic-component';
 $richPackageId = 'redcms.atomic-rich';
-$packageIds = [$readyPackageId, $richPackageId];
+$packageIds = [$readyPackageId, $componentPackageId, $richPackageId];
 $temporaryRoot = sys_get_temp_dir() . '/redcms-addon-atomic-enable-' . bin2hex(random_bytes(8));
 $executionMarker = $temporaryRoot . '/registrar-executed';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
@@ -134,6 +136,60 @@ function red_addon_atomic_enable_package($project, $packageId, $serviceId, $mark
     file_put_contents($directory . '/addon.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 }
 
+function red_addon_atomic_enable_component_package(
+    $project,
+    $packageId,
+    $componentId,
+    $marker
+) {
+    $parts = explode('.', $packageId, 2);
+    $directory = $project . '/addons/' . $parts[0] . '/' . $parts[1];
+    if (!mkdir($directory, 0700, true) && !is_dir($directory)) {
+        throw new RuntimeException('Could not create atomic component fixture.');
+    }
+    $entrypoint = "<?php\nreturn static function (RED_Addon_Runtime_Registry \$runtime): void {\n" .
+        '    file_put_contents(' . var_export($marker, true) . ", 'component-executed\\n', FILE_APPEND | LOCK_EX);\n" .
+        '    $runtime->registerComponent(' . var_export($componentId, true) .
+        ", static function (array \$context): array {\n" .
+        "        return ['title' => 'Lifecycle component', 'summary' => 'Enabled through the supported Owner lifecycle.'];\n" .
+        "    });\n" .
+        "};\n";
+    file_put_contents($directory . '/addon.php', $entrypoint);
+    $manifest = [
+        '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
+        'schemaVersion' => 1,
+        'id' => $packageId,
+        'name' => 'Atomic Component Enable Fixture',
+        'description' => 'Disposable default public component fixture.',
+        'version' => '1.0.0',
+        'type' => 'component',
+        'compatibility' => ['cms' => '>=5.1 <6.0', 'php' => '>=8.2 <9.0'],
+        'provides' => [
+            'components' => [$componentId],
+            'services' => [],
+            'adminTools' => [],
+            'adapters' => [],
+        ],
+        'dependencies' => ['required' => [], 'optional' => []],
+        'permissions' => [$packageId . '.manage'],
+        'settings' => [],
+        'migrations' => [],
+        'routes' => [],
+        'jobs' => [],
+        'outboundHosts' => [],
+        'assets' => ['public' => [], 'admin' => []],
+        'integrity' => [
+            'entrypoint' => 'addon.php',
+            'files' => [['path' => 'addon.php', 'sha256' => hash('sha256', $entrypoint)]],
+        ],
+        'uninstall' => ['defaultDataAction' => 'retain', 'allowExplicitPurge' => true],
+    ];
+    file_put_contents(
+        $directory . '/addon.json',
+        json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+    );
+}
+
 function red_addon_atomic_enable_record_installation($connection, array $package, $actorId)
 {
     $snapshot = red_addon_registry_snapshot($package);
@@ -180,20 +236,27 @@ try {
 
     $fixtureProject = $temporaryRoot . '/project';
     red_addon_atomic_enable_package($fixtureProject, $readyPackageId, 'redcms.atomic-ready/service', $executionMarker);
+    red_addon_atomic_enable_component_package(
+        $fixtureProject,
+        $componentPackageId,
+        'redcms.atomic-component/card',
+        $executionMarker
+    );
     red_addon_atomic_enable_package($fixtureProject, $richPackageId, 'redcms.atomic-rich/service', $executionMarker, true);
     $catalog = red_addon_discover($fixtureProject, ['cmsVersion' => '5.1.0', 'phpVersion' => PHP_VERSION]);
     $readyPackage = $catalog['packages'][$readyPackageId] ?? [];
+    $componentPackage = $catalog['packages'][$componentPackageId] ?? [];
     $richPackage = $catalog['packages'][$richPackageId] ?? [];
-    red_addon_atomic_enable_assert(!empty($catalog['valid']) && !empty($readyPackage['valid']) && !empty($richPackage['valid']) && !file_exists($executionMarker), 'fixture discovery is trusted and non-executing');
-    red_addon_atomic_enable_assert(red_addon_atomic_enable_record_installation($connection, $readyPackage, $actorId) && red_addon_atomic_enable_record_installation($connection, $richPackage, $actorId), 'fixtures start installed and disabled');
+    red_addon_atomic_enable_assert(!empty($catalog['valid']) && !empty($readyPackage['valid']) && !empty($componentPackage['valid']) && !empty($richPackage['valid']) && !file_exists($executionMarker), 'fixture discovery is trusted and non-executing');
+    red_addon_atomic_enable_assert(red_addon_atomic_enable_record_installation($connection, $readyPackage, $actorId) && red_addon_atomic_enable_record_installation($connection, $componentPackage, $actorId) && red_addon_atomic_enable_record_installation($connection, $richPackage, $actorId), 'fixtures start installed and disabled');
 
     $deniedPlan = red_addon_enable_transition_plan($connection, $readyPackage, 1, $catalog);
     red_addon_atomic_enable_assert(empty($deniedPlan['valid']) && $deniedPlan['errors'] === ['owner_enable_capability_required'], 'legacy administrator cannot plan an enable transition');
     $richPlan = red_addon_enable_transition_plan($connection, $richPackage, $actorId, $catalog);
-    red_addon_atomic_enable_assert(empty($richPlan['valid']) && $richPlan['errors'] === ['registration_only_service_required'] && !file_exists($executionMarker), 'richer package surfaces remain non-executing and blocked');
+    red_addon_atomic_enable_assert(empty($richPlan['valid']) && $richPlan['errors'] === ['supported_activation_profile_required'] && !file_exists($executionMarker), 'richer package surfaces remain non-executing and blocked');
 
     $plan = red_addon_enable_transition_plan($connection, $readyPackage, $actorId, $catalog);
-    red_addon_atomic_enable_assert(!empty($plan['valid']) && $plan['transitionReady'] && red_addon_valid_sha256($plan['planSha256']) && !file_exists($executionMarker), 'Owner dry run yields an exact non-executing registration-only transition plan');
+    red_addon_atomic_enable_assert(!empty($plan['valid']) && $plan['transitionReady'] && ($plan['activationProfile']['id'] ?? '') === 'registration_only_service' && red_addon_valid_sha256($plan['planSha256']) && !file_exists($executionMarker), 'Owner dry run yields an exact non-executing registration-only transition plan');
     $before = red_addon_atomic_enable_fingerprint($connection, $packageIds);
     $stale = red_addon_enable_package($connection, $readyPackageId, $fixtureProject, $actorId, str_repeat('f', 64));
     red_addon_atomic_enable_assert($stale['status'] === 'plan_changed' && $before === red_addon_atomic_enable_fingerprint($connection, $packageIds) && !file_exists($executionMarker), 'stale plan is rejected before registrar execution or database mutation');
@@ -212,8 +275,80 @@ try {
     $enabled = red_addon_enable_package($connection, $readyPackageId, $fixtureProject, $actorId, $plan['planSha256']);
     red_addon_atomic_enable_assert($enabled['status'] === 'enabled' && ($enabled['runtimeRegistrations']['packageId'] ?? '') === $readyPackageId && file_exists($executionMarker), 'validated registrar and atomic state/audit transition enable the package');
     red_addon_atomic_enable_assert(red_addon_atomic_enable_scalar($connection, "SELECT CONCAT_WS(':', (SELECT LifecycleState FROM RED_Addon_Installations WHERE PackageID='redcms.atomic-ready'), (SELECT COUNT(*) FROM RED_Addon_Activity_Log WHERE PackageID='redcms.atomic-ready' AND EventName='addon.enable.completed' AND Result='succeeded' AND DetailCode='enabled'))") === 'enabled:1', 'enabled state and bounded audit fact commit together');
+
+    $beforeComponentPlan = (string) file_get_contents($executionMarker);
+    $componentPlan = red_addon_enable_transition_plan(
+        $connection,
+        $componentPackage,
+        $actorId,
+        $catalog
+    );
+    red_addon_atomic_enable_assert(
+        !empty($componentPlan['valid'])
+            && $componentPlan['transitionReady']
+            && ($componentPlan['activationProfile']['id'] ?? '')
+                === 'default_public_component'
+            && red_addon_valid_sha256($componentPlan['planSha256'])
+            && file_get_contents($executionMarker) === $beforeComponentPlan,
+        'Owner dry run accepts the default public component without executing it'
+    );
+    $componentEnabled = red_addon_enable_package(
+        $connection,
+        $componentPackageId,
+        $fixtureProject,
+        $actorId,
+        $componentPlan['planSha256']
+    );
+    red_addon_atomic_enable_assert(
+        $componentEnabled['status'] === 'enabled'
+            && ($componentEnabled['runtimeRegistrations']['registrations']['components'][0]
+                ?? '') === 'redcms.atomic-component/card',
+        'registrar validation and atomic state/audit transition enable the default public component'
+    );
+    red_addon_atomic_enable_assert(
+        red_addon_atomic_enable_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT LifecycleState FROM RED_Addon_Installations
+                 WHERE PackageID='redcms.atomic-component'),
+                (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                 WHERE PackageID='redcms.atomic-component'
+                   AND EventName='addon.enable.completed'
+                   AND Result='succeeded'
+                   AND DetailCode='enabled'))"
+        ) === 'enabled:1',
+        'component enabled state and bounded audit fact commit together'
+    );
     $runtime = red_addon_runtime_bootstrap($connection, $fixtureProject);
-    red_addon_atomic_enable_assert($runtime['context']->handler('services', 'redcms.atomic-ready/service') !== null, 'a later runtime bootstrap can load the newly enabled package');
+    red_addon_atomic_enable_assert(
+        $runtime['context']->handler('services', 'redcms.atomic-ready/service') !== null
+            && $runtime['context']->handler(
+                'components',
+                'redcms.atomic-component/card'
+            ) !== null,
+        'a later runtime bootstrap loads both supported enabled profiles'
+    );
+    red_addon_runtime_set_request_context($runtime['context']);
+    $publicContext = red_addon_public_component_context(
+        'redcms.atomic-component/card',
+        42,
+        'default',
+        'lifecycle-component',
+        2,
+        true
+    );
+    ob_start();
+    $publicRendered = red_addon_public_component_render($publicContext);
+    $publicOutput = (string) ob_get_clean();
+    red_addon_atomic_enable_assert(
+        $publicRendered
+            && str_contains($publicOutput, '<h2>Lifecycle component</h2>')
+            && str_contains(
+                $publicOutput,
+                'Enabled through the supported Owner lifecycle.'
+            ),
+        'the lifecycle-enabled component reaches the core-owned default public renderer'
+    );
     $repeat = red_addon_enable_package($connection, $readyPackageId, $fixtureProject, $actorId, $plan['planSha256']);
     red_addon_atomic_enable_assert($repeat['status'] === 'package_not_installed_disabled_current', 'an enabled package cannot be enabled a second time');
 
@@ -221,7 +356,7 @@ try {
     red_addon_atomic_enable_assert(str_contains($cli, "PHP_SAPI !== 'cli'") && str_contains($cli, '--confirm-database=') && str_contains($cli, '--confirm-package=') && str_contains($cli, '--confirm-version=') && str_contains($cli, '--confirm-plan-sha256=') && str_contains($cli, '--confirm-backup-sha256=') && str_contains($cli, '--confirm-state=') && str_contains($cli, '--apply') && !file_exists($projectRoot . '/admin/bin/addon_enable.php') && !file_exists($projectRoot . '/bin/addon_enable.php'), 'enable command is server-local with exact confirmation guards and no web endpoint');
 
     red_addon_atomic_enable_cleanup($connection, $packageIds, $actorId, $temporaryRoot);
-    red_addon_atomic_enable_assert(red_addon_atomic_enable_scalar($connection, "SELECT CONCAT_WS(':', (SELECT COUNT(*) FROM RED_Addon_Installations WHERE PackageID IN ('redcms.atomic-ready','redcms.atomic-rich')), (SELECT COUNT(*) FROM RED_Addon_Activity_Log WHERE PackageID IN ('redcms.atomic-ready','redcms.atomic-rich')), (SELECT COUNT(*) FROM RED_Admin WHERE RecordID=$actorId))") === '0:0:0' && !file_exists($executionMarker), 'all package, audit, authorization, and code fixtures clean up exactly');
+    red_addon_atomic_enable_assert(red_addon_atomic_enable_scalar($connection, "SELECT CONCAT_WS(':', (SELECT COUNT(*) FROM RED_Addon_Installations WHERE PackageID IN ('redcms.atomic-ready','redcms.atomic-component','redcms.atomic-rich')), (SELECT COUNT(*) FROM RED_Addon_Activity_Log WHERE PackageID IN ('redcms.atomic-ready','redcms.atomic-component','redcms.atomic-rich')), (SELECT COUNT(*) FROM RED_Admin WHERE RecordID=$actorId))") === '0:0:0' && !file_exists($executionMarker), 'all package, audit, authorization, and code fixtures clean up exactly');
     printf("Add-on atomic enable self-test passed: %d assertions.\n", $assertions);
 } catch (Throwable $throwable) {
     red_addon_atomic_enable_cleanup($connection, $packageIds, $actorId, $temporaryRoot);
