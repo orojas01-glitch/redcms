@@ -121,9 +121,9 @@ add-on packages without executing them.
   install, enable, disable, upgrade, uninstall, or purge capability.
 
 This is not a PHP sandbox and does not authorize untrusted packages. There is
-no package upload, extraction, web installer, or enable transition. The
-separate server-local installer and request loader accept only packages that
-pass this operator-reviewed first-party trust boundary.
+no package upload, extraction, web installer, or web enable transition. The
+separate server-local installer, enable command, and request loader accept
+only packages that pass this operator-reviewed first-party trust boundary.
 
 ### Add-On Owner Authorization
 
@@ -221,11 +221,14 @@ gate evaluator supports only a registration-only service profile with no
 component, route, job, adapter, asset, administrator-tool, outbound-host, or
 settings surface. That profile may report only its declarative gates ready.
 Every richer surface fails closed with explicit theme, settings, or live-data
-evidence. The package registrar remains unexecuted. `enableReady`, state
-mutation, and runtime loading remain false until the separately reviewed
-atomic transition validates that registrar.
+evidence. The package registrar remains unexecuted during preflight.
+`enableReady`, state mutation, and runtime loading remain false there. The
+separate CLI-only Owner enable command requires exact plan and backup
+confirmations, revalidates under the per-client package lock, validates the
+fixed registrar, and commits the state compare-and-swap plus bounded audit fact
+in one transaction. It accepts no richer package surface.
 
-No web endpoint consumes the installer. Enablement, handler dispatch,
+No web endpoint consumes the installer or enable command. Handler dispatch,
 upgrades, disablement, uninstall, purge, and client business packages require
 separate reviewed implementations with backup, dependency, live-data, and
 rollback or recovery gates.
@@ -255,9 +258,9 @@ executes only temporary fixtures outside the starter. Uninstalled and disabled
 packages never execute. Current enabled packages register into a request-local
 lookup context, but core does not yet invoke component, service,
 administrator-tool, adapter, or route handlers. The clean starter contains no
-package directory or enabled state, and no core command can enable a package
-until the separate Owner-authorized lifecycle, settings, theme, live-data, and
-recovery gates are implemented.
+package directory or enabled state. The only implemented enable command accepts
+the constrained registration-only service profile; settings, theme, live-data,
+recovery, and every richer lifecycle gate remain separate work.
 
 ## Multi-User Authorization
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Server-local, read-only preflight for a future add-on enable transition.
+ * Server-local, read-only preflight for the separate add-on enable transition.
  *
  * This command cannot apply a state transition and never includes addon.php.
  */
@@ -146,6 +146,6 @@ echo 'State mutation: no' . PHP_EOL;
 echo 'Runtime load: no' . PHP_EOL;
 echo 'Plan SHA-256: ' . $plan['planSha256'] . PHP_EOL;
 echo "READ ONLY: no database changes or package code execution occurred.\n";
-echo "The Owner-authorized atomic state transition remains separate reviewed work.\n";
+echo "Use the separate Owner-authorized enable command for registrar validation and atomic state change.\n";
 $db->close();
 exit(0);
