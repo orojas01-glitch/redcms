@@ -102,11 +102,15 @@ try {
         str_contains($installer, 'CREATE TABLE `RED_Addon_Installations`')
             && str_contains($installer, 'CREATE TABLE `RED_Addon_Migrations`')
             && str_contains($installer, 'CREATE TABLE `RED_Addon_Activity_Log`')
+            && preg_match(
+                '/`Component`\\s+varchar\\(160\\).*NOT NULL/i',
+                $installer
+            ) === 1
             && !preg_match(
                 '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations|Activity_Log)`?/i',
                 $installer
             ),
-        'starter ships empty add-on registry and audit tables with no package state, migration history, or lifecycle event'
+        'starter ships empty add-on registry and full component-id storage with no package state, migration history, or lifecycle event'
     );
 
     $productionFiles = array_merge(

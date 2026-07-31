@@ -231,7 +231,7 @@ DROP TABLE IF EXISTS `RED_Articles`;
 CREATE TABLE `RED_Articles` (
   `RecordID` int unsigned NOT NULL,
   `Title` mediumtext NOT NULL,
-  `Component` varchar(50) NOT NULL,
+  `Component` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `Alias` mediumtext NOT NULL,
   `Sections` varchar(100) NOT NULL,
   `HomePosition` int NOT NULL,

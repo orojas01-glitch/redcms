@@ -286,7 +286,16 @@ if (!function_exists('red_addon_install_sql_guard')) {
             }
         }
 
-        preg_match_all('/`?(RED_[A-Za-z0-9_]*)`?/i', $sql, $matches);
+        $guardSql = preg_replace(
+            '/\bREFERENCES\s+`?RED_Articles`?\s*\(\s*`?RecordID`?\s*\)/i',
+            'REFERENCES RED_Addon_Core_Article_Parent (RecordID)',
+            $sql
+        );
+        if (!is_string($guardSql)) {
+            return 'migration_forbidden_sql';
+        }
+
+        preg_match_all('/`?(RED_[A-Za-z0-9_]*)`?/i', $guardSql, $matches);
         $reservedRegistryTables = [
             'red_addon_installations',
             'red_addon_migrations',
@@ -308,7 +317,7 @@ if (!function_exists('red_addon_install_sql_guard')) {
                 '/\#[^\r\n]*/',
             ],
             ' ',
-            $sql
+            $guardSql
         );
         if (!is_string($scopeSql)) {
             return 'migration_forbidden_sql';

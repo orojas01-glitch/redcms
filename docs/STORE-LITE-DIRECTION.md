@@ -234,7 +234,9 @@ Store Lite still cannot use the current minimal enablement profile. Generic
 combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- package-owned component persistence and editor contracts;
+- transactional package-owned component editor, revision, and data-loader
+  contracts; the numeric placement-parent relationship and read-only public
+  binding foundation are complete;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;
@@ -277,8 +279,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 1. Approve this Store Lite product and security boundary.
 2. Completed: implement the generic combined-package activation contract with
    disposable component-plus-service fixtures.
-3. Implement generic package component persistence and bounded editor/public
-   view contracts.
+3. Started: implement generic package component persistence and bounded
+   editor/public view contracts. Full component-id storage, the exact numeric
+   package-table parent relationship, and read-only public binding resolution
+   are complete; transactional editor writes, revisions, package data loading,
+   and delete behavior remain.
 4. Implement generic typed service, route, administrator-tool, settings, and
    asset contracts as separate reviewed batches.
 5. Create Store Lite in its separate distribution using only those accepted

@@ -202,11 +202,14 @@ no add-on activity rows.
 - all required dependencies to be installed, compatible, current, and enabled;
   and
 - checksum-revalidated migrations confined to reviewed package files and
-  package-owned `RED_Addon_*` tables.
+  package-owned `RED_Addon_*` tables. A package table may declare an exact
+  foreign key to the core-owned numeric `RED_Articles(RecordID)` placement
+  parent; this is the only permitted core-table reference.
 
 The SQL guard refuses oversized/binary files, explicit transaction controls,
 database/user/privilege/plugin/routine/trigger/event changes, file I/O, system
-schemas, core or registry tables, and obvious unnamespaced table writes. It is
+schemas, core or registry writes, alternate `RED_Articles` column references,
+every other core-table reference, and obvious unnamespaced table writes. It is
 defense-in-depth for reviewed first-party SQL, not a complete SQL parser or an
 untrusted-code sandbox.
 
@@ -283,6 +286,16 @@ route handlers remain lookup-only. The clean starter contains no package
 directory or enabled state. The implemented enable command accepts only the
 constrained registration-only service, default public component, and combined
 default-component plus registration-only-service profiles.
+
+For add-on components, `RED_Articles` remains the core-owned placement parent
+and stores the complete validated component id. Production public dispatch
+also requires a read-only exact match between that numeric parent, its
+component id, the persisted enabled installation, and the request-local
+runtime owner. Package-specific fields stay in package-owned tables; core does
+not select a table, class, callback, or executable loader from database data.
+The generic editor, transactional parent-plus-child write, revision, restore,
+and delete contracts are not implemented by this foundation.
+
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Settings, package assets,
 migrations, live data, recovery, and every richer enablement gate remain
@@ -291,9 +304,10 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-component persistence, typed service invocation, routes, administrator tools,
-settings, assets, and live-data compatibility pass separate
-disposable-fixture reviews.
+transactional component editing and revisions, typed service invocation,
+routes, administrator tools, settings, assets, and live-data compatibility
+pass separate disposable-fixture reviews. The numeric placement-parent
+relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
 

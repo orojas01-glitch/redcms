@@ -21,6 +21,11 @@ inspect that disabled package's dependency, capability, and route readiness
 without changing state or loading code. Front-controller page requests now bootstrap
 only already-recorded `enabled` packages whose complete registry, dependency,
 namespace, and integrity evidence remains current; the clean starter has none.
+The existing `RED_Articles` placement parent now stores the full manifest
+component id, reviewed package migrations may add only an exact foreign key to
+its numeric `RecordID`, and public add-on dispatch verifies that persisted
+parent against the enabled request-local owner. Package fields and business
+records remain in separately installed package tables.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -53,6 +58,8 @@ not active features.
 - Owner-authorized atomic disablement with enabled-dependent refusal and no
   package execution or data deletion
 - Fail-closed request bootstrap and lookup context for already-enabled first-party packages
+- Generic package-owned component parent relationship with read-only,
+  fail-closed persisted-placement resolution
 
 ## Portable Starter Distribution
 
