@@ -28,8 +28,11 @@ parent against the enabled request-local owner. Package fields and business
 records remain in separately installed package tables.
 Manifest Version 1 can now validate optional data-only component editor
 schemas with fixed field types, bounds, and declared permissions without
-executing package code. Packages that declare an editor remain blocked from
-enablement until the separate transactional write and revision runner exists.
+executing package code. Core can also normalize and validate submitted scalar
+values against that schema without rendering an editor, loading a package, or
+writing a database. Packages that declare an editor remain blocked from
+enablement until the separate authorization, transactional write, and revision
+runner exists.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -65,6 +68,7 @@ not active features.
 - Generic package-owned component parent relationship with read-only,
   fail-closed persisted-placement resolution
 - Non-executing bounded component editor-schema validation and normalized lookup
+- Fail-closed component editor value normalization with no package execution or writes
 
 ## Portable Starter Distribution
 
@@ -127,6 +131,7 @@ Run the non-executing add-on trust gate and isolated runtime-contract check:
 
 ```bash
 php scripts/addon-trust-self-test.php
+php scripts/addon-component-editor-self-test.php
 php scripts/addon-runtime-self-test.php
 php scripts/addon-validate.php --all
 php scripts/admin-addon-owner.php --status

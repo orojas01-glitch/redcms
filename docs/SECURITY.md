@@ -118,6 +118,11 @@ add-on packages without executing them.
 - Optional component editor metadata is data-only: it may declare fixed field
   types, bounds, labels, and already-requested permissions, but no table,
   column, class, callback, template, SQL, or persistence handler.
+- Submitted component editor values pass a core-owned closed-schema validator
+  before any future package handler can receive them. Unknown/nested values,
+  invalid encodings or controls, non-canonical numbers, values outside bounds,
+  and malformed choice, URL, email, date, datetime, or media references return
+  no normalized payload.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -237,6 +242,9 @@ registrar remains unexecuted during preflight.
 Packages declaring `componentEditors` fail closed with
 `component_editor_contract_required`; schema validation does not imply an
 editor renderer, write authority, activation support, or package persistence.
+Submitted-value validation is likewise non-authorizing and non-executing; it
+does not load a registrar, inspect a package table, or make the package
+eligible for activation.
 `enableReady`, state mutation, and runtime loading remain false there. The
 separate CLI-only Owner enable command requires exact plan and backup
 confirmations, revalidates under the database-wide lifecycle lock and
