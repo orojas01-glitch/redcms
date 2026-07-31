@@ -33,8 +33,12 @@ values against that schema, then render a display-only set of escaped,
 accessible administrator controls from either an empty state or the validator's
 exact result. The renderer opens no form, supplies no Save action, loads no
 package or package data, and writes no database. Packages that declare an
-editor remain blocked from enablement until the separate authorization,
-transactional write, revision, restore, and delete runner exists.
+editor now also have a fresh database-backed permission-decision prerequisite:
+each fixed operation resolves to its exact manifest permission, and only that
+per-client administrator grant passes. Owner and lifecycle grants do not imply
+package access. The decision grants nothing and writes nothing. Packages remain
+blocked from enablement until the separate transactional write, revision,
+restore, and delete runner exists.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -72,6 +76,7 @@ not active features.
 - Non-executing bounded component editor-schema validation and normalized lookup
 - Fail-closed component editor value normalization with no package execution or writes
 - Core-owned display-only component editor controls with escaped fixed markup
+- Fresh exact component-editor package-permission decisions with no implicit Owner access
 
 ## Portable Starter Distribution
 

@@ -4262,6 +4262,9 @@ red_acceptance_assert_equals \
 printf '%s\n' 'Running persisted Owner lifecycle authorization checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-owner-authorization-self-test.php"
 
+printf '%s\n' 'Running component editor package-permission checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-editor-authorization-self-test.php"
+
 printf '%s\n' 'Running read-only add-on registry reconciliation checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-registry-self-test.php"
 

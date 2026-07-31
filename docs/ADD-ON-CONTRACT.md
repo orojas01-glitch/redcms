@@ -357,10 +357,22 @@ style, package template, rejected raw input, authorization decision, package
 data lookup, or persistence behavior. Callers rendering more than one instance
 must provide a distinct safe id prefix.
 
-Discovery, validation, and display-only rendering do not authorize activation.
-Enablement preflight reports `component_editor_contract_required` until the
-separate permission-enforced transactional parent/child write, revision,
-restore, and delete runner is implemented and accepted.
+`red_addon_component_editor_permission_decision()` is the next database-backed
+authorization prerequisite. It resolves one of the six fixed editor operations
+to the exact permission already present in the normalized schema, then requires
+an exact case-sensitive `RED_Admin_Capabilities` row for that administrator in
+the current client database. Owner role, Webmaster/legacy Superadmin type,
+add-on lifecycle capabilities, and unrelated package grants do not imply
+access. The lookup is fresh so revocation applies on the next decision. It
+creates no grant, role, endpoint, form, audit event, package state, or business
+write and does not replace protected-session, CSRF, enabled-package,
+transaction, revision, or data-loader checks.
+
+Discovery, validation, display-only rendering, and read-only permission
+decisions do not authorize activation. Enablement preflight reports
+`component_editor_contract_required` until the separate permission-enforced
+transactional parent/child write, revision, restore, and delete runner is
+implemented and accepted.
 
 ## Core Registry And Execution
 
@@ -656,7 +668,11 @@ session refresh, and Administrator Users cannot demote or delete the protected
 Owner.
 
 Each package declares its permissions, but core owns authorization enforcement.
-An add-on cannot grant permissions to itself.
+An add-on cannot grant permissions to itself. The per-client capability column
+matches the manifest's 160-character permission limit. A package editor
+operation requires its exact fresh grant; Owner and lifecycle grants confer no
+daily package access. The first decision helper is read-only, and no
+administrator grant-management UI or package-driven grant path exists yet.
 
 Important lifecycle, settings, order, payment, appointment, entitlement, and
 donation changes require an actor, timestamp, target identifier, result, and
