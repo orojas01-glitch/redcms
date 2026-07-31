@@ -22,10 +22,12 @@ component-id storage, a narrowly guarded package-table relationship to the
 numeric placement parent, and fail-closed read-only public binding resolution.
 Optional data-only component editor schemas are also validated and normalized
 without package execution. Submitted scalar values can now be validated and
-normalized against those schemas with fail-closed empty output, but editor
-rendering and activation remain blocked. Its package code and the
-authorization, transactional editor, data-loader, service, route, tool,
-settings, and asset contracts have not started.
+normalized against those schemas with fail-closed empty output. Core can render
+the schema and exact validator state as escaped, accessible, display-only
+administrator controls, but supplies no form action or Save control. Activation
+remains blocked. Its package code and the authorization, transactional write,
+revision, restore, delete, data-loader, service, route, tool, settings, and
+asset contracts have not started.
 
 ## Product Goal
 
@@ -286,6 +288,12 @@ request bootstrap excludes the disabled package.
     normalized payload on any error. Keep authorization, administrator
     rendering, package execution, persistence, revisions, and activation out
     of this batch.
+15. Completed display-only editor-renderer prerequisite: map the fixed schema
+    types to core-owned escaped administrator controls, render only an empty
+    state or an exact validator result, expose stable labels, help, and
+    core-owned errors, and fail closed on forged state. Keep the renderer
+    outside a form with no Save action, authorization decision, package data
+    load, package execution, database write, or activation change.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

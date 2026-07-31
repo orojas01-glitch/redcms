@@ -346,7 +346,18 @@ closed. On any error it returns no normalized values. This helper does not
 authorize an actor, render a form, execute the registrar, load package data,
 select a table or callback, or write state.
 
-Discovery and validation do not render an editor or authorize activation.
+`red_addon_component_editor_ui_render()` is the separate display-only
+administrator prerequisite. It accepts the validated manifest plus either no
+value state or the exact closed result shape returned by the value validator.
+Core maps the fixed types to fixed inputs, selects, and textareas; escapes all
+package-declared copy, choices, and values; provides stable labels, help,
+required state, and fixed error messages; and fails closed on forged or
+ambiguous state. The fragment contains no form, action, Save control, script,
+style, package template, rejected raw input, authorization decision, package
+data lookup, or persistence behavior. Callers rendering more than one instance
+must provide a distinct safe id prefix.
+
+Discovery, validation, and display-only rendering do not authorize activation.
 Enablement preflight reports `component_editor_contract_required` until the
 separate permission-enforced transactional parent/child write, revision,
 restore, and delete runner is implemented and accepted.
@@ -866,9 +877,9 @@ responses, or structured data.
    core-rendered default public component, and combined default-component plus
    registration-only-service profiles. The registrar-validating atomic
    `enabled` transition for those constrained profiles is implemented. The
-   component profiles add no editor, persistence, package assets, business
-   data, or client package, and services remain lookup-only. Non-executing,
-   data-retaining atomic disablement is also implemented with
+   component profiles add no operational editor form, persistence, package
+   assets, business data, or client package, and services remain lookup-only.
+   Non-executing, data-retaining atomic disablement is also implemented with
    enabled-dependent refusal and later-request unload proof. Every richer
    package surface and every later lifecycle transition remain separate
    reviewed batches.
@@ -883,8 +894,9 @@ responses, or structured data.
    disposable-fixture batches. The component parent relationship, full
    component-id storage, package-table foreign-key allowance, and read-only
    public binding resolver, declarative field schema, and fail-closed submitted
-   value normalization are implemented; editor rendering, authorization,
-   transactional writes, revisions, and package data loaders remain blocked.
+   value normalization are implemented. Core-owned display-only editor
+   rendering is also implemented; authorization, transactional writes,
+   revisions, restore/delete behavior, and package data loaders remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

@@ -167,9 +167,9 @@ text/textarea/integer/boolean/select/URL/email/date/datetime/media-reference
 field types with closed constraints. Unknown or executable-looking fields,
 undeclared components or permissions, duplicate keys/options, and invalid
 bounds fail validation. A normalized lookup is available, but enablement
-preflight deliberately reports `component_editor_contract_required`; no editor
-UI, write handler, table selector, transaction, revision, or package data
-loader is activated.
+preflight deliberately reports `component_editor_contract_required`; no
+operational form, write handler, table selector, transaction, revision, or
+package data loader is activated.
 
 The next non-writing prerequisite is also implemented: core validates one
 submitted scalar-value object against that normalized schema and returns
@@ -178,6 +178,14 @@ invalid text encodings or controls, non-canonical or out-of-range numbers,
 closed-choice violations, malformed locator and temporal values, and missing
 required fields. This helper neither authorizes a user nor renders, loads, or
 writes package data, so the same activation blocker remains in force.
+
+The display-only editor-renderer prerequisite is now implemented. Core maps
+the fixed schema types to namespaced administrator controls, escapes every
+package-declared label, help string, option, and validated value, and exposes
+stable required, help, and core-owned error relationships. It accepts only an
+empty state or the exact closed validator result and fails closed on forged
+state. The fragment deliberately contains no form, Save control, authorization
+decision, package code or data load, database write, or activation change.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
