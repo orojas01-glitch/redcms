@@ -20,8 +20,10 @@ controls remain inactive. The Store Lite product and security boundary is
 defined. The first generic component-persistence foundation now provides full
 component-id storage, a narrowly guarded package-table relationship to the
 numeric placement parent, and fail-closed read-only public binding resolution.
-Its package code and the richer editor, data-loader, service, route, tool,
-settings, and asset contracts have not started.
+Optional data-only component editor schemas are also validated and normalized
+without package execution, but remain activation-blocked. Its package code and
+the transactional editor, data-loader, service, route, tool, settings, and
+asset contracts have not started.
 
 ## Product Goal
 
@@ -269,8 +271,13 @@ request bootstrap excludes the disabled package.
     placement parent, store the full manifest component id, permit package
     tables only an exact numeric parent foreign key, and require an enabled
     runtime-owner match before production public dispatch. Transactional
-    editor writes, field schemas, revisions, package data loading, and delete
-    behavior remain separate batches.
+    editor writes, revisions, package data loading, and delete behavior remain
+    separate batches.
+13. Completed editor-schema prerequisite: validate optional data-only
+    component editor declarations against provided components, six
+    already-requested permissions, and fixed field types and bounds. Expose a
+    normalized read-only lookup while keeping enablement blocked until the
+    separate transactional write, revision, restore, and delete runner exists.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

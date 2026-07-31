@@ -26,6 +26,10 @@ component id, reviewed package migrations may add only an exact foreign key to
 its numeric `RecordID`, and public add-on dispatch verifies that persisted
 parent against the enabled request-local owner. Package fields and business
 records remain in separately installed package tables.
+Manifest Version 1 can now validate optional data-only component editor
+schemas with fixed field types, bounds, and declared permissions without
+executing package code. Packages that declare an editor remain blocked from
+enablement until the separate transactional write and revision runner exists.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -60,6 +64,7 @@ not active features.
 - Fail-closed request bootstrap and lookup context for already-enabled first-party packages
 - Generic package-owned component parent relationship with read-only,
   fail-closed persisted-placement resolution
+- Non-executing bounded component editor-schema validation and normalized lookup
 
 ## Portable Starter Distribution
 

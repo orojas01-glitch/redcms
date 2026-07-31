@@ -120,6 +120,13 @@
         "$ref": "#/$defs/permission"
       }
     },
+    "componentEditors": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/componentEditor"
+      }
+    },
     "settings": {
       "type": "array",
       "maxItems": 200,
@@ -257,6 +264,161 @@
         },
         "version": {
           "$ref": "#/$defs/versionRange"
+        }
+      }
+    },
+    "componentEditor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component",
+        "label",
+        "description",
+        "icon",
+        "permissions",
+        "fields"
+      ],
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/capability"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "icon": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
+        },
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "create",
+            "view",
+            "edit",
+            "delete",
+            "publish",
+            "restore"
+          ],
+          "properties": {
+            "create": {
+              "$ref": "#/$defs/permission"
+            },
+            "view": {
+              "$ref": "#/$defs/permission"
+            },
+            "edit": {
+              "$ref": "#/$defs/permission"
+            },
+            "delete": {
+              "$ref": "#/$defs/permission"
+            },
+            "publish": {
+              "$ref": "#/$defs/permission"
+            },
+            "restore": {
+              "$ref": "#/$defs/permission"
+            }
+          }
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/componentField"
+          }
+        }
+      }
+    },
+    "componentField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "type", "required"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "type": {
+          "enum": [
+            "text",
+            "textarea",
+            "integer",
+            "boolean",
+            "select",
+            "url",
+            "email",
+            "date",
+            "datetime",
+            "media-reference"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "help": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "minimum": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "maximum": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/componentFieldOption"
+          }
+        }
+      }
+    },
+    "componentFieldOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "label"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
         }
       }
     },

@@ -235,8 +235,9 @@ combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
 - transactional package-owned component editor, revision, and data-loader
-  contracts; the numeric placement-parent relationship and read-only public
-  binding foundation are complete;
+  contracts; the numeric placement-parent relationship, read-only public
+  binding, and non-executing declarative editor-schema foundations are
+  complete;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;
@@ -282,8 +283,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 3. Started: implement generic package component persistence and bounded
    editor/public view contracts. Full component-id storage, the exact numeric
    package-table parent relationship, and read-only public binding resolution
-   are complete; transactional editor writes, revisions, package data loading,
-   and delete behavior remain.
+   are complete. Bounded data-only editor-schema validation and normalized
+   lookup are also complete but activation-blocked; transactional editor
+   writes, revisions, package data loading, and delete behavior remain.
 4. Implement generic typed service, route, administrator-tool, settings, and
    asset contracts as separate reviewed batches.
 5. Create Store Lite in its separate distribution using only those accepted

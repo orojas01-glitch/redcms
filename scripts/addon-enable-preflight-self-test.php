@@ -774,6 +774,7 @@ try {
             && $defaultComponentProfile['id']
                 === 'default_public_component'
             && $defaultComponentProfile['gates'] === [
+                'componentEditor' => 'not_applicable',
                 'themeCompatibility' => 'passed',
                 'settings' => 'passed',
                 'liveData' => 'not_applicable',
@@ -808,12 +809,55 @@ try {
             && $defaultComponentWithServicesProfile['id']
                 === 'default_public_component_with_services'
             && $defaultComponentWithServicesProfile['gates'] === [
+                'componentEditor' => 'not_applicable',
                 'themeCompatibility' => 'passed',
                 'settings' => 'passed',
                 'liveData' => 'not_applicable',
             ]
             && $defaultComponentWithServicesProfile['blockers'] === [],
         'a default public component plus registration-only services clears declarative gates'
+    );
+
+    $componentEditorProfile =
+        red_addon_enable_preflight_activation_profile([
+            'provides' => [
+                'components' => ['redcms.synthetic/component'],
+                'services' => [],
+                'adminTools' => [],
+                'adapters' => [],
+            ],
+            'componentEditors' => [[
+                'component' => 'redcms.synthetic/component',
+            ]],
+            'settings' => [],
+            'migrations' => [],
+            'routes' => [],
+            'jobs' => [],
+            'outboundHosts' => [],
+            'assets' => [
+                'public' => [],
+                'admin' => [],
+            ],
+        ]);
+    red_addon_enable_test_assert(
+        empty($componentEditorProfile['eligible'])
+            && $componentEditorProfile['id'] === 'expanded_contract_required'
+            && $componentEditorProfile['gates'] === [
+                'componentEditor' => 'blocked',
+                'themeCompatibility' => 'passed',
+                'settings' => 'passed',
+                'liveData' => 'not_applicable',
+            ]
+            && $componentEditorProfile['blockers'] === [
+                [
+                    'code' => 'component_editor_contract_required',
+                    'componentEditors' => 1,
+                ],
+                [
+                    'code' => 'supported_activation_profile_required',
+                ],
+            ],
+        'declarative editor metadata remains blocked until transactional editor dispatch exists'
     );
 
     $expandedProfile = red_addon_enable_preflight_activation_profile([
@@ -838,6 +882,7 @@ try {
         empty($expandedProfile['eligible'])
             && $expandedProfile['id'] === 'expanded_contract_required'
             && $expandedProfile['gates'] === [
+                'componentEditor' => 'not_applicable',
                 'themeCompatibility' => 'blocked',
                 'settings' => 'blocked',
                 'liveData' => 'blocked',
