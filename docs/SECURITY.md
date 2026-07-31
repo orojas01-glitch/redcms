@@ -123,6 +123,11 @@ add-on packages without executing them.
   invalid encodings or controls, non-canonical numbers, values outside bounds,
   and malformed choice, URL, email, date, datetime, or media references return
   no normalized payload.
+- The display-only administrator renderer accepts only an empty state or the
+  validator's exact closed result. It maps fixed field types to core-owned
+  namespaced controls, escapes every manifest label, help string, option, and
+  value, and renders only core-owned error messages. It emits no form, submit
+  action, script, style, package template, or rejected raw value.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -240,11 +245,11 @@ because core owns its escaped default renderer. Every richer surface fails
 closed with explicit theme, settings, or live-data evidence. The package
 registrar remains unexecuted during preflight.
 Packages declaring `componentEditors` fail closed with
-`component_editor_contract_required`; schema validation does not imply an
-editor renderer, write authority, activation support, or package persistence.
-Submitted-value validation is likewise non-authorizing and non-executing; it
-does not load a registrar, inspect a package table, or make the package
-eligible for activation.
+`component_editor_contract_required`; schema/value validation and display-only
+core rendering do not imply write authority, activation support, or package
+persistence. The renderer is likewise non-authorizing and non-executing; it
+does not open a form, provide a Save action, load a registrar, inspect a
+package table, or make the package eligible for activation.
 `enableReady`, state mutation, and runtime loading remain false there. The
 separate CLI-only Owner enable command requires exact plan and backup
 confirmations, revalidates under the database-wide lifecycle lock and

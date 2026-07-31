@@ -234,10 +234,11 @@ Store Lite still cannot use the current minimal enablement profile. Generic
 combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- transactional package-owned component editor, revision, and data-loader
-  contracts; the numeric placement-parent relationship, read-only public
-  binding, non-executing declarative editor-schema, and fail-closed submitted
-  value normalization foundations are complete;
+- permission-enforced transactional component write, revision, restore,
+  delete, and package data-loader contracts; the numeric placement-parent
+  relationship, read-only public binding, non-executing declarative
+  editor-schema, fail-closed submitted-value normalization, and core-owned
+  display-only editor renderer foundations are complete;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;

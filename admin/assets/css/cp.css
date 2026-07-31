@@ -2882,6 +2882,105 @@ div#cp_ftp{background-color: #63C}
 	display: none;
 }
 
+#advanced .red-admin-addon-editor {
+	display: block;
+	box-sizing: border-box;
+	min-width: 0;
+	margin: 0;
+	padding: 16px;
+	border: 1px solid #d7e0e7;
+	border-radius: 9px;
+	background: #fff;
+	color: #202d38;
+}
+
+#advanced .red-admin-addon-editor input,
+#advanced .red-admin-addon-editor select,
+#advanced .red-admin-addon-editor textarea {
+	box-sizing: border-box;
+}
+
+#advanced .red-admin-addon-editor__legend {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	color: #263746;
+	font: 700 15px/1.3 Arial, Helvetica, sans-serif;
+}
+
+#advanced .red-admin-addon-editor__description {
+	margin: 5px 0 14px;
+	padding: 0;
+	color: #647482;
+	font: 400 11px/1.45 Arial, Helvetica, sans-serif;
+}
+
+#advanced .red-admin-addon-editor__summary {
+	margin: 0 0 14px;
+	padding: 10px 12px;
+	border: 1px solid #e6b8b4;
+	border-radius: 7px;
+	background: #fff8f7;
+	color: #9d302a;
+	font: 700 10px/1.4 Arial, Helvetica, sans-serif;
+}
+
+#advanced .red-admin-addon-editor__summary ul {
+	margin: 0;
+	padding: 0 0 0 18px;
+}
+
+#advanced .red-admin-addon-editor__fields {
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+#advanced .red-admin-addon-editor .red-admin-field input[type="email"],
+#advanced .red-admin-addon-editor .red-admin-field textarea {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: 8px 10px;
+	border: 1px solid #bdc9d3;
+	border-radius: 7px;
+	background: #fbfcfd;
+	box-shadow: inset 0 1px 1px rgba(19, 37, 53, .035);
+	color: #202d38;
+	font: 400 12px/1.35 Arial, Helvetica, sans-serif;
+	transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+#advanced .red-admin-addon-editor .red-admin-field input[type="email"] {
+	height: 40px;
+	line-height: 1.2;
+}
+
+#advanced .red-admin-addon-editor .red-admin-field textarea {
+	min-height: 112px;
+	resize: vertical;
+}
+
+#advanced .red-admin-addon-editor .red-admin-field input[type="email"]:hover,
+#advanced .red-admin-addon-editor .red-admin-field textarea:hover {
+	border-color: #93a7b8;
+	background: #fff;
+}
+
+#advanced .red-admin-addon-editor .red-admin-field input[type="email"]:focus,
+#advanced .red-admin-addon-editor .red-admin-field textarea:focus {
+	border-color: #3972cf;
+	background: #fff;
+	box-shadow: 0 0 0 3px rgba(57, 114, 207, .15);
+	outline: 0;
+}
+
+#advanced .red-admin-addon-editor .red-admin-field input[type="email"][aria-invalid="true"],
+#advanced .red-admin-addon-editor .red-admin-field textarea[aria-invalid="true"] {
+	border-color: #c9443b;
+	box-shadow: 0 0 0 3px rgba(201, 68, 59, .13);
+}
+
 #advanced .red-admin-choice-card {
 	display: flex;
 	grid-column: 1 / -1;
