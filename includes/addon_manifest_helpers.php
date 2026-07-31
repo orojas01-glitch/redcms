@@ -323,6 +323,429 @@ if (!function_exists('red_addon_validate_string_list')) {
     }
 }
 
+if (!function_exists('red_addon_valid_component_field_key')) {
+    function red_addon_valid_component_field_key($value)
+    {
+        return is_string($value)
+            && strlen($value) <= 64
+            && preg_match('/\A[a-z][a-z0-9-]*\z/', $value) === 1;
+    }
+}
+
+if (!function_exists('red_addon_validate_component_editors')) {
+    function red_addon_validate_component_editors(
+        $editors,
+        array $providedComponents,
+        array $declaredPermissions,
+        array &$result
+    ) {
+        if (!is_array($editors) || !array_is_list($editors)) {
+            red_addon_add_error($result, 'Component editors must be an array.');
+            return [];
+        }
+        if (count($editors) > 200) {
+            red_addon_add_error($result, 'Component editors exceeds 200 entries.');
+        }
+
+        $normalized = [];
+        $seenComponents = [];
+        foreach ($editors as $editorIndex => $editor) {
+            $editorContext = 'Component editor[' . $editorIndex . ']';
+            if (!red_addon_validate_object_keys(
+                $editor,
+                ['component', 'label', 'description', 'icon', 'permissions', 'fields'],
+                ['component', 'label', 'description', 'icon', 'permissions', 'fields'],
+                $editorContext,
+                $result
+            )) {
+                continue;
+            }
+
+            $componentId = isset($editor['component']) && is_string($editor['component'])
+                ? $editor['component']
+                : '';
+            if (!red_addon_valid_capability($componentId)) {
+                red_addon_add_error($result, $editorContext . ' component is invalid.');
+            } elseif (!in_array($componentId, $providedComponents, true)) {
+                red_addon_add_error(
+                    $result,
+                    $editorContext . ' component must appear in Provides components.'
+                );
+            } elseif (isset($seenComponents[$componentId])) {
+                red_addon_add_error(
+                    $result,
+                    'Component editor for "' . $componentId . '" is duplicated.'
+                );
+            } else {
+                $seenComponents[$componentId] = true;
+            }
+
+            $label = red_addon_required_string(
+                $editor,
+                'label',
+                $editorContext,
+                120,
+                $result
+            );
+            $description = red_addon_required_string(
+                $editor,
+                'description',
+                $editorContext,
+                500,
+                $result
+            );
+            $icon = isset($editor['icon']) && is_string($editor['icon'])
+                ? $editor['icon']
+                : '';
+            if (preg_match('/\A[a-z][a-z0-9-]{0,39}\z/', $icon) !== 1) {
+                red_addon_add_error($result, $editorContext . ' icon token is invalid.');
+            }
+
+            $permissionKeys = [
+                'create',
+                'view',
+                'edit',
+                'delete',
+                'publish',
+                'restore',
+            ];
+            $permissions = $editor['permissions'] ?? null;
+            $normalizedPermissions = [];
+            if (red_addon_validate_object_keys(
+                $permissions,
+                $permissionKeys,
+                $permissionKeys,
+                $editorContext . ' permissions',
+                $result
+            )) {
+                foreach ($permissionKeys as $permissionKey) {
+                    $permission = isset($permissions[$permissionKey])
+                        && is_string($permissions[$permissionKey])
+                        ? $permissions[$permissionKey]
+                        : '';
+                    if (!red_addon_valid_permission($permission)) {
+                        red_addon_add_error(
+                            $result,
+                            $editorContext . ' permission "' . $permissionKey . '" is invalid.'
+                        );
+                    } elseif (!in_array($permission, $declaredPermissions, true)) {
+                        red_addon_add_error(
+                            $result,
+                            $editorContext . ' permission "' . $permissionKey
+                                . '" must appear in Permissions.'
+                        );
+                    }
+                    $normalizedPermissions[$permissionKey] = $permission;
+                }
+            }
+
+            $fields = $editor['fields'] ?? null;
+            $normalizedFields = [];
+            $seenFieldKeys = [];
+            if (!is_array($fields) || !array_is_list($fields)) {
+                red_addon_add_error($result, $editorContext . ' fields must be an array.');
+            } else {
+                if ($fields === []) {
+                    red_addon_add_error($result, $editorContext . ' fields must not be empty.');
+                }
+                if (count($fields) > 100) {
+                    red_addon_add_error($result, $editorContext . ' fields exceeds 100 entries.');
+                }
+                foreach ($fields as $fieldIndex => $field) {
+                    $fieldContext = $editorContext . ' field[' . $fieldIndex . ']';
+                    if (!red_addon_validate_object_keys(
+                        $field,
+                        ['key', 'label', 'type', 'required'],
+                        [
+                            'key',
+                            'label',
+                            'type',
+                            'required',
+                            'help',
+                            'minLength',
+                            'maxLength',
+                            'minimum',
+                            'maximum',
+                            'options',
+                        ],
+                        $fieldContext,
+                        $result
+                    )) {
+                        continue;
+                    }
+
+                    $fieldKey = isset($field['key']) && is_string($field['key'])
+                        ? $field['key']
+                        : '';
+                    if (!red_addon_valid_component_field_key($fieldKey)) {
+                        red_addon_add_error($result, $fieldContext . ' key is invalid.');
+                    } elseif (isset($seenFieldKeys[$fieldKey])) {
+                        red_addon_add_error(
+                            $result,
+                            $editorContext . ' field key "' . $fieldKey . '" is duplicated.'
+                        );
+                    } else {
+                        $seenFieldKeys[$fieldKey] = true;
+                    }
+                    $fieldLabel = red_addon_required_string(
+                        $field,
+                        'label',
+                        $fieldContext,
+                        120,
+                        $result
+                    );
+                    $fieldType = isset($field['type']) && is_string($field['type'])
+                        ? $field['type']
+                        : '';
+                    $allowedFieldTypes = [
+                        'text',
+                        'textarea',
+                        'integer',
+                        'boolean',
+                        'select',
+                        'url',
+                        'email',
+                        'date',
+                        'datetime',
+                        'media-reference',
+                    ];
+                    if (!in_array($fieldType, $allowedFieldTypes, true)) {
+                        red_addon_add_error($result, $fieldContext . ' type is unsupported.');
+                    }
+                    $required = $field['required'] ?? null;
+                    if (!is_bool($required)) {
+                        red_addon_add_error($result, $fieldContext . ' required must be boolean.');
+                    }
+                    $help = null;
+                    if (array_key_exists('help', $field)) {
+                        $help = red_addon_required_string(
+                            $field,
+                            'help',
+                            $fieldContext,
+                            500,
+                            $result
+                        );
+                    }
+
+                    $lengthTypes = [
+                        'text' => 500,
+                        'textarea' => 10000,
+                        'url' => 2048,
+                        'email' => 254,
+                        'media-reference' => 255,
+                    ];
+                    $minLength = $field['minLength'] ?? null;
+                    $maxLength = $field['maxLength'] ?? null;
+                    if (isset($lengthTypes[$fieldType])) {
+                        if ($minLength !== null
+                            && (!is_int($minLength)
+                                || $minLength < 0
+                                || $minLength > $lengthTypes[$fieldType])
+                        ) {
+                            red_addon_add_error($result, $fieldContext . ' minLength is invalid.');
+                        }
+                        if (!is_int($maxLength)
+                            || $maxLength < 1
+                            || $maxLength > $lengthTypes[$fieldType]
+                        ) {
+                            red_addon_add_error($result, $fieldContext . ' maxLength is invalid.');
+                        }
+                        if (is_int($minLength)
+                            && is_int($maxLength)
+                            && $minLength > $maxLength
+                        ) {
+                            red_addon_add_error(
+                                $result,
+                                $fieldContext . ' minLength must not exceed maxLength.'
+                            );
+                        }
+                    } elseif (array_key_exists('minLength', $field)
+                        || array_key_exists('maxLength', $field)
+                    ) {
+                        red_addon_add_error(
+                            $result,
+                            $fieldContext . ' length limits are unsupported for this type.'
+                        );
+                    }
+
+                    $minimum = $field['minimum'] ?? null;
+                    $maximum = $field['maximum'] ?? null;
+                    if ($fieldType === 'integer') {
+                        if (!is_int($minimum)
+                            || !is_int($maximum)
+                            || $minimum < -2147483648
+                            || $maximum > 2147483647
+                            || $minimum > $maximum
+                        ) {
+                            red_addon_add_error(
+                                $result,
+                                $fieldContext . ' integer bounds are invalid.'
+                            );
+                        }
+                    } elseif (array_key_exists('minimum', $field)
+                        || array_key_exists('maximum', $field)
+                    ) {
+                        red_addon_add_error(
+                            $result,
+                            $fieldContext . ' numeric bounds are unsupported for this type.'
+                        );
+                    }
+
+                    $options = $field['options'] ?? null;
+                    $normalizedOptions = [];
+                    if ($fieldType === 'select') {
+                        if (!is_array($options) || !array_is_list($options)) {
+                            red_addon_add_error(
+                                $result,
+                                $fieldContext . ' options must be an array.'
+                            );
+                        } else {
+                            if ($options === []) {
+                                red_addon_add_error(
+                                    $result,
+                                    $fieldContext . ' options must not be empty.'
+                                );
+                            }
+                            if (count($options) > 100) {
+                                red_addon_add_error(
+                                    $result,
+                                    $fieldContext . ' options exceeds 100 entries.'
+                                );
+                            }
+                            $seenOptions = [];
+                            foreach ($options as $optionIndex => $option) {
+                                $optionContext = $fieldContext
+                                    . ' option[' . $optionIndex . ']';
+                                if (!red_addon_validate_object_keys(
+                                    $option,
+                                    ['value', 'label'],
+                                    ['value', 'label'],
+                                    $optionContext,
+                                    $result
+                                )) {
+                                    continue;
+                                }
+                                $optionValue = red_addon_required_string(
+                                    $option,
+                                    'value',
+                                    $optionContext,
+                                    120,
+                                    $result
+                                );
+                                $optionLabel = red_addon_required_string(
+                                    $option,
+                                    'label',
+                                    $optionContext,
+                                    120,
+                                    $result
+                                );
+                                if (isset($seenOptions[$optionValue])) {
+                                    red_addon_add_error(
+                                        $result,
+                                        $fieldContext . ' option value "'
+                                            . $optionValue . '" is duplicated.'
+                                    );
+                                } else {
+                                    $seenOptions[$optionValue] = true;
+                                }
+                                $normalizedOptions[] = [
+                                    'value' => $optionValue,
+                                    'label' => $optionLabel,
+                                ];
+                            }
+                        }
+                    } elseif (array_key_exists('options', $field)) {
+                        red_addon_add_error(
+                            $result,
+                            $fieldContext . ' options are allowed only for select fields.'
+                        );
+                    }
+
+                    $normalizedField = [
+                        'key' => $fieldKey,
+                        'label' => $fieldLabel,
+                        'type' => $fieldType,
+                        'required' => is_bool($required) ? $required : false,
+                    ];
+                    if ($help !== null) {
+                        $normalizedField['help'] = $help;
+                    }
+                    if (isset($lengthTypes[$fieldType])) {
+                        if ($minLength !== null) {
+                            $normalizedField['minLength'] = $minLength;
+                        }
+                        $normalizedField['maxLength'] = $maxLength;
+                    }
+                    if ($fieldType === 'integer') {
+                        $normalizedField['minimum'] = $minimum;
+                        $normalizedField['maximum'] = $maximum;
+                    }
+                    if ($fieldType === 'select') {
+                        $normalizedField['options'] = $normalizedOptions;
+                    }
+                    $normalizedFields[] = $normalizedField;
+                }
+            }
+
+            $normalized[] = [
+                'component' => $componentId,
+                'label' => $label,
+                'description' => $description,
+                'icon' => $icon,
+                'permissions' => $normalizedPermissions,
+                'fields' => $normalizedFields,
+            ];
+        }
+
+        return $normalized;
+    }
+}
+
+if (!function_exists('red_addon_component_editor_schema')) {
+    function red_addon_component_editor_schema(array $manifest, $componentId)
+    {
+        if (!is_string($componentId) || !red_addon_valid_capability($componentId)) {
+            return null;
+        }
+        if (!array_key_exists('componentEditors', $manifest)) {
+            return null;
+        }
+        $result = ['errors' => [], 'warnings' => []];
+        $providedComponents = red_addon_validate_string_list(
+            $manifest['provides']['components'] ?? null,
+            'Provides components',
+            200,
+            'red_addon_valid_capability',
+            $result
+        );
+        $permissions = red_addon_validate_string_list(
+            $manifest['permissions'] ?? null,
+            'Permissions',
+            200,
+            'red_addon_valid_permission',
+            $result
+        );
+        $editors = red_addon_validate_component_editors(
+            $manifest['componentEditors'] ?? null,
+            $providedComponents,
+            $permissions,
+            $result
+        );
+        if ($result['errors'] !== []) {
+            return null;
+        }
+        foreach ($editors as $editor) {
+            if (isset($editor['component'])
+                && is_string($editor['component'])
+                && hash_equals($componentId, $editor['component'])
+            ) {
+                return $editor;
+            }
+        }
+        return null;
+    }
+}
+
 if (!function_exists('red_addon_safe_package_file')) {
     function red_addon_safe_package_file($packageDirectory, $relativePath)
     {
@@ -539,7 +962,7 @@ if (!function_exists('red_addon_validate_manifest')) {
         red_addon_validate_object_keys(
             $manifest,
             $requiredTopLevel,
-            array_merge(['$schema'], $requiredTopLevel),
+            array_merge(['$schema', 'componentEditors'], $requiredTopLevel),
             'Manifest',
             $result
         );
@@ -601,6 +1024,12 @@ if (!function_exists('red_addon_validate_manifest')) {
         }
 
         $provides = $manifest['provides'] ?? null;
+        $providedCapabilities = [
+            'components' => [],
+            'services' => [],
+            'adminTools' => [],
+            'adapters' => [],
+        ];
         if (red_addon_validate_object_keys(
             $provides,
             ['components', 'services', 'adminTools', 'adapters'],
@@ -609,7 +1038,7 @@ if (!function_exists('red_addon_validate_manifest')) {
             $result
         )) {
             foreach (['components', 'services', 'adminTools', 'adapters'] as $provideType) {
-                red_addon_validate_string_list(
+                $providedCapabilities[$provideType] = red_addon_validate_string_list(
                     $provides[$provideType] ?? null,
                     'Provides ' . $provideType,
                     200,
@@ -670,13 +1099,22 @@ if (!function_exists('red_addon_validate_manifest')) {
             }
         }
 
-        red_addon_validate_string_list(
+        $declaredPermissions = red_addon_validate_string_list(
             $manifest['permissions'] ?? null,
             'Permissions',
             200,
             'red_addon_valid_permission',
             $result
         );
+
+        if (array_key_exists('componentEditors', $manifest)) {
+            red_addon_validate_component_editors(
+                $manifest['componentEditors'],
+                $providedCapabilities['components'],
+                $declaredPermissions,
+                $result
+            );
+        }
 
         $settings = $manifest['settings'] ?? null;
         $settingKeys = [];

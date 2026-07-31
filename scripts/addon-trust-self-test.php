@@ -184,8 +184,10 @@ try {
             && ($schema['properties']['$schema']['const'] ?? '') ===
                 'https://red-sphere.com/schemas/addon-manifest-v1.json'
             && ($schema['properties']['integrity']['properties']['entrypoint']['const'] ?? '') === 'addon.php'
+            && ($schema['properties']['componentEditors']['items']['$ref'] ?? '')
+                === '#/$defs/componentEditor'
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded component editors, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
@@ -245,6 +247,190 @@ try {
         !file_exists($executionMarker)
             && filemtime($validDirectory . '/addon.php') === $entrypointMtime,
         'manifest validation neither executes nor rewrites addon.php'
+    );
+
+    $editorProject = red_addon_test_project($temporaryRoot, 'component-editor-project');
+    red_addon_test_write_package(
+        $editorProject,
+        'redcms.editor',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $componentId = 'redcms.editor/product';
+            $permission = 'editor.products.manage';
+            $manifest['type'] = 'component';
+            $manifest['provides']['components'] = [$componentId];
+            $manifest['provides']['services'] = [];
+            $manifest['permissions'] = [$permission];
+            $manifest['componentEditors'] = [[
+                'component' => $componentId,
+                'label' => 'Product',
+                'description' => 'Bounded disposable component editor.',
+                'icon' => 'package',
+                'permissions' => [
+                    'create' => $permission,
+                    'view' => $permission,
+                    'edit' => $permission,
+                    'delete' => $permission,
+                    'publish' => $permission,
+                    'restore' => $permission,
+                ],
+                'fields' => [
+                    [
+                        'key' => 'title',
+                        'label' => 'Title',
+                        'type' => 'text',
+                        'required' => true,
+                        'maxLength' => 200,
+                    ],
+                    [
+                        'key' => 'price-minor',
+                        'label' => 'Price',
+                        'type' => 'integer',
+                        'required' => true,
+                        'minimum' => 0,
+                        'maximum' => 2147483647,
+                    ],
+                    [
+                        'key' => 'availability',
+                        'label' => 'Availability',
+                        'type' => 'select',
+                        'required' => true,
+                        'options' => [
+                            ['value' => 'available', 'label' => 'Available'],
+                            ['value' => 'unavailable', 'label' => 'Unavailable'],
+                        ],
+                    ],
+                ],
+            ]];
+        }
+    );
+    $editorResult = red_addon_validate_manifest(
+        'redcms.editor',
+        $editorProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    $editorSchema = red_addon_component_editor_schema(
+        is_array($editorResult['manifest'] ?? null)
+            ? $editorResult['manifest']
+            : [],
+        'redcms.editor/product'
+    );
+    red_addon_test_assert(
+        !empty($editorResult['valid'])
+            && is_array($editorSchema)
+            && ($editorSchema['component'] ?? '') === 'redcms.editor/product'
+            && array_column($editorSchema['fields'] ?? [], 'key') === [
+                'title',
+                'price-minor',
+                'availability',
+            ]
+            && !file_exists($executionMarker),
+        'bounded component editor metadata validates and normalizes without package execution'
+    );
+
+    $nullEditorProject = red_addon_test_project(
+        $temporaryRoot,
+        'null-component-editor-project'
+    );
+    red_addon_test_write_package(
+        $nullEditorProject,
+        'redcms.null-editor',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $manifest['componentEditors'] = null;
+        }
+    );
+    $nullEditor = red_addon_validate_manifest(
+        'redcms.null-editor',
+        $nullEditorProject,
+        ['cmsVersion' => '5.1.0']
+    );
+
+    $invalidEditorProject = red_addon_test_project(
+        $temporaryRoot,
+        'invalid-component-editor-project'
+    );
+    red_addon_test_write_package(
+        $invalidEditorProject,
+        'redcms.invalid-editor',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $manifest['provides']['components'] = [
+                'redcms.invalid-editor/declared',
+            ];
+            $manifest['permissions'] = ['invalid-editor.manage'];
+            $manifest['componentEditors'] = [[
+                'component' => 'redcms.invalid-editor/undeclared',
+                'label' => 'Invalid',
+                'description' => 'Invalid component editor fixture.',
+                'icon' => '../unsafe',
+                'permissions' => [
+                    'create' => 'invalid-editor.manage',
+                    'view' => 'invalid-editor.manage',
+                    'edit' => 'invalid-editor.missing',
+                    'delete' => 'invalid-editor.manage',
+                    'publish' => 'invalid-editor.manage',
+                    'restore' => 'invalid-editor.manage',
+                ],
+                'fields' => [
+                    [
+                        'key' => 'content',
+                        'label' => 'Content',
+                        'type' => 'html',
+                        'required' => true,
+                        'callback' => 'dangerous',
+                    ],
+                    [
+                        'key' => 'content',
+                        'label' => 'Duplicate',
+                        'type' => 'integer',
+                        'required' => true,
+                        'minimum' => 10,
+                        'maximum' => 1,
+                    ],
+                ],
+            ]];
+        }
+    );
+    $invalidEditor = red_addon_validate_manifest(
+        'redcms.invalid-editor',
+        $invalidEditorProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    red_addon_test_assert(
+        empty($invalidEditor['valid'])
+            && red_addon_test_error_contains(
+                $invalidEditor,
+                'component must appear in Provides components'
+            )
+            && red_addon_test_error_contains(
+                $invalidEditor,
+                'permission "edit" must appear in Permissions'
+            )
+            && red_addon_test_error_contains($invalidEditor, 'icon token is invalid')
+            && red_addon_test_error_contains(
+                $invalidEditor,
+                'unsupported field "callback"'
+            )
+            && red_addon_test_error_contains($invalidEditor, 'type is unsupported')
+            && red_addon_test_error_contains($invalidEditor, 'field key "content" is duplicated')
+            && red_addon_test_error_contains($invalidEditor, 'integer bounds are invalid')
+            && empty($nullEditor['valid'])
+            && red_addon_test_error_contains(
+                $nullEditor,
+                'Component editors must be an array'
+            )
+            && red_addon_component_editor_schema(
+                is_array($invalidEditor['manifest'] ?? null)
+                    ? $invalidEditor['manifest']
+                    : [],
+                'redcms.invalid-editor/undeclared'
+            ) === null
+            && !file_exists($executionMarker),
+        'component editor schemas fail closed on null metadata, undeclared ownership, permissions, executable-looking fields, unsupported types, duplicates, and invalid bounds'
     );
 
     $exampleProject = red_addon_test_project($temporaryRoot, 'documented-example-project');

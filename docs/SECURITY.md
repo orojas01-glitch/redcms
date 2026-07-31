@@ -115,6 +115,9 @@ add-on packages without executing them.
   discovery or validation.
 - Manifest fields cannot select PHP files, classes, methods, callbacks, or SQL
   text.
+- Optional component editor metadata is data-only: it may declare fixed field
+  types, bounds, labels, and already-requested permissions, but no table,
+  column, class, callback, template, SQL, or persistence handler.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -231,6 +234,9 @@ outbound hosts. Either component profile clears theme compatibility only
 because core owns its escaped default renderer. Every richer surface fails
 closed with explicit theme, settings, or live-data evidence. The package
 registrar remains unexecuted during preflight.
+Packages declaring `componentEditors` fail closed with
+`component_editor_contract_required`; schema validation does not imply an
+editor renderer, write authority, activation support, or package persistence.
 `enableReady`, state mutation, and runtime loading remain false there. The
 separate CLI-only Owner enable command requires exact plan and backup
 confirmations, revalidates under the database-wide lifecycle lock and

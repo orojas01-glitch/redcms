@@ -157,14 +157,26 @@ key to its numeric `RecordID`, and production public dispatch resolves that
 parent read-only against both persisted enabled state and the request-local
 runtime owner. Missing parents, component drift, disabled state, alternate
 core references, and orphan package records fail closed. Transactional editor
-writes, field schemas, revisions, package data loaders, and delete behavior
-remain later isolated batches.
+writes, revisions, package data loaders, and delete behavior remain later
+isolated batches.
+
+The editor-schema prerequisite is implemented as non-executing manifest data.
+A package may optionally declare one bounded editor schema per provided
+component, six already-requested lifecycle permissions, and only fixed
+text/textarea/integer/boolean/select/URL/email/date/datetime/media-reference
+field types with closed constraints. Unknown or executable-looking fields,
+undeclared components or permissions, duplicate keys/options, and invalid
+bounds fail validation. A normalized lookup is available, but enablement
+preflight deliberately reports `component_editor_contract_required`; no editor
+UI, write handler, table selector, transaction, revision, or package data
+loader is activated.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
-blocked. The generic numeric parent relationship and public binding resolver
-are implemented; editor, typed-service invocation, route,
+blocked. The generic numeric parent relationship, public binding resolver, and
+declarative editor-schema validation are implemented; transactional editing,
+typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

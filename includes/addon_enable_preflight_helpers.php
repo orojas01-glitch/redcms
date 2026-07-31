@@ -217,6 +217,11 @@ if (!function_exists('red_addon_enable_preflight_runtime_inventory')) {
                     ? $manifest['permissions']
                     : []
             ),
+            'componentEditors' => count(
+                is_array($manifest['componentEditors'] ?? null)
+                    ? $manifest['componentEditors']
+                    : []
+            ),
             'settings' => count(
                 is_array($manifest['settings'] ?? null)
                     ? $manifest['settings']
@@ -277,6 +282,7 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
         ];
         $hasComponents = $provides['components'] > 0;
         $hasServices = $provides['services'] > 0;
+        $componentEditorRequired = $inventory['componentEditors'] > 0;
         $themeRequired = $inventory['publicAssets'] > 0;
         $settingsRequired = $inventory['settings'] > 0;
         $operationalSurface = $liveDataSurface;
@@ -284,16 +290,19 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
         $liveDataRequired = array_sum($operationalSurface) > 0;
         $registrationOnly = $hasServices
             && !$hasComponents
+            && !$componentEditorRequired
             && !$themeRequired
             && !$settingsRequired
             && !$liveDataRequired;
         $defaultPublicComponent = $hasComponents
             && !$hasServices
+            && !$componentEditorRequired
             && !$themeRequired
             && !$settingsRequired
             && !$liveDataRequired;
         $defaultPublicComponentWithServices = $hasComponents
             && $hasServices
+            && !$componentEditorRequired
             && !$themeRequired
             && !$settingsRequired
             && !$liveDataRequired;
@@ -302,6 +311,12 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
             || $defaultPublicComponentWithServices;
         $blockers = [];
 
+        if ($componentEditorRequired) {
+            $blockers[] = [
+                'code' => 'component_editor_contract_required',
+                'componentEditors' => $inventory['componentEditors'],
+            ];
+        }
         if ($themeRequired) {
             $blockers[] = [
                 'code' => 'theme_contract_required',
@@ -341,6 +356,9 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
                 ),
             'eligible' => $eligible,
             'gates' => [
+                'componentEditor' => $componentEditorRequired
+                    ? 'blocked'
+                    : 'not_applicable',
                 'themeCompatibility' => $themeRequired
                     ? 'blocked'
                     : ($hasComponents ? 'passed' : 'not_applicable'),
@@ -390,6 +408,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
                 'dependencies' => 'not_checked',
                 'capabilityNamespace' => 'not_checked',
                 'routeNamespace' => 'not_checked',
+                'componentEditor' => 'not_implemented',
                 'themeCompatibility' => 'not_implemented',
                 'settings' => 'not_implemented',
                 'liveData' => 'not_implemented',

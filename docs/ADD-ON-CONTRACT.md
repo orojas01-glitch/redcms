@@ -192,6 +192,7 @@ Every package declares:
 - Required and optional package dependencies
 - Requested administrator permissions
 - Components, services, administrator tools, and adapters
+- Optional data-only component editor schemas
 - Settings schema, including which settings are secret references
 - Ordered immutable migrations and their checksums
 - Public and administrator route declarations
@@ -236,6 +237,62 @@ An illustrative manifest shape is:
     "store.orders.manage",
     "store.settings.manage"
   ],
+  "componentEditors": [
+    {
+      "component": "redcms.store-lite/product",
+      "label": "Product",
+      "description": "Create and edit one placeable Store Lite product.",
+      "icon": "package",
+      "permissions": {
+        "create": "store.products.manage",
+        "view": "store.products.manage",
+        "edit": "store.products.manage",
+        "delete": "store.products.manage",
+        "publish": "store.products.manage",
+        "restore": "store.products.manage"
+      },
+      "fields": [
+        {
+          "key": "title",
+          "label": "Title",
+          "type": "text",
+          "required": true,
+          "maxLength": 200
+        },
+        {
+          "key": "summary",
+          "label": "Summary",
+          "type": "textarea",
+          "required": false,
+          "maxLength": 2000
+        },
+        {
+          "key": "price-minor",
+          "label": "Price in minor currency units",
+          "type": "integer",
+          "required": true,
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        {
+          "key": "availability",
+          "label": "Availability",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "available",
+              "label": "Available"
+            },
+            {
+              "value": "unavailable",
+              "label": "Unavailable"
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "settings": [],
   "migrations": [],
   "routes": [],
@@ -268,6 +325,20 @@ The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
 `includes/addon_manifest_helpers.php`. This remains a trust-inspection contract,
 not an active loader contract.
+
+`componentEditors` is optional in Manifest Version 1 so existing render-only
+component packages remain compatible. When present, each editor must target
+one identifier already declared by `provides.components`, bind all six
+lifecycle operations to permissions already declared by the package, and use
+only the fixed field types and bounds in the published schema. The data cannot
+name a table, column, class, callback, template, SQL fragment, or persistence
+handler. `red_addon_component_editor_schema()` returns only the normalized
+data-only definition.
+
+Discovery and validation do not render an editor or authorize activation.
+Enablement preflight reports `component_editor_contract_required` until the
+separate transactional parent/child write, revision, restore, and delete
+runner is implemented and accepted.
 
 ## Core Registry And Execution
 
@@ -584,8 +655,9 @@ Upgrades and uninstall remain later explicit transitions.
   required by another enabled package or when active public assignments would
   become unsafe without an approved fallback. The first implementation
   enforces enabled-dependent refusal; persisted add-on assignments remain
-  outside the supported minimal profile because component editor and
-  persistence contracts are not implemented.
+  outside the supported minimal profile because declarative editor metadata
+  does not yet provide transactional writes, revisions, restore, delete, or
+  package data loading.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
