@@ -64,7 +64,8 @@ class content
                 $layout,
                 article,
                 $position,
-                $ActiveDate
+                $ActiveDate,
+                $db->connection
             );
 			if ($componentContext !== null && $componentContext['active']) {
 				$this->recordid=$componentContext['inputs']['recordId'];

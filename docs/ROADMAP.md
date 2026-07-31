@@ -150,13 +150,24 @@ migrations, settings, media, or business data. Service, route, adapter, and
 administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
+The first generic persistence foundation is implemented without adding a
+package or business table to core. `RED_Articles` stores the full validated
+component id, reviewed package migrations may declare only an exact foreign
+key to its numeric `RecordID`, and production public dispatch resolves that
+parent read-only against both persisted enabled state and the request-local
+runtime owner. Missing parents, component drift, disabled state, alternate
+core references, and orphan package records fail closed. Transactional editor
+writes, field schemas, revisions, package data loaders, and delete behavior
+remain later isolated batches.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
-blocked. Generic persistence, editor, typed-service invocation, route,
-administrator-tool, settings, asset, and live-data contracts must be
-implemented and accepted with disposable fixtures before the separately
-distributed package can be enabled.
+blocked. The generic numeric parent relationship and public binding resolver
+are implemented; editor, typed-service invocation, route,
+administrator-tool, settings, asset, live-data, and richer package persistence
+contracts must still be implemented and accepted with disposable fixtures
+before the separately distributed package can be enabled.
 
 ### Version 5.1 Compatibility Work
 

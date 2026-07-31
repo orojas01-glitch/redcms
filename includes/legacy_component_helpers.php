@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/video_url_helpers.php';
 require_once __DIR__ . '/addon_component_render_helpers.php';
+require_once __DIR__ . '/addon_component_persistence_helpers.php';
 /**
  * Prepared inputs and fixed core dispatch for the legacy public components.
  *
@@ -27,11 +28,27 @@ if (!function_exists('red_legacy_public_component_input_inventory')) {
 }
 
 if (!function_exists('red_legacy_public_component_context')) {
-    function red_legacy_public_component_context(array $row, $layout, $article, $position, $active)
+    function red_legacy_public_component_context(
+        array $row,
+        $layout,
+        $article,
+        $position,
+        $active,
+        $connection = null
+    )
     {
         $component = isset($row['Component']) ? (string) $row['Component'] : '';
         $inventory = red_legacy_public_component_input_inventory();
         if (!isset($inventory[$component])) {
+            if ($connection !== null
+                && red_addon_component_persistence_binding(
+                    $connection,
+                    array_key_exists('RecordID', $row) ? $row['RecordID'] : null,
+                    $component
+                ) === null
+            ) {
+                return null;
+            }
             return red_addon_public_component_context(
                 $component,
                 array_key_exists('RecordID', $row) ? $row['RecordID'] : null,

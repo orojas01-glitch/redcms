@@ -446,6 +446,21 @@ layout, visibility, and ordering fields. Specialized records should use a
 package-owned table with an explicit numeric relationship to the parent
 article. Parent and child writes must share one transaction.
 
+The generic parent-relationship foundation persists the complete validated
+component id in `RED_Articles.Component` and permits a reviewed package
+migration to declare only an exact foreign key to
+`RED_Articles(RecordID)`. The package SQL guard continues to reject inserts,
+updates, deletes, schema changes, alternate-column references, and every other
+core-table access. Before production public dispatch, core resolves the
+numeric parent read-only and requires its component id, the enabled
+installation state, and the request-local runtime owner to agree exactly.
+Core does not select a package table or store specialized fields.
+
+This foundation does not yet provide create/edit field schemas, transactional
+parent-plus-child writes, revision snapshots, restore, export/import, or
+delete behavior. Those editor and lifecycle contracts remain separate
+reviewed batches.
+
 Add-on components must not be implemented by adding another hard-coded switch
 to `class_content.php`. The add-on registry is the only new dispatcher.
 
@@ -779,7 +794,10 @@ responses, or structured data.
    preflight, enablement, runtime-render, disablement, and cleanup evidence.
 8. Implement the remaining generic persistence, editor, typed-service, route,
    administrator-tool, settings, asset, and live-data contracts as separate
-   disposable-fixture batches.
+   disposable-fixture batches. The component parent relationship, full
+   component-id storage, package-table foreign-key allowance, and read-only
+   public binding resolver are implemented; transactional editor writes,
+   revisions, and package data loaders remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

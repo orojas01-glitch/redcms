@@ -17,8 +17,11 @@ enabled manifest-declared component are implemented for already-recorded
 enabled packages. Service, route, adapter, and administrator-tool dispatch,
 upgrades, uninstall/purge, member access, publishing, payment, and integration
 controls remain inactive. The Store Lite product and security boundary is
-defined, but its package code and the richer generic contracts it requires
-have not started.
+defined. The first generic component-persistence foundation now provides full
+component-id storage, a narrowly guarded package-table relationship to the
+numeric placement parent, and fail-closed read-only public binding resolution.
+Its package code and the richer editor, data-loader, service, route, tool,
+settings, and asset contracts have not started.
 
 ## Product Goal
 
@@ -262,6 +265,12 @@ request bootstrap excludes the disabled package.
     non-executing disablement, and exact disposable cleanup. Persistence,
     editor, typed service invocation, routes, administrator tools, settings,
     assets, and live-data behavior remain blocked.
+12. Completed persistence foundation: preserve `RED_Articles` as the single
+    placement parent, store the full manifest component id, permit package
+    tables only an exact numeric parent foreign key, and require an enabled
+    runtime-owner match before production public dispatch. Transactional
+    editor writes, field schemas, revisions, package data loading, and delete
+    behavior remain separate batches.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
