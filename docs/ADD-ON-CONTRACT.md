@@ -335,10 +335,21 @@ name a table, column, class, callback, template, SQL fragment, or persistence
 handler. `red_addon_component_editor_schema()` returns only the normalized
 data-only definition.
 
+`red_addon_component_editor_validate_values()` is the next non-executing
+prerequisite. It resolves an exact valid editor schema from the supplied
+manifest data, then accepts one object of submitted scalar values. Operational
+callers must use the package's already trust-validated catalog manifest.
+Unknown fields, arrays, invalid UTF-8 or controls, non-canonical integers,
+values outside declared bounds, unlisted select choices, malformed
+URLs/email/dates/datetimes/media references, and missing required values fail
+closed. On any error it returns no normalized values. This helper does not
+authorize an actor, render a form, execute the registrar, load package data,
+select a table or callback, or write state.
+
 Discovery and validation do not render an editor or authorize activation.
 Enablement preflight reports `component_editor_contract_required` until the
-separate transactional parent/child write, revision, restore, and delete
-runner is implemented and accepted.
+separate permission-enforced transactional parent/child write, revision,
+restore, and delete runner is implemented and accepted.
 
 ## Core Registry And Execution
 
@@ -527,10 +538,13 @@ numeric parent read-only and requires its component id, the enabled
 installation state, and the request-local runtime owner to agree exactly.
 Core does not select a package table or store specialized fields.
 
-This foundation does not yet provide create/edit field schemas, transactional
-parent-plus-child writes, revision snapshots, restore, export/import, or
-delete behavior. Those editor and lifecycle contracts remain separate
-reviewed batches.
+The data-only create/edit field schema and submitted-value
+normalization/validation prerequisites are implemented. This foundation does
+not render administrator fields, authorize component actions, register
+package persistence callbacks, load package records, perform transactional
+parent-plus-child writes, capture package revision snapshots, restore,
+export/import, or delete. Those editor and lifecycle contracts remain
+separate reviewed batches.
 
 Add-on components must not be implemented by adding another hard-coded switch
 to `class_content.php`. The add-on registry is the only new dispatcher.
@@ -868,8 +882,9 @@ responses, or structured data.
    administrator-tool, settings, asset, and live-data contracts as separate
    disposable-fixture batches. The component parent relationship, full
    component-id storage, package-table foreign-key allowance, and read-only
-   public binding resolver are implemented; transactional editor writes,
-   revisions, and package data loaders remain blocked.
+   public binding resolver, declarative field schema, and fail-closed submitted
+   value normalization are implemented; editor rendering, authorization,
+   transactional writes, revisions, and package data loaders remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

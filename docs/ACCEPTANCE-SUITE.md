@@ -10,7 +10,8 @@ This is a local development and controlled staging tool. It is not a HostGator d
 
 Before it creates a database or grant, the runner executes
 `scripts/clean-starter-boundary-self-test.php` and
-the SEO and add-on trust contract self-tests. Those dependency-free checks require the
+the SEO, add-on trust, and component-editor value contract self-tests. Those
+dependency-free checks require the
 portable theme set, generic installer presets, server-local outbound-mail
 configuration, deployment-neutral Apache rules, the shared SEO storage,
 editor, validation, rendering, and cleanup contract, and a fail-closed
@@ -22,6 +23,10 @@ schema: declared components and permissions must resolve exactly, field types
 and constraints are allowlisted, and executable or storage-owned instructions
 are rejected. Declaring that metadata remains an explicit activation blocker
 until the core-owned editor and persistence lifecycle exists.
+The separate 13-assertion value contract accepts only schema-declared scalar
+fields, normalizes their closed types, rejects malformed or unknown input, and
+returns no normalized payload on any error without executing package code or
+opening a database.
 The runner also executes a temporary first-party runtime fixture that proves
 fixed-entrypoint integrity, exact manifest registration, dependency ordering,
 and fail-closed output or registration ambiguity without enabling a package.
@@ -108,7 +113,8 @@ Milestone 5 content-version, direct page-structure, and custom Layout Builder
 foundations.
 The latest complete 2026-07-30 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
-metadata migration contract, 42-assertion add-on trust contract, and
+metadata migration contract, 42-assertion add-on trust contract, 13-assertion
+add-on component-editor value contract, and
 17-assertion non-activating runtime contract, imported the 25-table installer,
 applied all 37 migrations to the expected 26-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner
@@ -180,6 +186,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Guest permission checks use only disposable account data and target the disposable database. The potentially mutating layout request uses a valid CSRF token but must be denied by the Guest role before any write.
 - Owner authorization acceptance runs only in the uniquely named disposable database. It requires empty default storage, a manager-only one-time bootstrap under a database advisory lock, the exact six fixed capabilities, one allowlisted audit row, database-backed session refresh, refusal of a second Owner, refusal of Owner demotion/deletion, transactional rollback after an injected audit failure, CLI confirmation guards, and exact cleanup.
 - Add-on registry acceptance runs only in the uniquely named disposable database and executes no package PHP or SQL. It requires empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, enabled/current load eligibility, immutable migration identity, protected ledger ownership, and exact cleanup.
+- Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
 - Add-on request-bootstrap acceptance runs only in the uniquely named disposable database and uses temporary first-party packages outside the clean starter. It proves uninstalled and disabled packages never execute, enabled dependencies register first, exact handlers and owners remain lookup-only, lifecycle CLIs do not request-load packages, bootstrap writes no registry or audit state, drift and missing dependencies/code fail before execution, and every package/database/filesystem fixture is removed.
 - Add-on install acceptance runs only in the uniquely named disposable database and uses a temporary validated first-party fixture outside the clean starter. It proves exact Owner authorization and dependency state, stale-plan and audit fail-closed behavior before SQL, resumable partial DDL, immutable migration evidence, bounded audit data, disabled/unloaded completion, local-only confirmations, and zero residual package, SQL, authorization, audit, or code-execution artifacts.
 - Add-on enablement-preflight acceptance runs only in the uniquely named disposable database and uses temporary validated packages outside the clean starter. It requires exact Owner `addons.enable` authority, exact installed-disabled/current registry evidence, deterministic client-bound plans, required enabled dependencies, capability and route conflict reporting, registration-only service, core-rendered default component, and combined default-component plus registration-only-service profiles that clear their declarative gates, exact richer-surface theme/settings/live-data/component-editor blockers, no apply path, identical pre/post registry and authorization fingerprints, no package execution, and exact cleanup.

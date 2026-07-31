@@ -21,9 +21,11 @@ defined. The first generic component-persistence foundation now provides full
 component-id storage, a narrowly guarded package-table relationship to the
 numeric placement parent, and fail-closed read-only public binding resolution.
 Optional data-only component editor schemas are also validated and normalized
-without package execution, but remain activation-blocked. Its package code and
-the transactional editor, data-loader, service, route, tool, settings, and
-asset contracts have not started.
+without package execution. Submitted scalar values can now be validated and
+normalized against those schemas with fail-closed empty output, but editor
+rendering and activation remain blocked. Its package code and the
+authorization, transactional editor, data-loader, service, route, tool,
+settings, and asset contracts have not started.
 
 ## Product Goal
 
@@ -278,6 +280,12 @@ request bootstrap excludes the disabled package.
     already-requested permissions, and fixed field types and bounds. Expose a
     normalized read-only lookup while keeping enablement blocked until the
     separate transactional write, revision, restore, and delete runner exists.
+14. Completed editor-value prerequisite: normalize one submitted scalar-value
+    object only after the exact component schema resolves, reject unknown,
+    nested, malformed, non-canonical, or out-of-bounds values, and return no
+    normalized payload on any error. Keep authorization, administrator
+    rendering, package execution, persistence, revisions, and activation out
+    of this batch.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

@@ -171,11 +171,20 @@ preflight deliberately reports `component_editor_contract_required`; no editor
 UI, write handler, table selector, transaction, revision, or package data
 loader is activated.
 
+The next non-writing prerequisite is also implemented: core validates one
+submitted scalar-value object against that normalized schema and returns
+values only when the complete object passes. It rejects unknown/nested fields,
+invalid text encodings or controls, non-canonical or out-of-range numbers,
+closed-choice violations, malformed locator and temporal values, and missing
+required fields. This helper neither authorizes a user nor renders, loads, or
+writes package data, so the same activation blocker remains in force.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
 blocked. The generic numeric parent relationship, public binding resolver, and
-declarative editor-schema validation are implemented; transactional editing,
+declarative editor-schema and submitted-value validation are implemented;
+administrator rendering, permission enforcement, transactional editing,
 typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
