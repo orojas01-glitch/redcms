@@ -871,6 +871,147 @@ try {
         'one successful update atomically records exact baseline and saved snapshots'
     );
 
+    $history = red_addon_component_revision_history(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        10
+    );
+    red_addon_editor_update_test_assert(
+        count($history) === 2
+            && $history[0]['revisionNumber'] === 2
+            && $history[0]['stateHash'] === $updated['stateHash']
+            && $history[1]['revisionNumber'] === 1
+            && $history[1]['stateHash'] === $loaded['stateHash']
+            && !array_key_exists('values', $history[0]),
+        'read-only history returns a bounded validated newest-first timeline without values'
+    );
+
+    $restorePreflight = red_addon_component_revision_restore_preflight(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[0]['RevisionID'],
+        $updated['stateHash']
+    );
+    $restorePreflightRepeat = red_addon_component_revision_restore_preflight(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[0]['RevisionID'],
+        $updated['stateHash']
+    );
+    red_addon_editor_update_test_assert(
+        $restorePreflight['ready'] === true
+            && $restorePreflight['permission'] === $editPermission
+            && $restorePreflight['revisionNumber'] === 1
+            && $restorePreflight['currentStateHash'] === $updated['stateHash']
+            && $restorePreflight['targetStateHash'] === $loaded['stateHash']
+            && $restorePreflight['targetValues'] === $loaded['values']
+            && preg_match('/\A[a-f0-9]{64}\z/', $restorePreflight['planHash'])
+                === 1
+            && $restorePreflightRepeat['planHash']
+                === $restorePreflight['planHash']
+            && red_addon_editor_update_test_values(
+                $connection, $packageTable, $contentRecordId
+            ) === 'Updated fixture:11',
+        'restore preflight is deterministic, authorized, and strictly read-only'
+    );
+
+    $alreadyCurrent = red_addon_component_revision_restore_preflight(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[1]['RevisionID'],
+        $updated['stateHash']
+    );
+    red_addon_editor_update_test_assert(
+        empty($alreadyCurrent['ready'])
+            && $alreadyCurrent['reason'] === 'already_current'
+            && $alreadyCurrent['planHash'] === '',
+        'restore preflight refuses a revision that already matches current state'
+    );
+
+    $stalePreflight = red_addon_component_revision_restore_preflight(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[0]['RevisionID'],
+        $loaded['stateHash']
+    );
+    red_addon_editor_update_test_assert(
+        $stalePreflight['reason'] === 'stale_state'
+            && red_addon_component_revision_history(
+                $connection,
+                $package['manifest'],
+                $componentId,
+                $contentRecordId,
+                $adminRecordId,
+                0
+            ) === [],
+        'stale current evidence and invalid history limits fail closed'
+    );
+
+    $originalSnapshot = $revisionRows[0]['Snapshot'];
+    $statement = mysqli_prepare(
+        $connection,
+        'UPDATE RED_Addon_Component_Revisions SET Snapshot=? WHERE RevisionID=?'
+    );
+    $tamperedSnapshot = '{"schema":1,"tampered":true}';
+    $baselineRevisionId = (int) $revisionRows[0]['RevisionID'];
+    mysqli_stmt_bind_param(
+        $statement,
+        'si',
+        $tamperedSnapshot,
+        $baselineRevisionId
+    );
+    mysqli_stmt_execute($statement);
+    mysqli_stmt_close($statement);
+    $tamperedPreflight = red_addon_component_revision_restore_preflight(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash']
+    );
+    $tamperedHistory = red_addon_component_revision_history(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        10
+    );
+    $statement = mysqli_prepare(
+        $connection,
+        'UPDATE RED_Addon_Component_Revisions SET Snapshot=? WHERE RevisionID=?'
+    );
+    mysqli_stmt_bind_param(
+        $statement,
+        'si',
+        $originalSnapshot,
+        $baselineRevisionId
+    );
+    mysqli_stmt_execute($statement);
+    mysqli_stmt_close($statement);
+    red_addon_editor_update_test_assert(
+        $tamperedPreflight['reason'] === 'revision_unavailable'
+            && $tamperedHistory === [],
+        'tampered snapshots fail closed for both history and restore preflight'
+    );
+
     $writers = red_addon_editor_update_test_marker_count($writerMarker);
     $unchanged = red_addon_component_editor_update_values(
         $connection,
@@ -985,6 +1126,20 @@ try {
             && red_addon_editor_update_test_marker_count($writerMarker)
                 === $writers,
         'revoked edit permission refuses the writer before invocation'
+    );
+    $restoreDenied = red_addon_component_revision_restore_preflight(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash']
+    );
+    red_addon_editor_update_test_assert(
+        $restoreDenied['reason'] === 'permission_denied'
+            && empty($restoreDenied['ready']),
+        'revoked restore permission fails before snapshot lookup or package execution'
     );
     red_addon_editor_update_test_grant(
         $connection,

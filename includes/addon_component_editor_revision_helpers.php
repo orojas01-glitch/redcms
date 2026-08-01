@@ -275,3 +275,312 @@ if (!function_exists('red_addon_component_revision_record')) {
         }
     }
 }
+
+if (!function_exists('red_addon_component_revision_validated_row')) {
+    function red_addon_component_revision_validated_row(
+        array $manifest,
+        $componentId,
+        $contentRecordId,
+        array $row
+    ) {
+        $packageId = is_string($manifest['id'] ?? null)
+            ? $manifest['id']
+            : '';
+        $snapshot = isset($row['Snapshot']) && is_string($row['Snapshot'])
+            ? json_decode($row['Snapshot'], true)
+            : null;
+        if (!is_array($snapshot)
+            || array_keys($snapshot) !== [
+                'schema',
+                'package',
+                'component',
+                'contentRecordId',
+                'values',
+                'stateHash',
+            ]
+            || $snapshot['schema'] !== 1
+            || $snapshot['package'] !== $packageId
+            || $snapshot['component'] !== $componentId
+            || $snapshot['contentRecordId'] !== (string) $contentRecordId
+            || !is_array($snapshot['values'])
+            || !is_string($snapshot['stateHash'])
+            || !is_string($row['PackageID'] ?? null)
+            || !hash_equals($packageId, $row['PackageID'])
+            || !is_string($row['ComponentID'] ?? null)
+            || !hash_equals($componentId, $row['ComponentID'])
+            || (int) ($row['ContentRecordID'] ?? 0) !== $contentRecordId
+            || !is_string($row['StateHash'] ?? null)
+            || !hash_equals($snapshot['stateHash'], $row['StateHash'])
+        ) {
+            return null;
+        }
+        $validated = red_addon_component_editor_validate_values(
+            $manifest,
+            $componentId,
+            $snapshot['values']
+        );
+        $calculated = red_addon_component_editor_data_hash(
+            $packageId,
+            $componentId,
+            $contentRecordId,
+            $snapshot['values']
+        );
+        if (empty($validated['valid'])
+            || ($validated['values'] ?? null) !== $snapshot['values']
+            || $calculated === ''
+            || !hash_equals($calculated, $snapshot['stateHash'])
+        ) {
+            return null;
+        }
+        return [
+            'revisionId' => (int) ($row['RevisionID'] ?? 0),
+            'revisionNumber' => (int) ($row['RevisionNumber'] ?? 0),
+            'operation' => (string) ($row['Operation'] ?? ''),
+            'actorRecordId' => (int) ($row['ActorAdminRecordID'] ?? 0),
+            'actorAlias' => (string) ($row['ActorAlias'] ?? ''),
+            'stateHash' => $snapshot['stateHash'],
+            'values' => $snapshot['values'],
+            'restoredFromRevisionId' => (int) (
+                $row['RestoredFromRevisionID'] ?? 0
+            ),
+            'createdAt' => (string) ($row['CreatedAt'] ?? ''),
+        ];
+    }
+}
+
+if (!function_exists('red_addon_component_revision_history')) {
+    function red_addon_component_revision_history(
+        $connection,
+        array $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $limit = 25
+    ) {
+        $contentRecordId = filter_var(
+            $contentRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $adminRecordId = filter_var(
+            $adminRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $limit = filter_var(
+            $limit,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1, 'max_range' => 50]]
+        );
+        $packageId = is_string($manifest['id'] ?? null)
+            ? $manifest['id']
+            : '';
+        if ($contentRecordId === false
+            || $adminRecordId === false
+            || $limit === false
+            || !red_addon_component_revision_table_available($connection)
+            || red_addon_runtime_manifest($packageId) !== $manifest
+        ) {
+            return [];
+        }
+        $authorization = red_addon_component_editor_permission_decision(
+            $connection,
+            $manifest,
+            $componentId,
+            'view',
+            $adminRecordId
+        );
+        $binding = red_addon_component_persistence_binding(
+            $connection,
+            $contentRecordId,
+            $componentId
+        );
+        if (empty($authorization['authorized'])
+            || !is_array($binding)
+            || ($binding['package'] ?? '') !== $packageId
+        ) {
+            return [];
+        }
+        try {
+            $statement = mysqli_prepare(
+                $connection,
+                'SELECT RevisionID, ContentRecordID, PackageID, ComponentID,
+                        RevisionNumber, Operation, ActorAdminRecordID,
+                        ActorAlias, Snapshot, StateHash,
+                        RestoredFromRevisionID, CreatedAt
+                 FROM RED_Addon_Component_Revisions
+                 WHERE ContentRecordID=? AND PackageID=? AND ComponentID=?
+                 ORDER BY RevisionNumber DESC LIMIT ?'
+            );
+            if (!$statement) {
+                return [];
+            }
+            mysqli_stmt_bind_param(
+                $statement,
+                'issi',
+                $contentRecordId,
+                $packageId,
+                $componentId,
+                $limit
+            );
+            mysqli_stmt_execute($statement);
+            $result = mysqli_stmt_get_result($statement);
+            $history = [];
+            while ($result && ($row = mysqli_fetch_assoc($result))) {
+                $validated = red_addon_component_revision_validated_row(
+                    $manifest,
+                    $componentId,
+                    $contentRecordId,
+                    $row
+                );
+                if (!is_array($validated)) {
+                    $history = [];
+                    break;
+                }
+                unset($validated['values']);
+                $history[] = $validated;
+            }
+            if ($result) {
+                mysqli_free_result($result);
+            }
+            mysqli_stmt_close($statement);
+            return $history;
+        } catch (Throwable $throwable) {
+            return [];
+        }
+    }
+}
+
+if (!function_exists('red_addon_component_revision_restore_preflight')) {
+    function red_addon_component_revision_restore_preflight(
+        $connection,
+        array $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $revisionId,
+        $expectedCurrentStateHash
+    ) {
+        $result = [
+            'ready' => false,
+            'package' => '',
+            'component' => '',
+            'contentRecordId' => 0,
+            'actorRecordId' => 0,
+            'permission' => '',
+            'revisionId' => 0,
+            'revisionNumber' => 0,
+            'currentStateHash' => '',
+            'targetStateHash' => '',
+            'targetValues' => [],
+            'planHash' => '',
+            'reason' => 'invalid_evidence',
+        ];
+        $contentRecordId = filter_var($contentRecordId, FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]);
+        $adminRecordId = filter_var($adminRecordId, FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]);
+        $revisionId = filter_var($revisionId, FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]);
+        $packageId = is_string($manifest['id'] ?? null)
+            ? $manifest['id']
+            : '';
+        if ($contentRecordId === false
+            || $adminRecordId === false
+            || $revisionId === false
+            || !is_string($expectedCurrentStateHash)
+            || preg_match('/\A[a-f0-9]{64}\z/', $expectedCurrentStateHash)
+                !== 1
+            || red_addon_runtime_manifest($packageId) !== $manifest
+        ) {
+            return $result;
+        }
+        $result['package'] = $packageId;
+        $result['component'] = (string) $componentId;
+        $result['contentRecordId'] = $contentRecordId;
+        $result['actorRecordId'] = $adminRecordId;
+        $authorization = red_addon_component_editor_permission_decision(
+            $connection, $manifest, $componentId, 'restore', $adminRecordId
+        );
+        $result['permission'] = (string) ($authorization['permission'] ?? '');
+        if (empty($authorization['authorized'])) {
+            $result['reason'] = 'permission_denied';
+            return $result;
+        }
+        $current = red_addon_component_editor_load_values(
+            $connection, $manifest, $componentId, $contentRecordId,
+            $adminRecordId
+        );
+        if (empty($current['loaded'])) {
+            $result['reason'] = 'current_state_unavailable';
+            return $result;
+        }
+        $result['currentStateHash'] = $current['stateHash'];
+        if (!hash_equals($current['stateHash'], $expectedCurrentStateHash)) {
+            $result['reason'] = 'stale_state';
+            return $result;
+        }
+        try {
+            $statement = mysqli_prepare(
+                $connection,
+                'SELECT RevisionID, ContentRecordID, PackageID, ComponentID,
+                        RevisionNumber, Operation, ActorAdminRecordID,
+                        ActorAlias, Snapshot, StateHash,
+                        RestoredFromRevisionID, CreatedAt
+                 FROM RED_Addon_Component_Revisions
+                 WHERE RevisionID=? AND ContentRecordID=?
+                   AND PackageID=? AND ComponentID=? LIMIT 1'
+            );
+            mysqli_stmt_bind_param(
+                $statement, 'iiss', $revisionId, $contentRecordId,
+                $packageId, $componentId
+            );
+            mysqli_stmt_execute($statement);
+            $query = mysqli_stmt_get_result($statement);
+            $row = $query ? mysqli_fetch_assoc($query) : null;
+            if ($query) {
+                mysqli_free_result($query);
+            }
+            mysqli_stmt_close($statement);
+        } catch (Throwable $throwable) {
+            $row = null;
+        }
+        $target = is_array($row)
+            ? red_addon_component_revision_validated_row(
+                $manifest, $componentId, $contentRecordId, $row
+            )
+            : null;
+        if (!is_array($target)) {
+            $result['reason'] = 'revision_unavailable';
+            return $result;
+        }
+        $result['revisionId'] = $target['revisionId'];
+        $result['revisionNumber'] = $target['revisionNumber'];
+        $result['targetStateHash'] = $target['stateHash'];
+        $result['targetValues'] = $target['values'];
+        if (hash_equals($current['stateHash'], $target['stateHash'])) {
+            $result['reason'] = 'already_current';
+            return $result;
+        }
+        $plan = [
+            'schema' => 1,
+            'package' => $packageId,
+            'component' => $componentId,
+            'contentRecordId' => (string) $contentRecordId,
+            'actorRecordId' => (string) $adminRecordId,
+            'revisionId' => (string) $target['revisionId'],
+            'revisionNumber' => (string) $target['revisionNumber'],
+            'currentStateHash' => $current['stateHash'],
+            'targetStateHash' => $target['stateHash'],
+        ];
+        $json = json_encode($plan, JSON_UNESCAPED_SLASHES);
+        if (!is_string($json)) {
+            $result['reason'] = 'plan_failed';
+            return $result;
+        }
+        $result['planHash'] = hash('sha256', $json);
+        $result['ready'] = true;
+        $result['reason'] = 'ready';
+        return $result;
+    }
+}

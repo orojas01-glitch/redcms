@@ -159,6 +159,12 @@ add-on packages without executing them.
   or writes outside its declared package tables. Core exposes no operational
   form or endpoint and adds no create, revision history UI, restore, delete,
   or activation path.
+- Read-only revision history requires the exact view grant and enabled binding,
+  validates every stored snapshot, and returns bounded metadata without values.
+  Restore preflight separately requires the exact restore grant, current state
+  hash, and one exact integrity-valid target revision before returning a
+  deterministic plan hash. Neither helper invokes the writer or applies a
+  restore.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -284,7 +290,7 @@ Packages declaring `componentEditors` fail closed with
 core rendering, permission decisions, bounded data loading, and the
 activation-blocked existing-record update helper do not imply complete editor
 authority or activation support. Component creation, parent-metadata updates,
-revision history/restore, delete, and an operational endpoint remain absent. The renderer is
+restore execution/history UI, delete, and an operational endpoint remain absent. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
 package table, or make the package eligible for activation.
@@ -352,7 +358,7 @@ runtime owner. Package-specific fields stay in package-owned tables; core does
 not select a table, class, callback, or executable loader from database data.
 Activation-blocked data loading, existing-record updates, and immutable
 revision snapshots are implemented as separate prerequisites. Component
-creation, parent-metadata writes, revision history/restore, delete, and an
+creation, parent-metadata writes, restore execution/UI, delete, and an
 operational editor remain absent. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
@@ -365,7 +371,7 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-component creation, parent-metadata editing, revision history/restore, typed service invocation,
+component creation, parent-metadata editing, restore execution/history UI, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The numeric placement-parent
 relationship and read-only public binding foundation are implemented.
