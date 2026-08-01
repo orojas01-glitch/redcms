@@ -35,10 +35,13 @@ now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, operational editor endpoint, component
-creation, parent-metadata write, restore execution/history UI, delete, service,
-route, tool, settings, or asset contract is operational. Successful updates
+creation, parent-metadata write, history UI, delete, service, route, tool,
+settings, or asset contract is operational. Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
-current client database.
+current client database. The activation-blocked atomic restore runner now
+revalidates the exact restore plan under the locked enabled parent, uses the
+registered writer, verifies the reloaded target state, and commits a
+source-linked restore revision or rolls back the package write.
 
 ## Product Goal
 
@@ -287,14 +290,15 @@ request bootstrap excludes the disabled package.
     tables only an exact numeric parent foreign key, and require an enabled
     runtime-owner match before production public dispatch. Later prerequisites
     now add transactional existing-record updates and immutable revision
-    snapshots; component creation, parent-metadata editing, revision
-    history/restore, and delete behavior remain separate batches.
+    snapshots, validated history/preflight, and atomic restore execution;
+    component creation, parent-metadata editing, history UI, and delete
+    behavior remain separate batches.
 13. Completed editor-schema prerequisite: validate optional data-only
     component editor declarations against provided components, six
     already-requested permissions, and fixed field types and bounds. Expose a
     normalized read-only lookup while keeping enablement blocked until the
-    separate component creation, parent-metadata, revision-history/restore,
-    delete, and operational editor contracts exist.
+    separate component creation, parent-metadata, history UI, delete, and
+    operational editor contracts exist.
 14. Completed editor-value prerequisite: normalize one submitted scalar-value
     object only after the exact component schema resolves, reject unknown,
     nested, malformed, non-canonical, or out-of-bounds values, and return no
@@ -340,6 +344,15 @@ request bootstrap excludes the disabled package.
     hash, and integrity-valid target snapshot for a deterministic plan. Invoke
     no writer and keep restore execution, history UI, endpoints, audit, and
     activation eligibility separate.
+21. Completed atomic restore-runner prerequisite: revalidate the exact current
+    state, target revision, permissions, enabled binding, and deterministic
+    plan under the locked parent; invoke only the registered writer with the
+    validated target values; require the exact reloaded postcondition; and
+    commit one immutable source-linked restore revision in the same transaction.
+    Roll back stale plans, revoked grants, writer/postcondition failures, and
+    revision-ledger failures. Keep history UI, forms/endpoints, audit workflow,
+    activation eligibility, component creation, parent metadata, and delete
+    behavior separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

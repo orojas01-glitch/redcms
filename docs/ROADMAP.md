@@ -158,8 +158,9 @@ parent read-only against both persisted enabled state and the request-local
 runtime owner. Missing parents, component drift, disabled state, alternate
 core references, and orphan package records fail closed. Activation-blocked
 existing-record updates and immutable revision snapshots are now implemented;
-component creation, parent-metadata editing, restore execution/history UI, and
-delete behavior remain later isolated batches.
+atomic restore execution is also implemented behind the exact read-only plan.
+Component creation, parent-metadata editing, history UI, and delete behavior
+remain later isolated batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -223,6 +224,11 @@ Bounded revision history and restore preflight are now also implemented as
 read-only helpers. They require current view/restore grants, exact enabled
 ownership, the current state hash, and a fully revalidated target snapshot;
 they return metadata and a deterministic plan but execute no restore.
+The separate activation-blocked restore runner rechecks that plan under the
+locked enabled parent, uses only the registered writer and target snapshot,
+requires the exact reloaded target state, and commits a source-linked restore
+revision in the same transaction. Stale plans, revoked grants, writer failures,
+postcondition failures, and revision-ledger failures roll back.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
@@ -231,7 +237,7 @@ blocked. The generic numeric parent relationship, public binding resolver, and
 declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
 implemented; component creation, parent-metadata editing, restore
-execution/history UI, delete behavior, typed-service
+history UI, delete behavior, typed-service
 invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures

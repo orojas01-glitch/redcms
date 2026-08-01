@@ -41,7 +41,7 @@ blocked from enablement. An enabled disposable fixture can now register one
 exact package data loader per declared editor; core requires the view grant,
 the persisted parent/runtime owner match, contained execution, and schema-valid
 returned values before exposing a state hash. No operational form, component
-create, history UI/restore execution, or delete runner exists. A separate activation-blocked
+create, history UI, or delete runner exists. A separate activation-blocked
 helper can now apply an existing package record update only after the exact
 view and edit grants, current state hash, locked placement parent, enabled
 runtime ownership, declared InnoDB tables, contained writer execution, and
@@ -51,7 +51,10 @@ changes now atomically retain core-owned baseline and saved snapshots in the
 current client database. A separate read-only helper can list a bounded,
 integrity-validated timeline and produce a deterministic restore plan only
 after current view/restore grants, ownership, state, and target evidence pass;
-no history UI or restore runner is exposed.
+an activation-blocked atomic restore helper now revalidates that exact plan
+under the existing record lock, invokes only the registered writer, verifies
+the reloaded target state, and commits one source-linked restore snapshot. No
+history UI, endpoint, audit workflow, or activation path is exposed.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -94,6 +97,7 @@ not active features.
 - Transactional existing-record package updates with stale-state refusal and rollback proof
 - Immutable per-client package-value revision snapshots committed with updates
 - Read-only validated revision history and deterministic restore preflight
+- Atomic source-linked component revision restoration with stale-plan rollback
 
 ## Portable Starter Distribution
 

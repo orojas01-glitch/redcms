@@ -180,7 +180,8 @@ function red_addon_editor_update_test_revision_rows(
     $statement = mysqli_prepare(
         $connection,
         'SELECT RevisionID, RevisionNumber, PackageID, ComponentID, Operation,
-                ActorAdminRecordID, ActorAlias, Snapshot, StateHash
+                ActorAdminRecordID, ActorAlias, Snapshot, StateHash,
+                RestoredFromRevisionID
          FROM RED_Addon_Component_Revisions
          WHERE ContentRecordID=? ORDER BY RevisionNumber'
     );
@@ -924,6 +925,67 @@ try {
         'restore preflight is deterministic, authorized, and strictly read-only'
     );
 
+    $writers = red_addon_editor_update_test_marker_count($writerMarker);
+    $invalidRestorePlan = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[0]['RevisionID'],
+        $updated['stateHash'],
+        'not-a-plan-hash'
+    );
+    red_addon_editor_update_test_assert(
+        empty($invalidRestorePlan['restored'])
+            && $invalidRestorePlan['reason'] === 'invalid_plan_hash'
+            && red_addon_editor_update_test_marker_count($writerMarker)
+                === $writers,
+        'restore execution rejects a non-canonical plan hash before package execution'
+    );
+
+    $wrongRestorePlan = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[0]['RevisionID'],
+        $updated['stateHash'],
+        str_repeat('0', 64)
+    );
+    red_addon_editor_update_test_assert(
+        empty($wrongRestorePlan['restored'])
+            && $wrongRestorePlan['reason'] === 'plan_mismatch'
+            && red_addon_editor_update_test_values(
+                $connection, $packageTable, $contentRecordId
+            ) === 'Updated fixture:11'
+            && red_addon_editor_update_test_marker_count($writerMarker)
+                === $writers,
+        'restore execution revalidates and matches the exact deterministic plan before writing'
+    );
+
+    mysqli_begin_transaction($connection);
+    $nestedRestoreTransaction = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        (int) $revisionRows[0]['RevisionID'],
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
+    mysqli_rollback($connection);
+    red_addon_editor_update_test_assert(
+        empty($nestedRestoreTransaction['restored'])
+            && $nestedRestoreTransaction['reason']
+                === 'transaction_already_active'
+            && red_addon_editor_update_test_marker_count($writerMarker)
+                === $writers,
+        'restore execution refuses a caller-owned transaction before writing'
+    );
+
     $alreadyCurrent = red_addon_component_revision_restore_preflight(
         $connection,
         $package['manifest'],
@@ -986,6 +1048,16 @@ try {
         $baselineRevisionId,
         $updated['stateHash']
     );
+    $tamperedRestoreRun = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
     $tamperedHistory = red_addon_component_revision_history(
         $connection,
         $package['manifest'],
@@ -1008,8 +1080,10 @@ try {
     mysqli_stmt_close($statement);
     red_addon_editor_update_test_assert(
         $tamperedPreflight['reason'] === 'revision_unavailable'
-            && $tamperedHistory === [],
-        'tampered snapshots fail closed for both history and restore preflight'
+            && $tamperedHistory === []
+            && $tamperedRestoreRun['reason'] === 'revision_unavailable'
+            && empty($tamperedRestoreRun['restored']),
+        'tampered snapshots fail closed for history, preflight, and restore execution'
     );
 
     $writers = red_addon_editor_update_test_marker_count($writerMarker);
@@ -1136,10 +1210,24 @@ try {
         $baselineRevisionId,
         $updated['stateHash']
     );
+    $restoreRunDenied = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
     red_addon_editor_update_test_assert(
         $restoreDenied['reason'] === 'permission_denied'
-            && empty($restoreDenied['ready']),
-        'revoked restore permission fails before snapshot lookup or package execution'
+            && empty($restoreDenied['ready'])
+            && $restoreRunDenied['reason'] === 'permission_denied'
+            && empty($restoreRunDenied['restored'])
+            && red_addon_editor_update_test_marker_count($writerMarker)
+                === $writers,
+        'revoked restore permission fails before snapshot lookup or writer execution'
     );
     red_addon_editor_update_test_grant(
         $connection,
@@ -1383,6 +1471,153 @@ try {
             && $revisionRowsAfterFailures[1]['StateHash']
                 === $updated['stateHash'],
         'all refused and rolled-back writes preserve the exact committed revision timeline'
+    );
+
+    red_addon_editor_update_test_set_mode(
+        $connection,
+        $packageTable,
+        $contentRecordId,
+        'emit'
+    );
+    $writers = red_addon_editor_update_test_marker_count($writerMarker);
+    ob_start();
+    $restoreWriterFailure = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
+    $restoreFailureOutput = (string) ob_get_clean();
+    red_addon_editor_update_test_assert(
+        empty($restoreWriterFailure['restored'])
+            && $restoreWriterFailure['reason'] === 'writer_failed'
+            && $restoreFailureOutput === ''
+            && red_addon_editor_update_test_values(
+                $connection, $packageTable, $contentRecordId
+            ) === 'Updated fixture:11'
+            && count(red_addon_editor_update_test_revision_rows(
+                $connection, $contentRecordId
+            )) === 2
+            && red_addon_editor_update_test_marker_count($writerMarker)
+                === $writers + 1,
+        'restore writer output rolls back package values and revision evidence'
+    );
+    red_addon_editor_update_test_set_mode(
+        $connection,
+        $packageTable,
+        $contentRecordId,
+        'valid'
+    );
+
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Addon_Component_Revisions
+         ADD CONSTRAINT redcms_addon_component_revision_fail
+         CHECK (Operation <> 'restore')"
+    );
+    $restoreRevisionFailure = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Revisions
+         DROP CHECK redcms_addon_component_revision_fail'
+    );
+    red_addon_editor_update_test_assert(
+        empty($restoreRevisionFailure['restored'])
+            && $restoreRevisionFailure['reason'] === 'revision_failed'
+            && red_addon_editor_update_test_values(
+                $connection, $packageTable, $contentRecordId
+            ) === 'Updated fixture:11'
+            && count(red_addon_editor_update_test_revision_rows(
+                $connection, $contentRecordId
+            )) === 2,
+        'a forced restore-ledger failure rolls back the package restore atomically'
+    );
+
+    $restored = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
+    red_addon_editor_update_test_assert(
+        $restored['restored'] === true
+            && $restored['reason'] === 'restored'
+            && $restored['permission'] === $editPermission
+            && $restored['sourceRevisionId'] === $baselineRevisionId
+            && $restored['previousStateHash'] === $updated['stateHash']
+            && $restored['stateHash'] === $loaded['stateHash']
+            && $restored['values'] === $loaded['values']
+            && $restored['revisionId'] > 0
+            && $restored['revisionNumber'] === 3
+            && red_addon_editor_update_test_values(
+                $connection, $packageTable, $contentRecordId
+            ) === 'Initial fixture:7',
+        'authorized restore commits the exact target snapshot and result evidence'
+    );
+
+    $restoredRows = red_addon_editor_update_test_revision_rows(
+        $connection,
+        $contentRecordId
+    );
+    $restoredHistory = red_addon_component_revision_history(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        10
+    );
+    red_addon_editor_update_test_assert(
+        count($restoredRows) === 3
+            && $restoredRows[2]['Operation'] === 'restore'
+            && (int) $restoredRows[2]['RestoredFromRevisionID']
+                === $baselineRevisionId
+            && $restoredRows[2]['StateHash'] === $loaded['stateHash']
+            && count($restoredHistory) === 3
+            && $restoredHistory[0]['operation'] === 'restore'
+            && $restoredHistory[0]['restoredFromRevisionId']
+                === $baselineRevisionId
+            && !array_key_exists('values', $restoredHistory[0]),
+        'restore commits one immutable linked revision visible only as bounded metadata'
+    );
+
+    $writers = red_addon_editor_update_test_marker_count($writerMarker);
+    $staleRestoreRun = red_addon_component_revision_restore_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $baselineRevisionId,
+        $updated['stateHash'],
+        $restorePreflight['planHash']
+    );
+    red_addon_editor_update_test_assert(
+        empty($staleRestoreRun['restored'])
+            && $staleRestoreRun['reason'] === 'stale_state'
+            && red_addon_editor_update_test_marker_count($writerMarker)
+                === $writers
+            && red_addon_editor_update_test_values(
+                $connection, $packageTable, $contentRecordId
+            ) === 'Initial fixture:7',
+        'a consumed restore plan becomes stale and cannot invoke the writer again'
     );
 
     red_addon_editor_update_test_cleanup(
