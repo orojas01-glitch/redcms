@@ -14,6 +14,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
     final class RED_Addon_Runtime_Registry
     {
         private string $packageId;
+        private array $manifest;
         private array $allowed = [];
         private array $handlers = [];
 
@@ -23,6 +24,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 throw new InvalidArgumentException('Runtime package id is invalid.');
             }
             $this->packageId = $packageId;
+            $this->manifest = $manifest;
             foreach (['components', 'services', 'adminTools', 'adapters'] as $type) {
                 $values = is_array($manifest['provides'][$type] ?? null)
                     ? $manifest['provides'][$type]
@@ -30,6 +32,23 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 $this->allowed[$type] = array_fill_keys($values, true);
                 $this->handlers[$type] = [];
             }
+            $componentDataLoaders = [];
+            $componentEditors = is_array($manifest['componentEditors'] ?? null)
+                ? $manifest['componentEditors']
+                : [];
+            foreach ($componentEditors as $editor) {
+                $componentId = is_array($editor)
+                    && is_string($editor['component'] ?? null)
+                        ? $editor['component']
+                        : '';
+                if ($componentId !== ''
+                    && isset($this->allowed['components'][$componentId])
+                ) {
+                    $componentDataLoaders[$componentId] = true;
+                }
+            }
+            $this->allowed['componentDataLoaders'] = $componentDataLoaders;
+            $this->handlers['componentDataLoaders'] = [];
             $routeIds = [];
             foreach ($manifest['routes'] ?? [] as $route) {
                 if (is_array($route) && is_string($route['id'] ?? null)) {
@@ -43,6 +62,11 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
         public function packageId(): string
         {
             return $this->packageId;
+        }
+
+        public function manifest(): array
+        {
+            return $this->manifest;
         }
 
         public function register(string $type, string $id, callable $handler): void
@@ -68,6 +92,13 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
         public function registerService(string $id, callable $handler): void
         {
             $this->register('services', $id, $handler);
+        }
+
+        public function registerComponentDataLoader(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register('componentDataLoaders', $id, $handler);
         }
 
         public function registerAdminTool(string $id, callable $handler): void
@@ -136,7 +167,14 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
             $this->order = array_values($order);
             $this->packages = $packages;
             foreach (
-                ['components', 'services', 'adminTools', 'adapters', 'routes']
+                [
+                    'components',
+                    'componentDataLoaders',
+                    'services',
+                    'adminTools',
+                    'adapters',
+                    'routes',
+                ]
                 as $type
             ) {
                 $this->handlers[$type] = [];
@@ -193,6 +231,15 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
         public function owner(string $type, string $id): ?string
         {
             return $this->owners[$type][$id] ?? null;
+        }
+
+        public function manifest(string $packageId): ?array
+        {
+            $registry = $this->packages[$packageId] ?? null;
+            return $registry instanceof RED_Addon_Runtime_Registry
+                && $registry->packageId() === $packageId
+                    ? $registry->manifest()
+                    : null;
         }
 
         public function snapshot(): array
@@ -551,6 +598,16 @@ if (!function_exists('red_addon_runtime_owner')) {
         $context = red_addon_runtime_current_context();
         return $context instanceof RED_Addon_Runtime_Context
             ? $context->owner((string) $type, (string) $id)
+            : null;
+    }
+}
+
+if (!function_exists('red_addon_runtime_manifest')) {
+    function red_addon_runtime_manifest($packageId)
+    {
+        $context = red_addon_runtime_current_context();
+        return $context instanceof RED_Addon_Runtime_Context
+            ? $context->manifest((string) $packageId)
             : null;
     }
 }

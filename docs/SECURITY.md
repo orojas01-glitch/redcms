@@ -135,6 +135,15 @@ add-on packages without executing them.
   legacy Superadmin, add-on lifecycle grants, or another package permission.
   The decision writes no grant, role, package, or audit state and is necessary
   but not sufficient for a future protected write endpoint.
+- Component-editor data loading is available only from the exact enabled
+  runtime owner after that view decision and the persisted numeric placement
+  parent agree. Each declared editor has one registrar-bound loader. Core
+  contains output and failures, rejects foreign ownership, disabled state,
+  drift, and invalid returned fields, and revalidates the complete value object
+  before exposing it with a core-owned state hash. The helper opens no endpoint
+  and core performs no package, content, authorization, lifecycle, or audit
+  write. The trusted first-party loader contract is read-only; it is not a PHP
+  sandbox for untrusted package code.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -257,8 +266,8 @@ closed with explicit theme, settings, or live-data evidence. The package
 registrar remains unexecuted during preflight.
 Packages declaring `componentEditors` fail closed with
 `component_editor_contract_required`; schema/value validation, display-only
-core rendering, and read-only permission decisions do not imply write
-authority, activation support, or package persistence. The renderer is
+core rendering, read-only permission decisions, and bounded data loading do not
+imply write authority, activation support, or package persistence. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
 package table, or make the package eligible for activation.
@@ -325,7 +334,10 @@ component id, the persisted enabled installation, and the request-local
 runtime owner. Package-specific fields stay in package-owned tables; core does
 not select a table, class, callback, or executable loader from database data.
 The generic editor, transactional parent-plus-child write, revision, restore,
-and delete contracts are not implemented by this foundation.
+and delete contracts are not implemented by this foundation. The bounded
+component-editor data loader may read package-owned values only through the
+exact enabled registrar owner and returns nothing unless core validation
+accepts the complete result.
 
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Settings, package assets,

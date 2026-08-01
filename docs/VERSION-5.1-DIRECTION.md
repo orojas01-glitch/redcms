@@ -27,10 +27,12 @@ the schema and exact validator state as escaped, accessible, display-only
 administrator controls, but supplies no form action or Save control. Activation
 remains blocked. Core now also resolves each fixed editor operation to its exact
 manifest permission and checks a fresh per-client administrator grant without
-granting state or inferring Owner access. Its package code and the permission
-grant/revoke workflow, transactional write, revision, restore, delete,
-data-loader, service, route, tool, settings, and asset contracts have not
-started.
+granting state or inferring Owner access. The bounded data-loader prerequisite
+now requires that exact view grant, the enabled parent/runtime owner, contained
+package execution, and schema-valid returned values before exposing a
+core-owned state hash. No permission grant/revoke workflow, transactional
+write, revision, restore, delete, service, route, tool, settings, or asset
+contract is operational.
 
 ## Product Goal
 
@@ -278,8 +280,8 @@ request bootstrap excludes the disabled package.
     placement parent, store the full manifest component id, permit package
     tables only an exact numeric parent foreign key, and require an enabled
     runtime-owner match before production public dispatch. Transactional
-    editor writes, revisions, package data loading, and delete behavior remain
-    separate batches.
+    editor writes, revisions, restore, and delete behavior remain separate
+    batches.
 13. Completed editor-schema prerequisite: validate optional data-only
     component editor declarations against provided components, six
     already-requested permissions, and fixed field types and bounds. Expose a
@@ -303,6 +305,12 @@ request bootstrap excludes the disabled package.
     administrator grant. Do not infer package access from Owner or lifecycle
     grants, add a grant-management UI, execute package code, write package
     state, or change activation eligibility.
+17. Completed component data-loader prerequisite: require an enabled package
+    to register exactly one loader for each declared editor, then enforce the
+    exact view grant and current placement/runtime owner before invocation.
+    Contain output and failures, revalidate the complete returned value object,
+    and expose a core-owned state hash without adding an endpoint, form, write,
+    revision, audit event, or activation eligibility.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

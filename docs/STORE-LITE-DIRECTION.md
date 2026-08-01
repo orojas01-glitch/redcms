@@ -234,13 +234,14 @@ Store Lite still cannot use the current minimal enablement profile. Generic
 combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- permission-enforced transactional component write, revision, restore,
-  delete, and package data-loader contracts; the numeric placement-parent
+- permission-enforced transactional component write, revision, restore, and
+  delete contracts; the numeric placement-parent
   relationship, read-only public binding, non-executing declarative
   editor-schema, fail-closed submitted-value normalization, and core-owned
   display-only editor renderer foundations are complete; exact fresh
-  package-permission decisions are also complete, but no grant-management
-  workflow or transactional writer exists;
+  package-permission decisions and bounded package data loading are also
+  complete, but no grant-management workflow, transactional writer, revision,
+  restore, or delete runner exists;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;
@@ -288,9 +289,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    package-table parent relationship, and read-only public binding resolution
    are complete. Bounded data-only editor-schema validation and normalized
    lookup plus submitted-value validation are also complete but
-   activation-blocked; administrator rendering, permission enforcement,
-   transactional editor writes, revisions, package data loading, and delete
-   behavior remain.
+   activation-blocked. Display-only administrator rendering, exact permission
+   decisions, and bounded enabled-package data loading are complete;
+   transactional editor writes, revisions, restore, and delete behavior remain.
 4. Implement generic typed service, route, administrator-tool, settings, and
    asset contracts as separate reviewed batches.
 5. Create Store Lite in its separate distribution using only those accepted

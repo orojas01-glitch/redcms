@@ -7,9 +7,11 @@ finishes disabled without executing package PHP. A fixed runtime-registration
 contract, fail-closed front-controller page-request bootstrap, constrained
 atomic enablement, safe default component dispatch, and non-executing atomic
 disablement are implemented and tested only with temporary first-party
-fixtures. RED-CMS does not dispatch services, routes, adapters, or
-administrator tools, and does not upgrade, uninstall, or purge packages
-through this contract yet.
+fixtures. Component-editor schema/value validation, display-only rendering,
+exact permissions, and bounded enabled-package data loading are also
+implemented as activation-blocked prerequisites. RED-CMS does not dispatch
+services, routes, adapters, or administrator tools, and does not upgrade,
+uninstall, or purge packages through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -368,8 +370,23 @@ creates no grant, role, endpoint, form, audit event, package state, or business
 write and does not replace protected-session, CSRF, enabled-package,
 transaction, revision, or data-loader checks.
 
-Discovery, validation, display-only rendering, and read-only permission
-decisions do not authorize activation. Enablement preflight reports
+`registerComponentDataLoader()` and
+`red_addon_component_editor_load_values()` provide the bounded current-value
+prerequisite. A registrar may bind exactly one loader only for a component
+that declares editor metadata. Core invokes it only after the exact view grant,
+the numeric persisted parent, enabled installation, request-local component
+owner, manifest package id, and data-loader owner agree. The loader receives
+only the current database connection plus the exact component id and numeric
+content record id. Output, exceptions, altered output buffers, foreign owners,
+disabled or drifted parents, unknown fields, and invalid values fail closed.
+Core revalidates the complete returned object and exposes its normalized values
+with a package/component/record-bound SHA-256 state hash. This trusted
+first-party in-process callback is not a PHP sandbox; the contract requires a
+read-only loader. Core exposes no editor endpoint and performs no package,
+content, authorization, lifecycle, revision, or audit write.
+
+Discovery, validation, display-only rendering, permission decisions, and
+bounded data loading do not authorize activation. Enablement preflight reports
 `component_editor_contract_required` until the separate permission-enforced
 transactional parent/child write, revision, restore, and delete runner is
 implemented and accepted.
@@ -521,8 +538,10 @@ sandbox. `scripts/addon-runtime-self-test.php` and
 outside the clean starter. Uninstalled and disabled packages remain
 unexecuted. Current enabled registrars run once in dependency order. Core
 invokes only an enabled manifest-declared component through its fixed public
-placement context and core-owned default renderer; service, route, adapter,
-and administrator-tool handlers remain non-dispatched. Request failure returns
+placement context and core-owned default renderer. A declared component data
+loader may be invoked only through the exact permission/binding/schema gate
+above; service, route, adapter, and administrator-tool handlers remain
+non-dispatched. Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
 step. It must revalidate the approved plan and registrar under the shared
@@ -561,13 +580,14 @@ numeric parent read-only and requires its component id, the enabled
 installation state, and the request-local runtime owner to agree exactly.
 Core does not select a package table or store specialized fields.
 
-The data-only create/edit field schema and submitted-value
-normalization/validation prerequisites are implemented. This foundation does
-not render administrator fields, authorize component actions, register
-package persistence callbacks, load package records, perform transactional
-parent-plus-child writes, capture package revision snapshots, restore,
-export/import, or delete. Those editor and lifecycle contracts remain
-separate reviewed batches.
+The data-only create/edit field schema, submitted-value normalization,
+display-only administrator rendering, exact permission decisions, and bounded
+current-value loading prerequisites are implemented. The loader executes only
+from the enabled registrar owner, returns no values until core revalidates the
+complete schema, and produces a core-owned state hash. This foundation does
+not open an operational form or endpoint, perform transactional parent-plus-
+child writes, capture package revision snapshots, restore, export/import, or
+delete. Those editor and lifecycle contracts remain separate reviewed batches.
 
 Add-on components must not be implemented by adding another hard-coded switch
 to `class_content.php`. The add-on registry is the only new dispatcher.
@@ -697,8 +717,7 @@ Upgrades and uninstall remain later explicit transitions.
   become unsafe without an approved fallback. The first implementation
   enforces enabled-dependent refusal; persisted add-on assignments remain
   outside the supported minimal profile because declarative editor metadata
-  does not yet provide transactional writes, revisions, restore, delete, or
-  package data loading.
+  does not yet provide transactional writes, revisions, restore, or delete.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
@@ -911,8 +930,9 @@ responses, or structured data.
    component-id storage, package-table foreign-key allowance, and read-only
    public binding resolver, declarative field schema, and fail-closed submitted
    value normalization are implemented. Core-owned display-only editor
-   rendering is also implemented; authorization, transactional writes,
-   revisions, restore/delete behavior, and package data loaders remain blocked.
+   rendering, exact permission decisions, and bounded enabled-package data
+   loading are also implemented; transactional writes, revisions, and
+   restore/delete behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member
