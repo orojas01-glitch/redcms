@@ -25,9 +25,12 @@ without package execution. Submitted scalar values can now be validated and
 normalized against those schemas with fail-closed empty output. Core can render
 the schema and exact validator state as escaped, accessible, display-only
 administrator controls, but supplies no form action or Save control. Activation
-remains blocked. Its package code and the authorization, transactional write,
-revision, restore, delete, data-loader, service, route, tool, settings, and
-asset contracts have not started.
+remains blocked. Core now also resolves each fixed editor operation to its exact
+manifest permission and checks a fresh per-client administrator grant without
+granting state or inferring Owner access. Its package code and the permission
+grant/revoke workflow, transactional write, revision, restore, delete,
+data-loader, service, route, tool, settings, and asset contracts have not
+started.
 
 ## Product Goal
 
@@ -294,6 +297,12 @@ request bootstrap excludes the disabled package.
     core-owned errors, and fail closed on forged state. Keep the renderer
     outside a form with no Save action, authorization decision, package data
     load, package execution, database write, or activation change.
+16. Completed editor-permission prerequisite: align the per-client capability
+    column with the 160-character manifest permission limit, resolve only the
+    six fixed editor operations, and require a fresh, exact, case-sensitive
+    administrator grant. Do not infer package access from Owner or lifecycle
+    grants, add a grant-management UI, execute package code, write package
+    state, or change activation eligibility.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

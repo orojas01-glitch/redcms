@@ -238,7 +238,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   delete, and package data-loader contracts; the numeric placement-parent
   relationship, read-only public binding, non-executing declarative
   editor-schema, fail-closed submitted-value normalization, and core-owned
-  display-only editor renderer foundations are complete;
+  display-only editor renderer foundations are complete; exact fresh
+  package-permission decisions are also complete, but no grant-management
+  workflow or transactional writer exists;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;

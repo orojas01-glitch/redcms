@@ -187,6 +187,14 @@ empty state or the exact closed validator result and fails closed on forged
 state. The fragment deliberately contains no form, Save control, authorization
 decision, package code or data load, database write, or activation change.
 
+The first package-permission prerequisite is now implemented without adding a
+grant workflow. The per-client capability column matches the existing
+160-character manifest limit, each of the six editor operations resolves to
+its exact declared permission, and a fresh case-sensitive database lookup
+requires that administrator's exact grant. Owner and lifecycle grants do not
+imply package access. The decision is read-only and does not activate a
+package, execute code, open an endpoint, or write content.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
