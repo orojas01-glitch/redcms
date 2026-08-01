@@ -18,7 +18,7 @@ require_once $projectRoot
     . '/includes/addon_component_editor_write_helpers.php';
 
 if (!preg_match(
-    '/\Aredcms_(?:acceptance|addon_editor_update)_[A-Za-z0-9_]+\z/',
+    '/\Aredcms_(?:acceptance|addon_editor_update|rev_base)_[A-Za-z0-9_]+\z/',
     (string) DBNAME
 )) {
     fwrite(
@@ -104,11 +104,29 @@ function red_addon_editor_update_test_cleanup(
     $temporaryRoot
 ) {
     try {
+        if (red_addon_editor_update_test_scalar(
+            $connection,
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+             WHERE CONSTRAINT_SCHEMA=DATABASE()
+               AND TABLE_NAME='RED_Addon_Component_Revisions'
+               AND CONSTRAINT_NAME='redcms_addon_component_revision_fail'"
+        ) === '1') {
+            mysqli_query(
+                $connection,
+                'ALTER TABLE RED_Addon_Component_Revisions
+                 DROP CHECK redcms_addon_component_revision_fail'
+            );
+        }
         foreach ($tables as $table) {
             if (preg_match('/\ARED_Addon_[A-Za-z0-9_]+\z/', $table) === 1) {
                 mysqli_query($connection, 'DROP TABLE IF EXISTS `' . $table . '`');
             }
         }
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
+                . (int) $contentRecordId
+        );
         mysqli_query(
             $connection,
             'DELETE FROM RED_Articles WHERE RecordID=' . (int) $contentRecordId
@@ -152,6 +170,31 @@ function red_addon_editor_update_test_cleanup(
     }
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
     red_addon_editor_update_test_remove_tree($temporaryRoot);
+}
+
+function red_addon_editor_update_test_revision_rows(
+    $connection,
+    $contentRecordId
+) {
+    $rows = [];
+    $statement = mysqli_prepare(
+        $connection,
+        'SELECT RevisionID, RevisionNumber, PackageID, ComponentID, Operation,
+                ActorAdminRecordID, ActorAlias, Snapshot, StateHash
+         FROM RED_Addon_Component_Revisions
+         WHERE ContentRecordID=? ORDER BY RevisionNumber'
+    );
+    mysqli_stmt_bind_param($statement, 'i', $contentRecordId);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+    while ($result && ($row = mysqli_fetch_assoc($result))) {
+        $rows[] = $row;
+    }
+    if ($result) {
+        mysqli_free_result($result);
+    }
+    mysqli_stmt_close($statement);
+    return $rows;
 }
 
 function red_addon_editor_update_test_insert_parent(
@@ -500,6 +543,34 @@ try {
         'discovery remains non-executing for a declared component writer'
     );
 
+    red_addon_editor_update_test_assert(
+        red_addon_editor_update_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(
+                ':',
+                (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA=DATABASE()
+                   AND TABLE_NAME='RED_Addon_Component_Revisions'),
+                (SELECT ENGINE FROM INFORMATION_SCHEMA.TABLES
+                 WHERE TABLE_SCHEMA=DATABASE()
+                   AND TABLE_NAME='RED_Addon_Component_Revisions'),
+                (SELECT CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA=DATABASE()
+                   AND TABLE_NAME='RED_Addon_Component_Revisions'
+                   AND COLUMN_NAME='PackageID'),
+                (SELECT CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS
+                 WHERE TABLE_SCHEMA=DATABASE()
+                   AND TABLE_NAME='RED_Addon_Component_Revisions'
+                   AND COLUMN_NAME='ComponentID'),
+                (SELECT COUNT(DISTINCT INDEX_NAME)
+                 FROM INFORMATION_SCHEMA.STATISTICS
+                 WHERE TABLE_SCHEMA=DATABASE()
+                   AND TABLE_NAME='RED_Addon_Component_Revisions')
+             )"
+        ) === '12:InnoDB:127:160:5',
+        'the core revision ledger has the exact transactional schema and identifier capacity'
+    );
+
     $renderOnly = $package['manifest'];
     unset($renderOnly['componentEditors']);
     $undeclaredRegistry = new RED_Addon_Runtime_Registry(
@@ -532,7 +603,7 @@ try {
             static function (): bool {
                 return true;
             },
-            ['RED_Articles']
+            ['RED_Addon_Component_Revisions']
         );
         red_addon_editor_update_test_assert(false, 'core table metadata must fail');
     } catch (LogicException $exception) {
@@ -747,6 +818,8 @@ try {
                 $updated['stateHash']
             )
             && !hash_equals($loaded['stateHash'], $updated['stateHash'])
+            && $updated['revisionId'] > 0
+            && $updated['revisionNumber'] === 2
             && $updated['reason'] === 'updated',
         'exact grants and current state commit normalized package values with a new state hash: '
             . json_encode($updated, JSON_UNESCAPED_SLASHES)
@@ -765,6 +838,39 @@ try {
         'the package update preserves the locked core placement parent'
     );
 
+    $revisionRows = red_addon_editor_update_test_revision_rows(
+        $connection,
+        $contentRecordId
+    );
+    $baselineSnapshot = isset($revisionRows[0]['Snapshot'])
+        ? json_decode($revisionRows[0]['Snapshot'], true)
+        : null;
+    $savedSnapshot = isset($revisionRows[1]['Snapshot'])
+        ? json_decode($revisionRows[1]['Snapshot'], true)
+        : null;
+    red_addon_editor_update_test_assert(
+        count($revisionRows) === 2
+            && (int) $revisionRows[0]['RevisionNumber'] === 1
+            && $revisionRows[0]['Operation'] === 'baseline'
+            && $revisionRows[0]['PackageID'] === $packageId
+            && $revisionRows[0]['ComponentID'] === $componentId
+            && (int) $revisionRows[0]['ActorAdminRecordID'] === $adminRecordId
+            && $revisionRows[0]['ActorAlias'] === 'EditWrite'
+            && $revisionRows[0]['StateHash'] === $loaded['stateHash']
+            && is_array($baselineSnapshot)
+            && $baselineSnapshot['values'] === $loaded['values']
+            && $baselineSnapshot['stateHash'] === $loaded['stateHash']
+            && (int) $revisionRows[1]['RevisionID']
+                === $updated['revisionId']
+            && (int) $revisionRows[1]['RevisionNumber'] === 2
+            && $revisionRows[1]['Operation'] === 'save'
+            && $revisionRows[1]['StateHash'] === $updated['stateHash']
+            && is_array($savedSnapshot)
+            && $savedSnapshot['values'] === $updated['values']
+            && $savedSnapshot['stateHash'] === $updated['stateHash'],
+        'one successful update atomically records exact baseline and saved snapshots'
+    );
+
     $writers = red_addon_editor_update_test_marker_count($writerMarker);
     $unchanged = red_addon_component_editor_update_values(
         $connection,
@@ -780,10 +886,60 @@ try {
             && empty($unchanged['updated'])
             && $unchanged['stateHash'] === $updated['stateHash']
             && $unchanged['reason'] === 'unchanged'
+            && count(red_addon_editor_update_test_revision_rows(
+                $connection,
+                $contentRecordId
+            )) === 2
             && red_addon_editor_update_test_marker_count($writerMarker)
                 === $writers,
         'an identical current submission succeeds without invoking the writer'
     );
+
+    $revisionFailureValues = [
+        'title' => 'Revision failure',
+        'quantity' => 12,
+    ];
+    $revisionFailureHash = red_addon_component_editor_data_hash(
+        $packageId,
+        $componentId,
+        $contentRecordId,
+        $revisionFailureValues
+    );
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Addon_Component_Revisions
+         ADD CONSTRAINT redcms_addon_component_revision_fail
+         CHECK (StateHash <> '$revisionFailureHash')"
+    );
+    $revisionFailure = red_addon_component_editor_update_values(
+        $connection,
+        $package['manifest'],
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $updated['stateHash'],
+        ['title' => 'Revision failure', 'quantity' => '12']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Revisions
+         DROP CHECK redcms_addon_component_revision_fail'
+    );
+    red_addon_editor_update_test_assert(
+        empty($revisionFailure['updated'])
+            && $revisionFailure['reason'] === 'revision_failed'
+            && red_addon_editor_update_test_values(
+                $connection,
+                $packageTable,
+                $contentRecordId
+            ) === 'Updated fixture:11'
+            && count(red_addon_editor_update_test_revision_rows(
+                $connection,
+                $contentRecordId
+            )) === 2,
+        'a forced revision insert failure rolls back package values and revision evidence'
+    );
+    $writers = red_addon_editor_update_test_marker_count($writerMarker);
 
     $stale = red_addon_component_editor_update_values(
         $connection,
@@ -1061,6 +1217,18 @@ try {
             && $reloaded['stateHash'] === $updated['stateHash'],
         'all injected failures preserve the last committed package state'
     );
+    $revisionRowsAfterFailures = red_addon_editor_update_test_revision_rows(
+        $connection,
+        $contentRecordId
+    );
+    red_addon_editor_update_test_assert(
+        count($revisionRowsAfterFailures) === 2
+            && $revisionRowsAfterFailures[0]['StateHash']
+                === $loaded['stateHash']
+            && $revisionRowsAfterFailures[1]['StateHash']
+                === $updated['stateHash'],
+        'all refused and rolled-back writes preserve the exact committed revision timeline'
+    );
 
     red_addon_editor_update_test_cleanup(
         $connection,
@@ -1081,6 +1249,8 @@ try {
                  WHERE AdminRecordID=$adminRecordId),
                 (SELECT COUNT(*) FROM RED_Articles
                  WHERE RecordID=$contentRecordId),
+                (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                 WHERE ContentRecordID=$contentRecordId),
                 (SELECT COUNT(*) FROM RED_Addon_Installations
                  WHERE PackageID='"
                     . mysqli_real_escape_string($connection, $packageId)
@@ -1089,7 +1259,7 @@ try {
                  WHERE TABLE_SCHEMA=DATABASE()
                    AND TABLE_NAME IN ('$packageTable', '$transactionTable'))
              )"
-        ) === '0:0:0:0:0'
+        ) === '0:0:0:0:0:0'
             && !file_exists($temporaryRoot),
         'all disposable update database and filesystem fixtures are removed'
     );

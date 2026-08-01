@@ -215,6 +215,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, MigrationID, MigrationPath, Checksum, AppliedByAdminRecordID, AppliedAt, ExecutionMs))), 0) FROM RED_Addon_Migrations),
             (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, EventName, PackageID, PackageVersion, ActorAdminRecordID, Result, DetailCode, OccurredAt))), 0) FROM RED_Addon_Activity_Log),
+            (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RevisionID, ContentRecordID, PackageID, ComponentID, RevisionNumber, Operation, ActorAdminRecordID, ActorAlias, Snapshot, StateHash, RestoredFromRevisionID, CreatedAt))), 0) FROM RED_Addon_Component_Revisions),
             (SELECT COUNT(*) FROM RED_Articles),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, Title, Component, Alias, Sections, Categories, SubCategories, Layout, Active, Updated))), 0) FROM RED_Articles)
         );
@@ -759,6 +761,7 @@ red_acceptance_all_table_checksums() {
             RED_Addon_Installations,
             RED_Addon_Migrations,
             RED_Addon_Activity_Log,
+            RED_Addon_Component_Revisions,
             RED_Articles,
             RED_C_Form,
             RED_C_Gallery,
@@ -4324,6 +4327,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Addon_Installations),
         (SELECT COUNT(*) FROM RED_Addon_Migrations),
         (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
+        (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
         (SELECT COUNT(*) FROM RED_Advanced),
         (SELECT COUNT(*) FROM RED_Articles),
         (SELECT COUNT(*) FROM RED_C_Form),
@@ -4386,10 +4390,10 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
       AND CONSTRAINT_NAME='fk_red_addon_migrations_installation';
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '26:26:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '27:27:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
@@ -4462,4 +4466,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on component data loading and transactional updates, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on component data loading, transactional updates, and immutable revision snapshots, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

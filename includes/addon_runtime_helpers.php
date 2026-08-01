@@ -124,6 +124,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 'red_addon_installations',
                 'red_addon_migrations',
                 'red_addon_activity_log',
+                'red_addon_component_revisions',
             ];
             foreach ($tables as $table) {
                 if (!is_string($table)
