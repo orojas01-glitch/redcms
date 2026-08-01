@@ -159,8 +159,11 @@ runtime owner. Missing parents, component drift, disabled state, alternate
 core references, and orphan package records fail closed. Activation-blocked
 existing-record updates and immutable revision snapshots are now implemented;
 atomic restore execution is also implemented behind the exact read-only plan.
-Component creation, parent-metadata editing, history UI, and delete behavior
-remain later isolated batches.
+Creation now has a separate read-only preflight that validates an inactive,
+hidden core parent shell plus schema-valid package values and returns a
+deterministic plan without invoking package code or writing state. The atomic
+creation runner, parent-metadata editing, public placement, history UI, and
+delete behavior remain later isolated batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -230,14 +233,26 @@ requires the exact reloaded target state, and commits a source-linked restore
 revision in the same transaction. Stale plans, revoked grants, writer failures,
 postcondition failures, and revision-ledger failures roll back.
 
+The read-only component-creation preflight is now implemented. An enabled
+registrar may optionally bind one creator per declared editor with one to eight
+package-owned transaction tables. Core requires the exact create grant,
+manifest and runtime component/loader/creator ownership, InnoDB core and
+package tables, an unused numeric record id with no parent/revision/SEO
+evidence, a valid active-theme layout, closed parent metadata, and fully
+normalized package values. The returned hash binds an inactive, hidden,
+unrouted parent shell to the complete normalized plan. The helper invokes no
+loader or creator, reserves no id, and writes no state. Atomic execution,
+parent-metadata editing, public placement, forms/endpoints, audit, and
+activation eligibility remain absent.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
 blocked. The generic numeric parent relationship, public binding resolver, and
 declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
-implemented; component creation, parent-metadata editing, restore
-history UI, delete behavior, typed-service
+implemented; read-only component-creation planning is implemented, while its
+atomic runner, parent-metadata editing, restore history UI, delete behavior, typed-service
 invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
