@@ -35,7 +35,7 @@ now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, operational editor endpoint, component
-creation, parent-metadata write, revision history/restore, delete, service,
+creation, parent-metadata write, restore execution/history UI, delete, service,
 route, tool, settings, or asset contract is operational. Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database.
@@ -325,7 +325,7 @@ request bootstrap excludes the disabled package.
     recheck view/edit grants and the current state hash, pass only normalized
     values, contain callback failures, reload the saved values, and roll back
     unless the complete postcondition matches. Keep component creation,
-    parent-metadata writes, revision history/restore, delete, audit workflow,
+    parent-metadata writes, restore execution/history UI, delete, audit workflow,
     web forms/endpoints, and activation eligibility out of this batch.
 19. Completed revision-snapshot prerequisite: store immutable normalized
     baseline/checkpoint and saved package values with exact package, component,
@@ -334,6 +334,12 @@ request bootstrap excludes the disabled package.
     revision for unchanged values, and roll back the package write when ledger
     insertion fails. Keep history UI, restore, delete, operational endpoints,
     audit workflow, and activation eligibility separate.
+20. Completed read-only revision-history and restore-preflight prerequisite:
+    require the exact enabled binding and view grant for a bounded validated
+    newest-first timeline, then require the exact restore grant, current state
+    hash, and integrity-valid target snapshot for a deterministic plan. Invoke
+    no writer and keep restore execution, history UI, endpoints, audit, and
+    activation eligibility separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

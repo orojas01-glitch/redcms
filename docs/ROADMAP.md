@@ -158,7 +158,7 @@ parent read-only against both persisted enabled state and the request-local
 runtime owner. Missing parents, component drift, disabled state, alternate
 core references, and orphan package records fail closed. Activation-blocked
 existing-record updates and immutable revision snapshots are now implemented;
-component creation, parent-metadata editing, revision history/restore, and
+component creation, parent-metadata editing, restore execution/history UI, and
 delete behavior remain later isolated batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
@@ -219,6 +219,10 @@ eligibility is added. Successful updates atomically retain immutable baseline
 and saved normalized-value snapshots in a core-owned per-client ledger;
 identical submissions add no revision, and a ledger failure rolls back the
 package write.
+Bounded revision history and restore preflight are now also implemented as
+read-only helpers. They require current view/restore grants, exact enabled
+ownership, the current state hash, and a fully revalidated target snapshot;
+they return metadata and a deterministic plan but execute no restore.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
@@ -226,8 +230,8 @@ registration shape is accepted, but the complete Store Lite manifest remains
 blocked. The generic numeric parent relationship, public binding resolver, and
 declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
-implemented; component creation, parent-metadata editing, revision
-history/restore, delete behavior, typed-service
+implemented; component creation, parent-metadata editing, restore
+execution/history UI, delete behavior, typed-service
 invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures

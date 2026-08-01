@@ -410,8 +410,15 @@ workflow, or activation eligibility.
 Discovery, validation, display-only rendering, permission decisions, bounded
 data loading, existing-record updates, and revision snapshots do not authorize
 activation.
+`red_addon_component_revision_history()` and
+`red_addon_component_revision_restore_preflight()` add read-only prerequisites:
+bounded newest-first metadata only after the exact view grant and enabled
+binding, plus an integrity-validated target snapshot and deterministic plan
+only after the exact restore grant and current state hash. They invoke no
+writer, apply no restore, expose no endpoint, and write no audit or lifecycle
+state.
 Enablement preflight reports `component_editor_contract_required` until the
-separate create/parent-metadata, revision-history/restore, delete, audit, and
+separate create/parent-metadata, restore runner/UI, delete, audit, and
 operational endpoint contracts are implemented and accepted.
 
 ## Core Registry And Execution
@@ -615,7 +622,7 @@ may now update through the transaction and postcondition gate above while the
 core parent remains locked and unchanged, with immutable baseline and saved
 snapshots committed in the same transaction. This foundation does not open an
 operational form or endpoint, create a component/parent, edit parent metadata,
-provide revision history/restore, export/import, delete, or add an audit
+provide a history UI/restore execution, export/import, delete, or add an audit
 workflow. Those editor and lifecycle contracts remain separate reviewed
 batches.
 
@@ -964,7 +971,7 @@ responses, or structured data.
    rendering, exact permission decisions, bounded enabled-package data loading,
    transactional existing-record package updates, and immutable package-value
    revision snapshots are also implemented. Component creation,
-   parent-metadata writes, revision history/restore, audit workflow, and delete
+   parent-metadata writes, restore execution/UI, audit workflow, and delete
    behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
