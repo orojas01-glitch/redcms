@@ -165,6 +165,15 @@ add-on packages without executing them.
   hash, and one exact integrity-valid target revision before returning a
   deterministic plan hash. Neither helper invokes the writer or applies a
   restore.
+- Atomic restore execution is a separate activation-blocked helper. It locks
+  the exact enabled placement parent, re-runs the restore preflight, matches
+  the caller's current-state and plan hashes, invokes only the registered
+  writer with the integrity-validated target values, reloads the package state,
+  and commits one immutable `restore` snapshot linked to the source revision.
+  Revoked view/restore grants, stale or substituted plans, binding drift,
+  callback/output/buffer failures, postcondition mismatch, lost transactions,
+  and revision-ledger failure roll back. The helper exposes no endpoint,
+  history UI, audit workflow, package activation, or parent/delete mutation.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -290,7 +299,7 @@ Packages declaring `componentEditors` fail closed with
 core rendering, permission decisions, bounded data loading, and the
 activation-blocked existing-record update helper do not imply complete editor
 authority or activation support. Component creation, parent-metadata updates,
-restore execution/history UI, delete, and an operational endpoint remain absent. The renderer is
+revision history UI, delete, and an operational endpoint remain absent. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
 package table, or make the package eligible for activation.
@@ -358,7 +367,7 @@ runtime owner. Package-specific fields stay in package-owned tables; core does
 not select a table, class, callback, or executable loader from database data.
 Activation-blocked data loading, existing-record updates, and immutable
 revision snapshots are implemented as separate prerequisites. Component
-creation, parent-metadata writes, restore execution/UI, delete, and an
+creation, parent-metadata writes, restore UI, delete, and an
 operational editor remain absent. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
@@ -371,7 +380,7 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-component creation, parent-metadata editing, restore execution/history UI, typed service invocation,
+component creation, parent-metadata editing, revision history UI, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The numeric placement-parent
 relationship and read-only public binding foundation are implemented.

@@ -6,7 +6,9 @@
  * enabled, exact runtime owner with a declared editor, current view and edit
  * grants, a matching state hash, schema-valid values, and one registrar-bound
  * writer. Core locks the placement parent and owns the transaction; trusted
- * first-party package code may update only its declared InnoDB tables.
+ * first-party package code may update only its declared InnoDB tables. The
+ * separate restore helper revalidates an exact read-only restore plan under
+ * the same boundary and records the restored snapshot atomically.
  */
 
 require_once __DIR__ . '/admin_transaction_helpers.php';
@@ -440,6 +442,303 @@ if (!function_exists('red_addon_component_editor_update_values')) {
                 mysqli_rollback($connection);
             } catch (Throwable $rollbackFailure) {
                 error_log('RED-CMS add-on component rollback failed.');
+            }
+            $result['reason'] = $transactionReason;
+            return $result;
+        }
+    }
+}
+
+if (!function_exists('red_addon_component_revision_restore_result')) {
+    function red_addon_component_revision_restore_result(
+        $adminRecordId,
+        $contentRecordId,
+        $componentId,
+        $reason
+    ) {
+        return [
+            'restored' => false,
+            'actorRecordId' => is_int($adminRecordId) ? $adminRecordId : 0,
+            'contentRecordId' => is_int($contentRecordId)
+                ? $contentRecordId
+                : 0,
+            'component' => is_string($componentId)
+                && red_addon_valid_capability($componentId)
+                    ? $componentId
+                    : '',
+            'package' => '',
+            'permission' => '',
+            'values' => [],
+            'previousStateHash' => '',
+            'stateHash' => '',
+            'sourceRevisionId' => 0,
+            'revisionId' => 0,
+            'revisionNumber' => 0,
+            'reason' => (string) $reason,
+        ];
+    }
+}
+
+if (!function_exists('red_addon_component_revision_restore_values')) {
+    function red_addon_component_revision_restore_values(
+        $connection,
+        array $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $revisionId,
+        $expectedCurrentStateHash,
+        $expectedPlanHash
+    ) {
+        $adminRecordId = filter_var(
+            $adminRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $contentRecordId = filter_var(
+            $contentRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $revisionId = filter_var(
+            $revisionId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $result = red_addon_component_revision_restore_result(
+            $adminRecordId === false ? 0 : $adminRecordId,
+            $contentRecordId === false ? 0 : $contentRecordId,
+            $componentId,
+            $adminRecordId === false
+                ? 'invalid_actor'
+                : ($contentRecordId === false
+                    ? 'invalid_content_record'
+                    : ($revisionId === false
+                        ? 'invalid_revision'
+                        : 'schema_unavailable'))
+        );
+        if ($adminRecordId === false
+            || $contentRecordId === false
+            || $revisionId === false
+        ) {
+            return $result;
+        }
+        if (!red_addon_component_editor_state_hash_valid(
+            $expectedCurrentStateHash
+        )) {
+            $result['reason'] = 'invalid_state_hash';
+            return $result;
+        }
+        if (!red_addon_component_editor_state_hash_valid($expectedPlanHash)) {
+            $result['reason'] = 'invalid_plan_hash';
+            return $result;
+        }
+
+        $packageId = is_string($manifest['id'] ?? null)
+            ? $manifest['id']
+            : '';
+        $schema = red_addon_component_editor_schema($manifest, $componentId);
+        if (!red_addon_valid_package_id($packageId) || !is_array($schema)) {
+            $result['reason'] = 'schema_unavailable';
+            return $result;
+        }
+        if (red_addon_runtime_manifest($packageId) !== $manifest) {
+            $result['reason'] = 'manifest_mismatch';
+            return $result;
+        }
+
+        $writerOwner = red_addon_runtime_owner(
+            'componentDataWriters',
+            $componentId
+        );
+        $writer = red_addon_runtime_handler(
+            'componentDataWriters',
+            $componentId
+        );
+        $tables = red_addon_component_editor_writer_tables($componentId);
+        if (!is_string($writerOwner)
+            || !hash_equals($packageId, $writerOwner)
+            || !is_callable($writer)
+            || !is_array($tables)
+        ) {
+            $result['reason'] = 'writer_unavailable';
+            return $result;
+        }
+        $result['package'] = $packageId;
+        $result['sourceRevisionId'] = $revisionId;
+        if (!red_addon_component_revision_table_available($connection)) {
+            $result['reason'] = 'revision_unavailable';
+            return $result;
+        }
+        if (!red_admin_transaction_tables_supported(
+            $connection,
+            array_merge(
+                ['RED_Articles', 'RED_Addon_Component_Revisions'],
+                $tables
+            )
+        )) {
+            $result['reason'] = 'transaction_unsupported';
+            return $result;
+        }
+        if (red_addon_component_editor_transaction_active($connection)) {
+            $result['reason'] = 'transaction_already_active';
+            return $result;
+        }
+        if (!mysqli_begin_transaction($connection)) {
+            $result['reason'] = 'transaction_failed';
+            return $result;
+        }
+
+        $transactionReason = 'transaction_failed';
+        try {
+            if (!red_addon_component_editor_lock_binding(
+                $connection,
+                $packageId,
+                $componentId,
+                $contentRecordId
+            )) {
+                $transactionReason = 'binding_unavailable';
+                throw new RuntimeException($transactionReason);
+            }
+
+            $preflight = red_addon_component_revision_restore_preflight(
+                $connection,
+                $manifest,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId,
+                $revisionId,
+                $expectedCurrentStateHash
+            );
+            $result['permission'] = is_string(
+                $preflight['permission'] ?? null
+            ) ? $preflight['permission'] : '';
+            if (empty($preflight['ready'])) {
+                $transactionReason = is_string($preflight['reason'] ?? null)
+                    ? $preflight['reason']
+                    : 'preflight_failed';
+                throw new RuntimeException($transactionReason);
+            }
+            if (!is_string($preflight['planHash'] ?? null)
+                || !hash_equals($preflight['planHash'], $expectedPlanHash)
+            ) {
+                $transactionReason = 'plan_mismatch';
+                throw new RuntimeException($transactionReason);
+            }
+
+            $current = red_addon_component_editor_load_values(
+                $connection,
+                $manifest,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId
+            );
+            if (empty($current['loaded'])
+                || !hash_equals(
+                    (string) ($preflight['currentStateHash'] ?? ''),
+                    (string) ($current['stateHash'] ?? '')
+                )
+            ) {
+                $transactionReason = 'current_state_unavailable';
+                throw new RuntimeException($transactionReason);
+            }
+            $result['previousStateHash'] = $current['stateHash'];
+
+            $checkpoint = red_addon_component_revision_record(
+                $connection,
+                $packageId,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId,
+                $current['values'],
+                'checkpoint'
+            );
+            if (!is_array($checkpoint) || empty($checkpoint['recorded'])) {
+                $transactionReason = 'revision_failed';
+                throw new RuntimeException($transactionReason);
+            }
+
+            if (!red_addon_component_editor_invoke_writer(
+                $writer,
+                $connection,
+                [
+                    'component' => $componentId,
+                    'contentRecordId' => $contentRecordId,
+                    'actorRecordId' => $adminRecordId,
+                    'previousStateHash' => $current['stateHash'],
+                ],
+                $preflight['targetValues']
+            )) {
+                $transactionReason = 'writer_failed';
+                throw new RuntimeException($transactionReason);
+            }
+            if (!red_addon_component_editor_transaction_active($connection)) {
+                $transactionReason = 'transaction_lost';
+                throw new RuntimeException($transactionReason);
+            }
+
+            $saved = red_addon_component_editor_load_values(
+                $connection,
+                $manifest,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId
+            );
+            if (empty($saved['loaded'])
+                || $saved['values'] !== $preflight['targetValues']
+                || !hash_equals(
+                    (string) ($preflight['targetStateHash'] ?? ''),
+                    (string) ($saved['stateHash'] ?? '')
+                )
+            ) {
+                $transactionReason = 'postcondition_failed';
+                throw new RuntimeException($transactionReason);
+            }
+            if (!red_addon_component_editor_transaction_active($connection)) {
+                $transactionReason = 'transaction_lost';
+                throw new RuntimeException($transactionReason);
+            }
+
+            $revision = red_addon_component_revision_record(
+                $connection,
+                $packageId,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId,
+                $saved['values'],
+                'restore',
+                $revisionId
+            );
+            if (!is_array($revision)
+                || empty($revision['recorded'])
+                || empty($revision['inserted'])
+                || (int) ($revision['restoredFromRevisionId'] ?? 0)
+                    !== $revisionId
+                || !hash_equals(
+                    (string) ($revision['stateHash'] ?? ''),
+                    $saved['stateHash']
+                )
+            ) {
+                $transactionReason = 'revision_failed';
+                throw new RuntimeException($transactionReason);
+            }
+            if (!mysqli_commit($connection)) {
+                $transactionReason = 'transaction_failed';
+                throw new RuntimeException($transactionReason);
+            }
+
+            $result['restored'] = true;
+            $result['values'] = $saved['values'];
+            $result['stateHash'] = $saved['stateHash'];
+            $result['revisionId'] = (int) $revision['revisionId'];
+            $result['revisionNumber'] = (int) $revision['revisionNumber'];
+            $result['reason'] = 'restored';
+            return $result;
+        } catch (Throwable $throwable) {
+            try {
+                mysqli_rollback($connection);
+            } catch (Throwable $rollbackFailure) {
+                error_log('RED-CMS add-on component restore rollback failed.');
             }
             $result['reason'] = $transactionReason;
             return $result;

@@ -10,7 +10,8 @@ disablement are implemented and tested only with temporary first-party
 fixtures. Component-editor schema/value validation, display-only rendering,
 exact permissions, bounded enabled-package data loading, transactional
 existing-record package updates, and immutable package-value revision
-snapshots are also implemented as activation-blocked prerequisites. RED-CMS does not dispatch
+snapshots, validated history/preflight, and atomic restore execution are also
+implemented as activation-blocked prerequisites. RED-CMS does not dispatch
 services, routes, adapters, or administrator tools, and does not upgrade,
 uninstall, or purge packages through this contract yet.
 
@@ -417,8 +418,18 @@ binding, plus an integrity-validated target snapshot and deterministic plan
 only after the exact restore grant and current state hash. They invoke no
 writer, apply no restore, expose no endpoint, and write no audit or lifecycle
 state.
+`red_addon_component_revision_restore_values()` is the separate atomic apply
+prerequisite. It locks the exact enabled placement parent, re-runs the complete
+restore preflight, requires the caller's exact current-state and plan hashes,
+invokes only the registrar-bound writer with the integrity-validated target
+values, reloads the target postcondition, and commits one immutable `restore`
+snapshot linked to the source revision. Stale or substituted evidence, revoked
+view/restore grants, binding drift, writer/output/buffer failures, incomplete
+writes, lost transactions, and revision-ledger failures roll back. It opens no
+endpoint, form, history UI, audit workflow, activation path, create path,
+parent-metadata mutation, or delete behavior.
 Enablement preflight reports `component_editor_contract_required` until the
-separate create/parent-metadata, restore runner/UI, delete, audit, and
+separate create/parent-metadata, history UI, delete, audit, and
 operational endpoint contracts are implemented and accepted.
 
 ## Core Registry And Execution
@@ -620,11 +631,12 @@ from the enabled registrar owner, returns no values until core revalidates the
 complete schema, and produces a core-owned state hash. Existing package values
 may now update through the transaction and postcondition gate above while the
 core parent remains locked and unchanged, with immutable baseline and saved
-snapshots committed in the same transaction. This foundation does not open an
-operational form or endpoint, create a component/parent, edit parent metadata,
-provide a history UI/restore execution, export/import, delete, or add an audit
-workflow. Those editor and lifecycle contracts remain separate reviewed
-batches.
+snapshots committed in the same transaction. An exact validated revision may
+also be restored atomically through the same writer boundary with a
+source-linked restore snapshot. This foundation does not open an operational
+form or endpoint, create a component/parent, edit parent metadata, provide a
+history UI, export/import, delete, or add an audit workflow. Those editor and
+lifecycle contracts remain separate reviewed batches.
 
 Add-on components must not be implemented by adding another hard-coded switch
 to `class_content.php`. The add-on registry is the only new dispatcher.
@@ -755,7 +767,7 @@ Upgrades and uninstall remain later explicit transitions.
   enforces enabled-dependent refusal; persisted add-on assignments remain
   outside the supported minimal profile because declarative editor metadata
   does not yet provide component creation, parent-metadata writes, revision
-  history/restore, delete, or an operational endpoint.
+  history UI, delete, or an operational endpoint.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
@@ -970,9 +982,9 @@ responses, or structured data.
    value normalization are implemented. Core-owned display-only editor
    rendering, exact permission decisions, bounded enabled-package data loading,
    transactional existing-record package updates, and immutable package-value
-   revision snapshots are also implemented. Component creation,
-   parent-metadata writes, restore execution/UI, audit workflow, and delete
-   behavior remain blocked.
+   revision snapshots, validated history/preflight, and atomic restore
+   execution are also implemented. Component creation, parent-metadata writes,
+   history UI, audit workflow, and delete behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member
