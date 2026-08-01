@@ -42,6 +42,14 @@ current client database. The activation-blocked atomic restore runner now
 revalidates the exact restore plan under the locked enabled parent, uses the
 registered writer, verifies the reloaded target state, and commits a
 source-linked restore revision or rolls back the package write.
+Core now also provides a read-only component-creation preflight. It requires
+the exact create grant, enabled manifest/runtime ownership, a registrar-bound
+creator with declared InnoDB package tables, an unused numeric parent id, an
+active-theme layout, and normalized package values. It returns a deterministic
+inactive, hidden, unrouted parent-shell plan without invoking a loader or
+creator and without reserving or writing anything. Atomic creation,
+parent-metadata editing, public placement, operational endpoints, audit, and
+activation eligibility remain absent.
 
 ## Product Goal
 
@@ -353,6 +361,16 @@ request bootstrap excludes the disabled package.
     revision-ledger failures. Keep history UI, forms/endpoints, audit workflow,
     activation eligibility, component creation, parent metadata, and delete
     behavior separate.
+22. Completed read-only component-creation preflight prerequisite: allow at
+    most one optional registrar-bound creator per declared editor with closed
+    package-table metadata; require the exact create grant, enabled
+    manifest/component/loader/creator ownership, InnoDB transaction support,
+    an unused numeric record id, a valid active-theme layout, and fully
+    normalized package values; and return a deterministic plan whose core
+    parent shell is fixed inactive, hidden, and unrouted. Invoke no package
+    callback, reserve no id, and write no state. Keep the atomic creation
+    runner, parent-metadata editing, public placement, forms/endpoints, audit,
+    history UI, delete, and activation eligibility separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

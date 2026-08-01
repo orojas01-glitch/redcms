@@ -54,7 +54,14 @@ after current view/restore grants, ownership, state, and target evidence pass;
 an activation-blocked atomic restore helper now revalidates that exact plan
 under the existing record lock, invokes only the registered writer, verifies
 the reloaded target state, and commits one source-linked restore snapshot. No
-history UI, endpoint, audit workflow, or activation path is exposed.
+history UI, endpoint, audit workflow, or activation path is exposed. A new
+read-only creation preflight requires the exact create grant, enabled runtime
+component/loader/creator ownership, an unused numeric parent id, an
+active-theme layout, schema-valid package values, and declared InnoDB package
+tables. It returns only a deterministic plan for an inactive, hidden, unrouted
+parent shell and never invokes the creator or loader. The atomic creation
+runner, operational form, parent-metadata editing, public placement, and
+activation eligibility remain absent.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -98,6 +105,8 @@ not active features.
 - Immutable per-client package-value revision snapshots committed with updates
 - Read-only validated revision history and deterministic restore preflight
 - Atomic source-linked component revision restoration with stale-plan rollback
+- Read-only inactive component-creation planning with exact owner, grant,
+  schema, identifier, theme-layout, and transaction-table gates
 
 ## Portable Starter Distribution
 

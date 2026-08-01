@@ -52,6 +52,9 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->allowed['componentDataLoaders'] = $componentDataLoaders;
             $this->handlers['componentDataLoaders'] = [];
             $this->metadata['componentDataLoaders'] = [];
+            $this->allowed['componentDataCreators'] = $componentDataLoaders;
+            $this->handlers['componentDataCreators'] = [];
+            $this->metadata['componentDataCreators'] = [];
             $this->allowed['componentDataWriters'] = $componentDataLoaders;
             $this->handlers['componentDataWriters'] = [];
             $this->metadata['componentDataWriters'] = [];
@@ -114,11 +117,8 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->register('componentDataLoaders', $id, $handler);
         }
 
-        public function registerComponentDataWriter(
-            string $id,
-            callable $handler,
-            array $tables
-        ): void {
+        private function componentTransactionTables(array $tables): array
+        {
             $normalized = [];
             $reserved = [
                 'red_addon_installations',
@@ -134,21 +134,42 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                     || isset($normalized[$table])
                 ) {
                     throw new LogicException(
-                        'Component data-writer transaction table is invalid.'
+                        'Component transaction table is invalid.'
                     );
                 }
                 $normalized[$table] = true;
             }
             if ($normalized === [] || count($normalized) > 8) {
                 throw new LogicException(
-                    'Component data writer requires one to eight package tables.'
+                    'Component persistence requires one to eight package tables.'
                 );
             }
+            return array_keys($normalized);
+        }
+
+        public function registerComponentDataCreator(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $this->register(
+                'componentDataCreators',
+                $id,
+                $handler,
+                ['tables' => $this->componentTransactionTables($tables)]
+            );
+        }
+
+        public function registerComponentDataWriter(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
             $this->register(
                 'componentDataWriters',
                 $id,
                 $handler,
-                ['tables' => array_keys($normalized)]
+                ['tables' => $this->componentTransactionTables($tables)]
             );
         }
 
@@ -170,7 +191,11 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
         public function assertComplete(): void
         {
             foreach ($this->allowed as $type => $allowed) {
-                if ($type === 'componentDataWriters') {
+                if (in_array(
+                    $type,
+                    ['componentDataCreators', 'componentDataWriters'],
+                    true
+                )) {
                     continue;
                 }
                 $missing = array_values(array_diff(
@@ -230,6 +255,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                 [
                     'components',
                     'componentDataLoaders',
+                    'componentDataCreators',
                     'componentDataWriters',
                     'services',
                     'adminTools',

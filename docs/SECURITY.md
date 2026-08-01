@@ -174,6 +174,16 @@ add-on packages without executing them.
   callback/output/buffer failures, postcondition mismatch, lost transactions,
   and revision-ledger failure roll back. The helper exposes no endpoint,
   history UI, audit workflow, package activation, or parent/delete mutation.
+- Component creation preflight is separately read-only. An optional
+  registrar-bound creator must belong to the exact enabled manifest owner and
+  declare only package-owned transaction tables. Core requires the exact
+  create grant, component and loader ownership, InnoDB support, an unused
+  numeric record id with no parent/revision/SEO evidence, a valid active-theme
+  layout, closed title/layout/language metadata, and normalized package values.
+  The resulting hash fixes the parent as inactive, hidden, and unrouted. The
+  preflight never invokes the creator or loader, reserves no identifier, opens
+  no transaction, and writes no state. Creator PHP remains trusted
+  first-party code for a future atomic runner, not a sandboxed preflight hook.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -297,8 +307,9 @@ registrar remains unexecuted during preflight.
 Packages declaring `componentEditors` fail closed with
 `component_editor_contract_required`; schema/value validation, display-only
 core rendering, permission decisions, bounded data loading, and the
-activation-blocked existing-record update helper do not imply complete editor
-authority or activation support. Component creation, parent-metadata updates,
+activation-blocked existing-record update/restore helpers and read-only
+creation preflight do not imply complete editor authority or activation
+support. Atomic component creation, parent-metadata updates,
 revision history UI, delete, and an operational endpoint remain absent. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
@@ -365,9 +376,10 @@ also requires a read-only exact match between that numeric parent, its
 component id, the persisted enabled installation, and the request-local
 runtime owner. Package-specific fields stay in package-owned tables; core does
 not select a table, class, callback, or executable loader from database data.
-Activation-blocked data loading, existing-record updates, and immutable
-revision snapshots are implemented as separate prerequisites. Component
-creation, parent-metadata writes, restore UI, delete, and an
+Activation-blocked data loading, existing-record updates, immutable revision
+snapshots, and read-only inactive creation planning are implemented as
+separate prerequisites. Atomic component creation, parent-metadata writes,
+restore UI, delete, and an
 operational editor remain absent. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
@@ -380,7 +392,7 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-component creation, parent-metadata editing, revision history UI, typed service invocation,
+atomic component creation, parent-metadata editing, revision history UI, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The numeric placement-parent
 relationship and read-only public binding foundation are implemented.

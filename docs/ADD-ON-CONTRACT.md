@@ -11,7 +11,8 @@ fixtures. Component-editor schema/value validation, display-only rendering,
 exact permissions, bounded enabled-package data loading, transactional
 existing-record package updates, and immutable package-value revision
 snapshots, validated history/preflight, and atomic restore execution are also
-implemented as activation-blocked prerequisites. RED-CMS does not dispatch
+implemented as activation-blocked prerequisites. Read-only inactive component
+creation planning is implemented without a creation runner. RED-CMS does not dispatch
 services, routes, adapters, or administrator tools, and does not upgrade,
 uninstall, or purge packages through this contract yet.
 
@@ -428,8 +429,21 @@ view/restore grants, binding drift, writer/output/buffer failures, incomplete
 writes, lost transactions, and revision-ledger failures roll back. It opens no
 endpoint, form, history UI, audit workflow, activation path, create path,
 parent-metadata mutation, or delete behavior.
+`registerComponentDataCreator()` and
+`red_addon_component_editor_create_preflight()` add a separate read-only
+creation prerequisite. A registrar may bind at most one optional creator for a
+declared editor and must declare one to eight package-owned `RED_Addon_*`
+transaction tables. Core requires the exact create grant, enabled installation,
+exact runtime manifest and component/loader/creator owners, an unused numeric
+record id with no parent/revision/SEO evidence, an active-theme layout, closed
+title/layout/language parent metadata, fully normalized package values, and
+InnoDB support for every future transaction table. It returns a deterministic
+hash over an inactive, hidden, unrouted core parent shell and the package plan.
+It does not invoke the creator or loader, reserve an id, open a transaction,
+or write state. The callback is registration evidence for a future trusted
+first-party atomic runner, not an executable preflight hook or a PHP sandbox.
 Enablement preflight reports `component_editor_contract_required` until the
-separate create/parent-metadata, history UI, delete, audit, and
+separate atomic create/parent-metadata, history UI, delete, audit, and
 operational endpoint contracts are implemented and accepted.
 
 ## Core Registry And Execution
@@ -566,7 +580,9 @@ lifecycle transition or lifecycle CLI:
 - registration accepts only manifest-declared component, service,
   administrator-tool, adapter, and route identifiers;
 - each declared component editor requires exactly one data loader and may bind
-  at most one existing-record writer with closed package-table metadata;
+  at most one creator and one existing-record writer with closed package-table
+  metadata; creator registration is lookup-only until a separate atomic runner
+  exists;
 - every declared runtime identifier must register exactly once;
 - required enabled dependencies are ordered before their dependents;
 - every enabled registry row, package identity, migration ledger, dependency,
@@ -634,7 +650,9 @@ core parent remains locked and unchanged, with immutable baseline and saved
 snapshots committed in the same transaction. An exact validated revision may
 also be restored atomically through the same writer boundary with a
 source-linked restore snapshot. This foundation does not open an operational
-form or endpoint, create a component/parent, edit parent metadata, provide a
+form or endpoint or create a component/parent. It can produce a read-only,
+deterministic plan for an inactive hidden parent and package row, but cannot
+execute it, edit parent metadata, provide a
 history UI, export/import, delete, or add an audit workflow. Those editor and
 lifecycle contracts remain separate reviewed batches.
 
@@ -983,7 +1001,8 @@ responses, or structured data.
    rendering, exact permission decisions, bounded enabled-package data loading,
    transactional existing-record package updates, and immutable package-value
    revision snapshots, validated history/preflight, and atomic restore
-   execution are also implemented. Component creation, parent-metadata writes,
+   execution are also implemented. Read-only inactive component-creation
+   preflight is implemented; its atomic runner, parent-metadata writes,
    history UI, audit workflow, and delete behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
