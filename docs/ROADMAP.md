@@ -157,8 +157,7 @@ key to its numeric `RecordID`, and production public dispatch resolves that
 parent read-only against both persisted enabled state and the request-local
 runtime owner. Missing parents, component drift, disabled state, alternate
 core references, and orphan package records fail closed. Transactional editor
-writes, revisions, package data loaders, and delete behavior remain later
-isolated batches.
+writes, revisions, restore, and delete behavior remain later isolated batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -169,7 +168,7 @@ undeclared components or permissions, duplicate keys/options, and invalid
 bounds fail validation. A normalized lookup is available, but enablement
 preflight deliberately reports `component_editor_contract_required`; no
 operational form, write handler, table selector, transaction, revision, or
-package data loader is activated.
+package data-loading endpoint is activated.
 
 The next non-writing prerequisite is also implemented: core validates one
 submitted scalar-value object against that normalized schema and returns
@@ -195,13 +194,21 @@ requires that administrator's exact grant. Owner and lifecycle grants do not
 imply package access. The decision is read-only and does not activate a
 package, execute code, open an endpoint, or write content.
 
+The bounded package data-loader prerequisite is now implemented without
+opening an editor endpoint. An enabled package registrar must bind exactly one
+loader for each declared component editor. Core requires the exact view grant,
+the current enabled placement/runtime owner, contained loader execution, and a
+complete schema-valid returned value object. It exposes normalized values plus
+a core-owned state hash for later stale-write and revision checks, but performs
+no content, package, authorization, lifecycle, or audit write.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
 blocked. The generic numeric parent relationship, public binding resolver, and
 declarative editor-schema and submitted-value validation are implemented;
-administrator rendering, permission enforcement, transactional editing,
-typed-service invocation, route,
+transactional editing, revisions, restore/delete behavior, typed-service
+invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
