@@ -47,9 +47,12 @@ the exact create grant, enabled manifest/runtime ownership, a registrar-bound
 creator with declared InnoDB package tables, an unused numeric parent id, an
 active-theme layout, and normalized package values. It returns a deterministic
 inactive, hidden, unrouted parent-shell plan without invoking a loader or
-creator and without reserving or writing anything. Atomic creation,
-parent-metadata editing, public placement, operational endpoints, audit, and
-activation eligibility remain absent.
+creator and without reserving or writing anything. Its separate
+activation-blocked atomic runner now revalidates that plan under lifecycle and
+theme serialization, creates the parent and package row, verifies the exact
+loader postcondition, and commits initial core/package revisions together.
+Parent-metadata editing, public placement, operational endpoints, delete,
+audit, and activation eligibility remain absent.
 
 ## Product Goal
 
@@ -371,6 +374,18 @@ request bootstrap excludes the disabled package.
     callback, reserve no id, and write no state. Keep the atomic creation
     runner, parent-metadata editing, public placement, forms/endpoints, audit,
     history UI, delete, and activation eligibility separate.
+23. Completed atomic component-creation runner prerequisite: reject
+    caller-owned transactions, serialize with add-on lifecycle and theme
+    changes, lock the exact enabled installation, and revalidate the caller's
+    complete plan. Insert only the planned inactive hidden parent, invoke only
+    the registered creator with bounded identity context and normalized values,
+    reload through the registered loader, and require exact parent/package
+    postconditions. Commit the parent, package row, core `create` revision, and
+    package `baseline` revision together. Roll back stale plans, creator output,
+    exceptions, buffer changes, false returns, partial writes, postcondition
+    mismatch, and either ledger failure. Keep forms/endpoints, parent-metadata
+    editing, public placement, delete, audit workflow, and activation
+    eligibility separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

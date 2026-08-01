@@ -59,9 +59,15 @@ read-only creation preflight requires the exact create grant, enabled runtime
 component/loader/creator ownership, an unused numeric parent id, an
 active-theme layout, schema-valid package values, and declared InnoDB package
 tables. It returns only a deterministic plan for an inactive, hidden, unrouted
-parent shell and never invokes the creator or loader. The atomic creation
-runner, operational form, parent-metadata editing, public placement, and
-activation eligibility remain absent.
+parent shell and never invokes the creator or loader. A separate
+activation-blocked atomic runner revalidates that exact plan under the add-on
+lifecycle and theme locks, inserts the parent, invokes only the registered
+creator, reloads through the registered loader, requires the exact normalized
+postcondition, and commits initial core `create` plus package `baseline`
+revisions together. Callback failures, partial writes, stale evidence, and
+either ledger failure roll back. The operational form, parent-metadata editing,
+public placement, delete path, audit workflow, and activation eligibility
+remain absent.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -107,6 +113,8 @@ not active features.
 - Atomic source-linked component revision restoration with stale-plan rollback
 - Read-only inactive component-creation planning with exact owner, grant,
   schema, identifier, theme-layout, and transaction-table gates
+- Atomic inactive component creation with creator/loader containment, exact
+  postcondition verification, dual initial revisions, and rollback proof
 
 ## Portable Starter Distribution
 
