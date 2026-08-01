@@ -11,6 +11,7 @@
 
 require_once __DIR__ . '/admin_transaction_helpers.php';
 require_once __DIR__ . '/addon_component_editor_data_helpers.php';
+require_once __DIR__ . '/addon_component_editor_revision_helpers.php';
 
 if (!function_exists('red_addon_component_editor_write_result')) {
     function red_addon_component_editor_write_result(
@@ -35,6 +36,8 @@ if (!function_exists('red_addon_component_editor_write_result')) {
             'values' => [],
             'previousStateHash' => '',
             'stateHash' => '',
+            'revisionId' => 0,
+            'revisionNumber' => 0,
             'reason' => (string) $reason,
         ];
     }
@@ -66,6 +69,7 @@ if (!function_exists('red_addon_component_editor_writer_tables')) {
             'red_addon_installations',
             'red_addon_migrations',
             'red_addon_activity_log',
+            'red_addon_component_revisions',
         ];
         foreach ($tables as $table) {
             if (!is_string($table)
@@ -262,9 +266,16 @@ if (!function_exists('red_addon_component_editor_update_values')) {
             return $result;
         }
         $result['package'] = $packageId;
+        if (!red_addon_component_revision_table_available($connection)) {
+            $result['reason'] = 'revision_unavailable';
+            return $result;
+        }
         if (!red_admin_transaction_tables_supported(
             $connection,
-            array_merge(['RED_Articles'], $tables)
+            array_merge(
+                ['RED_Articles', 'RED_Addon_Component_Revisions'],
+                $tables
+            )
         )) {
             $result['reason'] = 'transaction_unsupported';
             return $result;
@@ -337,6 +348,22 @@ if (!function_exists('red_addon_component_editor_update_values')) {
                 return $result;
             }
 
+            $checkpoint = red_addon_component_revision_record(
+                $connection,
+                $packageId,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId,
+                $current['values'],
+                'checkpoint'
+            );
+            if (!is_array($checkpoint)
+                || empty($checkpoint['recorded'])
+            ) {
+                $transactionReason = 'revision_failed';
+                throw new RuntimeException($transactionReason);
+            }
+
             if (!red_addon_component_editor_invoke_writer(
                 $writer,
                 $connection,
@@ -376,6 +403,26 @@ if (!function_exists('red_addon_component_editor_update_values')) {
                 $transactionReason = 'transaction_lost';
                 throw new RuntimeException($transactionReason);
             }
+            $revision = red_addon_component_revision_record(
+                $connection,
+                $packageId,
+                $componentId,
+                $contentRecordId,
+                $adminRecordId,
+                $saved['values'],
+                'save'
+            );
+            if (!is_array($revision)
+                || empty($revision['recorded'])
+                || empty($revision['inserted'])
+                || !hash_equals(
+                    (string) ($revision['stateHash'] ?? ''),
+                    $saved['stateHash']
+                )
+            ) {
+                $transactionReason = 'revision_failed';
+                throw new RuntimeException($transactionReason);
+            }
             if (!mysqli_commit($connection)) {
                 $transactionReason = 'transaction_failed';
                 throw new RuntimeException($transactionReason);
@@ -384,6 +431,8 @@ if (!function_exists('red_addon_component_editor_update_values')) {
             $result['updated'] = true;
             $result['values'] = $saved['values'];
             $result['stateHash'] = $saved['stateHash'];
+            $result['revisionId'] = (int) $revision['revisionId'];
+            $result['revisionNumber'] = (int) $revision['revisionNumber'];
             $result['reason'] = 'updated';
             return $result;
         } catch (Throwable $throwable) {

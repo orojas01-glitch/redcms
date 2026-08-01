@@ -151,11 +151,14 @@ add-on packages without executing them.
   exact state hash, supplies only normalized values, contains callback output
   and failures, and reloads the values before commit. Stale state, drift,
   revocation, disabled ownership, unsupported tables, false returns, and
-  incomplete writes fail closed with rollback. This trusted first-party
+  incomplete writes fail closed with rollback. Core records normalized
+  baseline and saved snapshots in `RED_Addon_Component_Revisions` inside the
+  same transaction; revision insertion failure rolls back the package write,
+  and unchanged submissions create no revision. This trusted first-party
   callback is not a PHP sandbox and must not issue transaction controls, DDL,
   or writes outside its declared package tables. Core exposes no operational
-  form or endpoint and adds no create, revision, restore, delete, or activation
-  path.
+  form or endpoint and adds no create, revision history UI, restore, delete,
+  or activation path.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -281,7 +284,7 @@ Packages declaring `componentEditors` fail closed with
 core rendering, permission decisions, bounded data loading, and the
 activation-blocked existing-record update helper do not imply complete editor
 authority or activation support. Component creation, parent-metadata updates,
-revisions, restore, delete, and an operational endpoint remain absent. The renderer is
+revision history/restore, delete, and an operational endpoint remain absent. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
 package table, or make the package eligible for activation.
@@ -347,11 +350,12 @@ also requires a read-only exact match between that numeric parent, its
 component id, the persisted enabled installation, and the request-local
 runtime owner. Package-specific fields stay in package-owned tables; core does
 not select a table, class, callback, or executable loader from database data.
-The generic editor, transactional parent-plus-child write, revision, restore,
-and delete contracts are not implemented by this foundation. The bounded
-component-editor data loader may read package-owned values only through the
-exact enabled registrar owner and returns nothing unless core validation
-accepts the complete result.
+Activation-blocked data loading, existing-record updates, and immutable
+revision snapshots are implemented as separate prerequisites. Component
+creation, parent-metadata writes, revision history/restore, delete, and an
+operational editor remain absent. The bounded component-editor data loader may
+read package-owned values only through the exact enabled registrar owner and
+returns nothing unless core validation accepts the complete result.
 
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Settings, package assets,
@@ -361,7 +365,7 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-component creation, parent-metadata editing, revisions, typed service invocation,
+component creation, parent-metadata editing, revision history/restore, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The numeric placement-parent
 relationship and read-only public binding foundation are implemented.

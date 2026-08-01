@@ -241,8 +241,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   display-only editor renderer foundations are complete; exact fresh
   package-permission decisions and bounded package data loading are also
   complete. The activation-blocked existing-record package update runner is
-  also complete with stale-state and rollback checks, but no grant-management
-  workflow, component-create/parent-metadata writer, revision, restore, or
+  also complete with stale-state, rollback, and immutable baseline/save
+  revision snapshots, but no grant-management workflow,
+  component-create/parent-metadata writer, revision history UI, restore, or
   delete runner exists;
 - typed service invocation;
 - declared public and administrator routes;
@@ -293,8 +294,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    lookup plus submitted-value validation are also complete but
    activation-blocked. Display-only administrator rendering, exact permission
    decisions, bounded enabled-package data loading, and existing-record package
-   updates are complete; component creation, parent-metadata writes, revisions,
-   restore, and delete behavior remain.
+   updates and immutable revision snapshots are complete; component creation,
+   parent-metadata writes, revision history/restore, and delete behavior remain.
 4. Implement generic typed service, route, administrator-tool, settings, and
    asset contracts as separate reviewed batches.
 5. Create Store Lite in its separate distribution using only those accepted

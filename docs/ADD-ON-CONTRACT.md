@@ -8,9 +8,9 @@ contract, fail-closed front-controller page-request bootstrap, constrained
 atomic enablement, safe default component dispatch, and non-executing atomic
 disablement are implemented and tested only with temporary first-party
 fixtures. Component-editor schema/value validation, display-only rendering,
-exact permissions, bounded enabled-package data loading, and transactional
-existing-record package updates are also implemented as activation-blocked
-prerequisites. RED-CMS does not dispatch
+exact permissions, bounded enabled-package data loading, transactional
+existing-record package updates, and immutable package-value revision
+snapshots are also implemented as activation-blocked prerequisites. RED-CMS does not dispatch
 services, routes, adapters, or administrator tools, and does not upgrade,
 uninstall, or purge packages through this contract yet.
 
@@ -396,17 +396,22 @@ edit grants, reloads and compares the current state hash, and passes only the
 normalized submitted values plus bounded identity context. It contains output,
 exceptions, and altered buffers, requires a strict true return, reloads the
 saved values through the bounded loader, and commits only when the complete
-postcondition matches. Otherwise it rolls back. An identical submission is a
-successful no-op and does not invoke the writer. This trusted first-party
+postcondition matches. Otherwise it rolls back. Before the writer runs, core
+records the current normalized values as a baseline or checkpoint when needed;
+after the exact postcondition passes, it records the saved values. Both
+immutable snapshots and the package write commit or roll back together in the
+per-client `RED_Addon_Component_Revisions` ledger. An identical submission is
+a successful no-op and creates no revision. This trusted first-party
 callback is not a sandbox and must not issue transaction controls, DDL, or
 writes outside its declared tables. Core exposes no endpoint or form and adds
-no create, parent-metadata write, revision, restore, delete, audit workflow, or
-activation eligibility.
+no create, parent-metadata write, revision history UI, restore, delete, audit
+workflow, or activation eligibility.
 
 Discovery, validation, display-only rendering, permission decisions, bounded
-data loading, and existing-record updates do not authorize activation.
+data loading, existing-record updates, and revision snapshots do not authorize
+activation.
 Enablement preflight reports `component_editor_contract_required` until the
-separate create/parent-metadata, revision, restore, delete, audit, and
+separate create/parent-metadata, revision-history/restore, delete, audit, and
 operational endpoint contracts are implemented and accepted.
 
 ## Core Registry And Execution
@@ -582,7 +587,7 @@ A placeable add-on component must provide:
 - A bounded public data loader
 - A non-executable rendering context
 - An accessible default public view
-- Content-revision snapshot, restore, export, and import behavior
+- Content-revision history, restore, export, and import behavior
 - Delete/deactivate behavior and dependent-media rules
 - Theme compatibility and CSS isolation metadata
 
@@ -607,10 +612,11 @@ current-value loading prerequisites are implemented. The loader executes only
 from the enabled registrar owner, returns no values until core revalidates the
 complete schema, and produces a core-owned state hash. Existing package values
 may now update through the transaction and postcondition gate above while the
-core parent remains locked and unchanged. This foundation does not open an
+core parent remains locked and unchanged, with immutable baseline and saved
+snapshots committed in the same transaction. This foundation does not open an
 operational form or endpoint, create a component/parent, edit parent metadata,
-capture package revision snapshots, restore, export/import, delete, or add an
-audit workflow. Those editor and lifecycle contracts remain separate reviewed
+provide revision history/restore, export/import, delete, or add an audit
+workflow. Those editor and lifecycle contracts remain separate reviewed
 batches.
 
 Add-on components must not be implemented by adding another hard-coded switch
@@ -741,8 +747,8 @@ Upgrades and uninstall remain later explicit transitions.
   become unsafe without an approved fallback. The first implementation
   enforces enabled-dependent refusal; persisted add-on assignments remain
   outside the supported minimal profile because declarative editor metadata
-  does not yet provide component creation, parent-metadata writes, revisions,
-  restore, delete, or an operational endpoint.
+  does not yet provide component creation, parent-metadata writes, revision
+  history/restore, delete, or an operational endpoint.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
@@ -956,9 +962,10 @@ responses, or structured data.
    public binding resolver, declarative field schema, and fail-closed submitted
    value normalization are implemented. Core-owned display-only editor
    rendering, exact permission decisions, bounded enabled-package data loading,
-   and transactional existing-record package updates are also implemented.
-   Component creation, parent-metadata writes, revisions, audit workflow, and
-   restore/delete behavior remain blocked.
+   transactional existing-record package updates, and immutable package-value
+   revision snapshots are also implemented. Component creation,
+   parent-metadata writes, revision history/restore, audit workflow, and delete
+   behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

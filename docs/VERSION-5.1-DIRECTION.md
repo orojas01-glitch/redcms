@@ -35,8 +35,10 @@ now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, operational editor endpoint, component
-creation, parent-metadata write, revision, restore, delete, service, route,
-tool, settings, or asset contract is operational.
+creation, parent-metadata write, revision history/restore, delete, service,
+route, tool, settings, or asset contract is operational. Successful updates
+atomically retain core-owned baseline and saved package-value snapshots in the
+current client database.
 
 ## Product Goal
 
@@ -283,14 +285,16 @@ request bootstrap excludes the disabled package.
 12. Completed persistence foundation: preserve `RED_Articles` as the single
     placement parent, store the full manifest component id, permit package
     tables only an exact numeric parent foreign key, and require an enabled
-    runtime-owner match before production public dispatch. Transactional
-    editor writes, revisions, restore, and delete behavior remain separate
-    batches.
+    runtime-owner match before production public dispatch. Later prerequisites
+    now add transactional existing-record updates and immutable revision
+    snapshots; component creation, parent-metadata editing, revision
+    history/restore, and delete behavior remain separate batches.
 13. Completed editor-schema prerequisite: validate optional data-only
     component editor declarations against provided components, six
     already-requested permissions, and fixed field types and bounds. Expose a
     normalized read-only lookup while keeping enablement blocked until the
-    separate transactional write, revision, restore, and delete runner exists.
+    separate component creation, parent-metadata, revision-history/restore,
+    delete, and operational editor contracts exist.
 14. Completed editor-value prerequisite: normalize one submitted scalar-value
     object only after the exact component schema resolves, reject unknown,
     nested, malformed, non-canonical, or out-of-bounds values, and return no
@@ -321,8 +325,15 @@ request bootstrap excludes the disabled package.
     recheck view/edit grants and the current state hash, pass only normalized
     values, contain callback failures, reload the saved values, and roll back
     unless the complete postcondition matches. Keep component creation,
-    parent-metadata writes, revisions, restore, delete, audit workflow, web
-    forms/endpoints, and activation eligibility out of this batch.
+    parent-metadata writes, revision history/restore, delete, audit workflow,
+    web forms/endpoints, and activation eligibility out of this batch.
+19. Completed revision-snapshot prerequisite: store immutable normalized
+    baseline/checkpoint and saved package values with exact package, component,
+    content record, actor, revision number, and state hash in a core-owned
+    per-client ledger. Commit snapshots and package writes together, add no
+    revision for unchanged values, and roll back the package write when ledger
+    insertion fails. Keep history UI, restore, delete, operational endpoints,
+    audit workflow, and activation eligibility separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
