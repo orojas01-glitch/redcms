@@ -202,12 +202,26 @@ complete schema-valid returned value object. It exposes normalized values plus
 a core-owned state hash for later stale-write and revision checks, but performs
 no content, package, authorization, lifecycle, or audit write.
 
+The existing-record package update prerequisite is now implemented without an
+administrator endpoint or activation change. A registrar may bind at most one
+writer per declared editor and must list the package-owned transaction tables.
+Core requires those tables and the placement parent to be InnoDB, locks the
+exact enabled parent, checks the current view and edit grants plus state hash,
+passes only normalized schema values, contains writer output and failures,
+reloads the saved values, and commits only when the complete postcondition
+matches. Stale state, revoked grants, drift, disabled ownership, unsupported
+tables, exceptions, output, buffer changes, false returns, and partial writes
+fail closed with rollback. No create path, parent-metadata update, operational
+form, revision, restore, delete, audit workflow, or activation eligibility is
+added.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
 blocked. The generic numeric parent relationship, public binding resolver, and
-declarative editor-schema and submitted-value validation are implemented;
-transactional editing, revisions, restore/delete behavior, typed-service
+declarative editor-schema, submitted-value validation, and activation-blocked
+existing-record package updates are implemented; component creation,
+parent-metadata editing, revisions, restore/delete behavior, typed-service
 invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures

@@ -30,9 +30,13 @@ manifest permission and checks a fresh per-client administrator grant without
 granting state or inferring Owner access. The bounded data-loader prerequisite
 now requires that exact view grant, the enabled parent/runtime owner, contained
 package execution, and schema-valid returned values before exposing a
-core-owned state hash. No permission grant/revoke workflow, transactional
-write, revision, restore, delete, service, route, tool, settings, or asset
-contract is operational.
+core-owned state hash. The activation-blocked existing-record update helper
+now requires exact view/edit grants, a current state hash, locked enabled
+ownership, declared InnoDB package tables, contained writer execution, and an
+exact reloaded postcondition before committing package-owned values. No
+permission grant/revoke workflow, operational editor endpoint, component
+creation, parent-metadata write, revision, restore, delete, service, route,
+tool, settings, or asset contract is operational.
 
 ## Product Goal
 
@@ -311,6 +315,14 @@ request bootstrap excludes the disabled package.
     Contain output and failures, revalidate the complete returned value object,
     and expose a core-owned state hash without adding an endpoint, form, write,
     revision, audit event, or activation eligibility.
+18. Completed existing-record update prerequisite: allow at most one
+    registrar-bound writer per declared editor, require its package-owned
+    transaction tables to be InnoDB, lock the exact enabled placement parent,
+    recheck view/edit grants and the current state hash, pass only normalized
+    values, contain callback failures, reload the saved values, and roll back
+    unless the complete postcondition matches. Keep component creation,
+    parent-metadata writes, revisions, restore, delete, audit workflow, web
+    forms/endpoints, and activation eligibility out of this batch.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

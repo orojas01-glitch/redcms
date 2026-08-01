@@ -144,6 +144,18 @@ add-on packages without executing them.
   and core performs no package, content, authorization, lifecycle, or audit
   write. The trusted first-party loader contract is read-only; it is not a PHP
   sandbox for untrusted package code.
+- Existing package-record updates require one registrar-bound writer owned by
+  the same enabled package. The writer declares one to eight package-owned
+  `RED_Addon_*` transaction tables; core requires those tables and the locked
+  placement parent to be InnoDB, requires current view and edit grants plus the
+  exact state hash, supplies only normalized values, contains callback output
+  and failures, and reloads the values before commit. Stale state, drift,
+  revocation, disabled ownership, unsupported tables, false returns, and
+  incomplete writes fail closed with rollback. This trusted first-party
+  callback is not a PHP sandbox and must not issue transaction controls, DDL,
+  or writes outside its declared package tables. Core exposes no operational
+  form or endpoint and adds no create, revision, restore, delete, or activation
+  path.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -266,8 +278,10 @@ closed with explicit theme, settings, or live-data evidence. The package
 registrar remains unexecuted during preflight.
 Packages declaring `componentEditors` fail closed with
 `component_editor_contract_required`; schema/value validation, display-only
-core rendering, read-only permission decisions, and bounded data loading do not
-imply write authority, activation support, or package persistence. The renderer is
+core rendering, permission decisions, bounded data loading, and the
+activation-blocked existing-record update helper do not imply complete editor
+authority or activation support. Component creation, parent-metadata updates,
+revisions, restore, delete, and an operational endpoint remain absent. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
 package table, or make the package eligible for activation.
@@ -347,7 +361,7 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-transactional component editing and revisions, typed service invocation,
+component creation, parent-metadata editing, revisions, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The numeric placement-parent
 relationship and read-only public binding foundation are implemented.

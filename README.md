@@ -40,8 +40,14 @@ package access. The decision grants nothing and writes nothing. Packages remain
 blocked from enablement. An enabled disposable fixture can now register one
 exact package data loader per declared editor; core requires the view grant,
 the persisted parent/runtime owner match, contained execution, and schema-valid
-returned values before exposing a state hash. No operational form, write,
-revision, restore, or delete runner exists.
+returned values before exposing a state hash. No operational form, component
+create, revision, restore, or delete runner exists. A separate activation-blocked
+helper can now apply an existing package record update only after the exact
+view and edit grants, current state hash, locked placement parent, enabled
+runtime ownership, declared InnoDB tables, contained writer execution, and
+reloaded postcondition all pass. It opens no endpoint or form and does not
+create parent records, capture revisions, restore, delete, or activate a
+package.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -81,6 +87,7 @@ not active features.
 - Core-owned display-only component editor controls with escaped fixed markup
 - Fresh exact component-editor package-permission decisions with no implicit Owner access
 - Bounded enabled-package component data loading with validated values and a core-owned state hash
+- Transactional existing-record package updates with stale-state refusal and rollback proof
 
 ## Portable Starter Distribution
 

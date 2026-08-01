@@ -17,6 +17,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
         private array $manifest;
         private array $allowed = [];
         private array $handlers = [];
+        private array $metadata = [];
 
         public function __construct(string $packageId, array $manifest)
         {
@@ -31,6 +32,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                     : [];
                 $this->allowed[$type] = array_fill_keys($values, true);
                 $this->handlers[$type] = [];
+                $this->metadata[$type] = [];
             }
             $componentDataLoaders = [];
             $componentEditors = is_array($manifest['componentEditors'] ?? null)
@@ -49,6 +51,10 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             }
             $this->allowed['componentDataLoaders'] = $componentDataLoaders;
             $this->handlers['componentDataLoaders'] = [];
+            $this->metadata['componentDataLoaders'] = [];
+            $this->allowed['componentDataWriters'] = $componentDataLoaders;
+            $this->handlers['componentDataWriters'] = [];
+            $this->metadata['componentDataWriters'] = [];
             $routeIds = [];
             foreach ($manifest['routes'] ?? [] as $route) {
                 if (is_array($route) && is_string($route['id'] ?? null)) {
@@ -57,6 +63,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             }
             $this->allowed['routes'] = array_fill_keys($routeIds, true);
             $this->handlers['routes'] = [];
+            $this->metadata['routes'] = [];
         }
 
         public function packageId(): string
@@ -69,7 +76,12 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             return $this->manifest;
         }
 
-        public function register(string $type, string $id, callable $handler): void
+        public function register(
+            string $type,
+            string $id,
+            callable $handler,
+            array $metadata = []
+        ): void
         {
             if (!isset($this->allowed[$type]) || !isset($this->allowed[$type][$id])) {
                 throw new LogicException(
@@ -82,6 +94,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 );
             }
             $this->handlers[$type][$id] = $handler;
+            $this->metadata[$type][$id] = $metadata;
         }
 
         public function registerComponent(string $id, callable $handler): void
@@ -99,6 +112,43 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             callable $handler
         ): void {
             $this->register('componentDataLoaders', $id, $handler);
+        }
+
+        public function registerComponentDataWriter(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $normalized = [];
+            $reserved = [
+                'red_addon_installations',
+                'red_addon_migrations',
+                'red_addon_activity_log',
+            ];
+            foreach ($tables as $table) {
+                if (!is_string($table)
+                    || preg_match('/\ARED_Addon_[A-Za-z0-9_]{1,54}\z/', $table)
+                        !== 1
+                    || in_array(strtolower($table), $reserved, true)
+                    || isset($normalized[$table])
+                ) {
+                    throw new LogicException(
+                        'Component data-writer transaction table is invalid.'
+                    );
+                }
+                $normalized[$table] = true;
+            }
+            if ($normalized === [] || count($normalized) > 8) {
+                throw new LogicException(
+                    'Component data writer requires one to eight package tables.'
+                );
+            }
+            $this->register(
+                'componentDataWriters',
+                $id,
+                $handler,
+                ['tables' => array_keys($normalized)]
+            );
         }
 
         public function registerAdminTool(string $id, callable $handler): void
@@ -119,6 +169,9 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
         public function assertComplete(): void
         {
             foreach ($this->allowed as $type => $allowed) {
+                if ($type === 'componentDataWriters') {
+                    continue;
+                }
                 $missing = array_values(array_diff(
                     array_keys($allowed),
                     array_keys($this->handlers[$type])
@@ -151,6 +204,11 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
         {
             return $this->handlers[$type][$id] ?? null;
         }
+
+        public function metadata(string $type, string $id): array
+        {
+            return $this->metadata[$type][$id] ?? [];
+        }
     }
 }
 
@@ -161,6 +219,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
         private array $packages;
         private array $handlers = [];
         private array $owners = [];
+        private array $metadata = [];
 
         public function __construct(array $order, array $packages)
         {
@@ -170,6 +229,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                 [
                     'components',
                     'componentDataLoaders',
+                    'componentDataWriters',
                     'services',
                     'adminTools',
                     'adapters',
@@ -179,6 +239,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
             ) {
                 $this->handlers[$type] = [];
                 $this->owners[$type] = [];
+                $this->metadata[$type] = [];
             }
 
             foreach ($this->order as $packageId) {
@@ -208,6 +269,8 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                         }
                         $this->handlers[$type][$id] = $handler;
                         $this->owners[$type][$id] = $packageId;
+                        $this->metadata[$type][$id] =
+                            $registry->metadata($type, $id);
                     }
                 }
             }
@@ -231,6 +294,11 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
         public function owner(string $type, string $id): ?string
         {
             return $this->owners[$type][$id] ?? null;
+        }
+
+        public function metadata(string $type, string $id): array
+        {
+            return $this->metadata[$type][$id] ?? [];
         }
 
         public function manifest(string $packageId): ?array
@@ -609,6 +677,16 @@ if (!function_exists('red_addon_runtime_manifest')) {
         return $context instanceof RED_Addon_Runtime_Context
             ? $context->manifest((string) $packageId)
             : null;
+    }
+}
+
+if (!function_exists('red_addon_runtime_metadata')) {
+    function red_addon_runtime_metadata($type, $id)
+    {
+        $context = red_addon_runtime_current_context();
+        return $context instanceof RED_Addon_Runtime_Context
+            ? $context->metadata((string) $type, (string) $id)
+            : [];
     }
 }
 

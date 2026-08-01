@@ -8,8 +8,9 @@ contract, fail-closed front-controller page-request bootstrap, constrained
 atomic enablement, safe default component dispatch, and non-executing atomic
 disablement are implemented and tested only with temporary first-party
 fixtures. Component-editor schema/value validation, display-only rendering,
-exact permissions, and bounded enabled-package data loading are also
-implemented as activation-blocked prerequisites. RED-CMS does not dispatch
+exact permissions, bounded enabled-package data loading, and transactional
+existing-record package updates are also implemented as activation-blocked
+prerequisites. RED-CMS does not dispatch
 services, routes, adapters, or administrator tools, and does not upgrade,
 uninstall, or purge packages through this contract yet.
 
@@ -385,11 +386,28 @@ first-party in-process callback is not a PHP sandbox; the contract requires a
 read-only loader. Core exposes no editor endpoint and performs no package,
 content, authorization, lifecycle, revision, or audit write.
 
-Discovery, validation, display-only rendering, permission decisions, and
-bounded data loading do not authorize activation. Enablement preflight reports
-`component_editor_contract_required` until the separate permission-enforced
-transactional parent/child write, revision, restore, and delete runner is
-implemented and accepted.
+`registerComponentDataWriter()` and
+`red_addon_component_editor_update_values()` provide the activation-blocked
+existing-record update prerequisite. A registrar may bind at most one writer
+for a declared editor and must list one to eight package-owned `RED_Addon_*`
+transaction tables. Core requires those tables and `RED_Articles` to be
+InnoDB, locks the exact enabled placement parent, requires current view and
+edit grants, reloads and compares the current state hash, and passes only the
+normalized submitted values plus bounded identity context. It contains output,
+exceptions, and altered buffers, requires a strict true return, reloads the
+saved values through the bounded loader, and commits only when the complete
+postcondition matches. Otherwise it rolls back. An identical submission is a
+successful no-op and does not invoke the writer. This trusted first-party
+callback is not a sandbox and must not issue transaction controls, DDL, or
+writes outside its declared tables. Core exposes no endpoint or form and adds
+no create, parent-metadata write, revision, restore, delete, audit workflow, or
+activation eligibility.
+
+Discovery, validation, display-only rendering, permission decisions, bounded
+data loading, and existing-record updates do not authorize activation.
+Enablement preflight reports `component_editor_contract_required` until the
+separate create/parent-metadata, revision, restore, delete, audit, and
+operational endpoint contracts are implemented and accepted.
 
 ## Core Registry And Execution
 
@@ -524,6 +542,8 @@ lifecycle transition or lifecycle CLI:
   nor registrar invocation may emit output, and the registrar must return null;
 - registration accepts only manifest-declared component, service,
   administrator-tool, adapter, and route identifiers;
+- each declared component editor requires exactly one data loader and may bind
+  at most one existing-record writer with closed package-table metadata;
 - every declared runtime identifier must register exactly once;
 - required enabled dependencies are ordered before their dependents;
 - every enabled registry row, package identity, migration ledger, dependency,
@@ -540,7 +560,8 @@ unexecuted. Current enabled registrars run once in dependency order. Core
 invokes only an enabled manifest-declared component through its fixed public
 placement context and core-owned default renderer. A declared component data
 loader may be invoked only through the exact permission/binding/schema gate
-above; service, route, adapter, and administrator-tool handlers remain
+above, and a declared writer only through the transaction/state/postcondition
+gate above; service, route, adapter, and administrator-tool handlers remain
 non-dispatched. Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
@@ -584,10 +605,13 @@ The data-only create/edit field schema, submitted-value normalization,
 display-only administrator rendering, exact permission decisions, and bounded
 current-value loading prerequisites are implemented. The loader executes only
 from the enabled registrar owner, returns no values until core revalidates the
-complete schema, and produces a core-owned state hash. This foundation does
-not open an operational form or endpoint, perform transactional parent-plus-
-child writes, capture package revision snapshots, restore, export/import, or
-delete. Those editor and lifecycle contracts remain separate reviewed batches.
+complete schema, and produces a core-owned state hash. Existing package values
+may now update through the transaction and postcondition gate above while the
+core parent remains locked and unchanged. This foundation does not open an
+operational form or endpoint, create a component/parent, edit parent metadata,
+capture package revision snapshots, restore, export/import, delete, or add an
+audit workflow. Those editor and lifecycle contracts remain separate reviewed
+batches.
 
 Add-on components must not be implemented by adding another hard-coded switch
 to `class_content.php`. The add-on registry is the only new dispatcher.
@@ -717,7 +741,8 @@ Upgrades and uninstall remain later explicit transitions.
   become unsafe without an approved fallback. The first implementation
   enforces enabled-dependent refusal; persisted add-on assignments remain
   outside the supported minimal profile because declarative editor metadata
-  does not yet provide transactional writes, revisions, restore, or delete.
+  does not yet provide component creation, parent-metadata writes, revisions,
+  restore, delete, or an operational endpoint.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
@@ -930,8 +955,9 @@ responses, or structured data.
    component-id storage, package-table foreign-key allowance, and read-only
    public binding resolver, declarative field schema, and fail-closed submitted
    value normalization are implemented. Core-owned display-only editor
-   rendering, exact permission decisions, and bounded enabled-package data
-   loading are also implemented; transactional writes, revisions, and
+   rendering, exact permission decisions, bounded enabled-package data loading,
+   and transactional existing-record package updates are also implemented.
+   Component creation, parent-metadata writes, revisions, audit workflow, and
    restore/delete behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
