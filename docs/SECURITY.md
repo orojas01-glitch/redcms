@@ -496,6 +496,19 @@ handler. Output, exceptions, output-buffer changes, and malformed results are
 contained. No database connection, session, actor authority, route request, or
 automatic service call is supplied by this boundary.
 
+Public add-on routes have one deliberately narrow dispatch boundary. Core
+matches only an exact unencoded static manifest path owned by the enabled
+request-local registrar and permits only public `GET` with
+`csrf: not-applicable`. The final request exposes only route id, method, path,
+and bounded JSON-compatible query data. The final result is encoded by core as
+JSON with `no-store` and `nosniff`; packages cannot emit HTML, redirects,
+headers, or raw output. Invalid input, exceptions, buffer changes, malformed or
+oversized results, and ownership drift fail closed. Member routes, unsafe
+methods, placeholders, administrator routes, sessions, server variables,
+uploads, and database connections are not exposed. Current enablement gates
+still reject any route-bearing package, so this dispatcher does not activate a
+richer package by itself.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

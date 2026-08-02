@@ -256,7 +256,10 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   exists. The audited public-placement control is complete but does not by
   itself admit the Store Lite package;
 - typed service invocation is complete as an internal core-to-package boundary;
-- declared public and administrator routes;
+- exact static public `GET` routes are complete as a core-owned JSON boundary,
+  while unsafe/member/placeholder routes and route-bearing package enablement
+  remain gated;
+- declared administrator routes;
 - scoped administrator-tool dispatch;
 - namespaced package asset loading;
 - package settings and secret-reference handling; and

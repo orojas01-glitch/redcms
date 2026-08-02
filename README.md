@@ -156,6 +156,9 @@ not active features.
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results
+- Core-owned public add-on route dispatch for exact static `GET` paths with
+  public authentication, typed bounded query/result objects, JSON-only
+  responses, and fail-closed package behavior
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -250,7 +253,13 @@ public or administrator assets, administrator tools, adapters, and outbound
 hosts. Core's escaped default component renderer is the complete
 theme-compatibility contract for either component profile. Services are
 registered into the request-local lookup context but are not automatically
-invoked. The separate enable command is also dry-run first. It accepts only
+invoked. Public route dispatch exists as a separate core boundary, but the
+current enablement profiles still reject every package that declares routes.
+The first route slice accepts only an exact static manifest path, public
+authentication, `GET`, `csrf: not-applicable`, bounded query values, and a
+typed JSON result. Member routes, unsafe methods, placeholders, package HTML,
+and administrator routes remain non-dispatched. The separate enable command is
+also dry-run first. It accepts only
 those three constrained profiles and requires exact database, package,
 version, plan, backup SHA-256, and installed-disabled confirmations before it
 validates the fixed registrar and atomically records `enabled` plus its bounded

@@ -145,11 +145,15 @@ atomically records `enabled` with its bounded audit fact. Safe default
 component dispatch is implemented. Services can be invoked only through a
 non-HTTP core boundary that requires exact enabled request-local ownership,
 supplies one immutable typed request, accepts one typed result, and bounds all
-JSON-compatible values. No route, session, administrator, database, or
-automatic invocation is added. The Owner-authorized disable command serializes with
+JSON-compatible values. Exact static public `GET` routes now have a separate
+core-owned JSON dispatcher with the same request-local ownership and
+containment discipline. It exposes no session, database, member,
+administrator, unsafe-method, placeholder, HTML, redirect, upload, or arbitrary
+header surface, and route-bearing packages remain ineligible for current
+enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,
-migrations, settings, media, or business data. Route, adapter, and
+migrations, settings, media, or business data. Richer route, adapter, and
 administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
