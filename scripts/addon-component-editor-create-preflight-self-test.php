@@ -38,6 +38,7 @@ $viewPermission = 'fixture.editor-create.view';
 $packageTable = 'RED_Addon_Component_Editor_Create_Fixture';
 $creatorCalls = 0;
 $loaderCalls = 0;
+$creatorMode = 'valid';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -60,6 +61,27 @@ function red_addon_editor_create_test_scalar($connection, $sql)
     return $row ? (string) $row[0] : '';
 }
 
+function red_addon_editor_create_test_record_fingerprint(
+    $connection,
+    $contentRecordId,
+    $packageTable
+) {
+    return red_addon_editor_create_test_scalar(
+        $connection,
+        "SELECT CONCAT_WS(':',
+            (SELECT COUNT(*) FROM RED_Articles
+             WHERE RecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM `$packageTable`
+             WHERE ContentRecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM RED_Content_Revisions
+             WHERE ContentRecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+             WHERE ContentRecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM RED_Page_SEO
+             WHERE OwnerRecordID=$contentRecordId))"
+    );
+}
+
 function red_addon_editor_create_test_cleanup(
     $connection,
     $adminRecordId,
@@ -69,6 +91,28 @@ function red_addon_editor_create_test_cleanup(
 ) {
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
     try {
+        foreach (
+            [
+                'RED_Addon_Component_Revisions'
+                    => 'redcms_addon_component_create_revision_fail',
+                'RED_Content_Revisions'
+                    => 'redcms_component_create_parent_revision_fail',
+            ] as $table => $constraint
+        ) {
+            if (red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                 WHERE CONSTRAINT_SCHEMA=DATABASE()
+                   AND TABLE_NAME='$table'
+                   AND CONSTRAINT_NAME='$constraint'"
+            ) === '1') {
+                mysqli_query(
+                    $connection,
+                    'ALTER TABLE `' . $table . '` DROP CHECK `'
+                        . $constraint . '`'
+                );
+            }
+        }
         mysqli_query(
             $connection,
             'DELETE FROM RED_Page_SEO WHERE OwnerRecordID=' . (int) $contentRecordId
@@ -227,6 +271,7 @@ function red_addon_editor_create_test_context(
     $packageTable,
     &$creatorCalls,
     &$loaderCalls,
+    &$creatorMode,
     $withCreator = true
 ) {
     $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
@@ -238,16 +283,85 @@ function red_addon_editor_create_test_context(
     );
     $registry->registerComponentDataLoader(
         $componentId,
-        static function () use (&$loaderCalls): array {
+        static function ($connection, array $context) use (
+            &$loaderCalls,
+            $packageTable
+        ): array {
             $loaderCalls++;
-            return ['title' => 'Unexpected', 'quantity' => 1];
+            $statement = mysqli_prepare(
+                $connection,
+                'SELECT Title, Quantity FROM `' . $packageTable
+                    . '` WHERE ContentRecordID=? LIMIT 1'
+            );
+            mysqli_stmt_bind_param(
+                $statement,
+                'i',
+                $context['contentRecordId']
+            );
+            mysqli_stmt_execute($statement);
+            $queryResult = mysqli_stmt_get_result($statement);
+            $row = $queryResult ? mysqli_fetch_assoc($queryResult) : null;
+            mysqli_stmt_close($statement);
+            if (!is_array($row)) {
+                throw new RuntimeException('missing creation fixture data');
+            }
+            return [
+                'title' => $row['Title'],
+                'quantity' => (int) $row['Quantity'],
+            ];
         }
     );
     if ($withCreator) {
         $registry->registerComponentDataCreator(
             $componentId,
-            static function () use (&$creatorCalls): bool {
+            static function (
+                $connection,
+                array $context,
+                array $values
+            ) use (&$creatorCalls, &$creatorMode, $packageTable): bool {
                 $creatorCalls++;
+                if (array_keys($context) !== [
+                        'component',
+                        'contentRecordId',
+                        'actorRecordId',
+                        'planHash',
+                    ]
+                    || array_keys($values) !== ['title', 'quantity']
+                ) {
+                    throw new RuntimeException('unexpected creation context');
+                }
+                $quantity = $creatorMode === 'partial'
+                    ? $values['quantity'] + 1
+                    : $values['quantity'];
+                $statement = mysqli_prepare(
+                    $connection,
+                    'INSERT INTO `' . $packageTable
+                        . '` (ContentRecordID, Title, Quantity) VALUES (?, ?, ?)'
+                );
+                mysqli_stmt_bind_param(
+                    $statement,
+                    'isi',
+                    $context['contentRecordId'],
+                    $values['title'],
+                    $quantity
+                );
+                $inserted = mysqli_stmt_execute($statement);
+                mysqli_stmt_close($statement);
+                if (!$inserted) {
+                    return false;
+                }
+                if ($creatorMode === 'emit') {
+                    echo 'unsafe-creator-output';
+                }
+                if ($creatorMode === 'throw') {
+                    throw new RuntimeException('private creator failure');
+                }
+                if ($creatorMode === 'nested') {
+                    ob_start();
+                }
+                if ($creatorMode === 'false') {
+                    return false;
+                }
                 return true;
             },
             [$packageTable]
@@ -338,7 +452,9 @@ try {
     mysqli_query(
         $connection,
         'CREATE TABLE `' . $packageTable . '` ('
-            . '`ContentRecordID` int unsigned NOT NULL PRIMARY KEY'
+            . '`ContentRecordID` int unsigned NOT NULL PRIMARY KEY,'
+            . '`Title` varchar(120) NOT NULL,'
+            . '`Quantity` int NOT NULL'
             . ') ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 '
             . 'COLLATE=utf8mb4_unicode_ci'
     );
@@ -397,7 +513,8 @@ try {
         $componentId,
         $packageTable,
         $creatorCalls,
-        $loaderCalls
+        $loaderCalls,
+        $creatorMode
     );
     red_addon_runtime_set_request_context($context);
     $contract = red_theme_active_layout_contract($connection, $projectRoot);
@@ -433,6 +550,13 @@ try {
     mysqli_query(
         $connection,
         'ALTER TABLE `' . $packageTable . '` ENGINE=InnoDB'
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE `' . $packageTable . '` ADD CONSTRAINT '
+            . '`fk_red_addon_editor_create_parent` FOREIGN KEY '
+            . '(`ContentRecordID`) REFERENCES `RED_Articles` (`RecordID`) '
+            . 'ON DELETE RESTRICT ON UPDATE RESTRICT'
     );
 
     $fingerprintBefore = red_addon_editor_create_test_scalar(
@@ -602,6 +726,7 @@ try {
         $packageTable,
         $creatorCalls,
         $loaderCalls,
+        $creatorMode,
         false
     );
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
@@ -638,36 +763,230 @@ try {
         'caller and enabled runtime manifests must match exactly'
     );
 
-    $parent = $plan['parentValues'];
-    $columns = array_keys($parent);
-    $values = [];
-    foreach (array_values($parent) as $value) {
-        $values[] = "'" . mysqli_real_escape_string(
-            $connection,
-            (string) $value
-        ) . "'";
-    }
-    mysqli_query(
-        $connection,
-        'INSERT INTO RED_Articles (`' . implode('`,`', $columns) . '`) VALUES ('
-            . implode(',', $values) . ')'
-    );
-    $refused = red_addon_component_editor_create_preflight(
+    $refused = red_addon_component_editor_create_values(
         $connection,
         $manifest,
         $componentId,
         $contentRecordId,
         $adminRecordId,
         $parentMetadata,
-        $submittedValues
+        $submittedValues,
+        'invalid'
     );
     red_addon_editor_create_test_assert(
-        empty($refused['ready']) && $refused['reason'] === 'record_id_unavailable',
-        'any existing core parent evidence refuses candidate reuse'
+        empty($refused['created'])
+            && $refused['reason'] === 'invalid_plan_hash'
+            && $creatorCalls === 0
+            && $loaderCalls === 0,
+        'the atomic runner requires one exact SHA-256 plan hash'
+    );
+
+    $refused = red_addon_component_editor_create_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentMetadata,
+        $submittedValues,
+        str_repeat('0', 64)
     );
     red_addon_editor_create_test_assert(
-        $creatorCalls === 0 && $loaderCalls === 0,
-        'every refusal path remains non-executing'
+        empty($refused['created'])
+            && $refused['reason'] === 'stale_plan'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '0:0:0:0:0',
+        'a substituted but well-formed plan is refused before execution'
+    );
+
+    mysqli_begin_transaction($connection);
+    $refused = red_addon_component_editor_create_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentMetadata,
+        $submittedValues,
+        $plan['planHash']
+    );
+    mysqli_rollback($connection);
+    red_addon_editor_create_test_assert(
+        empty($refused['created'])
+            && $refused['reason'] === 'transaction_already_active',
+        'the runner refuses a caller-owned transaction'
+    );
+
+    foreach (
+        [
+            'emit' => 'creator_failed',
+            'throw' => 'creator_failed',
+            'nested' => 'creator_failed',
+            'false' => 'creator_failed',
+            'partial' => 'package_postcondition_failed',
+        ] as $mode => $expectedReason
+    ) {
+        $creatorMode = $mode;
+        $refused = red_addon_component_editor_create_values(
+            $connection,
+            $manifest,
+            $componentId,
+            $contentRecordId,
+            $adminRecordId,
+            $parentMetadata,
+            $submittedValues,
+            $plan['planHash']
+        );
+        $modeFingerprint = red_addon_editor_create_test_record_fingerprint(
+            $connection,
+            $contentRecordId,
+            $packageTable
+        );
+        red_addon_editor_create_test_assert(
+            empty($refused['created'])
+                && $refused['reason'] === $expectedReason
+                && $modeFingerprint === '0:0:0:0:0',
+            'creator mode ' . $mode
+                . ' rolls back every parent/package/revision row; reason='
+                . $refused['reason'] . '; fingerprint=' . $modeFingerprint
+        );
+    }
+
+    $creatorMode = 'valid';
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Revisions ADD CONSTRAINT '
+            . '`redcms_addon_component_create_revision_fail` CHECK '
+            . '(`ContentRecordID` <> ' . $contentRecordId . ')'
+    );
+    $refused = red_addon_component_editor_create_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentMetadata,
+        $submittedValues,
+        $plan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Revisions DROP CHECK '
+            . '`redcms_addon_component_create_revision_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['created'])
+            && $refused['reason'] === 'package_revision_failed'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '0:0:0:0:0',
+        'a forced package-ledger failure rolls back parent and package creation'
+    );
+
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions ADD CONSTRAINT '
+            . '`redcms_component_create_parent_revision_fail` CHECK '
+            . '(`ContentRecordID` <> ' . $contentRecordId . ')'
+    );
+    $refused = red_addon_component_editor_create_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentMetadata,
+        $submittedValues,
+        $plan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions DROP CHECK '
+            . '`redcms_component_create_parent_revision_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['created'])
+            && $refused['reason'] === 'parent_revision_failed'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '0:0:0:0:0',
+        'a forced parent-ledger failure rolls back package revision and both rows'
+    );
+
+    $created = red_addon_component_editor_create_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentMetadata,
+        $submittedValues,
+        $plan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($created['created'])
+            && $created['reason'] === 'created'
+            && $created['parentValues'] === $plan['parentValues']
+            && $created['values'] === $plan['values']
+            && $created['planHash'] === $plan['planHash']
+            && preg_match('/\A[a-f0-9]{64}\z/', $created['stateHash']) === 1
+            && $created['parentRevisionId'] > 0
+            && $created['packageRevisionId'] > 0,
+        'the exact plan creates one inactive parent, package row, and both revisions atomically'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_record_fingerprint(
+            $connection,
+            $contentRecordId,
+            $packageTable
+        ) === '1:1:1:1:0'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':', a.Active, a.PagePosition,
+                    IF(a.Alias='', 'empty', a.Alias), p.Title, p.Quantity,
+                    cr.Operation, ar.Operation)
+                 FROM RED_Articles a
+                 INNER JOIN `$packageTable` p
+                   ON p.ContentRecordID=a.RecordID
+                 INNER JOIN RED_Content_Revisions cr
+                   ON cr.ContentRecordID=a.RecordID
+                 INNER JOIN RED_Addon_Component_Revisions ar
+                   ON ar.ContentRecordID=a.RecordID
+                 WHERE a.RecordID=$contentRecordId"
+            ) === 'N:0:empty:Package row:5:create:baseline',
+        'committed state remains hidden and has exact create/baseline evidence'
+    );
+
+    $refused = red_addon_component_editor_create_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentMetadata,
+        $submittedValues,
+        $plan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['created'])
+            && $refused['reason'] === 'record_id_unavailable'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '1:1:1:1:0',
+        'the committed numeric id cannot be reused and remains unchanged'
+    );
+    red_addon_editor_create_test_assert(
+        $creatorCalls === 8 && $loaderCalls === 4,
+        'only executing runner paths invoke the creator or postcondition loader'
     );
 
     red_addon_editor_create_test_cleanup(
@@ -706,7 +1025,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on component creation preflight self-test passed ('
+    'Add-on component creation preflight/runner self-test passed ('
         . $assertions . " assertions).\n"
 );
 
