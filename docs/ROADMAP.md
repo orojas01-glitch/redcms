@@ -307,8 +307,15 @@ active Article route; core derives its hierarchy, alias, layout, and language,
 requires source/destination language agreement, and validates the proposed
 page position against the active theme. The deterministic plan binds both
 states and the closed placement values while writing and activating nothing.
-The locked atomic placement/activation runner, audit behavior, and UI remain
-separate work.
+The locked atomic placement/activation runner is now implemented behind that
+exact plan. It serializes lifecycle and active-theme changes; locks the enabled
+installation, inactive source, and destination page; and revalidates the plan.
+Only the seven derived placement fields change. Package state and destination
+state must remain exact, and one explicit-actor core `move` revision commits in
+the same transaction. Caller transactions, stale/reused plans, revoked grants,
+destination drift, unsupported positions, transaction loss, postcondition
+mismatch, and revision failure roll back. The audited administrator control
+remains separate work.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
@@ -319,7 +326,7 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while atomic public placement/activation, typed-service invocation, route,
+while the audited public-placement control, typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

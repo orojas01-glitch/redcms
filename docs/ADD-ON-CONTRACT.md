@@ -527,10 +527,22 @@ requires source/destination language agreement; and validates the resulting
 candidate against the active theme's page-position contract. The deterministic
 plan binds the exact actor, package, component, source state, destination state,
 and closed placement values. It invokes no package writer, opens no transaction
-or endpoint, and writes or activates nothing. The separate locked atomic
-placement runner remains unimplemented.
+or endpoint, and writes or activates nothing.
+`red_addon_component_editor_publish_values()` implements the separate atomic
+runner behind that exact plan. It refuses caller-owned transactions, acquires
+the database-wide add-on lifecycle and active-theme locks, then locks the
+enabled installation, exact inactive source parent, and numeric destination
+page. The complete preflight and plan hash are revalidated under those locks.
+Core updates only `Sections`, `Categories`, `SubCategories`, `Article`,
+`PagePosition`, `PagePositionOrder`, and `Active`; no package writer or
+mutating package callback runs.
+The complete source row, unchanged package state, unchanged destination state,
+fresh publish grant, and one explicit-actor core `move` revision are required
+postconditions. Stale or reused plans, destination drift, revoked grants,
+transaction loss, unsupported placement, row mismatch, and revision failure
+roll back. No endpoint, administrator control, or audit event is added.
 Enablement preflight reports `component_editor_contract_required` until the
-audit and atomic public-placement/activation contracts
+audited operational public-placement control
 are implemented and accepted.
 
 ## Core Registry And Execution

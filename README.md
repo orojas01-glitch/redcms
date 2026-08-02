@@ -147,6 +147,9 @@ not active features.
 - Read-only public-placement planning with exact view/publish grants, current
   parent/package evidence, unique destination ownership, active-theme position
   validation, deterministic hashing, and zero activation or writes
+- Atomic exact-plan public placement with lifecycle/theme/source/target locks,
+  seven-field parent mutation, unchanged package and destination postconditions,
+  one core move revision, single-use refusal, and rollback proof
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

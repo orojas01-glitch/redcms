@@ -310,8 +310,14 @@ if (!function_exists('red_addon_component_editor_parent_revision')) {
     function red_addon_component_editor_parent_revision(
         $connection,
         $contentRecordId,
-        $adminRecordId
+        $adminRecordId,
+        $operation = 'save'
     ) {
+        if (!is_string($operation)
+            || !in_array($operation, ['save', 'move'], true)
+        ) {
+            return null;
+        }
         $latest = red_admin_content_revision_latest(
             $connection,
             $contentRecordId
@@ -347,7 +353,6 @@ if (!function_exists('red_addon_component_editor_parent_revision')) {
         ) {
             return null;
         }
-        $operation = 'save';
         try {
             $statement = mysqli_prepare(
                 $connection,
