@@ -168,8 +168,8 @@ reloads the exact postcondition, and commits initial core/package revisions in
 one transaction. Permission-enforced inactive parent metadata and the
 display-only value-free revision timeline are completed boundaries below;
 read-only delete planning and atomic inactive deletion are also complete;
-public placement, restore UI actions, and operational editor/delete endpoints
-remain later isolated batches.
+public placement, restore UI actions, and create/delete endpoints remain later
+isolated batches. The operational existing-record form is now complete.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -214,8 +214,8 @@ complete schema-valid returned value object. It exposes normalized values plus
 a core-owned state hash for later stale-write and revision checks, but performs
 no content, package, authorization, lifecycle, or audit write.
 
-The existing-record package update prerequisite is now implemented without an
-administrator endpoint or activation change. A registrar may bind at most one
+The existing-record package update prerequisite now backs a core-owned
+administrator endpoint without changing activation eligibility. A registrar may bind at most one
 writer per declared editor and must list the package-owned transaction tables.
 Core requires those tables and the placement parent to be InnoDB, locks the
 exact enabled parent, checks the current view and edit grants plus state hash,
@@ -223,9 +223,12 @@ passes only normalized schema values, contains writer output and failures,
 reloads the saved values, and commits only when the complete postcondition
 matches. Stale state, revoked grants, drift, disabled ownership, unsupported
 tables, exceptions, output, buffer changes, false returns, and partial writes
-fail closed with rollback. No create path, parent-metadata update, operational
-form, revision history UI, restore, delete, audit workflow, or activation
-eligibility is added. Successful updates atomically retain immutable baseline
+fail closed with rollback. No create path, parent-metadata update, revision
+history action, restore, delete, audit workflow, or activation
+eligibility is added. The form submits only a numeric parent id, state hash,
+CSRF token, and schema values; package/component ownership is re-derived from
+the database and runtime registry. Successful updates atomically retain
+immutable baseline
 and saved normalized-value snapshots in a core-owned per-client ledger;
 identical submissions add no revision, and a ledger failure rolls back the
 package write.
@@ -304,7 +307,8 @@ declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
-inactive delete runner are implemented, while typed-service invocation, route,
+inactive delete runner and operational existing-record form are implemented,
+while public placement/activation, typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

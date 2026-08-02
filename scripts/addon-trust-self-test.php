@@ -1000,9 +1000,18 @@ try {
     );
 
     $adminFiles = glob($repositoryRoot . '/admin/bin/*addon*') ?: [];
+    $lifecycleAdminFiles = array_values(array_filter(
+        $adminFiles,
+        static function ($path) {
+            return preg_match(
+                '/(?:install|enable|disable|upgrade|uninstall|purge).*addon|addon.*(?:install|enable|disable|upgrade|uninstall|purge)/i',
+                basename($path)
+            ) === 1;
+        }
+    ));
     red_addon_test_assert(
-        $adminFiles === [],
-        'the trust batch exposes no install, enable, disable, upgrade, uninstall, or purge endpoint'
+        $lifecycleAdminFiles === [],
+        'the trust batch exposes no web install, enable, disable, upgrade, uninstall, or purge endpoint'
     );
     red_addon_test_assert(
         !file_exists($executionMarker),

@@ -16,6 +16,9 @@ require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot . '/includes/addon_install_helpers.php';
 require_once $projectRoot
     . '/includes/addon_component_editor_write_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_component_editor_endpoint_helpers.php';
+require_once $projectRoot . '/includes/legacy_component_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_editor_update|rev_base)_[A-Za-z0-9_]+\z/',
@@ -741,6 +744,54 @@ try {
         $contentRecordId,
         $adminRecordId
     );
+    $endpointContext = red_addon_component_editor_endpoint_context(
+        $connection,
+        $contentRecordId,
+        $adminRecordId
+    );
+    $endpointHtml = red_addon_component_editor_endpoint_render(
+        $endpointContext,
+        str_repeat('a', 64)
+    );
+    $_SESSION['AdminRecordID'] = $adminRecordId;
+    $controlContext = red_legacy_control_panel_component_context(
+        $connection,
+        [
+            'Component' => $componentId,
+            'RecordID' => $contentRecordId,
+            'Alias' => 'addon-editor-fixture',
+            'PagePositionOrder' => 1,
+        ],
+        'PageFeature',
+        'PagePosition',
+        '1',
+        'index',
+        'RED_Articles',
+        0
+    );
+    red_addon_editor_update_test_assert(
+        $endpointContext['ready'] === true
+            && $endpointContext['component'] === $componentId
+            && $endpointContext['package'] === $packageId
+            && $endpointContext['values'] === $loaded['values']
+            && $endpointContext['stateHash'] === $loaded['stateHash']
+            && str_contains($endpointHtml, 'data-red-addon-component-form')
+            && str_contains($endpointHtml, 'name="ContentRecordID" value="'
+                . $contentRecordId . '"')
+            && str_contains($endpointHtml, 'name="CurrentStateHash" value="'
+                . $loaded['stateHash'] . '"')
+            && str_contains($endpointHtml, 'name="csrf_token" value="'
+                . str_repeat('a', 64) . '"')
+            && str_contains($endpointHtml, 'name="componentValues[title]"')
+            && !str_contains($endpointHtml, 'name="package"')
+            && !str_contains($endpointHtml, 'name="component"')
+            && $controlContext['authorized'] === true
+            && $controlContext['supported'] === true
+            && $controlContext['inputs'] === [
+                'recordId' => $contentRecordId,
+            ],
+        'the operational form derives immutable ownership server-side and exposes only core record, state, CSRF, and schema-value inputs'
+    );
     $writers = red_addon_editor_update_test_marker_count($writerMarker);
     $unsupported = red_addon_component_editor_update_values(
         $connection,
@@ -1201,6 +1252,37 @@ try {
                 === $writers,
         'revoked edit permission refuses the writer before invocation'
     );
+    $endpointDenied = red_addon_component_editor_endpoint_context(
+        $connection,
+        $contentRecordId,
+        $adminRecordId
+    );
+    $controlDenied = red_legacy_control_panel_component_context(
+        $connection,
+        [
+            'Component' => $componentId,
+            'RecordID' => $contentRecordId,
+            'Alias' => 'addon-editor-fixture',
+            'PagePositionOrder' => 1,
+        ],
+        'PageFeature',
+        'PagePosition',
+        '1',
+        'index',
+        'RED_Articles',
+        0
+    );
+    red_addon_editor_update_test_assert(
+        empty($endpointDenied['ready'])
+            && $endpointDenied['reason'] === 'edit_permission_denied'
+            && $controlDenied['authorized'] === false
+            && $controlDenied['supported'] === false
+            && red_addon_component_editor_endpoint_render(
+                $endpointDenied,
+                str_repeat('a', 64)
+            ) === red_addon_component_editor_ui_unavailable(),
+        'the operational form fails closed after exact edit permission revocation'
+    );
     $restoreDenied = red_addon_component_revision_restore_preflight(
         $connection,
         $package['manifest'],
@@ -1256,6 +1338,16 @@ try {
             && red_addon_editor_update_test_marker_count($writerMarker)
                 === $writers,
         'an editor without the current view grant cannot validate stale state'
+    );
+    $endpointViewDenied = red_addon_component_editor_endpoint_context(
+        $connection,
+        $contentRecordId,
+        $adminRecordId
+    );
+    red_addon_editor_update_test_assert(
+        empty($endpointViewDenied['ready'])
+            && $endpointViewDenied['reason'] === 'view_permission_denied',
+        'the operational form fails closed after exact view permission revocation'
     );
     red_addon_editor_update_test_grant(
         $connection,

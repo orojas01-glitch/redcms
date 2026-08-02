@@ -357,12 +357,12 @@ because core owns its escaped default renderer. Every richer surface fails
 closed with explicit theme, settings, or live-data evidence. The package
 registrar remains unexecuted during preflight.
 Packages declaring `componentEditors` fail closed with
-`component_editor_contract_required`; schema/value validation, display-only
-core rendering, permission decisions, bounded data loading, and the
-activation-blocked existing-record update/restore helpers and read-only
-creation preflight do not imply complete editor authority or activation
-support. Revision restore UI actions, a delete endpoint/control, public
-placement, activation, and an operational editor remain absent. The
+`component_editor_contract_required`; schema/value validation, core rendering,
+permission decisions, bounded data loading, the operational existing-record
+form, and the activation-blocked update/restore helpers and read-only creation
+preflight do not imply complete editor authority or activation support.
+Revision restore UI actions, a create or delete endpoint/control, public
+placement, and activation remain absent. The
 activation-blocked atomic delete runner does not change those gates. The
 parent-metadata prerequisite is
 activation-blocked and does not complete the editor lifecycle. The renderer is
@@ -434,10 +434,13 @@ not select a table, class, callback, or executable loader from database data.
 Activation-blocked data loading, existing-record updates, immutable revision
 snapshots, read-only inactive creation planning, and permission-enforced
 inactive parent-metadata writes are implemented as separate prerequisites.
-Atomic inactive creation is also implemented behind the exact plan. Restore
-UI, public placement/activation, delete controls/endpoints, and an operational
-editor remain absent. Atomic inactive deletion is implemented only behind an
-exact preflight plan. The bounded component-editor data loader may
+Atomic inactive creation is also implemented behind the exact plan. The
+authenticated existing-record editor accepts only a core record id, current
+state hash, CSRF token, and schema values; it derives package/component
+ownership again and requires fresh exact view/edit grants before invoking the
+atomic writer. Restore UI, public placement/activation, and create/delete
+controls/endpoints remain absent. Atomic inactive deletion is implemented only
+behind an exact preflight plan. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 

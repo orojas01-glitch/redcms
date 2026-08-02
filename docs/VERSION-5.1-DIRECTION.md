@@ -23,10 +23,12 @@ numeric placement parent, and fail-closed read-only public binding resolution.
 Optional data-only component editor schemas are also validated and normalized
 without package execution. Submitted scalar values can now be validated and
 normalized against those schemas with fail-closed empty output. Core can render
-the schema and exact validator state as escaped, accessible, display-only
-administrator controls, but supplies no form action or Save control. Activation
-remains blocked. Core now also resolves each fixed editor operation to its exact
-manifest permission and checks a fresh per-client administrator grant without
+the schema and exact validator state as escaped, accessible administrator
+controls. A core-owned authenticated existing-record form now supplies the
+first Save path for already-enabled persisted components, with CSRF, fresh
+exact view/edit grants, server-derived ownership, and stale-state protection.
+Activation remains blocked. Core now also resolves each fixed editor operation
+to its exact manifest permission and checks a fresh per-client administrator grant without
 granting state or inferring Owner access. The bounded data-loader prerequisite
 now requires that exact view grant, the enabled parent/runtime owner, contained
 package execution, and schema-valid returned values before exposing a
@@ -34,8 +36,9 @@ core-owned state hash. The activation-blocked existing-record update helper
 now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
-permission grant/revoke workflow, operational editor endpoint, restore action,
-delete, service, route, tool, settings, or asset contract is operational.
+permission grant/revoke workflow, restore action, create/delete endpoint,
+public placement, service, route, tool, settings, or asset contract is
+operational.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -51,8 +54,8 @@ creator and without reserving or writing anything. Its separate
 activation-blocked atomic runner now revalidates that plan under lifecycle and
 theme serialization, creates the parent and package row, verifies the exact
 loader postcondition, and commits initial core/package revisions together.
-Public placement, operational editor/delete endpoints, audit, and activation
-eligibility remain absent. Atomic deletion is available only behind the exact
+Public placement, create/delete endpoints, audit, and activation eligibility
+remain absent. Atomic deletion is available only behind the exact
 activation-blocked preflight plan. The activation-blocked parent
 metadata prerequisite now provides a read-only state gate and atomic writer.
 It requires exact view/edit grants, enabled ownership, a closed inactive shell,
@@ -434,6 +437,14 @@ request bootstrap excludes the disabled package.
     failure. Retain both immutable ledgers after success and expose no endpoint,
     form, control, audit event, media deletion, uninstall/purge, public
     placement, or activation behavior.
+28. Completed operational existing-record editor: expose an authenticated,
+    CSRF-protected core form only after the persisted parent, enabled package,
+    request-local runtime owner, manifest schema, loader, and fresh exact
+    view/edit grants agree. Accept only the numeric core record id, current
+    state hash, and schema field values; derive package and component identity
+    again server-side; and save only through the existing atomic writer. Keep
+    creation/deletion controls, restore actions, public placement, activation,
+    grant management, and audit workflow separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
