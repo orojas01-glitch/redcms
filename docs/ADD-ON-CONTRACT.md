@@ -376,6 +376,21 @@ fails closed. The fragment contains no form, button, link, script, style,
 package template, restore preflight, restore action, authorization lookup,
 package execution, endpoint, or write.
 
+`registerComponentDataDeleter()` and
+`red_addon_component_editor_delete_preflight()` define the read-only deletion
+plan boundary. A declared editor may bind at most one optional deleter with one
+to eight package-owned `RED_Addon_*` transaction tables. Before returning a
+plan, core requires the exact delete grant before package loading, then the
+view grant, enabled manifest/component/loader/deleter ownership, inactive
+hidden unrouted parent shell, caller-supplied current parent and package state
+hashes, current core revision evidence, latest integrity-valid package
+revision, and InnoDB support for every future transaction table. The plan is
+deterministic and contains no package values. Preflight does not invoke the
+deleter, lock a row, open a transaction, record a revision or audit event,
+delete data, render a control, expose an endpoint, or authorize public
+placement. The trusted first-party callback is registration evidence for a
+separate atomic runner, not executable preflight code or a PHP sandbox.
+
 `red_addon_component_editor_permission_decision()` is the next database-backed
 authorization prerequisite. It resolves one of the six fixed editor operations
 to the exact permission already present in the normalized schema, then requires
@@ -1050,8 +1065,9 @@ responses, or structured data.
    execution are also implemented. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
-   implemented; restore actions, audit workflow, public placement/activation,
-   and delete behavior remain blocked.
+   implemented. Read-only delete planning is also implemented; its atomic
+   runner, restore actions, audit workflow, and public placement/activation
+   remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

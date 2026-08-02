@@ -58,6 +58,9 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->allowed['componentDataWriters'] = $componentDataLoaders;
             $this->handlers['componentDataWriters'] = [];
             $this->metadata['componentDataWriters'] = [];
+            $this->allowed['componentDataDeleters'] = $componentDataLoaders;
+            $this->handlers['componentDataDeleters'] = [];
+            $this->metadata['componentDataDeleters'] = [];
             $routeIds = [];
             foreach ($manifest['routes'] ?? [] as $route) {
                 if (is_array($route) && is_string($route['id'] ?? null)) {
@@ -173,6 +176,19 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             );
         }
 
+        public function registerComponentDataDeleter(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $this->register(
+                'componentDataDeleters',
+                $id,
+                $handler,
+                ['tables' => $this->componentTransactionTables($tables)]
+            );
+        }
+
         public function registerAdminTool(string $id, callable $handler): void
         {
             $this->register('adminTools', $id, $handler);
@@ -193,7 +209,11 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             foreach ($this->allowed as $type => $allowed) {
                 if (in_array(
                     $type,
-                    ['componentDataCreators', 'componentDataWriters'],
+                    [
+                        'componentDataCreators',
+                        'componentDataWriters',
+                        'componentDataDeleters',
+                    ],
                     true
                 )) {
                     continue;
@@ -257,6 +277,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'componentDataLoaders',
                     'componentDataCreators',
                     'componentDataWriters',
+                    'componentDataDeleters',
                     'services',
                     'adminTools',
                     'adapters',

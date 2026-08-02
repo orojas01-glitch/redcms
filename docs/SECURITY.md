@@ -173,6 +173,14 @@ add-on packages without executing them.
   malformed, duplicate, or value-bearing input fails closed. Its status text
   never substitutes for restore preflight, and it emits no form, button, link,
   package markup, authorization lookup, package execution, or write.
+- Component deletion planning requires the exact delete grant before any
+  package loader can execute, then reuses the exact view-authorized inactive
+  parent boundary. It requires caller-supplied current parent/package hashes,
+  the latest validated immutable package revision, exact enabled runtime
+  component/loader/deleter ownership, and declared package-owned InnoDB tables.
+  The deterministic plan contains no package values. Preflight never invokes
+  the deleter, opens a transaction, deletes data, writes revision/audit state,
+  or exposes an endpoint or control.
 - Atomic restore execution is a separate activation-blocked helper. It locks
   the exact enabled placement parent, re-runs the restore preflight, matches
   the caller's current-state and plan hashes, invokes only the registered
