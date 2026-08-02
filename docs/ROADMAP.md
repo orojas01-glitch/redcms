@@ -167,8 +167,9 @@ plan under lifecycle/theme serialization, creates the parent and package row,
 reloads the exact postcondition, and commits initial core/package revisions in
 one transaction. Permission-enforced inactive parent metadata and the
 display-only value-free revision timeline are completed boundaries below;
-public placement, restore actions, and delete behavior remain later isolated
-batches.
+read-only delete planning and atomic inactive deletion are also complete;
+public placement, restore UI actions, and operational editor/delete endpoints
+remain later isolated batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -244,6 +245,16 @@ unrouted shell, exact parent and package state hashes, the latest validated
 package revision, enabled runtime ownership, and InnoDB support before returning
 a deterministic plan. It never invokes the deleter or opens a transaction,
 endpoint, form, delete action, audit event, public placement, or activation path.
+The separate activation-blocked atomic delete runner revalidates that exact
+plan under lifecycle/theme/installation/parent locks, records
+duplicate-preserving package and core `delete` snapshots before mutation,
+invokes only the registrar-bound deleter, and requires every declared package
+row to be absent before deleting SEO metadata and the inactive parent. All rows
+and attempted revisions roll back on stale evidence, callback output or
+failure, partial deletion, lost transaction, ledger failure, or any failed
+postcondition. Successful deletion retains both immutable revision ledgers and
+adds no endpoint, control, audit event, media deletion, uninstall, purge,
+public placement, or activation behavior.
 The separate activation-blocked restore runner rechecks that plan under the
 locked enabled parent, uses only the registered writer and target snapshot,
 requires the exact reloaded target state, and commits a source-linked restore
@@ -292,8 +303,8 @@ blocked. The generic numeric parent relationship, public binding resolver, and
 declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
-implemented, and the activation-blocked parent-metadata writer is implemented,
-while atomic delete execution, typed-service invocation, route,
+implemented, and the activation-blocked parent-metadata writer plus atomic
+inactive delete runner are implemented, while typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

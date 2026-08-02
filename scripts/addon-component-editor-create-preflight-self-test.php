@@ -46,6 +46,7 @@ $creatorCalls = 0;
 $loaderCalls = 0;
 $deleterCalls = 0;
 $creatorMode = 'valid';
+$deleterMode = 'valid';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -111,6 +112,14 @@ function red_addon_editor_create_test_cleanup(
                 [
                     'RED_Content_Revisions',
                     'redcms_component_parent_update_revision_fail',
+                ],
+                [
+                    'RED_Addon_Component_Revisions',
+                    'redcms_component_delete_package_revision_fail',
+                ],
+                [
+                    'RED_Content_Revisions',
+                    'redcms_component_delete_parent_revision_fail',
                 ],
             ] as [$table, $constraint]
         ) {
@@ -295,6 +304,7 @@ function red_addon_editor_create_test_context(
     &$loaderCalls,
     &$deleterCalls,
     &$creatorMode,
+    &$deleterMode,
     $withCreator = true,
     $withDeleter = true
 ) {
@@ -394,8 +404,50 @@ function red_addon_editor_create_test_context(
     if ($withDeleter) {
         $registry->registerComponentDataDeleter(
             $componentId,
-            static function () use (&$deleterCalls): bool {
+            static function ($connection, array $context) use (
+                &$deleterCalls,
+                &$deleterMode,
+                $packageTable
+            ): bool {
                 $deleterCalls++;
+                if (array_keys($context) !== [
+                    'component',
+                    'contentRecordId',
+                    'actorRecordId',
+                    'planHash',
+                ]) {
+                    throw new RuntimeException('unexpected deletion context');
+                }
+                if ($deleterMode !== 'partial') {
+                    $statement = mysqli_prepare(
+                        $connection,
+                        'DELETE FROM `' . $packageTable
+                            . '` WHERE ContentRecordID=?'
+                    );
+                    mysqli_stmt_bind_param(
+                        $statement,
+                        'i',
+                        $context['contentRecordId']
+                    );
+                    $deleted = mysqli_stmt_execute($statement)
+                        && mysqli_stmt_affected_rows($statement) === 1;
+                    mysqli_stmt_close($statement);
+                    if (!$deleted) {
+                        return false;
+                    }
+                }
+                if ($deleterMode === 'emit') {
+                    echo 'unsafe-deleter-output';
+                }
+                if ($deleterMode === 'throw') {
+                    throw new RuntimeException('private deleter failure');
+                }
+                if ($deleterMode === 'nested') {
+                    ob_start();
+                }
+                if ($deleterMode === 'false') {
+                    return false;
+                }
                 return true;
             },
             [$packageTable]
@@ -619,7 +671,8 @@ try {
         $creatorCalls,
         $loaderCalls,
         $deleterCalls,
-        $creatorMode
+        $creatorMode,
+        $deleterMode
     );
     red_addon_runtime_set_request_context($context);
     $contract = red_theme_active_layout_contract($connection, $projectRoot);
@@ -833,6 +886,7 @@ try {
         $loaderCalls,
         $deleterCalls,
         $creatorMode,
+        $deleterMode,
         false,
         true
     );
@@ -1226,6 +1280,7 @@ try {
         $loaderCalls,
         $deleterCalls,
         $creatorMode,
+        $deleterMode,
         true,
         false
     );
@@ -1513,8 +1568,294 @@ try {
             ) === '1:1:2:1:0',
         'the committed numeric id cannot be reused and remains unchanged'
     );
+
+    $seoValues = array_merge(
+        red_seo_empty_values(),
+        ['SEO_Title' => 'Disposable component delete metadata']
+    );
+    $_SESSION['AdminRecordID'] = $adminRecordId;
+    $_SESSION['alias'] = 'CreatePlan';
+    $seoPrepared = red_seo_save_metadata(
+        $connection,
+        'article',
+        $contentRecordId,
+        $seoValues,
+        $adminRecordId
+    ) && red_admin_content_revision_record_current(
+        $connection,
+        $contentRecordId,
+        'save'
+    );
+    unset($_SESSION['AdminRecordID'], $_SESSION['alias']);
     red_addon_editor_create_test_assert(
-        $creatorCalls === 8 && $loaderCalls === 18 && $deleterCalls === 0,
+        $seoPrepared
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '1:1:3:1:1',
+        'the disposable delete fixture includes current revision-backed SEO metadata'
+    );
+
+    $deleteParentState = red_addon_component_editor_parent_state(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId
+    );
+    $deletePlan = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash']
+    );
+    $deleteFingerprint = red_addon_editor_create_test_record_fingerprint(
+        $connection,
+        $contentRecordId,
+        $packageTable
+    );
+    red_addon_editor_create_test_assert(
+        !empty($deleteParentState['loaded'])
+            && !empty($deletePlan['ready'])
+            && $deleteFingerprint === '1:1:3:1:1',
+        'the updated inactive record produces a fresh executable delete plan'
+    );
+
+    $deleterCallsBeforeRefusal = $deleterCalls;
+    $refused = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        hash('sha256', 'stale-delete-plan')
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['deleted'])
+            && $refused['reason'] === 'stale_plan'
+            && $deleterCalls === $deleterCallsBeforeRefusal
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === $deleteFingerprint,
+        'a stale delete plan is refused without invoking package deletion'
+    );
+
+    mysqli_begin_transaction($connection);
+    $refused = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        $deletePlan['planHash']
+    );
+    mysqli_rollback($connection);
+    red_addon_editor_create_test_assert(
+        empty($refused['deleted'])
+            && $refused['reason'] === 'transaction_already_active'
+            && $deleterCalls === $deleterCallsBeforeRefusal,
+        'atomic deletion refuses a caller-owned transaction'
+    );
+
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID='
+            . $adminRecordId . " AND Capability='"
+            . mysqli_real_escape_string($connection, $deletePermission) . "'"
+    );
+    $refused = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        $deletePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['deleted'])
+            && $refused['reason'] === 'permission_denied'
+            && $deleterCalls === $deleterCallsBeforeRefusal,
+        'the runner rechecks the exact delete grant before package callbacks'
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $deletePermission
+    );
+
+    foreach (
+        [
+            'emit' => 'deleter_failed',
+            'throw' => 'deleter_failed',
+            'nested' => 'deleter_failed',
+            'false' => 'deleter_failed',
+            'partial' => 'package_postcondition_failed',
+        ] as $mode => $reason
+    ) {
+        $deleterMode = $mode;
+        $refused = red_addon_component_editor_delete_values(
+            $connection,
+            $manifest,
+            $componentId,
+            $contentRecordId,
+            $adminRecordId,
+            $deleteParentState['stateHash'],
+            $deleteParentState['packageStateHash'],
+            $deletePlan['planHash']
+        );
+        red_addon_editor_create_test_assert(
+            empty($refused['deleted'])
+                && $refused['reason'] === $reason
+                && red_addon_editor_create_test_record_fingerprint(
+                    $connection,
+                    $contentRecordId,
+                    $packageTable
+                ) === $deleteFingerprint,
+            "the $mode package deleter fails closed and rolls back all state"
+        );
+    }
+    $deleterMode = 'valid';
+
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Revisions ADD CONSTRAINT '
+            . '`redcms_component_delete_package_revision_fail` CHECK '
+            . "(`Operation` <> 'delete' OR `ContentRecordID` <> "
+            . $contentRecordId . ')'
+    );
+    $refused = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        $deletePlan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Revisions DROP CHECK '
+            . '`redcms_component_delete_package_revision_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['deleted'])
+            && $refused['reason'] === 'package_revision_failed'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === $deleteFingerprint,
+        'a forced package delete-revision failure rolls back the operation'
+    );
+
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions ADD CONSTRAINT '
+            . '`redcms_component_delete_parent_revision_fail` CHECK '
+            . "(`Operation` <> 'delete' OR `ContentRecordID` <> "
+            . $contentRecordId . ')'
+    );
+    $refused = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        $deletePlan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions DROP CHECK '
+            . '`redcms_component_delete_parent_revision_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['deleted'])
+            && $refused['reason'] === 'parent_revision_failed'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === $deleteFingerprint,
+        'a forced core delete-revision failure rolls back the package revision'
+    );
+
+    $deleted = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        $deletePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($deleted['deleted'])
+            && $deleted['reason'] === 'deleted'
+            && $deleted['package'] === $packageId
+            && $deleted['viewPermission'] === $viewPermission
+            && $deleted['deletePermission'] === $deletePermission
+            && $deleted['parentRevisionId'] > 0
+            && $deleted['packageRevisionId'] > 0
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '0:0:4:2:0',
+        'the exact plan deletes parent and package rows atomically while retaining both ledgers'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT CONCAT(RevisionNumber, ':', Operation, ':', StateHash)
+                 FROM RED_Addon_Component_Revisions
+                 WHERE RevisionID=" . (int) $deleted['packageRevisionId'] . "),
+                (SELECT CONCAT(RevisionNumber, ':', Operation, ':', SnapshotHash)
+                 FROM RED_Content_Revisions
+                 WHERE RevisionID=" . (int) $deleted['parentRevisionId'] . '))'
+        ) === '2:delete:' . $deleteParentState['packageStateHash']
+            . ':4:delete:' . $deleteParentState['stateHash'],
+        'the surviving final revisions are immutable delete snapshots of both states'
+    );
+
+    $reused = red_addon_component_editor_delete_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $deleteParentState['stateHash'],
+        $deleteParentState['packageStateHash'],
+        $deletePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($reused['deleted'])
+            && $reused['reason'] === 'binding_unavailable'
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === '0:0:4:2:0',
+        'a committed delete plan is single-use and cannot alter retained evidence'
+    );
+    red_addon_editor_create_test_assert(
+        $creatorCalls === 8 && $loaderCalls > 18 && $deleterCalls === 6,
         'only authorized state and runner paths invoke package callbacks'
     );
 
@@ -1554,7 +1895,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on component creation/parent-metadata/delete-plan self-test passed ('
+    'Add-on component creation/parent-metadata/atomic-delete self-test passed ('
         . $assertions . " assertions).\n"
 );
 

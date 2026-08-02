@@ -181,6 +181,16 @@ add-on packages without executing them.
   The deterministic plan contains no package values. Preflight never invokes
   the deleter, opens a transaction, deletes data, writes revision/audit state,
   or exposes an endpoint or control.
+- Atomic component deletion is activation-blocked and requires that exact plan
+  again under the shared lifecycle/theme and enabled-binding locks. Core first
+  records explicit-actor `delete` snapshots in both immutable ledgers, contains
+  the registrar-bound deleter, verifies every declared package table has no
+  matching row, removes SEO metadata, and deletes only the exact inactive
+  hidden parent. Callback output/failure, partial deletion, stale evidence,
+  transaction loss, ledger failure, or any postcondition failure rolls back
+  everything. The ledgers remain after success; no endpoint, control, audit
+  event, media deletion, uninstall/purge, public placement, or activation is
+  authorized.
 - Atomic restore execution is a separate activation-blocked helper. It locks
   the exact enabled placement parent, re-runs the restore preflight, matches
   the caller's current-state and plan hashes, invokes only the registered
@@ -223,8 +233,9 @@ add-on packages without executing them.
   and package state are postconditions, and one explicit-actor core `save`
   revision shares the transaction. Identical values add no revision; stale,
   revoked, public/placed, transaction, postcondition, and ledger failures roll
-  back. No endpoint, public placement, activation, delete, audit event, or
-  package-value write is exposed.
+  back. No endpoint, public placement, activation, delete control, audit event,
+  or package-value write is exposed; deletion remains available only through
+  the separate exact-plan atomic helper.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -350,8 +361,10 @@ Packages declaring `componentEditors` fail closed with
 core rendering, permission decisions, bounded data loading, and the
 activation-blocked existing-record update/restore helpers and read-only
 creation preflight do not imply complete editor authority or activation
-support. Revision restore actions, delete, public placement, activation, and an
-operational endpoint remain absent. The parent-metadata prerequisite is
+support. Revision restore UI actions, a delete endpoint/control, public
+placement, activation, and an operational editor remain absent. The
+activation-blocked atomic delete runner does not change those gates. The
+parent-metadata prerequisite is
 activation-blocked and does not complete the editor lifecycle. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
@@ -422,8 +435,9 @@ Activation-blocked data loading, existing-record updates, immutable revision
 snapshots, read-only inactive creation planning, and permission-enforced
 inactive parent-metadata writes are implemented as separate prerequisites.
 Atomic inactive creation is also implemented behind the exact plan. Restore
-UI, public placement/activation, delete, and an
-operational editor remain absent. The bounded component-editor data loader may
+UI, public placement/activation, delete controls/endpoints, and an operational
+editor remain absent. Atomic inactive deletion is implemented only behind an
+exact preflight plan. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
