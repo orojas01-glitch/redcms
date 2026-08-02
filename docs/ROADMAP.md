@@ -299,6 +299,17 @@ revoked, stale, public/placed, caller-owned-transaction, postcondition, and
 revision failures leave the parent and package unchanged. No UI, endpoint,
 public placement, activation, delete, audit, or package-value write is added.
 
+The read-only public-placement prerequisite is now implemented. It requires
+the exact publish grant before package loading and reuses the complete
+view-authorized inactive parent, enabled binding, package-state, and current
+core-revision evidence. A numeric destination id must resolve to one unique
+active Article route; core derives its hierarchy, alias, layout, and language,
+requires source/destination language agreement, and validates the proposed
+page position against the active theme. The deterministic plan binds both
+states and the closed placement values while writing and activating nothing.
+The locked atomic placement/activation runner, audit behavior, and UI remain
+separate work.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
@@ -308,7 +319,7 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while public placement/activation, typed-service invocation, route,
+while atomic public placement/activation, typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

@@ -16,7 +16,8 @@ flowchart TD
     F6 --> F7["Read-only delete preflight"]
     F7 --> F8["Atomic delete runner"]
     F8 --> F9["Operational editor endpoint and form"]
-    F9 --> C["CURRENT / NEXT<br/>Public placement and activation"]
+    F9 --> F10["Read-only public-placement preflight"]
+    F10 --> C["CURRENT / NEXT<br/>Atomic public placement and activation"]
     C --> G4["Typed services, routes, and admin tools"]
     G4 --> G5["Settings, assets, and live-data gates"]
     G5 --> S["TARGET<br/>Store Lite optional package"]
@@ -29,7 +30,7 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9 complete;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10 complete;
     class C current;
     class G4,G5,E,A,D,R remaining;
     class S target;
@@ -38,8 +39,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-owned existing-record editor form and CSRF endpoints with server-derived ownership, exact view/edit grants, stale-state protection, and the atomic package writer. |
-| Current milestone | Define public placement and activation without weakening the richer-package enablement blocker. |
+| Latest completed slice | Read-only public-placement preflight with exact view/publish grants, inactive parent and package-state evidence, one existing public Article route, active-theme position validation, deterministic planning, and zero writes. |
+| Current milestone | Implement the atomic public-placement/activation runner behind that exact plan without weakening the richer-package enablement blocker. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

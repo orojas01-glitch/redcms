@@ -236,6 +236,15 @@ add-on packages without executing them.
   back. No endpoint, public placement, activation, delete control, audit event,
   or package-value write is exposed; deletion remains available only through
   the separate exact-plan atomic helper.
+- Public-placement planning is separately read-only. It requires the exact
+  publish grant before package loading and then the complete view-authorized
+  inactive parent, enabled binding, package-state, and current revision
+  evidence. Core accepts only numeric source/target ids plus bounded position
+  and order values, derives one unique active `Article` route, requires exact
+  language agreement, validates hierarchy and the active-theme position
+  contract, and hashes the actor, package, component, both states, and closed
+  placement values. It performs no activation, update, package write, audit,
+  endpoint, or transaction; the atomic runner remains a separate gate.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -438,8 +447,9 @@ Atomic inactive creation is also implemented behind the exact plan. The
 authenticated existing-record editor accepts only a core record id, current
 state hash, CSRF token, and schema values; it derives package/component
 ownership again and requires fresh exact view/edit grants before invoking the
-atomic writer. Restore UI, public placement/activation, and create/delete
-controls/endpoints remain absent. Atomic inactive deletion is implemented only
+atomic writer. Restore UI, atomic public placement/activation, and create/delete
+controls/endpoints remain absent. Read-only public-placement planning and
+atomic inactive deletion are implemented only
 behind an exact preflight plan. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.

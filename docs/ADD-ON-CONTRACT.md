@@ -516,8 +516,21 @@ state, stale hashes, revoked grants, caller-owned transactions, postcondition
 failure, lost transactions, and revision failure roll back. These helpers
 expose no form, route, public placement, activation, delete, audit event, or
 package-value write.
+`red_addon_component_editor_publish_preflight()` implements the next read-only
+public-placement prerequisite. It requires the exact publish grant before
+package loading, then reuses the exact view-authorized inactive parent,
+enabled runtime/binding, package-state, and current core-revision evidence.
+The caller supplies only numeric source and target ids, a page position and
+order, plus the current parent/package hashes. Core derives one uniquely owned,
+active `Article` destination route, its hierarchy, alias, layout, and language;
+requires source/destination language agreement; and validates the resulting
+candidate against the active theme's page-position contract. The deterministic
+plan binds the exact actor, package, component, source state, destination state,
+and closed placement values. It invokes no package writer, opens no transaction
+or endpoint, and writes or activates nothing. The separate locked atomic
+placement runner remains unimplemented.
 Enablement preflight reports `component_editor_contract_required` until the
-operational editor endpoint, audit, and public-placement/activation contracts
+audit and atomic public-placement/activation contracts
 are implemented and accepted.
 
 ## Core Registry And Execution

@@ -144,6 +144,9 @@ not active features.
   postcondition verification, dual initial revisions, and rollback proof
 - Permission-enforced inactive parent metadata updates with stale-state
   refusal, exact shell preservation, core revisions, and rollback proof
+- Read-only public-placement planning with exact view/publish grants, current
+  parent/package evidence, unique destination ownership, active-theme position
+  validation, deterministic hashing, and zero activation or writes
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

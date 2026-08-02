@@ -1,6 +1,6 @@
 <?php
 /**
- * Disposable checks for add-on component creation and parent metadata.
+ * Disposable checks for component creation, parent metadata, placement, and deletion.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -17,6 +17,8 @@ require_once $projectRoot
     . '/includes/addon_component_editor_create_helpers.php';
 require_once $projectRoot
     . '/includes/addon_component_editor_parent_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_component_editor_publish_helpers.php';
 require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
@@ -35,12 +37,15 @@ if (!preg_match(
 $assertions = 0;
 $adminRecordId = 2147000975;
 $contentRecordId = 2147000976;
+$targetPageRecordId = 2147000977;
+$duplicateTargetPageRecordId = 2147000978;
 $packageId = 'redcms.editor-create-fixture';
 $componentId = 'redcms.editor-create-fixture/item';
 $createPermission = 'fixture.editor-create.create';
 $viewPermission = 'fixture.editor-create.view';
 $editPermission = 'fixture.editor-create.edit';
 $deletePermission = 'fixture.editor-create.delete';
+$publishPermission = 'fixture.editor-create.publish';
 $packageTable = 'RED_Addon_Component_Editor_Create_Fixture';
 $creatorCalls = 0;
 $loaderCalls = 0;
@@ -94,6 +99,8 @@ function red_addon_editor_create_test_cleanup(
     $connection,
     $adminRecordId,
     $contentRecordId,
+    $targetPageRecordId,
+    $duplicateTargetPageRecordId,
     $packageId,
     $packageTable
 ) {
@@ -143,6 +150,10 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Page_SEO WHERE OwnerRecordID=' . (int) $targetPageRecordId
+        );
+        mysqli_query(
+            $connection,
             'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
                 . (int) $contentRecordId
         );
@@ -153,11 +164,25 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Content_Revisions WHERE ContentRecordID='
+                . (int) $targetPageRecordId
+        );
+        mysqli_query(
+            $connection,
             'DROP TABLE IF EXISTS `' . $packageTable . '`'
         );
         mysqli_query(
             $connection,
             'DELETE FROM RED_Articles WHERE RecordID=' . (int) $contentRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Articles WHERE RecordID=' . (int) $targetPageRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Articles WHERE RecordID='
+                . (int) $duplicateTargetPageRecordId
         );
         foreach (
             [
@@ -226,7 +251,8 @@ function red_addon_editor_create_test_manifest(
     $createPermission,
     $viewPermission,
     $editPermission,
-    $deletePermission
+    $deletePermission,
+    $publishPermission
 ) {
     return [
         '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
@@ -249,6 +275,7 @@ function red_addon_editor_create_test_manifest(
             $viewPermission,
             $editPermission,
             $deletePermission,
+            $publishPermission,
         ],
         'componentEditors' => [[
             'component' => $componentId,
@@ -260,7 +287,7 @@ function red_addon_editor_create_test_manifest(
                 'view' => $viewPermission,
                 'edit' => $editPermission,
                 'delete' => $deletePermission,
-                'publish' => $createPermission,
+                'publish' => $publishPermission,
                 'restore' => $createPermission,
             ],
             'fields' => [
@@ -465,6 +492,8 @@ try {
         $connection,
         $adminRecordId,
         $contentRecordId,
+        $targetPageRecordId,
+        $duplicateTargetPageRecordId,
         $packageId,
         $packageTable
     );
@@ -474,7 +503,8 @@ try {
         $createPermission,
         $viewPermission,
         $editPermission,
-        $deletePermission
+        $deletePermission,
+        $publishPermission
     );
 
     $undeclared = $manifest;
@@ -636,6 +666,11 @@ try {
         $connection,
         $adminRecordId,
         $deletePermission
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $publishPermission
     );
     $manifestHash = hash('sha256', json_encode($manifest));
     $inventoryHash = hash('sha256', 'create-preflight-fixture');
@@ -1548,6 +1583,301 @@ try {
         'public or non-shell parent state is outside the metadata writer'
     );
 
+    $targetInserted = red_admin_article_insert(
+        $connection,
+        $targetPageRecordId,
+        [
+            'Title' => 'Disposable placement target',
+            'Component' => 'Article',
+            'Alias' => 'addon-placement-target',
+            'Sections' => '',
+            'Categories' => '',
+            'SubCategories' => '',
+            'Layout' => $layout,
+            'Article' => '',
+            'Active' => 'Y',
+            'Language' => 'en',
+            'LongDesc' => '<p>Disposable placement target.</p>',
+        ]
+    );
+    $target = red_addon_component_editor_publish_target(
+        $connection,
+        $targetPageRecordId
+    );
+    red_addon_editor_create_test_assert(
+        $targetInserted
+            && is_array($target)
+            && $target['recordId'] === $targetPageRecordId
+            && $target['alias'] === 'addon-placement-target'
+            && strlen($target['stateHash']) === 64,
+        'one exact active Article route is an eligible placement target'
+    );
+
+    $loaderCallsBeforeInvalidPublish = $loaderCalls;
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        0,
+        0,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready'])
+            && $refused['reason'] === 'invalid_request'
+            && $loaderCalls === $loaderCallsBeforeInvalidPublish,
+        'invalid placement input is refused before package loading'
+    );
+
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID='
+            . $adminRecordId . " AND Capability='"
+            . mysqli_real_escape_string($connection, $publishPermission) . "'"
+    );
+    $loaderCallsBeforePublishRefusal = $loaderCalls;
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready'])
+            && $refused['reason'] === 'permission_denied'
+            && $refused['publishPermission'] === $publishPermission
+            && $loaderCalls === $loaderCallsBeforePublishRefusal,
+        'the fresh exact publish grant is required before package loading'
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $publishPermission
+    );
+
+    $publishFingerprint = red_addon_editor_create_test_scalar(
+        $connection,
+        "SELECT CONCAT_WS(':',
+            (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                SubCategories, Article, PagePosition, PagePositionOrder)
+             FROM RED_Articles WHERE RecordID=$contentRecordId),
+            (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                SubCategories, Layout, Language, PagePosition)
+             FROM RED_Articles WHERE RecordID=$targetPageRecordId),
+            (SELECT COUNT(*) FROM `$packageTable`
+             WHERE ContentRecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM RED_Content_Revisions
+             WHERE ContentRecordID IN ($contentRecordId,$targetPageRecordId)),
+            (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+             WHERE ContentRecordID=$contentRecordId))"
+    );
+    $publishPlan = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    $repeatPublishPlan = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($publishPlan['ready'])
+            && $publishPlan['reason'] === 'ready'
+            && $publishPlan['package'] === $packageId
+            && $publishPlan['viewPermission'] === $viewPermission
+            && $publishPlan['publishPermission'] === $publishPermission
+            && $publishPlan['parentStateHash'] === $updated['stateHash']
+            && $publishPlan['packageStateHash'] === $updated['packageStateHash']
+            && $publishPlan['targetStateHash'] === $target['stateHash']
+            && $publishPlan['placementValues'] === [
+                'Sections' => '',
+                'Categories' => '',
+                'SubCategories' => '',
+                'Article' => 'addon-placement-target',
+                'PagePosition' => 1,
+                'PagePositionOrder' => 3,
+                'Active' => 'Y',
+            ]
+            && strlen($publishPlan['planHash']) === 64,
+        'publish preflight derives one closed public-placement plan from the exact route owner'
+    );
+    red_addon_editor_create_test_assert(
+        !empty($repeatPublishPlan['ready'])
+            && $repeatPublishPlan['planHash'] === $publishPlan['planHash']
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                        SubCategories, Article, PagePosition, PagePositionOrder)
+                     FROM RED_Articles WHERE RecordID=$contentRecordId),
+                    (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                        SubCategories, Layout, Language, PagePosition)
+                     FROM RED_Articles WHERE RecordID=$targetPageRecordId),
+                    (SELECT COUNT(*) FROM `$packageTable`
+                     WHERE ContentRecordID=$contentRecordId),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID IN ($contentRecordId,$targetPageRecordId)),
+                    (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                     WHERE ContentRecordID=$contentRecordId))"
+            ) === $publishFingerprint,
+        'identical publish evidence is deterministic and writes no core or package state'
+    );
+
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        hash('sha256', 'stale-parent'),
+        $updated['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready']) && $refused['reason'] === 'stale_state',
+        'stale parent evidence cannot produce a placement plan'
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Language='sp'
+         WHERE RecordID=$targetPageRecordId"
+    );
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Language='en'
+         WHERE RecordID=$targetPageRecordId"
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready']) && $refused['reason'] === 'language_mismatch',
+        'a component cannot be planned onto a route in another language'
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Active='N'
+         WHERE RecordID=$targetPageRecordId"
+    );
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Active='Y'
+         WHERE RecordID=$targetPageRecordId"
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready'])
+            && $refused['reason'] === 'target_page_unavailable',
+        'inactive destinations are not eligible public route owners'
+    );
+
+    $duplicateInserted = red_admin_article_insert(
+        $connection,
+        $duplicateTargetPageRecordId,
+        [
+            'Title' => 'Duplicate disposable placement target',
+            'Component' => 'Article',
+            'Alias' => 'addon-placement-target',
+            'Sections' => '',
+            'Categories' => '',
+            'SubCategories' => '',
+            'Layout' => $layout,
+            'Article' => '',
+            'Active' => 'Y',
+            'Language' => 'en',
+        ]
+    );
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Articles WHERE RecordID='
+            . $duplicateTargetPageRecordId
+    );
+    red_addon_editor_create_test_assert(
+        $duplicateInserted
+            && empty($refused['ready'])
+            && $refused['reason'] === 'target_page_unavailable',
+        'ambiguous route ownership cannot produce a placement plan'
+    );
+
+    $refused = red_addon_component_editor_publish_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        99,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready'])
+            && $refused['reason'] === 'placement_unsupported',
+        'the active theme must support the requested destination position'
+    );
+
     $refused = red_addon_component_editor_create_values(
         $connection,
         $manifest,
@@ -1863,6 +2193,8 @@ try {
         $connection,
         $adminRecordId,
         $contentRecordId,
+        $targetPageRecordId,
+        $duplicateTargetPageRecordId,
         $packageId,
         $packageTable
     );
@@ -1886,6 +2218,8 @@ try {
         $connection,
         $adminRecordId,
         $contentRecordId,
+        $targetPageRecordId,
+        $duplicateTargetPageRecordId,
         $packageId,
         $packageTable
     );
@@ -1895,7 +2229,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on component creation/parent-metadata/atomic-delete self-test passed ('
+    'Add-on component creation/parent-metadata/public-placement/atomic-delete self-test passed ('
         . $assertions . " assertions).\n"
 );
 
