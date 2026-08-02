@@ -252,8 +252,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   and dual initial revisions. Read-only parent state and atomic
   title/layout/language updates are complete with exact grants, shell/package
   postconditions, and core revision rollback, but no grant-management
-  workflow, restore UI action, audited public-placement control, delete
-  endpoint/control, uninstall, or purge exists;
+  workflow, restore UI action, delete endpoint/control, uninstall, or purge
+  exists. The audited public-placement control is complete but does not by
+  itself admit the Store Lite package;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;

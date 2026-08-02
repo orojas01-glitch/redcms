@@ -250,10 +250,18 @@ add-on packages without executing them.
   and destination-page row locks. Only the seven derived placement fields may
   change; package data and the destination route must remain byte-for-byte
   equivalent to their planned states. Success requires one explicit-actor
-  core `move` revision. Caller transactions, reused or stale plans, grant or
+  core `move` revision and one allowlisted `component.public_placed` audit fact
+  containing only the numeric actor and component-parent identifiers. The
+  revision, audit row, and seven parent fields share one transaction; an audit
+  failure rolls everything back. Caller transactions, reused or stale plans, grant or
   route drift, unsupported positions, transaction loss, postcondition
-  mismatch, and revision failure roll back. No package writer, endpoint,
-  administrator control, or audit event is authorized.
+  mismatch, revision failure, and audit failure roll back.
+- The authenticated placement control is core-owned, POST-only, and protected
+  by the existing administrator-session and CSRF checks. Browser input contains
+  only the numeric component-parent id, numeric destination page/position/order,
+  and current parent/package hashes. Core derives package, component, manifest,
+  grants, theme positions, target ownership, and the exact plan again on the
+  server; no package callback chooses placement or receives request data.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -500,7 +508,10 @@ The shared contracts live in:
 
 `database/migrations/2026-07-12-login-attempt-throttling.sql` adds `RED_Login_Attempts`, and `includes/login_throttle_helpers.php` applies the policy from `bin/login.php`.
 
-- Only failed administrator login attempts are stored here. Successful login history is intentionally not stored by the minimal activity-audit batch; its initial scope is successful Administrator Users mutations only.
+- Only failed administrator login attempts are stored here. Successful login
+  history is intentionally not stored by the activity-audit policy; its
+  allowlist covers successful Administrator Users mutations, Owner bootstrap,
+  and the core-owned public-placement completion fact only.
 - Stored fields are a lowercase/trimmed username SHA-256 digest, the packed client network address supplied by `REMOTE_ADDR`, and the failure timestamp. Passwords, password hashes, submitted usernames, session IDs, CSRF tokens, and content are not stored.
 - The application deliberately ignores client-supplied `X-Forwarded-For`. A reverse proxy must normalize the trusted client address at the web-server boundary before PHP if per-client throttling is required behind that proxy.
 - Within a rolling 15-minute window, a new login is temporarily blocked after five failures for the same username/client pair, 15 failures for the same username across clients, or 30 failures from one client across usernames.
@@ -512,11 +523,12 @@ The shared contracts live in:
 
 `database/migrations/2026-07-12-administrator-activity-audit.sql` adds
 `RED_Admin_Activity_Log`, and `includes/admin_audit_helpers.php` writes only
-explicitly allowlisted administrator events.
+explicitly allowlisted administrator event/target pairs.
 
 - Events are successful `administrator.created`, `administrator.updated`, and
   `administrator.deleted` operations plus the server-local
-  `administrator.owner_bootstrapped` event.
+  `administrator.owner_bootstrapped` event and the core-owned
+  `component.public_placed` operation.
 - Each row contains the event name, numeric actor administrator ID, target type, numeric target record ID, and timestamp. No foreign key is used so a deletion event remains attributable after the target account is removed.
 - The table does not contain usernames, aliases, emails, IP addresses, passwords or password hashes, session IDs, CSRF tokens, request bodies, component/tool permission lists, or content bodies.
 - The administrator mutation and its audit insertion share one InnoDB transaction. If audit persistence fails, the user mutation rolls back and the existing endpoint returns `no`.

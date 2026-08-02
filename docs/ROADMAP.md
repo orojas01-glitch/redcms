@@ -311,11 +311,14 @@ The locked atomic placement/activation runner is now implemented behind that
 exact plan. It serializes lifecycle and active-theme changes; locks the enabled
 installation, inactive source, and destination page; and revalidates the plan.
 Only the seven derived placement fields change. Package state and destination
-state must remain exact, and one explicit-actor core `move` revision commits in
-the same transaction. Caller transactions, stale/reused plans, revoked grants,
+state must remain exact, and one explicit-actor core `move` revision plus one
+bounded `component.public_placed` administrator audit fact commit in the same
+transaction. The core-owned authenticated POST/CSRF control exposes only
+numeric destination choices and stale-state hashes; package/component identity,
+permissions, target ownership, and the exact plan are derived again server-side.
+Caller transactions, stale/reused plans, revoked grants,
 destination drift, unsupported positions, transaction loss, postcondition
-mismatch, and revision failure roll back. The audited administrator control
-remains separate work.
+mismatch, revision failure, and audit failure roll back.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
@@ -326,7 +329,7 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while the audited public-placement control, typed-service invocation, route,
+while typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

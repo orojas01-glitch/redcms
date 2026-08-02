@@ -3039,6 +3039,27 @@ div#cp_ftp{background-color: #63C}
 	font-size: 10px;
 }
 
+#advanced .red-admin-addon-form > label {
+	display: grid;
+	box-sizing: border-box;
+	gap: 6px;
+	color: #435565;
+	font: 700 11px/1.4 Arial, Helvetica, sans-serif;
+}
+
+#advanced .red-admin-addon-form > label select,
+#advanced .red-admin-addon-form > label input {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 38px;
+	padding: 8px 10px;
+	border: 1px solid #b8c5cf;
+	border-radius: 7px;
+	background: #fff;
+	color: #202d38;
+	font: 400 13px/1.4 Arial, Helvetica, sans-serif;
+}
+
 #advanced .red-admin-addon-form__actions {
 	justify-content: flex-end;
 }

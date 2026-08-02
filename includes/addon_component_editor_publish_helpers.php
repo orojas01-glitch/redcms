@@ -9,6 +9,319 @@
  */
 
 require_once __DIR__ . '/addon_component_editor_parent_helpers.php';
+require_once __DIR__ . '/admin_audit_helpers.php';
+
+if (!function_exists('red_addon_component_editor_publish_control_result')) {
+    function red_addon_component_editor_publish_control_result($reason)
+    {
+        return [
+            'ready' => false,
+            'contentRecordId' => 0,
+            'actorRecordId' => 0,
+            'component' => '',
+            'package' => '',
+            'title' => '',
+            'manifest' => [],
+            'parentStateHash' => '',
+            'packageStateHash' => '',
+            'targets' => [],
+            'positions' => [],
+            'reason' => (string) $reason,
+        ];
+    }
+}
+
+if (!function_exists('red_addon_component_editor_publish_control_context')) {
+    function red_addon_component_editor_publish_control_context(
+        $connection,
+        $contentRecordId,
+        $adminRecordId
+    ) {
+        $result = red_addon_component_editor_publish_control_result(
+            'invalid_request'
+        );
+        $contentRecordId = filter_var(
+            $contentRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $adminRecordId = filter_var(
+            $adminRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        if (!($connection instanceof mysqli)
+            || $contentRecordId === false
+            || $adminRecordId === false
+        ) {
+            return $result;
+        }
+        $result['contentRecordId'] = $contentRecordId;
+        $result['actorRecordId'] = $adminRecordId;
+
+        try {
+            $statement = mysqli_prepare(
+                $connection,
+                'SELECT Component, Title FROM RED_Articles WHERE RecordID=? LIMIT 1'
+            );
+            if (!$statement) {
+                $result['reason'] = 'record_unavailable';
+                return $result;
+            }
+            mysqli_stmt_bind_param($statement, 'i', $contentRecordId);
+            mysqli_stmt_execute($statement);
+            $queryResult = mysqli_stmt_get_result($statement);
+            $row = $queryResult ? mysqli_fetch_assoc($queryResult) : null;
+            if ($queryResult) {
+                mysqli_free_result($queryResult);
+            }
+            mysqli_stmt_close($statement);
+        } catch (Throwable $throwable) {
+            $row = null;
+        }
+        if (!is_array($row)) {
+            $result['reason'] = 'record_unavailable';
+            return $result;
+        }
+        $componentId = is_string($row['Component'] ?? null)
+            ? trim($row['Component'])
+            : '';
+        $binding = red_addon_component_persistence_binding(
+            $connection,
+            $contentRecordId,
+            $componentId
+        );
+        if (!is_array($binding)) {
+            $result['reason'] = 'binding_unavailable';
+            return $result;
+        }
+        $manifest = red_addon_runtime_manifest($binding['package'] ?? '');
+        if (!is_array($manifest)
+            || !is_array(
+                red_addon_component_editor_schema($manifest, $componentId)
+            )
+        ) {
+            $result['reason'] = 'schema_unavailable';
+            return $result;
+        }
+        $result['component'] = $componentId;
+        $result['package'] = (string) $binding['package'];
+        $result['title'] = trim((string) ($row['Title'] ?? ''));
+        $result['manifest'] = $manifest;
+
+        $publish = red_addon_component_editor_permission_decision(
+            $connection,
+            $manifest,
+            $componentId,
+            'publish',
+            $adminRecordId
+        );
+        if (empty($publish['authorized'])) {
+            $result['reason'] = 'publish_permission_denied';
+            return $result;
+        }
+        $parent = red_addon_component_editor_parent_state(
+            $connection,
+            $manifest,
+            $componentId,
+            $contentRecordId,
+            $adminRecordId
+        );
+        if (empty($parent['loaded'])) {
+            $result['reason'] = (string) (
+                $parent['reason'] ?? 'parent_state_unavailable'
+            );
+            return $result;
+        }
+        $positions = red_admin_article_layout_position_options(
+            $connection,
+            (string) ($parent['parentValues']['layout'] ?? ''),
+            false
+        );
+        if ($positions === []) {
+            $result['reason'] = 'positions_unavailable';
+            return $result;
+        }
+        $normalizedPositions = [];
+        foreach ($positions as $positionId => $label) {
+            $positionId = (int) $positionId;
+            if ($positionId < 1 || $positionId > 99 || !is_string($label)) {
+                $result['reason'] = 'positions_unavailable';
+                return $result;
+            }
+            $normalizedPositions[] = [
+                'value' => $positionId,
+                'label' => $label,
+            ];
+        }
+
+        try {
+            $statement = mysqli_prepare(
+                $connection,
+                "SELECT RecordID, Title FROM RED_Articles
+                 WHERE Component='Article' AND Active='Y' AND PagePosition>0
+                   AND BINARY Language=BINARY ? AND RecordID<>?
+                 ORDER BY Title ASC, RecordID ASC LIMIT 201"
+            );
+            if (!$statement) {
+                $result['reason'] = 'targets_unavailable';
+                return $result;
+            }
+            $language = (string) $parent['parentValues']['language'];
+            mysqli_stmt_bind_param(
+                $statement,
+                'si',
+                $language,
+                $contentRecordId
+            );
+            mysqli_stmt_execute($statement);
+            $queryResult = mysqli_stmt_get_result($statement);
+            $targetRows = [];
+            while ($queryResult && ($targetRow = mysqli_fetch_assoc($queryResult))) {
+                $targetRows[] = $targetRow;
+            }
+            if ($queryResult) {
+                mysqli_free_result($queryResult);
+            }
+            mysqli_stmt_close($statement);
+        } catch (Throwable $throwable) {
+            $targetRows = [];
+        }
+        if (count($targetRows) > 200) {
+            $result['reason'] = 'target_limit_exceeded';
+            return $result;
+        }
+        $targets = [];
+        foreach ($targetRows as $targetRow) {
+            $targetId = (int) ($targetRow['RecordID'] ?? 0);
+            $target = red_addon_component_editor_publish_target(
+                $connection,
+                $targetId
+            );
+            if (!is_array($target)) {
+                continue;
+            }
+            $targets[] = [
+                'recordId' => $targetId,
+                'title' => trim((string) ($targetRow['Title'] ?? '')),
+                'alias' => $target['alias'],
+            ];
+        }
+        if ($targets === []) {
+            $result['reason'] = 'targets_unavailable';
+            return $result;
+        }
+
+        $result['ready'] = true;
+        $result['parentStateHash'] = (string) $parent['stateHash'];
+        $result['packageStateHash'] = (string) $parent['packageStateHash'];
+        $result['targets'] = $targets;
+        $result['positions'] = $normalizedPositions;
+        $result['reason'] = 'ready';
+        return $result;
+    }
+}
+
+if (!function_exists('red_addon_component_editor_publish_control_render')) {
+    function red_addon_component_editor_publish_control_render(
+        array $context,
+        $csrfToken
+    ) {
+        if (array_keys($context) !== [
+                'ready', 'contentRecordId', 'actorRecordId', 'component',
+                'package', 'title', 'manifest', 'parentStateHash',
+                'packageStateHash', 'targets', 'positions', 'reason',
+            ]
+            || ($context['ready'] ?? null) !== true
+            || !is_int($context['contentRecordId'])
+            || $context['contentRecordId'] < 1
+            || !is_int($context['actorRecordId'])
+            || $context['actorRecordId'] < 1
+            || !is_string($context['component'])
+            || !red_addon_valid_capability($context['component'])
+            || !is_string($context['package'])
+            || !red_addon_valid_package_id($context['package'])
+            || !is_string($context['title'])
+            || !is_array($context['manifest'])
+            || !is_string($context['reason'])
+            || $context['reason'] !== 'ready'
+            || !red_addon_component_editor_state_hash_valid(
+                $context['parentStateHash'] ?? ''
+            )
+            || !red_addon_component_editor_state_hash_valid(
+                $context['packageStateHash'] ?? ''
+            )
+            || !is_string($csrfToken)
+            || preg_match('/\A[a-f0-9]{64}\z/D', $csrfToken) !== 1
+            || !is_array($context['targets'])
+            || $context['targets'] === []
+            || !is_array($context['positions'])
+            || $context['positions'] === []
+        ) {
+            return '';
+        }
+        $escape = static function ($value) {
+            return htmlspecialchars(
+                (string) $value,
+                ENT_QUOTES | ENT_SUBSTITUTE,
+                'UTF-8'
+            );
+        };
+        $targetOptions = '';
+        foreach ($context['targets'] as $target) {
+            if (!is_array($target)
+                || array_keys($target) !== ['recordId', 'title', 'alias']
+                || !is_int($target['recordId'])
+                || $target['recordId'] < 1
+                || !is_string($target['title'])
+                || !is_string($target['alias'])
+            ) {
+                return '';
+            }
+            $label = $target['title'] !== ''
+                ? $target['title']
+                : '/' . $target['alias'] . '/';
+            $targetOptions .= '<option value="' . (int) $target['recordId']
+                . '">' . $escape($label) . ' — /'
+                . $escape($target['alias']) . '/</option>';
+        }
+        $positionOptions = '';
+        foreach ($context['positions'] as $position) {
+            if (!is_array($position)
+                || array_keys($position) !== ['value', 'label']
+                || !is_int($position['value'])
+                || $position['value'] < 1
+                || $position['value'] > 99
+                || !is_string($position['label'])
+            ) {
+                return '';
+            }
+            $positionOptions .= '<option value="' . (int) $position['value']
+                . '">' . $escape($position['label']) . '</option>';
+        }
+        return '<form class="red-admin-addon-form" data-red-addon-placement-form'
+            . ' method="post" action="/admin/bin/place_addon_component.php">'
+            . '<header class="red-admin-addon-form__header"><div><span>Public placement</span>'
+            . '<h2>Place this component</h2></div></header>'
+            . '<p>Choose one public page and a supported position. This action makes the component public.</p>'
+            . '<label>Page<select name="TargetPageRecordID" required>'
+            . $targetOptions . '</select></label>'
+            . '<label>Position<select name="PagePosition" required>'
+            . $positionOptions . '</select></label>'
+            . '<label>Order<input type="number" name="PagePositionOrder" value="0" min="0" max="2147483647" step="1" required /></label>'
+            . '<input type="hidden" name="ContentRecordID" value="'
+            . (int) $context['contentRecordId'] . '" />'
+            . '<input type="hidden" name="ParentStateHash" value="'
+            . $escape($context['parentStateHash']) . '" />'
+            . '<input type="hidden" name="PackageStateHash" value="'
+            . $escape($context['packageStateHash']) . '" />'
+            . '<input type="hidden" name="csrf_token" value="'
+            . $escape($csrfToken) . '" />'
+            . '<div class="red-admin-addon-form__actions">'
+            . '<span data-red-addon-placement-status role="status" aria-live="polite" hidden></span>'
+            . '<button type="submit">Place component</button></div></form>';
+    }
+}
 
 if (!function_exists('red_addon_component_editor_publish_result')) {
     function red_addon_component_editor_publish_result(
@@ -567,7 +880,11 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
         $result['planHash'] = $expectedPlanHash;
         if (!red_admin_transaction_tables_supported(
             $connection,
-            ['RED_Articles', 'RED_Content_Revisions']
+            [
+                'RED_Articles',
+                'RED_Content_Revisions',
+                'RED_Admin_Activity_Log',
+            ]
         )) {
             $result['reason'] = 'transaction_unsupported';
             return $result;
@@ -764,6 +1081,16 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
                             );
                         if (!is_array($revision)) {
                             $transactionReason = 'revision_failed';
+                            throw new RuntimeException($transactionReason);
+                        }
+                        if (!red_admin_audit_record(
+                            $connection,
+                            'component.public_placed',
+                            'component',
+                            $contentRecordId,
+                            $adminRecordId
+                        )) {
+                            $transactionReason = 'audit_failed';
                             throw new RuntimeException($transactionReason);
                         }
                         $latest = red_admin_content_revision_latest(
