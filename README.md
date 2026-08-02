@@ -124,6 +124,8 @@ not active features.
 - Atomic source-linked component revision restoration with stale-plan rollback
 - Core-owned display-only component revision timeline with no value disclosure
   or restore action
+- Read-only component deletion planning with exact grants, inactive shell,
+  state/revision evidence, and a non-invoked registrar-bound deleter
 - Read-only inactive component-creation planning with exact owner, grant,
   schema, identifier, theme-layout, and transaction-table gates
 - Atomic inactive component creation with creator/loader containment, exact

@@ -413,6 +413,15 @@ request bootstrap excludes the disabled package.
     reordered, malformed, or value-bearing input. Expose no form, button,
     link, hash, package value, restore preflight, restore action, endpoint,
     audit write, public placement, or activation behavior.
+26. Completed read-only component-delete preflight prerequisite: allow at most
+    one optional registrar-bound deleter for a declared editor with one to eight
+    package-owned transaction tables; require exact view/delete grants, enabled
+    ownership, the inactive hidden unrouted parent shell, caller-supplied parent
+    and package state hashes, current core revision evidence, the latest
+    integrity-valid package revision, and InnoDB support; and return a
+    deterministic value-free plan. Invoke no deleter, open no transaction, and
+    keep the atomic runner, endpoint, form, control, audit event, public
+    placement, activation, uninstall, and purge behavior separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

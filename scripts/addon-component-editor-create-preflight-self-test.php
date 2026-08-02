@@ -17,6 +17,8 @@ require_once $projectRoot
     . '/includes/addon_component_editor_create_helpers.php';
 require_once $projectRoot
     . '/includes/addon_component_editor_parent_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_editor_create|rev_base)_[A-Za-z0-9_]+\z/',
@@ -38,9 +40,11 @@ $componentId = 'redcms.editor-create-fixture/item';
 $createPermission = 'fixture.editor-create.create';
 $viewPermission = 'fixture.editor-create.view';
 $editPermission = 'fixture.editor-create.edit';
+$deletePermission = 'fixture.editor-create.delete';
 $packageTable = 'RED_Addon_Component_Editor_Create_Fixture';
 $creatorCalls = 0;
 $loaderCalls = 0;
+$deleterCalls = 0;
 $creatorMode = 'valid';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -212,7 +216,8 @@ function red_addon_editor_create_test_manifest(
     $componentId,
     $createPermission,
     $viewPermission,
-    $editPermission
+    $editPermission,
+    $deletePermission
 ) {
     return [
         '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
@@ -234,6 +239,7 @@ function red_addon_editor_create_test_manifest(
             $createPermission,
             $viewPermission,
             $editPermission,
+            $deletePermission,
         ],
         'componentEditors' => [[
             'component' => $componentId,
@@ -244,7 +250,7 @@ function red_addon_editor_create_test_manifest(
                 'create' => $createPermission,
                 'view' => $viewPermission,
                 'edit' => $editPermission,
-                'delete' => $createPermission,
+                'delete' => $deletePermission,
                 'publish' => $createPermission,
                 'restore' => $createPermission,
             ],
@@ -287,8 +293,10 @@ function red_addon_editor_create_test_context(
     $packageTable,
     &$creatorCalls,
     &$loaderCalls,
+    &$deleterCalls,
     &$creatorMode,
-    $withCreator = true
+    $withCreator = true,
+    $withDeleter = true
 ) {
     $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
     $registry->registerComponent(
@@ -383,6 +391,16 @@ function red_addon_editor_create_test_context(
             [$packageTable]
         );
     }
+    if ($withDeleter) {
+        $registry->registerComponentDataDeleter(
+            $componentId,
+            static function () use (&$deleterCalls): bool {
+                $deleterCalls++;
+                return true;
+            },
+            [$packageTable]
+        );
+    }
     $registry->assertComplete();
     return new RED_Addon_Runtime_Context(
         [$packageId],
@@ -403,7 +421,8 @@ try {
         $componentId,
         $createPermission,
         $viewPermission,
-        $editPermission
+        $editPermission,
+        $deletePermission
     );
 
     $undeclared = $manifest;
@@ -466,6 +485,64 @@ try {
         );
     }
 
+    $registry = new RED_Addon_Runtime_Registry($packageId, $undeclared);
+    try {
+        $registry->registerComponentDataDeleter(
+            $componentId,
+            static function (): bool {
+                return true;
+            },
+            [$packageTable]
+        );
+        red_addon_editor_create_test_assert(false, 'undeclared deleter must fail');
+    } catch (LogicException $exception) {
+        red_addon_editor_create_test_assert(
+            str_contains($exception->getMessage(), 'undeclared'),
+            'only a declared component editor may bind a deleter'
+        );
+    }
+
+    $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
+    try {
+        $registry->registerComponentDataDeleter(
+            $componentId,
+            static function (): bool {
+                return true;
+            },
+            ['RED_Addon_Component_Revisions']
+        );
+        red_addon_editor_create_test_assert(false, 'core deleter table must fail');
+    } catch (LogicException $exception) {
+        red_addon_editor_create_test_assert(
+            str_contains($exception->getMessage(), 'table'),
+            'deleter metadata accepts only package tables'
+        );
+    }
+
+    $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
+    $registry->registerComponentDataDeleter(
+        $componentId,
+        static function (): bool {
+            return true;
+        },
+        [$packageTable]
+    );
+    try {
+        $registry->registerComponentDataDeleter(
+            $componentId,
+            static function (): bool {
+                return true;
+            },
+            [$packageTable]
+        );
+        red_addon_editor_create_test_assert(false, 'duplicate deleter must fail');
+    } catch (LogicException $exception) {
+        red_addon_editor_create_test_assert(
+            str_contains($exception->getMessage(), 'duplicated'),
+            'one editor may bind at most one deleter'
+        );
+    }
+
     mysqli_query(
         $connection,
         'CREATE TABLE `' . $packageTable . '` ('
@@ -503,6 +580,11 @@ try {
         $adminRecordId,
         $editPermission
     );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $deletePermission
+    );
     $manifestHash = hash('sha256', json_encode($manifest));
     $inventoryHash = hash('sha256', 'create-preflight-fixture');
     $version = $manifest['version'];
@@ -536,6 +618,7 @@ try {
         $packageTable,
         $creatorCalls,
         $loaderCalls,
+        $deleterCalls,
         $creatorMode
     );
     red_addon_runtime_set_request_context($context);
@@ -748,8 +831,10 @@ try {
         $packageTable,
         $creatorCalls,
         $loaderCalls,
+        $deleterCalls,
         $creatorMode,
-        false
+        false,
+        true
     );
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
     red_addon_runtime_set_request_context($withoutCreator);
@@ -1012,6 +1097,157 @@ try {
             && $parentState['packageStateHash'] === $created['stateHash'],
         'read-only parent state requires the exact view grant, shell, package row, and current revision'
     );
+
+    $deleteFingerprint = red_addon_editor_create_test_record_fingerprint(
+        $connection,
+        $contentRecordId,
+        $packageTable
+    );
+    $deletePlan = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $parentState['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($deletePlan['ready'])
+            && $deletePlan['reason'] === 'ready'
+            && $deletePlan['viewPermission'] === $viewPermission
+            && $deletePlan['deletePermission'] === $deletePermission
+            && $deletePlan['parentStateHash'] === $parentState['stateHash']
+            && $deletePlan['packageStateHash'] ===
+                $parentState['packageStateHash']
+            && $deletePlan['packageRevisionId'] ===
+                $created['packageRevisionId']
+            && $deletePlan['transactionTables'] === [$packageTable]
+            && preg_match(
+                '/\A[a-f0-9]{64}\z/',
+                $deletePlan['planHash']
+            ) === 1
+            && $deleterCalls === 0
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === $deleteFingerprint,
+        'delete preflight binds exact permission, shell, state, revision, and tables without executing or writing'
+    );
+    $repeatDeletePlan = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $parentState['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($repeatDeletePlan['ready'])
+            && $repeatDeletePlan['planHash'] === $deletePlan['planHash']
+            && $deleterCalls === 0
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === $deleteFingerprint,
+        'identical delete evidence produces a deterministic read-only plan'
+    );
+
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID='
+            . $adminRecordId . " AND Capability='"
+            . mysqli_real_escape_string($connection, $deletePermission) . "'"
+    );
+    $loaderCallsBeforeDeleteRefusal = $loaderCalls;
+    $refused = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $parentState['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready'])
+            && $refused['reason'] === 'permission_denied'
+            && $loaderCalls === $loaderCallsBeforeDeleteRefusal
+            && $deleterCalls === 0,
+        'fresh delete permission is required before package loading or deletion'
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $deletePermission
+    );
+
+    $refusedParent = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        hash('sha256', 'stale-parent'),
+        $parentState['packageStateHash']
+    );
+    $refusedPackage = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        hash('sha256', 'stale-package')
+    );
+    red_addon_editor_create_test_assert(
+        empty($refusedParent['ready'])
+            && $refusedParent['reason'] === 'stale_parent_state'
+            && empty($refusedPackage['ready'])
+            && $refusedPackage['reason'] === 'stale_package_state'
+            && $deleterCalls === 0
+            && red_addon_editor_create_test_record_fingerprint(
+                $connection,
+                $contentRecordId,
+                $packageTable
+            ) === $deleteFingerprint,
+        'stale core or package state refuses delete planning without mutation'
+    );
+
+    $withoutDeleter = red_addon_editor_create_test_context(
+        $manifest,
+        $packageId,
+        $componentId,
+        $packageTable,
+        $creatorCalls,
+        $loaderCalls,
+        $deleterCalls,
+        $creatorMode,
+        true,
+        false
+    );
+    unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+    red_addon_runtime_set_request_context($withoutDeleter);
+    $refused = red_addon_component_editor_delete_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $parentState['packageStateHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['ready'])
+            && $refused['reason'] === 'deleter_unavailable'
+            && $deleterCalls === 0,
+        'an exact registrar-bound package deleter is mandatory but not invoked'
+    );
+    unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+    red_addon_runtime_set_request_context($context);
 
     mysqli_query(
         $connection,
@@ -1278,7 +1514,7 @@ try {
         'the committed numeric id cannot be reused and remains unchanged'
     );
     red_addon_editor_create_test_assert(
-        $creatorCalls === 8 && $loaderCalls === 14,
+        $creatorCalls === 8 && $loaderCalls === 18 && $deleterCalls === 0,
         'only authorized state and runner paths invoke package callbacks'
     );
 
@@ -1318,7 +1554,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on component creation/parent-metadata self-test passed ('
+    'Add-on component creation/parent-metadata/delete-plan self-test passed ('
         . $assertions . " assertions).\n"
 );
 

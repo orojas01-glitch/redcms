@@ -13,7 +13,8 @@ flowchart TD
     F3 --> F4["Atomic update, immutable revisions, restore"]
     F4 --> F5["Inactive creation and parent metadata"]
     F5 --> F6["Display-only revision-history UI"]
-    F6 --> C["CURRENT / NEXT<br/>Delete contract"]
+    F6 --> F7["Read-only delete preflight"]
+    F7 --> C["CURRENT / NEXT<br/>Atomic delete runner"]
     C --> G2["Operational editor endpoint and form"]
     G2 --> G3["Public placement and activation"]
     G3 --> G4["Typed services, routes, and admin tools"]
@@ -28,7 +29,7 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6 complete;
+    class F1,F2,F3,F4,F5,F6,F7 complete;
     class C current;
     class G2,G3,G4,G5,E,A,D,R remaining;
     class S target;
@@ -37,8 +38,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Display-only, core-owned component revision timeline with no value disclosure or restore action. |
-| Current milestone | Define safe, non-destructive component deletion behavior. |
+| Latest completed slice | Read-only delete planning with exact permission, state, revision, inactive-shell, and package-deleter evidence. |
+| Current milestone | Define the atomic delete runner while preserving both core and package revision history. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

@@ -237,6 +237,13 @@ newest-first result plus the current state hash. It escapes bounded metadata,
 marks non-current entries as requiring a fresh restore check, and fails closed
 on stale, reordered, malformed, or value-bearing input. It renders no form,
 link, button, package markup, hash, value, or restore action.
+The first delete-contract prerequisite is now also implemented as read-only
+planning. One optional registrar-bound deleter declares only package-owned
+transaction tables. Core requires fresh view/delete grants, the inactive hidden
+unrouted shell, exact parent and package state hashes, the latest validated
+package revision, enabled runtime ownership, and InnoDB support before returning
+a deterministic plan. It never invokes the deleter or opens a transaction,
+endpoint, form, delete action, audit event, public placement, or activation path.
 The separate activation-blocked restore runner rechecks that plan under the
 locked enabled parent, uses only the registered writer and target snapshot,
 requires the exact reloaded target state, and commits a source-linked restore
@@ -286,7 +293,7 @@ declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer is implemented,
-while delete behavior, typed-service invocation, route,
+while atomic delete execution, typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
