@@ -479,13 +479,22 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-revision restore actions, typed service invocation,
-routes, administrator tools, settings, assets, and live-data compatibility
+revision restore actions, routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The activation-blocked parent
 metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
+
+Internal typed service invocation is implemented without an HTTP or
+administrator endpoint. Core requires exact request-local runtime ownership and
+manifest declaration, passes a final request object containing only a bounded
+operation identifier and JSON-compatible input, and accepts only a final result
+object. Floating-point values, objects, resources, unsafe keys/control bytes,
+excess depth/nodes/string size, and oversized encoded payloads fail before the
+handler. Output, exceptions, output-buffer changes, and malformed results are
+contained. No database connection, session, actor authority, route request, or
+automatic service call is supplied by this boundary.
 
 ## Multi-User Authorization
 

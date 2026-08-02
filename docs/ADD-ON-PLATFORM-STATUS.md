@@ -19,8 +19,10 @@ flowchart TD
     F9 --> F10["Read-only public-placement preflight"]
     F10 --> F11["Atomic public placement and activation"]
     F11 --> F12["Audited administrator placement control"]
-    F12 --> C["CURRENT / NEXT<br/>Typed services, routes, and admin tools"]
-    C --> G5["Settings, assets, and live-data gates"]
+    F12 --> F13["Typed internal service invocation"]
+    F13 --> C["CURRENT / NEXT<br/>Public route dispatch"]
+    C --> G4["Administrator-tool dispatch"]
+    G4 --> G5["Settings, assets, and live-data gates"]
     G5 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
@@ -31,17 +33,17 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12 complete;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13 complete;
     class C current;
-    class G5,E,A,D,R remaining;
+    class G4,G5,E,A,D,R remaining;
     class S target;
 ```
 
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-owned POST/CSRF placement control with server-derived ownership, exact preflight/runner handoff, one atomic `move` revision plus bounded administrator audit fact, and rollback on either ledger failure. |
-| Current milestone | Define typed service, route, and administrator-tool registration contracts without enabling richer packages yet. |
+| Latest completed slice | Internal typed service invocation with exact enabled runtime ownership, final request/result objects, bounded JSON-compatible values, and containment of package failures or malformed behavior. |
+| Current milestone | Define public route dispatch without exposing administrator tools or weakening richer-package enablement blockers. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
