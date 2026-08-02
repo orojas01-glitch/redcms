@@ -87,6 +87,15 @@ class content
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public $OrderQuery='';
 
+	private function renderAddonControlPanelComponent(array $componentContext)
+	{
+		$recordId=(int)($componentContext['inputs']['recordId'] ?? 0);
+		if ($recordId < 1) {
+			return;
+		}
+		echo '<button type="button" class="cp red-admin-component-action red-admin-component-action--addon" data-red-addon-component-edit data-content-record-id="'.$recordId.'">Edit component</button>';
+	}
+
 	private function renderStructuredControlPanelComponent(array $componentContext)
 	{
 		switch ($componentContext['component'])
@@ -117,6 +126,10 @@ class content
 				$this->recordid=$componentInputs['recordId'];
 				$comp = new gallery();
 				$comp->cp_album($componentInputs['position'], $this->recordid, $componentInputs['layout'], $componentInputs['varFeatures'], $componentInputs['varPosition'], $componentInputs['table']);
+				break;
+
+			default:
+				$this->renderAddonControlPanelComponent($componentContext);
 				break;
 		}
 	}
@@ -294,6 +307,10 @@ class content
 				$comp = new gallery();
 				$comp->cp_album($componentInputs['position'], $this->recordid, $componentInputs['layout'], $componentInputs['varFeatures'], $componentInputs['varPosition'], $componentInputs['table']);
 				////////////////////////////////////////////////////
+				break;
+
+				default:
+				$this->renderAddonControlPanelComponent($componentContext);
 				break;
 				
 				

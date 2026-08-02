@@ -2993,6 +2993,80 @@ div#cp_ftp{background-color: #63C}
 	color: #202d38;
 }
 
+#advanced .red-admin-addon-workspace,
+#advanced .red-admin-addon-form {
+	display: grid;
+	box-sizing: border-box;
+	gap: 16px;
+	min-width: 0;
+}
+
+#advanced .red-admin-addon-form__return {
+	margin-bottom: 14px;
+}
+
+#advanced .red-admin-addon-form__header,
+#advanced .red-admin-addon-form__actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+#advanced .red-admin-addon-form__header span,
+#advanced .red-admin-addon-form__header h2 {
+	margin: 0;
+}
+
+#advanced .red-admin-addon-form__header span {
+	color: #647482;
+	font: 700 10px/1.3 Arial, Helvetica, sans-serif;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+}
+
+#advanced .red-admin-addon-form__header h2 {
+	margin-top: 3px;
+	color: #202d38;
+	font: 700 19px/1.3 Arial, Helvetica, sans-serif;
+}
+
+#advanced .red-admin-addon-form__header code {
+	padding: 5px 8px;
+	border-radius: 6px;
+	background: #edf2f6;
+	color: #425463;
+	font-size: 10px;
+}
+
+#advanced .red-admin-addon-form__actions {
+	justify-content: flex-end;
+}
+
+#advanced .red-admin-addon-form__actions [role="status"] {
+	margin-right: auto;
+	color: #435565;
+	font: 700 11px/1.4 Arial, Helvetica, sans-serif;
+}
+
+#advanced .red-admin-addon-form__actions button,
+#advanced .red-admin-component-action--addon {
+	min-height: 36px;
+	padding: 8px 14px;
+	border: 0;
+	border-radius: 7px;
+	background: #3972cf;
+	color: #fff;
+	font: 700 11px/1.2 Arial, Helvetica, sans-serif;
+	cursor: pointer;
+}
+
+#advanced .red-admin-addon-form__actions button:disabled,
+#advanced .red-admin-component-action--addon:disabled {
+	cursor: wait;
+	opacity: .6;
+}
+
 #advanced .red-admin-addon-history__header {
 	display: flex;
 	align-items: flex-start;

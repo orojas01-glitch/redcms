@@ -2,6 +2,8 @@
 require_once __DIR__.'/video_url_helpers.php';
 require_once __DIR__ . '/addon_component_render_helpers.php';
 require_once __DIR__ . '/addon_component_persistence_helpers.php';
+require_once __DIR__ . '/addon_component_editor_authorization_helpers.php';
+require_once __DIR__ . '/admin_authorization_helpers.php';
 /**
  * Prepared inputs and fixed core dispatch for the legacy public components.
  *
@@ -176,6 +178,53 @@ if (!function_exists('red_legacy_control_panel_component_context')) {
     ) {
         if (!function_exists('red_admin_article_access_allowed')) {
             throw new RuntimeException('The legacy control-panel authorization helper is unavailable.');
+        }
+
+        $component = is_string($row['Component'] ?? null)
+            ? (string) $row['Component']
+            : '';
+        $legacyInventory = red_legacy_control_panel_component_input_inventory();
+        if (!isset($legacyInventory[$component])) {
+            $recordId = (int) ($row['RecordID'] ?? 0);
+            $binding = red_addon_component_persistence_binding(
+                $connection,
+                $recordId,
+                $component
+            );
+            $manifest = is_array($binding)
+                ? red_addon_runtime_manifest($binding['package'] ?? '')
+                : null;
+            $authorized = is_array($manifest);
+            foreach (['view', 'edit'] as $operation) {
+                $decision = $authorized
+                    ? red_addon_component_editor_permission_decision(
+                        $connection,
+                        $manifest,
+                        $component,
+                        $operation,
+                        (int) ($_SESSION['AdminRecordID'] ?? 0)
+                    )
+                    : ['authorized' => false];
+                if (empty($decision['authorized'])) {
+                    $authorized = false;
+                    break;
+                }
+            }
+            $context = red_legacy_control_panel_component_context_from_data(
+                $row,
+                $varFeatures,
+                $varPosition,
+                $position,
+                $layout,
+                $table,
+                $authorized,
+                $orderIndex
+            );
+            if ($context['authorized']) {
+                $context['supported'] = true;
+                $context['inputs'] = ['recordId' => $recordId];
+            }
+            return $context;
         }
 
         $authorized = red_admin_article_access_allowed(

@@ -40,13 +40,17 @@ package access. The decision grants nothing and writes nothing. Packages remain
 blocked from enablement. An enabled disposable fixture can now register one
 exact package data loader per declared editor; core requires the view grant,
 the persisted parent/runtime owner match, contained execution, and schema-valid
-returned values before exposing a state hash. No operational form or component
-create/delete endpoint exists. A separate activation-blocked
+returned values before exposing a state hash. Core now exposes a CSRF-protected
+existing-record editor for an already-enabled, already-persisted component;
+the endpoint derives package and component ownership from current server-side
+state and requires fresh exact view/edit grants. No component create/delete
+endpoint exists. A separate activation-blocked
 helper can now apply an existing package record update only after the exact
 view and edit grants, current state hash, locked placement parent, enabled
 runtime ownership, declared InnoDB tables, contained writer execution, and
-reloaded postcondition all pass. It opens no endpoint or form and does not
-create parent records, restore, delete, or activate a package. Successful
+reloaded postcondition all pass. The same writer now backs that operational
+form, but does not create parent records, restore, delete, publicly place
+content, or activate a package. Successful
 changes now atomically retain core-owned baseline and saved snapshots in the
 current client database. A separate read-only helper can list a bounded,
 integrity-validated timeline and produce a deterministic restore plan only
@@ -82,9 +86,9 @@ now revalidates the value-free plan under shared lifecycle/theme and exact
 binding locks, records core and package `delete` snapshots, invokes only the
 registered deleter, and removes the package row, SEO row, and inactive parent
 together. Partial deletion, callback failure, stale evidence, or either ledger
-failure rolls back; both immutable ledgers remain after success. The
-operational form, public placement, delete endpoint/control, audit workflow,
-uninstall/purge, and activation eligibility remain absent.
+failure rolls back; both immutable ledgers remain after success. Public
+placement, create/delete controls and endpoints, restore action, audit
+workflow, uninstall/purge, and activation eligibility remain absent.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -125,6 +129,8 @@ not active features.
 - Fresh exact component-editor package-permission decisions with no implicit Owner access
 - Bounded enabled-package component data loading with validated values and a core-owned state hash
 - Transactional existing-record package updates with stale-state refusal and rollback proof
+- CSRF-protected existing-record component editor with server-derived package
+  ownership and exact view/edit permission checks
 - Immutable per-client package-value revision snapshots committed with updates
 - Read-only validated revision history and deterministic restore preflight
 - Atomic source-linked component revision restoration with stale-plan rollback

@@ -77,6 +77,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/admin/class/class_add_tools.php';
 	<script type="text/javascript" src="/admin/assets/js/feature-slider-editor.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/feature-slider-editor.js')); ?>"></script>
 	<script type="text/javascript" src="/admin/assets/js/main-menu-editor.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/main-menu-editor.js')); ?>"></script>
 	<script type="text/javascript" src="/admin/assets/js/content-revisions.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/content-revisions.js')); ?>"></script>
+	<script type="text/javascript" src="/admin/assets/js/addon-component-editor.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/addon-component-editor.js')); ?>"></script>
 	<script type="text/javascript" src="/admin/assets/js/layout-distribution.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/layout-distribution.js')); ?>"></script>
 	<script type="text/javascript" src="/admin/assets/js/layout-builder.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/layout-builder.js')); ?>"></script>
 <!-- /TinyMCE -->
