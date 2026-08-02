@@ -455,8 +455,24 @@ exceptions, buffer changes, false returns, partial writes, postcondition
 mismatch, and either ledger failure fail closed. The runner remains
 activation-blocked and exposes no form, route, audit event, parent-metadata
 editor, public placement, delete, or activation eligibility.
+`red_addon_component_editor_parent_state()` and
+`red_addon_component_editor_parent_update()` implement the separate
+activation-blocked parent-metadata prerequisite. Read-only state requires the
+exact view grant, enabled manifest/runtime/persisted binding, a closed inactive
+hidden unrouted shell, a schema-valid package loader result, and a current core
+revision whose hash matches the parent snapshot. The writer first requires the
+exact edit grant and caller state hash without invoking package code, then
+serializes lifecycle and theme changes, locks the enabled installation and
+parent, and rechecks every condition. It may update only `Title`, `Layout`, and
+`Language`; the entire remaining parent shell and package state must match the
+pre-write values. One explicit-actor core `save` revision commits with a
+change, while an identical submission adds no revision. Unsupported parent
+state, stale hashes, revoked grants, caller-owned transactions, postcondition
+failure, lost transactions, and revision failure roll back. These helpers
+expose no form, route, public placement, activation, delete, audit event, or
+package-value write.
 Enablement preflight reports `component_editor_contract_required` until the
-separate parent-metadata, history UI, delete, audit, and
+separate history UI, delete, audit, and
 operational endpoint contracts are implemented and accepted.
 
 ## Core Registry And Execution
@@ -664,8 +680,11 @@ snapshots committed in the same transaction. An exact validated revision may
 also be restored atomically through the same writer boundary with a
 source-linked restore snapshot. This foundation can now atomically execute the
 exact read-only creation plan for an inactive hidden parent and package row,
-including both initial revisions. It does not open an operational form or
-endpoint, edit parent metadata, choose public placement, provide a
+including both initial revisions. The separate core-owned parent boundary can
+now read and atomically update only title, active-theme layout, and language
+while the record remains an inactive hidden unrouted shell, with exact grants,
+stale-state refusal, package-state preservation, and one core revision. It does
+not open an operational form or endpoint, choose public placement, provide a
 history UI, export/import, delete, or add an audit workflow. Those editor and
 lifecycle contracts remain separate reviewed batches.
 
@@ -797,8 +816,9 @@ Upgrades and uninstall remain later explicit transitions.
   become unsafe without an approved fallback. The first implementation
   enforces enabled-dependent refusal; persisted add-on assignments remain
   outside the supported minimal profile because declarative editor metadata
-  does not yet provide component creation, parent-metadata writes, revision
-  history UI, delete, or an operational endpoint.
+  does not yet provide revision history UI, delete, public placement, or an
+  operational endpoint, even though inactive creation and parent-metadata
+  prerequisites are implemented.
 - **Upgrade:** back up, validate compatibility, test migrations against a
   disposable copy, apply immutable migrations, and verify postconditions.
 - **Uninstall:** disable first. Retain data by default.
@@ -1015,8 +1035,9 @@ responses, or structured data.
    transactional existing-record package updates, and immutable package-value
    revision snapshots, validated history/preflight, and atomic restore
    execution are also implemented. Read-only inactive component-creation
-   preflight and its atomic runner are implemented; parent-metadata writes,
-   history UI, audit workflow, and delete behavior remain blocked.
+   preflight and its atomic runner plus permission-enforced inactive
+   parent-metadata writes are implemented; history UI, audit workflow, public
+   placement/activation, and delete behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

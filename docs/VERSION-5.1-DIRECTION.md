@@ -34,9 +34,9 @@ core-owned state hash. The activation-blocked existing-record update helper
 now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
-permission grant/revoke workflow, operational editor endpoint, component
-creation, parent-metadata write, history UI, delete, service, route, tool,
-settings, or asset contract is operational. Successful updates
+permission grant/revoke workflow, operational editor endpoint, history UI,
+delete, service, route, tool, settings, or asset contract is operational.
+Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
 revalidates the exact restore plan under the locked enabled parent, uses the
@@ -51,8 +51,16 @@ creator and without reserving or writing anything. Its separate
 activation-blocked atomic runner now revalidates that plan under lifecycle and
 theme serialization, creates the parent and package row, verifies the exact
 loader postcondition, and commits initial core/package revisions together.
-Parent-metadata editing, public placement, operational endpoints, delete,
-audit, and activation eligibility remain absent.
+Public placement, operational endpoints, delete, audit, and activation
+eligibility remain absent. The activation-blocked parent
+metadata prerequisite now provides a read-only state gate and atomic writer.
+It requires exact view/edit grants, enabled ownership, a closed inactive shell,
+current package-loader and core-revision evidence, an exact state hash, and
+lifecycle/theme/installation/parent serialization. Only title, active-theme
+layout, and language may change; the full shell and package state must remain
+exact, and one core `save` revision commits with the update. Unchanged values
+add no revision. No form, endpoint, public placement, activation, delete,
+audit event, or package-value mutation is exposed.
 
 ## Product Goal
 
@@ -386,6 +394,17 @@ request bootstrap excludes the disabled package.
     mismatch, and either ledger failure. Keep forms/endpoints, parent-metadata
     editing, public placement, delete, audit workflow, and activation
     eligibility separate.
+24. Completed permission-enforced parent-metadata prerequisite: expose one
+    read-only state only after the exact view grant, enabled manifest/runtime
+    binding, inactive hidden unrouted shell, valid package-loader result, and
+    current core revision all agree. Require the exact edit grant and caller
+    state hash before an atomic write; serialize lifecycle and theme changes,
+    lock the installation and parent, recheck every condition, change only
+    title, active-theme layout, and language, preserve the full shell and
+    package state, and commit one core `save` revision. Add no revision for an
+    unchanged submission and roll back stale, revoked, unsupported-state,
+    postcondition, or revision failure. Keep UI/endpoints, public placement,
+    activation, delete, audit workflow, and package-value writes separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

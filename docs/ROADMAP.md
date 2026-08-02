@@ -165,8 +165,9 @@ deterministic plan without invoking package code or writing state. Its
 activation-blocked atomic runner is now also implemented: it revalidates the
 plan under lifecycle/theme serialization, creates the parent and package row,
 reloads the exact postcondition, and commits initial core/package revisions in
-one transaction. Parent-metadata editing, public placement, history UI, and
-delete behavior remain later isolated batches.
+one transaction. Permission-enforced inactive parent metadata is now the next
+completed boundary below; public placement, history UI, and delete behavior
+remain later isolated batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -258,6 +259,19 @@ postcondition mismatches, and either revision-ledger failure roll back. It
 opens no form or endpoint and does not edit parent metadata, choose public
 placement, activate content, delete, or write an audit event.
 
+The permission-enforced parent-metadata prerequisite is now implemented as a
+separate activation-blocked boundary. Read-only state requires the exact view
+grant, enabled manifest/runtime/binding, the closed inactive hidden unrouted
+shell, a valid package loader result, and current core revision evidence. The
+atomic writer additionally requires the exact edit grant and caller state
+hash, serializes with lifecycle and theme changes, locks the enabled
+installation and parent, and rechecks every condition. It changes only title,
+active-theme layout, and language, requires the exact full parent and unchanged
+package postconditions, and commits one core `save` revision. Invalid,
+revoked, stale, public/placed, caller-owned-transaction, postcondition, and
+revision failures leave the parent and package unchanged. No UI, endpoint,
+public placement, activation, delete, audit, or package-value write is added.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains
@@ -265,8 +279,8 @@ blocked. The generic numeric parent relationship, public binding resolver, and
 declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
-implemented, while parent-metadata editing, restore history UI, delete behavior, typed-service
-invocation, route,
+implemented, and the activation-blocked parent-metadata writer is implemented,
+while restore history UI, delete behavior, typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

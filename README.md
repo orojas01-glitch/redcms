@@ -65,9 +65,15 @@ lifecycle and theme locks, inserts the parent, invokes only the registered
 creator, reloads through the registered loader, requires the exact normalized
 postcondition, and commits initial core `create` plus package `baseline`
 revisions together. Callback failures, partial writes, stale evidence, and
-either ledger failure roll back. The operational form, parent-metadata editing,
-public placement, delete path, audit workflow, and activation eligibility
-remain absent.
+either ledger failure roll back. A separate read-only parent-state helper now
+requires the exact view grant, enabled runtime binding, inactive shell,
+package loader result, and current core revision. Its activation-blocked
+atomic writer requires the exact edit grant and state hash, then changes only
+the core-owned title, active-theme layout, and language under lifecycle/theme
+serialization. It preserves hidden, inactive, unrouted placement, records one
+core `save` revision, adds no revision for unchanged values, and rolls back a
+revision or postcondition failure. The operational form, public placement,
+delete path, audit workflow, and activation eligibility remain absent.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,
@@ -115,6 +121,8 @@ not active features.
   schema, identifier, theme-layout, and transaction-table gates
 - Atomic inactive component creation with creator/loader containment, exact
   postcondition verification, dual initial revisions, and rollback proof
+- Permission-enforced inactive parent metadata updates with stale-state
+  refusal, exact shell preservation, core revisions, and rollback proof
 
 ## Portable Starter Distribution
 
