@@ -15,6 +15,7 @@ if (!function_exists('red_admin_audit_event_allowed')) {
             'administrator.updated',
             'administrator.deleted',
             'administrator.owner_bootstrapped',
+            'component.public_placed',
         ], true);
     }
 }
@@ -22,7 +23,18 @@ if (!function_exists('red_admin_audit_event_allowed')) {
 if (!function_exists('red_admin_audit_target_allowed')) {
     function red_admin_audit_target_allowed($targetType)
     {
-        return $targetType === 'administrator';
+        return in_array($targetType, ['administrator', 'component'], true);
+    }
+}
+
+if (!function_exists('red_admin_audit_event_target_allowed')) {
+    function red_admin_audit_event_target_allowed($eventName, $targetType)
+    {
+        if ($eventName === 'component.public_placed') {
+            return $targetType === 'component';
+        }
+        return str_starts_with($eventName, 'administrator.')
+            && $targetType === 'administrator';
     }
 }
 
@@ -66,6 +78,7 @@ if (!function_exists('red_admin_audit_record')) {
             || $targetRecordId <= 0
             || !red_admin_audit_event_allowed($eventName)
             || !red_admin_audit_target_allowed($targetType)
+            || !red_admin_audit_event_target_allowed($eventName, $targetType)
         ) {
             return false;
         }

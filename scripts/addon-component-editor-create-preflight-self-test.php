@@ -125,6 +125,10 @@ function red_addon_editor_create_test_cleanup(
                     'redcms_component_publish_revision_fail',
                 ],
                 [
+                    'RED_Admin_Activity_Log',
+                    'redcms_component_publish_audit_fail',
+                ],
+                [
                     'RED_Addon_Component_Revisions',
                     'redcms_component_delete_package_revision_fail',
                 ],
@@ -170,6 +174,12 @@ function red_addon_editor_create_test_cleanup(
             $connection,
             'DELETE FROM RED_Content_Revisions WHERE ContentRecordID='
                 . (int) $targetPageRecordId
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Admin_Activity_Log
+             WHERE TargetType='component' AND TargetRecordID="
+                . (int) $contentRecordId
         );
         mysqli_query(
             $connection,
@@ -1751,6 +1761,64 @@ try {
             ) === $publishFingerprint,
         'identical publish evidence is deterministic and writes no core or package state'
     );
+    $controlContext = red_addon_component_editor_publish_control_context(
+        $connection,
+        $contentRecordId,
+        $adminRecordId
+    );
+    $controlHtml = red_addon_component_editor_publish_control_render(
+        $controlContext,
+        str_repeat('b', 64)
+    );
+    red_addon_editor_create_test_assert(
+        !empty($controlContext['ready'])
+            && $controlContext['component'] === $componentId
+            && $controlContext['package'] === $packageId
+            && $controlContext['parentStateHash'] === $updated['stateHash']
+            && $controlContext['packageStateHash']
+                === $updated['packageStateHash']
+            && $controlContext['targets'] === [[
+                'recordId' => $targetPageRecordId,
+                'title' => 'Disposable placement target',
+                'alias' => 'addon-placement-target',
+            ]]
+            && $controlContext['positions'] !== []
+            && str_contains($controlHtml, 'data-red-addon-placement-form')
+            && str_contains(
+                $controlHtml,
+                'action="/admin/bin/place_addon_component.php"'
+            )
+            && str_contains(
+                $controlHtml,
+                'name="ContentRecordID" value="' . $contentRecordId . '"'
+            )
+            && str_contains(
+                $controlHtml,
+                'name="TargetPageRecordID"'
+            )
+            && str_contains($controlHtml, 'name="PagePosition"')
+            && str_contains($controlHtml, 'name="PagePositionOrder"')
+            && str_contains($controlHtml, 'name="ParentStateHash"')
+            && str_contains($controlHtml, 'name="PackageStateHash"')
+            && str_contains(
+                $controlHtml,
+                'name="csrf_token" value="' . str_repeat('b', 64) . '"'
+            )
+            && !str_contains($controlHtml, 'name="package"')
+            && !str_contains($controlHtml, 'name="component"')
+            && !str_contains($controlHtml, 'name="planHash"')
+            && red_addon_component_editor_publish_control_render(
+                array_replace($controlContext, [
+                    'targets' => [[
+                        'recordId' => (string) $targetPageRecordId,
+                        'title' => 'Forged target',
+                        'alias' => 'forged-target',
+                    ]],
+                ]),
+                str_repeat('b', 64)
+            ) === '',
+        'the core placement form exposes only numeric choices, stale-state evidence, and CSRF while deriving ownership server-side'
+    );
 
     $refused = red_addon_component_editor_publish_preflight(
         $connection,
@@ -1975,7 +2043,10 @@ try {
             (SELECT CONCAT_WS('|', Title, Quantity) FROM `$packageTable`
              WHERE ContentRecordID=$contentRecordId),
             (SELECT COUNT(*) FROM RED_Content_Revisions
-             WHERE ContentRecordID=$contentRecordId))"
+             WHERE ContentRecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+             WHERE TargetType='component'
+               AND TargetRecordID=$contentRecordId))"
     );
     mysqli_query(
         $connection,
@@ -2017,9 +2088,59 @@ try {
                     (SELECT CONCAT_WS('|', Title, Quantity) FROM `$packageTable`
                      WHERE ContentRecordID=$contentRecordId),
                     (SELECT COUNT(*) FROM RED_Content_Revisions
-                     WHERE ContentRecordID=$contentRecordId))"
+                     WHERE ContentRecordID=$contentRecordId),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE TargetType='component'
+                       AND TargetRecordID=$contentRecordId))"
             ) === $placementFingerprint,
         'a forced placement revision failure rolls back source, target, and package state'
+    );
+
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Admin_Activity_Log ADD CONSTRAINT '
+            . '`redcms_component_publish_audit_fail` CHECK '
+            . "(`EventName` <> 'component.public_placed')"
+    );
+    $refused = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Admin_Activity_Log DROP CHECK '
+            . '`redcms_component_publish_audit_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['placed'])
+            && $refused['reason'] === 'audit_failed'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                        SubCategories, Article, PagePosition, PagePositionOrder)
+                     FROM RED_Articles WHERE RecordID=$contentRecordId),
+                    (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                        SubCategories, Layout, Language, PagePosition)
+                     FROM RED_Articles WHERE RecordID=$targetPageRecordId),
+                    (SELECT CONCAT_WS('|', Title, Quantity) FROM `$packageTable`
+                     WHERE ContentRecordID=$contentRecordId),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$contentRecordId),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE TargetType='component'
+                       AND TargetRecordID=$contentRecordId))"
+            ) === $placementFingerprint,
+        'a forced placement audit failure rolls back parent, revision, package, and destination state'
     );
 
     $placed = red_addon_component_editor_publish_values(
@@ -2047,8 +2168,17 @@ try {
             && $placed['targetStateHash'] === $publishPlan['targetStateHash']
             && $placed['placementValues'] === $publishPlan['placementValues']
             && $placed['revisionId'] > 0
-            && $placed['revisionNumber'] === 3,
-        'the exact plan atomically places and activates the component with one move revision'
+            && $placed['revisionNumber'] === 3
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':', EventName, ActorAdminRecordID,
+                    TargetType, TargetRecordID)
+                 FROM RED_Admin_Activity_Log
+                 WHERE TargetType='component'
+                   AND TargetRecordID=$contentRecordId"
+            ) === 'component.public_placed:' . $adminRecordId
+                . ':component:' . $contentRecordId,
+        'the exact plan atomically places and activates the component with one move revision and one bounded audit fact'
     );
     red_addon_editor_create_test_assert(
         red_addon_editor_create_test_scalar(
@@ -2459,10 +2589,13 @@ try {
                  WHERE PackageID='"
                     . mysqli_real_escape_string($connection, $packageId) . "'),
                 (SELECT COUNT(*) FROM RED_Admin WHERE RecordID=$adminRecordId),
+                (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                 WHERE TargetType='component'
+                   AND TargetRecordID=$contentRecordId),
                 (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
                  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"
                     . $packageTable . "'))"
-        ) === '0:0:0:0',
+        ) === '0:0:0:0:0',
         'the disposable creation fixture cleans all database state'
     );
 } catch (Throwable $throwable) {

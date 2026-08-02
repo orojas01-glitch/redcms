@@ -149,7 +149,10 @@ not active features.
   validation, deterministic hashing, and zero activation or writes
 - Atomic exact-plan public placement with lifecycle/theme/source/target locks,
   seven-field parent mutation, unchanged package and destination postconditions,
-  one core move revision, single-use refusal, and rollback proof
+  one core move revision, one bounded administrator audit fact, single-use
+  refusal, and rollback proof
+- Core-owned public-placement form and POST/CSRF endpoint with server-derived
+  package/component ownership and numeric destination choices
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

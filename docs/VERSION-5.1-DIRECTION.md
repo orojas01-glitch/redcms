@@ -54,8 +54,9 @@ creator and without reserving or writing anything. Its separate
 activation-blocked atomic runner now revalidates that plan under lifecycle and
 theme serialization, creates the parent and package row, verifies the exact
 loader postcondition, and commits initial core/package revisions together.
-Public placement, create/delete endpoints, audit, and activation eligibility
-remain absent. Atomic deletion is available only behind the exact
+Create/delete endpoints and activation eligibility remain absent. Audited
+public placement is available only through the core-owned POST/CSRF control
+and exact atomic plan. Atomic deletion is available only behind the exact
 activation-blocked preflight plan. The activation-blocked parent
 metadata prerequisite now provides a read-only state gate and atomic writer.
 It requires exact view/edit grants, enabled ownership, a closed inactive shell,
@@ -63,8 +64,8 @@ current package-loader and core-revision evidence, an exact state hash, and
 lifecycle/theme/installation/parent serialization. Only title, active-theme
 layout, and language may change; the full shell and package state must remain
 exact, and one core `save` revision commits with the update. Unchanged values
-add no revision. No form, endpoint, public placement, activation, delete
-control, audit event, or package-value mutation is exposed.
+add no revision. No parent-metadata form, create/delete endpoint, delete
+control, activation, or package-value mutation is exposed.
 
 ## Product Goal
 

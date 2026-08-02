@@ -101,4 +101,42 @@
             }
         });
     });
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target.closest('[data-red-addon-placement-form]');
+        if (!form) {
+            return;
+        }
+        event.preventDefault();
+        var submit = form.querySelector('button[type="submit"]');
+        var status = form.querySelector('[data-red-addon-placement-status]');
+        if (submit) {
+            submit.disabled = true;
+        }
+        if (status) {
+            status.hidden = false;
+            status.textContent = 'Placing component…';
+        }
+        post(form.action, new FormData(form)).then(function (response) {
+            return response.json().catch(function () {
+                return {ok: false, reason: 'invalid_response'};
+            }).then(function (data) {
+                if (!response.ok || !data.ok) {
+                    var error = new Error(data.reason || 'placement_failed');
+                    error.reason = data.reason || 'placement_failed';
+                    throw error;
+                }
+                return loadEditor(form.querySelector('[name="ContentRecordID"]').value);
+            });
+        }).catch(function (error) {
+            if (status) {
+                status.textContent = error.reason === 'stale_state'
+                    ? 'This component or destination changed. Reopen it before placing.'
+                    : 'The component could not be placed. No changes were applied.';
+            }
+            if (submit) {
+                submit.disabled = false;
+            }
+        });
+    });
 }());

@@ -6,6 +6,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/addon_runtime_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/addon_component_editor_endpoint_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/addon_component_editor_publish_helpers.php';
 
 $unexpectedKeys = array_diff(
     array_keys($_POST),
@@ -32,7 +33,19 @@ try {
         echo red_addon_component_editor_ui_unavailable();
     } else {
         header('Cache-Control: no-store');
-        echo red_addon_component_editor_endpoint_render($context, red_csrf_token());
+        $csrfToken = red_csrf_token();
+        echo red_addon_component_editor_endpoint_render($context, $csrfToken);
+        $placement = red_addon_component_editor_publish_control_context(
+            $db->connection,
+            $contentRecordId,
+            (int) ($_SESSION['AdminRecordID'] ?? 0)
+        );
+        if (!empty($placement['ready'])) {
+            echo red_addon_component_editor_publish_control_render(
+                $placement,
+                $csrfToken
+            );
+        }
     }
 } finally {
     $db->close();

@@ -537,13 +537,17 @@ Core updates only `Sections`, `Categories`, `SubCategories`, `Article`,
 `PagePosition`, `PagePositionOrder`, and `Active`; no package writer or
 mutating package callback runs.
 The complete source row, unchanged package state, unchanged destination state,
-fresh publish grant, and one explicit-actor core `move` revision are required
-postconditions. Stale or reused plans, destination drift, revoked grants,
-transaction loss, unsupported placement, row mismatch, and revision failure
-roll back. No endpoint, administrator control, or audit event is added.
-Enablement preflight reports `component_editor_contract_required` until the
-audited operational public-placement control
-are implemented and accepted.
+fresh publish grant, one explicit-actor core `move` revision, and one bounded
+`component.public_placed` administrator audit fact are required postconditions.
+Stale or reused plans, destination drift, revoked grants, transaction loss,
+unsupported placement, row mismatch, revision failure, and audit failure roll
+back. The core-owned authenticated POST/CSRF control exposes only numeric
+destination choices and current parent/package hashes; core derives package,
+component, manifest, grant, target ownership, and exact plan evidence again.
+Enablement preflight continues to report
+`component_editor_contract_required` while richer component-editor packages
+remain outside the admitted enablement profiles; completing this operational
+control does not implicitly enable any package.
 
 ## Core Registry And Execution
 
