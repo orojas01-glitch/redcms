@@ -13,6 +13,8 @@ existing-record package updates, and immutable package-value revision
 snapshots, validated history/preflight, and atomic restore execution are also
 implemented as activation-blocked prerequisites. Read-only inactive component
 creation planning and its activation-blocked atomic runner are implemented.
+Permission-enforced inactive parent metadata, read-only delete planning, and
+atomic inactive deletion with retained revision ledgers are implemented.
 RED-CMS does not dispatch
 services, routes, adapters, or administrator tools, and does not upgrade,
 uninstall, or purge packages through this contract yet.
@@ -391,6 +393,21 @@ delete data, render a control, expose an endpoint, or authorize public
 placement. The trusted first-party callback is registration evidence for a
 separate atomic runner, not executable preflight code or a PHP sandbox.
 
+`red_addon_component_editor_delete_values()` is that activation-blocked atomic
+runner. It refuses caller-owned transactions and revalidates the caller's exact
+plan under the shared lifecycle lock, theme-contract lock, enabled-installation
+row lock, and exact parent binding. Before mutation, core reloads and hashes the
+current values and inserts duplicate-preserving `delete` snapshots into both
+the package and core revision ledgers using the explicit administrator actor.
+It then invokes only the registered deleter with fixed identity context,
+requires zero matching rows in every declared package table, removes article
+SEO metadata, and deletes exactly one inactive hidden parent. A stale plan,
+revoked grant, output, exception, changed buffers, false return, partial
+deletion, lost transaction, revision failure, or postcondition failure rolls
+back all data and attempted evidence. Success deliberately retains both
+immutable ledgers. The runner exposes no endpoint, form, control, audit event,
+media deletion, uninstall/purge, public placement, or activation authority.
+
 `red_addon_component_editor_permission_decision()` is the next database-backed
 authorization prerequisite. It resolves one of the six fixed editor operations
 to the exact permission already present in the normalized schema, then requires
@@ -500,8 +517,8 @@ failure, lost transactions, and revision failure roll back. These helpers
 expose no form, route, public placement, activation, delete, audit event, or
 package-value write.
 Enablement preflight reports `component_editor_contract_required` until the
-separate history UI, delete, audit, and
-operational endpoint contracts are implemented and accepted.
+operational editor endpoint, audit, and public-placement/activation contracts
+are implemented and accepted.
 
 ## Core Registry And Execution
 
@@ -1065,9 +1082,9 @@ responses, or structured data.
    execution are also implemented. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
-   implemented. Read-only delete planning is also implemented; its atomic
-   runner, restore actions, audit workflow, and public placement/activation
-   remain blocked.
+   implemented. Read-only delete planning and its atomic inactive runner are
+   also implemented; restore UI actions, an operational editor endpoint, audit
+   workflow, and public placement/activation remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member

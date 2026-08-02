@@ -161,7 +161,8 @@ if (!function_exists('red_addon_component_revision_record')) {
         $adminRecordId,
         array $values,
         $operation,
-        $restoredFromRevisionId = null
+        $restoredFromRevisionId = null,
+        $allowDuplicate = false
     ) {
         $contentRecordId = filter_var(
             $contentRecordId,
@@ -181,9 +182,10 @@ if (!function_exists('red_addon_component_revision_record')) {
             || !red_addon_valid_capability($componentId)
             || !in_array(
                 $operation,
-                ['baseline', 'checkpoint', 'save', 'restore'],
+                ['baseline', 'checkpoint', 'save', 'restore', 'delete'],
                 true
             )
+            || !is_bool($allowDuplicate)
             || !red_addon_component_revision_table_available($connection)
         ) {
             return null;
@@ -236,7 +238,8 @@ if (!function_exists('red_addon_component_revision_record')) {
         ) {
             return null;
         }
-        if (is_array($latest)
+        if (!$allowDuplicate
+            && is_array($latest)
             && is_string($latest['StateHash'] ?? null)
             && hash_equals($latest['StateHash'], $stateHash)
         ) {
@@ -250,7 +253,9 @@ if (!function_exists('red_addon_component_revision_record')) {
             ];
         }
 
-        if (!is_array($latest) && $operation === 'restore') {
+        if (!is_array($latest)
+            && in_array($operation, ['restore', 'delete'], true)
+        ) {
             return null;
         }
         $revisionNumber = is_array($latest)
@@ -375,7 +380,7 @@ if (!function_exists('red_addon_component_revision_validated_row')) {
             || (int) ($row['RevisionNumber'] ?? 0) < 1
             || !in_array(
                 $operation,
-                ['baseline', 'checkpoint', 'save', 'restore'],
+                ['baseline', 'checkpoint', 'save', 'restore', 'delete'],
                 true
             )
             || ($operation === 'restore'

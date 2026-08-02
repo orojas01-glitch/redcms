@@ -234,9 +234,11 @@ Store Lite still cannot use the current minimal enablement profile. Generic
 combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- the atomic delete runner; read-only delete planning now requires exact
-  permissions, inactive-shell and state/revision evidence, and a non-invoked
-  registrar-bound deleter. The permission-enforced inactive
+- an operational editor endpoint and form; read-only delete planning and the
+  activation-blocked atomic delete runner now require exact permissions,
+  inactive-shell and state/revision evidence, and a registrar-bound deleter.
+  The runner retains both delete snapshots and rolls back partial deletion.
+  The permission-enforced inactive
   parent-metadata writer, numeric placement-parent
   relationship, read-only public binding, non-executing declarative
   editor-schema, fail-closed submitted-value normalization, and core-owned
@@ -250,9 +252,8 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   and dual initial revisions. Read-only parent state and atomic
   title/layout/language updates are complete with exact grants, shell/package
   postconditions, and core revision rollback, but no grant-management
-  workflow, restore action, public placement/activation path, or atomic delete
-  runner
-  exists;
+  workflow, restore UI action, public placement/activation path, delete
+  endpoint/control, uninstall, or purge exists;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;
@@ -306,8 +307,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    atomic restore execution are complete. Read-only inactive creation
    preflight and its atomic runner plus permission-enforced inactive parent
    metadata writes and the display-only value-free revision timeline are also
-   complete. Read-only delete planning is complete; restore actions, public
-   placement/activation, and atomic deletion remain. The creation preflight
+   complete. Read-only delete planning and atomic inactive deletion are
+   complete; restore UI actions, operational editing, and public
+   placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Implement generic typed service, route, administrator-tool, settings, and

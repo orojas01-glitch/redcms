@@ -51,7 +51,13 @@ if (!function_exists('red_addon_component_revision_ui_state')) {
             'restoredFromRevisionId',
             'createdAt',
         ];
-        $allowedOperations = ['baseline', 'checkpoint', 'save', 'restore'];
+        $allowedOperations = [
+            'baseline',
+            'checkpoint',
+            'save',
+            'restore',
+            'delete',
+        ];
         $seenRevisionIds = [];
         $previousRevisionNumber = null;
         $entries = [];
@@ -134,6 +140,7 @@ if (!function_exists('red_addon_component_revision_ui_render')) {
             'checkpoint' => 'Checkpoint',
             'save' => 'Saved',
             'restore' => 'Restored',
+            'delete' => 'Deleted',
         ];
         $statusLabels = [
             'current' => 'Current',

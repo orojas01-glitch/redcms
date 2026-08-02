@@ -40,8 +40,8 @@ package access. The decision grants nothing and writes nothing. Packages remain
 blocked from enablement. An enabled disposable fixture can now register one
 exact package data loader per declared editor; core requires the view grant,
 the persisted parent/runtime owner match, contained execution, and schema-valid
-returned values before exposing a state hash. No operational form, component
-create endpoint, or delete runner exists. A separate activation-blocked
+returned values before exposing a state hash. No operational form or component
+create/delete endpoint exists. A separate activation-blocked
 helper can now apply an existing package record update only after the exact
 view and edit grants, current state hash, locked placement parent, enabled
 runtime ownership, declared InnoDB tables, contained writer execution, and
@@ -77,8 +77,14 @@ atomic writer requires the exact edit grant and state hash, then changes only
 the core-owned title, active-theme layout, and language under lifecycle/theme
 serialization. It preserves hidden, inactive, unrouted placement, records one
 core `save` revision, adds no revision for unchanged values, and rolls back a
-revision or postcondition failure. The operational form, public placement,
-delete path, audit workflow, and activation eligibility remain absent.
+revision or postcondition failure. An activation-blocked atomic delete runner
+now revalidates the value-free plan under shared lifecycle/theme and exact
+binding locks, records core and package `delete` snapshots, invokes only the
+registered deleter, and removes the package row, SEO row, and inactive parent
+together. Partial deletion, callback failure, stale evidence, or either ledger
+failure rolls back; both immutable ledgers remain after success. The
+operational form, public placement, delete endpoint/control, audit workflow,
+uninstall/purge, and activation eligibility remain absent.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Service, route, adapter, and administrator-tool dispatch,

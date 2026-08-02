@@ -51,16 +51,17 @@ creator and without reserving or writing anything. Its separate
 activation-blocked atomic runner now revalidates that plan under lifecycle and
 theme serialization, creates the parent and package row, verifies the exact
 loader postcondition, and commits initial core/package revisions together.
-Public placement, operational endpoints, delete, audit, and activation
-eligibility remain absent. The activation-blocked parent
+Public placement, operational editor/delete endpoints, audit, and activation
+eligibility remain absent. Atomic deletion is available only behind the exact
+activation-blocked preflight plan. The activation-blocked parent
 metadata prerequisite now provides a read-only state gate and atomic writer.
 It requires exact view/edit grants, enabled ownership, a closed inactive shell,
 current package-loader and core-revision evidence, an exact state hash, and
 lifecycle/theme/installation/parent serialization. Only title, active-theme
 layout, and language may change; the full shell and package state must remain
 exact, and one core `save` revision commits with the update. Unchanged values
-add no revision. No form, endpoint, public placement, activation, delete,
-audit event, or package-value mutation is exposed.
+add no revision. No form, endpoint, public placement, activation, delete
+control, audit event, or package-value mutation is exposed.
 
 ## Product Goal
 
@@ -422,6 +423,17 @@ request bootstrap excludes the disabled package.
     deterministic value-free plan. Invoke no deleter, open no transaction, and
     keep the atomic runner, endpoint, form, control, audit event, public
     placement, activation, uninstall, and purge behavior separate.
+27. Completed activation-blocked atomic component-delete runner: reject
+    caller-owned transactions, revalidate the exact value-free plan under the
+    shared lifecycle/theme and enabled-binding locks, capture forced duplicate
+    package/core `delete` snapshots, invoke only the registered deleter, verify
+    every declared package table has no row for the parent, then remove SEO and
+    the exact inactive hidden parent. Roll back parent, SEO, package data, and
+    both attempted revisions after stale evidence, callback containment,
+    partial deletion, transaction loss, ledger failure, or postcondition
+    failure. Retain both immutable ledgers after success and expose no endpoint,
+    form, control, audit event, media deletion, uninstall/purge, public
+    placement, or activation behavior.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
