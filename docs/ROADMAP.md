@@ -150,11 +150,16 @@ core-owned JSON dispatcher with the same request-local ownership and
 containment discipline. It exposes no session, database, member,
 administrator, unsafe-method, placeholder, HTML, redirect, upload, or arbitrary
 header surface, and route-bearing packages remain ineligible for current
-enablement. The Owner-authorized disable command serializes with
+enablement. Read-only administrator tools now require a data-only manifest
+mapping, exact enabled registrar owner, and fresh case-sensitive package grant;
+core accepts only a bounded text model and renders escaped display-only markup
+through a POST/CSRF endpoint. Owner/lifecycle/legacy authority does not imply
+tool access, package HTML or writes are unavailable, and tool-bearing packages
+remain ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,
-migrations, settings, media, or business data. Richer route, adapter, and
-administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
+migrations, settings, media, or business data. Richer route/tool actions,
+adapter dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
 The first generic persistence foundation is implemented without adding a

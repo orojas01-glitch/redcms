@@ -127,6 +127,13 @@
         "$ref": "#/$defs/componentEditor"
       }
     },
+    "adminToolContracts": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/adminToolContract"
+      }
+    },
     "settings": {
       "type": "array",
       "maxItems": 200,
@@ -335,6 +342,43 @@
           "items": {
             "$ref": "#/$defs/componentField"
           }
+        }
+      }
+    },
+    "adminToolContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "label",
+        "description",
+        "icon",
+        "permission",
+        "mode"
+      ],
+      "properties": {
+        "tool": {
+          "$ref": "#/$defs/capability"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "icon": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
+        },
+        "permission": {
+          "$ref": "#/$defs/permission"
+        },
+        "mode": {
+          "const": "read-only"
         }
       }
     },

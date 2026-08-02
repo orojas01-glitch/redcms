@@ -453,6 +453,16 @@ request bootstrap excludes the disabled package.
     administrator, HTML, redirect, upload, session, server, and database
     surfaces remain closed, and current enablement profiles still reject all
     route-bearing packages.
+30. Completed display-only administrator-tool prerequisite: map one provided
+    tool to one declared permission through closed manifest metadata, require
+    the exact enabled registrar owner and a fresh case-sensitive per-client
+    grant, pass only the tool id and numeric actor in a final request, and
+    accept only bounded plain text for core-owned escaped rendering. Protect
+    the endpoint with administrator session plus POST/CSRF checks. Owner,
+    lifecycle and legacy grants imply nothing; package HTML, links, forms,
+    actions, writes, sessions, request globals, database connections, uploads,
+    redirects, arbitrary headers, grant management, and tool-bearing package
+    enablement remain closed.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

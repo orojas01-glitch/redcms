@@ -186,8 +186,10 @@ try {
             && ($schema['properties']['integrity']['properties']['entrypoint']['const'] ?? '') === 'addon.php'
             && ($schema['properties']['componentEditors']['items']['$ref'] ?? '')
                 === '#/$defs/componentEditor'
+            && ($schema['properties']['adminToolContracts']['items']['$ref'] ?? '')
+                === '#/$defs/adminToolContract'
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded component editors, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded component editors and administrator tools, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
@@ -327,6 +329,106 @@ try {
             ]
             && !file_exists($executionMarker),
         'bounded component editor metadata validates and normalizes without package execution'
+    );
+
+    $toolProject = red_addon_test_project(
+        $temporaryRoot,
+        'administrator-tool-project'
+    );
+    red_addon_test_write_package(
+        $toolProject,
+        'redcms.tool',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $toolId = 'redcms.tool/orders';
+            $permission = 'tool.orders.view';
+            $manifest['provides']['adminTools'] = [$toolId];
+            $manifest['permissions'][] = $permission;
+            $manifest['adminToolContracts'] = [[
+                'tool' => $toolId,
+                'label' => 'Orders',
+                'description' => 'Read-only order status.',
+                'icon' => 'orders',
+                'permission' => $permission,
+                'mode' => 'read-only',
+            ]];
+        }
+    );
+    $toolResult = red_addon_validate_manifest(
+        'redcms.tool',
+        $toolProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    $toolContract = red_addon_admin_tool_contract(
+        is_array($toolResult['manifest'] ?? null)
+            ? $toolResult['manifest']
+            : [],
+        'redcms.tool/orders'
+    );
+    red_addon_test_assert(
+        !empty($toolResult['valid'])
+            && $toolContract === [
+                'tool' => 'redcms.tool/orders',
+                'label' => 'Orders',
+                'description' => 'Read-only order status.',
+                'icon' => 'orders',
+                'permission' => 'tool.orders.view',
+                'mode' => 'read-only',
+            ]
+            && !file_exists($executionMarker),
+        'administrator tool metadata maps one provided tool to one declared permission without package execution'
+    );
+
+    $invalidToolProject = red_addon_test_project(
+        $temporaryRoot,
+        'invalid-administrator-tool-project'
+    );
+    red_addon_test_write_package(
+        $invalidToolProject,
+        'redcms.invalid-tool',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $manifest['provides']['adminTools'] = [
+                'redcms.invalid-tool/declared',
+            ];
+            $manifest['adminToolContracts'] = [[
+                'tool' => 'redcms.invalid-tool/undeclared',
+                'label' => 'Invalid',
+                'description' => 'Invalid administrator tool fixture.',
+                'icon' => '../unsafe',
+                'permission' => 'invalid.missing',
+                'mode' => 'write',
+                'callback' => 'dangerous',
+            ]];
+        }
+    );
+    $invalidTool = red_addon_validate_manifest(
+        'redcms.invalid-tool',
+        $invalidToolProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    red_addon_test_assert(
+        empty($invalidTool['valid'])
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'contains unsupported field "callback"'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'must appear in Provides adminTools'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'permission must appear in Permissions'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'mode must be read-only'
+            )
+            && !file_exists($executionMarker),
+        'administrator tool contracts reject executable, undeclared, ungranted, and writable metadata'
     );
 
     $nullEditorProject = red_addon_test_project(

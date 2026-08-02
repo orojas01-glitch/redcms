@@ -1,5 +1,6 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_tool_helpers.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/addon_admin_tool_helpers.php";
 red_start_session();
 red_require_admin();
 
@@ -75,13 +76,17 @@ class add_tools
 		// READ SESSION 'AdminTools' AND KEEP THE RENDERED ORDER HUMAN-FRIENDLY.
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		$tools = red_admin_tool_rows_by_group($db->connection, $compgroup, red_admin_session_id_list('AdminTools'));
+		$addonTools = red_addon_admin_tool_catalog(
+			$db->connection,
+			(int) ($_SESSION['AdminRecordID'] ?? 0)
+		);
 		usort($tools, function ($left, $right) {
 			return strnatcasecmp(
 				red_admin_tool_text($left['ButtonTag'] ?? ''),
 				red_admin_tool_text($right['ButtonTag'] ?? '')
 			);
 		});
-		$toolCount = count($tools);
+		$toolCount = count($tools) + count($addonTools);
 		$db->close();
 	?>
 	<div class="red-admin-card-chooser">
@@ -159,6 +164,27 @@ class add_tools
 			echo '<span class="red-admin-add-card__action" aria-hidden="true">→</span>';
 			echo '</a></div>';
 			$cardNumber++;
+		}
+		if ($addonTools !== []) {
+			echo '<script type="text/javascript">' . "\n";
+			echo 'function redAdminOpenAddonTool(toolId,targetId){' . "\n";
+			echo '$.ajax({type:"POST",url:"/admin/bin/view_addon_tool.php",data:{tool:toolId},success:function(data){$("#tools_"+targetId+"_grid").hide();$("#msggbox_tools_"+targetId).html(data).fadeIn(150);}});' . "\n";
+			echo 'return false;}' . "\n";
+			echo '</script>';
+		}
+		foreach ($addonTools as $addonTool) {
+			$toolId = (string) $addonTool['tool'];
+			$label = red_admin_tool_html($addonTool['label']);
+			$description = red_admin_tool_html($addonTool['description']);
+			$cardId = 'cp_tool-addon-' . substr(hash('sha256', $toolId), 0, 12);
+			$buttonOnClick = 'return redAdminOpenAddonTool(' .
+				json_encode($toolId) . ',' . json_encode($cpareastyle) . ');';
+			echo '<div class="cp_addcontent red-admin-add-card red-admin-add-card--tool-default" id="' . red_admin_tool_html($cardId) . '" role="listitem" data-addon-tool="' . red_admin_tool_html($toolId) . '">';
+			echo '<a href="#cp_' . red_admin_tool_html($cpareastyle) . '" onClick="' . red_admin_tool_html($buttonOnClick) . '" class="cp_addcontent_button red-admin-add-card__link" aria-label="Open ' . $label . ' add-on tool">';
+			echo '<span class="red-admin-add-card__icon" aria-hidden="true">' . $this->tool_card_icon('tool-default') . '</span>';
+			echo '<span class="red-admin-add-card__copy"><span class="red-admin-add-card__label">' . $label . '</span><span class="red-admin-add-card__description">' . $description . '</span></span>';
+			echo '<span class="red-admin-add-card__action" aria-hidden="true">→</span>';
+			echo '</a></div>';
 		}
 		?>
 	    </div>

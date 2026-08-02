@@ -19,6 +19,11 @@ editor, validation, rendering, and cleanup contract, and a fail-closed
 migration manifest with explicit reporting and transaction guards. They also
 require closed, non-executing add-on discovery with exact path, compatibility,
 dependency, route, settings, and SHA-256 inventory validation.
+The 44-assertion trust fixture also validates optional administrator-tool
+contracts as data only: each contract must reference one provided tool, one
+already-requested permission, bounded label/description/icon metadata, and the
+fixed `read-only` mode. Executable, writable, undeclared, or ungranted metadata
+fails without running package PHP.
 Optional component-editor metadata is also validated as a fixed, data-only
 schema: declared components and permissions must resolve exactly, field types
 and constraints are allowlisted, and executable or storage-owned instructions
@@ -62,6 +67,16 @@ permission capacity, exact operation-to-permission resolution, non-Owner
 package grants, no implicit Owner access, case-sensitive matching, immediate
 revocation, read-only decisions, and exact actor/grant cleanup. Its grants are
 test setup only; no operational grant-management workflow exists.
+The separate 18-assertion administrator-tool fixture requires an enabled
+request-local registrar, one valid data-only tool contract, and a fresh exact
+case-sensitive package grant. It proves Owner/lifecycle authority does not
+imply tool access, revocation applies on the next request, only granted tools
+enter the core chooser, and handlers receive one final actor/tool request.
+Core escapes the bounded text view model and emits no package HTML, links,
+forms, buttons, scripts, or write actions. Output, exceptions, malformed
+results, buffer or HTTP-state changes fail closed; the endpoint is protected by
+administrator session and POST/CSRF checks; and all actor/role/grant fixtures
+are removed exactly.
 The next 20-assertion disposable fixture requires exactly one loader for each
 declared editor and refuses undeclared or duplicate loaders. It proves exact
 view permission, enabled parent/runtime/manifest ownership, normalized returned
