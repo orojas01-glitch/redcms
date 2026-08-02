@@ -159,6 +159,9 @@ not active features.
 - Core-owned public add-on route dispatch for exact static `GET` paths with
   public authentication, typed bounded query/result objects, JSON-only
   responses, and fail-closed package behavior
+- Permission-scoped display-only administrator tools with data-only manifest
+  contracts, fresh exact per-client grants, typed text view models, core-owned
+  escaped rendering, and a protected POST/CSRF endpoint
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

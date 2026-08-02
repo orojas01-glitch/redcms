@@ -260,7 +260,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   while unsafe/member/placeholder routes and route-bearing package enablement
   remain gated;
 - declared administrator routes;
-- scoped administrator-tool dispatch;
+- display-only administrator-tool dispatch is complete with exact package
+  grants and core rendering; writable order/product actions and tool-bearing
+  package enablement remain gated;
 - namespaced package asset loading;
 - package settings and secret-reference handling; and
 - live-data disable/upgrade compatibility checks.

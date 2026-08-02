@@ -509,6 +509,23 @@ uploads, and database connections are not exposed. Current enablement gates
 still reject any route-bearing package, so this dispatcher does not activate a
 richer package by itself.
 
+Display-only add-on administrator tools require an optional closed manifest
+contract that maps one provided tool to one already-requested permission and
+the fixed `read-only` mode. Core resolves the enabled request-local owner and
+performs a fresh exact case-sensitive grant lookup in the current client
+database. Owner, legacy administrator types, lifecycle capabilities, legacy
+tool ids, and unrelated grants provide no access. The POST-only endpoint
+requires a validated administrator session and CSRF token.
+
+The trusted handler receives only the tool id and numeric actor record id and
+returns only bounded plain text. Core escapes the final view and never accepts
+package HTML, links, forms, buttons, scripts, styles, actions, writes, sessions,
+request globals, database connections, redirects, or arbitrary headers.
+Output, exceptions, malformed/oversized results, and buffer or HTTP-state
+changes fail closed. Permission revocation applies on the next catalog or
+dispatch lookup. Current enablement gates still reject every tool-bearing
+package.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

@@ -245,6 +245,16 @@ An illustrative manifest shape is:
     "store.orders.manage",
     "store.settings.manage"
   ],
+  "adminToolContracts": [
+    {
+      "tool": "redcms.store-lite/orders",
+      "label": "Orders",
+      "description": "Review current Store Lite order status.",
+      "icon": "orders",
+      "permission": "store.orders.view",
+      "mode": "read-only"
+    }
+  ],
   "componentEditors": [
     {
       "component": "redcms.store-lite/product",
@@ -706,7 +716,9 @@ loader may be invoked only through the exact permission/binding/schema gate
 above, and a declared writer only through the transaction/state/postcondition
 gate above. Services dispatch only through the typed internal boundary below.
 Exact static public `GET` routes may dispatch only through the core JSON
-boundary below; adapter and administrator-tool handlers remain non-dispatched.
+boundary below. A declared read-only administrator tool may dispatch only
+through the fresh-permission/core-renderer boundary below; adapters remain
+non-dispatched.
 Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
@@ -838,6 +850,37 @@ administrator routes, HTML, redirects, uploads, files, sessions, server
 variables, database connections, or arbitrary headers. It also does not make a
 route-bearing package eligible for enablement: all current enablement profiles
 continue to reject routes until richer package lifecycle gates are reviewed.
+
+## Administrator Tool Contract
+
+An optional `adminToolContracts` entry maps one identifier from
+`provides.adminTools` to one permission already present in `permissions`, plus
+a bounded label, description, icon token, and the fixed `read-only` mode. The
+manifest validator rejects duplicate, undeclared, ungranted, executable, or
+writable metadata without loading package PHP. A provided tool without this
+data-only mapping remains registered but cannot enter the chooser or dispatch.
+
+`includes/addon_admin_tool_helpers.php` resolves the exact enabled
+request-local owner, manifest contract, and registrar callback. It performs a
+fresh case-sensitive lookup of the exact package permission in the current
+client database; Owner, Webmaster, legacy Superadmin, lifecycle grants, legacy
+`AdminTools`, and unrelated package grants confer no access. Revocation applies
+on the next catalog or dispatch decision.
+
+The handler receives one final request containing only the tool id and numeric
+administrator record id. It must return one final result containing bounded
+plain-text title, description, and label/value facts. Core escapes and renders
+that model. Package output, exceptions, buffer/HTTP-state changes, malformed or
+oversized results fail closed. `admin/bin/view_addon_tool.php` is POST-only,
+requires a current protected administrator session and CSRF token, bootstraps
+the enabled registrar, and invokes only this dispatcher.
+
+This first slice exposes no package HTML, links, forms, buttons, scripts,
+styles, actions, writes, database connection, session, request globals,
+uploads, redirects, arbitrary headers, audit event, or grant-management UI.
+The existing enablement profiles still reject packages that provide
+administrator tools, so this prerequisite does not activate Store Lite or any
+richer package.
 
 ## Data, Migration, And Client Isolation
 
