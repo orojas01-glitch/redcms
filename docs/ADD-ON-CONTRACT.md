@@ -704,8 +704,10 @@ invokes only an enabled manifest-declared component through its fixed public
 placement context and core-owned default renderer. A declared component data
 loader may be invoked only through the exact permission/binding/schema gate
 above, and a declared writer only through the transaction/state/postcondition
-gate above. Services dispatch only through the typed internal boundary below;
-route, adapter, and administrator-tool handlers remain non-dispatched. Request failure returns
+gate above. Services dispatch only through the typed internal boundary below.
+Exact static public `GET` routes may dispatch only through the core JSON
+boundary below; adapter and administrator-tool handlers remain non-dispatched.
+Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
 step. It must revalidate the approved plan and registrar under the shared
@@ -820,6 +822,22 @@ Packages must not create arbitrary root PHP endpoints or edit `index.php` or
 `admin/mainnav.php`. Public URLs already owned by a client remain unchanged.
 New package endpoints use a reserved core namespace unless a separately
 reviewed compatibility route maps an existing URL.
+
+`includes/addon_public_route_helpers.php` is the only implemented public route
+boundary. This first slice resolves an exact manifest path from the enabled
+request-local registrar and requires `scope: public`, `authentication: public`,
+`GET`, and `csrf: not-applicable`. The path must be static and unencoded. Core
+supplies a final request containing only the declared route id, method, exact
+path, and bounded JSON-compatible query values. The handler must return a final
+result; core constructs the JSON body and fixed security/cache headers. Package
+output, exceptions, output-buffer changes, malformed results, and oversized
+responses produce only a generic temporary-unavailability response.
+
+This does not dispatch member routes, unsafe methods, placeholder routes,
+administrator routes, HTML, redirects, uploads, files, sessions, server
+variables, database connections, or arbitrary headers. It also does not make a
+route-bearing package eligible for enablement: all current enablement profiles
+continue to reject routes until richer package lifecycle gates are reviewed.
 
 ## Data, Migration, And Client Isolation
 

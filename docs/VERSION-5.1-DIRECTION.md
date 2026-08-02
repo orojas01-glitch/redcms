@@ -446,6 +446,13 @@ request bootstrap excludes the disabled package.
     again server-side; and save only through the existing atomic writer. Keep
     creation/deletion controls, restore actions, public placement, activation,
     grant management, and audit workflow separate.
+29. Completed public-route prerequisite: dispatch only an exact unencoded
+    static path from an enabled request-local registrar; permit public `GET`
+    with `csrf: not-applicable`; pass bounded typed query data; accept a typed
+    result; and emit only core-owned JSON. Member, unsafe-method, placeholder,
+    administrator, HTML, redirect, upload, session, server, and database
+    surfaces remain closed, and current enablement profiles still reject all
+    route-bearing packages.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

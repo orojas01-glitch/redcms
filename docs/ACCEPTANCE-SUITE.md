@@ -44,6 +44,15 @@ objects, bounded JSON-compatible input/output, pre-handler refusal of invalid
 values, explicit package error results, and containment of malformed returns,
 output, exceptions, and output-buffer tampering without adding an HTTP,
 administrator, session, or database surface.
+The separate 20-assertion public-route fixture proves that core claims only an
+exact unencoded static path from the enabled request-local registrar, permits
+only public `GET` plus `csrf: not-applicable`, passes only a final request with
+bounded query values, and emits only core-encoded JSON from a final result. It
+also proves non-GET, invalid-query, member, unsafe-method, and placeholder
+routes are refused before handler invocation; package output, exceptions,
+buffer tampering, malformed results, and oversized responses fail closed; and
+the front controller dispatches a claimed route before theme output. Current
+enablement profiles remain unchanged and still reject route-bearing packages.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code

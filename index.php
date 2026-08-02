@@ -79,6 +79,7 @@ class_content.php: call all components.*/
 
 <?php
 require_once __DIR__ . '/includes/addon_runtime_helpers.php';
+require_once __DIR__ . '/includes/addon_public_route_helpers.php';
 
 $redAddonRuntimeConnection = null;
 try {
@@ -113,6 +114,19 @@ try {
     if ($redAddonRuntimeConnection instanceof mysqli) {
         mysqli_close($redAddonRuntimeConnection);
     }
+}
+
+$redAddonPublicRoute = red_addon_public_route_dispatch(
+    $_SERVER['REQUEST_METHOD'] ?? '',
+    $_SERVER['REQUEST_URI'] ?? '',
+    $_GET ?? []
+);
+if (!empty($redAddonPublicRoute['claimed'])) {
+    while (ob_get_level() > $redThemeRequestBufferLevel) {
+        ob_end_clean();
+    }
+    red_addon_public_route_emit($redAddonPublicRoute);
+    exit;
 }
 ?>
 
