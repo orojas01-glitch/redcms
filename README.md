@@ -153,6 +153,9 @@ not active features.
   refusal, and rollback proof
 - Core-owned public-placement form and POST/CSRF endpoint with server-derived
   package/component ownership and numeric destination choices
+- Internal typed add-on service invocation with exact enabled runtime
+  ownership, immutable request/result objects, bounded JSON-compatible values,
+  and containment of output, exceptions, buffer changes, and malformed results
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -222,6 +225,7 @@ php scripts/addon-trust-self-test.php
 php scripts/addon-component-editor-self-test.php
 php scripts/addon-component-editor-renderer-self-test.php
 php scripts/addon-runtime-self-test.php
+php scripts/addon-service-invocation-self-test.php
 php scripts/addon-validate.php --all
 php scripts/admin-addon-owner.php --status
 php scripts/addon-registry-status.php --all

@@ -307,7 +307,7 @@ request bootstrap excludes the disabled package.
     registration-only services as one package, with non-executing preflight,
     atomic Owner enablement, later request registration and default rendering,
     non-executing disablement, and exact disposable cleanup. Persistence,
-    editor, typed service invocation, routes, administrator tools, settings,
+    editor, routes, administrator tools, settings,
     assets, and live-data behavior remain blocked.
 12. Completed persistence foundation: preserve `RED_Articles` as the single
     placement parent, store the full manifest component id, permit package

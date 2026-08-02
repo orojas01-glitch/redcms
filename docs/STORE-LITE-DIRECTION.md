@@ -255,7 +255,7 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   workflow, restore UI action, delete endpoint/control, uninstall, or purge
   exists. The audited public-placement control is complete but does not by
   itself admit the Store Lite package;
-- typed service invocation;
+- typed service invocation is complete as an internal core-to-package boundary;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;
 - namespaced package asset loading;
@@ -313,8 +313,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Implement generic typed service, route, administrator-tool, settings, and
-   asset contracts as separate reviewed batches.
+4. Continue with generic route, administrator-tool, settings, and asset
+   contracts as separate reviewed batches; typed internal service invocation
+   is complete.
 5. Create Store Lite in its separate distribution using only those accepted
    contracts.
 6. Add package-owned migrations, Product editing, catalog, cart, orders, and

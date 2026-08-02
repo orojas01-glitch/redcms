@@ -142,11 +142,14 @@ richer package remains blocked behind its explicit contracts. The separate
 Owner-authorized enable command revalidates that exact plan under the shared
 lifecycle lock and target package lock, validates the fixed registrar, and
 atomically records `enabled` with its bounded audit fact. Safe default
-component dispatch is implemented; services remain lookup-only and are not
-automatically invoked. The Owner-authorized disable command serializes with
+component dispatch is implemented. Services can be invoked only through a
+non-HTTP core boundary that requires exact enabled request-local ownership,
+supplies one immutable typed request, accepts one typed result, and bounds all
+JSON-compatible values. No route, session, administrator, database, or
+automatic invocation is added. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,
-migrations, settings, media, or business data. Service, route, adapter, and
+migrations, settings, media, or business data. Route, adapter, and
 administrator-tool dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
@@ -329,8 +332,7 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while typed-service invocation, route,
-administrator-tool, settings, asset, live-data, and richer package persistence
+while route, administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
 

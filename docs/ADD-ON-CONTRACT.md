@@ -695,7 +695,8 @@ lifecycle transition or lifecycle CLI:
   fails closed.
 
 The contract still assumes operator-reviewed first-party PHP and is not a
-sandbox. `scripts/addon-runtime-self-test.php` and
+sandbox. `scripts/addon-runtime-self-test.php`,
+`scripts/addon-service-invocation-self-test.php`, and
 `scripts/addon-request-bootstrap-self-test.php` execute only temporary fixtures
 outside the clean starter. Uninstalled and disabled packages remain
 unexecuted. Current enabled registrars run once in dependency order. Core
@@ -703,12 +704,22 @@ invokes only an enabled manifest-declared component through its fixed public
 placement context and core-owned default renderer. A declared component data
 loader may be invoked only through the exact permission/binding/schema gate
 above, and a declared writer only through the transaction/state/postcondition
-gate above; service, route, adapter, and administrator-tool handlers remain
-non-dispatched. Request failure returns
+gate above. Services dispatch only through the typed internal boundary below;
+route, adapter, and administrator-tool handlers remain non-dispatched. Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
 step. It must revalidate the approved plan and registrar under the shared
 lifecycle lock and target package lock before its atomic state transition.
+
+`includes/addon_service_helpers.php` is the only generic core-to-package
+service invocation boundary. It resolves the exact request-local owner and
+manifest declaration, constructs a final request object from one bounded
+operation id and JSON-compatible input, and accepts only a final result object.
+It rejects floating-point values in favor of explicit string representations,
+bounds depth, nodes, keys, strings, and encoded size, and contains package
+output, exceptions, output-buffer changes, and malformed results. It supplies
+no database connection, HTTP request, session, administrator authority, or
+automatic invocation.
 
 ## Component Contract
 
@@ -1088,7 +1099,9 @@ responses, or structured data.
    registration-only-service profiles. The registrar-validating atomic
    `enabled` transition for those constrained profiles is implemented. The
    component profiles add no operational editor form, persistence, package
-   assets, business data, or client package, and services remain lookup-only.
+   assets, business data, or client package. Services are callable only through
+   the separate typed boundary with exact runtime ownership and final bounded
+   request/result objects.
    Non-executing, data-retaining atomic disablement is also implemented with
    enabled-dependent refusal and later-request unload proof. Every richer
    package surface and every later lifecycle transition remain separate
@@ -1099,7 +1112,7 @@ responses, or structured data.
 7. Implement generic combined default-component plus registration-only-service
    activation. This constrained profile is implemented with disposable
    preflight, enablement, runtime-render, disablement, and cleanup evidence.
-8. Implement the remaining generic persistence, editor, typed-service, route,
+8. Implement the remaining generic persistence, editor, route,
    administrator-tool, settings, asset, and live-data contracts as separate
    disposable-fixture batches. The component parent relationship, full
    component-id storage, package-table foreign-key allowance, and read-only

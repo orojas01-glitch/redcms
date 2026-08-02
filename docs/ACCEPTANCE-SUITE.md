@@ -38,6 +38,12 @@ hash/value/action disclosure, and fail-closed stale or forged history.
 The runner also executes a temporary first-party runtime fixture that proves
 fixed-entrypoint integrity, exact manifest registration, dependency ordering,
 and fail-closed output or registration ambiguity without enabling a package.
+The separate 15-assertion typed-service fixture proves exact enabled
+request-local ownership and manifest agreement, immutable request/result
+objects, bounded JSON-compatible input/output, pre-handler refusal of invalid
+values, explicit package error results, and containment of malformed returns,
+output, exceptions, and output-buffer tampering without adding an HTTP,
+administrator, session, or database surface.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
