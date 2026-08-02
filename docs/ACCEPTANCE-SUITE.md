@@ -28,10 +28,13 @@ The separate 13-assertion value contract accepts only schema-declared scalar
 fields, normalizes their closed types, rejects malformed or unknown input, and
 returns no normalized payload on any error without executing package code or
 opening a database.
-The separate 15-assertion renderer contract maps those schemas to escaped,
+The separate 20-assertion renderer contract maps those schemas to escaped,
 core-owned controls, checks stable label/help/error relationships and fixed
 field-type attributes, rejects forged state, and proves the fragment contains
 no form, submit control, package markup, package execution, or database access.
+It also validates a core-owned, value-free revision timeline, exact newest-first
+metadata, current-state agreement, escaped actors, fixed status language, no
+hash/value/action disclosure, and fail-closed stale or forged history.
 The runner also executes a temporary first-party runtime fixture that proves
 fixed-entrypoint integrity, exact manifest registration, dependency ordering,
 and fail-closed output or registration ambiguity without enabling a package.
@@ -172,7 +175,7 @@ foundations.
 The latest complete 2026-08-01 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 42-assertion add-on trust contract, 13-assertion
-add-on component-editor value contract, 15-assertion display-only
+add-on component-editor value contract, 20-assertion display-only
 component-editor renderer contract, and
 17-assertion non-activating runtime contract, imported the 25-table installer,
 applied all 39 migrations to the expected 27-table schema with zero pending or
@@ -203,6 +206,11 @@ had zero console errors, failed requests, missing labels, clipped controls,
 forms, or submit buttons. This proves the display-only markup and responsive
 containment only; an operational authorization and write flow does not yet
 exist.
+The component revision-history fixture was also rendered from the actual core
+helper at 1512×900 and 390×844. Both viewports had zero console errors,
+horizontal overflow, forms, buttons, or links; all three fixed history states
+and three revision rows remained present. This proves the display-only visual
+contract only and does not open a restore action or operational endpoint.
 
 ## Requirements
 
@@ -258,7 +266,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Owner authorization acceptance runs only in the uniquely named disposable database. It requires empty default storage, a manager-only one-time bootstrap under a database advisory lock, the exact six fixed capabilities, one allowlisted audit row, database-backed session refresh, refusal of a second Owner, refusal of Owner demotion/deletion, transactional rollback after an injected audit failure, CLI confirmation guards, and exact cleanup.
 - Add-on registry acceptance runs only in the uniquely named disposable database and executes no package PHP or SQL. It requires empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, enabled/current load eligibility, immutable migration identity, protected ledger ownership, and exact cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
-- Add-on component-editor renderer acceptance runs before database creation. It requires core-owned escaped markup for every fixed schema type, stable namespaced labels/help/errors, scoped border-box control sizing, no rejected-value reflection, fail-closed malformed state, and no form, submit control, authorization, package execution, package data access, or database state.
+- Add-on component-editor renderer acceptance runs before database creation. It requires core-owned escaped markup for every fixed schema type, stable namespaced labels/help/errors, scoped border-box control sizing, no rejected-value reflection, fail-closed malformed state, and no form, submit control, authorization, package execution, package data access, or database state. Its revision-timeline checks additionally require exact value-free newest-first metadata, newest/current hash agreement, escaped actor and timestamp copy, fixed current/matching/restore-check-required states, responsive containment, no value or hash disclosure, no action markup, and fail-closed empty, stale, reordered, or value-bearing input.
 - Add-on component-editor permission acceptance runs only in the uniquely named disposable database. It requires the full manifest permission capacity, exact operation mapping, explicit package grants independent of Owner/lifecycle authority, binary case matching, next-decision revocation, read-only state fingerprints, and zero residual administrator, role, or grant fixtures.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.
 - Add-on component-editor update acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires declared-editor-only writer registration, one exact writer owner, closed package-table metadata, InnoDB refusal before invocation, current view/edit grants, enabled locked parent/runtime/manifest ownership, normalized values, a current state hash, exact saved-value reload, immutable core-owned baseline/save snapshots, bounded validated history metadata, deterministic read-only restore preflight, exact plan matching, atomic source-linked restore execution, unchanged no-op behavior, stale/revoked/drifted/disabled/forged/tampered refusal, rollback after update or restore revision-ledger failure, emitted output, exceptions, nested buffers, false returns, and incomplete writes, unchanged core placement state, exact restored target state and revision timeline, and zero package, parent, revision, administrator, grant, table, or filesystem fixtures.

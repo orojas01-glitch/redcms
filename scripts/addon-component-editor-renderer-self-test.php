@@ -9,6 +9,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 require_once dirname(__DIR__) . '/includes/addon_component_editor_ui_helpers.php';
+require_once dirname(__DIR__) . '/includes/addon_component_editor_revision_ui_helpers.php';
 
 $assertions = 0;
 
@@ -395,6 +396,100 @@ try {
                 'input[type="email"][aria-invalid="true"]'
             ),
         'administrator styles are core-owned, scoped, and contain control width'
+    );
+
+    $currentHash = hash('sha256', 'current-state');
+    $history = [
+        [
+            'revisionId' => 42,
+            'revisionNumber' => 3,
+            'operation' => 'restore',
+            'actorRecordId' => 7,
+            'actorAlias' => 'Owner <one>',
+            'stateHash' => $currentHash,
+            'restoredFromRevisionId' => 20,
+            'createdAt' => '2026-08-01 15:30:00',
+        ],
+        [
+            'revisionId' => 21,
+            'revisionNumber' => 2,
+            'operation' => 'save',
+            'actorRecordId' => 7,
+            'actorAlias' => '',
+            'stateHash' => hash('sha256', 'other-state'),
+            'restoredFromRevisionId' => 0,
+            'createdAt' => '2026-08-01 15:20:00',
+        ],
+        [
+            'revisionId' => 20,
+            'revisionNumber' => 1,
+            'operation' => 'baseline',
+            'actorRecordId' => 7,
+            'actorAlias' => 'Owner <one>',
+            'stateHash' => $currentHash,
+            'restoredFromRevisionId' => 0,
+            'createdAt' => '2026-08-01 15:10:00',
+        ],
+    ];
+    $historyHtml = red_addon_component_revision_ui_render(
+        $history,
+        $currentHash,
+        'Fixture <item>',
+        'fixture-history'
+    );
+    red_addon_editor_renderer_test_assert(
+        str_contains($historyHtml, 'aria-labelledby="fixture-history-heading"')
+            && str_contains($historyHtml, 'Fixture &lt;item&gt;')
+            && str_contains($historyHtml, 'Owner &lt;one&gt;')
+            && str_contains($historyHtml, 'Administrator #7')
+            && str_contains($historyHtml, 'Revision record #20'),
+        'history markup is accessible and escapes bounded revision metadata'
+    );
+    red_addon_editor_renderer_test_assert(
+        str_contains($historyHtml, '>Current</span>')
+            && str_contains($historyHtml, '>Restore check required</span>')
+            && str_contains($historyHtml, '>Matches current</span>')
+            && substr_count($historyHtml, '<li ') === 3,
+        'history distinguishes current, matching, and preflight-required states'
+    );
+    red_addon_editor_renderer_test_assert(
+        !str_contains($historyHtml, '<form')
+            && !str_contains($historyHtml, '<button')
+            && !str_contains($historyHtml, '<a ')
+            && !str_contains($historyHtml, '<script')
+            && !str_contains($historyHtml, '<style')
+            && !str_contains($historyHtml, $currentHash)
+            && !str_contains($historyHtml, 'componentValues'),
+        'history discloses no values, hashes, action, link, or executable markup'
+    );
+    $forgedHistory = $history;
+    $forgedHistory[1]['values'] = ['secret' => 'must-not-render'];
+    $wrongOrder = [$history[1], $history[0], $history[2]];
+    red_addon_editor_renderer_test_assert(
+        red_addon_component_revision_ui_render(
+            [],
+            $currentHash
+        ) === red_addon_component_revision_ui_unavailable()
+            && red_addon_component_revision_ui_render(
+                $forgedHistory,
+                $currentHash
+            ) === red_addon_component_revision_ui_unavailable()
+            && red_addon_component_revision_ui_render(
+                $wrongOrder,
+                $currentHash
+            ) === red_addon_component_revision_ui_unavailable()
+            && red_addon_component_revision_ui_render(
+                $history,
+                hash('sha256', 'stale-state')
+            ) === red_addon_component_revision_ui_unavailable(),
+        'empty, value-bearing, reordered, and stale histories fail closed'
+    );
+    red_addon_editor_renderer_test_assert(
+        str_contains($css, '#advanced .red-admin-addon-history {')
+            && str_contains($css, '.red-admin-addon-history__list {')
+            && str_contains($css, '@media (max-width: 700px)')
+            && str_contains($css, '.red-admin-addon-history__meta {'),
+        'revision-history styles are core-owned, scoped, and responsive'
     );
 
     printf(

@@ -363,6 +363,19 @@ style, package template, rejected raw input, authorization decision, package
 data lookup, or persistence behavior. Callers rendering more than one instance
 must provide a distinct safe id prefix.
 
+`red_addon_component_revision_ui_render()` is the separate display-only
+revision-timeline boundary. Its history argument must have the exact
+value-free shape produced by `red_addon_component_revision_history()`, remain
+strictly newest-first, and have a newest state hash equal to the supplied
+current core-owned hash. Core revalidates every closed metadata field, escapes
+all displayed actor and timestamp text, and discloses neither stored values nor
+state hashes. The newest row is current; an older equal state is marked as
+matching current; every other older row is marked as requiring a fresh restore
+check. Empty, stale, reordered, malformed, duplicate, or value-bearing input
+fails closed. The fragment contains no form, button, link, script, style,
+package template, restore preflight, restore action, authorization lookup,
+package execution, endpoint, or write.
+
 `red_addon_component_editor_permission_decision()` is the next database-backed
 authorization prerequisite. It resolves one of the six fixed editor operations
 to the exact permission already present in the normalized schema, then requires
@@ -685,7 +698,7 @@ now read and atomically update only title, active-theme layout, and language
 while the record remains an inactive hidden unrouted shell, with exact grants,
 stale-state refusal, package-state preservation, and one core revision. It does
 not open an operational form or endpoint, choose public placement, provide a
-history UI, export/import, delete, or add an audit workflow. Those editor and
+restore action, export/import, delete, or add an audit workflow. Those editor and
 lifecycle contracts remain separate reviewed batches.
 
 Add-on components must not be implemented by adding another hard-coded switch
@@ -816,7 +829,7 @@ Upgrades and uninstall remain later explicit transitions.
   become unsafe without an approved fallback. The first implementation
   enforces enabled-dependent refusal; persisted add-on assignments remain
   outside the supported minimal profile because declarative editor metadata
-  does not yet provide revision history UI, delete, public placement, or an
+  does not yet provide delete, public placement, or an
   operational endpoint, even though inactive creation and parent-metadata
   prerequisites are implemented.
 - **Upgrade:** back up, validate compatibility, test migrations against a
@@ -1036,8 +1049,9 @@ responses, or structured data.
    revision snapshots, validated history/preflight, and atomic restore
    execution are also implemented. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
-   parent-metadata writes are implemented; history UI, audit workflow, public
-   placement/activation, and delete behavior remain blocked.
+   parent-metadata writes and the display-only value-free revision timeline are
+   implemented; restore actions, audit workflow, public placement/activation,
+   and delete behavior remain blocked.
 9. Implement and distribute Store Lite separately as the first complete
    optional component plus service package.
 10. If private folders are scheduled for activation, implement and pass Member
