@@ -234,7 +234,7 @@ Store Lite still cannot use the current minimal enablement profile. Generic
 combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- revision-history UI and delete contracts; the permission-enforced inactive
+- delete contracts; the permission-enforced inactive
   parent-metadata writer, numeric placement-parent
   relationship, read-only public binding, non-executing declarative
   editor-schema, fail-closed submitted-value normalization, and core-owned
@@ -248,7 +248,7 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   and dual initial revisions. Read-only parent state and atomic
   title/layout/language updates are complete with exact grants, shell/package
   postconditions, and core revision rollback, but no grant-management
-  workflow, history UI, public placement/activation path, or delete runner
+  workflow, restore action, public placement/activation path, or delete runner
   exists;
 - typed service invocation;
 - declared public and administrator routes;
@@ -302,7 +302,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    updates, immutable revision snapshots, validated history/preflight, and
    atomic restore execution are complete. Read-only inactive creation
    preflight and its atomic runner plus permission-enforced inactive parent
-   metadata writes are also complete; history UI, public placement/activation,
+   metadata writes and the display-only value-free revision timeline are also
+   complete; restore actions, public placement/activation,
    and delete behavior remain. The preflight invokes no creator;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Implement generic typed service, route, administrator-tool, settings, and

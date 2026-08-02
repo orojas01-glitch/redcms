@@ -165,6 +165,14 @@ add-on packages without executing them.
   hash, and one exact integrity-valid target revision before returning a
   deterministic plan hash. Neither helper invokes the writer or applies a
   restore.
+- The core-owned revision-history renderer accepts only that bounded,
+  value-free metadata and a current state hash whose value matches the newest
+  entry. It revalidates exact keys, types, operations, hashes, uniqueness, and
+  newest-first ordering; escapes displayed actor and timestamp metadata; and
+  exposes no stored package values or hashes. Empty, stale, reordered,
+  malformed, duplicate, or value-bearing input fails closed. Its status text
+  never substitutes for restore preflight, and it emits no form, button, link,
+  package markup, authorization lookup, package execution, or write.
 - Atomic restore execution is a separate activation-blocked helper. It locks
   the exact enabled placement parent, re-runs the restore preflight, matches
   the caller's current-state and plan hashes, invokes only the registered
@@ -173,7 +181,7 @@ add-on packages without executing them.
   Revoked view/restore grants, stale or substituted plans, binding drift,
   callback/output/buffer failures, postcondition mismatch, lost transactions,
   and revision-ledger failure roll back. The helper exposes no endpoint,
-  history UI, audit workflow, package activation, or parent/delete mutation.
+  restore UI action, audit workflow, package activation, or parent/delete mutation.
 - Component creation preflight is separately read-only. An optional
   registrar-bound creator must belong to the exact enabled manifest owner and
   declare only package-owned transaction tables. Core requires the exact
@@ -334,7 +342,7 @@ Packages declaring `componentEditors` fail closed with
 core rendering, permission decisions, bounded data loading, and the
 activation-blocked existing-record update/restore helpers and read-only
 creation preflight do not imply complete editor authority or activation
-support. Revision history UI, delete, public placement, activation, and an
+support. Revision restore actions, delete, public placement, activation, and an
 operational endpoint remain absent. The parent-metadata prerequisite is
 activation-blocked and does not complete the editor lifecycle. The renderer is
 likewise non-authorizing and non-executing; it
@@ -419,7 +427,7 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-revision history UI, typed service invocation,
+revision restore actions, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
 pass separate disposable-fixture reviews. The activation-blocked parent
 metadata prerequisite, numeric placement-parent

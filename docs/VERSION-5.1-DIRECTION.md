@@ -34,7 +34,7 @@ core-owned state hash. The activation-blocked existing-record update helper
 now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
-permission grant/revoke workflow, operational editor endpoint, history UI,
+permission grant/revoke workflow, operational editor endpoint, restore action,
 delete, service, route, tool, settings, or asset contract is operational.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
@@ -405,6 +405,14 @@ request bootstrap excludes the disabled package.
     unchanged submission and roll back stale, revoked, unsupported-state,
     postcondition, or revision failure. Keep UI/endpoints, public placement,
     activation, delete, audit workflow, and package-value writes separate.
+25. Completed display-only component revision-history UI prerequisite: accept
+    only the bounded value-free history already returned after the exact view
+    grant and enabled binding, require its newest state to match the caller's
+    current core-owned hash, escape fixed metadata, and distinguish current,
+    matching, and restore-check-required entries. Fail closed on empty, stale,
+    reordered, malformed, or value-bearing input. Expose no form, button,
+    link, hash, package value, restore preflight, restore action, endpoint,
+    audit write, public placement, or activation behavior.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

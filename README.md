@@ -41,7 +41,7 @@ blocked from enablement. An enabled disposable fixture can now register one
 exact package data loader per declared editor; core requires the view grant,
 the persisted parent/runtime owner match, contained execution, and schema-valid
 returned values before exposing a state hash. No operational form, component
-create, history UI, or delete runner exists. A separate activation-blocked
+create endpoint, or delete runner exists. A separate activation-blocked
 helper can now apply an existing package record update only after the exact
 view and edit grants, current state hash, locked placement parent, enabled
 runtime ownership, declared InnoDB tables, contained writer execution, and
@@ -53,8 +53,13 @@ integrity-validated timeline and produce a deterministic restore plan only
 after current view/restore grants, ownership, state, and target evidence pass;
 an activation-blocked atomic restore helper now revalidates that exact plan
 under the existing record lock, invokes only the registered writer, verifies
-the reloaded target state, and commits one source-linked restore snapshot. No
-history UI, endpoint, audit workflow, or activation path is exposed. A new
+the reloaded target state, and commits one source-linked restore snapshot. Core
+can now render the authorized, value-free timeline as a strictly display-only
+administrator panel. It requires the newest revision to match the supplied
+current state, escapes bounded metadata, and labels older states as requiring
+a fresh restore check; malformed, stale, reordered, or value-bearing history
+fails closed. No restore action, endpoint, audit workflow, or activation path
+is exposed. A new
 read-only creation preflight requires the exact create grant, enabled runtime
 component/loader/creator ownership, an unused numeric parent id, an
 active-theme layout, schema-valid package values, and declared InnoDB package
@@ -117,12 +122,18 @@ not active features.
 - Immutable per-client package-value revision snapshots committed with updates
 - Read-only validated revision history and deterministic restore preflight
 - Atomic source-linked component revision restoration with stale-plan rollback
+- Core-owned display-only component revision timeline with no value disclosure
+  or restore action
 - Read-only inactive component-creation planning with exact owner, grant,
   schema, identifier, theme-layout, and transaction-table gates
 - Atomic inactive component creation with creator/loader containment, exact
   postcondition verification, dual initial revisions, and rollback proof
 - Permission-enforced inactive parent metadata updates with stale-state
   refusal, exact shell preservation, core revisions, and rollback proof
+
+See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
+for the current milestone, remaining Store Lite gates, and later optional
+package sequence.
 
 ## Portable Starter Distribution
 

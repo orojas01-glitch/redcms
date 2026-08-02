@@ -165,9 +165,10 @@ deterministic plan without invoking package code or writing state. Its
 activation-blocked atomic runner is now also implemented: it revalidates the
 plan under lifecycle/theme serialization, creates the parent and package row,
 reloads the exact postcondition, and commits initial core/package revisions in
-one transaction. Permission-enforced inactive parent metadata is now the next
-completed boundary below; public placement, history UI, and delete behavior
-remain later isolated batches.
+one transaction. Permission-enforced inactive parent metadata and the
+display-only value-free revision timeline are completed boundaries below;
+public placement, restore actions, and delete behavior remain later isolated
+batches.
 
 The editor-schema prerequisite is implemented as non-executing manifest data.
 A package may optionally declare one bounded editor schema per provided
@@ -231,6 +232,11 @@ Bounded revision history and restore preflight are now also implemented as
 read-only helpers. They require current view/restore grants, exact enabled
 ownership, the current state hash, and a fully revalidated target snapshot;
 they return metadata and a deterministic plan but execute no restore.
+The separate core-owned history renderer accepts only that value-free,
+newest-first result plus the current state hash. It escapes bounded metadata,
+marks non-current entries as requiring a fresh restore check, and fails closed
+on stale, reordered, malformed, or value-bearing input. It renders no form,
+link, button, package markup, hash, value, or restore action.
 The separate activation-blocked restore runner rechecks that plan under the
 locked enabled parent, uses only the registered writer and target snapshot,
 requires the exact reloaded target state, and commits a source-linked restore
@@ -280,10 +286,14 @@ declarative editor-schema, submitted-value validation, and activation-blocked
 existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer is implemented,
-while restore history UI, delete behavior, typed-service invocation, route,
+while delete behavior, typed-service invocation, route,
 administrator-tool, settings, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
+
+The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
+the completed foundation, current reviewed slice, remaining Store Lite gates,
+and later optional vertical packages without changing their scope.
 
 ### Version 5.1 Compatibility Work
 
