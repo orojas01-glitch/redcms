@@ -244,7 +244,16 @@ add-on packages without executing them.
   language agreement, validates hierarchy and the active-theme position
   contract, and hashes the actor, package, component, both states, and closed
   placement values. It performs no activation, update, package write, audit,
-  endpoint, or transaction; the atomic runner remains a separate gate.
+  endpoint, or transaction.
+- Atomic public placement revalidates the exact deterministic plan under the
+  shared lifecycle and theme locks plus enabled-installation, source-parent,
+  and destination-page row locks. Only the seven derived placement fields may
+  change; package data and the destination route must remain byte-for-byte
+  equivalent to their planned states. Success requires one explicit-actor
+  core `move` revision. Caller transactions, reused or stale plans, grant or
+  route drift, unsupported positions, transaction loss, postcondition
+  mismatch, and revision failure roll back. No package writer, endpoint,
+  administrator control, or audit event is authorized.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -447,9 +456,9 @@ Atomic inactive creation is also implemented behind the exact plan. The
 authenticated existing-record editor accepts only a core record id, current
 state hash, CSRF token, and schema values; it derives package/component
 ownership again and requires fresh exact view/edit grants before invoking the
-atomic writer. Restore UI, atomic public placement/activation, and create/delete
-controls/endpoints remain absent. Read-only public-placement planning and
-atomic inactive deletion are implemented only
+atomic writer. Restore UI and create/delete controls/endpoints remain absent.
+Read-only planning, atomic public placement/activation, and atomic inactive
+deletion are implemented only
 behind an exact preflight plan. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.

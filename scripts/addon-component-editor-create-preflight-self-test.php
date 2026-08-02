@@ -121,6 +121,10 @@ function red_addon_editor_create_test_cleanup(
                     'redcms_component_parent_update_revision_fail',
                 ],
                 [
+                    'RED_Content_Revisions',
+                    'redcms_component_publish_revision_fail',
+                ],
+                [
                     'RED_Addon_Component_Revisions',
                     'redcms_component_delete_package_revision_fail',
                 ],
@@ -1878,6 +1882,254 @@ try {
         'the active theme must support the requested destination position'
     );
 
+    mysqli_begin_transaction($connection);
+    $refused = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    mysqli_rollback($connection);
+    red_addon_editor_create_test_assert(
+        empty($refused['placed'])
+            && $refused['reason'] === 'transaction_already_active',
+        'atomic placement refuses a caller-owned transaction'
+    );
+
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID='
+            . $adminRecordId . " AND Capability='"
+            . mysqli_real_escape_string($connection, $publishPermission) . "'"
+    );
+    $loaderCallsBeforePublishRunnerRefusal = $loaderCalls;
+    $refused = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['placed'])
+            && $refused['reason'] === 'permission_denied'
+            && $loaderCalls === $loaderCallsBeforePublishRunnerRefusal,
+        'atomic placement rechecks the exact publish grant before package loading'
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $publishPermission
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Alias='addon-placement-target-drift'
+         WHERE RecordID=$targetPageRecordId"
+    );
+    $refused = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Alias='addon-placement-target'
+         WHERE RecordID=$targetPageRecordId"
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['placed']) && $refused['reason'] === 'stale_plan',
+        'destination drift invalidates the caller plan before placement'
+    );
+
+    $placementFingerprint = red_addon_editor_create_test_scalar(
+        $connection,
+        "SELECT CONCAT_WS(':',
+            (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                SubCategories, Article, PagePosition, PagePositionOrder)
+             FROM RED_Articles WHERE RecordID=$contentRecordId),
+            (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                SubCategories, Layout, Language, PagePosition)
+             FROM RED_Articles WHERE RecordID=$targetPageRecordId),
+            (SELECT CONCAT_WS('|', Title, Quantity) FROM `$packageTable`
+             WHERE ContentRecordID=$contentRecordId),
+            (SELECT COUNT(*) FROM RED_Content_Revisions
+             WHERE ContentRecordID=$contentRecordId))"
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions ADD CONSTRAINT '
+            . '`redcms_component_publish_revision_fail` CHECK '
+            . "(`Operation` <> 'move' OR `ContentRecordID` <> "
+            . $contentRecordId . ')'
+    );
+    $refused = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions DROP CHECK '
+            . '`redcms_component_publish_revision_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['placed'])
+            && $refused['reason'] === 'revision_failed'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                        SubCategories, Article, PagePosition, PagePositionOrder)
+                     FROM RED_Articles WHERE RecordID=$contentRecordId),
+                    (SELECT CONCAT_WS('|', Active, Alias, Sections, Categories,
+                        SubCategories, Layout, Language, PagePosition)
+                     FROM RED_Articles WHERE RecordID=$targetPageRecordId),
+                    (SELECT CONCAT_WS('|', Title, Quantity) FROM `$packageTable`
+                     WHERE ContentRecordID=$contentRecordId),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$contentRecordId))"
+            ) === $placementFingerprint,
+        'a forced placement revision failure rolls back source, target, and package state'
+    );
+
+    $placed = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($placed['placed'])
+            && $placed['reason'] === 'placed'
+            && $placed['package'] === $packageId
+            && $placed['viewPermission'] === $viewPermission
+            && $placed['publishPermission'] === $publishPermission
+            && $placed['previousParentStateHash'] === $updated['stateHash']
+            && $placed['stateHash'] !== $updated['stateHash']
+            && $placed['packageStateHash'] === $updated['packageStateHash']
+            && $placed['targetStateHash'] === $publishPlan['targetStateHash']
+            && $placed['placementValues'] === $publishPlan['placementValues']
+            && $placed['revisionId'] > 0
+            && $placed['revisionNumber'] === 3,
+        'the exact plan atomically places and activates the component with one move revision'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':', a.Active, IF(a.Alias='', 'empty', a.Alias),
+                IF(a.Sections='', 'empty', a.Sections),
+                IF(a.Categories='', 'empty', a.Categories),
+                IF(a.SubCategories='', 'empty', a.SubCategories),
+                a.Article, a.PagePosition, a.PagePositionOrder,
+                cr.RevisionNumber, cr.Operation, cr.ActorAdminRecordID,
+                p.Title, p.Quantity,
+                (SELECT Alias FROM RED_Articles
+                 WHERE RecordID=$targetPageRecordId))
+             FROM RED_Articles a
+             INNER JOIN RED_Content_Revisions cr
+               ON cr.ContentRecordID=a.RecordID AND cr.RevisionNumber=3
+             INNER JOIN `$packageTable` p ON p.ContentRecordID=a.RecordID
+             WHERE a.RecordID=$contentRecordId"
+        ) === 'Y:empty:empty:empty:empty:addon-placement-target:1:3:3:move:'
+            . $adminRecordId . ':Package row:5:addon-placement-target',
+        'placement changes only the derived parent fields and preserves package and target data'
+    );
+
+    $revisionCountAfterPlacement = red_addon_editor_create_test_scalar(
+        $connection,
+        "SELECT COUNT(*) FROM RED_Content_Revisions
+         WHERE ContentRecordID=$contentRecordId"
+    );
+    $refused = red_addon_component_editor_publish_values(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $targetPageRecordId,
+        1,
+        3,
+        $updated['stateHash'],
+        $updated['packageStateHash'],
+        $publishPlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['placed'])
+            && $refused['reason'] === 'parent_state_unsupported'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$contentRecordId"
+            ) === $revisionCountAfterPlacement,
+        'a committed public-placement plan is single-use'
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles
+         SET Sections='', Categories='', SubCategories='', Article='',
+             PagePosition=0, PagePositionOrder=0, Active='N'
+         WHERE RecordID=$contentRecordId"
+    );
+    $fixtureRestored = red_addon_component_editor_parent_revision(
+        $connection,
+        $contentRecordId,
+        $adminRecordId,
+        'save'
+    );
+    $restoredParentState = red_addon_component_editor_parent_state(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId
+    );
+    red_addon_editor_create_test_assert(
+        is_array($fixtureRestored)
+            && $fixtureRestored['revisionNumber'] === 4
+            && !empty($restoredParentState['loaded'])
+            && $restoredParentState['packageStateHash']
+                === $updated['packageStateHash'],
+        'the disposable fixture returns to a revision-backed inactive shell for delete testing'
+    );
+
     $refused = red_addon_component_editor_create_values(
         $connection,
         $manifest,
@@ -1895,7 +2147,7 @@ try {
                 $connection,
                 $contentRecordId,
                 $packageTable
-            ) === '1:1:2:1:0',
+            ) === '1:1:4:1:0',
         'the committed numeric id cannot be reused and remains unchanged'
     );
 
@@ -1923,7 +2175,7 @@ try {
                 $connection,
                 $contentRecordId,
                 $packageTable
-            ) === '1:1:3:1:1',
+            ) === '1:1:5:1:1',
         'the disposable delete fixture includes current revision-backed SEO metadata'
     );
 
@@ -1951,7 +2203,7 @@ try {
     red_addon_editor_create_test_assert(
         !empty($deleteParentState['loaded'])
             && !empty($deletePlan['ready'])
-            && $deleteFingerprint === '1:1:3:1:1',
+            && $deleteFingerprint === '1:1:5:1:1',
         'the updated inactive record produces a fresh executable delete plan'
     );
 
@@ -2146,7 +2398,7 @@ try {
                 $connection,
                 $contentRecordId,
                 $packageTable
-            ) === '0:0:4:2:0',
+            ) === '0:0:6:2:0',
         'the exact plan deletes parent and package rows atomically while retaining both ledgers'
     );
     red_addon_editor_create_test_assert(
@@ -2160,7 +2412,7 @@ try {
                  FROM RED_Content_Revisions
                  WHERE RevisionID=" . (int) $deleted['parentRevisionId'] . '))'
         ) === '2:delete:' . $deleteParentState['packageStateHash']
-            . ':4:delete:' . $deleteParentState['stateHash'],
+            . ':6:delete:' . $deleteParentState['stateHash'],
         'the surviving final revisions are immutable delete snapshots of both states'
     );
 
@@ -2181,7 +2433,7 @@ try {
                 $connection,
                 $contentRecordId,
                 $packageTable
-            ) === '0:0:4:2:0',
+            ) === '0:0:6:2:0',
         'a committed delete plan is single-use and cannot alter retained evidence'
     );
     red_addon_editor_create_test_assert(

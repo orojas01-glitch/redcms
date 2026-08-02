@@ -211,7 +211,7 @@ if (!function_exists('red_admin_content_revision_latest')) {
         try {
             $stmt = mysqli_prepare(
                 $connection,
-                'SELECT RevisionID, RevisionNumber, SnapshotHash FROM RED_Content_Revisions '
+                'SELECT RevisionID, RevisionNumber, Operation, SnapshotHash FROM RED_Content_Revisions '
                 . 'WHERE ContentRecordID=? ORDER BY RevisionNumber DESC LIMIT 1'
             );
             if (!$stmt) {
