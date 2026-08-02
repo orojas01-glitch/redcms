@@ -234,8 +234,8 @@ Store Lite still cannot use the current minimal enablement profile. Generic
 combined component-plus-service registration is complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
-- permission-enforced parent-metadata write, revision-history UI, and delete
-  contracts; the numeric placement-parent
+- revision-history UI and delete contracts; the permission-enforced inactive
+  parent-metadata writer, numeric placement-parent
   relationship, read-only public binding, non-executing declarative
   editor-schema, fail-closed submitted-value normalization, and core-owned
   display-only editor renderer foundations are complete; exact fresh
@@ -245,8 +245,11 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   revision snapshots. Validated history/preflight and atomic source-linked
   restore execution are also complete. Read-only inactive creation preflight
   and its atomic runner are complete with exact creator/loader postconditions
-  and dual initial revisions, but no grant-management workflow,
-  parent-metadata writer, history UI, or delete runner exists;
+  and dual initial revisions. Read-only parent state and atomic
+  title/layout/language updates are complete with exact grants, shell/package
+  postconditions, and core revision rollback, but no grant-management
+  workflow, history UI, public placement/activation path, or delete runner
+  exists;
 - typed service invocation;
 - declared public and administrator routes;
 - scoped administrator-tool dispatch;
@@ -298,8 +301,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    decisions, bounded enabled-package data loading, and existing-record package
    updates, immutable revision snapshots, validated history/preflight, and
    atomic restore execution are complete. Read-only inactive creation
-   preflight and its atomic runner are also complete; parent-metadata writes,
-   history UI, and delete behavior remain. The preflight invokes no creator;
+   preflight and its atomic runner plus permission-enforced inactive parent
+   metadata writes are also complete; history UI, public placement/activation,
+   and delete behavior remain. The preflight invokes no creator;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Implement generic typed service, route, administrator-tool, settings, and
    asset contracts as separate reviewed batches.

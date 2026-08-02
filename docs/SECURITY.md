@@ -196,6 +196,19 @@ add-on packages without executing them.
   mismatch, and either ledger failure fail closed. The callback is still
   trusted in-process PHP and must not issue transaction controls, DDL, or
   writes outside declared package tables.
+- Parent metadata uses a separate core-owned activation-blocked boundary.
+  Read-only state requires the exact view grant, enabled manifest/runtime and
+  persisted binding, a closed inactive hidden unrouted shell, a valid package
+  loader result, and a current matching core revision. The atomic writer
+  checks the exact edit grant before package loading, rejects caller-owned
+  transactions, requires a caller state hash, and rechecks the complete state
+  under lifecycle, theme, installation, and parent locks. Only title,
+  active-theme layout, and language can change. The full remaining parent row
+  and package state are postconditions, and one explicit-actor core `save`
+  revision shares the transaction. Identical values add no revision; stale,
+  revoked, public/placed, transaction, postcondition, and ledger failures roll
+  back. No endpoint, public placement, activation, delete, audit event, or
+  package-value write is exposed.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -321,8 +334,9 @@ Packages declaring `componentEditors` fail closed with
 core rendering, permission decisions, bounded data loading, and the
 activation-blocked existing-record update/restore helpers and read-only
 creation preflight do not imply complete editor authority or activation
-support. Parent-metadata updates,
-revision history UI, delete, and an operational endpoint remain absent. The renderer is
+support. Revision history UI, delete, public placement, activation, and an
+operational endpoint remain absent. The parent-metadata prerequisite is
+activation-blocked and does not complete the editor lifecycle. The renderer is
 likewise non-authorizing and non-executing; it
 does not open a form, provide a Save action, load a registrar, inspect a
 package table, or make the package eligible for activation.
@@ -389,10 +403,10 @@ component id, the persisted enabled installation, and the request-local
 runtime owner. Package-specific fields stay in package-owned tables; core does
 not select a table, class, callback, or executable loader from database data.
 Activation-blocked data loading, existing-record updates, immutable revision
-snapshots, and read-only inactive creation planning are implemented as
-separate prerequisites. Atomic inactive creation is also implemented behind
-the exact plan. Parent-metadata writes,
-restore UI, delete, and an
+snapshots, read-only inactive creation planning, and permission-enforced
+inactive parent-metadata writes are implemented as separate prerequisites.
+Atomic inactive creation is also implemented behind the exact plan. Restore
+UI, public placement/activation, delete, and an
 operational editor remain absent. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
@@ -405,9 +419,10 @@ separate work.
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-parent-metadata editing, revision history UI, typed service invocation,
+revision history UI, typed service invocation,
 routes, administrator tools, settings, assets, and live-data compatibility
-pass separate disposable-fixture reviews. The numeric placement-parent
+pass separate disposable-fixture reviews. The activation-blocked parent
+metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Disposable checks for read-only add-on component creation preflight.
+ * Disposable checks for add-on component creation and parent metadata.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -15,6 +15,8 @@ require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot
     . '/includes/addon_component_editor_create_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_component_editor_parent_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_editor_create|rev_base)_[A-Za-z0-9_]+\z/',
@@ -35,6 +37,7 @@ $packageId = 'redcms.editor-create-fixture';
 $componentId = 'redcms.editor-create-fixture/item';
 $createPermission = 'fixture.editor-create.create';
 $viewPermission = 'fixture.editor-create.view';
+$editPermission = 'fixture.editor-create.edit';
 $packageTable = 'RED_Addon_Component_Editor_Create_Fixture';
 $creatorCalls = 0;
 $loaderCalls = 0;
@@ -93,11 +96,19 @@ function red_addon_editor_create_test_cleanup(
     try {
         foreach (
             [
-                'RED_Addon_Component_Revisions'
-                    => 'redcms_addon_component_create_revision_fail',
-                'RED_Content_Revisions'
-                    => 'redcms_component_create_parent_revision_fail',
-            ] as $table => $constraint
+                [
+                    'RED_Addon_Component_Revisions',
+                    'redcms_addon_component_create_revision_fail',
+                ],
+                [
+                    'RED_Content_Revisions',
+                    'redcms_component_create_parent_revision_fail',
+                ],
+                [
+                    'RED_Content_Revisions',
+                    'redcms_component_parent_update_revision_fail',
+                ],
+            ] as [$table, $constraint]
         ) {
             if (red_addon_editor_create_test_scalar(
                 $connection,
@@ -200,7 +211,8 @@ function red_addon_editor_create_test_manifest(
     $packageId,
     $componentId,
     $createPermission,
-    $viewPermission
+    $viewPermission,
+    $editPermission
 ) {
     return [
         '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
@@ -218,7 +230,11 @@ function red_addon_editor_create_test_manifest(
             'adapters' => [],
         ],
         'dependencies' => ['required' => [], 'optional' => []],
-        'permissions' => [$createPermission, $viewPermission],
+        'permissions' => [
+            $createPermission,
+            $viewPermission,
+            $editPermission,
+        ],
         'componentEditors' => [[
             'component' => $componentId,
             'label' => 'Create fixture',
@@ -227,7 +243,7 @@ function red_addon_editor_create_test_manifest(
             'permissions' => [
                 'create' => $createPermission,
                 'view' => $viewPermission,
-                'edit' => $createPermission,
+                'edit' => $editPermission,
                 'delete' => $createPermission,
                 'publish' => $createPermission,
                 'restore' => $createPermission,
@@ -386,7 +402,8 @@ try {
         $packageId,
         $componentId,
         $createPermission,
-        $viewPermission
+        $viewPermission,
+        $editPermission
     );
 
     $undeclared = $manifest;
@@ -480,6 +497,11 @@ try {
         $connection,
         $adminRecordId,
         $viewPermission
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $editPermission
     );
     $manifestHash = hash('sha256', json_encode($manifest));
     $inventoryHash = hash('sha256', 'create-preflight-fixture');
@@ -964,6 +986,277 @@ try {
         'committed state remains hidden and has exact create/baseline evidence'
     );
 
+    $parentState = red_addon_component_editor_parent_state(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId
+    );
+    red_addon_editor_create_test_assert(
+        !empty($parentState['loaded'])
+            && $parentState['reason'] === 'loaded'
+            && $parentState['viewPermission'] === $viewPermission
+            && $parentState['parentValues'] === $parentMetadata
+            && preg_match(
+                '/\A[a-f0-9]{64}\z/',
+                $parentState['stateHash']
+            ) === 1
+            && $parentState['stateHash'] ===
+                red_addon_editor_create_test_scalar(
+                    $connection,
+                    "SELECT SnapshotHash FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$contentRecordId
+                     ORDER BY RevisionNumber DESC LIMIT 1"
+                )
+            && $parentState['packageStateHash'] === $created['stateHash'],
+        'read-only parent state requires the exact view grant, shell, package row, and current revision'
+    );
+
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID='
+            . $adminRecordId . " AND Capability='"
+            . mysqli_real_escape_string($connection, $viewPermission) . "'"
+    );
+    $refused = red_addon_component_editor_parent_state(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['loaded'])
+            && $refused['reason'] === 'permission_denied',
+        'parent state requires a fresh exact view grant before package loading'
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $viewPermission
+    );
+
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID='
+            . $adminRecordId . " AND Capability='"
+            . mysqli_real_escape_string($connection, $editPermission) . "'"
+    );
+    $loaderCallsBeforeEditRefusal = $loaderCalls;
+    $refused = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        [
+            'title' => 'Updated inactive parent',
+            'layout' => $layout,
+            'language' => 'en',
+        ]
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['updated'])
+            && $refused['reason'] === 'permission_denied'
+            && $loaderCalls === $loaderCallsBeforeEditRefusal,
+        'the exact edit grant is required before any package callback'
+    );
+    red_addon_editor_create_test_grant(
+        $connection,
+        $adminRecordId,
+        $editPermission
+    );
+
+    $loaderCallsBeforeInvalid = $loaderCalls;
+    $refused = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        [
+            'title' => 'Updated inactive parent',
+            'layout' => $layout,
+            'language' => 'en',
+            'active' => 'Y',
+        ]
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['updated'])
+            && $refused['reason'] === 'invalid_parent_values'
+            && $loaderCalls === $loaderCallsBeforeInvalid,
+        'unknown or activation metadata is refused before package loading'
+    );
+
+    mysqli_begin_transaction($connection);
+    $refused = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        [
+            'title' => 'Updated inactive parent',
+            'layout' => $layout,
+            'language' => 'en',
+        ]
+    );
+    mysqli_rollback($connection);
+    red_addon_editor_create_test_assert(
+        empty($refused['updated'])
+            && $refused['reason'] === 'transaction_already_active',
+        'parent metadata refuses a caller-owned transaction'
+    );
+
+    $unchanged = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $parentMetadata
+    );
+    red_addon_editor_create_test_assert(
+        !empty($unchanged['unchanged'])
+            && empty($unchanged['updated'])
+            && $unchanged['reason'] === 'unchanged'
+            && $unchanged['stateHash'] === $parentState['stateHash']
+            && $unchanged['revisionId'] === 0
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$contentRecordId"
+            ) === '1',
+        'identical parent metadata commits no change and adds no revision'
+    );
+
+    $updatedMetadata = [
+        'title' => 'Updated inactive parent',
+        'layout' => $layout,
+        'language' => 'en',
+    ];
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions ADD CONSTRAINT '
+            . '`redcms_component_parent_update_revision_fail` CHECK '
+            . "(`Operation` <> 'save' OR `ContentRecordID` <> "
+            . $contentRecordId . ')'
+    );
+    $refused = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $updatedMetadata
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Content_Revisions DROP CHECK '
+            . '`redcms_component_parent_update_revision_fail`'
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['updated'])
+            && $refused['reason'] === 'revision_failed'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':', Title, Layout, Language, Active,
+                    PagePosition, IF(Alias='', 'empty', Alias))
+                 FROM RED_Articles WHERE RecordID=$contentRecordId"
+            ) === 'Inactive creation fixture:' . $layout . ':sp:N:0:empty'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$contentRecordId"
+            ) === '1',
+        'a forced core revision failure rolls back every parent metadata change'
+    );
+
+    $updated = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $updatedMetadata
+    );
+    red_addon_editor_create_test_assert(
+        !empty($updated['updated'])
+            && empty($updated['unchanged'])
+            && $updated['reason'] === 'updated'
+            && $updated['editPermission'] === $editPermission
+            && $updated['parentValues'] === $updatedMetadata
+            && $updated['previousStateHash'] === $parentState['stateHash']
+            && $updated['stateHash'] !== $parentState['stateHash']
+            && $updated['packageStateHash'] === $created['stateHash']
+            && $updated['revisionId'] > 0
+            && $updated['revisionNumber'] === 2,
+        'the exact metadata update commits with a new core state and revision'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':', a.Title, a.Layout, a.Language, a.Active,
+                a.PagePosition, IF(a.Alias='', 'empty', a.Alias),
+                cr.RevisionNumber, cr.Operation, cr.ActorAdminRecordID,
+                (SELECT COUNT(*) FROM RED_Addon_Component_Revisions ar
+                 WHERE ar.ContentRecordID=a.RecordID),
+                p.Title, p.Quantity)
+             FROM RED_Articles a
+             INNER JOIN RED_Content_Revisions cr
+               ON cr.ContentRecordID=a.RecordID
+              AND cr.RevisionNumber=2
+             INNER JOIN `$packageTable` p
+               ON p.ContentRecordID=a.RecordID
+             WHERE a.RecordID=$contentRecordId"
+        ) === 'Updated inactive parent:' . $layout
+            . ':en:N:0:empty:2:save:' . $adminRecordId
+            . ':1:Package row:5',
+        'only title, layout, and language change while placement and package data remain exact'
+    );
+
+    $refused = red_addon_component_editor_parent_update(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $parentState['stateHash'],
+        $parentMetadata
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['updated']) && $refused['reason'] === 'stale_state',
+        'the pre-update parent state hash is single-use after a change'
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Active='Y' WHERE RecordID=$contentRecordId"
+    );
+    $refused = red_addon_component_editor_parent_state(
+        $connection,
+        $manifest,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Active='N' WHERE RecordID=$contentRecordId"
+    );
+    red_addon_editor_create_test_assert(
+        empty($refused['loaded'])
+            && $refused['reason'] === 'parent_state_unsupported',
+        'public or non-shell parent state is outside the metadata writer'
+    );
+
     $refused = red_addon_component_editor_create_values(
         $connection,
         $manifest,
@@ -981,12 +1274,12 @@ try {
                 $connection,
                 $contentRecordId,
                 $packageTable
-            ) === '1:1:1:1:0',
+            ) === '1:1:2:1:0',
         'the committed numeric id cannot be reused and remains unchanged'
     );
     red_addon_editor_create_test_assert(
-        $creatorCalls === 8 && $loaderCalls === 4,
-        'only executing runner paths invoke the creator or postcondition loader'
+        $creatorCalls === 8 && $loaderCalls === 14,
+        'only authorized state and runner paths invoke package callbacks'
     );
 
     red_addon_editor_create_test_cleanup(
@@ -1025,7 +1318,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on component creation preflight/runner self-test passed ('
+    'Add-on component creation/parent-metadata self-test passed ('
         . $assertions . " assertions).\n"
 );
 
