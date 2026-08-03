@@ -32,14 +32,15 @@ credential-free HTTP/HTTPS URLs, email addresses, and opaque lowercase
 secret references. The fixture performs no database access, secret lookup,
 authorization, administrator rendering, package execution, or lifecycle
 change.
-The 16-assertion disposable setting-storage preflight fixture requires the
-exact empty seven-column table and installation foreign key, explicit
+The 23-assertion disposable setting-storage and atomic-writer fixture requires
+the exact empty seven-column table and installation foreign key, explicit
 package-declared permission bindings, fresh binary grants, exact trusted
 filesystem/registry identity, installed-disabled or enabled state, complete
 typed target values, valid current stored rows, deterministic current/target
 and plan hashes, immediate revocation, zero package execution or secret
-resolution, zero mutation, and exact package/administrator/grant/filesystem
-cleanup.
+resolution, exact full replacement, ordinary/secret column separation, one
+bounded audit fact, no-op handling, stale-target refusal, rollback after audit
+or injected failure, and exact package/administrator/grant/filesystem cleanup.
 Optional component-editor metadata is also validated as a fixed, data-only
 schema: declared components and permissions must resolve exactly, field types
 and constraints are allowlisted, and executable or storage-owned instructions
@@ -249,7 +250,7 @@ contract, and 20-assertion public-route contract, imported the 26-table installe
 applied all 40 migrations to the expected 28-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
-16-assertion add-on setting storage and authorization write preflight,
+23-assertion add-on setting storage, authorization preflight, and atomic writer,
 18-assertion permission-scoped administrator-tool dispatch,
 20-assertion bounded component-editor data-loader lifecycle,
 47-assertion operational component form, transactional component-editor update, history, restore-preflight,
@@ -345,14 +346,17 @@ The command must return a nonzero status if installation, migration, schema, rel
   secret-looking, or schema-invalid input returns no normalized configuration.
   It performs no database access, secret resolution, authorization, rendering,
   package execution, or lifecycle mutation.
-- Add-on setting storage/write-preflight acceptance runs only in the uniquely
+- Add-on setting storage/preflight/atomic-writer acceptance runs only in the uniquely
   named disposable database. It requires the exact empty generic schema and
   restrictive installation foreign key, explicit package-declared permission
   bindings, fresh case-sensitive grants, exact trusted package and registry
   identity, supported lifecycle state, complete typed target values, valid
   current rows, deterministic value-free hashes, next-decision revocation, no
-  package execution, no secret resolution, no database mutation, and exact
-  cleanup.
+  package execution, no secret resolution, and exact cleanup. Atomic
+  replacement additionally requires shared locks, exact plan comparison,
+  complete rows, separate ordinary/secret columns, exact postcondition reload,
+  one value-free audit fact, no-op handling, and full rollback on audit or
+  injected late failure.
 - Add-on component-editor renderer acceptance runs before database creation. It requires core-owned escaped markup for every fixed schema type, stable namespaced labels/help/errors, scoped border-box control sizing, no rejected-value reflection, fail-closed malformed state, and no form, submit control, authorization, package execution, package data access, or database state. Its revision-timeline checks additionally require exact value-free newest-first metadata, newest/current hash agreement, escaped actor and timestamp copy, fixed current/matching/restore-check-required states, responsive containment, no value or hash disclosure, no action markup, and fail-closed empty, stale, reordered, or value-bearing input.
 - Add-on component-editor permission acceptance runs only in the uniquely named disposable database. It requires the full manifest permission capacity, exact operation mapping, explicit package grants independent of Owner/lifecycle authority, binary case matching, next-decision revocation, read-only state fingerprints, and zero residual administrator, role, or grant fixtures.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.

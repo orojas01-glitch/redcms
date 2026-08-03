@@ -41,7 +41,7 @@ ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, restore action, or create/delete endpoint is
 implied by these prerequisites. Writable route/tool actions, settings
-persistence, and package asset loading are not operational.
+UI/endpoints, and package asset loading are not operational.
 The first non-executing settings-value prerequisite now normalizes only valid
 data-only definitions, requires exact type-correct non-secret defaults, and
 validates one closed configuration object. Missing, unknown, nested, malformed,
@@ -56,6 +56,13 @@ filesystem and registry identity, installed-disabled or enabled state,
 complete typed values, fresh case-sensitive database grants, valid current
 stored rows, and deterministic current/target/plan hashes. It does not write,
 resolve secrets, render controls, execute package code, or relax enablement.
+The internal atomic setting writer refuses caller-owned transactions, holds
+the shared lifecycle/package plus installation/setting row locks, recreates
+the complete plan, replaces every typed setting, reloads the exact target
+hash/count, and atomically records one value-free `addon.settings.updated`
+fact. Exact no-ops add no audit. Stale plans, drift, postcondition/audit
+failure, or injected late failure roll back. No settings UI/endpoint or secret
+lookup is added.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -494,6 +501,13 @@ request bootstrap excludes the disabled package.
     values, valid current rows, and deterministic state/plan hashes. Persist
     no value, resolve no secret, invoke no package, render no form, and change
     no lifecycle or activation state.
+33. Completed internal atomic settings persistence: refuse caller-owned
+    transactions; serialize with lifecycle/package and row locks; recreate and
+    compare the exact plan; replace the complete normalized configuration;
+    reload its target hash/count; and atomically record one bounded value-free
+    audit fact. Treat exact state as a no-op and roll back on all drift, write,
+    postcondition, audit, or injected failures. Add no UI, endpoint, secret
+    resolution, package execution, or activation eligibility.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

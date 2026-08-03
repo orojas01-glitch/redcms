@@ -17,8 +17,8 @@ Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
 Typed internal services, exact static public `GET` routes, and display-only
 administrator tools now have separate fail-closed dispatch boundaries.
-Adapters, writable route/tool actions, atomic settings persistence, package
-assets, and richer enablement remain blocked. RED-CMS does not upgrade, uninstall, or
+Adapters, writable route/tool actions, settings UI/endpoints, package assets,
+and richer enablement remain blocked. RED-CMS does not upgrade, uninstall, or
 purge packages through this contract yet.
 
 ## Implemented Trust Boundary
@@ -373,7 +373,19 @@ target configuration; requires fresh binary grants for every setting; rejects
 unknown or malformed current rows; and returns only deterministic current,
 target, and plan hashes. It never returns setting values, writes storage,
 resolves secrets, renders controls, invokes package code, or changes lifecycle
-state. An atomic writer remains a separate reviewed contract.
+state.
+
+`red_addon_setting_write()` is that internal atomic writer. It accepts the
+complete configuration plus the exact preflight plan SHA-256, refuses a
+caller-owned transaction, acquires the shared lifecycle and exact package
+locks, then locks the installation and setting rows. Inside one transaction it
+recreates the plan and grants, compares the digest, replaces every normalized
+row, reloads the exact target hash/count, and records one
+`addon.settings.updated` / `settings_updated` fact containing no values or
+secret references. Exact state returns `unchanged` without a duplicate audit.
+Stale plans, drift, replacement/postcondition/audit failure, or injected late
+failure roll back completely. It resolves no secret, executes no package code,
+renders no form, exposes no endpoint, and does not change activation.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -1222,8 +1234,8 @@ responses, or structured data.
    revision snapshots, validated history/preflight, and atomic restore
    execution are also implemented. Data-only setting definitions now have
    type-correct defaults plus closed value and secret-reference normalization;
-   empty per-client storage plus exact permissioned write preflight are
-   implemented; atomic persistence, editing UI, secret availability, and
+   empty per-client storage, exact permissioned write preflight, and atomic
+   internal persistence are implemented; editing UI, secret availability, and
    activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
