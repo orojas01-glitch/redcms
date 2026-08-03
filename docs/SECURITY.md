@@ -505,24 +505,25 @@ read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
 The implemented disable command is non-executing and data-retaining for any
-current enabled package with no enabled dependent. Settings, static
-package-asset injection, migrations, live data, recovery, and every
-richer enablement gate remain separate work.
+current enabled package with no enabled dependent. Settings UI/endpoints,
+migrations, live data, recovery, and every richer enablement gate remain
+separate work.
 
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-revision restore actions, routes, administrator tools, settings, asset
-injection, and live-data compatibility pass separate
+revision restore actions, routes, administrator tools, settings, and live-data
+compatibility pass separate
 disposable-fixture reviews. The activation-blocked parent
 metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
 The atomic setting helper and availability evidence do not supply Store Lite
-settings UI/endpoints, actual secret lookup, package-asset injection, or
-enablement readiness. The CSS/JavaScript asset plan, read-only delivery
-preflight, and static endpoint are complete, but none injects an asset.
+settings UI/endpoints, actual secret lookup, or enablement readiness. The
+CSS/JavaScript plan, read-only delivery preflight, static endpoint, and
+core-owned document injection are complete, but do not make Store Lite
+enablement-ready.
 
 The first namespaced asset helper accepts only a trusted manifest's
 package-owned CSS and JavaScript declarations and derives deterministic
@@ -539,7 +540,17 @@ bytes up to 4 MiB through `GET` or `HEAD`, with fixed immutable-cache and
 assets receive only a generic `404`; unavailable registry storage receives a
 generic `503`; and other methods receive a fixed `405`. No response exposes a
 filesystem path, preflight reason, package output, or package PHP execution.
-Public/admin injection remains separate reviewed work.
+
+The separate core-owned injection planner re-discovers trusted manifests and
+current registry evidence without loading `addon.php`, then revalidates both
+asset surfaces for every enabled package. It selects public CSS/JavaScript for
+every document and selects administrator CSS/JavaScript only when the existing
+signed-in administrator overlay is present. Core emits escaped tags only
+immediately before one unambiguous closing `head` or `body` boundary; catalog,
+registry, integrity, plan, or document-boundary failure suppresses every
+package tag. The planner does not start a session, invoke a registrar, or write
+state. The pre-existing request runtime registration remains separate, and the
+asset endpoint independently revalidates every later browser asset request.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and

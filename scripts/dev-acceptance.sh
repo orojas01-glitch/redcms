@@ -165,6 +165,12 @@ ACCEPTANCE_ROLLBACK_TRIGGER_NAME="red_acceptance_force_gallery_update"
 ACCEPTANCE_ROLLBACK_TRIGGER_CREATED=0
 ACCEPTANCE_ROLLBACK_FIXTURE_CREATED=0
 ACCEPTANCE_ADDON_ASSET_ENDPOINT_FIXTURE_CREATED=0
+ACCEPTANCE_ADDON_ASSET_INJECTION_FIXTURE_CREATED=0
+ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_CREATED=0
+ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID=2147000909
+ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME="codex_acceptance_asset_injection"
+ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD="CodexAssetInjection-2026!"
+ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_ALIAS="CodexAssets"
 
 red_acceptance_create_admin_defaults() {
     ADMIN_DEFAULTS_FILE="$(mktemp "${TMPDIR:-/tmp}/redcms-acceptance-admin.XXXXXX")"
@@ -608,6 +614,173 @@ red_acceptance_run_addon_asset_endpoint() {
 
     red_acceptance_addon_asset_endpoint_cleanup
     printf '%s\n' 'PASS: static immutable add-on asset endpoint served exact bytes and rejected method, checksum, traversal, lifecycle, and integrity drift without sessions or package execution.'
+}
+
+red_acceptance_addon_asset_injection_fixture() {
+    RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli \
+        "$RED_PROJECT_ROOT/scripts/addon-asset-injection-self-test.php" "$1"
+}
+
+red_acceptance_addon_asset_injection_metadata() {
+    local metadata="$1"
+    local key="$2"
+    local value=""
+
+    value="$(printf '%s\n' "$metadata" | awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; exit }')"
+    printf '%s' "$value"
+}
+
+red_acceptance_addon_asset_injection_admin_artifacts() {
+    red_acceptance_app_mysql --execute="
+        SELECT CONCAT_WS(
+            ':',
+            (SELECT COUNT(*) FROM RED_Admin
+             WHERE RecordID=$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID
+                OR Username='$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME'),
+            (SELECT COUNT(*) FROM RED_Login_Attempts
+             WHERE UsernameHash=UNHEX(SHA2(LOWER(TRIM('$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME')), 256))),
+            (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+             WHERE ActorAdminRecordID=$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID
+                OR (TargetType='administrator'
+                    AND TargetRecordID=$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID))
+        );
+    "
+}
+
+red_acceptance_remove_addon_asset_injection_admin() {
+    red_acceptance_app_mysql --execute="
+        DELETE FROM RED_Admin_Activity_Log
+        WHERE ActorAdminRecordID=$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID
+           OR (TargetType='administrator'
+               AND TargetRecordID=$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID);
+        DELETE FROM RED_Login_Attempts
+        WHERE UsernameHash=UNHEX(SHA2(LOWER(TRIM('$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME')), 256));
+        DELETE FROM RED_Admin
+        WHERE RecordID=$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID
+           OR Username='$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME';
+    "
+}
+
+red_acceptance_addon_asset_injection_cleanup() {
+    if [[ "$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_CREATED" -eq 1 ]]; then
+        red_acceptance_remove_addon_asset_injection_admin
+        if [[ "$(red_acceptance_addon_asset_injection_admin_artifacts)" != '0:0:0' ]]; then
+            printf '%s\n' 'Cleanup failure: add-on asset injection administrator fixture remains.' >&2
+            return 1
+        fi
+        ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_CREATED=0
+    fi
+    if [[ "$ACCEPTANCE_ADDON_ASSET_INJECTION_FIXTURE_CREATED" -eq 1 ]]; then
+        red_acceptance_addon_asset_injection_fixture --runtime-cleanup
+        if [[ -e "$RED_PROJECT_ROOT/addons/redcms/asset-injection-fixture" \
+            || -e "$RED_PROJECT_ROOT/addons" ]]; then
+            printf '%s\n' 'Cleanup failure: add-on asset injection fixture files remain.' >&2
+            return 1
+        fi
+        ACCEPTANCE_ADDON_ASSET_INJECTION_FIXTURE_CREATED=0
+    fi
+}
+
+red_acceptance_run_addon_asset_injection() {
+    local metadata=""
+    local public_css_url=""
+    local public_script_url=""
+    local admin_css_url=""
+    local admin_script_url=""
+    local execution_marker=""
+    local anonymous_home="$ACCEPTANCE_RESPONSE_DIR/addon-asset-injection-anonymous.html"
+    local authenticated_home="$ACCEPTANCE_RESPONSE_DIR/addon-asset-injection-authenticated.html"
+    local metrics=""
+    local status=""
+
+    ACCEPTANCE_ADDON_ASSET_INJECTION_FIXTURE_CREATED=1
+    metadata="$(red_acceptance_addon_asset_injection_fixture --runtime-setup)"
+    public_css_url="$(red_acceptance_addon_asset_injection_metadata "$metadata" publicCssUrl)"
+    public_script_url="$(red_acceptance_addon_asset_injection_metadata "$metadata" publicScriptUrl)"
+    admin_css_url="$(red_acceptance_addon_asset_injection_metadata "$metadata" adminCssUrl)"
+    admin_script_url="$(red_acceptance_addon_asset_injection_metadata "$metadata" adminScriptUrl)"
+    execution_marker="$(red_acceptance_addon_asset_injection_metadata "$metadata" executionMarker)"
+    if [[ ! "$public_css_url" =~ ^/_red/addons/redcms/asset-injection-fixture/assets/public/injection\.css\?v=[a-f0-9]{64}$ \
+        || ! "$public_script_url" =~ ^/_red/addons/redcms/asset-injection-fixture/assets/public/injection\.js\?v=[a-f0-9]{64}$ \
+        || ! "$admin_css_url" =~ ^/_red/addons/redcms/asset-injection-fixture/assets/admin/injection\.css\?v=[a-f0-9]{64}$ \
+        || ! "$admin_script_url" =~ ^/_red/addons/redcms/asset-injection-fixture/assets/admin/injection\.js\?v=[a-f0-9]{64}$ \
+        || -z "$execution_marker" \
+        || -e "$execution_marker" ]]; then
+        printf '%s\n' 'FAIL: add-on asset injection fixture metadata is invalid.' >&2
+        return 1
+    fi
+
+    metrics="$(curl -sS --max-time 10 -o "$anonymous_home" -w '%{http_code}' "$ACCEPTANCE_BASE_URL/")"
+    status="$metrics"
+    red_acceptance_assert_equals 'add-on asset injection anonymous homepage HTTP status' '200' "$status"
+    if ! grep -Fq "<link rel=\"stylesheet\" href=\"$public_css_url\">" "$anonymous_home" \
+        || ! grep -Fq "<script src=\"$public_script_url\" defer></script>" "$anonymous_home" \
+        || grep -Fq "$admin_css_url" "$anonymous_home" \
+        || grep -Fq "$admin_script_url" "$anonymous_home"; then
+        printf '%s\n' 'FAIL: anonymous document did not keep public/admin add-on asset surfaces isolated.' >&2
+        return 1
+    fi
+    if [[ ! -f "$execution_marker" \
+        || "$(wc -l < "$execution_marker" | tr -d '[:space:]')" != '1' ]] \
+        || ! grep -Fqx 'runtime:redcms.asset-injection-fixture' "$execution_marker"; then
+        printf '%s\n' 'FAIL: anonymous document injection did not preserve one normal runtime registration.' >&2
+        return 1
+    fi
+
+    red_acceptance_app_mysql --execute="
+        INSERT INTO RED_Admin (
+            RecordID, Username, Password, Administrator, Alias, AdminType,
+            AdminComponents, AdminTools, Email, Contact_Form, Contact_Form_Pref,
+            Donation_Form, Donation_Form_Pref
+        ) VALUES (
+            $ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID,
+            '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME',
+            '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD',
+            'Admin',
+            '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_ALIAS',
+            'webmaster',
+            '100,102,103,104,105,117,107,111,116',
+            '1,2',
+            'asset-injection-acceptance@example.invalid',
+            'N',
+            'to',
+            'N',
+            'to'
+        );
+    "
+    ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_CREATED=1
+    ACCEPTANCE_COOKIE_JAR="$ACCEPTANCE_RESPONSE_DIR/addon-asset-injection.cookies"
+    : > "$ACCEPTANCE_COOKIE_JAR"
+    chmod 600 "$ACCEPTANCE_COOKIE_JAR"
+    red_acceptance_post_login \
+        'add-on-asset-injection-webmaster-login' \
+        "$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME" \
+        "$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD" \
+        'yes'
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$authenticated_home" \
+        -w '%{http_code}' \
+        "$ACCEPTANCE_BASE_URL/")"
+    status="$metrics"
+    red_acceptance_assert_equals 'add-on asset injection authenticated homepage HTTP status' '200' "$status"
+    if ! grep -Fq "<link rel=\"stylesheet\" href=\"$public_css_url\">" "$authenticated_home" \
+        || ! grep -Fq "<script src=\"$public_script_url\" defer></script>" "$authenticated_home" \
+        || ! grep -Fq "<link rel=\"stylesheet\" href=\"$admin_css_url\">" "$authenticated_home" \
+        || ! grep -Fq "<script src=\"$admin_script_url\" defer></script>" "$authenticated_home" \
+        || ! grep -Fq "$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_ALIAS" "$authenticated_home"; then
+        printf '%s\n' 'FAIL: authenticated administrator document is missing its core-owned add-on asset references.' >&2
+        return 1
+    fi
+    if [[ "$(wc -l < "$execution_marker" | tr -d '[:space:]')" != '2' ]] \
+        || [[ "$(grep -Fxc 'runtime:redcms.asset-injection-fixture' "$execution_marker")" != '2' ]]; then
+        printf '%s\n' 'FAIL: administrator document injection caused unexpected package runtime execution.' >&2
+        return 1
+    fi
+
+    red_acceptance_addon_asset_injection_cleanup
+    printf '%s\n' 'PASS: core-owned add-on asset injection keeps anonymous public tags separate from authenticated administrator tags and preserves normal runtime execution.'
 }
 
 red_acceptance_response_text() {
@@ -4228,6 +4401,15 @@ red_acceptance_cleanup() {
         fi
     fi
 
+    if [[ "$ACCEPTANCE_ADDON_ASSET_INJECTION_FIXTURE_CREATED" -eq 1 \
+        || "$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_CREATED" -eq 1 ]]; then
+        red_acceptance_addon_asset_injection_cleanup >/dev/null 2>&1
+        if [[ $? -ne 0 ]]; then
+            printf '%s\n' 'Cleanup warning: could not remove the add-on asset injection fixtures.' >&2
+            cleanup_status=1
+        fi
+    fi
+
     if [[ "$ACCEPTANCE_GALLERY_MEDIA_MANIFEST_CAPTURED" -eq 1 ]]; then
         gallery_media_manifest_after="$(red_acceptance_gallery_media_manifest 2>/dev/null)"
         if [[ $? -ne 0 || "$gallery_media_manifest_after" != "$ACCEPTANCE_GALLERY_MEDIA_MANIFEST_BEFORE" ]]; then
@@ -4472,6 +4654,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running immutable add-on asset endpoint response checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-asset-endpoint-self-test.php"
 
+printf '%s\n' 'Running core-owned add-on asset injection checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-asset-injection-self-test.php"
+
 printf '%s\n' 'Running enabled add-on request bootstrap checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-request-bootstrap-self-test.php"
 
@@ -4622,6 +4807,9 @@ red_acceptance_inject_failure after_server
 printf '%s\n' 'Running isolated static immutable add-on asset endpoint lifecycle.'
 red_acceptance_run_addon_asset_endpoint
 
+printf '%s\n' 'Running isolated core-owned add-on asset injection lifecycle.'
+red_acceptance_run_addon_asset_injection
+
 red_acceptance_check_route 'home' '/' 'starter-navigation' 'Contacto'
 red_acceptance_check_route 'contact' '/contacto/' 'id="form_contact"' 'name="message"'
 red_acceptance_check_route 'administration' '/administracion/' 'id="form_login"' 'name="password"'
@@ -4668,4 +4856,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
