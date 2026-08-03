@@ -117,8 +117,14 @@ delivery has a separate read-only preflight: it accepts only an exact
 checksum-versioned reserved URL, revalidates the complete manifest inventory,
 current enabled registry evidence, safe package path, and final file checksum,
 then returns internal evidence only. It does not serve a byte, inject markup,
-execute package PHP, or write state. The static endpoint and public/admin
-injection remain the next separate slice.
+execute package PHP, or write state. The core-owned static endpoint is
+separate from that preflight and from public/admin injection. It reruns the
+evidence before theme, session, or add-on runtime bootstrap and serves
+only exact checksum-matching CSS/JavaScript bytes up to 4 MiB through
+`GET`/`HEAD`, with fixed immutable-cache and `nosniff` headers. Invalid,
+disabled, drifted, missing, noncanonical, and oversized assets return only a
+generic fail-closed response; no response executes package PHP or injects a
+document asset. Core-owned public/admin injection is the remaining asset work.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -205,8 +211,10 @@ features.
 - Deterministic namespaced CSS/JavaScript asset plans with hashed URLs and
   escaped tags, without filesystem serving or response injection
 - Read-only immutable asset-delivery preflight with full integrity and
-  enabled-registry revalidation, without serving, injection, execution, or
-  mutation
+  enabled-registry revalidation, without execution or mutation
+- Core-owned static immutable CSS/JavaScript endpoint with exact bytes,
+  `GET`/`HEAD` boundaries, immutable caching, and no session or package-runtime
+  bootstrap; public/admin document injection remains separate
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -289,9 +297,11 @@ php scripts/admin-addon-enable.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
-The database-backed setting-storage preflight fixture runs automatically in
-`scripts/dev-acceptance.sh` against its uniquely named disposable database and
-FrankenPHP CLI.
+The database-backed setting-storage preflight and immutable asset-endpoint
+fixtures run automatically in `scripts/dev-acceptance.sh` against its uniquely
+named disposable database and FrankenPHP CLI. The endpoint fixture verifies
+real HTTP headers and bytes plus checksum, traversal, lifecycle, and integrity
+refusal without a session or package-PHP execution.
 
 The install command is a dry run by default. Apply requires the exact database,
 package, version, plan digest, SHA-256 from a separately verified backup, and

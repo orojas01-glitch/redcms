@@ -264,9 +264,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering; writable order/product actions and tool-bearing
   package enablement remain gated;
-- a static immutable package-asset endpoint and core-owned public/admin
-  injection; read-only preflight is complete but does not serve or inject an
-  asset;
+- core-owned public/admin package-asset injection; deterministic planning,
+  read-only preflight, and static immutable delivery are complete but do not
+  inject an asset;
 - permissioned settings UI/endpoints and actual secret lookup; typed
   validation, storage, read-only preflight, internal atomic persistence, and
   non-executing secret-reference availability are complete; and
@@ -323,14 +323,14 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Continue with generic settings UI/endpoints and asset contracts as separate
-   reviewed batches. Typed internal service
+4. Continue with generic settings UI/endpoints and public/admin asset-injection
+   contracts as separate reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
    internal atomic settings persistence, non-executing server-local secret
-   availability evidence, and read-only immutable asset-delivery preflight are
-   complete. Actual secret lookup and the static asset endpoint/injection remain
-   blocked.
+   availability evidence, read-only immutable asset-delivery preflight, and
+   static immutable endpoint are complete. Actual secret lookup and public/admin
+   asset injection remain blocked.
 5. Create Store Lite in its separate distribution using only those accepted
    contracts.
 6. Add package-owned migrations, Product editing, catalog, cart, orders, and

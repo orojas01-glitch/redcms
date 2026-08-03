@@ -18,7 +18,7 @@ atomic inactive deletion with retained revision ledgers are implemented.
 Typed internal services, exact static public `GET` routes, and display-only
 administrator tools now have separate fail-closed dispatch boundaries.
 Adapters, writable route/tool actions, settings UI/endpoints, package asset
-delivery/injection, and richer enablement remain blocked. RED-CMS does not
+injection, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
 
 ## Implemented Trust Boundary
@@ -428,6 +428,28 @@ header or markup, and does not execute package PHP. The static delivery
 endpoint must re-run this preflight for its current request and must never
 accept a filesystem path from a caller. Core-owned public/admin injection
 remains a separate contract.
+
+`includes/addon_asset_endpoint_helpers.php` now provides that core-owned
+static delivery boundary. `index.php` claims the reserved namespace before
+theme bootstrap, session startup, or enabled-package runtime registration. For
+each claimed request it opens only the current client's database connection,
+reruns the preflight, and accepts only `GET` or `HEAD` after the package is
+still `enabled_current`. A successful response serves at most 4 MiB of the
+exact preflighted CSS or JavaScript bytes after a final in-memory byte-length
+and SHA-256 comparison. Core emits the fixed matching content type,
+`Cache-Control: public, max-age=31536000, immutable`, `nosniff`,
+`Accept-Ranges: none`, and the exact content length. `HEAD` has the same
+metadata with no body.
+
+Malformed, noncanonical, stale, undeclared, disabled, drifted, missing, or
+oversized assets return only a generic `404` with `no-store`; registry storage
+unavailability returns a generic `503`; and a valid asset requested with any
+method other than `GET` or `HEAD` returns a generic `405` with the fixed
+`Allow` header. The endpoint exposes no preflight reason, internal path,
+manifest, registry row, session, package output, package PHP, mutation, or
+markup injection. Admin-surface assets are static package files, not a
+separate authorization boundary; later core-owned injection determines where
+an already-deliverable asset is referenced.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -1281,10 +1303,10 @@ responses, or structured data.
    type-correct defaults plus closed value and secret-reference normalization;
    empty per-client storage, exact permissioned write preflight, and atomic
    internal persistence plus non-executing server-local availability evidence
-   are implemented. Deterministic namespaced CSS/JavaScript asset planning and
-   read-only immutable delivery preflight are also implemented; editing UI,
-   actual secret lookup, the static delivery endpoint, public/admin injection,
-   and activation readiness remain separate. Read-only inactive component-creation
+   are implemented. Deterministic namespaced CSS/JavaScript asset planning,
+   read-only immutable delivery preflight, and the core-owned static immutable
+   delivery endpoint are also implemented; editing UI, actual secret lookup,
+   public/admin injection, and activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
    implemented. Read-only delete planning and its atomic inactive runner are
