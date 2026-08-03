@@ -25,7 +25,7 @@ flowchart TD
     F15 --> F16["Typed setting values and secret references"]
     F16 --> F17["Settings storage and write preflight"]
     F17 --> F18["Atomic setting persistence"]
-    F18 --> F19["Secret-reference availability evidence"]
+    F18 --> F19["Secret availability + authorized settings read model"]
     F19 --> F20["Namespaced CSS/JS asset plan"]
     F20 --> F21["Read-only immutable asset-delivery preflight"]
     F21 --> F22["Static immutable asset endpoint"]
@@ -56,7 +56,7 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Read-only public-mutation live-data preflight: one trusted `installed_disabled` declaration is bound to current per-client migration, InnoDB-table, typed-setting, and opaque-secret-availability evidence. It returns hashes/counts only; no dispatcher, cookie/session, token issuance, secret resolution, package execution, mutation, or enablement change was added. |
+| Latest completed slice | Core-only authorized settings read model: one trusted current package is bound to the recorded identity/lifecycle, and every setting receives a fresh exact grant decision. Authorized non-secret values retain `stored`/`default`/`unset` state; secret settings expose only `configured`; there is no UI, endpoint, write, secret lookup, package execution, or enablement change. |
 | Current milestone | Public-request and richer-enablement gates; anonymous subject, CSRF/idempotency/rate-limit/transaction runner, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |

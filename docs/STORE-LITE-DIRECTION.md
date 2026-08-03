@@ -286,9 +286,10 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   public CSS/JavaScript is added only at the document `head`/`body-end`, and
   administrator counterparts are added only for the existing signed-in overlay;
   invalid, drifted, or ambiguous state emits no package markup;
-- permissioned settings UI/endpoints and actual secret lookup; typed
-  validation, storage, read-only preflight, internal atomic persistence, and
-  non-executing secret-reference availability are complete; and
+- typed validation, storage, read-only preflight, internal atomic persistence,
+  core-only per-setting authorized reads, and non-executing secret-reference
+  availability are complete; permissioned settings UI/endpoints and actual
+  secret lookup remain gated; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures

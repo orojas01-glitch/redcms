@@ -82,6 +82,15 @@ hash/count, and atomically records one value-free `addon.settings.updated`
 fact. Exact no-ops add no audit. Stale plans, drift, postcondition/audit
 failure, or injected late failure roll back. No settings UI/endpoint or secret
 lookup is added.
+The separate core-only current-setting read model rechecks exact trusted
+package/registry identity and installed-disabled or enabled state, requires an
+explicit declared permission for every operational setting, and makes fresh
+case-sensitive decisions per setting. It returns authorized non-secret
+stored/default/unset values and one deterministic visible-model hash; a secret
+setting yields only its configured state, never its opaque reference. Invalid
+storage, identity, lifecycle, or grant state returns no partial model. It does
+not render an administrator screen, expose an endpoint, write a row, execute a
+package, resolve a secret, or change activation eligibility.
 The separate server-local availability boundary validates only a bounded list
 of opaque `config:` references declared by the operator, revalidates the
 complete typed configuration, and returns deterministic counts, missing
@@ -551,28 +560,36 @@ request bootstrap excludes the disabled package.
     declaration state into deterministic hashes; and report only counts and
     missing setting keys. Return no reference identifier or secret value, read
     no database or secret, execute no package, and change no activation gate.
-35. Completed non-executing namespaced asset planning: accept only a trusted
+35. Completed core-only authorized current-setting read model: recheck trusted
+    package/registry identity and supported lifecycle state; require an exact
+    fresh package grant per declared operational setting; return only each
+    authorized non-secret stored/default/unset typed value and a visible-model
+    hash; and report only configured state for secret-reference settings. Fail
+    closed without a partial model on storage, schema, identity, lifecycle, or
+    grant drift. Add no UI, endpoint, write, package execution, secret lookup,
+    reference disclosure, or activation eligibility.
+36. Completed non-executing namespaced asset planning: accept only a trusted
     manifest surface's package-owned CSS/JavaScript declarations; require
     safe `assets/` paths, checksums, and type/location pairing; derive
     checksum-versioned package URLs; bind exact sorted rows into a plan hash;
     and render only escaped core-owned tags after revalidation. Read no package
     file, serve no response, inject no document markup, execute no package,
     access no database, or change lifecycle/activation.
-36. Completed read-only immutable asset-delivery preflight: claim only an exact
+37. Completed read-only immutable asset-delivery preflight: claim only an exact
     checksum-versioned reserved CSS/JavaScript URL; revalidate the complete
     manifest inventory, enabled/current registry state, recreated surface plan,
     no-symlink package containment, current length, and SHA-256; and return
     internal delivery evidence only. Serve no byte, emit no header or markup,
     execute no package PHP, write no state, and add no injection or activation
     path.
-37. Completed core-owned static immutable asset endpoint: intercept the
+38. Completed core-owned static immutable asset endpoint: intercept the
     reserved namespace before theme, session, or package runtime bootstrap;
     rerun current-request preflight; serve only checksum-matching CSS/JavaScript
     bytes up to 4 MiB through `GET`/`HEAD` with fixed immutable-cache and
     `nosniff` headers; and return generic `404`/`503`/`405` responses without
     paths, preflight evidence, package output, execution, mutation, or markup
     injection.
-38. Completed core-owned public/admin document injection: after the existing
+39. Completed core-owned public/admin document injection: after the existing
     request runtime bootstrap, re-discover trusted manifests and current
     registry evidence without loading package PHP; revalidate both asset
     surfaces for every enabled package; add public CSS at `head` and public
@@ -580,7 +597,7 @@ request bootstrap excludes the disabled package.
     existing signed-in overlay is present; and emit no package tags for any
     catalog, registry, integrity, plan, or document-boundary failure. The
     planner does not invoke a registrar, write state, or relax activation.
-39. Completed non-executing administrator tool write-action preflight:
+40. Completed non-executing administrator tool write-action preflight:
     validate a separate data-only action contract that maps one registered
     tool to one unique action, explicit permission, `POST`, and required CSRF;
     require matching enabled request-local tool/action owners, a fresh exact
@@ -588,7 +605,7 @@ request bootstrap excludes the disabled package.
     deterministic contract and plan hashes. It invokes no package callback,
     reads no package record, starts no transaction, writes no state, renders no
     form, exposes no endpoint, and does not alter enablement eligibility.
-40. Completed internal atomic administrator tool action runner: require fixed
+41. Completed internal atomic administrator tool action runner: require fixed
     `once-per-target` idempotency, one declared package-table set and read-only
     state loader, form an opaque exact state-aware plan in a rollback-only
     transaction, revalidate it under lifecycle/package locks, reserve the
@@ -596,25 +613,25 @@ request bootstrap excludes the disabled package.
     action and state reload, require an exact changed postcondition, and commit
     only the package change, ledger row, and value-free audit fact together.
     It accepts no request/session data.
-41. Completed protected unlinked administrator action endpoint: require POST,
+42. Completed protected unlinked administrator action endpoint: require POST,
     a current database-backed administrator session, and CSRF before parsing
     only a declared tool, action, and canonical positive target; derive the
     state-aware plan only on the server; invoke only the scoped core bridge;
     return no package, actor, target, plan, or state values; and leave all
     administrator controls, forms, and public routes absent.
-42. Defined the generic public-mutation boundary: reserve any future
+43. Defined the generic public-mutation boundary: reserve any future
     static-POST anonymous add-on write for a separately declared and
     core-owned CSRF, scalar-validation, rate/idempotency, transaction, and
     value-free-response path. This documentation-only contract adds no route,
     manifest field, cookie/session, handler, ledger, package, or enablement
     behavior.
-43. Completed the optional closed `publicMutationContracts` declaration and
+44. Completed the optional closed `publicMutationContracts` declaration and
     value-free deterministic preflight: it binds one static public POST/CSRF
     route to fixed scalar, anonymous, idempotency, privacy, rate-limit,
     package-table, postcondition, audit, and outcome metadata; it invokes no
     package code and adds no dispatcher, endpoint, cookie/session, database
     access, ledger, package behavior, or enablement change.
-44. Completed a separate read-only public-mutation live-data preflight: it
+45. Completed a separate read-only public-mutation live-data preflight: it
     joins current trusted `installed_disabled` package evidence with the
     declared migration, package-table, typed-setting, and opaque
     secret-availability state for one client, returning only hashes and
