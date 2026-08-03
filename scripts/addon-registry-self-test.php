@@ -13,7 +13,7 @@ $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/';
 $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
-require_once $projectRoot . '/includes/addon_registry_helpers.php';
+require_once $projectRoot . '/includes/addon_asset_delivery_helpers.php';
 
 if (!preg_match('/\Aredcms_(?:acceptance|addon_registry)_[A-Za-z0-9_]+\z/', (string) DBNAME)) {
     fwrite(STDERR, "Add-on registry self-test refused non-disposable database: " . DBNAME . "\n");
@@ -44,6 +44,46 @@ function red_addon_registry_test_scalar($connection, $sql)
         mysqli_free_result($result);
     }
     return $row ? (string) $row[0] : '';
+}
+
+function red_addon_registry_test_registry_fingerprint($connection, $packageId)
+{
+    $statement = mysqli_prepare(
+        $connection,
+        'SELECT CONCAT_WS(\':\', PackageVersion, PackageType, ManifestSHA256,
+                InventorySHA256, LifecycleState,
+                (SELECT COUNT(*) FROM RED_Addon_Migrations WHERE PackageID=?))
+         FROM RED_Addon_Installations
+         WHERE PackageID=?'
+    );
+    if (!$statement) {
+        return '';
+    }
+    mysqli_stmt_bind_param($statement, 'ss', $packageId, $packageId);
+    if (!mysqli_stmt_execute($statement)) {
+        mysqli_stmt_close($statement);
+        return '';
+    }
+    $result = mysqli_stmt_get_result($statement);
+    $row = $result ? mysqli_fetch_row($result) : null;
+    mysqli_stmt_close($statement);
+    return $row ? (string) $row[0] : '';
+}
+
+function red_addon_registry_test_asset_matches(array $result, array $asset, $surface)
+{
+    return !empty($result['claimed'])
+        && !empty($result['resolved'])
+        && $result['packageId'] === 'redcms.registry-fixture'
+        && $result['surfaces'] === [$surface]
+        && $result['path'] === $asset['path']
+        && $result['type'] === $asset['type']
+        && $result['location'] === $asset['location']
+        && $result['sha256'] === $asset['sha256']
+        && $result['contentType'] === $asset['contentType']
+        && $result['byteLength'] === strlen($asset['contents'])
+        && $result['filePath'] === $asset['filePath']
+        && $result['reason'] === 'resolved';
 }
 
 function red_addon_registry_test_remove_tree($path)
@@ -97,19 +137,73 @@ function red_addon_registry_test_package($temporaryRoot, $executionMarker)
     $project = $temporaryRoot . '/project';
     $directory = $project . '/addons/redcms/registry-fixture';
     $migrationDirectory = $directory . '/migrations';
+    $publicAssetDirectory = $directory . '/assets/public';
+    $adminAssetDirectory = $directory . '/assets/admin';
     if (!mkdir($migrationDirectory, 0700, true) && !is_dir($migrationDirectory)) {
         throw new RuntimeException('Could not create registry package fixture.');
+    }
+    if (!mkdir($publicAssetDirectory, 0700, true)
+        && !is_dir($publicAssetDirectory)
+    ) {
+        throw new RuntimeException('Could not create public asset fixture.');
+    }
+    if (!mkdir($adminAssetDirectory, 0700, true)
+        && !is_dir($adminAssetDirectory)
+    ) {
+        throw new RuntimeException('Could not create administrator asset fixture.');
     }
 
     $entrypoint = "<?php\nfile_put_contents(" .
         var_export($executionMarker, true) .
         ", 'executed');\n";
     $migration = "CREATE TABLE RED_Addon_Registry_Fixture (RecordID int unsigned NOT NULL);\n";
+    $publicStyle = ".redcms-registry-fixture{display:block;}\n";
+    $publicScript = "window.redcmsRegistryFixture=true;\n";
+    $adminStyle = ".redcms-registry-fixture-admin{display:block;}\n";
     file_put_contents($directory . '/addon.php', $entrypoint);
     file_put_contents(
         $migrationDirectory . '/2026-07-26-create-fixture.sql',
         $migration
     );
+    file_put_contents($publicAssetDirectory . '/registry.css', $publicStyle);
+    file_put_contents($publicAssetDirectory . '/registry.js', $publicScript);
+    file_put_contents($adminAssetDirectory . '/registry.css', $adminStyle);
+
+    $assets = [
+        'publicStyle' => [
+            'path' => 'assets/public/registry.css',
+            'sha256' => hash('sha256', $publicStyle),
+            'location' => 'head',
+            'type' => 'style',
+            'contentType' => 'text/css; charset=UTF-8',
+            'contents' => $publicStyle,
+            'filePath' => (string) realpath(
+                $publicAssetDirectory . '/registry.css'
+            ),
+        ],
+        'publicScript' => [
+            'path' => 'assets/public/registry.js',
+            'sha256' => hash('sha256', $publicScript),
+            'location' => 'body-end',
+            'type' => 'script',
+            'contentType' => 'text/javascript; charset=UTF-8',
+            'contents' => $publicScript,
+            'filePath' => (string) realpath(
+                $publicAssetDirectory . '/registry.js'
+            ),
+        ],
+        'adminStyle' => [
+            'path' => 'assets/admin/registry.css',
+            'sha256' => hash('sha256', $adminStyle),
+            'location' => 'head',
+            'type' => 'style',
+            'contentType' => 'text/css; charset=UTF-8',
+            'contents' => $adminStyle,
+            'filePath' => (string) realpath(
+                $adminAssetDirectory . '/registry.css'
+            ),
+        ],
+    ];
 
     $manifest = [
         '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
@@ -144,8 +238,20 @@ function red_addon_registry_test_package($temporaryRoot, $executionMarker)
         'jobs' => [],
         'outboundHosts' => [],
         'assets' => [
-            'public' => [],
-            'admin' => [],
+            'public' => [[
+                'path' => $assets['publicStyle']['path'],
+                'sha256' => $assets['publicStyle']['sha256'],
+                'location' => $assets['publicStyle']['location'],
+            ], [
+                'path' => $assets['publicScript']['path'],
+                'sha256' => $assets['publicScript']['sha256'],
+                'location' => $assets['publicScript']['location'],
+            ]],
+            'admin' => [[
+                'path' => $assets['adminStyle']['path'],
+                'sha256' => $assets['adminStyle']['sha256'],
+                'location' => $assets['adminStyle']['location'],
+            ]],
         ],
         'integrity' => [
             'entrypoint' => 'addon.php',
@@ -155,6 +261,15 @@ function red_addon_registry_test_package($temporaryRoot, $executionMarker)
             ], [
                 'path' => 'migrations/2026-07-26-create-fixture.sql',
                 'sha256' => hash('sha256', $migration),
+            ], [
+                'path' => $assets['publicStyle']['path'],
+                'sha256' => $assets['publicStyle']['sha256'],
+            ], [
+                'path' => $assets['publicScript']['path'],
+                'sha256' => $assets['publicScript']['sha256'],
+            ], [
+                'path' => $assets['adminStyle']['path'],
+                'sha256' => $assets['adminStyle']['sha256'],
             ]],
         ],
         'uninstall' => [
@@ -166,7 +281,10 @@ function red_addon_registry_test_package($temporaryRoot, $executionMarker)
         $directory . '/addon.json',
         json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
-    return $project;
+    return [
+        'project' => $project,
+        'assets' => $assets,
+    ];
 }
 
 try {
@@ -220,10 +338,12 @@ try {
         'registry lifecycle mappings require both Owner and the exact capability'
     );
 
-    $fixtureProject = red_addon_registry_test_package(
+    $fixture = red_addon_registry_test_package(
         $temporaryRoot,
         $executionMarker
     );
+    $fixtureProject = $fixture['project'];
+    $fixtureAssets = $fixture['assets'];
     $package = red_addon_validate_manifest(
         $packageId,
         $fixtureProject,
@@ -382,6 +502,206 @@ try {
             && $enabledReport['loadable']
             && $enabledReport['warnings'] === [],
         'recorded enabled state with current evidence is eligible for runtime loading'
+    );
+
+    $publicStyleUrl = red_addon_asset_url(
+        $packageId,
+        $fixtureAssets['publicStyle']['path'],
+        $fixtureAssets['publicStyle']['sha256']
+    );
+    $publicScriptUrl = red_addon_asset_url(
+        $packageId,
+        $fixtureAssets['publicScript']['path'],
+        $fixtureAssets['publicScript']['sha256']
+    );
+    $adminStyleUrl = red_addon_asset_url(
+        $packageId,
+        $fixtureAssets['adminStyle']['path'],
+        $fixtureAssets['adminStyle']['sha256']
+    );
+    $notMatched = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        '/media/registry.css'
+    );
+    red_addon_registry_test_assert(
+        empty($notMatched['claimed'])
+            && empty($notMatched['resolved'])
+            && $notMatched['reason'] === 'not_matched'
+            && $notMatched['filePath'] === ''
+            && !file_exists($executionMarker),
+        'non-reserved paths are not claimed and cannot trigger package loading'
+    );
+
+    $registryFingerprintBefore = red_addon_registry_test_registry_fingerprint(
+        $connection,
+        $packageId
+    );
+    ob_start();
+    $publicStyleDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        $publicStyleUrl
+    );
+    $deliveryOutput = ob_get_clean();
+    $registryFingerprintAfter = red_addon_registry_test_registry_fingerprint(
+        $connection,
+        $packageId
+    );
+    red_addon_registry_test_assert(
+        is_string($publicStyleUrl)
+            && red_addon_registry_test_asset_matches(
+                $publicStyleDelivery,
+                $fixtureAssets['publicStyle'],
+                'public'
+            )
+            && $deliveryOutput === ''
+            && $registryFingerprintBefore !== ''
+            && $registryFingerprintBefore === $registryFingerprintAfter
+            && !file_exists($executionMarker),
+        'enabled current public CSS resolves as internal evidence without output, execution, or registry writes'
+    );
+
+    $publicScriptDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        $publicScriptUrl
+    );
+    red_addon_registry_test_assert(
+        is_string($publicScriptUrl)
+            && red_addon_registry_test_asset_matches(
+                $publicScriptDelivery,
+                $fixtureAssets['publicScript'],
+                'public'
+            )
+            && !file_exists($executionMarker),
+        'enabled current public JavaScript resolves only at body end with the exact content type'
+    );
+
+    $adminStyleDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        $adminStyleUrl
+    );
+    red_addon_registry_test_assert(
+        is_string($adminStyleUrl)
+            && red_addon_registry_test_asset_matches(
+                $adminStyleDelivery,
+                $fixtureAssets['adminStyle'],
+                'admin'
+            )
+            && !file_exists($executionMarker),
+        'public and administrator assets retain exact separate surface evidence'
+    );
+
+    $staleSha256 = $fixtureAssets['publicStyle']['sha256'];
+    $staleSha256[0] = $staleSha256[0] === '0' ? '1' : '0';
+    $versionMismatch = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        red_addon_asset_url(
+            $packageId,
+            $fixtureAssets['publicStyle']['path'],
+            $staleSha256
+        )
+    );
+    red_addon_registry_test_assert(
+        !empty($versionMismatch['claimed'])
+            && empty($versionMismatch['resolved'])
+            && $versionMismatch['reason'] === 'asset_version_mismatch'
+            && $versionMismatch['filePath'] === ''
+            && !file_exists($executionMarker),
+        'a stale or substituted checksum URL returns no asset evidence'
+    );
+
+    $malformedDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        $publicStyleUrl . '&unexpected=1'
+    );
+    $traversalDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        '/_red/addons/redcms/registry-fixture/assets/../registry.css?v=' .
+            $fixtureAssets['publicStyle']['sha256']
+    );
+    red_addon_registry_test_assert(
+        !empty($malformedDelivery['claimed'])
+            && empty($malformedDelivery['resolved'])
+            && $malformedDelivery['reason'] === 'request_invalid'
+            && $malformedDelivery['filePath'] === ''
+            && !empty($traversalDelivery['claimed'])
+            && empty($traversalDelivery['resolved'])
+            && $traversalDelivery['reason'] === 'request_invalid'
+            && $traversalDelivery['filePath'] === ''
+            && !file_exists($executionMarker),
+        'reserved delivery URLs reject noncanonical query data and traversal before package validation'
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Addon_Installations
+         SET LifecycleState='installed_disabled'
+         WHERE PackageID='redcms.registry-fixture'"
+    );
+    $disabledDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        $publicStyleUrl
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Addon_Installations
+         SET LifecycleState='enabled'
+         WHERE PackageID='redcms.registry-fixture'"
+    );
+    red_addon_registry_test_assert(
+        !empty($disabledDelivery['claimed'])
+            && empty($disabledDelivery['resolved'])
+            && $disabledDelivery['reason'] === 'package_not_enabled'
+            && $disabledDelivery['filePath'] === ''
+            && !file_exists($executionMarker),
+        'installed-disabled packages cannot resolve immutable delivery evidence'
+    );
+
+    file_put_contents(
+        $fixtureAssets['publicStyle']['filePath'],
+        $fixtureAssets['publicStyle']['contents'] . '/* tampered */' . "\n"
+    );
+    $tamperedDelivery = red_addon_asset_delivery_preflight(
+        $connection,
+        $fixtureProject,
+        $publicStyleUrl
+    );
+    file_put_contents(
+        $fixtureAssets['publicStyle']['filePath'],
+        $fixtureAssets['publicStyle']['contents']
+    );
+    red_addon_registry_test_assert(
+        !empty($tamperedDelivery['claimed'])
+            && empty($tamperedDelivery['resolved'])
+            && $tamperedDelivery['reason'] === 'package_invalid'
+            && $tamperedDelivery['filePath'] === ''
+            && !file_exists($executionMarker),
+        'changed package files fail complete integrity validation before delivery evidence'
+    );
+
+    $deliverySource = file_get_contents(
+        $projectRoot . '/includes/addon_asset_delivery_helpers.php'
+    );
+    $forbiddenDeliveryCalls = [
+        'header(', 'http_response_code', 'echo ', 'print ', 'include ',
+        'require ', 'mysqli_query', 'mysqli_stmt_', 'INSERT ', 'UPDATE ',
+        'DELETE ', 'file_put_contents', 'unlink(', 'mkdir(',
+    ];
+    red_addon_registry_test_assert(
+        is_string($deliverySource)
+            && array_filter(
+                $forbiddenDeliveryCalls,
+                static fn ($needle) => str_contains($deliverySource, $needle)
+            ) === []
+            && !file_exists($executionMarker),
+        'delivery preflight has no HTTP response, package execution, or mutation call path'
     );
 
     red_addon_registry_test_remove_tree($temporaryRoot . '/project');

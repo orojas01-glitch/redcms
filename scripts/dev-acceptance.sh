@@ -4290,7 +4290,7 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running component creation, parent metadata, atomic placement, and atomic-delete checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-editor-create-preflight-self-test.php"
 
-printf '%s\n' 'Running read-only add-on registry reconciliation checks.'
+printf '%s\n' 'Running read-only add-on registry reconciliation and asset-delivery preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-registry-self-test.php"
 
 printf '%s\n' 'Running enabled add-on request bootstrap checks.'
@@ -4486,4 +4486,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

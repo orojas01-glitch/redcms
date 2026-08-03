@@ -17,7 +17,7 @@ enabled manifest-declared component are implemented for already-recorded
 enabled packages. Typed internal service invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
 separate fail-closed dispatch boundaries. Adapters, writable route/tool
-actions, atomic settings writes, immutable package-asset delivery/injection,
+actions, atomic settings writes, a static package-asset endpoint/injection,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -347,8 +347,8 @@ request bootstrap excludes the disabled package.
     registration-only services as one package, with non-executing preflight,
     atomic Owner enablement, later request registration and default rendering,
     non-executing disablement, and exact disposable cleanup. Persistence,
-    editor, routes, administrator tools, settings, immutable asset
-    delivery/injection, and live-data behavior remain blocked.
+    editor, routes, administrator tools, settings, the static asset
+    endpoint/injection, and live-data behavior remain blocked.
 12. Completed persistence foundation: preserve `RED_Articles` as the single
     placement parent, store the full manifest component id, permit package
     tables only an exact numeric parent foreign key, and require an enabled
@@ -537,6 +537,13 @@ request bootstrap excludes the disabled package.
     and render only escaped core-owned tags after revalidation. Read no package
     file, serve no response, inject no document markup, execute no package,
     access no database, or change lifecycle/activation.
+36. Completed read-only immutable asset-delivery preflight: claim only an exact
+    checksum-versioned reserved CSS/JavaScript URL; revalidate the complete
+    manifest inventory, enabled/current registry state, recreated surface plan,
+    no-symlink package containment, current length, and SHA-256; and return
+    internal delivery evidence only. Serve no byte, emit no header or markup,
+    execute no package PHP, write no state, and add no injection or activation
+    path. The static endpoint and public/admin injection remain separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
