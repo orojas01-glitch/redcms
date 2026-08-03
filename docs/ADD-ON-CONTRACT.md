@@ -412,6 +412,23 @@ HTTP response, injects no response markup, accesses no database, executes no
 package PHP, and changes no lifecycle or activation gate. Immutable delivery
 and public/admin injection are later contracts.
 
+`red_addon_asset_delivery_preflight()` is the next read-only prerequisite. It
+claims only an exact, checksum-versioned URL in the reserved
+`/_red/addons/<vendor>/<package>/assets/...` namespace. Before returning any
+internal delivery evidence, core revalidates the complete package manifest and
+inventory without loading `addon.php`, requires current `enabled` registry
+evidence, recreates both public and administrator asset plans, rejects
+noncanonical or stale versions, and resolves the declared file through the
+same no-symlink package-file guard used by integrity validation. It then checks
+the current file length and SHA-256. A successful result identifies only the
+exact CSS or JavaScript type, location, content type, byte length, internal
+path, checksum, and declared surface; it contains no file bytes and is not an
+HTTP response. The helper writes no database or lifecycle state, emits no
+header or markup, and does not execute package PHP. The static delivery
+endpoint must re-run this preflight for its current request and must never
+accept a filesystem path from a caller. Core-owned public/admin injection
+remains a separate contract.
+
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
 `includes/addon_manifest_helpers.php`. This remains a trust-inspection contract,
@@ -1264,8 +1281,9 @@ responses, or structured data.
    type-correct defaults plus closed value and secret-reference normalization;
    empty per-client storage, exact permissioned write preflight, and atomic
    internal persistence plus non-executing server-local availability evidence
-   are implemented. Deterministic namespaced CSS/JavaScript asset planning is
-   also implemented; editing UI, actual secret lookup, asset delivery/injection,
+   are implemented. Deterministic namespaced CSS/JavaScript asset planning and
+   read-only immutable delivery preflight are also implemented; editing UI,
+   actual secret lookup, the static delivery endpoint, public/admin injection,
    and activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are

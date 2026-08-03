@@ -113,7 +113,12 @@ CSS/JavaScript asset plan. The plan accepts only `assets/*.css` for `head` and
 declared SHA-256, and renders only core-owned escaped tags after its plan hash
 revalidates. It does not read or serve a file, inject markup into a response,
 execute package PHP, access a database, or change lifecycle. Immutable asset
-delivery and public/admin injection are the next separate slice.
+delivery has a separate read-only preflight: it accepts only an exact
+checksum-versioned reserved URL, revalidates the complete manifest inventory,
+current enabled registry evidence, safe package path, and final file checksum,
+then returns internal evidence only. It does not serve a byte, inject markup,
+execute package PHP, or write state. The static endpoint and public/admin
+injection remain the next separate slice.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -199,6 +204,9 @@ features.
   secret lookup, reference disclosure, database access, or activation change
 - Deterministic namespaced CSS/JavaScript asset plans with hashed URLs and
   escaped tags, without filesystem serving or response injection
+- Read-only immutable asset-delivery preflight with full integrity and
+  enabled-registry revalidation, without serving, injection, execution, or
+  mutation
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

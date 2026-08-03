@@ -200,8 +200,8 @@ validates the inventory, revalidates the complete typed package configuration,
 and returns only counts, missing setting keys, and deterministic declaration,
 configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
-not relax activation. Settings UI/endpoints, actual secret lookup, immutable
-package-asset delivery/injection, and richer enablement remain blocked.
+not relax activation. Settings UI/endpoints, actual secret lookup, the static
+package-asset endpoint/injection, and richer enablement remain blocked.
 
 The first package-asset prerequisite is now implemented without delivery or
 response injection. Trusted manifests can form a deterministic plan only for
@@ -211,8 +211,13 @@ escaped core-owned tags after revalidating the plan hash. Invalid, duplicate,
 unsafe, unsupported, or location-mismatched declarations return no partial
 plan. The helper reads no package file, serves no HTTP response, executes no
 package PHP, opens no database, and does not change activation. Immutable
-asset delivery, public/admin injection, settings UI/endpoints, actual secret
-lookup, and richer enablement remain blocked.
+delivery has a separate read-only preflight: only an exact checksum-versioned
+reserved URL can reach it; it revalidates the complete package inventory,
+current enabled registry record, recreated surface plan, safe file containment,
+and final file checksum before returning internal evidence. It serves no byte,
+emits no markup or header, executes no package PHP, and writes no state. The
+static asset endpoint, public/admin injection, settings UI/endpoints, actual
+secret lookup, and richer enablement remain blocked.
 
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
@@ -394,7 +399,7 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while writable route/administrator-tool actions, settings UI/endpoints,
-actual secret lookup, asset, live-data, and richer package persistence
+actual secret lookup, static asset delivery/injection, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
 

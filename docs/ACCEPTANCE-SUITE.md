@@ -247,7 +247,8 @@ The current compatibility foundation performs these checks through one command:
 63. Stop the isolated server, clean authentication/permission/Section-delete/Article/Form/Gallery/upload/rollback fixtures, remove the temporary response/cookie directory, revoke and verify removal of the temporary grant, and drop the disposable database through an exit trap on success, failure, `INT`, or `TERM`.
 
 Representative behavior coverage is complete through the generic Version 5.1
-SEO, read-only add-on trust, persisted Owner authorization, read-only registry,
+SEO, read-only add-on trust, persisted Owner authorization, read-only registry
+and immutable asset-delivery preflight,
 guarded disabled-install/recovery, read-only enablement-preflight, atomic
 constrained service/default-component/combined-profile enablement, and
 non-destructive atomic disablement foundations, fail-closed enabled-package
@@ -272,7 +273,7 @@ drifted files, and completed the 16-assertion Owner authorization,
 47-assertion operational component form, transactional component-editor update, history, restore-preflight,
 and atomic-restore lifecycle,
 85-assertion component-creation preflight/atomic-runner/parent-metadata/public-placement-preflight/atomic-placement/atomic-delete lifecycle,
-14-assertion add-on registry, 19-assertion disabled
+23-assertion add-on registry and immutable asset-delivery preflight, 19-assertion disabled
 installation/recovery, 23-assertion read-only enablement preflight,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
@@ -280,7 +281,7 @@ persistence/dispatch,
 38-assertion SEO database, 29-assertion content-revision, 21-assertion
 layout-distribution, and 36-assertion custom-layout lifecycles. The normalized
 schema matched signature
-`38f4bfb3e849ddc806bc388f80d5cd9793f571cd844ccd937f058e14f015f06e`.
+`950e15db4ee94a6af78f2a16870a17081431fcf220d98f7c2fdba1952a2c28f4`.
 It also passed every authentication, permission, Move Content, Section archive,
 Article upload/CRUD, Form CRUD, Gallery CRUD/upload, and forced-rollback
 lifecycle with clean logs, preserved the tracked empty-media manifests, and
@@ -328,7 +329,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -351,7 +352,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Authentication fixture cleanup is safe to rerun and executes before grant/database removal after successful and injected-failure paths.
 - Guest permission checks use only disposable account data and target the disposable database. The potentially mutating layout request uses a valid CSRF token but must be denied by the Guest role before any write.
 - Owner authorization acceptance runs only in the uniquely named disposable database. It requires empty default storage, a manager-only one-time bootstrap under a database advisory lock, the exact six fixed capabilities, one allowlisted audit row, database-backed session refresh, refusal of a second Owner, refusal of Owner demotion/deletion, transactional rollback after an injected audit failure, CLI confirmation guards, and exact cleanup.
-- Add-on registry acceptance runs only in the uniquely named disposable database and executes no package PHP or SQL. It requires empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, enabled/current load eligibility, immutable migration identity, protected ledger ownership, and exact cleanup.
+- Add-on registry and immutable asset-delivery-preflight acceptance run only in the uniquely named disposable database and execute no package PHP or SQL. They require empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, enabled/current load eligibility, immutable migration identity, protected ledger ownership, exact public/admin CSS/JavaScript evidence, canonical checksum-version refusal, disabled and whole-package-integrity refusal, no output or registry write, and exact cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
