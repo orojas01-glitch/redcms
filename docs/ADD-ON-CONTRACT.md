@@ -17,9 +17,9 @@ Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
 Typed internal services, exact static public `GET` routes, and display-only
 administrator tools now have separate fail-closed dispatch boundaries.
-Adapters, writable route/tool actions, settings UI/endpoints, package assets,
-and richer enablement remain blocked. RED-CMS does not upgrade, uninstall, or
-purge packages through this contract yet.
+Adapters, writable route/tool actions, settings UI/endpoints, package asset
+delivery/injection, and richer enablement remain blocked. RED-CMS does not
+upgrade, uninstall, or purge packages through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -397,6 +397,20 @@ identifier or secret value. Invalid, changed, or forged declarations fail
 closed. This is non-executing availability evidence, not secret resolution: it
 reads no database or secret, invokes no package, renders no control, persists
 nothing, and does not change lifecycle or activation eligibility.
+
+`red_addon_asset_plan()` is the separate non-executing package-asset
+prerequisite. It accepts a trusted manifest's exact `public` or `admin` asset
+array and produces a sorted, SHA-256-bound plan only for package-owned
+`assets/*.css` files at `head` and `assets/*.js` files at `body-end`. Every
+planned URL uses the reserved `/_red/addons/<vendor>/<package>/...` namespace
+and includes the declared checksum as its immutable version. Duplicate paths,
+unknown fields, unsafe paths, unsupported file types, invalid checksums, and
+location/type mismatches produce no partial plan. The plan's core-owned HTML
+renderer revalidates every row and its aggregate hash before emitting escaped
+`link` or deferred `script` tags. This helper reads no package file, serves no
+HTTP response, injects no response markup, accesses no database, executes no
+package PHP, and changes no lifecycle or activation gate. Immutable delivery
+and public/admin injection are later contracts.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -1250,8 +1264,9 @@ responses, or structured data.
    type-correct defaults plus closed value and secret-reference normalization;
    empty per-client storage, exact permissioned write preflight, and atomic
    internal persistence plus non-executing server-local availability evidence
-   are implemented; editing UI, actual secret lookup, package assets, and
-   activation readiness remain separate. Read-only inactive component-creation
+   are implemented. Deterministic namespaced CSS/JavaScript asset planning is
+   also implemented; editing UI, actual secret lookup, asset delivery/injection,
+   and activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
    implemented. Read-only delete planning and its atomic inactive runner are

@@ -49,6 +49,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-trust-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-values-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-secret-availability-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-asset-plan-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-component-editor-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-component-editor-renderer-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-runtime-self-test.php"
@@ -4485,4 +4486,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

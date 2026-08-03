@@ -200,8 +200,19 @@ validates the inventory, revalidates the complete typed package configuration,
 and returns only counts, missing setting keys, and deterministic declaration,
 configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
-not relax activation. Settings UI/endpoints, actual secret lookup, package
-assets, and richer enablement remain blocked.
+not relax activation. Settings UI/endpoints, actual secret lookup, immutable
+package-asset delivery/injection, and richer enablement remain blocked.
+
+The first package-asset prerequisite is now implemented without delivery or
+response injection. Trusted manifests can form a deterministic plan only for
+package-owned CSS at `head` and JavaScript at `body-end`; core derives a
+reserved namespaced URL containing the declared SHA-256 and can render only
+escaped core-owned tags after revalidating the plan hash. Invalid, duplicate,
+unsafe, unsupported, or location-mismatched declarations return no partial
+plan. The helper reads no package file, serves no HTTP response, executes no
+package PHP, opens no database, and does not change activation. Immutable
+asset delivery, public/admin injection, settings UI/endpoints, actual secret
+lookup, and richer enablement remain blocked.
 
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
