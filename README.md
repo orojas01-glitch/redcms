@@ -100,6 +100,13 @@ under lifecycle/package and row locks, replaces the complete configuration,
 verifies the exact postcondition, and commits one value-free audit fact; every
 late failure rolls back. No administrator form or endpoint, secret resolution,
 package execution, or activation path is added.
+A separate core-only current-setting read model now rechecks that same trusted
+identity and lifecycle state, then filters each declared setting by its fresh
+exact grant. It returns normalized stored/default/unset non-secret values only
+to authorized administrators and a secret setting's configured state only; it
+never returns an opaque secret reference. The model adds no administrator
+screen or endpoint, persistence, package execution, secret lookup, or
+activation eligibility.
 Server-local configuration can now declare only the opaque `config:`
 references that an operator has provisioned. Core validates that bounded
 inventory and produces deterministic per-package availability evidence using
@@ -240,6 +247,9 @@ features.
   preflight with explicit manifest permissions and fresh database grants
 - Atomic complete-setting persistence with shared locks, exact postcondition,
   value-free audit, no-op handling, and rollback
+- Core-only current-setting read models with per-setting fresh grants,
+  authorized typed non-secret values, and masked secret configured state—no UI,
+  endpoint, secret-reference disclosure, package execution, or mutation
 - Non-executing server-local secret-reference availability evidence with no
   secret lookup, reference disclosure, database access, or activation change
 - Deterministic namespaced CSS/JavaScript asset plans with hashed URLs and

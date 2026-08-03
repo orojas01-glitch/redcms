@@ -4696,6 +4696,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running add-on setting storage, authorization preflight, and atomic writer checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-storage-preflight-self-test.php"
 
+printf '%s\n' 'Running permission-scoped add-on setting read-model checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-read-model-self-test.php"
+
 printf '%s\n' 'Running permission-scoped administrator tool dispatch checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-dispatch-self-test.php"
 
@@ -4926,4 +4929,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer/permission-scoped settings read model, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

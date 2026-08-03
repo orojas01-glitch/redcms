@@ -405,6 +405,21 @@ Stale plans, drift, replacement/postcondition/audit failure, or injected late
 failure roll back completely. It resolves no secret, executes no package code,
 renders no form, exposes no endpoint, and does not change activation.
 
+`red_addon_setting_read_model()` is the separate core-only current-setting
+reader. It accepts only a trusted complete package plus numeric current actor,
+rechecks the exact installed package identity and an `installed_disabled` or
+`enabled` lifecycle, and requires an explicit package-declared permission for
+every setting. Each setting receives a fresh binary grant decision; only the
+authorized subset is returned. Non-secret entries retain their normalized
+typed stored value or trusted manifest default, with an explicit `stored`,
+`default`, or `unset` source. Secret-reference entries disclose only the
+boolean configured state and never a `config:` identifier. The deterministic
+model hash covers only the returned subset. Missing grants, unknown/malformed
+stored rows, identity/lifecycle drift, or encoding failures return no partial
+model. This helper renders no control, exposes no endpoint, persists nothing,
+executes no package, resolves no secret, and changes no lifecycle or
+enablement gate.
+
 `red_addon_secret_reference_declarations()` reads only the operator's bounded
 server-local list of opaque `config:` identifiers from
 `ADDON_SECRET_REFERENCES` and `RED_ADDON_SECRET_REFERENCES`; neither source
@@ -1425,9 +1440,10 @@ responses, or structured data.
    revision snapshots, validated history/preflight, and atomic restore
    execution are also implemented. Data-only setting definitions now have
    type-correct defaults plus closed value and secret-reference normalization;
-   empty per-client storage, exact permissioned write preflight, and atomic
-   internal persistence plus non-executing server-local availability evidence
-   are implemented. Deterministic namespaced CSS/JavaScript asset planning,
+   empty per-client storage, exact permissioned write preflight, atomic
+   internal persistence, and a core-only per-setting authorized read model plus
+   non-executing server-local availability evidence are implemented.
+   Deterministic namespaced CSS/JavaScript asset planning,
    read-only immutable delivery preflight, and the core-owned static immutable
    delivery endpoint and core-owned public/admin document injection are also
    implemented. Data-only administrator action contracts and their exact

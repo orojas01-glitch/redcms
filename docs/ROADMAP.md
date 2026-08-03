@@ -215,6 +215,16 @@ postcondition, injected, permission, identity, lifecycle, or state failure
 rolls the replacement back. Settings UI/endpoints, secret availability, and
 richer enablement remain blocked.
 
+A separate core-only current-setting read model is now implemented. It binds
+the same trusted package identity and supported installed-disabled/enabled
+lifecycle state, requires every operational setting to name a package-declared
+permission, and makes a fresh binary decision per setting. Authorized readers
+receive only normalized non-secret stored/default/unset values plus a
+deterministic model hash; secret settings report only whether an opaque
+reference is configured. Identity, lifecycle, schema, stored-value, or grant
+drift fails closed with no partial model. It adds no administrator UI or
+endpoint, write, package execution, secret lookup, or enablement eligibility.
+
 Non-executing secret-reference availability evidence is now implemented.
 Each server may declare a bounded list of opaque `config:` references in its
 ignored local configuration or `RED_ADDON_SECRET_REFERENCES`; core merges and
@@ -421,10 +431,11 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
-complete, its protected UI/endpoint, public writable routes, settings UI/endpoints, actual
-secret lookup, live-data, and richer package persistence contracts must still
-be implemented and accepted with disposable fixtures before the separately
-distributed package can be enabled.
+complete, and a core-only authorized setting read model is complete. Its
+protected settings UI/endpoint, public writable routes, actual secret lookup,
+live-data, and richer package persistence contracts must still be implemented
+and accepted with disposable fixtures before the separately distributed package
+can be enabled.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

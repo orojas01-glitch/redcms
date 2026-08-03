@@ -352,6 +352,7 @@ applied all 41 migrations to the expected 29-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
 23-assertion add-on setting storage, authorization preflight, and atomic writer,
+13-assertion permission-scoped add-on setting read model,
 18-assertion permission-scoped administrator-tool dispatch,
 18-assertion non-executing administrator-action preflight,
 32-assertion atomic internal administrator-action runner and protected endpoint bridge,
@@ -418,7 +419,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -487,6 +488,15 @@ The command must return a nonzero status if installation, migration, schema, rel
   complete rows, separate ordinary/secret columns, exact postcondition reload,
   one value-free audit fact, no-op handling, and full rollback on audit or
   injected late failure.
+- Add-on setting-read-model acceptance runs only in the uniquely named
+  disposable database and one temporary trusted package. It requires exact
+  installed identity and supported lifecycle evidence, a declared permission
+  for every setting, fresh per-setting binary grants, valid stored values, and
+  deterministic authorized models. It proves stored/default/unset typed values
+  appear only in the authorized non-secret subset; secret entries disclose only
+  configured state; revocation, case changes, stored-value drift, and registry
+  identity drift return no partial result; no reader call writes a row, audit,
+  grant, or package marker; and all fixture rows/files are removed.
 - Add-on component-editor renderer acceptance runs before database creation. It requires core-owned escaped markup for every fixed schema type, stable namespaced labels/help/errors, scoped border-box control sizing, no rejected-value reflection, fail-closed malformed state, and no form, submit control, authorization, package execution, package data access, or database state. Its revision-timeline checks additionally require exact value-free newest-first metadata, newest/current hash agreement, escaped actor and timestamp copy, fixed current/matching/restore-check-required states, responsive containment, no value or hash disclosure, no action markup, and fail-closed empty, stale, reordered, or value-bearing input.
 - Add-on component-editor permission acceptance runs only in the uniquely named disposable database. It requires the full manifest permission capacity, exact operation mapping, explicit package grants independent of Owner/lifecycle authority, binary case matching, next-decision revocation, read-only state fingerprints, and zero residual administrator, role, or grant fixtures.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.

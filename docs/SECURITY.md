@@ -148,6 +148,14 @@ add-on packages without executing them.
   audit fact. Ordinary JSON and opaque secret references remain physically
   separated. Exact no-ops add no audit. Any stale plan, drift, write,
   postcondition, audit, or injected failure rolls back all rows and audit state.
+- The separate core-only current-setting reader repeats trusted package and
+  lifecycle validation, then makes one fresh exact case-sensitive grant
+  decision per declared setting. It exposes normalized ordinary stored/default/
+  unset values only for the authorized subset; secret-reference entries reveal
+  only whether a reference is configured. It returns no `config:` identifier,
+  renders no control, exposes no endpoint, writes no state, executes no
+  package, resolves no secret, or changes activation eligibility. Storage,
+  identity, lifecycle, permission, or value drift returns no partial model.
 - Server-local add-on secret availability is a separate non-executing
   attestation. `ADDON_SECRET_REFERENCES` in ignored local configuration and
   `RED_ADDON_SECRET_REFERENCES` may list only bounded lowercase `config:`
