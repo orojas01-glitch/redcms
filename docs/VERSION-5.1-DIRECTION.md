@@ -26,10 +26,11 @@ per-client ledger record, and value-free audit fact. A separate unlinked
 core-owned administrator endpoint validates session and CSRF itself, accepts
 only exact action identities, derives its plan server-side, and returns only
 value-free bounded outcomes; it adds no UI or public route. The separately
-documented public-mutation boundary defines a future static-POST anonymous path
-with CSRF, idempotency, rate-limit, transaction, and response constraints; it
-adds no manifest field, dispatcher, cookie/session, ledger, package behavior,
-or enablement change. Adapters,
+documented public-mutation boundary now validates optional closed declaration
+metadata and produces value-free deterministic preflight evidence for a future
+static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
+response constraints; it still adds no dispatcher, cookie/session, ledger,
+package behavior, or enablement change. Adapters,
 operational writable route/tool actions, settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
@@ -603,6 +604,12 @@ request bootstrap excludes the disabled package.
     value-free-response path. This documentation-only contract adds no route,
     manifest field, cookie/session, handler, ledger, package, or enablement
     behavior.
+43. Completed the optional closed `publicMutationContracts` declaration and
+    value-free deterministic preflight: it binds one static public POST/CSRF
+    route to fixed scalar, anonymous, idempotency, privacy, rate-limit,
+    package-table, postcondition, audit, and outcome metadata; it invokes no
+    package code and adds no dispatcher, endpoint, cookie/session, database
+    access, ledger, package behavior, or enablement change.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

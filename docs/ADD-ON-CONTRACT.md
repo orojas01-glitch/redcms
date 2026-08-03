@@ -21,9 +21,10 @@ separate fail-closed boundaries. Adapters, operational writable route/tool
 actions, settings UI/endpoints, actual secret
 lookup, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
-The planned generic public-mutation boundary is documented in
-[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md), but it has no
-manifest field, dispatcher, endpoint, package, state, or enablement effect.
+The generic public-mutation boundary now has optional closed manifest metadata
+and a value-free, non-executing declaration preflight. It has no dispatcher,
+endpoint, package runtime, request/cookie/session state, database state, or
+enablement effect.
 
 ## Implemented Trust Boundary
 
@@ -210,6 +211,7 @@ Every package declares:
 - Settings schema, including which settings are secret references
 - Ordered immutable migrations and their checksums
 - Public and administrator route declarations
+- Optional closed public-mutation declarations, separate from routes
 - Background jobs and retry policy
 - Exact outbound network hosts
 - Public/admin assets and their loading locations
@@ -332,6 +334,7 @@ An illustrative manifest shape is:
   "settings": [],
   "migrations": [],
   "routes": [],
+  "publicMutationContracts": [],
   "jobs": [],
   "outboundHosts": [],
   "assets": {
@@ -992,21 +995,31 @@ variables, database connections, or arbitrary headers. It also does not make a
 route-bearing package eligible for enablement: all current enablement profiles
 continue to reject routes until richer package lifecycle gates are reviewed.
 
-## Planned Public Mutation Boundary
+## Public Mutation Declaration Boundary
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the future
-generic core-owned path for a narrowly declared static public POST mutation. It
-requires a later data-only public-mutation declaration, a client-scoped
-anonymous subject, CSRF, exact scalar request validation, server-derived state,
-privacy-preserving rate/idempotency evidence, a contained transaction runner,
-and bounded core-owned responses.
+generic core-owned path for a narrowly declared static public POST mutation.
+The optional `publicMutationContracts` field now validates only closed,
+data-only metadata: one already-declared static public POST/CSRF route, a
+unique mutation identity, two bounded scalar field shapes, fixed anonymous,
+CSRF, idempotency, privacy, rate-limit, and postcondition policies, package
+table declarations, a value-free audit category, and the fixed `accepted` /
+`unchanged` outcome vocabulary.
+
+`includes/addon_public_mutation_preflight_helpers.php` converts one validated
+declaration into deterministic hashes and value-free counts only. It never
+loads a package, reads request/cookie/session state, reads a database, verifies
+tables, creates identity/CSRF/idempotency material, starts a transaction, or
+invokes a handler. Unknown/executable metadata, reserved core request names,
+route drift, weak policies, duplicate identities, and core add-on tables fail
+closed before package PHP is loaded.
 
 The current routes schema and addon_public_route_helpers.php remain public
-GET-only. This contract does not add a declaration, dispatcher, cookie/session,
-ledger, handler, browser form, route eligibility, package fixture, or Store
-Lite behavior. It leaves legacy public form operations unchanged. Each
-implementation stage remains a separate disposable-fixture and richer
-enablement review.
+GET-only. This contract does not add a dispatcher, cookie/session, ledger,
+handler, browser form, route eligibility, package fixture, or Store Lite
+behavior. It leaves legacy public form operations unchanged. Each later live
+request stage remains a separate disposable-fixture and richer enablement
+review.
 
 ## Administrator Tool Contract
 

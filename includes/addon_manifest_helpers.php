@@ -985,6 +985,665 @@ if (!function_exists('red_addon_admin_tool_action_contract')) {
     }
 }
 
+if (!function_exists('red_addon_valid_public_mutation_table')) {
+    function red_addon_valid_public_mutation_table($value)
+    {
+        $reserved = [
+            'red_addon_installations',
+            'red_addon_migrations',
+            'red_addon_activity_log',
+            'red_addon_component_revisions',
+            'red_addon_admin_action_executions',
+            'red_addon_settings',
+            'red_addon_public_mutation_executions',
+        ];
+        return is_string($value)
+            && preg_match('/\ARED_Addon_[A-Za-z0-9_]{1,54}\z/', $value) === 1
+            && !in_array(strtolower($value), $reserved, true);
+    }
+}
+
+if (!function_exists('red_addon_valid_public_mutation_audit_category')) {
+    function red_addon_valid_public_mutation_audit_category($value)
+    {
+        return is_string($value)
+            && strlen($value) <= 120
+            && preg_match('/\A[a-z][a-z0-9.-]*\z/', $value) === 1;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_reserved_field_keys')) {
+    function red_addon_public_mutation_reserved_field_keys()
+    {
+        return [
+            'cart',
+            'cart-id',
+            'cart-owner',
+            'callback',
+            'csrf',
+            'csrf-token',
+            'currency',
+            'database',
+            'idempotency',
+            'idempotency-key',
+            'mutation',
+            'order',
+            'order-id',
+            'order-state',
+            'package',
+            'payment',
+            'permission',
+            'plan',
+            'price',
+            'provider',
+            'redirect',
+            'return',
+            'route',
+            'state',
+            'subject',
+            'table',
+            'tables',
+            'total',
+        ];
+    }
+}
+
+if (!function_exists('red_addon_validate_public_mutation_request_fields')) {
+    function red_addon_validate_public_mutation_request_fields(
+        $fields,
+        $context,
+        array &$result
+    ) {
+        if (!is_array($fields) || !array_is_list($fields)) {
+            red_addon_add_error(
+                $result,
+                $context . ' requestFields must be an array.'
+            );
+            return [];
+        }
+        if ($fields === [] || count($fields) > 8) {
+            red_addon_add_error(
+                $result,
+                $context . ' requestFields must contain one to eight fields.'
+            );
+        }
+
+        $normalized = [];
+        $seenKeys = [];
+        foreach ($fields as $index => $field) {
+            $fieldContext = $context . ' requestField[' . $index . ']';
+            if (!red_addon_validate_object_keys(
+                $field,
+                ['key', 'type', 'required'],
+                [
+                    'key',
+                    'type',
+                    'required',
+                    'minLength',
+                    'maxLength',
+                    'minimum',
+                    'maximum',
+                ],
+                $fieldContext,
+                $result
+            )) {
+                continue;
+            }
+
+            $key = is_string($field['key'] ?? null) ? $field['key'] : '';
+            $fieldValid = true;
+            if (!red_addon_valid_component_field_key($key)) {
+                red_addon_add_error($result, $fieldContext . ' key is invalid.');
+                $fieldValid = false;
+            } elseif (in_array(
+                $key,
+                red_addon_public_mutation_reserved_field_keys(),
+                true
+            )) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' key is reserved for core-owned state.'
+                );
+                $fieldValid = false;
+            } elseif (isset($seenKeys[$key])) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' request field key "' . $key . '" is duplicated.'
+                );
+                $fieldValid = false;
+            } else {
+                $seenKeys[$key] = true;
+            }
+
+            $type = is_string($field['type'] ?? null) ? $field['type'] : '';
+            if (!in_array($type, ['identifier', 'positive-integer'], true)) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' type must be identifier or positive-integer.'
+                );
+                continue;
+            }
+            if (!is_bool($field['required'] ?? null)) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' required must be boolean.'
+                );
+                $fieldValid = false;
+            }
+
+            $keys = array_keys($field);
+            sort($keys, SORT_STRING);
+            if ($type === 'identifier') {
+                $expectedKeys = [
+                    'key',
+                    'maxLength',
+                    'minLength',
+                    'required',
+                    'type',
+                ];
+                if ($keys !== $expectedKeys) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext .
+                            ' identifier fields require only minLength and maxLength bounds.'
+                    );
+                    continue;
+                }
+                $minLength = $field['minLength'] ?? null;
+                $maxLength = $field['maxLength'] ?? null;
+                if (!is_int($minLength) || $minLength < 1 || $minLength > 160) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' minLength must be an integer from 1 to 160.'
+                    );
+                    $fieldValid = false;
+                }
+                if (!is_int($maxLength) || $maxLength < 1 || $maxLength > 160) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' maxLength must be an integer from 1 to 160.'
+                    );
+                    $fieldValid = false;
+                }
+                if (is_int($minLength)
+                    && is_int($maxLength)
+                    && $minLength > $maxLength
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' minLength must not exceed maxLength.'
+                    );
+                    $fieldValid = false;
+                }
+                if ($fieldValid) {
+                    $normalized[] = [
+                        'key' => $key,
+                        'type' => $type,
+                        'required' => $field['required'],
+                        'minLength' => $minLength,
+                        'maxLength' => $maxLength,
+                    ];
+                }
+                continue;
+            }
+
+            $expectedKeys = [
+                'key',
+                'maximum',
+                'minimum',
+                'required',
+                'type',
+            ];
+            if ($keys !== $expectedKeys) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext .
+                        ' positive-integer fields require only minimum and maximum bounds.'
+                );
+                continue;
+            }
+            $minimum = $field['minimum'] ?? null;
+            $maximum = $field['maximum'] ?? null;
+            if (!is_int($minimum) || $minimum < 1 || $minimum > 2147483647) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' minimum must be an integer from 1 to 2147483647.'
+                );
+                $fieldValid = false;
+            }
+            if (!is_int($maximum) || $maximum < 1 || $maximum > 2147483647) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' maximum must be an integer from 1 to 2147483647.'
+                );
+                $fieldValid = false;
+            }
+            if (is_int($minimum)
+                && is_int($maximum)
+                && $minimum > $maximum
+            ) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' minimum must not exceed maximum.'
+                );
+                $fieldValid = false;
+            }
+            if ($fieldValid) {
+                $normalized[] = [
+                    'key' => $key,
+                    'type' => $type,
+                    'required' => $field['required'],
+                    'minimum' => $minimum,
+                    'maximum' => $maximum,
+                ];
+            }
+        }
+        if ($normalized === []) {
+            red_addon_add_error(
+                $result,
+                $context . ' requestFields must contain one valid field.'
+            );
+        }
+        usort(
+            $normalized,
+            static function (array $left, array $right): int {
+                return strcmp($left['key'], $right['key']);
+            }
+        );
+        return $normalized;
+    }
+}
+
+if (!function_exists('red_addon_validate_public_mutation_tables')) {
+    function red_addon_validate_public_mutation_tables(
+        $tables,
+        $context,
+        array &$result
+    ) {
+        if (!is_array($tables) || !array_is_list($tables)) {
+            red_addon_add_error($result, $context . ' tables must be an array.');
+            return [];
+        }
+        if ($tables === [] || count($tables) > 8) {
+            red_addon_add_error(
+                $result,
+                $context . ' tables must contain one to eight package tables.'
+            );
+        }
+        $normalized = [];
+        foreach ($tables as $index => $table) {
+            if (!red_addon_valid_public_mutation_table($table)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' tables[' . $index . '] is not a package-owned table.'
+                );
+                continue;
+            }
+            $tableKey = strtolower($table);
+            if (isset($normalized[$tableKey])) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' table "' . $table . '" is duplicated.'
+                );
+                continue;
+            }
+            $normalized[$tableKey] = $table;
+        }
+        $tables = array_values($normalized);
+        sort($tables, SORT_STRING);
+        if ($tables === []) {
+            red_addon_add_error(
+                $result,
+                $context . ' tables must contain one valid package table.'
+            );
+        }
+        return $tables;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_static_route')) {
+    function red_addon_public_mutation_static_route($route, $packageId)
+    {
+        $parts = red_addon_package_parts($packageId);
+        $keys = is_array($route) ? array_keys($route) : [];
+        sort($keys, SORT_STRING);
+        if ($parts === null
+            || $keys !== [
+                'authentication',
+                'csrf',
+                'id',
+                'methods',
+                'path',
+                'scope',
+            ]
+        ) {
+            return null;
+        }
+        $routeId = is_string($route['id'] ?? null) ? $route['id'] : '';
+        $path = is_string($route['path'] ?? null) ? $route['path'] : '';
+        $publicPrefix = '/addons/' . $parts[0] . '/' . $parts[1];
+        if (!red_addon_valid_capability($routeId)
+            || ($route['scope'] ?? null) !== 'public'
+            || ($route['authentication'] ?? null) !== 'public'
+            || ($route['methods'] ?? null) !== ['POST']
+            || ($route['csrf'] ?? null) !== 'required'
+            || !red_addon_valid_route_path($path)
+            || strpbrk($path, '{}') !== false
+            || strpos($path, $publicPrefix . '/') !== 0
+        ) {
+            return null;
+        }
+        return [
+            'id' => $routeId,
+            'path' => $path,
+            'scope' => 'public',
+            'authentication' => 'public',
+            'method' => 'POST',
+            'csrf' => 'required',
+        ];
+    }
+}
+
+if (!function_exists('red_addon_validate_public_mutation_contracts')) {
+    function red_addon_validate_public_mutation_contracts(
+        $contracts,
+        $routes,
+        $packageId,
+        array &$result
+    ) {
+        if (!is_array($contracts) || !array_is_list($contracts)) {
+            red_addon_add_error(
+                $result,
+                'Public mutation contracts must be an array.'
+            );
+            return [];
+        }
+        if (count($contracts) > 50) {
+            red_addon_add_error(
+                $result,
+                'Public mutation contracts exceeds 50 entries.'
+            );
+        }
+        if (!is_array($routes) || !array_is_list($routes)
+            || !red_addon_valid_package_id($packageId)
+        ) {
+            red_addon_add_error(
+                $result,
+                'Public mutation contracts require a valid package routes declaration.'
+            );
+            return [];
+        }
+
+        $routeMap = [];
+        foreach ($routes as $route) {
+            $routeId = is_array($route) && is_string($route['id'] ?? null)
+                ? $route['id']
+                : '';
+            if (!red_addon_valid_capability($routeId)) {
+                continue;
+            }
+            if (isset($routeMap[$routeId])) {
+                red_addon_add_error(
+                    $result,
+                    'Public mutation contracts cannot bind a duplicated route id.'
+                );
+                continue;
+            }
+            $routeMap[$routeId] = $route;
+        }
+
+        $normalized = [];
+        $seenRoutes = [];
+        $seenMutations = [];
+        foreach ($contracts as $index => $contract) {
+            $context = 'Public mutation contract[' . $index . ']';
+            if (!red_addon_validate_object_keys(
+                $contract,
+                [
+                    'route',
+                    'mutation',
+                    'scope',
+                    'authentication',
+                    'method',
+                    'csrf',
+                    'encoding',
+                    'maxBodyBytes',
+                    'requestFields',
+                    'subject',
+                    'idempotency',
+                    'privacy',
+                    'rateLimit',
+                    'tables',
+                    'postcondition',
+                    'audit',
+                    'outcomes',
+                ],
+                [
+                    'route',
+                    'mutation',
+                    'scope',
+                    'authentication',
+                    'method',
+                    'csrf',
+                    'encoding',
+                    'maxBodyBytes',
+                    'requestFields',
+                    'subject',
+                    'idempotency',
+                    'privacy',
+                    'rateLimit',
+                    'tables',
+                    'postcondition',
+                    'audit',
+                    'outcomes',
+                ],
+                $context,
+                $result
+            )) {
+                continue;
+            }
+
+            $routeId = is_string($contract['route'] ?? null)
+                ? $contract['route']
+                : '';
+            $contractValid = true;
+            if (!red_addon_valid_capability($routeId)) {
+                red_addon_add_error($result, $context . ' route is invalid.');
+                $contractValid = false;
+            } elseif (strpos($routeId, $packageId . '/') !== 0) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' route must use the package capability namespace.'
+                );
+                $contractValid = false;
+            } elseif (isset($seenRoutes[$routeId])) {
+                red_addon_add_error(
+                    $result,
+                    'Public mutation contract for route "' . $routeId . '" is duplicated.'
+                );
+                $contractValid = false;
+            } else {
+                $seenRoutes[$routeId] = true;
+            }
+            $boundRoute = $routeMap[$routeId] ?? null;
+            $normalizedRoute = red_addon_public_mutation_static_route(
+                $boundRoute,
+                $packageId
+            );
+            if (!is_array($normalizedRoute)
+                || !hash_equals($routeId, $normalizedRoute['id'])
+            ) {
+                red_addon_add_error(
+                    $result,
+                    $context .
+                        ' route must bind one exact static public POST/CSRF-required route.'
+                );
+                $contractValid = false;
+            }
+
+            $mutation = is_string($contract['mutation'] ?? null)
+                ? $contract['mutation']
+                : '';
+            if (!red_addon_valid_capability($mutation)) {
+                red_addon_add_error($result, $context . ' mutation is invalid.');
+                $contractValid = false;
+            } elseif (strpos($mutation, $packageId . '/') !== 0) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' mutation must use the package capability namespace.'
+                );
+                $contractValid = false;
+            } elseif ($mutation === $routeId) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' mutation must differ from its route.'
+                );
+                $contractValid = false;
+            } elseif (isset($seenMutations[$mutation])) {
+                red_addon_add_error(
+                    $result,
+                    'Public mutation "' . $mutation . '" is duplicated.'
+                );
+                $contractValid = false;
+            } else {
+                $seenMutations[$mutation] = true;
+            }
+
+            foreach ([
+                'scope' => 'public',
+                'authentication' => 'public',
+                'method' => 'POST',
+                'csrf' => 'required',
+                'encoding' => 'application/x-www-form-urlencoded',
+                'subject' => 'anonymous',
+                'idempotency' => 'core-issued-key',
+                'privacy' => 'no-store',
+                'rateLimit' => 'required',
+                'postcondition' => 'server-derived-state',
+            ] as $key => $expected) {
+                if (($contract[$key] ?? null) !== $expected) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' ' . $key . ' must be ' . $expected . '.'
+                    );
+                    $contractValid = false;
+                }
+            }
+            $maxBodyBytes = $contract['maxBodyBytes'] ?? null;
+            if (!is_int($maxBodyBytes)
+                || $maxBodyBytes < 128
+                || $maxBodyBytes > 8192
+            ) {
+                red_addon_add_error(
+                    $result,
+                    $context .
+                        ' maxBodyBytes must be an integer from 128 to 8192.'
+                );
+                $contractValid = false;
+            }
+            $requestFields = red_addon_validate_public_mutation_request_fields(
+                $contract['requestFields'] ?? null,
+                $context,
+                $result
+            );
+            if ($requestFields === []) {
+                $contractValid = false;
+            }
+            $tables = red_addon_validate_public_mutation_tables(
+                $contract['tables'] ?? null,
+                $context,
+                $result
+            );
+            if ($tables === []) {
+                $contractValid = false;
+            }
+            $audit = is_string($contract['audit'] ?? null) ? $contract['audit'] : '';
+            if (!red_addon_valid_public_mutation_audit_category($audit)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' audit must be a bounded value-free category.'
+                );
+                $contractValid = false;
+            }
+            if (($contract['outcomes'] ?? null) !== ['accepted', 'unchanged']) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' outcomes must be exactly accepted then unchanged.'
+                );
+                $contractValid = false;
+            }
+
+            if ($contractValid) {
+                $normalized[] = [
+                    'route' => $routeId,
+                    'mutation' => $mutation,
+                    'path' => $normalizedRoute['path'],
+                    'scope' => 'public',
+                    'authentication' => 'public',
+                    'method' => 'POST',
+                    'csrf' => 'required',
+                    'encoding' => 'application/x-www-form-urlencoded',
+                    'maxBodyBytes' => $maxBodyBytes,
+                    'requestFields' => $requestFields,
+                    'subject' => 'anonymous',
+                    'idempotency' => 'core-issued-key',
+                    'privacy' => 'no-store',
+                    'rateLimit' => 'required',
+                    'tables' => $tables,
+                    'postcondition' => 'server-derived-state',
+                    'audit' => $audit,
+                    'outcomes' => ['accepted', 'unchanged'],
+                ];
+            }
+        }
+        usort(
+            $normalized,
+            static function (array $left, array $right): int {
+                return strcmp(
+                    $left['route'] . "\0" . $left['mutation'],
+                    $right['route'] . "\0" . $right['mutation']
+                );
+            }
+        );
+        return $normalized;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_contract')) {
+    function red_addon_public_mutation_contract(
+        array $manifest,
+        $routeId,
+        $mutationId
+    ) {
+        if (!is_string($routeId)
+            || !red_addon_valid_capability($routeId)
+            || !is_string($mutationId)
+            || !red_addon_valid_capability($mutationId)
+            || !array_key_exists('publicMutationContracts', $manifest)
+        ) {
+            return null;
+        }
+        $result = ['errors' => [], 'warnings' => []];
+        $contracts = red_addon_validate_public_mutation_contracts(
+            $manifest['publicMutationContracts'] ?? null,
+            $manifest['routes'] ?? null,
+            $manifest['id'] ?? null,
+            $result
+        );
+        if ($result['errors'] !== []) {
+            return null;
+        }
+        foreach ($contracts as $contract) {
+            if (hash_equals($routeId, $contract['route'])
+                && hash_equals($mutationId, $contract['mutation'])
+            ) {
+                return $contract;
+            }
+        }
+        return null;
+    }
+}
+
 if (!function_exists('red_addon_validate_component_editors')) {
     function red_addon_validate_component_editors(
         $editors,
@@ -1621,6 +2280,7 @@ if (!function_exists('red_addon_validate_manifest')) {
                     'componentEditors',
                     'adminToolContracts',
                     'adminToolActionContracts',
+                    'publicMutationContracts',
                 ],
                 $requiredTopLevel
             ),
@@ -1929,6 +2589,15 @@ if (!function_exists('red_addon_validate_manifest')) {
                     red_addon_add_error($result, $routeContext . ' unsafe methods require CSRF protection.');
                 }
             }
+        }
+
+        if (array_key_exists('publicMutationContracts', $manifest)) {
+            red_addon_validate_public_mutation_contracts(
+                $manifest['publicMutationContracts'],
+                $routes,
+                $packageId,
+                $result
+            );
         }
 
         $jobs = $manifest['jobs'] ?? null;

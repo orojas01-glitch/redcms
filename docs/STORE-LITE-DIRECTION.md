@@ -169,8 +169,9 @@ core settings tables.
   orders or duplicate paid transitions.
 
 The generic boundary for a future add-to-cart request is documented in
-[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md). It is
-documentation only: Store Lite has no public mutation route, anonymous cart
+[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md). The generic core
+can now validate optional closed declaration metadata and return value-free
+preflight evidence, but Store Lite has no public mutation route, anonymous cart
 cookie, package files, tables, or enablement profile yet.
 
 The initial order states should remain small:
@@ -264,8 +265,8 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - typed service invocation is complete as an internal core-to-package boundary;
 - exact static public `GET` routes are complete as a core-owned JSON boundary,
   while unsafe/member/placeholder routes and route-bearing package enablement
-  remain gated. The documented public-mutation boundary reserves a future
-  core-owned static POST path but does not implement it, create an anonymous
+  remain gated. The public-mutation declaration preflight reserves a future
+  core-owned static POST path but does not dispatch it, create an anonymous
   cart subject, or relax any route/enablement gate;
 - declared administrator routes;
 - display-only administrator-tool dispatch is complete with exact package
@@ -337,9 +338,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Defined the generic public-mutation boundary without adding a route,
-   manifest field, cookie/session, ledger, package code, or Store Lite
-   behavior. It remains a prerequisite for a later cart write path.
+4. Completed the optional public-mutation declaration preflight without adding
+   a dispatcher, cookie/session, ledger, package code, or Store Lite behavior.
+   It remains a prerequisite for a later cart write path.
 5. Continue with generic settings UI/endpoints as a separate reviewed batch.
    Typed internal service
    invocation, exact static public `GET` routes, display-only administrator

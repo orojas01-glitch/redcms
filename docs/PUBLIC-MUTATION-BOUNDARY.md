@@ -1,9 +1,10 @@
 # RED-CMS Public Mutation Boundary
 
-Status: planned generic contract. This document records the prerequisite for a
-future public write dispatcher. It does **not** add a manifest field, route,
-endpoint, cookie, session, handler, database table, migration, package,
-permission, enablement profile, or Store Lite behavior.
+Status: data-only declaration validation and non-executing preflight are
+implemented. This document records the prerequisite for a future public write
+dispatcher. It does **not** add a dispatcher, endpoint, cookie, session,
+handler, database table, migration, package, permission, enablement profile,
+or Store Lite behavior.
 
 ## Purpose
 
@@ -28,6 +29,7 @@ changed by it.
 | --- | --- | --- |
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
+| `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
 | Anonymous cart identity | Does not exist | None |
 | Public CSRF issuance/validation | No add-on public-mutation path exists | None |
 | Public mutation ledger/audit | Does not exist | None |
@@ -37,25 +39,33 @@ The planned contract cannot make a route-bearing package eligible for the
 current constrained enablement profiles. It must be implemented and accepted
 before a richer enablement decision can consider it.
 
-## Proposed Declarative Shape
+## Implemented Declarative Shape
 
-A later non-executing manifest-validation batch may introduce a closed
-publicMutationContracts declaration. It is intentionally separate from the
-existing routes array and is not a JSON schema or runtime API yet. Each future
-entry must bind exactly one already-declared route to one mutation identity and
-must declare, at minimum:
+The optional closed `publicMutationContracts` manifest field is implemented in
+the Version 1 schema and trust validator. It is intentionally separate from
+`routes`. Existing package manifests without it remain compatible. If present,
+each entry must bind exactly one already-declared route to one mutation identity
+and must declare every one of these fixed values:
 
-- the route id and a unique mutation id;
-- scope public, authentication public, method POST, and CSRF required;
-- an exact static, unencoded path inside the package's reserved public
-  namespace; path placeholders remain out of scope;
-- a closed request-field contract with scalar types, canonical encodings,
-  requiredness, bounds, and an overall body limit;
-- the permitted anonymous-subject mode, idempotency policy, privacy/cache
-  policy, and rate-limit policy;
-- the package-owned mutable-table set, expected postcondition class, and
-  value-free audit category; and
-- a bounded public outcome vocabulary.
+- a route id and unique mutation id, bound to an exact static, unencoded path
+  in the package's reserved public namespace;
+- `scope: public`, `authentication: public`, `method: POST`, and
+  `csrf: required`, matching the referenced route exactly;
+- `encoding: application/x-www-form-urlencoded`, a body bound from 128 to
+  8,192 bytes, and one to eight closed request fields;
+- only `identifier` fields with explicit 1–160 byte bounds or
+  `positive-integer` fields with explicit 1–2,147,483,647 bounds;
+- `subject: anonymous`, `idempotency: core-issued-key`,
+  `privacy: no-store`, `rateLimit: required`, and
+  `postcondition: server-derived-state`;
+- one to eight package-shaped tables, a bounded value-free audit category; and
+- exactly the public success vocabulary `accepted`, `unchanged`.
+
+Core canonicalizes field and table order, rejects duplicated route, mutation,
+field, and table identities, reserves all core-controlled request names, and
+rejects unknown/executable metadata. It also rejects core add-on tables as
+package tables. The validation does not claim the route, verify a table,
+generate a subject/token/key, or admit the package to enablement.
 
 The manifest may not name PHP files, classes, arbitrary callbacks, SQL, HTML,
 redirects, response headers, cookie names, sessions, payment-provider fields,
@@ -209,10 +219,10 @@ This planning slice does not authorize:
 
 ## Delivery Order
 
-1. This contract records the fixed safety boundary without code or state.
-2. A later batch may validate the closed data-only declaration and produce
-   non-executing readiness/preflight evidence; it must still refuse enablement
-   and invoke no mutation handler.
+1. This contract recorded the fixed safety boundary without code or state.
+2. The closed data-only declaration and value-free deterministic preflight are
+   complete. They still refuse route dispatch and enablement, invoke no package
+   handler, and read no database, request, cookie, or session state.
 3. A separate batch may add the core-owned anonymous-subject/CSRF/rate-limit
    foundation and transaction runner, with disposable fixtures only.
 4. A separate richer enablement/live-data batch may admit only packages that
