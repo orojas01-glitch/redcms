@@ -113,6 +113,27 @@ CREATE TABLE `RED_Addon_Installations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Settings`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Settings` (
+  `PackageID` varchar(127) NOT NULL,
+  `SettingKey` varchar(160) NOT NULL,
+  `ValueType` varchar(32) NOT NULL,
+  `ValueJSON` text DEFAULT NULL,
+  `SecretReference` varchar(160) DEFAULT NULL,
+  `UpdatedByAdminRecordID` int unsigned NOT NULL,
+  `UpdatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`PackageID`,`SettingKey`),
+  KEY `idx_red_addon_settings_updated` (`PackageID`,`UpdatedAt`,`SettingKey`),
+  CONSTRAINT `fk_red_addon_settings_installation` FOREIGN KEY (`PackageID`) REFERENCES `RED_Addon_Installations` (`PackageID`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Addon_Migrations`
 --
 

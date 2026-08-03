@@ -516,6 +516,10 @@
         "secret": {
           "type": "boolean"
         },
+        "permission": {
+          "description": "Optional package-declared permission required by operational setting storage and editing boundaries.",
+          "$ref": "#/$defs/permission"
+        },
         "default": {
           "description": "A non-secret default. PHP trust validation also requires the value to match the declared setting type; null means no configured default.",
           "type": ["string", "integer", "boolean", "null"]

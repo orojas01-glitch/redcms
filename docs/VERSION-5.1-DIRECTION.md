@@ -17,7 +17,7 @@ enabled manifest-declared component are implemented for already-recorded
 enabled packages. Typed internal service invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
 separate fail-closed dispatch boundaries. Adapters, writable route/tool
-actions, settings persistence, package assets, upgrades, uninstall/purge,
+actions, atomic settings writes, package assets, upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
 component-persistence foundation now provides full
@@ -49,6 +49,13 @@ loosely coerced, or oversized values fail with no normalized configuration.
 Secret settings return only separate opaque lowercase `config:` references;
 core does not resolve secret material. No database, permission, form, package
 runtime, or activation path is added.
+An additive per-client settings-storage prerequisite now provides one empty
+generic table and a read-only write preflight. Operational definitions bind an
+explicit permission already declared by the package. Preflight requires exact
+filesystem and registry identity, installed-disabled or enabled state,
+complete typed values, fresh case-sensitive database grants, valid current
+stored rows, and deterministic current/target/plan hashes. It does not write,
+resolve secrets, render controls, execute package code, or relax enablement.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -480,6 +487,13 @@ request bootstrap excludes the disabled package.
     lowercase `config:` secret references separately from ordinary values.
     Resolve no secret, access no database, authorize no actor, render no form,
     execute no package, persist no setting, and change no activation gate.
+32. Completed per-client settings storage and read-only write preflight:
+    install only an empty generic table; bind each operational setting to an
+    explicit package-declared permission; require fresh exact grants, trusted
+    installed package identity, supported lifecycle state, complete typed
+    values, valid current rows, and deterministic state/plan hashes. Persist
+    no value, resolve no secret, invoke no package, render no form, and change
+    no lifecycle or activation state.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

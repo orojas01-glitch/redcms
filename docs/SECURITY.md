@@ -130,6 +130,15 @@ add-on packages without executing them.
   `config:` reference identifiers and are separated from ordinary values;
   core does not resolve or return secret material through this boundary. It
   opens no database, form, permission, package runtime, or activation path.
+- Each client database now has empty generic package-setting storage. Ordinary
+  JSON scalars and opaque secret-reference identifiers use separate nullable
+  columns under an exact package foreign key. A read-only write preflight
+  requires an exact trusted filesystem/registry identity, installed-disabled
+  or enabled state, complete typed values, explicit package-declared setting
+  permissions, fresh binary grants, and a current-state fingerprint. Unknown
+  or malformed stored rows, identity drift, lifecycle drift, missing grants,
+  or stale inputs fail closed. The boundary writes nothing, resolves no secret,
+  invokes no package, renders no form, and changes no lifecycle state.
 - The display-only administrator renderer accepts only an empty state or the
   validator's exact closed result. It maps fixed field types to core-owned
   namespaced controls, escapes every manifest label, help string, option, and
@@ -492,8 +501,8 @@ metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
-The data-only setting-value prerequisite does not supply Store Lite storage,
-settings permissions/UI, secret availability, or enablement readiness.
+The setting storage/preflight prerequisite does not supply Store Lite setting
+writes, settings UI/endpoints, secret availability, or enablement readiness.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and

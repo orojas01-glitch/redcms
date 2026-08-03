@@ -387,7 +387,11 @@ if (!function_exists('red_addon_setting_string_is_valid')) {
 }
 
 if (!function_exists('red_addon_validate_settings')) {
-    function red_addon_validate_settings($settings, array &$result)
+    function red_addon_validate_settings(
+        $settings,
+        array &$result,
+        array $declaredPermissions = []
+    )
     {
         if (!is_array($settings) || !array_is_list($settings)) {
             red_addon_add_error($result, 'Settings must be an array.');
@@ -413,7 +417,15 @@ if (!function_exists('red_addon_validate_settings')) {
             if (!red_addon_validate_object_keys(
                 $setting,
                 ['key', 'label', 'type', 'secret'],
-                ['key', 'label', 'type', 'secret', 'default', 'options'],
+                [
+                    'key',
+                    'label',
+                    'type',
+                    'secret',
+                    'permission',
+                    'default',
+                    'options',
+                ],
                 $context,
                 $result
             )) {
@@ -453,6 +465,29 @@ if (!function_exists('red_addon_validate_settings')) {
                     $result,
                     $context . ' must use secret-reference exactly when secret is true.'
                 );
+            }
+
+            $permission = null;
+            if (array_key_exists('permission', $setting)) {
+                $permission = is_string($setting['permission'])
+                    ? $setting['permission']
+                    : '';
+                if (!red_addon_valid_permission($permission)) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' permission is invalid.'
+                    );
+                } elseif (!in_array(
+                    $permission,
+                    $declaredPermissions,
+                    true
+                )) {
+                    red_addon_add_error(
+                        $result,
+                        $context .
+                            ' permission must be declared by the package.'
+                    );
+                }
             }
 
             $options = [];
@@ -527,6 +562,12 @@ if (!function_exists('red_addon_validate_settings')) {
                 'type' => $type,
                 'secret' => is_bool($secret) ? $secret : false,
             ];
+            if (is_string($permission)
+                && red_addon_valid_permission($permission)
+                && in_array($permission, $declaredPermissions, true)
+            ) {
+                $definition['permission'] = $permission;
+            }
             if ($hasDefault && $secret !== true && $defaultValid) {
                 $definition['default'] = $default;
             }
@@ -543,9 +584,17 @@ if (!function_exists('red_addon_settings_schema')) {
     function red_addon_settings_schema(array $manifest)
     {
         $result = ['errors' => [], 'warnings' => []];
+        $permissions = red_addon_validate_string_list(
+            $manifest['permissions'] ?? [],
+            'Permissions',
+            200,
+            'red_addon_valid_permission',
+            $result
+        );
         $settings = red_addon_validate_settings(
             $manifest['settings'] ?? null,
-            $result
+            $result,
+            $permissions
         );
         return $result['errors'] === [] ? $settings : null;
     }
@@ -1514,7 +1563,11 @@ if (!function_exists('red_addon_validate_manifest')) {
             );
         }
 
-        red_addon_validate_settings($manifest['settings'] ?? null, $result);
+        red_addon_validate_settings(
+            $manifest['settings'] ?? null,
+            $result,
+            $declaredPermissions
+        );
 
         $integrityReferences = [];
         $migrationIds = [];

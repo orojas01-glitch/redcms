@@ -17,8 +17,8 @@ Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
 Typed internal services, exact static public `GET` routes, and display-only
 administrator tools now have separate fail-closed dispatch boundaries.
-Adapters, writable route/tool actions, settings persistence, package assets,
-and richer enablement remain blocked. RED-CMS does not upgrade, uninstall, or
+Adapters, writable route/tool actions, atomic settings persistence, package
+assets, and richer enablement remain blocked. RED-CMS does not upgrade, uninstall, or
 purge packages through this contract yet.
 
 ## Implemented Trust Boundary
@@ -360,6 +360,20 @@ reads or writes a database, authorizes an actor, renders a form, executes
 package PHP, or changes package lifecycle state. Per-client storage,
 permissioned editing, secret-availability checks, and activation readiness are
 later contracts.
+
+Operational setting definitions may add one `permission` that must exactly
+match a permission declared by the package. The clean installer provides an
+empty per-client `RED_Addon_Settings` table keyed by package and setting. It
+stores normalized ordinary scalar JSON separately from opaque `config:`
+identifiers and restricts package deletion through the installation foreign
+key. `red_addon_setting_write_preflight()` is read only: it binds the exact
+validated filesystem package to the recorded version, type, manifest hash,
+inventory hash, and installed-disabled or enabled state; revalidates the full
+target configuration; requires fresh binary grants for every setting; rejects
+unknown or malformed current rows; and returns only deterministic current,
+target, and plan hashes. It never returns setting values, writes storage,
+resolves secrets, renders controls, invokes package code, or changes lifecycle
+state. An atomic writer remains a separate reviewed contract.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -1208,7 +1222,8 @@ responses, or structured data.
    revision snapshots, validated history/preflight, and atomic restore
    execution are also implemented. Data-only setting definitions now have
    type-correct defaults plus closed value and secret-reference normalization;
-   per-client storage, permissioned editing, secret availability, and
+   empty per-client storage plus exact permissioned write preflight are
+   implemented; atomic persistence, editing UI, secret availability, and
    activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are

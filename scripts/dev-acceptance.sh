@@ -214,6 +214,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', AdminRecordID, Capability, GrantedByAdminRecordID, GrantedAt))), 0) FROM RED_Admin_Capabilities),
             (SELECT COUNT(*) FROM RED_Addon_Installations),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, PackageVersion, PackageType, ManifestSHA256, InventorySHA256, LifecycleState, InstalledByAdminRecordID, InstalledAt, UpdatedByAdminRecordID, UpdatedAt))), 0) FROM RED_Addon_Installations),
+            (SELECT COUNT(*) FROM RED_Addon_Settings),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, SettingKey, ValueType, ValueJSON, SecretReference, UpdatedByAdminRecordID, UpdatedAt))), 0) FROM RED_Addon_Settings),
             (SELECT COUNT(*) FROM RED_Addon_Migrations),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, MigrationID, MigrationPath, Checksum, AppliedByAdminRecordID, AppliedAt, ExecutionMs))), 0) FROM RED_Addon_Migrations),
             (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
@@ -762,6 +764,7 @@ red_acceptance_all_table_checksums() {
             RED_Admin_Roles,
             RED_Advanced,
             RED_Addon_Installations,
+            RED_Addon_Settings,
             RED_Addon_Migrations,
             RED_Addon_Activity_Log,
             RED_Addon_Component_Revisions,
@@ -4235,8 +4238,8 @@ installer_admin_seed="$(red_acceptance_app_mysql --execute="
     SELECT CONCAT_WS(':', COUNT(*), SUM(CHAR_LENGTH(Password)=60), SUM(Email='')) FROM RED_Admin;
 ")"
 
-red_acceptance_assert_equals 'installer table count' '25' "$installer_table_count"
-red_acceptance_assert_equals 'installer InnoDB table count' '25' "$installer_innodb_count"
+red_acceptance_assert_equals 'installer table count' '26' "$installer_table_count"
+red_acceptance_assert_equals 'installer InnoDB table count' '26' "$installer_innodb_count"
 red_acceptance_assert_equals 'installer non-utf8mb4 character columns' '0' "$installer_non_utf8_count"
 red_acceptance_assert_equals 'installer migration ledger count' '0' "$installer_migration_count"
 red_acceptance_assert_equals 'installer sanitized administrator seeds' '2:2:2' "$installer_admin_seed"
@@ -4270,6 +4273,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 
 printf '%s\n' 'Running component editor package-permission checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-editor-authorization-self-test.php"
+
+printf '%s\n' 'Running add-on setting storage and authorization preflight checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-storage-preflight-self-test.php"
 
 printf '%s\n' 'Running permission-scoped administrator tool dispatch checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-dispatch-self-test.php"
@@ -4333,6 +4339,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Admin_Roles),
         (SELECT COUNT(*) FROM RED_Admin_Capabilities),
         (SELECT COUNT(*) FROM RED_Addon_Installations),
+        (SELECT COUNT(*) FROM RED_Addon_Settings),
         (SELECT COUNT(*) FROM RED_Addon_Migrations),
         (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
         (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
@@ -4395,18 +4402,21 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
     SELECT COUNT(*)
     FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS
     WHERE CONSTRAINT_SCHEMA=DATABASE()
-      AND CONSTRAINT_NAME='fk_red_addon_migrations_installation';
+      AND CONSTRAINT_NAME IN (
+        'fk_red_addon_migrations_installation',
+        'fk_red_addon_settings_installation'
+      );
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '27:27:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '28:28:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
 red_acceptance_assert_equals 'administrator authorization foreign keys' '2' "$admin_authorization_foreign_keys"
-red_acceptance_assert_equals 'add-on registry foreign keys' '1' "$addon_registry_foreign_keys"
+red_acceptance_assert_equals 'add-on registry foreign keys' '2' "$addon_registry_foreign_keys"
 
 printf '%s\n' 'Running disposable theme contract serialization checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$SCRIPT_DIR/theme-contract-lock-self-test.sh"
@@ -4474,4 +4484,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting storage/write preflight, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
