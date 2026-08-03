@@ -639,6 +639,23 @@ CSRF policy is still not a token check. The endpoint is deliberately unlinked:
 it adds no administrator form/control or public route. Current enablement gates
 continue to reject tool-bearing packages.
 
+## Planned Public Mutation Boundary
+
+[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) records the
+security contract for a later optional-package public write path. It is not an
+implemented endpoint. The existing add-on public router continues to refuse
+unsafe methods before package execution.
+
+Any later implementation must use one static trusted declaration, a
+client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
+scalar input validation, server-derived state, privacy-preserving rate and
+idempotency enforcement, package-table transaction containment, exact
+postcondition reload, and only bounded no-store/nosniff responses. It may not
+leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
+or payment data. No current enablement profile admits this capability; this
+document creates no route, cookie/session, ledger, package execution, Store
+Lite behavior, or client data.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

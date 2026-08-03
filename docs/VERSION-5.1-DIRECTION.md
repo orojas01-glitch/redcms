@@ -25,7 +25,11 @@ evidence under shared locks and commits only an exact contained action,
 per-client ledger record, and value-free audit fact. A separate unlinked
 core-owned administrator endpoint validates session and CSRF itself, accepts
 only exact action identities, derives its plan server-side, and returns only
-value-free bounded outcomes; it adds no UI or public route. Adapters,
+value-free bounded outcomes; it adds no UI or public route. The separately
+documented public-mutation boundary defines a future static-POST anonymous path
+with CSRF, idempotency, rate-limit, transaction, and response constraints; it
+adds no manifest field, dispatcher, cookie/session, ledger, package behavior,
+or enablement change. Adapters,
 operational writable route/tool actions, settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
@@ -593,6 +597,12 @@ request bootstrap excludes the disabled package.
     state-aware plan only on the server; invoke only the scoped core bridge;
     return no package, actor, target, plan, or state values; and leave all
     administrator controls, forms, and public routes absent.
+42. Defined the generic public-mutation boundary: reserve any future
+    static-POST anonymous add-on write for a separately declared and
+    core-owned CSRF, scalar-validation, rate/idempotency, transaction, and
+    value-free-response path. This documentation-only contract adds no route,
+    manifest field, cookie/session, handler, ledger, package, or enablement
+    behavior.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

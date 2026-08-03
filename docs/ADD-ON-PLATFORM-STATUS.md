@@ -33,8 +33,8 @@ flowchart TD
     C --> A1["Administrator write-action preflight"]
     A1 --> A2["Atomic internal admin action runner"]
     A2 --> A3["Protected unlinked admin action endpoint"]
-    A3 --> G4["CURRENT / NEXT<br/>Public-mutation planning"]
-    G4 --> G5["Live-data and richer enablement gates"]
+    A3 --> G4["Public-mutation contract"]
+    G4 --> G5["CURRENT / NEXT<br/>Richer enablement and live-data gates"]
     G5 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
@@ -45,20 +45,21 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3 complete;
-    class G4 current;
-    class G5,E,A,D,R remaining;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4 complete;
+    class G5 current;
+    class E,A,D,R remaining;
     class S target;
 ```
 
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Protected unlinked administrator action endpoint: database-backed session and CSRF validation, exact request parsing, server-derived state-aware plan, scoped atomic runner, and value-free bounded outcomes. No administrator UI, form, public route, Store Lite behavior, or enablement change was added. |
-| Current milestone | Public-mutation planning; settings UI/endpoints, actual secret lookup, live-data, and richer enablement remain blocked. |
+| Latest completed slice | Public-mutation contract: a documentation-only, static-POST future boundary for anonymous, CSRF-protected, idempotent, rate-limited, core-owned package writes. No manifest field, endpoint, cookie/session, mutation ledger, package, Store Lite behavior, or enablement change was added. |
+| Current milestone | Richer enablement and live-data gates; settings UI/endpoints, actual secret lookup, public-mutation implementation, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
-The current marker moves only after its slice passes focused checks, the full
-disposable-database acceptance suite, and relevant desktop/mobile
-administrator verification.
+A documentation-only planning checkpoint moves after its contract review and
+repository integrity checks. An implementation checkpoint moves only after its
+focused checks, the full disposable-database acceptance suite, and relevant
+desktop/mobile administrator verification.

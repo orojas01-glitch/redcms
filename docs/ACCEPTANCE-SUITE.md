@@ -111,6 +111,11 @@ routes are refused before handler invocation; package output, exceptions,
 buffer tampering, malformed results, and oversized responses fail closed; and
 the front controller dispatches a claimed route before theme output. Current
 enablement profiles remain unchanged and still reject route-bearing packages.
+The documented public-mutation boundary adds no implementation fixture: the
+current public-route fixture must continue to refuse unsafe methods before a
+package handler. A later isolated fixture must prove its own declaration,
+anonymous-subject, CSRF, rate/idempotency, transaction, response-redaction,
+disablement, and exact-cleanup requirements before it can change that behavior.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
