@@ -43,6 +43,7 @@ if (!function_exists('red_addon_install_audit_event_allowed')) {
             'addon.enable.completed',
             'addon.disable.completed',
             'addon.settings.updated',
+            'addon.action.completed',
         ], true);
     }
 }

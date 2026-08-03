@@ -18,8 +18,12 @@ enabled packages. Typed internal service invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
 separate fail-closed dispatch boundaries. A separate non-executing
 administrator write-action preflight binds exact runtime owners, an
-action-specific permission, `POST`/CSRF contract, and numeric target into a
-deterministic plan without callback execution or mutation. Adapters,
+action-specific permission, `POST`/CSRF contract, fixed target idempotency,
+and numeric target into a deterministic plan without callback execution or
+mutation. A separate internal atomic action runner revalidates target-state
+evidence under shared locks and commits only an exact contained action,
+per-client ledger record, and value-free audit fact; it has no UI or endpoint.
+Adapters,
 operational writable route/tool actions, settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
@@ -573,6 +577,15 @@ request bootstrap excludes the disabled package.
     deterministic contract and plan hashes. It invokes no package callback,
     reads no package record, starts no transaction, writes no state, renders no
     form, exposes no endpoint, and does not alter enablement eligibility.
+40. Completed internal atomic administrator tool action runner: require fixed
+    `once-per-target` idempotency, one declared package-table set and read-only
+    state loader, form an opaque exact state-aware plan in a rollback-only
+    transaction, revalidate it under lifecycle/package locks, reserve the
+    per-client action/target ledger key before callback invocation, contain the
+    action and state reload, require an exact changed postcondition, and commit
+    only the package change, ledger row, and value-free audit fact together.
+    It accepts no request/session data and adds no UI or endpoint; a later
+    core-owned endpoint must validate session and CSRF separately.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

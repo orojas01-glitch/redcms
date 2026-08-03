@@ -136,10 +136,15 @@ Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
 `GET` JSON routes, and display-only administrator tools have narrow core
-boundaries. A separate non-executing administrator action preflight now binds
-one declared action's registered runtime owner, exact package grant, `POST` and
-CSRF policy, and numeric target into deterministic evidence without invoking
-the action or writing state. Operational writable route/tool actions, upgrade,
+boundaries. A separate non-executing administrator action preflight binds one
+declared action's registered runtime owner, exact package grant, `POST`/CSRF
+policy, fixed `once-per-target` idempotency, and numeric target into
+deterministic evidence without invoking the action or writing state. A separate
+internal atomic runner can now revalidate an exact state-aware plan under the
+lifecycle and package locks, execute one contained registrar action, reload its
+postcondition, and commit only package state plus a core-owned execution
+ledger and value-free audit fact. It exposes no UI, route, or action endpoint;
+an eventual endpoint must validate session and CSRF itself. Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
 features.
@@ -214,6 +219,10 @@ features.
   action contracts, exact runtime-owner and permission binding, fixed
   `POST`/CSRF evidence, numeric target validation, deterministic hashes, and
   no package action execution or state mutation
+- Internal atomic administrator action runner with package-owned InnoDB table
+  declarations, rollback-only target-state preflight, stale-plan/replay refusal,
+  one-time per-client execution evidence, contained callbacks, exact
+  postcondition verification, and a value-free audit fact—without a UI or endpoint
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
