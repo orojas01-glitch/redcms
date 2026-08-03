@@ -17,7 +17,8 @@ enabled manifest-declared component are implemented for already-recorded
 enabled packages. Typed internal service invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
 separate fail-closed dispatch boundaries. Adapters, writable route/tool
-actions, atomic settings writes, package assets, upgrades, uninstall/purge,
+actions, atomic settings writes, immutable package-asset delivery/injection,
+upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
 component-persistence foundation now provides full
@@ -70,6 +71,14 @@ setting keys, and fingerprints. It returns no reference identifier or secret
 value, reads no database or secret, executes no package, and changes no
 activation gate. Actual secret lookup, settings UI/endpoints, and package asset
 loading remain unavailable.
+The first namespaced asset prerequisite now reduces one trusted manifest
+surface to a deterministic CSS/JavaScript plan. CSS must be beneath `assets/`
+and load at `head`; JavaScript must be beneath `assets/` and load at
+`body-end`. Core derives checksum-versioned package URLs and renders only
+escaped tags after revalidating the aggregate plan hash. It reads no package
+file, serves no response, injects no document markup, executes no package,
+opens no database, and changes no activation gate. Immutable delivery and
+public/admin injection remain unavailable.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -338,8 +347,8 @@ request bootstrap excludes the disabled package.
     registration-only services as one package, with non-executing preflight,
     atomic Owner enablement, later request registration and default rendering,
     non-executing disablement, and exact disposable cleanup. Persistence,
-    editor, routes, administrator tools, settings,
-    assets, and live-data behavior remain blocked.
+    editor, routes, administrator tools, settings, immutable asset
+    delivery/injection, and live-data behavior remain blocked.
 12. Completed persistence foundation: preserve `RED_Articles` as the single
     placement parent, store the full manifest component id, permit package
     tables only an exact numeric parent foreign key, and require an enabled
@@ -521,6 +530,13 @@ request bootstrap excludes the disabled package.
     declaration state into deterministic hashes; and report only counts and
     missing setting keys. Return no reference identifier or secret value, read
     no database or secret, execute no package, and change no activation gate.
+35. Completed non-executing namespaced asset planning: accept only a trusted
+    manifest surface's package-owned CSS/JavaScript declarations; require
+    safe `assets/` paths, checksums, and type/location pairing; derive
+    checksum-versioned package URLs; bind exact sorted rows into a plan hash;
+    and render only escaped core-owned tags after revalidation. Read no package
+    file, serve no response, inject no document markup, execute no package,
+    access no database, or change lifecycle/activation.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

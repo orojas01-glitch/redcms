@@ -107,6 +107,13 @@ counts, missing setting keys, and SHA-256 fingerprints; the result contains no
 reference identifier or secret value. This declaration is evidence only: it
 does not resolve a secret, execute a package, or make settings-bearing packages
 eligible for activation.
+Trusted package manifests can now be reduced to a deterministic, namespaced
+CSS/JavaScript asset plan. The plan accepts only `assets/*.css` for `head` and
+`assets/*.js` for `body-end`, binds each URL to the package namespace and
+declared SHA-256, and renders only core-owned escaped tags after its plan hash
+revalidates. It does not read or serve a file, inject markup into a response,
+execute package PHP, access a database, or change lifecycle. Immutable asset
+delivery and public/admin injection are the next separate slice.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -190,6 +197,8 @@ features.
   value-free audit, no-op handling, and rollback
 - Non-executing server-local secret-reference availability evidence with no
   secret lookup, reference disclosure, database access, or activation change
+- Deterministic namespaced CSS/JavaScript asset plans with hashed URLs and
+  escaped tags, without filesystem serving or response injection
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -257,6 +266,8 @@ Run the non-executing add-on trust gate and isolated runtime-contract check:
 ```bash
 php scripts/addon-trust-self-test.php
 php scripts/addon-setting-values-self-test.php
+php scripts/addon-secret-availability-self-test.php
+php scripts/addon-asset-plan-self-test.php
 php scripts/addon-component-editor-self-test.php
 php scripts/addon-component-editor-renderer-self-test.php
 php scripts/addon-runtime-self-test.php

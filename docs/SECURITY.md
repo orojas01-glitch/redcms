@@ -505,22 +505,32 @@ read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
 The implemented disable command is non-executing and data-retaining for any
-current enabled package with no enabled dependent. Settings, package assets,
-migrations, live data, recovery, and every richer enablement gate remain
-separate work.
+current enabled package with no enabled dependent. Settings, immutable
+package-asset delivery/injection, migrations, live data, recovery, and every
+richer enablement gate remain separate work.
 
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-revision restore actions, routes, administrator tools, settings, assets, and live-data compatibility
-pass separate disposable-fixture reviews. The activation-blocked parent
+revision restore actions, routes, administrator tools, settings, immutable
+asset delivery/injection, and live-data compatibility pass separate
+disposable-fixture reviews. The activation-blocked parent
 metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
 The atomic setting helper and availability evidence do not supply Store Lite
-settings UI/endpoints, actual secret lookup, package assets, or enablement
-readiness.
+settings UI/endpoints, actual secret lookup, immutable package-asset delivery,
+or enablement readiness. The CSS/JavaScript asset plan is complete but does
+not itself serve or inject an asset.
+
+The first namespaced asset helper accepts only a trusted manifest's
+package-owned CSS and JavaScript declarations and derives deterministic
+checksum-versioned URLs and core-owned tags. It rejects malformed or forged
+plans before generating markup. It does not read a package file, serve an HTTP
+response, inject response markup, execute package PHP, access a database, or
+relax enablement. Actual immutable asset delivery and public/admin injection
+remain separate reviewed work.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and

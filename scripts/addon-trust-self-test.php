@@ -10,6 +10,7 @@ if (PHP_SAPI !== 'cli') {
 
 $repositoryRoot = dirname(__DIR__);
 require_once $repositoryRoot . '/includes/addon_manifest_helpers.php';
+require_once $repositoryRoot . '/includes/addon_asset_helpers.php';
 require_once $repositoryRoot . '/includes/admin_addon_authorization_helpers.php';
 
 $assertions = 0;
@@ -921,6 +922,55 @@ try {
     red_addon_test_assert(
         !empty($migration['valid']) && ($migration['integrity']['verifiedFiles'] ?? 0) === 2,
         'reviewed migration files must match both their ordered declaration and exact package inventory'
+    );
+
+    $assetProject = red_addon_test_project($temporaryRoot, 'asset-project');
+    $assetStyle = "/* package style */\n";
+    $assetScript = "window.RED_ADDON_ASSET_FIXTURE = true;\n";
+    red_addon_test_write_package(
+        $assetProject,
+        'redcms.assets',
+        $executionMarker,
+        [
+            'assets/public/fixture.css' => $assetStyle,
+            'assets/public/fixture.js' => $assetScript,
+        ],
+        static function (&$manifest) use ($assetStyle, $assetScript) {
+            $manifest['assets']['public'] = [
+                [
+                    'path' => 'assets/public/fixture.css',
+                    'sha256' => hash('sha256', $assetStyle),
+                    'location' => 'head',
+                ],
+                [
+                    'path' => 'assets/public/fixture.js',
+                    'sha256' => hash('sha256', $assetScript),
+                    'location' => 'body-end',
+                ],
+            ];
+        }
+    );
+    $assetPackage = red_addon_validate_manifest(
+        'redcms.assets',
+        $assetProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    $assetPlan = red_addon_asset_plan(
+        is_array($assetPackage['manifest'] ?? null)
+            ? $assetPackage['manifest']
+            : [],
+        'public'
+    );
+    red_addon_test_assert(
+        !empty($assetPackage['valid'])
+            && ($assetPackage['integrity']['verifiedFiles'] ?? 0) === 3
+            && !empty($assetPlan['valid'])
+            && count($assetPlan['assets']) === 2,
+        'trusted CSS and JavaScript assets retain exact inventory evidence before planning'
+    );
+    red_addon_test_assert(
+        !file_exists($executionMarker),
+        'trusted asset validation and planning never execute package PHP'
     );
 
     $conflictProject = red_addon_test_project($temporaryRoot, 'reference-conflict-project');

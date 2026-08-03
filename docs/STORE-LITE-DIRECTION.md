@@ -264,10 +264,10 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering; writable order/product actions and tool-bearing
   package enablement remain gated;
-- namespaced package asset loading;
-- permissioned settings UI/endpoints and secret-reference availability; typed
-  validation, storage, read-only preflight, and internal atomic persistence
-  are complete; and
+- immutable namespaced package-asset delivery and public/admin injection;
+- permissioned settings UI/endpoints and actual secret lookup; typed
+  validation, storage, read-only preflight, internal atomic persistence, and
+  non-executing secret-reference availability are complete; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures
