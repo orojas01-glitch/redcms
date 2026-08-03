@@ -656,6 +656,15 @@ core add-on tables. The preflight returns only deterministic hashes and counts;
 it does not load package PHP, read a request/cookie/session/database, issue
 tokens, check live table state, start a transaction, or invoke a handler.
 
+A separate read-only live-data preflight now uses that trusted declaration only
+after the package is current and `installed_disabled`. It reads the one
+client's existing migration ledger, declared package-table engines, typed
+setting state, and opaque secret-reference availability; its plan returns only
+counts and SHA-256 evidence, never table names, setting values, references, or
+secret material. It remains non-activating and non-executing: it does not
+dispatch a request, issue anonymous/CSRF/idempotency material, resolve a
+secret, load package PHP, mutate a table, or relax any enablement profile.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

@@ -170,6 +170,12 @@ public-mutation boundary now validates optional closed declaration metadata and
 returns value-free non-executing preflight evidence for a future static-POST,
 anonymous, CSRF/idempotency/rate-limited core path. It still adds no dispatcher,
 cookie/session, ledger, package behavior, or enablement change.
+Its separate read-only live-data preflight can now bind one trusted,
+`installed_disabled` package declaration to current per-client migration,
+InnoDB-table, typed-setting, and opaque-secret-availability evidence. It
+returns hashes and counts only, and still cannot enable, dispatch, resolve a
+secret, issue anonymous/CSRF/idempotency material, load package code, or write
+state.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to

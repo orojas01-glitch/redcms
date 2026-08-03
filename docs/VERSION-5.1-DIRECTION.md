@@ -30,8 +30,12 @@ documented public-mutation boundary now validates optional closed declaration
 metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
 response constraints; it still adds no dispatcher, cookie/session, ledger,
-package behavior, or enablement change. Adapters,
-operational writable route/tool actions, settings UI/endpoints, actual secret lookup,
+package behavior, or enablement change. The separate read-only live-data
+preflight now binds a trusted declaration from an `installed_disabled` package
+to current per-client migration, table, typed-setting, and opaque
+secret-availability evidence without enabling it or loading package PHP.
+Adapters, operational writable route/tool actions,
+settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -610,6 +614,13 @@ request bootstrap excludes the disabled package.
     package-table, postcondition, audit, and outcome metadata; it invokes no
     package code and adds no dispatcher, endpoint, cookie/session, database
     access, ledger, package behavior, or enablement change.
+44. Completed a separate read-only public-mutation live-data preflight: it
+    joins current trusted `installed_disabled` package evidence with the
+    declared migration, package-table, typed-setting, and opaque
+    secret-availability state for one client, returning only hashes and
+    counts. It adds no request dispatcher, anonymous subject, CSRF or
+    idempotency issuance, secret resolution, package execution, lifecycle
+    change, or database write.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

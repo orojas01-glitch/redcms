@@ -1,10 +1,10 @@
 # RED-CMS Public Mutation Boundary
 
-Status: data-only declaration validation and non-executing preflight are
-implemented. This document records the prerequisite for a future public write
-dispatcher. It does **not** add a dispatcher, endpoint, cookie, session,
-handler, database table, migration, package, permission, enablement profile,
-or Store Lite behavior.
+Status: data-only declaration validation, its non-executing preflight, and a
+separate read-only live-data preflight are implemented. This document records
+the prerequisite for a future public write dispatcher. It does **not** add a
+dispatcher, endpoint, cookie, session, handler, database table, migration,
+package, permission, enablement profile, or Store Lite behavior.
 
 ## Purpose
 
@@ -30,6 +30,7 @@ changed by it.
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
+| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, and opaque-secret-availability evidence | No dispatcher, token/subject issuance, secret resolution, package execution, lifecycle change, or write |
 | Anonymous cart identity | Does not exist | None |
 | Public CSRF issuance/validation | No add-on public-mutation path exists | None |
 | Public mutation ledger/audit | Does not exist | None |
@@ -78,6 +79,24 @@ The initial mutation form must remain application/x-www-form-urlencoded with
 no files, nested values, JSON, query-controlled operation selection, or
 cross-origin support. POST is the only planned method. PUT, PATCH, and DELETE
 remain closed until separately reviewed.
+
+## Implemented Read-Only Live-Data Evidence
+
+`includes/addon_public_mutation_live_data_helpers.php` is deliberately later
+than declaration validation but earlier than a public request path. It accepts
+only a current, trusted, `installed_disabled` package and one already-validated
+declaration, then reads the existing client migration ledger, the declaration's
+package-owned table engines, typed generic setting state, and declared opaque
+secret-reference availability.
+
+Its deterministic plan returns no raw table name, setting value, opaque
+reference, or secret: it exposes only bounded counts, blocker codes, package
+identity, and SHA-256 fingerprints. Even when its data-evidence gate clears,
+the plan remains non-activating and non-executing: `enableReady`,
+`activationSupported`, and `requestDispatch` are false. It does not issue an
+anonymous subject, CSRF token, or idempotency key; resolve a secret; start a
+transaction; load package PHP; mutate client state; claim a route; or change
+enablement.
 
 ## Future Core-Owned Request Path
 
@@ -167,9 +186,10 @@ mutation:
 - disabled-state and later-disable proof: no route claim, runtime bootstrap,
   asset injection, or mutation after disable, with client data retained.
 
-No current enablement profile satisfies these gates. The future validator must
-report a bounded, value-free refusal rather than silently downgrade a public
-write to a weaker route.
+The new live-data preflight supplies only the migration/table/setting/opaque
+availability evidence in this list. No current enablement profile satisfies
+the complete set. The future validator must report a bounded, value-free
+refusal rather than silently downgrade a public write to a weaker route.
 
 ## Required Future Acceptance Evidence
 
@@ -223,10 +243,14 @@ This planning slice does not authorize:
 2. The closed data-only declaration and value-free deterministic preflight are
    complete. They still refuse route dispatch and enablement, invoke no package
    handler, and read no database, request, cookie, or session state.
-3. A separate batch may add the core-owned anonymous-subject/CSRF/rate-limit
+3. The separate read-only live-data preflight is complete. It inspects only
+   current trusted installed-disabled client evidence and returns counts and
+   fingerprints; it does not issue tokens, dispatch, enable, execute, resolve
+   secrets, or write.
+4. A separate batch may add the core-owned anonymous-subject/CSRF/rate-limit
    foundation and transaction runner, with disposable fixtures only.
-4. A separate richer enablement/live-data batch may admit only packages that
-   satisfy every declared prerequisite.
-5. Store Lite can then implement its separately distributed catalog and cart
+5. A separate richer enablement review may admit only packages that satisfy
+   every declared prerequisite.
+6. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

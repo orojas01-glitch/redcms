@@ -215,6 +215,11 @@ features.
 - Core-owned public add-on route dispatch for exact static `GET` paths with
   public authentication, typed bounded query/result objects, JSON-only
   responses, and fail-closed package behavior
+- Read-only public-mutation declaration and live-data preflights that bind one
+  trusted installed-disabled package to value-free per-client migration,
+  InnoDB-table, typed-setting, and opaque-secret-availability evidence without
+  dispatch, token issuance, secret resolution, package execution, or state
+  change
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

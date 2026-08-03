@@ -35,8 +35,9 @@ flowchart TD
     A2 --> A3["Protected unlinked admin action endpoint"]
     A3 --> G4["Public-mutation contract"]
     G4 --> G5["Public-mutation declaration preflight"]
-    G5 --> G6["CURRENT / NEXT<br/>Richer enablement and live-data gates"]
-    G6 --> S["TARGET<br/>Store Lite optional package"]
+    G5 --> G6["Read-only public-mutation live-data preflight"]
+    G6 --> G7["CURRENT / NEXT<br/>Public-request and richer enablement gates"]
+    G7 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -46,8 +47,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5 complete;
-    class G6 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6 complete;
+    class G7 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -55,8 +56,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Public-mutation declaration preflight: optional closed metadata for one static public POST/CSRF route produces deterministic value-free evidence. No dispatcher, endpoint, cookie/session, database access, mutation ledger, package, Store Lite behavior, or enablement change was added. |
-| Current milestone | Richer enablement and live-data gates; settings UI/endpoints, actual secret lookup, public-mutation request implementation, and Store Lite remain blocked. |
+| Latest completed slice | Read-only public-mutation live-data preflight: one trusted `installed_disabled` declaration is bound to current per-client migration, InnoDB-table, typed-setting, and opaque-secret-availability evidence. It returns hashes/counts only; no dispatcher, cookie/session, token issuance, secret resolution, package execution, mutation, or enablement change was added. |
+| Current milestone | Public-request and richer-enablement gates; anonymous subject, CSRF/idempotency/rate-limit/transaction runner, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

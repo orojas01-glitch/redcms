@@ -1014,6 +1014,18 @@ invokes a handler. Unknown/executable metadata, reserved core request names,
 route drift, weak policies, duplicate identities, and core add-on tables fail
 closed before package PHP is loaded.
 
+`includes/addon_public_mutation_live_data_helpers.php` is a separate,
+read-only client-scoped preflight. For one current trusted
+`installed_disabled` package, it joins that declaration with existing
+migration-ledger, declared InnoDB-table, typed-setting, and opaque
+secret-availability evidence. Its valid plan exposes only identities, counts,
+blocker codes, and SHA-256 fingerprints; it never returns a table name,
+setting value, reference, or secret. A cleared data-evidence gate is not an
+activation authorization: `enableReady`, `activationSupported`, and
+`requestDispatch` remain false, and the helper does not issue anonymous/CSRF/
+idempotency material, resolve a secret, execute package code, write state, or
+relax route-bearing enablement.
+
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher, cookie/session, ledger,
 handler, browser form, route eligibility, package fixture, or Store Lite
