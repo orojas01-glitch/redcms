@@ -802,6 +802,7 @@ if (!function_exists('red_addon_validate_admin_tool_action_contracts')) {
                     'permission',
                     'method',
                     'csrf',
+                    'idempotency',
                 ],
                 [
                     'tool',
@@ -811,6 +812,7 @@ if (!function_exists('red_addon_validate_admin_tool_action_contracts')) {
                     'permission',
                     'method',
                     'csrf',
+                    'idempotency',
                 ],
                 $context,
                 $result
@@ -909,6 +911,15 @@ if (!function_exists('red_addon_validate_admin_tool_action_contracts')) {
                     $context . ' csrf must be required.'
                 );
             }
+            $idempotency = is_string($contract['idempotency'] ?? null)
+                ? $contract['idempotency']
+                : '';
+            if ($idempotency !== 'once-per-target') {
+                red_addon_add_error(
+                    $result,
+                    $context . ' idempotency must be once-per-target.'
+                );
+            }
 
             $normalized[] = [
                 'tool' => $tool,
@@ -918,6 +929,7 @@ if (!function_exists('red_addon_validate_admin_tool_action_contracts')) {
                 'permission' => $permission,
                 'method' => $method,
                 'csrf' => $csrf,
+                'idempotency' => $idempotency,
             ];
         }
         return $normalized;

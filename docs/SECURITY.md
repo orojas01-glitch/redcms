@@ -597,23 +597,42 @@ changes fail closed. Permission revocation applies on the next catalog or
 dispatch lookup. Current enablement gates still reject every tool-bearing
 package.
 
-Administrator write actions have only a separate, non-executing preflight
+Administrator write actions have a split metadata and internal execution
 foundation. An optional closed `adminToolActionContracts` entry maps one
 provided tool to one unique action id, explicit package permission, bounded
-text metadata, `POST`, and `csrf: required`; other method/CSRF values,
+text metadata, `POST`, `csrf: required`, and fixed
+`idempotency: once-per-target`; weaker method, CSRF, or idempotency declarations,
 undeclared tools, duplicate actions, ungranted permissions, and executable
 metadata fail validation before package PHP is loaded. The enabled registrar
-must also bind that action id exactly once, but preflight never invokes it.
+must bind that id exactly once as both an action handler and a read-only target
+state loader, and the action declares one to eight package-owned InnoDB tables.
 
-The preflight requires matching request-local tool/action ownership, a fresh
-case-sensitive action permission in the current client database, and one
-positive integer target record id. It returns only deterministic contract and
-plan hashes. It reads no package record, starts no transaction, writes no
-state, accepts no request/session value, renders no control, exposes no
-endpoint, and emits no audit fact. Its declared CSRF policy is not a token
-check; a future protected endpoint and atomic runner must revalidate current
-ownership, permission, target state, CSRF, idempotency, transaction, and audit
-evidence before any package action can execute.
+The original metadata preflight remains non-executing: it requires matching
+request-local tool/action ownership, a fresh case-sensitive action permission
+in the current client database, and one positive integer target record id. It
+returns only deterministic contract and metadata-plan hashes; it reads no
+package record, starts no transaction, writes no state, invokes no callback,
+renders no control, and exposes no endpoint.
+
+The separate internal runner starts its state-aware preflight in a transaction
+that always rolls back. It accepts no request/session value and returns no
+target state values—only opaque hashes. On a matching plan it serializes with
+the lifecycle and package locks, locks the enabled installation, rechecks the
+current grant, runtime binding, contract, target state, and no-prior-execution
+ledger key, then reserves that key before the action callback runs. It reloads
+the target state after callback containment and commits only an exact changed
+postcondition together with the immutable per-client ledger row and a
+value-free add-on audit fact. Output, exception, output-buffer tampering,
+malformed state/result, stale plan, replay, revocation, lifecycle drift,
+transaction loss, postcondition mismatch, or audit failure refuses or rolls
+back the package mutation, reservation, and audit.
+
+The runner is not a PHP sandbox and is not a public or administrator endpoint.
+Reviewed first-party loaders must remain read-only and package callbacks must
+not control transactions. A later core-owned protected endpoint must validate
+the administrator session and CSRF token itself before it invokes this helper;
+the manifest CSRF policy is still not a token check. Current enablement gates
+continue to reject tool-bearing packages.
 
 ## Multi-User Authorization
 

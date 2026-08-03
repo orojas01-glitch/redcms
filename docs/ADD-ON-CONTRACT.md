@@ -266,7 +266,8 @@ An illustrative manifest shape is:
       "description": "Preflight a manual payment transition for one order.",
       "permission": "store.orders.manage",
       "method": "POST",
-      "csrf": "required"
+      "csrf": "required",
+      "idempotency": "once-per-target"
     }
   ],
   "componentEditors": [
@@ -1013,14 +1014,24 @@ requires a current protected administrator session and CSRF token, bootstraps
 the enabled registrar, and invokes only this dispatcher.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
-a future write action. It maps one provided tool to one unique action id, a
-bounded label and description, one explicitly declared permission, and only
-`POST` with `csrf: required`. The manifest validator rejects undeclared tools,
-duplicate or tool-equal action ids, ungranted permissions, executable fields,
-other methods, and any weaker CSRF declaration without loading package PHP.
-Each declared action must also have exactly one registrar-bound
-`registerAdminToolAction()` callback, but the callback is not invoked by this
-slice.
+one bounded administrative transition. It maps one provided tool to one unique
+action id, a bounded label and description, one explicitly declared permission,
+only `POST` with `csrf: required`, and the fixed
+`idempotency: once-per-target` policy. The manifest validator rejects
+undeclared tools, duplicate or tool-equal action ids, ungranted permissions,
+executable fields, other methods, weaker CSRF declarations, and weaker or
+ambiguous idempotency declarations without loading package PHP.
+
+Each declared action must have exactly one registrar-bound
+`registerAdminToolAction()` handler and one
+`registerAdminToolActionStateLoader()` handler. The action registration also
+declares one to eight existing package-owned InnoDB `RED_Addon_*` tables; core
+rejects core ledger names and undeclared, duplicate, malformed, or non-InnoDB
+tables. The state loader receives a final target request plus the connection,
+must return a final bounded target-state object for that same numeric target,
+and must be read-only. This remains trusted first-party PHP, not a sandbox:
+reviewed package code must not commit, roll back, alter output buffers, or
+write outside its declared action contract.
 
 `includes/addon_admin_tool_action_preflight_helpers.php` is a separate
 read-only gate. It requires the exact enabled request-local tool and action
@@ -1033,13 +1044,29 @@ globals, render a form, or expose an endpoint. The declared CSRF policy is
 evidence for a later protected endpoint; it is not an authorization substitute
 and no CSRF token is consumed here.
 
-Display-only tool dispatch still exposes no package HTML, links, forms,
-buttons, scripts, styles, actions, writes, package-data connection, uploads,
-redirects, arbitrary headers, audit event, or grant-management UI. The new
-action preflight adds no action runner, UI, endpoint, transaction, audit fact,
-or enablement eligibility. Existing enablement profiles still reject packages
-that provide administrator tools, so neither boundary activates Store Lite or
-any richer package.
+`includes/addon_admin_tool_action_execution_helpers.php` now provides the
+separate internal atomic runner. It first recreates a state-aware preflight in
+a rollback-only transaction, returning no target values—only exact contract,
+metadata-plan, previous-state, and execution-plan hashes. It then acquires the
+shared lifecycle and package locks, locks the enabled installation, recreates
+the exact plan and fresh grant, reserves the `(package, action, target)` ledger
+key, invokes only the registrar-bound action, reloads the exact target state,
+and commits the package mutation, immutable execution evidence, and one
+value-free `addon.action.completed` audit fact together. A changed result must
+produce the exact declared state; an unchanged result rolls its reservation
+back and consumes no target slot. Replays, stale plans, grant revocation,
+runtime/lifecycle drift, output, exceptions, transaction loss, malformed
+results, and failed postconditions roll back or refuse before package action
+execution.
+
+The runner is deliberately not an endpoint and consumes no request or session
+state. A later core-owned administrator endpoint must independently validate
+the current administrator session and CSRF token before it calls the runner;
+the manifest's POST/CSRF policy is evidence, not a token check. Display-only
+tool dispatch still exposes no package HTML, links, forms, buttons, scripts,
+styles, action control, route, or enablement eligibility. Existing enablement
+profiles still reject packages that provide administrator tools, so this
+generic core boundary does not activate Store Lite or any richer package.
 
 ## Data, Migration, And Client Isolation
 

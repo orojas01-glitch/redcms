@@ -113,6 +113,29 @@ CREATE TABLE `RED_Addon_Installations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Admin_Action_Executions`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Admin_Action_Executions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Admin_Action_Executions` (
+  `PackageID` varchar(127) NOT NULL,
+  `ActionID` varchar(160) NOT NULL,
+  `TargetRecordID` int unsigned NOT NULL,
+  `PlanSHA256` char(64) NOT NULL,
+  `ContractSHA256` char(64) NOT NULL,
+  `PreviousStateSHA256` char(64) NOT NULL,
+  `StateSHA256` char(64) NOT NULL,
+  `ActorAdminRecordID` int unsigned NOT NULL,
+  `CompletedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`PackageID`,`ActionID`,`TargetRecordID`),
+  KEY `idx_red_addon_admin_action_execution_package` (`PackageID`,`CompletedAt`,`TargetRecordID`),
+  CONSTRAINT `fk_red_addon_admin_action_execution_installation` FOREIGN KEY (`PackageID`) REFERENCES `RED_Addon_Installations` (`PackageID`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Addon_Settings`
 --
 

@@ -28,7 +28,7 @@ if (!preg_match(
 }
 
 $assertions = 0;
-$calls = ['tool' => 0, 'action' => 0];
+$calls = ['tool' => 0, 'action' => 0, 'loader' => 0];
 $actorId = 2147000967;
 $toolId = 'redcms.tool-action-fixture/orders';
 $actionId = 'redcms.tool-action-fixture/mark-paid';
@@ -90,6 +90,7 @@ function red_addon_admin_tool_action_test_manifest(
             'permission' => $permission,
             'method' => 'POST',
             'csrf' => 'required',
+            'idempotency' => 'once-per-target',
         ]],
         'routes' => [],
     ];
@@ -101,6 +102,7 @@ function red_addon_admin_tool_action_test_context(
     $permission,
     callable $toolHandler,
     callable $actionHandler,
+    callable $stateLoader,
     $description = 'Record a manual payment for one order.'
 ) {
     $manifest = red_addon_admin_tool_action_test_manifest(
@@ -114,7 +116,12 @@ function red_addon_admin_tool_action_test_context(
         $manifest
     );
     $registry->registerAdminTool($toolId, $toolHandler);
-    $registry->registerAdminToolAction($actionId, $actionHandler);
+    $registry->registerAdminToolAction(
+        $actionId,
+        $actionHandler,
+        ['RED_Addon_Admin_Action_Fixture']
+    );
+    $registry->registerAdminToolActionStateLoader($actionId, $stateLoader);
     $registry->assertComplete();
     return new RED_Addon_Runtime_Context(
         ['redcms.tool-action-fixture'],
@@ -213,13 +220,66 @@ try {
         $calls['action']++;
         throw new RuntimeException('action handlers must not run during preflight');
     };
+    $stateLoader = static function () use (&$calls) {
+        $calls['loader']++;
+        throw new RuntimeException('state loaders must not run during preflight');
+    };
+    $missingStateLoaderRegistry = new RED_Addon_Runtime_Registry(
+        'redcms.tool-action-fixture',
+        red_addon_admin_tool_action_test_manifest(
+            $toolId,
+            $actionId,
+            $permission
+        )
+    );
+    $missingStateLoaderRegistry->registerAdminTool($toolId, $toolHandler);
+    $missingStateLoaderRegistry->registerAdminToolAction(
+        $actionId,
+        $actionHandler,
+        ['RED_Addon_Admin_Action_Fixture']
+    );
+    $missingStateLoaderRejected = false;
+    try {
+        $missingStateLoaderRegistry->assertComplete();
+    } catch (LogicException $throwable) {
+        $missingStateLoaderRejected = true;
+    }
+    red_addon_admin_tool_action_test_assert(
+        $missingStateLoaderRejected
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
+        'a declared action requires one registrar-bound target-state loader before runtime completion'
+    );
+    $reservedTableRejected = false;
+    try {
+        $reservedTableRegistry = new RED_Addon_Runtime_Registry(
+            'redcms.tool-action-fixture',
+            red_addon_admin_tool_action_test_manifest(
+                $toolId,
+                $actionId,
+                $permission
+            )
+        );
+        $reservedTableRegistry->registerAdminToolAction(
+            $actionId,
+            $actionHandler,
+            ['RED_Addon_Admin_Action_Executions']
+        );
+    } catch (LogicException $throwable) {
+        $reservedTableRejected = true;
+    }
+    red_addon_admin_tool_action_test_assert(
+        $reservedTableRejected
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
+        'core action ledger tables cannot be declared as package action transaction tables'
+    );
     $GLOBALS['RED_ADDON_RUNTIME_CONTEXT'] =
         red_addon_admin_tool_action_test_context(
             $toolId,
             $actionId,
             $permission,
             $toolHandler,
-            $actionHandler
+            $actionHandler,
+            $stateLoader
         );
 
     $denied = red_addon_admin_tool_action_preflight(
@@ -234,7 +294,7 @@ try {
             && empty($denied['ready'])
             && empty($denied['invoked'])
             && $denied['reason'] === 'permission_denied'
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'a missing exact action permission refuses before either package callback'
     );
 
@@ -264,7 +324,7 @@ try {
     red_addon_admin_tool_action_test_assert(
         empty($ownerDenied['authorized'])
             && empty($ownerDenied['ready'])
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'Owner and lifecycle authority do not imply administrator action access'
     );
 
@@ -292,7 +352,7 @@ try {
     red_addon_admin_tool_action_test_assert(
         empty($caseDenied['authorized'])
             && empty($caseDenied['ready'])
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'case-drifted package permission cannot authorize an action preflight'
     );
 
@@ -334,6 +394,7 @@ try {
             && $ready['permission'] === $permission
             && $ready['method'] === 'POST'
             && $ready['csrf'] === 'required'
+            && $ready['idempotency'] === 'once-per-target'
             && $ready['actorRecordId'] === $actorId
             && $ready['targetRecordId'] === 7001
             && red_addon_valid_sha256($ready['contractSha256'])
@@ -342,7 +403,7 @@ try {
             && $ready['planSha256'] === $repeat['planSha256']
             && $countsBefore === '1:1:1'
             && $countsAfter === $countsBefore
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'the exact grant produces stable value-free action evidence without callbacks or database mutation'
     );
 
@@ -356,7 +417,7 @@ try {
     red_addon_admin_tool_action_test_assert(
         $otherTarget['ready'] === true
             && $otherTarget['planSha256'] !== $ready['planSha256']
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'the deterministic plan binds the exact numeric target record'
     );
 
@@ -367,6 +428,7 @@ try {
             $permission,
             $toolHandler,
             $actionHandler,
+            $stateLoader,
             'Record a verified manual payment for one order.'
         );
     $contractDrift = red_addon_admin_tool_action_preflight(
@@ -380,7 +442,7 @@ try {
         $contractDrift['ready'] === true
             && $contractDrift['contractSha256'] !== $ready['contractSha256']
             && $contractDrift['planSha256'] !== $ready['planSha256']
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'the deterministic plan changes when current action-contract evidence drifts'
     );
 
@@ -405,7 +467,7 @@ try {
                 && empty($invalid['ready'])
                 && empty($invalid['invoked'])
                 && $invalid['reason'] === 'invalid_request'
-                && $calls === ['tool' => 0, 'action' => 0],
+                && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
             'invalid action identities and target input fail before callback invocation'
         );
     }
@@ -442,7 +504,7 @@ try {
         empty($revoked['authorized'])
             && empty($revoked['ready'])
             && $revoked['reason'] === 'permission_denied'
-            && $calls === ['tool' => 0, 'action' => 0],
+            && $calls === ['tool' => 0, 'action' => 0, 'loader' => 0],
         'permission revocation applies on the next action preflight'
     );
 

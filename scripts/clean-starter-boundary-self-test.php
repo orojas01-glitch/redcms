@@ -103,15 +103,19 @@ try {
             && str_contains($installer, 'CREATE TABLE `RED_Addon_Migrations`')
             && str_contains($installer, 'CREATE TABLE `RED_Addon_Activity_Log`')
             && str_contains($installer, 'CREATE TABLE `RED_Addon_Settings`')
+            && str_contains(
+                $installer,
+                'CREATE TABLE `RED_Addon_Admin_Action_Executions`'
+            )
             && preg_match(
                 '/`Component`\\s+varchar\\(160\\).*NOT NULL/i',
                 $installer
             ) === 1
             && !preg_match(
-                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations|Activity_Log|Settings)`?/i',
+                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations|Activity_Log|Settings|Admin_Action_Executions)`?/i',
                 $installer
             ),
-        'starter ships empty add-on registry, settings storage, and full component-id capacity with no package, setting, migration, or lifecycle state'
+        'starter ships empty add-on registry, settings, action-execution storage, and full component-id capacity with no package, setting, migration, lifecycle, or business state'
     );
 
     $productionFiles = array_merge(

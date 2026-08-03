@@ -369,6 +369,7 @@ try {
                 'permission' => $actionPermission,
                 'method' => 'POST',
                 'csrf' => 'required',
+                'idempotency' => 'once-per-target',
             ]];
         }
     );
@@ -408,6 +409,7 @@ try {
                 'permission' => 'tool.orders.transition',
                 'method' => 'POST',
                 'csrf' => 'required',
+                'idempotency' => 'once-per-target',
             ]
             && !file_exists($executionMarker),
         'administrator tool metadata maps one display tool and one POST/CSRF write action to declared permissions without package execution'
@@ -443,6 +445,7 @@ try {
                 'permission' => 'invalid.missing',
                 'method' => 'GET',
                 'csrf' => 'not-applicable',
+                'idempotency' => 'many-per-target',
                 'callback' => 'dangerous',
             ]];
         }
@@ -481,6 +484,10 @@ try {
             && red_addon_test_error_contains(
                 $invalidTool,
                 'csrf must be required'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'idempotency must be once-per-target'
             )
             && !file_exists($executionMarker),
         'administrator tool and write-action contracts reject executable, undeclared, ungranted, and writable metadata'

@@ -49,6 +49,7 @@ if (!function_exists('red_addon_admin_tool_action_preflight_result')) {
             'permission' => '',
             'method' => '',
             'csrf' => '',
+            'idempotency' => '',
             'contractSha256' => '',
             'planSha256' => '',
             'reason' => (string) $reason,
@@ -68,6 +69,7 @@ if (!function_exists('red_addon_admin_tool_action_contract_fingerprint')) {
                 'permission' => $contract['permission'] ?? null,
                 'method' => $contract['method'] ?? null,
                 'csrf' => $contract['csrf'] ?? null,
+                'idempotency' => $contract['idempotency'] ?? null,
             ],
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
@@ -80,7 +82,7 @@ if (!function_exists('red_addon_admin_tool_action_preflight_fingerprint')) {
     {
         $encoded = json_encode(
             [
-                'version' => 1,
+                'version' => 2,
                 'package' => $plan['package'] ?? null,
                 'tool' => $plan['tool'] ?? null,
                 'action' => $plan['action'] ?? null,
@@ -89,6 +91,7 @@ if (!function_exists('red_addon_admin_tool_action_preflight_fingerprint')) {
                 'permission' => $plan['permission'] ?? null,
                 'method' => $plan['method'] ?? null,
                 'csrf' => $plan['csrf'] ?? null,
+                'idempotency' => $plan['idempotency'] ?? null,
                 'contractSha256' => $plan['contractSha256'] ?? null,
             ],
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
@@ -145,6 +148,7 @@ if (!function_exists('red_addon_admin_tool_action_preflight_binding')) {
             || !hash_equals($actionId, (string) ($contract['action'] ?? ''))
             || ($contract['method'] ?? null) !== 'POST'
             || ($contract['csrf'] ?? null) !== 'required'
+            || ($contract['idempotency'] ?? null) !== 'once-per-target'
         ) {
             return null;
         }
@@ -156,6 +160,7 @@ if (!function_exists('red_addon_admin_tool_action_preflight_binding')) {
             'permission' => $contract['permission'],
             'method' => $contract['method'],
             'csrf' => $contract['csrf'],
+            'idempotency' => $contract['idempotency'],
             'contract' => $contract,
         ];
     }
@@ -195,6 +200,7 @@ if (!function_exists('red_addon_admin_tool_action_preflight')) {
         $result['permission'] = $binding['permission'];
         $result['method'] = $binding['method'];
         $result['csrf'] = $binding['csrf'];
+        $result['idempotency'] = $binding['idempotency'];
         if (!red_addon_component_editor_actor_has_permission(
             $connection,
             $result['actorRecordId'],

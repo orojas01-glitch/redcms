@@ -399,7 +399,8 @@
         "description",
         "permission",
         "method",
-        "csrf"
+        "csrf",
+        "idempotency"
       ],
       "properties": {
         "tool": {
@@ -426,6 +427,9 @@
         },
         "csrf": {
           "const": "required"
+        },
+        "idempotency": {
+          "const": "once-per-target"
         }
       }
     },

@@ -47,6 +47,9 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->allowed['adminToolActions'] = $adminToolActions;
             $this->handlers['adminToolActions'] = [];
             $this->metadata['adminToolActions'] = [];
+            $this->allowed['adminToolActionStateLoaders'] = $adminToolActions;
+            $this->handlers['adminToolActionStateLoaders'] = [];
+            $this->metadata['adminToolActionStateLoaders'] = [];
             $componentDataLoaders = [];
             $componentEditors = is_array($manifest['componentEditors'] ?? null)
                 ? $manifest['componentEditors']
@@ -163,6 +166,37 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             return array_keys($normalized);
         }
 
+        private function adminToolActionTransactionTables(array $tables): array
+        {
+            $normalized = [];
+            $reserved = [
+                'red_addon_installations',
+                'red_addon_migrations',
+                'red_addon_activity_log',
+                'red_addon_component_revisions',
+                'red_addon_admin_action_executions',
+            ];
+            foreach ($tables as $table) {
+                if (!is_string($table)
+                    || preg_match('/\ARED_Addon_[A-Za-z0-9_]{1,54}\z/', $table)
+                        !== 1
+                    || in_array(strtolower($table), $reserved, true)
+                    || isset($normalized[$table])
+                ) {
+                    throw new LogicException(
+                        'Administrator action transaction table is invalid.'
+                    );
+                }
+                $normalized[$table] = true;
+            }
+            if ($normalized === [] || count($normalized) > 8) {
+                throw new LogicException(
+                    'Administrator action persistence requires one to eight package tables.'
+                );
+            }
+            return array_keys($normalized);
+        }
+
         public function registerComponentDataCreator(
             string $id,
             callable $handler,
@@ -209,9 +243,22 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
 
         public function registerAdminToolAction(
             string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $this->register(
+                'adminToolActions',
+                $id,
+                $handler,
+                ['tables' => $this->adminToolActionTransactionTables($tables)]
+            );
+        }
+
+        public function registerAdminToolActionStateLoader(
+            string $id,
             callable $handler
         ): void {
-            $this->register('adminToolActions', $id, $handler);
+            $this->register('adminToolActionStateLoaders', $id, $handler);
         }
 
         public function registerAdapter(string $id, callable $handler): void
@@ -301,6 +348,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'services',
                     'adminTools',
                     'adminToolActions',
+                    'adminToolActionStateLoaders',
                     'adapters',
                     'routes',
                 ]

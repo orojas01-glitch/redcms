@@ -156,10 +156,14 @@ core accepts only a bounded text model and renders escaped display-only markup
 through a POST/CSRF endpoint. Owner/lifecycle/legacy authority does not imply
 tool access. The separate non-executing administrator action preflight now
 requires an explicitly declared `POST`/CSRF-required action, matching tool and
-action runtime owners, a fresh action-specific grant, and one numeric target;
-it returns deterministic evidence without invoking a package action or writing
-state. Package HTML and operational writes remain unavailable, and tool-bearing
-packages remain ineligible for current enablement. The Owner-authorized disable command serializes with
+action runtime owners, a fresh action-specific grant, fixed
+`once-per-target` idempotency, and one numeric target; it returns deterministic
+metadata evidence without invoking a package action or writing state. A
+separate internal atomic runner now revalidates exact target-state evidence
+under lifecycle/package locks, reserves a per-client action/target ledger key,
+contains one registrar action and state reload, and commits only an exact
+changed postcondition with a value-free audit fact. It exposes no UI or action
+endpoint; tool-bearing packages remain ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,
 migrations, settings, media, or business data. Richer route/tool actions,
@@ -402,8 +406,8 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while the administrator action preflight is complete, its atomic runner and
-protected UI/endpoint, public writable routes, settings UI/endpoints, actual
+while the administrator action preflight and internal atomic runner are
+complete, its protected UI/endpoint, public writable routes, settings UI/endpoints, actual
 secret lookup, live-data, and richer package persistence contracts must still
 be implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled.

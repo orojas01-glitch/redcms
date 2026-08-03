@@ -231,6 +231,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, EventName, PackageID, PackageVersion, ActorAdminRecordID, Result, DetailCode, OccurredAt))), 0) FROM RED_Addon_Activity_Log),
             (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RevisionID, ContentRecordID, PackageID, ComponentID, RevisionNumber, Operation, ActorAdminRecordID, ActorAlias, Snapshot, StateHash, RestoredFromRevisionID, CreatedAt))), 0) FROM RED_Addon_Component_Revisions),
+            (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, ActionID, TargetRecordID, PlanSHA256, ContractSHA256, PreviousStateSHA256, StateSHA256, ActorAdminRecordID, CompletedAt))), 0) FROM RED_Addon_Admin_Action_Executions),
             (SELECT COUNT(*) FROM RED_Articles),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, Title, Component, Alias, Sections, Categories, SubCategories, Layout, Active, Updated))), 0) FROM RED_Articles)
         );
@@ -1111,6 +1113,7 @@ red_acceptance_all_table_checksums() {
             RED_Addon_Migrations,
             RED_Addon_Activity_Log,
             RED_Addon_Component_Revisions,
+            RED_Addon_Admin_Action_Executions,
             RED_Articles,
             RED_C_Form,
             RED_C_Gallery,
@@ -4598,8 +4601,8 @@ installer_admin_seed="$(red_acceptance_app_mysql --execute="
     SELECT CONCAT_WS(':', COUNT(*), SUM(CHAR_LENGTH(Password)=60), SUM(Email='')) FROM RED_Admin;
 ")"
 
-red_acceptance_assert_equals 'installer table count' '26' "$installer_table_count"
-red_acceptance_assert_equals 'installer InnoDB table count' '26' "$installer_innodb_count"
+red_acceptance_assert_equals 'installer table count' '27' "$installer_table_count"
+red_acceptance_assert_equals 'installer InnoDB table count' '27' "$installer_innodb_count"
 red_acceptance_assert_equals 'installer non-utf8mb4 character columns' '0' "$installer_non_utf8_count"
 red_acceptance_assert_equals 'installer migration ledger count' '0' "$installer_migration_count"
 red_acceptance_assert_equals 'installer sanitized administrator seeds' '2:2:2' "$installer_admin_seed"
@@ -4642,6 +4645,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 
 printf '%s\n' 'Running non-executing administrator tool action-preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-action-preflight-self-test.php"
+
+printf '%s\n' 'Running atomic internal administrator tool action-runner checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-action-execution-self-test.php"
 
 printf '%s\n' 'Running bounded component editor data-loader checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-editor-data-loader-self-test.php"
@@ -4712,6 +4718,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Addon_Migrations),
         (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
         (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
+        (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
         (SELECT COUNT(*) FROM RED_Advanced),
         (SELECT COUNT(*) FROM RED_Articles),
         (SELECT COUNT(*) FROM RED_C_Form),
@@ -4773,19 +4780,20 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
     WHERE CONSTRAINT_SCHEMA=DATABASE()
       AND CONSTRAINT_NAME IN (
         'fk_red_addon_migrations_installation',
-        'fk_red_addon_settings_installation'
+        'fk_red_addon_settings_installation',
+        'fk_red_addon_admin_action_execution_installation'
       );
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '28:28:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '29:29:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
 red_acceptance_assert_equals 'administrator authorization foreign keys' '2' "$admin_authorization_foreign_keys"
-red_acceptance_assert_equals 'add-on registry foreign keys' '2' "$addon_registry_foreign_keys"
+red_acceptance_assert_equals 'add-on registry foreign keys' '3' "$addon_registry_foreign_keys"
 
 printf '%s\n' 'Running disposable theme contract serialization checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$SCRIPT_DIR/theme-contract-lock-self-test.sh"

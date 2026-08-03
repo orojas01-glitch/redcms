@@ -31,7 +31,8 @@ flowchart TD
     F21 --> F22["Static immutable asset endpoint"]
     F22 --> C["Core-owned public/admin injection"]
     C --> A1["Administrator write-action preflight"]
-    A1 --> G4["CURRENT / NEXT<br/>Atomic admin action runner and public mutation planning"]
+    A1 --> A2["Atomic internal admin action runner"]
+    A2 --> G4["CURRENT / NEXT<br/>Protected action endpoint and public-mutation planning"]
     G4 --> G5["Live-data and richer enablement gates"]
     G5 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
@@ -43,7 +44,7 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1 complete;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2 complete;
     class G4 current;
     class G5,E,A,D,R remaining;
     class S target;
@@ -52,8 +53,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Non-executing administrator write-action preflight: separate POST/CSRF-required manifest contract, exact runtime-owner and package-permission binding, numeric target validation, deterministic hashes, and no callback execution, state change, UI, or endpoint. |
-| Current milestone | Atomic administrator action execution and public-mutation planning; settings UI/endpoints, actual secret lookup, live-data, and richer enablement remain blocked. |
+| Latest completed slice | Internal atomic administrator action runner: a `once-per-target` action contract, declared package tables and read-only state loader, rollback-only state evidence, fresh exact-plan revalidation, replay refusal, contained callback, postcondition check, per-client ledger, and value-free audit. No endpoint or UI was added. |
+| Current milestone | Protected administrator action endpoint and public-mutation planning; settings UI/endpoints, actual secret lookup, live-data, and richer enablement remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
