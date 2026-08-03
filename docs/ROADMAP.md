@@ -165,7 +165,11 @@ contains one registrar action and state reload, and commits only an exact
 changed postcondition with a value-free audit fact. The separate core-owned,
 unlinked administrator endpoint validates POST/session/CSRF itself, derives the
 action plan server-side, and returns only bounded value-free outcomes; it adds
-no administrator control, form, or public route. Tool-bearing packages remain
+no administrator control, form, or public route. The separately documented
+public-mutation boundary defines a future static-POST, anonymous,
+CSRF/idempotency/rate-limited core path without adding a manifest field,
+dispatcher, cookie/session, ledger, package behavior, or enablement change.
+Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,

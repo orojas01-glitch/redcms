@@ -21,6 +21,9 @@ separate fail-closed boundaries. Adapters, operational writable route/tool
 actions, settings UI/endpoints, actual secret
 lookup, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
+The planned generic public-mutation boundary is documented in
+[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md), but it has no
+manifest field, dispatcher, endpoint, package, state, or enablement effect.
 
 ## Implemented Trust Boundary
 
@@ -988,6 +991,22 @@ administrator routes, HTML, redirects, uploads, files, sessions, server
 variables, database connections, or arbitrary headers. It also does not make a
 route-bearing package eligible for enablement: all current enablement profiles
 continue to reject routes until richer package lifecycle gates are reviewed.
+
+## Planned Public Mutation Boundary
+
+[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the future
+generic core-owned path for a narrowly declared static public POST mutation. It
+requires a later data-only public-mutation declaration, a client-scoped
+anonymous subject, CSRF, exact scalar request validation, server-derived state,
+privacy-preserving rate/idempotency evidence, a contained transaction runner,
+and bounded core-owned responses.
+
+The current routes schema and addon_public_route_helpers.php remain public
+GET-only. This contract does not add a declaration, dispatcher, cookie/session,
+ledger, handler, browser form, route eligibility, package fixture, or Store
+Lite behavior. It leaves legacy public form operations unchanged. Each
+implementation stage remains a separate disposable-fixture and richer
+enablement review.
 
 ## Administrator Tool Contract
 

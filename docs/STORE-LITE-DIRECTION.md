@@ -168,6 +168,11 @@ core settings tables.
 - Duplicate submissions and replayed payment events cannot create duplicate
   orders or duplicate paid transitions.
 
+The generic boundary for a future add-to-cart request is documented in
+[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md). It is
+documentation only: Store Lite has no public mutation route, anonymous cart
+cookie, package files, tables, or enablement profile yet.
+
 The initial order states should remain small:
 
 `pending`, `awaiting_payment`, `paid`, `processing`, `completed`, `cancelled`,
@@ -259,7 +264,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - typed service invocation is complete as an internal core-to-package boundary;
 - exact static public `GET` routes are complete as a core-owned JSON boundary,
   while unsafe/member/placeholder routes and route-bearing package enablement
-  remain gated;
+  remain gated. The documented public-mutation boundary reserves a future
+  core-owned static POST path but does not implement it, create an anonymous
+  cart subject, or relax any route/enablement gate;
 - declared administrator routes;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
@@ -330,7 +337,10 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Continue with generic settings UI/endpoints as a separate reviewed batch.
+4. Defined the generic public-mutation boundary without adding a route,
+   manifest field, cookie/session, ledger, package code, or Store Lite
+   behavior. It remains a prerequisite for a later cart write path.
+5. Continue with generic settings UI/endpoints as a separate reviewed batch.
    Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -338,13 +348,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-5. Create Store Lite in its separate distribution using only those accepted
+6. Create Store Lite in its separate distribution using only those accepted
    contracts.
-6. Add package-owned migrations, Product editing, catalog, cart, orders, and
+7. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-7. Validate disable/re-enable, failure recovery, migration, responsive
+8. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-8. Add a separately reviewed hosted-payment adapter only after the
+9. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite
