@@ -627,11 +627,16 @@ malformed state/result, stale plan, replay, revocation, lifecycle drift,
 transaction loss, postcondition mismatch, or audit failure refuses or rolls
 back the package mutation, reservation, and audit.
 
-The runner is not a PHP sandbox and is not a public or administrator endpoint.
-Reviewed first-party loaders must remain read-only and package callbacks must
-not control transactions. A later core-owned protected endpoint must validate
-the administrator session and CSRF token itself before it invokes this helper;
-the manifest CSRF policy is still not a token check. Current enablement gates
+The runner is not a PHP sandbox and is not itself an endpoint. Reviewed
+first-party loaders must remain read-only and package callbacks must not
+control transactions. The separate core-owned
+`admin/bin/run_addon_tool_action.php` endpoint is POST-only and validates the
+database-backed administrator session plus CSRF token before it parses an exact
+tool/action/positive-target request. It derives and revalidates the plan only
+on the server, invokes no package handler directly, and returns only bounded
+outcomes with no package, actor, target, plan, or state values. The manifest
+CSRF policy is still not a token check. The endpoint is deliberately unlinked:
+it adds no administrator form/control or public route. Current enablement gates
 continue to reject tool-bearing packages.
 
 ## Multi-User Authorization

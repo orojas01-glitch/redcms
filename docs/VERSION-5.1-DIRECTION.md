@@ -22,8 +22,10 @@ action-specific permission, `POST`/CSRF contract, fixed target idempotency,
 and numeric target into a deterministic plan without callback execution or
 mutation. A separate internal atomic action runner revalidates target-state
 evidence under shared locks and commits only an exact contained action,
-per-client ledger record, and value-free audit fact; it has no UI or endpoint.
-Adapters,
+per-client ledger record, and value-free audit fact. A separate unlinked
+core-owned administrator endpoint validates session and CSRF itself, accepts
+only exact action identities, derives its plan server-side, and returns only
+value-free bounded outcomes; it adds no UI or public route. Adapters,
 operational writable route/tool actions, settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
@@ -584,8 +586,13 @@ request bootstrap excludes the disabled package.
     per-client action/target ledger key before callback invocation, contain the
     action and state reload, require an exact changed postcondition, and commit
     only the package change, ledger row, and value-free audit fact together.
-    It accepts no request/session data and adds no UI or endpoint; a later
-    core-owned endpoint must validate session and CSRF separately.
+    It accepts no request/session data.
+41. Completed protected unlinked administrator action endpoint: require POST,
+    a current database-backed administrator session, and CSRF before parsing
+    only a declared tool, action, and canonical positive target; derive the
+    state-aware plan only on the server; invoke only the scoped core bridge;
+    return no package, actor, target, plan, or state values; and leave all
+    administrator controls, forms, and public routes absent.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

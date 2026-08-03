@@ -865,6 +865,10 @@ red_acceptance_run_authentication() {
     local auth_home="$ACCEPTANCE_RESPONSE_DIR/authenticated-home.html"
     local protected_view="$ACCEPTANCE_RESPONSE_DIR/authenticated-users.html"
     local csrf_denial="$ACCEPTANCE_RESPONSE_DIR/csrf-denial.txt"
+    local addon_action_method_headers="$ACCEPTANCE_RESPONSE_DIR/addon-action-method.headers"
+    local addon_action_method_denial="$ACCEPTANCE_RESPONSE_DIR/addon-action-method.json"
+    local addon_action_csrf_denial="$ACCEPTANCE_RESPONSE_DIR/addon-action-csrf.txt"
+    local addon_action_invalid_request="$ACCEPTANCE_RESPONSE_DIR/addon-action-invalid.json"
     local logout_headers="$ACCEPTANCE_RESPONSE_DIR/logout-headers.txt"
     local logout_body="$ACCEPTANCE_RESPONSE_DIR/logout-body.txt"
     local logout_denial="$ACCEPTANCE_RESPONSE_DIR/logout-denial.txt"
@@ -990,6 +994,57 @@ red_acceptance_run_authentication() {
         return 1
     fi
     printf '%s\n' 'PASS: protected administrator view uses the authenticated session CSRF token.'
+
+    metrics="$(curl -sS --max-time 10 \
+        -D "$addon_action_method_headers" \
+        -o "$addon_action_method_denial" \
+        -w '%{http_code}:%{size_download}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/run_addon_tool_action.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_action_method_denial")"
+    red_acceptance_assert_equals 'administrator action endpoint method HTTP status' '405' "$status"
+    red_acceptance_assert_equals \
+        'administrator action endpoint method body' \
+        '{"ok":false,"reason":"method_not_allowed"}' \
+        "$body"
+    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_action_method_headers" \
+        || grep -Eqi '^Set-Cookie:' "$addon_action_method_headers"; then
+        printf '%s\n' 'FAIL: administrator action endpoint method refusal is not request-free.' >&2
+        return 1
+    fi
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_action_csrf_denial" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        --data-urlencode "tool=redcms.missing/tool" \
+        --data-urlencode "action=redcms.missing/action" \
+        --data-urlencode 'targetRecordId=1' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/run_addon_tool_action.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_action_csrf_denial")"
+    red_acceptance_assert_equals 'administrator action endpoint missing-CSRF HTTP status' '403' "$status"
+    red_acceptance_assert_equals 'administrator action endpoint missing-CSRF response' 'csrf' "$body"
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_action_invalid_request" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        --data-urlencode "csrf_token=$csrf_token" \
+        --data-urlencode "tool=redcms.missing/tool" \
+        "$ACCEPTANCE_BASE_URL/admin/bin/run_addon_tool_action.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_action_invalid_request")"
+    red_acceptance_assert_equals 'administrator action endpoint invalid-request HTTP status' '400' "$status"
+    red_acceptance_assert_equals \
+        'administrator action endpoint invalid-request body' \
+        '{"ok":false,"reason":"invalid_request"}' \
+        "$body"
+    printf '%s\n' 'PASS: unlinked administrator action endpoint enforces POST, current session CSRF, and exact request fields.'
 
     metrics="$(curl -sS --max-time 10 \
         -b "$ACCEPTANCE_COOKIE_JAR" \

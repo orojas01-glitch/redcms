@@ -1,6 +1,7 @@
 <?php
 /**
- * Disposable checks for the internal atomic administrator action runner.
+ * Disposable checks for the atomic administrator action runner and its
+ * protected endpoint bridge.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -13,7 +14,7 @@ $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/admin/';
 $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
-require_once $projectRoot . '/includes/addon_admin_tool_action_execution_helpers.php';
+require_once $projectRoot . '/includes/addon_admin_tool_action_endpoint_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_admin_tool_action_exec|rev_base)_[A-Za-z0-9_]+\z/',
@@ -325,7 +326,10 @@ try {
             $actorId,
         ]
     );
-    foreach ([7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108] as $targetId) {
+    foreach (
+        [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108, 7109, 7110, 7111, 7112]
+        as $targetId
+    ) {
         red_addon_admin_tool_action_execution_test_execute(
             $connection,
             "INSERT INTO RED_Addon_Admin_Action_Fixture (TargetRecordID, Status)
@@ -798,19 +802,280 @@ try {
         );
     }
 
+    $callsBeforeRequestValidation = $calls;
+    foreach (
+        [
+            [
+                'tool' => $toolId,
+                'action' => $actionId,
+                'targetRecordId' => '07109',
+                'csrf_token' => str_repeat('c', 64),
+            ],
+            [
+                'tool' => $toolId,
+                'action' => $actionId,
+                'targetRecordId' => '7109',
+                'csrf_token' => '',
+            ],
+            [
+                'tool' => $toolId,
+                'action' => $actionId,
+                'targetRecordId' => '7109',
+                'csrf_token' => str_repeat('c', 64),
+                'package' => $packageId,
+            ],
+            [
+                'tool' => '../tool',
+                'action' => $actionId,
+                'targetRecordId' => '7109',
+                'csrf_token' => str_repeat('c', 64),
+            ],
+        ] as $candidate
+    ) {
+        red_addon_admin_tool_action_execution_test_assert(
+            red_addon_admin_tool_action_endpoint_request($candidate) === null,
+            'the endpoint accepts no loose, extra, or caller-owned action fields'
+        );
+    }
+    $endpointRequest = red_addon_admin_tool_action_endpoint_request([
+        'tool' => $toolId,
+        'action' => $actionId,
+        'targetRecordId' => '7109',
+        'csrf_token' => str_repeat('c', 64),
+    ]);
+    red_addon_admin_tool_action_execution_test_assert(
+        is_array($endpointRequest)
+            && $endpointRequest === [
+                'tool' => $toolId,
+                'action' => $actionId,
+                'targetRecordId' => 7109,
+            ]
+            && $calls === $callsBeforeRequestValidation,
+        'the endpoint parser retains only exact server-safe action identities after outer CSRF validation'
+    );
+
+    $invalidEndpointActor = red_addon_admin_tool_action_endpoint_dispatch(
+        $connection,
+        $endpointRequest,
+        '2147000966'
+    );
+    red_addon_admin_tool_action_execution_test_assert(
+        $invalidEndpointActor === [
+            'httpStatus' => 400,
+            'ok' => false,
+            'status' => '',
+            'reason' => 'invalid_request',
+        ]
+            && $calls === $callsBeforeRequestValidation,
+        'the endpoint bridge accepts the actor only from a current integer session identity'
+    );
+
+    $callsBeforeEndpointExecution = $calls;
+    $auditBeforeEndpointExecution = red_addon_admin_tool_action_execution_test_audit_count(
+        $connection,
+        $packageId
+    );
+    $endpointExecuted = red_addon_admin_tool_action_endpoint_dispatch(
+        $connection,
+        $endpointRequest,
+        $actorId
+    );
+    $endpointExecutedBody = red_addon_admin_tool_action_endpoint_public_body(
+        $endpointExecuted
+    );
+    red_addon_admin_tool_action_execution_test_assert(
+        $endpointExecuted === [
+            'httpStatus' => 200,
+            'ok' => true,
+            'status' => 'executed',
+            'reason' => '',
+        ]
+            && $endpointExecutedBody === [
+                'ok' => true,
+                'status' => 'executed',
+            ]
+            && $calls['tool'] === $callsBeforeEndpointExecution['tool']
+            && $calls['action'] === $callsBeforeEndpointExecution['action'] + 1
+            && $calls['loader'] > $callsBeforeEndpointExecution['loader']
+            && red_addon_admin_tool_action_execution_test_status($connection, 7109)
+                === 'completed'
+            && red_addon_admin_tool_action_execution_test_ledger_count(
+                $connection,
+                $packageId,
+                $actionId,
+                7109
+            ) === 1
+            && red_addon_admin_tool_action_execution_test_audit_count(
+                $connection,
+                $packageId
+            ) === $auditBeforeEndpointExecution + 1,
+        'the endpoint derives the current plan server-side and returns only a bounded executed outcome'
+    );
+
+    $callsBeforeEndpointReplay = $calls;
+    $endpointReplay = red_addon_admin_tool_action_endpoint_dispatch(
+        $connection,
+        $endpointRequest,
+        $actorId
+    );
+    red_addon_admin_tool_action_execution_test_assert(
+        $endpointReplay === [
+            'httpStatus' => 409,
+            'ok' => false,
+            'status' => '',
+            'reason' => 'already_executed',
+        ]
+            && red_addon_admin_tool_action_endpoint_public_body($endpointReplay)
+                === ['ok' => false, 'reason' => 'already_executed']
+            && $calls === $callsBeforeEndpointReplay,
+        'the endpoint reports a bounded replay conflict before package state loading or action execution'
+    );
+
+    $handlerMode = 'unchanged';
+    $endpointUnchanged = red_addon_admin_tool_action_endpoint_dispatch(
+        $connection,
+        red_addon_admin_tool_action_endpoint_request([
+            'tool' => $toolId,
+            'action' => $actionId,
+            'targetRecordId' => '7110',
+            'csrf_token' => str_repeat('c', 64),
+        ]),
+        $actorId
+    );
+    $handlerMode = 'complete';
+    red_addon_admin_tool_action_execution_test_assert(
+        $endpointUnchanged === [
+            'httpStatus' => 200,
+            'ok' => true,
+            'status' => 'unchanged',
+            'reason' => '',
+        ]
+            && red_addon_admin_tool_action_execution_test_status($connection, 7110)
+                === 'pending'
+            && red_addon_admin_tool_action_execution_test_ledger_count(
+                $connection,
+                $packageId,
+                $actionId,
+                7110
+            ) === 0
+            && red_addon_admin_tool_action_execution_test_audit_count(
+                $connection,
+                $packageId
+            ) === $auditBeforeEndpointExecution + 1,
+        'the endpoint retains an unchanged action as a safe success without consuming idempotency evidence'
+    );
+
+    red_addon_admin_tool_action_execution_test_execute(
+        $connection,
+        'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID=?',
+        'i',
+        [$actorId]
+    );
+    $callsBeforeEndpointRevocation = $calls;
+    $endpointRevoked = red_addon_admin_tool_action_endpoint_dispatch(
+        $connection,
+        red_addon_admin_tool_action_endpoint_request([
+            'tool' => $toolId,
+            'action' => $actionId,
+            'targetRecordId' => '7111',
+            'csrf_token' => str_repeat('c', 64),
+        ]),
+        $actorId
+    );
+    red_addon_admin_tool_action_execution_test_assert(
+        $endpointRevoked === [
+            'httpStatus' => 403,
+            'ok' => false,
+            'status' => '',
+            'reason' => 'permission_denied',
+        ]
+            && $calls === $callsBeforeEndpointRevocation
+            && red_addon_admin_tool_action_execution_test_status($connection, 7111)
+                === 'pending',
+        'the endpoint rechecks the exact current grant before package state loading or action execution'
+    );
+    red_addon_admin_tool_action_execution_test_execute(
+        $connection,
+        'INSERT INTO RED_Admin_Capabilities (
+            AdminRecordID, Capability, GrantedByAdminRecordID
+         ) VALUES (?, ?, ?)',
+        'isi',
+        [$actorId, $permission, $actorId]
+    );
+
+    $handlerMode = 'output';
+    $endpointFailure = red_addon_admin_tool_action_endpoint_dispatch(
+        $connection,
+        red_addon_admin_tool_action_endpoint_request([
+            'tool' => $toolId,
+            'action' => $actionId,
+            'targetRecordId' => '7112',
+            'csrf_token' => str_repeat('c', 64),
+        ]),
+        $actorId
+    );
+    $handlerMode = 'complete';
+    red_addon_admin_tool_action_execution_test_assert(
+        $endpointFailure === [
+            'httpStatus' => 422,
+            'ok' => false,
+            'status' => '',
+            'reason' => 'action_failed',
+        ]
+            && red_addon_admin_tool_action_execution_test_status($connection, 7112)
+                === 'pending'
+            && red_addon_admin_tool_action_execution_test_ledger_count(
+                $connection,
+                $packageId,
+                $actionId,
+                7112
+            ) === 0
+            && red_addon_admin_tool_action_execution_test_audit_count(
+                $connection,
+                $packageId
+            ) === $auditBeforeEndpointExecution + 1,
+        'contained package output fails closed and exposes no package details through the endpoint'
+    );
+
     $helperSource = (string) file_get_contents(
         $projectRoot . '/includes/addon_admin_tool_action_execution_helpers.php'
     );
     $endpointSource = (string) file_get_contents(
         $projectRoot . '/admin/bin/view_addon_tool.php'
     );
+    $actionEndpointSource = (string) file_get_contents(
+        $projectRoot . '/admin/bin/run_addon_tool_action.php'
+    );
+    $endpointHelperSource = (string) file_get_contents(
+        $projectRoot . '/includes/addon_admin_tool_action_endpoint_helpers.php'
+    );
+    $chooserSource = (string) file_get_contents(
+        $projectRoot . '/admin/class/class_add_tools.php'
+    );
     red_addon_admin_tool_action_execution_test_assert(
         !str_contains($helperSource, '$_POST')
             && !str_contains($helperSource, '$_SESSION')
             && !str_contains($helperSource, 'REQUEST_URI')
             && !str_contains($endpointSource, 'addon_admin_tool_action_execute')
-            && !str_contains($endpointSource, 'adminToolActions'),
-        'the runner remains an internal no-request helper with no administrator action endpoint'
+            && !str_contains($endpointSource, 'adminToolActions')
+            && !str_contains($endpointHelperSource, '$_POST')
+            && !str_contains($endpointHelperSource, '$_SESSION')
+            && !str_contains($endpointHelperSource, 'REQUEST_URI')
+            && str_contains($actionEndpointSource, 'red_require_admin(true)')
+            && str_contains(
+                $actionEndpointSource,
+                'red_addon_runtime_request_bootstrap('
+            )
+            && str_contains(
+                $actionEndpointSource,
+                'red_addon_admin_tool_action_endpoint_dispatch('
+            )
+            && !str_contains(
+                $actionEndpointSource,
+                'red_addon_admin_tool_action_execute('
+            )
+            && !str_contains($chooserSource, 'run_addon_tool_action.php'),
+        'the runner stays request-free while the protected endpoint is server-derived and unlinked from the administrator UI'
     );
 } finally {
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
@@ -860,7 +1125,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on administrator tool action runner self-test passed (' .
+    'Add-on administrator tool action runner and endpoint helper self-test passed (' .
         $assertions . " assertions).\n"
 );
 

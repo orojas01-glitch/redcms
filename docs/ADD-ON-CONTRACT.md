@@ -1060,13 +1060,19 @@ results, and failed postconditions roll back or refuse before package action
 execution.
 
 The runner is deliberately not an endpoint and consumes no request or session
-state. A later core-owned administrator endpoint must independently validate
-the current administrator session and CSRF token before it calls the runner;
-the manifest's POST/CSRF policy is evidence, not a token check. Display-only
-tool dispatch still exposes no package HTML, links, forms, buttons, scripts,
-styles, action control, route, or enablement eligibility. Existing enablement
-profiles still reject packages that provide administrator tools, so this
-generic core boundary does not activate Store Lite or any richer package.
+state. `admin/bin/run_addon_tool_action.php` is the separate core-owned,
+POST-only boundary: it validates the current administrator session and CSRF
+token before parsing exactly `tool`, `action`, and canonical positive
+`targetRecordId` inputs (plus the consumed CSRF field). It derives the
+state-aware plan itself, calls the runner with that in-memory evidence, and
+returns only bounded `executed` or `unchanged` outcomes, or a generic refusal.
+It never returns package, actor, target, plan, or state values; a replay is a
+bounded conflict. The manifest's POST/CSRF policy remains evidence, not a token
+check. Display-only tool dispatch and the new endpoint expose no package HTML,
+links, forms, buttons, scripts, styles, action control, public route, or
+enablement eligibility. Existing enablement profiles still reject packages
+that provide administrator tools, so this generic core boundary does not
+activate Store Lite or any richer package.
 
 ## Data, Migration, And Client Isolation
 
