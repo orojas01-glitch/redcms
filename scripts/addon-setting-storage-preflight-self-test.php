@@ -13,7 +13,7 @@ $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/';
 $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
-require_once $projectRoot . '/includes/addon_setting_storage_helpers.php';
+require_once $projectRoot . '/includes/addon_setting_write_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_setting_storage)_[A-Za-z0-9_]+\z/',
@@ -86,6 +86,10 @@ function red_addon_setting_storage_test_cleanup(
         mysqli_query(
             $connection,
             "DELETE FROM RED_Addon_Settings WHERE PackageID='$escaped'"
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Addon_Activity_Log WHERE PackageID='$escaped'"
         );
         mysqli_query(
             $connection,
@@ -429,6 +433,159 @@ try {
         ) === $fingerprint,
         'preflight performs no database mutation'
     );
+
+    $auditFailure = red_addon_setting_write(
+        $connection,
+        $package,
+        $actorId,
+        $values,
+        $preflight['planSha256'],
+        static function () {
+            return false;
+        }
+    );
+    red_addon_setting_storage_test_assert(
+        $auditFailure['status'] === 'audit_failed'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(
+                    ':',
+                    (SELECT COUNT(*) FROM RED_Addon_Settings
+                     WHERE PackageID='redcms.storage-fixture'),
+                    (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                     WHERE PackageID='redcms.storage-fixture')
+                 )"
+            ) === '0:0',
+        'audit failure rolls back the complete replacement atomically'
+    );
+
+    $injectedFailure = red_addon_setting_write(
+        $connection,
+        $package,
+        $actorId,
+        $values,
+        $preflight['planSha256'],
+        null,
+        static function () {
+            return false;
+        }
+    );
+    red_addon_setting_storage_test_assert(
+        $injectedFailure['status'] === 'injected_failure'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'"
+            ) === '0',
+        'injected late failure rolls back every setting row'
+    );
+
+    $updated = red_addon_setting_write(
+        $connection,
+        $package,
+        $actorId,
+        $values,
+        $preflight['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        $updated['status'] === 'updated'
+            && hash_equals(
+                $preflight['targetStateSha256'],
+                $updated['stateSha256']
+            )
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(
+                    ':',
+                    (SELECT COUNT(*) FROM RED_Addon_Settings
+                     WHERE PackageID='redcms.storage-fixture'),
+                    (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                     WHERE PackageID='redcms.storage-fixture'
+                       AND EventName='addon.settings.updated'
+                       AND Result='succeeded'
+                       AND DetailCode='settings_updated')
+                 )"
+            ) === '3:1',
+        'exact plan atomically stores the complete target plus one bounded audit fact'
+    );
+    red_addon_setting_storage_test_assert(
+        red_addon_setting_storage_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(
+                ':',
+                (SELECT ValueJSON FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND SettingKey='store.name'),
+                (SELECT ValueJSON FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND SettingKey='store.enabled'),
+                (SELECT ValueJSON IS NULL FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND SettingKey='payment.api-key'),
+                (SELECT SecretReference FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND SettingKey='payment.api-key')
+             )"
+        ) === '"Fixture Store":false:1:config:redcms.storage-fixture.api-key',
+        'ordinary defaults and opaque secret references persist in separate columns'
+    );
+
+    $repeatPlan = red_addon_setting_write_preflight(
+        $connection,
+        $package,
+        $actorId,
+        $values
+    );
+    $unchanged = red_addon_setting_write(
+        $connection,
+        $package,
+        $actorId,
+        $values,
+        $repeatPlan['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        $unchanged['status'] === 'unchanged'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND EventName='addon.settings.updated'"
+            ) === '1',
+        'an exact no-op commits no replacement and no duplicate audit fact'
+    );
+
+    mysqli_begin_transaction($connection);
+    $nested = red_addon_setting_write(
+        $connection,
+        $package,
+        $actorId,
+        $values,
+        $repeatPlan['planSha256']
+    );
+    mysqli_rollback($connection);
+    red_addon_setting_storage_test_assert(
+        $nested['status'] === 'invalid',
+        'the writer refuses a caller-owned transaction before locking or mutation'
+    );
+
+    $changedValues = $values + ['store.name' => 'Changed Store'];
+    $planChanged = red_addon_setting_write(
+        $connection,
+        $package,
+        $actorId,
+        $changedValues,
+        $repeatPlan['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        $planChanged['status'] === 'plan_changed'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT ValueJSON FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND SettingKey='store.name'"
+            ) === '"Fixture Store"',
+        'changed target values invalidate the caller plan without mutation'
+    );
     red_addon_setting_storage_test_assert(
         empty(red_addon_setting_write_preflight(
             $connection,
@@ -554,12 +711,14 @@ red_addon_setting_storage_test_assert(
              WHERE PackageID='redcms.storage-fixture'),
             (SELECT COUNT(*) FROM RED_Addon_Installations
              WHERE PackageID='redcms.storage-fixture'),
+            (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+             WHERE PackageID='redcms.storage-fixture'),
             (SELECT COUNT(*) FROM RED_Admin
              WHERE RecordID IN ($actorId,$otherId)),
             (SELECT COUNT(*) FROM RED_Admin_Capabilities
              WHERE AdminRecordID IN ($actorId,$otherId))
          )"
-    ) === '0:0:0:0'
+    ) === '0:0:0:0:0'
         && !file_exists($temporaryRoot),
     'all storage, package, administrator, grant, and filesystem fixtures clean up'
 );

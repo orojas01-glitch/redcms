@@ -372,6 +372,59 @@ if (!function_exists('red_addon_setting_current_state')) {
     }
 }
 
+if (!function_exists('red_addon_setting_target_state')) {
+    function red_addon_setting_target_state(
+        array $manifest,
+        array $validated
+    ) {
+        $invalid = ['valid' => false, 'rows' => [], 'stateSha256' => ''];
+        if (empty($validated['valid'])
+            || !is_array($validated['values'] ?? null)
+            || !is_array($validated['secretReferences'] ?? null)
+        ) {
+            return $invalid;
+        }
+        $schema = red_addon_settings_schema($manifest);
+        if (!is_array($schema) || $schema === []) {
+            return $invalid;
+        }
+        $rows = [];
+        foreach ($schema as $definition) {
+            $key = $definition['key'] ?? null;
+            $type = $definition['type'] ?? null;
+            if (!is_string($key) || !is_string($type)) {
+                return $invalid;
+            }
+            if ($type === 'secret-reference') {
+                if (!array_key_exists($key, $validated['secretReferences'])) {
+                    return $invalid;
+                }
+                $value = $validated['secretReferences'][$key];
+            } else {
+                if (!array_key_exists($key, $validated['values'])) {
+                    return $invalid;
+                }
+                $value = $validated['values'][$key];
+            }
+            $rows[$key] = [$key, $type, $value];
+        }
+        ksort($rows, SORT_STRING);
+        $rows = array_values($rows);
+        $encoded = json_encode(
+            $rows,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        );
+        if (!is_string($encoded)) {
+            return $invalid;
+        }
+        return [
+            'valid' => true,
+            'rows' => $rows,
+            'stateSha256' => hash('sha256', $encoded),
+        ];
+    }
+}
+
 if (!function_exists('red_addon_setting_write_preflight')) {
     function red_addon_setting_write_preflight(
         $connection,
@@ -482,19 +535,12 @@ if (!function_exists('red_addon_setting_write_preflight')) {
             return $result;
         }
         $result['currentStateSha256'] = $current['stateSha256'];
-        $targetMaterial = [
-            'values' => $validated['values'],
-            'secretReferences' => $validated['secretReferences'],
-        ];
-        $targetJson = json_encode(
-            $targetMaterial,
-            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-        );
-        if (!is_string($targetJson)) {
+        $target = red_addon_setting_target_state($manifest, $validated);
+        if (empty($target['valid'])) {
             $result['errors'][] = 'target_encoding_failed';
             return $result;
         }
-        $result['targetStateSha256'] = hash('sha256', $targetJson);
+        $result['targetStateSha256'] = $target['stateSha256'];
         $planJson = json_encode([
             'database' => red_addon_setting_database_name($connection),
             'actorAdminRecordId' => (int) $adminRecordId,

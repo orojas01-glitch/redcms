@@ -139,6 +139,13 @@ add-on packages without executing them.
   or malformed stored rows, identity drift, lifecycle drift, missing grants,
   or stale inputs fail closed. The boundary writes nothing, resolves no secret,
   invokes no package, renders no form, and changes no lifecycle state.
+- The internal atomic setting writer consumes only that exact plan. It refuses
+  caller-owned transactions; acquires lifecycle, package, installation, and
+  setting-row locks; replaces the complete configuration; reloads the exact
+  target hash/count; and commits one value-free `addon.settings.updated`
+  audit fact. Ordinary JSON and opaque secret references remain physically
+  separated. Exact no-ops add no audit. Any stale plan, drift, write,
+  postcondition, audit, or injected failure rolls back all rows and audit state.
 - The display-only administrator renderer accepts only an empty state or the
   validator's exact closed result. It maps fixed field types to core-owned
   namespaced controls, escapes every manifest label, help string, option, and
@@ -501,8 +508,8 @@ metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
-The setting storage/preflight prerequisite does not supply Store Lite setting
-writes, settings UI/endpoints, secret availability, or enablement readiness.
+The atomic setting helper does not supply Store Lite settings UI/endpoints,
+secret availability, or enablement readiness.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and

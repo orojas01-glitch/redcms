@@ -183,6 +183,16 @@ stored-state fingerprint. It writes no row and resolves no secret. Atomic
 persistence, settings UI/endpoints, secret availability, assets, and richer
 enablement remain blocked.
 
+Atomic per-client setting persistence is now implemented as an internal core
+helper. It refuses caller-owned transactions, acquires the shared lifecycle
+and exact package locks, locks the installation and setting rows, recreates
+the complete plan, replaces every normalized ordinary value or opaque secret
+reference, reloads the exact target hash/count, and commits one value-free
+`addon.settings.updated` audit fact. Exact no-ops add no audit. Audit,
+postcondition, injected, permission, identity, lifecycle, or state failure
+rolls the replacement back. Settings UI/endpoints, secret availability,
+assets, and richer enablement remain blocked.
+
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
 component id, reviewed package migrations may declare only an exact foreign
@@ -362,7 +372,7 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while writable route/administrator-tool actions, atomic setting persistence,
+while writable route/administrator-tool actions, settings UI/endpoints,
 secret availability, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

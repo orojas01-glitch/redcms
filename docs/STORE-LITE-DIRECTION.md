@@ -265,9 +265,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   grants and core rendering; writable order/product actions and tool-bearing
   package enablement remain gated;
 - namespaced package asset loading;
-- atomic per-client package setting persistence, permissioned editing, and
-  secret-reference availability; typed validation, empty storage, and
-  read-only authorization/write preflight are complete; and
+- permissioned settings UI/endpoints and secret-reference availability; typed
+  validation, storage, read-only preflight, and internal atomic persistence
+  are complete; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures
@@ -321,11 +321,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Continue with generic atomic settings persistence, secret availability, and
-   asset contracts as separate reviewed batches. Typed internal service
+4. Continue with generic secret availability, settings UI/endpoints, and asset
+   contracts as separate reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
-   tools, typed setting validation, empty per-client storage, and read-only
-   settings authorization/write preflight are complete.
+   tools, typed setting validation, per-client storage, read-only preflight,
+   and internal atomic settings persistence are complete.
 5. Create Store Lite in its separate distribution using only those accepted
    contracts.
 6. Add package-owned migrations, Product editing, catalog, cart, orders, and

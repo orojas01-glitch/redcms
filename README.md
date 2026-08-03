@@ -95,8 +95,11 @@ type-correct non-secret defaults, and separates opaque `config:` secret
 references without resolving or exposing secret material. Each installation
 now includes an empty generic settings table plus a read-only write preflight
 that binds exact installed package identity, current-state evidence, and fresh
-case-sensitive package grants. No setting writer, administrator form, secret
-resolution, package execution, or activation path is added.
+case-sensitive package grants. The internal atomic writer recreates that plan
+under lifecycle/package and row locks, replaces the complete configuration,
+verifies the exact postcondition, and commits one value-free audit fact; every
+late failure rolls back. No administrator form or endpoint, secret resolution,
+package execution, or activation path is added.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -176,6 +179,8 @@ features.
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
   preflight with explicit manifest permissions and fresh database grants
+- Atomic complete-setting persistence with shared locks, exact postcondition,
+  value-free audit, no-op handling, and rollback
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
