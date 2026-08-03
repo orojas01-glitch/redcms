@@ -16,8 +16,11 @@ fail-closed page-request loading, and safe core-owned default dispatch for an
 enabled manifest-declared component are implemented for already-recorded
 enabled packages. Typed internal service invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
-separate fail-closed dispatch boundaries. Adapters, writable route/tool
-actions, settings UI/endpoints, actual secret lookup,
+separate fail-closed dispatch boundaries. A separate non-executing
+administrator write-action preflight binds exact runtime owners, an
+action-specific permission, `POST`/CSRF contract, and numeric target into a
+deterministic plan without callback execution or mutation. Adapters,
+operational writable route/tool actions, settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -41,8 +44,8 @@ now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, restore action, or create/delete endpoint is
-implied by these prerequisites. Writable route/tool actions, settings
-UI/endpoints, and package asset loading are not operational.
+implied by these prerequisites. Operational writable route/tool actions and
+settings UI/endpoints are not active.
 The first non-executing settings-value prerequisite now normalizes only valid
 data-only definitions, requires exact type-correct non-secret defaults, and
 validates one closed configuration object. Missing, unknown, nested, malformed,
@@ -562,6 +565,14 @@ request bootstrap excludes the disabled package.
     existing signed-in overlay is present; and emit no package tags for any
     catalog, registry, integrity, plan, or document-boundary failure. The
     planner does not invoke a registrar, write state, or relax activation.
+39. Completed non-executing administrator tool write-action preflight:
+    validate a separate data-only action contract that maps one registered
+    tool to one unique action, explicit permission, `POST`, and required CSRF;
+    require matching enabled request-local tool/action owners, a fresh exact
+    package grant, and one positive integer target record; and return only
+    deterministic contract and plan hashes. It invokes no package callback,
+    reads no package record, starts no transaction, writes no state, renders no
+    form, exposes no endpoint, and does not alter enablement eligibility.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

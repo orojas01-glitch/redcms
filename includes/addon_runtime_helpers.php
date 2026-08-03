@@ -34,6 +34,19 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 $this->handlers[$type] = [];
                 $this->metadata[$type] = [];
             }
+            $adminToolActions = [];
+            foreach ($manifest['adminToolActionContracts'] ?? [] as $contract) {
+                $actionId = is_array($contract)
+                    && is_string($contract['action'] ?? null)
+                        ? $contract['action']
+                        : '';
+                if (red_addon_valid_capability($actionId)) {
+                    $adminToolActions[$actionId] = true;
+                }
+            }
+            $this->allowed['adminToolActions'] = $adminToolActions;
+            $this->handlers['adminToolActions'] = [];
+            $this->metadata['adminToolActions'] = [];
             $componentDataLoaders = [];
             $componentEditors = is_array($manifest['componentEditors'] ?? null)
                 ? $manifest['componentEditors']
@@ -194,6 +207,13 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->register('adminTools', $id, $handler);
         }
 
+        public function registerAdminToolAction(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register('adminToolActions', $id, $handler);
+        }
+
         public function registerAdapter(string $id, callable $handler): void
         {
             $this->register('adapters', $id, $handler);
@@ -280,6 +300,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'componentDataDeleters',
                     'services',
                     'adminTools',
+                    'adminToolActions',
                     'adapters',
                     'routes',
                 ]
@@ -546,6 +567,22 @@ if (!function_exists('red_addon_runtime_namespace_errors')) {
                     }
                     $owners[$ownerKey] = $packageId;
                 }
+            }
+            foreach ($manifest['adminToolActionContracts'] ?? [] as $contract) {
+                $actionId = is_array($contract)
+                    && is_string($contract['action'] ?? null)
+                        ? $contract['action']
+                        : '';
+                if (!red_addon_valid_capability($actionId)) {
+                    continue;
+                }
+                $ownerKey = 'adminToolActions' . "\0" . $actionId;
+                if (isset($owners[$ownerKey])) {
+                    $errors[] = 'enabled_runtime_capability_conflict:' .
+                        'adminToolActions:' . $actionId;
+                    continue;
+                }
+                $owners[$ownerKey] = $packageId;
             }
             foreach ($manifest['routes'] ?? [] as $route) {
                 if (!is_array($route)) {
