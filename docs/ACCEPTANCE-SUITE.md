@@ -1,6 +1,6 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-08-01
+Date: 2026-08-03
 
 ## Purpose
 
@@ -137,17 +137,23 @@ case-sensitive revocation, strict positive integer target validation,
 deterministic contract/plan hashes, and plan change on target or contract
 drift. It also requires one registrar-bound state loader and refuses core
 ledger tables as package transaction metadata. Both package callbacks remain
-uninvoked, the fixture tables remain unchanged across preflight, no action
-endpoint exists, and all temporary administrator/role/grant rows are removed
-exactly.
-The separate 21-assertion action-runner fixture requires the fixed
+uninvoked, the fixture tables remain unchanged across preflight, the preflight
+itself has no endpoint, and all temporary administrator/role/grant rows are
+removed exactly.
+The separate 32-assertion action-runner and endpoint-bridge fixture requires the fixed
 `once-per-target` contract, an enabled per-client installation, one declared
 package table, and rollback-only state loading. It proves stale-plan and fresh
 grant-revocation refusal before action invocation; atomic package change,
 execution-ledger, and value-free audit commit; replay refusal before state
 loading; and rollback after output, exceptions, malformed results, state
-mismatch, or an unchanged action. It leaves no administrator, grant,
-installation, ledger, audit, or package-table fixture behind.
+mismatch, or an unchanged action. It additionally proves strict endpoint input
+parsing, server-derived plans, a current integer actor, bounded success/conflict
+responses without package/state values, immediate grant revocation, and
+contained package-output failure. The real HTTP acceptance pass proves the
+unlinked endpoint rejects a non-POST request without a session, rejects a
+signed-in POST without CSRF, and rejects malformed fields after CSRF validation.
+It leaves no administrator, grant, installation, ledger, audit, or package-table
+fixture behind.
 The next 20-assertion disposable fixture requires exactly one loader for each
 declared editor and refuses undeclared or duplicate loaders. It proves exact
 view permission, enabled parent/runtime/manifest ownership, normalized returned
@@ -229,13 +235,14 @@ The current compatibility foundation performs these checks through one command:
 6. Verify 27 InnoDB tables, utf8mb4 collations, an empty migration ledger, sanitized administrator seed placeholders, empty administrator role/capability tables, and empty add-on installation/migration/audit/action-execution storage.
 7. Apply every checked-in migration and require the ledger count to match the migration-file count.
 8. Run migrations again and require `No pending migrations.` plus zero checksum drift. Then run the 16-assertion Owner authorization lifecycle, 11-assertion component-editor package-permission lifecycle, 20-assertion bounded component data-loader lifecycle, 47-assertion operational form, transactional component-update, history, restore-preflight, and atomic-restore lifecycle, 85-assertion component-creation preflight/atomic-runner/parent-metadata/public-placement-preflight/atomic-placement/atomic-delete lifecycle, 23-assertion add-on registry and immutable asset-delivery-preflight lifecycle, 8-assertion static immutable asset-endpoint lifecycle, 11-assertion request-bootstrap lifecycle, 17-assertion safe component-persistence/dispatch lifecycle, 19-assertion install lifecycle, 23-assertion read-only enablement-preflight lifecycle, 23-assertion atomic-enable lifecycle, and 18-assertion atomic-disable lifecycle. Component-editor permission checks require 160-character storage, exact case-sensitive manifest permission resolution, explicit non-Owner grants, no implicit Owner access, fresh revocation, zero package execution or state mutation, and exact cleanup. Component data loading requires exact declared registration, view permission, enabled persisted and runtime ownership, exact runtime-manifest identity, closed returned values and state hash, contained failures, zero writes, and exact cleanup. Component history/preflight requires bounded validated metadata, exact restore permission, current and target state evidence, deterministic plans, and zero restore execution. Atomic restore requires that exact plan under the locked enabled binding, the same registered writer and InnoDB tables, exact target reload, one source-linked immutable restore revision, stale-plan refusal, caller-owned transaction refusal, and rollback on writer or ledger failure. Component creation preflight requires exact create permission and enabled runtime ownership, closed inactive hidden parent metadata, normalized package values, an unused numeric id, active-theme layout, InnoDB package tables, deterministic evidence, callback non-invocation, and zero writes. Parent metadata requires exact view/edit permissions, an inactive hidden unrouted shell, current package and core-revision evidence, a caller state hash, lifecycle/theme/installation/parent serialization, title/layout/language-only postconditions, package-state preservation, unchanged no-op behavior, core revision rollback, and exact cleanup. Public-placement preflight requires the exact publish grant before package loading, the current parent/package hashes, one unique active Article destination, exact language agreement, active-theme position support, deterministic source/target/placement evidence, and zero activation or writes. Atomic placement revalidates that plan under lifecycle/theme/source/target locks, changes only seven derived parent fields, preserves package and destination state, commits one core move revision plus one bounded audit fact, refuses reuse, and rolls back permission, drift, transaction, postcondition, revision, or audit failure. Its core-owned form exposes only numeric placement choices, current parent/package hashes, and CSRF while package, component, manifest, grants, target ownership, and the exact plan remain server-derived. Component updates require exact writer ownership and package-table metadata, current view/edit grants, locked enabled binding, current state hash, normalized values, InnoDB transaction support, caller-owned transaction refusal, exact reloaded postconditions, atomic baseline/save revision snapshots, rollback on every contained or revision-ledger failure, preserved core placement state, and exact cleanup. Component persistence/dispatch requires non-executing discovery, disabled non-execution, enabled request-local registration, full manifest component-id storage, a package-owned table with only the exact numeric article-parent foreign key, orphan refusal, read-only parent/runtime-owner agreement, fixed non-executable placement data, core-owned escaped default markup, static fail-closed fallbacks for emitted output, malformed view models, handler exceptions, and output-buffer tampering, inactive non-rendering, unchanged legacy contexts, and exact cleanup. Enablement preflight requires exact Owner authority, current installed-disabled evidence, deterministic plans, dependency and namespace checks, declarative readiness for constrained registration-only service, core-rendered default public component, and combined default-component plus registration-only-service profiles, explicit richer-surface blockers including declarative component-editor metadata, zero state mutation or package execution, CLI-only boundaries, drift refusal, and exact cleanup. Atomic enablement separately requires exact Owner authority and plan evidence, registrar validation under the shared lifecycle lock and package lock, atomic compare-and-swap state plus audit, lifecycle reach from newly enabled standalone and combined default components to the safe core renderer, injected-failure rollback, later registration of every declared combined-package identifier, repeat refusal, and exact cleanup. Atomic disablement requires exact Owner authority, deterministic current-registry and enabled-dependent evidence, cross-connection lifecycle-lock exclusion, stale-plan refusal, atomic state/audit rollback and commit, zero package or migration execution, removal of both combined-package component and service registrations from later requests, repeat refusal, and exact cleanup. Then run the 38-assertion disposable SEO lifecycle, 29-assertion content-revision lifecycle, 21-assertion page-layout distribution lifecycle, and 36-assertion custom-layout lifecycle with their existing rollback and cleanup requirements.
-   The atomic administrator-action runner additionally proves the fixed
+   The atomic administrator-action runner and protected endpoint bridge additionally prove the fixed
    `once-per-target` contract, declared package-owned InnoDB table metadata,
    rollback-only target-state preflight, exact-plan/revocation/replay refusal,
    contained action and loader behavior, postcondition verification, atomic
    per-client execution evidence plus value-free audit, rollback on output,
-   exception, malformed result, or mismatch, and exact fixture cleanup. It
-   adds no endpoint or browser action surface.
+   exception, malformed result, or mismatch, and exact fixture cleanup. The
+   core endpoint independently enforces POST/session/CSRF, exact fields, and
+   value-free bounded results; it adds no browser action surface.
 9. Verify the final 29-table InnoDB/utf8mb4 state, canonical clean-installer row counts including zero SEO, administrator authorization, add-on installation, setting, migration, lifecycle-audit, action-execution, and add-on component revision rows, and zero Form, Gallery, area, layout, and component relationship errors, then run the 14-assertion two-connection theme-contract suite against the disposable database. That suite proves database-scoped locking, reentrancy, cross-connection exclusion, exception-safe release, effective-theme agreement, safe inactive upload placeholders, and reserved active/previous theme rows.
 10. Compare a normalized table/column/index manifest with the configured primary schema while ignoring data and auto-increment counters.
 11. Confirm the primary isolation snapshot is unchanged.
@@ -244,7 +251,7 @@ The current compatibility foundation performs these checks through one command:
 14. Require HTTP 200, a nontrivial response size, route-specific content markers, and no PHP/runtime error markers for `/`, `/contacto/`, `/administracion/`, `/administracion/instructions`, and the clean-installer seed `/administracion/test-vimeo`.
 15. Insert one disposable plaintext-password Webmaster and require matching generic HTTP 200 `no` responses for wrong-password and unknown-user logins.
 16. Require a successful login to upgrade the legacy password to bcrypt, clear only that username's failed attempts, and preserve the upgraded hash on a second login.
-17. Require the authenticated homepage overlay, a valid 64-character CSRF token, the same token in a protected Administrator Users form, and HTTP 403 `csrf` for a protected write without the token.
+17. Require the authenticated homepage overlay, a valid 64-character CSRF token, the same token in a protected Administrator Users form, HTTP 403 `csrf` for a protected write without the token, and an unlinked administrator-action endpoint that rejects non-POST without a session, rejects signed-in missing-CSRF POST, and rejects malformed fields after CSRF validation.
 18. Require logout to redirect to `/` and make the old session return HTTP 403 `no` on a protected endpoint.
 19. Log in again with the upgraded password, delete the temporary administrator directly, and require the still-open session to return HTTP 403 `no` because its database-backed fingerprint can no longer be validated.
 20. Remove and verify zero temporary administrator, failed-login, and activity-audit rows. Login/logout intentionally remain outside the minimal activity-audit event allowlist.
@@ -316,7 +323,7 @@ drifted files, and completed the 16-assertion Owner authorization,
 23-assertion add-on setting storage, authorization preflight, and atomic writer,
 18-assertion permission-scoped administrator-tool dispatch,
 18-assertion non-executing administrator-action preflight,
-21-assertion atomic internal administrator-action runner,
+32-assertion atomic internal administrator-action runner and protected endpoint bridge,
 20-assertion bounded component-editor data-loader lifecycle,
 47-assertion operational component form, transactional component-editor update, history, restore-preflight,
 and atomic-restore lifecycle,

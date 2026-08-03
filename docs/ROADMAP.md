@@ -162,8 +162,11 @@ metadata evidence without invoking a package action or writing state. A
 separate internal atomic runner now revalidates exact target-state evidence
 under lifecycle/package locks, reserves a per-client action/target ledger key,
 contains one registrar action and state reload, and commits only an exact
-changed postcondition with a value-free audit fact. It exposes no UI or action
-endpoint; tool-bearing packages remain ineligible for current enablement. The Owner-authorized disable command serializes with
+changed postcondition with a value-free audit fact. The separate core-owned,
+unlinked administrator endpoint validates POST/session/CSRF itself, derives the
+action plan server-side, and returns only bounded value-free outcomes; it adds
+no administrator control, form, or public route. Tool-bearing packages remain
+ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
 `installed_disabled` without executing package PHP or deleting package code,
 migrations, settings, media, or business data. Richer route/tool actions,

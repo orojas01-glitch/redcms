@@ -143,8 +143,11 @@ deterministic evidence without invoking the action or writing state. A separate
 internal atomic runner can now revalidate an exact state-aware plan under the
 lifecycle and package locks, execute one contained registrar action, reload its
 postcondition, and commit only package state plus a core-owned execution
-ledger and value-free audit fact. It exposes no UI, route, or action endpoint;
-an eventual endpoint must validate session and CSRF itself. Operational writable route/tool actions, upgrade,
+ledger and value-free audit fact. A core-owned, unlinked administrator endpoint
+now validates the current session and CSRF token itself, accepts only an exact
+tool/action/positive-target request, derives the plan server-side, and returns
+only bounded executed, unchanged, or refusal outcomes. It exposes no UI, form,
+package values, package markup, or public route. Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
 features.
@@ -222,7 +225,10 @@ features.
 - Internal atomic administrator action runner with package-owned InnoDB table
   declarations, rollback-only target-state preflight, stale-plan/replay refusal,
   one-time per-client execution evidence, contained callbacks, exact
-  postcondition verification, and a value-free audit fact—without a UI or endpoint
+  postcondition verification, and a value-free audit fact
+- Core-owned, unlinked administrator action endpoint with independent
+  POST/session/CSRF validation, exact request fields, server-derived plans, and
+  value-free bounded outcomes—without an administrator control or public route
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
