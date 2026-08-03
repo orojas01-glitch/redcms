@@ -171,6 +171,18 @@ and remain separate from ordinary values; core does not resolve secret
 material. Per-client persistence, package settings permissions/UI, secret
 availability, assets, and settings-bearing package enablement remain blocked.
 
+The per-client settings storage and authorization prerequisite is now
+implemented. The clean installer contains one empty generic
+`RED_Addon_Settings` table; it stores ordinary typed JSON scalars separately
+from opaque secret-reference identifiers and is bound to the current
+installation row. Operational settings must explicitly name a permission
+already declared by their package. The read-only write preflight revalidates
+the exact filesystem/registry identity, installed-disabled or enabled state,
+complete typed target configuration, fresh binary grant decisions, and current
+stored-state fingerprint. It writes no row and resolves no secret. Atomic
+persistence, settings UI/endpoints, secret availability, assets, and richer
+enablement remain blocked.
+
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
 component id, reviewed package migrations may declare only an exact foreign
@@ -350,7 +362,7 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while writable route/administrator-tool actions, per-client settings storage,
+while writable route/administrator-tool actions, atomic setting persistence,
 secret availability, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.

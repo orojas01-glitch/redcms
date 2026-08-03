@@ -92,8 +92,11 @@ activation eligibility remain absent.
 Manifest-declared package settings now also have a non-executing typed value
 contract: core validates one closed configuration object, applies only
 type-correct non-secret defaults, and separates opaque `config:` secret
-references without resolving or exposing secret material. No settings table,
-administrator form, package execution, or activation path is added.
+references without resolving or exposing secret material. Each installation
+now includes an empty generic settings table plus a read-only write preflight
+that binds exact installed package identity, current-state evidence, and fresh
+case-sensitive package grants. No setting writer, administrator form, secret
+resolution, package execution, or activation path is added.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -171,6 +174,8 @@ features.
   escaped rendering, and a protected POST/CSRF endpoint
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
+- Empty per-client package-setting storage and deterministic read-only write
+  preflight with explicit manifest permissions and fresh database grants
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -250,6 +255,10 @@ php scripts/admin-addon-enable-preflight.php --package=vendor.package --actor-ad
 php scripts/admin-addon-enable.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
+
+The database-backed setting-storage preflight fixture runs automatically in
+`scripts/dev-acceptance.sh` against its uniquely named disposable database and
+FrankenPHP CLI.
 
 The install command is a dry run by default. Apply requires the exact database,
 package, version, plan digest, SHA-256 from a separately verified backup, and
