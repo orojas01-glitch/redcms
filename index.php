@@ -1,4 +1,51 @@
 <?php
+$redAddonAssetRequestUri = $_SERVER['REQUEST_URI'] ?? '';
+if (is_string($redAddonAssetRequestUri)
+    && str_starts_with($redAddonAssetRequestUri, '/_red/addons/')
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__ . '/includes/addon_asset_endpoint_helpers.php';
+
+    $redAddonAssetConnection = null;
+    try {
+        $redAddonAssetConnection = @mysqli_connect(
+            red_config_value('DBHOST', ['RED_DB_HOST', 'DBHOST'], 'localhost'),
+            red_config_value('DBUSER', ['RED_DB_USER', 'DBUSER'], ''),
+            red_config_value('DBPASS', ['RED_DB_PASS', 'DBPASS'], ''),
+            red_config_value('DBNAME', ['RED_DB_NAME', 'DBNAME'], '')
+        );
+        if (!$redAddonAssetConnection
+            || !@mysqli_set_charset($redAddonAssetConnection, 'utf8mb4')
+        ) {
+            throw new RuntimeException(
+                'The add-on asset database connection is unavailable.'
+            );
+        }
+        $redAddonAssetResponse = red_addon_asset_delivery_dispatch(
+            $redAddonAssetConnection,
+            __DIR__,
+            $_SERVER['REQUEST_METHOD'] ?? '',
+            $redAddonAssetRequestUri
+        );
+    } catch (Throwable $exception) {
+        error_log(
+            'RED-CMS add-on asset delivery failed: ' .
+            $exception->getMessage()
+        );
+        $redAddonAssetResponse = red_addon_asset_delivery_http_error(
+            503,
+            $_SERVER['REQUEST_METHOD'] ?? ''
+        );
+    } finally {
+        if ($redAddonAssetConnection instanceof mysqli) {
+            mysqli_close($redAddonAssetConnection);
+        }
+    }
+
+    red_addon_asset_delivery_emit($redAddonAssetResponse);
+    exit;
+}
+
 /**
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)

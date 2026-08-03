@@ -505,38 +505,41 @@ read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
 The implemented disable command is non-executing and data-retaining for any
-current enabled package with no enabled dependent. Settings, the static
-package-asset endpoint/injection, migrations, live data, recovery, and every
+current enabled package with no enabled dependent. Settings, static
+package-asset injection, migrations, live data, recovery, and every
 richer enablement gate remain separate work.
 
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
 registration is implemented, but Store Lite remains blocked until generic
-revision restore actions, routes, administrator tools, settings, the static
-asset endpoint/injection, and live-data compatibility pass separate
+revision restore actions, routes, administrator tools, settings, asset
+injection, and live-data compatibility pass separate
 disposable-fixture reviews. The activation-blocked parent
 metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
 The atomic setting helper and availability evidence do not supply Store Lite
-settings UI/endpoints, actual secret lookup, a static package-asset endpoint,
-or enablement readiness. The CSS/JavaScript asset plan and read-only delivery
-preflight are complete, but neither itself serves or injects an asset.
+settings UI/endpoints, actual secret lookup, package-asset injection, or
+enablement readiness. The CSS/JavaScript asset plan, read-only delivery
+preflight, and static endpoint are complete, but none injects an asset.
 
 The first namespaced asset helper accepts only a trusted manifest's
 package-owned CSS and JavaScript declarations and derives deterministic
 checksum-versioned URLs and core-owned tags. It rejects malformed or forged
-plans before generating markup. It does not read a package file, serve an HTTP
-response, inject response markup, execute package PHP, access a database, or
-relax enablement. The separate delivery preflight claims only an exact reserved
-checksum URL; it revalidates the complete package inventory, enabled/current
-registry report, surface plan, package containment without symlinks, and final
-file checksum before returning internal evidence. It sends no response or file
-bytes, emits no markup, executes no package PHP, and writes no state. The
-future HTTP endpoint must rederive this evidence for its current request rather
-than accept a path from a caller; public/admin injection remains separate
-reviewed work.
+plans before generating markup. The separate delivery preflight claims only an
+exact reserved checksum URL; it revalidates the complete package inventory,
+enabled/current registry report, surface plan, package containment without
+symlinks, and final file checksum before returning internal evidence.
+
+The core-owned static endpoint reruns that preflight before theme, session, or
+add-on runtime bootstrap. It serves only checksum-matching CSS/JavaScript
+bytes up to 4 MiB through `GET` or `HEAD`, with fixed immutable-cache and
+`nosniff` headers. Noncanonical, disabled, drifted, missing, and oversized
+assets receive only a generic `404`; unavailable registry storage receives a
+generic `503`; and other methods receive a fixed `405`. No response exposes a
+filesystem path, preflight reason, package output, or package PHP execution.
+Public/admin injection remains separate reviewed work.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and

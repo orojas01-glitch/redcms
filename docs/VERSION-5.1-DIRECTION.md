@@ -17,7 +17,7 @@ enabled manifest-declared component are implemented for already-recorded
 enabled packages. Typed internal service invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
 separate fail-closed dispatch boundaries. Adapters, writable route/tool
-actions, atomic settings writes, a static package-asset endpoint/injection,
+actions, atomic settings writes, package-asset injection,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -70,15 +70,16 @@ complete typed configuration, and returns deterministic counts, missing
 setting keys, and fingerprints. It returns no reference identifier or secret
 value, reads no database or secret, executes no package, and changes no
 activation gate. Actual secret lookup, settings UI/endpoints, and package asset
-loading remain unavailable.
+injection remain unavailable.
 The first namespaced asset prerequisite now reduces one trusted manifest
 surface to a deterministic CSS/JavaScript plan. CSS must be beneath `assets/`
 and load at `head`; JavaScript must be beneath `assets/` and load at
 `body-end`. Core derives checksum-versioned package URLs and renders only
 escaped tags after revalidating the aggregate plan hash. It reads no package
 file, serves no response, injects no document markup, executes no package,
-opens no database, and changes no activation gate. Immutable delivery and
-public/admin injection remain unavailable.
+opens no database, and changes no activation gate. Immutable delivery is now
+handled by the separate static endpoint; public/admin injection remains
+unavailable.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -347,8 +348,8 @@ request bootstrap excludes the disabled package.
     registration-only services as one package, with non-executing preflight,
     atomic Owner enablement, later request registration and default rendering,
     non-executing disablement, and exact disposable cleanup. Persistence,
-    editor, routes, administrator tools, settings, the static asset
-    endpoint/injection, and live-data behavior remain blocked.
+    editor, routes, administrator tools, settings, asset injection, and
+    live-data behavior remain blocked.
 12. Completed persistence foundation: preserve `RED_Articles` as the single
     placement parent, store the full manifest component id, permit package
     tables only an exact numeric parent foreign key, and require an enabled
@@ -543,7 +544,14 @@ request bootstrap excludes the disabled package.
     no-symlink package containment, current length, and SHA-256; and return
     internal delivery evidence only. Serve no byte, emit no header or markup,
     execute no package PHP, write no state, and add no injection or activation
-    path. The static endpoint and public/admin injection remain separate.
+    path. Public/admin injection remains separate.
+37. Completed core-owned static immutable asset endpoint: intercept the
+    reserved namespace before theme, session, or package runtime bootstrap;
+    rerun current-request preflight; serve only checksum-matching CSS/JavaScript
+    bytes up to 4 MiB through `GET`/`HEAD` with fixed immutable-cache and
+    `nosniff` headers; and return generic `404`/`503`/`405` responses without
+    paths, preflight evidence, package output, execution, mutation, or markup
+    injection. Public/admin injection remains separate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

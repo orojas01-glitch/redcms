@@ -164,6 +164,7 @@ ACCEPTANCE_ROLLBACK_UPDATED_ALIAS="codex-rollback-updated"
 ACCEPTANCE_ROLLBACK_TRIGGER_NAME="red_acceptance_force_gallery_update"
 ACCEPTANCE_ROLLBACK_TRIGGER_CREATED=0
 ACCEPTANCE_ROLLBACK_FIXTURE_CREATED=0
+ACCEPTANCE_ADDON_ASSET_ENDPOINT_FIXTURE_CREATED=0
 
 red_acceptance_create_admin_defaults() {
     ADMIN_DEFAULTS_FILE="$(mktemp "${TMPDIR:-/tmp}/redcms-acceptance-admin.XXXXXX")"
@@ -440,6 +441,173 @@ red_acceptance_check_not_found_route() {
     fi
 
     printf 'PASS: %s is an active-theme 404 and no longer renders the disposable %s.\n' "$label" "$entity_label"
+}
+
+red_acceptance_addon_asset_endpoint_fixture() {
+    RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli \
+        "$RED_PROJECT_ROOT/scripts/addon-asset-endpoint-self-test.php" "$1"
+}
+
+red_acceptance_addon_asset_endpoint_cleanup() {
+    if [[ "$ACCEPTANCE_ADDON_ASSET_ENDPOINT_FIXTURE_CREATED" -eq 1 ]]; then
+        red_acceptance_addon_asset_endpoint_fixture --runtime-cleanup
+        if [[ -e "$RED_PROJECT_ROOT/addons/redcms/asset-endpoint-fixture" \
+            || -e "$RED_PROJECT_ROOT/addons/.redcms-acceptance-asset-endpoint-fixture" ]]; then
+            printf '%s\n' 'Cleanup failure: add-on asset endpoint fixture files remain.' >&2
+            return 1
+        fi
+        ACCEPTANCE_ADDON_ASSET_ENDPOINT_FIXTURE_CREATED=0
+    fi
+}
+
+red_acceptance_addon_asset_endpoint_metadata() {
+    local metadata="$1"
+    local key="$2"
+    local value=""
+
+    value="$(printf '%s\n' "$metadata" | awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, ""); print; exit }')"
+    printf '%s' "$value"
+}
+
+red_acceptance_run_addon_asset_endpoint() {
+    local metadata=""
+    local css_url=""
+    local css_sha256=""
+    local css_length=""
+    local execution_marker=""
+    local stale_sha256=""
+    local metrics=""
+    local status=""
+    local size=""
+    local body=""
+    local headers=""
+    local headers_clean=""
+    local head_body=""
+    local head_headers=""
+    local head_headers_clean=""
+    local post_body=""
+    local post_headers=""
+    local post_headers_clean=""
+    local not_found_body=""
+    local not_found_headers=""
+    local not_found_headers_clean=""
+    local traversal_url=""
+
+    ACCEPTANCE_ADDON_ASSET_ENDPOINT_FIXTURE_CREATED=1
+    metadata="$(red_acceptance_addon_asset_endpoint_fixture --runtime-setup)"
+    css_url="$(red_acceptance_addon_asset_endpoint_metadata "$metadata" cssUrl)"
+    css_sha256="$(red_acceptance_addon_asset_endpoint_metadata "$metadata" cssSha256)"
+    css_length="$(red_acceptance_addon_asset_endpoint_metadata "$metadata" cssLength)"
+    execution_marker="$(red_acceptance_addon_asset_endpoint_metadata "$metadata" executionMarker)"
+    if [[ ! "$css_url" =~ ^/_red/addons/redcms/asset-endpoint-fixture/assets/public/endpoint\.css\?v=[a-f0-9]{64}$ \
+        || ! "$css_sha256" =~ ^[a-f0-9]{64}$ \
+        || ! "$css_length" =~ ^[0-9]+$ \
+        || "$execution_marker" != "$RED_PROJECT_ROOT/addons/redcms/asset-endpoint-fixture/.asset-endpoint-executed" ]]; then
+        printf '%s\n' 'FAIL: add-on asset endpoint fixture metadata is invalid.' >&2
+        return 1
+    fi
+
+    body="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint.css"
+    headers="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint.headers"
+    headers_clean="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint.headers.clean"
+    metrics="$(curl -sS --max-time 10 -D "$headers" -o "$body" -w '%{http_code}:%{size_download}' "$ACCEPTANCE_BASE_URL$css_url")"
+    status="${metrics%%:*}"
+    size="${metrics#*:}"
+    red_acceptance_assert_equals 'add-on asset endpoint GET HTTP status' '200' "$status"
+    red_acceptance_assert_equals 'add-on asset endpoint GET byte count' "$css_length" "$size"
+    red_acceptance_assert_equals 'add-on asset endpoint GET SHA-256' "$css_sha256" "$(red_sha256_file "$body")"
+    tr -d '\r' < "$headers" > "$headers_clean"
+    for header in \
+        'Content-Type: text/css; charset=UTF-8' \
+        'Cache-Control: public, max-age=31536000, immutable' \
+        'X-Content-Type-Options: nosniff' \
+        'Accept-Ranges: none' \
+        "Content-Length: $css_length"; do
+        if ! grep -Fqx "$header" "$headers_clean"; then
+            printf 'FAIL: add-on asset endpoint GET is missing header %s.\n' "$header" >&2
+            return 1
+        fi
+    done
+    if grep -Eqi '^Set-Cookie:' "$headers_clean" \
+        || [[ -e "$execution_marker" ]]; then
+        printf '%s\n' 'FAIL: add-on asset endpoint started a session or executed package PHP.' >&2
+        return 1
+    fi
+
+    head_body="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-head.body"
+    head_headers="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-head.headers"
+    head_headers_clean="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-head.headers.clean"
+    metrics="$(curl -sS --max-time 10 --head -D "$head_headers" -o "$head_body" -w '%{http_code}:%{size_download}' "$ACCEPTANCE_BASE_URL$css_url")"
+    status="${metrics%%:*}"
+    size="${metrics#*:}"
+    red_acceptance_assert_equals 'add-on asset endpoint HEAD HTTP status' '200' "$status"
+    red_acceptance_assert_equals 'add-on asset endpoint HEAD body bytes' '0' "$size"
+    tr -d '\r' < "$head_headers" > "$head_headers_clean"
+    if ! grep -Fqx "Content-Length: $css_length" "$head_headers_clean" \
+        || grep -Eqi '^Set-Cookie:' "$head_headers_clean" \
+        || [[ -e "$execution_marker" ]]; then
+        printf '%s\n' 'FAIL: add-on asset endpoint HEAD evidence is invalid.' >&2
+        return 1
+    fi
+
+    post_body="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-post.body"
+    post_headers="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-post.headers"
+    post_headers_clean="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-post.headers.clean"
+    metrics="$(curl -sS --max-time 10 -X POST -D "$post_headers" -o "$post_body" -w '%{http_code}' "$ACCEPTANCE_BASE_URL$css_url")"
+    red_acceptance_assert_equals 'add-on asset endpoint POST HTTP status' '405' "$metrics"
+    red_acceptance_assert_equals 'add-on asset endpoint POST body' 'Method not allowed.' "$(red_acceptance_response_text "$post_body")"
+    tr -d '\r' < "$post_headers" > "$post_headers_clean"
+    if ! grep -Fqx 'Allow: GET, HEAD' "$post_headers_clean" \
+        || grep -Eqi '^Set-Cookie:' "$post_headers_clean" \
+        || [[ -e "$execution_marker" ]]; then
+        printf '%s\n' 'FAIL: add-on asset endpoint POST refusal is invalid.' >&2
+        return 1
+    fi
+
+    stale_sha256="$css_sha256"
+    if [[ "${stale_sha256:0:1}" == '0' ]]; then
+        stale_sha256="1${stale_sha256:1}"
+    else
+        stale_sha256="0${stale_sha256:1}"
+    fi
+    not_found_body="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-not-found.body"
+    not_found_headers="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-not-found.headers"
+    not_found_headers_clean="$ACCEPTANCE_RESPONSE_DIR/addon-asset-endpoint-not-found.headers.clean"
+    metrics="$(curl -sS --max-time 10 -D "$not_found_headers" -o "$not_found_body" -w '%{http_code}' "$ACCEPTANCE_BASE_URL/_red/addons/redcms/asset-endpoint-fixture/assets/public/endpoint.css?v=$stale_sha256")"
+    red_acceptance_assert_equals 'add-on asset endpoint stale checksum HTTP status' '404' "$metrics"
+    red_acceptance_assert_equals 'add-on asset endpoint stale checksum body' 'Not found.' "$(red_acceptance_response_text "$not_found_body")"
+    tr -d '\r' < "$not_found_headers" > "$not_found_headers_clean"
+    if ! grep -Fqx 'Cache-Control: no-store' "$not_found_headers_clean" \
+        || grep -Eqi '^Set-Cookie:' "$not_found_headers_clean" \
+        || [[ -e "$execution_marker" ]]; then
+        printf '%s\n' 'FAIL: add-on asset endpoint stale checksum refusal is invalid.' >&2
+        return 1
+    fi
+
+    traversal_url="/_red/addons/redcms/asset-endpoint-fixture/assets/public/../endpoint.css?v=$css_sha256"
+    metrics="$(curl -sS --max-time 10 --path-as-is -o "$not_found_body" -w '%{http_code}' "$ACCEPTANCE_BASE_URL$traversal_url")"
+    red_acceptance_assert_equals 'add-on asset endpoint traversal HTTP status' '404' "$metrics"
+    red_acceptance_assert_equals 'add-on asset endpoint traversal body' 'Not found.' "$(red_acceptance_response_text "$not_found_body")"
+
+    red_acceptance_addon_asset_endpoint_fixture --runtime-disable
+    metrics="$(curl -sS --max-time 10 -o "$not_found_body" -w '%{http_code}' "$ACCEPTANCE_BASE_URL$css_url")"
+    red_acceptance_assert_equals 'add-on asset endpoint disabled HTTP status' '404' "$metrics"
+    red_acceptance_addon_asset_endpoint_fixture --runtime-enable
+
+    red_acceptance_addon_asset_endpoint_fixture --runtime-tamper
+    metrics="$(curl -sS --max-time 10 -o "$not_found_body" -w '%{http_code}' "$ACCEPTANCE_BASE_URL$css_url")"
+    red_acceptance_assert_equals 'add-on asset endpoint tampered HTTP status' '404' "$metrics"
+    red_acceptance_addon_asset_endpoint_fixture --runtime-restore
+    metrics="$(curl -sS --max-time 10 -o "$body" -w '%{http_code}' "$ACCEPTANCE_BASE_URL$css_url")"
+    red_acceptance_assert_equals 'add-on asset endpoint restored HTTP status' '200' "$metrics"
+    red_acceptance_assert_equals 'add-on asset endpoint restored SHA-256' "$css_sha256" "$(red_sha256_file "$body")"
+    if [[ -e "$execution_marker" ]]; then
+        printf '%s\n' 'FAIL: add-on asset endpoint lifecycle or integrity checks executed package PHP.' >&2
+        return 1
+    fi
+
+    red_acceptance_addon_asset_endpoint_cleanup
+    printf '%s\n' 'PASS: static immutable add-on asset endpoint served exact bytes and rejected method, checksum, traversal, lifecycle, and integrity drift without sessions or package execution.'
 }
 
 red_acceptance_response_text() {
@@ -4052,6 +4220,14 @@ red_acceptance_cleanup() {
         fi
     fi
 
+    if [[ "$ACCEPTANCE_ADDON_ASSET_ENDPOINT_FIXTURE_CREATED" -eq 1 ]]; then
+        red_acceptance_addon_asset_endpoint_cleanup >/dev/null 2>&1
+        if [[ $? -ne 0 ]]; then
+            printf '%s\n' 'Cleanup warning: could not remove the add-on asset endpoint fixture.' >&2
+            cleanup_status=1
+        fi
+    fi
+
     if [[ "$ACCEPTANCE_GALLERY_MEDIA_MANIFEST_CAPTURED" -eq 1 ]]; then
         gallery_media_manifest_after="$(red_acceptance_gallery_media_manifest 2>/dev/null)"
         if [[ $? -ne 0 || "$gallery_media_manifest_after" != "$ACCEPTANCE_GALLERY_MEDIA_MANIFEST_BEFORE" ]]; then
@@ -4293,6 +4469,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running read-only add-on registry reconciliation and asset-delivery preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-registry-self-test.php"
 
+printf '%s\n' 'Running immutable add-on asset endpoint response checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-asset-endpoint-self-test.php"
+
 printf '%s\n' 'Running enabled add-on request bootstrap checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-request-bootstrap-self-test.php"
 
@@ -4440,6 +4619,9 @@ printf '%s\n' 'Starting isolated PHP runtime and canonical public-route checks.'
 red_acceptance_start_php
 red_acceptance_inject_failure after_server
 
+printf '%s\n' 'Running isolated static immutable add-on asset endpoint lifecycle.'
+red_acceptance_run_addon_asset_endpoint
+
 red_acceptance_check_route 'home' '/' 'starter-navigation' 'Contacto'
 red_acceptance_check_route 'contact' '/contacto/' 'id="form_contact"' 'name="message"'
 red_acceptance_check_route 'administration' '/administracion/' 'id="form_login"' 'name="password"'
@@ -4486,4 +4668,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
