@@ -193,6 +193,16 @@ postcondition, injected, permission, identity, lifecycle, or state failure
 rolls the replacement back. Settings UI/endpoints, secret availability,
 assets, and richer enablement remain blocked.
 
+Non-executing secret-reference availability evidence is now implemented.
+Each server may declare a bounded list of opaque `config:` references in its
+ignored local configuration or `RED_ADDON_SECRET_REFERENCES`; core merges and
+validates the inventory, revalidates the complete typed package configuration,
+and returns only counts, missing setting keys, and deterministic declaration,
+configuration, and evidence hashes. The evidence contains no reference
+identifier or secret value, reads no database, executes no package, and does
+not relax activation. Settings UI/endpoints, actual secret lookup, package
+assets, and richer enablement remain blocked.
+
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
 component id, reviewed package migrations may declare only an exact foreign
@@ -373,7 +383,7 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while writable route/administrator-tool actions, settings UI/endpoints,
-secret availability, asset, live-data, and richer package persistence
+actual secret lookup, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
 

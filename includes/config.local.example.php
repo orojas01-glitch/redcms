@@ -15,4 +15,6 @@ return [
     'PAYPAL_PDT_AUTH_TOKEN' => '',
     'PAYPAL_CONFIRMATION_FROM_EMAIL' => '',
     'PAYPAL_CONFIRMATION_FROM_NAME' => 'RED-CMS',
+    // Opaque references only. Secret values remain in their provider.
+    'ADDON_SECRET_REFERENCES' => [],
 ];

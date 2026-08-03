@@ -32,6 +32,13 @@ credential-free HTTP/HTTPS URLs, email addresses, and opaque lowercase
 secret references. The fixture performs no database access, secret lookup,
 authorization, administrator rendering, package execution, or lifecycle
 change.
+The separate 18-assertion secret-reference availability fixture validates an
+empty default, sorted local/environment declaration merging, deduplication,
+bounded fail-closed syntax, exact package/configuration binding, deterministic
+hashes, missing setting-key reporting, stale and forged evidence refusal, and
+packages with no secret settings. Returned evidence contains no `config:`
+identifier or secret value and the helper has no database or package execution
+path.
 The 23-assertion disposable setting-storage and atomic-writer fixture requires
 the exact empty seven-column table and installation foreign key, explicit
 package-declared permission bindings, fresh binary grants, exact trusted
@@ -242,7 +249,8 @@ foundations.
 The latest complete 2026-08-02 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 44-assertion add-on trust contract, 22-assertion
-add-on setting-value contract, 13-assertion add-on component-editor value
+add-on setting-value contract, 18-assertion add-on secret-reference
+availability contract, 13-assertion add-on component-editor value
 contract, 20-assertion display-only
 component-editor renderer contract, and
 17-assertion non-activating runtime contract, 15-assertion typed-service
@@ -312,7 +320,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on component data loading, transactional updates, immutable revision snapshots, and atomic revision restore, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values, secret-reference availability, storage/write preflight/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement preflight, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -346,6 +354,14 @@ The command must return a nonzero status if installation, migration, schema, rel
   secret-looking, or schema-invalid input returns no normalized configuration.
   It performs no database access, secret resolution, authorization, rendering,
   package execution, or lifecycle mutation.
+- Add-on secret-reference availability acceptance runs before database
+  creation. It requires exact bounded server-local declarations, deterministic
+  local/environment merging, complete typed configuration revalidation,
+  package/configuration/declaration-bound hashes, exact missing setting keys,
+  stale or forged declaration refusal, and no reference identifier or secret
+  value in returned evidence. It performs no database access, secret lookup,
+  package execution, authorization, rendering, persistence, or lifecycle
+  mutation.
 - Add-on setting storage/preflight/atomic-writer acceptance runs only in the uniquely
   named disposable database. It requires the exact empty generic schema and
   restrictive installation foreign key, explicit package-declared permission

@@ -100,6 +100,13 @@ under lifecycle/package and row locks, replaces the complete configuration,
 verifies the exact postcondition, and commits one value-free audit fact; every
 late failure rolls back. No administrator form or endpoint, secret resolution,
 package execution, or activation path is added.
+Server-local configuration can now declare only the opaque `config:`
+references that an operator has provisioned. Core validates that bounded
+inventory and produces deterministic per-package availability evidence using
+counts, missing setting keys, and SHA-256 fingerprints; the result contains no
+reference identifier or secret value. This declaration is evidence only: it
+does not resolve a secret, execute a package, or make settings-bearing packages
+eligible for activation.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -181,6 +188,8 @@ features.
   preflight with explicit manifest permissions and fresh database grants
 - Atomic complete-setting persistence with shared locks, exact postcondition,
   value-free audit, no-op handling, and rollback
+- Non-executing server-local secret-reference availability evidence with no
+  secret lookup, reference disclosure, database access, or activation change
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

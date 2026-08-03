@@ -76,8 +76,8 @@ Its initial manifest contract should declare:
 The current Version 5.1 lifecycle can enable a constrained default component
 combined with registration-only services. It still cannot enable the complete
 Store Lite manifest because that package needs administrator tools,
-persistence, routes, persisted settings, secret-availability evidence, and
-assets. Store Lite must remain blocked until
+persistence, routes, settings editing, actual secret lookup, and assets. Store
+Lite must remain blocked until
 each richer generic surface below is implemented and accepted independently.
 
 ## Component Contract
@@ -321,11 +321,12 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Continue with generic secret availability, settings UI/endpoints, and asset
-   contracts as separate reviewed batches. Typed internal service
+4. Continue with generic settings UI/endpoints and asset contracts as separate
+   reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
-   and internal atomic settings persistence are complete.
+   internal atomic settings persistence, and non-executing server-local secret
+   availability evidence are complete. Actual secret lookup remains blocked.
 5. Create Store Lite in its separate distribution using only those accepted
    contracts.
 6. Add package-owned migrations, Product editing, catalog, cart, orders, and

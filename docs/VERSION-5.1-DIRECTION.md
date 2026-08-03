@@ -63,6 +63,13 @@ hash/count, and atomically records one value-free `addon.settings.updated`
 fact. Exact no-ops add no audit. Stale plans, drift, postcondition/audit
 failure, or injected late failure roll back. No settings UI/endpoint or secret
 lookup is added.
+The separate server-local availability boundary validates only a bounded list
+of opaque `config:` references declared by the operator, revalidates the
+complete typed configuration, and returns deterministic counts, missing
+setting keys, and fingerprints. It returns no reference identifier or secret
+value, reads no database or secret, executes no package, and changes no
+activation gate. Actual secret lookup, settings UI/endpoints, and package asset
+loading remain unavailable.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -508,6 +515,12 @@ request bootstrap excludes the disabled package.
     audit fact. Treat exact state as a no-op and roll back on all drift, write,
     postcondition, audit, or injected failures. Add no UI, endpoint, secret
     resolution, package execution, or activation eligibility.
+34. Completed non-executing secret-reference availability evidence: merge and
+    validate bounded server-local opaque-reference declarations; revalidate the
+    complete typed package configuration; bind package, configuration, and
+    declaration state into deterministic hashes; and report only counts and
+    missing setting keys. Return no reference identifier or secret value, read
+    no database or secret, execute no package, and change no activation gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
