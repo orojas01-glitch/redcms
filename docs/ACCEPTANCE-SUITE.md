@@ -56,6 +56,15 @@ noncanonical, stale, disabled, tampered, oversized, traversal, and unsupported
 method requests. The suite then makes real FrankenPHP HTTP requests against an
 attested temporary first-party fixture and verifies exact bytes, headers, no
 session, and no package-PHP execution before removing that fixture.
+The separate 11-assertion asset-injection fixture requires current trusted
+catalog and enabled-registry evidence, public-only and public-plus-administrator
+plans, exact escaped tag output, unambiguous document-boundary placement,
+forged-plan refusal, no registrar execution or registry mutation by the
+planner, disabled/integrity-drift refusal, invalid enabled-surface refusal, and
+exact fixture cleanup. The full suite then makes real anonymous and signed-in
+administrator HTTP requests against a temporary first-party package, verifies
+public tags remain separate from administrator tags, and proves injection adds
+no extra runtime registration before removing the package and administrator.
 The 23-assertion disposable setting-storage and atomic-writer fixture requires
 the exact empty seven-column table and installation foreign key, explicit
 package-declared permission bindings, fresh binary grants, exact trusted
@@ -389,6 +398,14 @@ The command must return a nonzero status if installation, migration, schema, rel
   and no partial output for invalid, duplicate, stale, or forged data. It
   performs no package-file read, HTTP delivery, response injection, database
   access, package execution, or lifecycle mutation.
+- Add-on core-owned asset-injection acceptance runs only in the uniquely named
+  disposable database and temporary first-party package. It requires current
+  trusted catalog and enabled-registry reconciliation, both-surface validation
+  for every enabled package, public-only versus administrator-overlay plans,
+  escaped tag output at exactly one document boundary, no partial markup for
+  forged, disabled, drifted, invalid, or ambiguous state, no planner registrar
+  invocation or registry mutation, real anonymous and signed-in HTTP documents,
+  and exact package/administrator/filesystem cleanup.
 - Add-on setting storage/preflight/atomic-writer acceptance runs only in the uniquely
   named disposable database. It requires the exact empty generic schema and
   restrictive installation foreign key, explicit package-declared permission

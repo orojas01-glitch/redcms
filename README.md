@@ -118,13 +118,20 @@ checksum-versioned reserved URL, revalidates the complete manifest inventory,
 current enabled registry evidence, safe package path, and final file checksum,
 then returns internal evidence only. It does not serve a byte, inject markup,
 execute package PHP, or write state. The core-owned static endpoint is
-separate from that preflight and from public/admin injection. It reruns the
+separate from that preflight and from document injection. It reruns the
 evidence before theme, session, or add-on runtime bootstrap and serves
 only exact checksum-matching CSS/JavaScript bytes up to 4 MiB through
 `GET`/`HEAD`, with fixed immutable-cache and `nosniff` headers. Invalid,
 disabled, drifted, missing, noncanonical, and oversized assets return only a
 generic fail-closed response; no response executes package PHP or injects a
-document asset. Core-owned public/admin injection is the remaining asset work.
+document asset. Core-owned document injection is now implemented separately:
+its planner re-discovers trusted manifests and current registry evidence without
+loading `addon.php`, validates both surfaces for every enabled package, and adds only
+public CSS/JavaScript tags to ordinary documents. When the existing signed-in
+administrator overlay is present, it additionally adds that package's
+administrator CSS/JavaScript tags. Tags are core-owned and escaped, appear only
+at unambiguous document boundaries, and are omitted entirely on catalog,
+registry, integrity, plan, or document-boundary failure.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
@@ -214,7 +221,10 @@ features.
   enabled-registry revalidation, without execution or mutation
 - Core-owned static immutable CSS/JavaScript endpoint with exact bytes,
   `GET`/`HEAD` boundaries, immutable caching, and no session or package-runtime
-  bootstrap; public/admin document injection remains separate
+  bootstrap
+- Core-owned public/admin document asset injection with current manifest and
+  registry revalidation, exact boundary insertion, and no additional package-PHP
+  execution
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

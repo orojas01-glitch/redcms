@@ -169,7 +169,7 @@ closed configuration object with bounded values and exact missing/unknown
 reporting. Secret settings accept only opaque lowercase `config:` references
 and remain separate from ordinary values; core does not resolve secret
 material. Per-client persistence, package settings permissions/UI, secret
-availability, asset injection, and settings-bearing package enablement remain blocked.
+availability, and settings-bearing package enablement remain blocked.
 
 The per-client settings storage and authorization prerequisite is now
 implemented. The clean installer contains one empty generic
@@ -180,7 +180,7 @@ already declared by their package. The read-only write preflight revalidates
 the exact filesystem/registry identity, installed-disabled or enabled state,
 complete typed target configuration, fresh binary grant decisions, and current
 stored-state fingerprint. It writes no row and resolves no secret. Atomic
-persistence, settings UI/endpoints, secret availability, asset injection, and richer
+persistence, settings UI/endpoints, secret availability, and richer
 enablement remain blocked.
 
 Atomic per-client setting persistence is now implemented as an internal core
@@ -190,8 +190,8 @@ the complete plan, replaces every normalized ordinary value or opaque secret
 reference, reloads the exact target hash/count, and commits one value-free
 `addon.settings.updated` audit fact. Exact no-ops add no audit. Audit,
 postcondition, injected, permission, identity, lifecycle, or state failure
-rolls the replacement back. Settings UI/endpoints, secret availability,
-asset injection, and richer enablement remain blocked.
+rolls the replacement back. Settings UI/endpoints, secret availability, and
+richer enablement remain blocked.
 
 Non-executing secret-reference availability evidence is now implemented.
 Each server may declare a bounded list of opaque `config:` references in its
@@ -200,28 +200,24 @@ validates the inventory, revalidates the complete typed package configuration,
 and returns only counts, missing setting keys, and deterministic declaration,
 configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
-not relax activation. Settings UI/endpoints, actual secret lookup,
-package-asset injection, and richer enablement remain blocked.
+not relax activation. Settings UI/endpoints, actual secret lookup, and richer
+enablement remain blocked.
 
-The first package-asset prerequisite is now implemented without delivery or
-response injection. Trusted manifests can form a deterministic plan only for
-package-owned CSS at `head` and JavaScript at `body-end`; core derives a
-reserved namespaced URL containing the declared SHA-256 and can render only
-escaped core-owned tags after revalidating the plan hash. Invalid, duplicate,
-unsafe, unsupported, or location-mismatched declarations return no partial
-plan. The helper reads no package file, serves no HTTP response, executes no
-package PHP, opens no database, and does not change activation. Immutable
-delivery has a separate read-only preflight: only an exact checksum-versioned
-reserved URL can reach it; it revalidates the complete package inventory,
-current enabled registry record, recreated surface plan, safe file containment,
-and final file checksum before returning internal evidence. It serves no byte,
-emits no markup or header, executes no package PHP, and writes no state. The
-core-owned static endpoint now reruns that evidence before session, theme, or
-package runtime bootstrap, serves only exact CSS/JavaScript bytes up to 4 MiB
-through `GET`/`HEAD` with fixed immutable-cache and `nosniff` headers, and
-returns generic fail-closed HTTP responses for invalid, disabled, drifted, or
-unavailable state. Public/admin injection, settings UI/endpoints, actual secret
-lookup, and richer enablement remain blocked.
+The namespaced package-asset foundation is now complete through core-owned
+document injection. Trusted manifests form deterministic plans only for
+package-owned CSS at `head` and JavaScript at `body-end`, using reserved
+checksum-versioned URLs and escaped core-owned tags. The static endpoint reruns
+current integrity and enabled-registry evidence before theme, session, or
+runtime bootstrap, serves only exact CSS/JavaScript bytes up to 4 MiB through
+`GET`/`HEAD` with fixed immutable-cache and `nosniff` headers, and returns
+generic fail-closed HTTP responses for invalid, disabled, drifted, or
+unavailable state. During ordinary page rendering, a separate non-executing
+planner revalidates the trusted catalog, registry, and both surfaces for every
+enabled package. It adds public tags at the document `head` and `body-end`, and
+adds administrator tags only when the existing signed-in overlay is present.
+Catalog, registry, integrity, plan, or document-boundary ambiguity emits no
+package markup. Settings UI/endpoints, actual secret lookup, and richer
+enablement remain blocked.
 
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
@@ -403,7 +399,7 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while writable route/administrator-tool actions, settings UI/endpoints,
-actual secret lookup, public/admin asset injection, live-data, and richer package persistence
+actual secret lookup, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
 

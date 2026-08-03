@@ -127,8 +127,10 @@ class_content.php: call all components.*/
 <?php
 require_once __DIR__ . '/includes/addon_runtime_helpers.php';
 require_once __DIR__ . '/includes/addon_public_route_helpers.php';
+require_once __DIR__ . '/includes/addon_asset_injection_helpers.php';
 
 $redAddonRuntimeConnection = null;
+$redAddonAssetInjection = red_addon_asset_injection_result(false);
 try {
     $redAddonRuntimeConnection = mysqli_connect(
         DBHOST,
@@ -146,6 +148,13 @@ try {
     $redAddonRuntimeContext = red_addon_runtime_request_bootstrap(
         $redAddonRuntimeConnection,
         __DIR__
+    );
+    $redAddonAssetInjection = red_addon_asset_injection_plan(
+        $redAddonRuntimeConnection,
+        __DIR__,
+        isset($_SESSION['alias'])
+            && is_string($_SESSION['alias'])
+            && trim($_SESSION['alias']) !== ''
     );
 } catch (Throwable $exception) {
     while (ob_get_level() > $redThemeRequestBufferLevel) {
@@ -177,7 +186,16 @@ if (!empty($redAddonPublicRoute['claimed'])) {
 }
 ?>
 
-<?php try { $redThemeAdapter->renderDocumentStart(); ?>
+<?php try {
+ob_start();
+$redThemeAdapter->renderDocumentStart();
+$redThemeDocumentStart = ob_get_clean();
+echo red_addon_asset_injection_insert_document(
+    $redThemeDocumentStart,
+    $redAddonAssetInjection,
+    'head'
+);
+?>
 <?php $redThemeAdapter->renderHeaderBundle(); ?>
 
 
@@ -199,7 +217,14 @@ $page->get_page_query();
 <?php $redThemeAdapter->renderFooter(); ?>
 
 <?php
+ob_start();
 $redThemeAdapter->renderDocumentEnd();
+$redThemeDocumentEnd = ob_get_clean();
+echo red_addon_asset_injection_insert_document(
+    $redThemeDocumentEnd,
+    $redAddonAssetInjection,
+    'body-end'
+);
 ob_end_flush();
 } catch (Throwable $exception) {
     while (ob_get_level() > $redThemeRequestBufferLevel) {
@@ -216,14 +241,28 @@ ob_end_flush();
         $redThemeRuntime = red_theme_runtime_bootstrap('legacy-bootstrap', __DIR__);
         $redThemeAdapter = $redThemeRuntime['adapter'];
         ob_start();
+        ob_start();
         $redThemeAdapter->renderDocumentStart();
+        $redThemeDocumentStart = ob_get_clean();
+        echo red_addon_asset_injection_insert_document(
+            $redThemeDocumentStart,
+            $redAddonAssetInjection,
+            'head'
+        );
         $redThemeAdapter->renderHeaderBundle();
         echo "\n\n<!--==============================content================================-->\n\n";
         $page = new Build_Page();
         $page->get_page_query();
         echo "\n\n<!--==============================footer=================================-->\n";
         $redThemeAdapter->renderFooter();
+        ob_start();
         $redThemeAdapter->renderDocumentEnd();
+        $redThemeDocumentEnd = ob_get_clean();
+        echo red_addon_asset_injection_insert_document(
+            $redThemeDocumentEnd,
+            $redAddonAssetInjection,
+            'body-end'
+        );
         ob_end_flush();
     } catch (Throwable $fallbackException) {
         while (ob_get_level() > $redThemeRequestBufferLevel) {

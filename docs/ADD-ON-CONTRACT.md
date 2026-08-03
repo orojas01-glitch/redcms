@@ -17,8 +17,8 @@ Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
 Typed internal services, exact static public `GET` routes, and display-only
 administrator tools now have separate fail-closed dispatch boundaries.
-Adapters, writable route/tool actions, settings UI/endpoints, package asset
-injection, and richer enablement remain blocked. RED-CMS does not
+Adapters, writable route/tool actions, settings UI/endpoints, actual secret
+lookup, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
 
 ## Implemented Trust Boundary
@@ -410,7 +410,7 @@ renderer revalidates every row and its aggregate hash before emitting escaped
 `link` or deferred `script` tags. This helper reads no package file, serves no
 HTTP response, injects no response markup, accesses no database, executes no
 package PHP, and changes no lifecycle or activation gate. Immutable delivery
-and public/admin injection are later contracts.
+is a separate contract; core-owned document injection is specified below.
 
 `red_addon_asset_delivery_preflight()` is the next read-only prerequisite. It
 claims only an exact, checksum-versioned URL in the reserved
@@ -426,8 +426,7 @@ path, checksum, and declared surface; it contains no file bytes and is not an
 HTTP response. The helper writes no database or lifecycle state, emits no
 header or markup, and does not execute package PHP. The static delivery
 endpoint must re-run this preflight for its current request and must never
-accept a filesystem path from a caller. Core-owned public/admin injection
-remains a separate contract.
+accept a filesystem path from a caller.
 
 `includes/addon_asset_endpoint_helpers.php` now provides that core-owned
 static delivery boundary. `index.php` claims the reserved namespace before
@@ -448,8 +447,21 @@ method other than `GET` or `HEAD` returns a generic `405` with the fixed
 `Allow` header. The endpoint exposes no preflight reason, internal path,
 manifest, registry row, session, package output, package PHP, mutation, or
 markup injection. Admin-surface assets are static package files, not a
-separate authorization boundary; later core-owned injection determines where
-an already-deliverable asset is referenced.
+separate authorization boundary.
+
+`includes/addon_asset_injection_helpers.php` provides the separate core-owned
+document boundary. After the pre-existing request runtime bootstrap,
+`index.php` re-discovers trusted manifests and current registry evidence without
+loading `addon.php`, then revalidates both asset surfaces for every enabled
+package. An ordinary document receives only public CSS at `head` and public
+JavaScript at `body-end`; an existing nonempty administrator session alias also
+selects the administrator counterparts. Core captures document-start and
+document-end phases and emits escaped tags only immediately before exactly one
+matching closing boundary. Any catalog, registry, integrity, plan, or document
+boundary failure leaves package markup out of the response. The planner does
+not start a session, invoke a registrar, write state, or relax activation; the
+endpoint independently revalidates any later browser request for the static
+bytes.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -1305,8 +1317,9 @@ responses, or structured data.
    internal persistence plus non-executing server-local availability evidence
    are implemented. Deterministic namespaced CSS/JavaScript asset planning,
    read-only immutable delivery preflight, and the core-owned static immutable
-   delivery endpoint are also implemented; editing UI, actual secret lookup,
-   public/admin injection, and activation readiness remain separate. Read-only inactive component-creation
+   delivery endpoint and core-owned public/admin document injection are also
+   implemented; editing UI, actual secret lookup, and activation readiness
+   remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
    implemented. Read-only delete planning and its atomic inactive runner are
