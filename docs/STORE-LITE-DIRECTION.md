@@ -76,7 +76,8 @@ Its initial manifest contract should declare:
 The current Version 5.1 lifecycle can enable a constrained default component
 combined with registration-only services. It still cannot enable the complete
 Store Lite manifest because that package needs administrator tools,
-persistence, routes, settings, and assets. Store Lite must remain blocked until
+persistence, routes, persisted settings, secret-availability evidence, and
+assets. Store Lite must remain blocked until
 each richer generic surface below is implemented and accepted independently.
 
 ## Component Contract
@@ -264,7 +265,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   grants and core rendering; writable order/product actions and tool-bearing
   package enablement remain gated;
 - namespaced package asset loading;
-- package settings and secret-reference handling; and
+- per-client package settings storage, permissioned editing, and
+  secret-reference availability; data-only typed setting validation is
+  complete; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures
@@ -318,9 +321,10 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Continue with generic route, administrator-tool, settings, and asset
-   contracts as separate reviewed batches; typed internal service invocation
-   is complete.
+4. Continue with generic settings storage/authorization, secret availability,
+   and asset contracts as separate reviewed batches. Typed internal service
+   invocation, exact static public `GET` routes, display-only administrator
+   tools, and data-only typed setting validation are complete.
 5. Create Store Lite in its separate distribution using only those accepted
    contracts.
 6. Add package-owned migrations, Product editing, catalog, cart, orders, and

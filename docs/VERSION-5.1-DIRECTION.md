@@ -14,10 +14,13 @@ backup, migration, launch verification, and rollback gate are complete without
 copying client assets or data into the starter. Fixed add-on registration,
 fail-closed page-request loading, and safe core-owned default dispatch for an
 enabled manifest-declared component are implemented for already-recorded
-enabled packages. Service, route, adapter, and administrator-tool dispatch,
-upgrades, uninstall/purge, member access, publishing, payment, and integration
-controls remain inactive. The Store Lite product and security boundary is
-defined. The first generic component-persistence foundation now provides full
+enabled packages. Typed internal service invocation, exact static public
+`GET` routes, and display-only permission-scoped administrator tools now have
+separate fail-closed dispatch boundaries. Adapters, writable route/tool
+actions, settings persistence, package assets, upgrades, uninstall/purge,
+member access, publishing, payment, and integration controls remain inactive.
+The Store Lite product and security boundary is defined. The first generic
+component-persistence foundation now provides full
 component-id storage, a narrowly guarded package-table relationship to the
 numeric placement parent, and fail-closed read-only public binding resolution.
 Optional data-only component editor schemas are also validated and normalized
@@ -36,9 +39,16 @@ core-owned state hash. The activation-blocked existing-record update helper
 now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
-permission grant/revoke workflow, restore action, create/delete endpoint,
-public placement, service, route, tool, settings, or asset contract is
-operational.
+permission grant/revoke workflow, restore action, or create/delete endpoint is
+implied by these prerequisites. Writable route/tool actions, settings
+persistence, and package asset loading are not operational.
+The first non-executing settings-value prerequisite now normalizes only valid
+data-only definitions, requires exact type-correct non-secret defaults, and
+validates one closed configuration object. Missing, unknown, nested, malformed,
+loosely coerced, or oversized values fail with no normalized configuration.
+Secret settings return only separate opaque lowercase `config:` references;
+core does not resolve secret material. No database, permission, form, package
+runtime, or activation path is added.
 Successful updates
 atomically retain core-owned baseline and saved package-value snapshots in the
 current client database. The activation-blocked atomic restore runner now
@@ -463,6 +473,13 @@ request bootstrap excludes the disabled package.
     actions, writes, sessions, request globals, database connections, uploads,
     redirects, arbitrary headers, grant management, and tool-bearing package
     enablement remain closed.
+31. Completed non-executing setting-value prerequisite: normalize only a valid
+    data-only settings schema; require exact type-correct non-secret defaults;
+    validate one closed object with strict scalar types, bounds, choices,
+    locator formats, and exact missing/unknown reporting; and return opaque
+    lowercase `config:` secret references separately from ordinary values.
+    Resolve no secret, access no database, authorize no actor, render no form,
+    execute no package, persist no setting, and change no activation gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

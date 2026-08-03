@@ -15,9 +15,11 @@ implemented as activation-blocked prerequisites. Read-only inactive component
 creation planning and its activation-blocked atomic runner are implemented.
 Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
-RED-CMS does not dispatch
-services, routes, adapters, or administrator tools, and does not upgrade,
-uninstall, or purge packages through this contract yet.
+Typed internal services, exact static public `GET` routes, and display-only
+administrator tools now have separate fail-closed dispatch boundaries.
+Adapters, writable route/tool actions, settings persistence, package assets,
+and richer enablement remain blocked. RED-CMS does not upgrade, uninstall, or
+purge packages through this contract yet.
 
 ## Implemented Trust Boundary
 
@@ -338,6 +340,26 @@ An illustrative manifest shape is:
 
 The zero checksum above is illustrative and must be replaced by the exact
 SHA-256 of the deployed `addon.php`.
+
+Manifest setting definitions are data only. Their fixed types are `text`,
+`boolean`, `integer`, `select`, `url`, `email`, and `secret-reference`.
+Defaults are optional, must match the exact declared non-secret type, and a
+null default means that no configured default exists. Select choices are
+non-empty and closed. A secret setting cannot contain a default or secret
+material; its eventual configured value is only an opaque lowercase
+`config:` reference to server-local configuration.
+
+`red_addon_settings_schema()` returns only the normalized definitions when the
+complete settings array passes. `red_addon_settings_validate_values()` accepts
+one closed object, rejects unknown or nested values, control bytes, loose
+boolean/integer coercion, out-of-range integers, undeclared selections,
+malformed URLs/emails, and invalid secret references, and reports missing
+non-default settings exactly. On success it returns non-secret values and
+secret-reference identifiers in separate maps. It never resolves a secret,
+reads or writes a database, authorizes an actor, renders a form, executes
+package PHP, or changes package lifecycle state. Per-client storage,
+permissioned editing, secret-availability checks, and activation readiness are
+later contracts.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -895,6 +917,8 @@ richer package.
   fixture directory.
 - Non-secret settings may be stored per installation. Secrets remain in
   environment variables or server-local ignored configuration.
+- The implemented value prerequisite accepts only opaque `config:` identifiers
+  for secret references and never reads or returns the referenced secret.
 - Client exports never replace `db-structure.sql`.
 - The starter may contain empty generic add-on registry tables after their
   migration is approved, but it contains no enabled client package, client
@@ -1182,7 +1206,10 @@ responses, or structured data.
    rendering, exact permission decisions, bounded enabled-package data loading,
    transactional existing-record package updates, and immutable package-value
    revision snapshots, validated history/preflight, and atomic restore
-   execution are also implemented. Read-only inactive component-creation
+   execution are also implemented. Data-only setting definitions now have
+   type-correct defaults plus closed value and secret-reference normalization;
+   per-client storage, permissioned editing, secret availability, and
+   activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
    implemented. Read-only delete planning and its atomic inactive runner are

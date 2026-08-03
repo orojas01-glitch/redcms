@@ -24,6 +24,14 @@ contracts as data only: each contract must reference one provided tool, one
 already-requested permission, bounded label/description/icon metadata, and the
 fixed `read-only` mode. Executable, writable, undeclared, or ungranted metadata
 fails without running package PHP.
+The separate 22-assertion setting-value fixture validates normalized manifest
+definitions, exact type-correct defaults, closed setting keys, required-value
+reporting, bounded text, strict booleans and integers, declared selections,
+credential-free HTTP/HTTPS URLs, email addresses, and opaque lowercase
+`config:` secret references. Invalid input returns no ordinary values or
+secret references. The fixture performs no database access, secret lookup,
+authorization, administrator rendering, package execution, or lifecycle
+change.
 Optional component-editor metadata is also validated as a fixed, data-only
 schema: declared components and permissions must resolve exactly, field types
 and constraints are allowlisted, and executable or storage-owned instructions
@@ -224,13 +232,16 @@ Milestone 5 content-version, direct page-structure, and custom Layout Builder
 foundations.
 The latest complete 2026-08-02 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
-metadata migration contract, 42-assertion add-on trust contract, 13-assertion
-add-on component-editor value contract, 20-assertion display-only
+metadata migration contract, 44-assertion add-on trust contract, 22-assertion
+add-on setting-value contract, 13-assertion add-on component-editor value
+contract, 20-assertion display-only
 component-editor renderer contract, and
-17-assertion non-activating runtime contract, imported the 25-table installer,
+17-assertion non-activating runtime contract, 15-assertion typed-service
+contract, and 20-assertion public-route contract, imported the 25-table installer,
 applied all 39 migrations to the expected 27-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
+18-assertion permission-scoped administrator-tool dispatch,
 20-assertion bounded component-editor data-loader lifecycle,
 47-assertion operational component form, transactional component-editor update, history, restore-preflight,
 and atomic-restore lifecycle,
@@ -316,6 +327,15 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Owner authorization acceptance runs only in the uniquely named disposable database. It requires empty default storage, a manager-only one-time bootstrap under a database advisory lock, the exact six fixed capabilities, one allowlisted audit row, database-backed session refresh, refusal of a second Owner, refusal of Owner demotion/deletion, transactional rollback after an injected audit failure, CLI confirmation guards, and exact cleanup.
 - Add-on registry acceptance runs only in the uniquely named disposable database and executes no package PHP or SQL. It requires empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, enabled/current load eligibility, immutable migration identity, protected ledger ownership, and exact cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
+- Add-on setting-value acceptance runs before database creation. It requires
+  exact normalized definitions, defaults matching the declared non-secret
+  type, one closed object, strict scalar types, bounded UTF-8 text, declared
+  selections, credential-free HTTP/HTTPS URLs, valid email addresses, exact
+  missing-setting reporting, and separate opaque lowercase `config:` secret
+  references. Unknown, nested, malformed, out-of-range, loosely coerced, raw
+  secret-looking, or schema-invalid input returns no normalized configuration.
+  It performs no database access, secret resolution, authorization, rendering,
+  package execution, or lifecycle mutation.
 - Add-on component-editor renderer acceptance runs before database creation. It requires core-owned escaped markup for every fixed schema type, stable namespaced labels/help/errors, scoped border-box control sizing, no rejected-value reflection, fail-closed malformed state, and no form, submit control, authorization, package execution, package data access, or database state. Its revision-timeline checks additionally require exact value-free newest-first metadata, newest/current hash agreement, escaped actor and timestamp copy, fixed current/matching/restore-check-required states, responsive containment, no value or hash disclosure, no action markup, and fail-closed empty, stale, reordered, or value-bearing input.
 - Add-on component-editor permission acceptance runs only in the uniquely named disposable database. It requires the full manifest permission capacity, exact operation mapping, explicit package grants independent of Owner/lifecycle authority, binary case matching, next-decision revocation, read-only state fingerprints, and zero residual administrator, role, or grant fixtures.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.

@@ -188,8 +188,10 @@ try {
                 === '#/$defs/componentEditor'
             && ($schema['properties']['adminToolContracts']['items']['$ref'] ?? '')
                 === '#/$defs/adminToolContract'
+            && ($schema['$defs']['setting']['properties']['options']['minItems'] ?? null)
+                === 1
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded component editors and administrator tools, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded editors, tools, and setting choices, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
@@ -828,8 +830,11 @@ try {
     );
     red_addon_test_assert(
         empty($defaultResult['valid'])
-            && red_addon_test_error_contains($defaultResult, 'string, integer, boolean, or null'),
-        'setting defaults match the closed JSON Schema scalar types and reject floating-point drift'
+            && red_addon_test_error_contains(
+                $defaultResult,
+                'default is invalid for its type'
+            ),
+        'setting defaults match their exact declared types and reject floating-point drift'
     );
 
     $limitProject = red_addon_test_project($temporaryRoot, 'limit-project');
