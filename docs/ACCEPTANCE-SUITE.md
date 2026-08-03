@@ -111,11 +111,17 @@ routes are refused before handler invocation; package output, exceptions,
 buffer tampering, malformed results, and oversized responses fail closed; and
 the front controller dispatches a claimed route before theme output. Current
 enablement profiles remain unchanged and still reject route-bearing packages.
-The documented public-mutation boundary adds no implementation fixture: the
-current public-route fixture must continue to refuse unsafe methods before a
-package handler. A later isolated fixture must prove its own declaration,
-anonymous-subject, CSRF, rate/idempotency, transaction, response-redaction,
-disablement, and exact-cleanup requirements before it can change that behavior.
+The separate 17-assertion public-mutation declaration-preflight fixture proves
+that one closed static POST/CSRF declaration canonicalizes deterministically
+into value-free evidence while declaration absence, route drift/placeholders,
+executable metadata, reserved request names, weak policy, core-table claims,
+malformed identities, and forged hashes fail closed. It also proves the helper
+has no database, request-global, package-execution, or filesystem-read path.
+It creates no route, handler, session/cookie, table, or enablement eligibility;
+the current public-route fixture must still refuse unsafe methods before a
+package handler. A later isolated fixture must prove anonymous-subject, CSRF,
+rate/idempotency, transaction, response-redaction, disablement, and exact
+cleanup requirements before it can change that behavior.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code

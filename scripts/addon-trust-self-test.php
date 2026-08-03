@@ -191,10 +191,16 @@ try {
                 === '#/$defs/adminToolContract'
             && ($schema['properties']['adminToolActionContracts']['items']['$ref'] ?? '')
                 === '#/$defs/adminToolActionContract'
+            && ($schema['properties']['publicMutationContracts']['items']['$ref'] ?? '')
+                === '#/$defs/publicMutationContract'
+            && ($schema['$defs']['publicMutationContract']['properties']['method']['const'] ?? '')
+                === 'POST'
+            && ($schema['$defs']['publicMutationContract']['properties']['idempotency']['const'] ?? '')
+                === 'core-issued-key'
             && ($schema['$defs']['setting']['properties']['options']['minItems'] ?? null)
                 === 1
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded editors, tools, write actions, and setting choices, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded editors, tools, write actions, public-mutation declarations, and setting choices, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
@@ -956,6 +962,162 @@ try {
             && red_addon_test_error_contains($route, 'unsafe methods require CSRF')
             && red_addon_test_error_contains($route, 'methods must not be empty'),
         'routes cannot escape their namespace, omit methods, or omit CSRF for unsafe methods'
+    );
+
+    $publicMutationProject = red_addon_test_project(
+        $temporaryRoot,
+        'public-mutation-project'
+    );
+    red_addon_test_write_package(
+        $publicMutationProject,
+        'redcms.mutation',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $manifest['routes'][] = [
+                'id' => 'redcms.mutation/cart-intent',
+                'scope' => 'public',
+                'path' => '/addons/redcms/mutation/cart-intent',
+                'methods' => ['POST'],
+                'authentication' => 'public',
+                'csrf' => 'required',
+            ];
+            $manifest['publicMutationContracts'] = [[
+                'route' => 'redcms.mutation/cart-intent',
+                'mutation' => 'redcms.mutation/add-to-cart',
+                'scope' => 'public',
+                'authentication' => 'public',
+                'method' => 'POST',
+                'csrf' => 'required',
+                'encoding' => 'application/x-www-form-urlencoded',
+                'maxBodyBytes' => 1024,
+                'requestFields' => [
+                    [
+                        'key' => 'product',
+                        'type' => 'identifier',
+                        'required' => true,
+                        'minLength' => 1,
+                        'maxLength' => 120,
+                    ],
+                    [
+                        'key' => 'quantity',
+                        'type' => 'positive-integer',
+                        'required' => true,
+                        'minimum' => 1,
+                        'maximum' => 100,
+                    ],
+                ],
+                'subject' => 'anonymous',
+                'idempotency' => 'core-issued-key',
+                'privacy' => 'no-store',
+                'rateLimit' => 'required',
+                'tables' => [
+                    'RED_Addon_Mutation_Cart_Items',
+                    'RED_Addon_Mutation_Carts',
+                ],
+                'postcondition' => 'server-derived-state',
+                'audit' => 'commerce.cart.item-added',
+                'outcomes' => ['accepted', 'unchanged'],
+            ]];
+        }
+    );
+    $publicMutation = red_addon_validate_manifest(
+        'redcms.mutation',
+        $publicMutationProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    $publicMutationContract = red_addon_public_mutation_contract(
+        is_array($publicMutation['manifest'] ?? null)
+            ? $publicMutation['manifest']
+            : [],
+        'redcms.mutation/cart-intent',
+        'redcms.mutation/add-to-cart'
+    );
+    red_addon_test_assert(
+        !empty($publicMutation['valid'])
+            && is_array($publicMutationContract)
+            && ($publicMutationContract['path'] ?? '')
+                === '/addons/redcms/mutation/cart-intent'
+            && ($publicMutationContract['idempotency'] ?? '') === 'core-issued-key'
+            && !file_exists($executionMarker),
+        'a closed public-mutation declaration validates against one static POST route without package execution'
+    );
+
+    $invalidPublicMutationProject = red_addon_test_project(
+        $temporaryRoot,
+        'invalid-public-mutation-project'
+    );
+    red_addon_test_write_package(
+        $invalidPublicMutationProject,
+        'redcms.invalid-mutation',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $manifest['routes'][] = [
+                'id' => 'redcms.invalid-mutation/cart-intent',
+                'scope' => 'public',
+                'path' => '/addons/redcms/invalid-mutation/cart-intent',
+                'methods' => ['GET'],
+                'authentication' => 'public',
+                'csrf' => 'required',
+            ];
+            $manifest['publicMutationContracts'] = [[
+                'route' => 'redcms.invalid-mutation/cart-intent',
+                'mutation' => 'redcms.invalid-mutation/add-to-cart',
+                'scope' => 'public',
+                'authentication' => 'public',
+                'method' => 'POST',
+                'csrf' => 'required',
+                'encoding' => 'application/x-www-form-urlencoded',
+                'maxBodyBytes' => 1024,
+                'requestFields' => [[
+                    'key' => 'price',
+                    'type' => 'identifier',
+                    'required' => true,
+                    'minLength' => 1,
+                    'maxLength' => 120,
+                ]],
+                'subject' => 'anonymous',
+                'idempotency' => 'optional',
+                'privacy' => 'no-store',
+                'rateLimit' => 'required',
+                'tables' => ['RED_Addon_Public_Mutation_Executions'],
+                'postcondition' => 'server-derived-state',
+                'audit' => 'commerce.cart.item-added',
+                'outcomes' => ['accepted', 'unchanged'],
+                'callback' => 'dangerous',
+            ]];
+        }
+    );
+    $invalidPublicMutation = red_addon_validate_manifest(
+        'redcms.invalid-mutation',
+        $invalidPublicMutationProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    red_addon_test_assert(
+        empty($invalidPublicMutation['valid'])
+            && red_addon_test_error_contains(
+                $invalidPublicMutation,
+                'contains unsupported field "callback"'
+            )
+            && red_addon_test_error_contains(
+                $invalidPublicMutation,
+                'route must bind one exact static public POST/CSRF-required route'
+            )
+            && red_addon_test_error_contains(
+                $invalidPublicMutation,
+                'key is reserved for core-owned state'
+            )
+            && red_addon_test_error_contains(
+                $invalidPublicMutation,
+                'idempotency must be core-issued-key'
+            )
+            && red_addon_test_error_contains(
+                $invalidPublicMutation,
+                'is not a package-owned table'
+            )
+            && !file_exists($executionMarker),
+        'public-mutation declarations reject executable metadata, weaker policy, route drift, reserved request state, and core tables before package execution'
     );
 
     $migrationProject = red_addon_test_project($temporaryRoot, 'migration-project');

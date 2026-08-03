@@ -639,12 +639,22 @@ CSRF policy is still not a token check. The endpoint is deliberately unlinked:
 it adds no administrator form/control or public route. Current enablement gates
 continue to reject tool-bearing packages.
 
-## Planned Public Mutation Boundary
+## Public Mutation Declaration Boundary
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) records the
-security contract for a later optional-package public write path. It is not an
-implemented endpoint. The existing add-on public router continues to refuse
-unsafe methods before package execution.
+security contract for a later optional-package public write path. The optional
+closed `publicMutationContracts` manifest field and its value-free
+non-executing preflight are implemented; the existing add-on public router
+still refuses unsafe methods before package execution.
+
+Each declaration binds one exact static public POST/CSRF route to one unique
+mutation id and fixed form encoding, scalar bounds, anonymous-subject,
+idempotency, privacy, rate-limit, postcondition, table, audit-category, and
+outcome metadata. The validator rejects unknown/executable fields, route
+drift, weak policies, duplicate identities, reserved core request names, and
+core add-on tables. The preflight returns only deterministic hashes and counts;
+it does not load package PHP, read a request/cookie/session/database, issue
+tokens, check live table state, start a transaction, or invoke a handler.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
@@ -653,8 +663,8 @@ idempotency enforcement, package-table transaction containment, exact
 postcondition reload, and only bounded no-store/nosniff responses. It may not
 leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
 or payment data. No current enablement profile admits this capability; this
-document creates no route, cookie/session, ledger, package execution, Store
-Lite behavior, or client data.
+foundation creates no dispatcher, cookie/session, ledger, package execution,
+Store Lite behavior, or client data.
 
 ## Multi-User Authorization
 

@@ -141,6 +141,14 @@
         "$ref": "#/$defs/adminToolActionContract"
       }
     },
+    "publicMutationContracts": {
+      "description": "Optional data-only declarations for future core-owned public POST mutations. Declarations do not create a route, handler, session, cookie, database write, or enablement eligibility.",
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/publicMutationContract"
+      }
+    },
     "settings": {
       "type": "array",
       "maxItems": 200,
@@ -254,6 +262,11 @@
       "type": "string",
       "maxLength": 160,
       "pattern": "^[a-z0-9][a-z0-9.-]*(?:/[a-z0-9][a-z0-9.-]*)?$"
+    },
+    "componentFieldKey": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9-]*$"
     },
     "capabilityList": {
       "type": "array",
@@ -432,6 +445,163 @@
           "const": "once-per-target"
         }
       }
+    },
+    "publicMutationContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route",
+        "mutation",
+        "scope",
+        "authentication",
+        "method",
+        "csrf",
+        "encoding",
+        "maxBodyBytes",
+        "requestFields",
+        "subject",
+        "idempotency",
+        "privacy",
+        "rateLimit",
+        "tables",
+        "postcondition",
+        "audit",
+        "outcomes"
+      ],
+      "properties": {
+        "route": {
+          "$ref": "#/$defs/capability"
+        },
+        "mutation": {
+          "$ref": "#/$defs/capability"
+        },
+        "scope": {
+          "const": "public"
+        },
+        "authentication": {
+          "const": "public"
+        },
+        "method": {
+          "const": "POST"
+        },
+        "csrf": {
+          "const": "required"
+        },
+        "encoding": {
+          "const": "application/x-www-form-urlencoded"
+        },
+        "maxBodyBytes": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 8192
+        },
+        "requestFields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/publicMutationIdentifierField"
+              },
+              {
+                "$ref": "#/$defs/publicMutationPositiveIntegerField"
+              }
+            ]
+          }
+        },
+        "subject": {
+          "const": "anonymous"
+        },
+        "idempotency": {
+          "const": "core-issued-key"
+        },
+        "privacy": {
+          "const": "no-store"
+        },
+        "rateLimit": {
+          "const": "required"
+        },
+        "tables": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/publicMutationTable"
+          }
+        },
+        "postcondition": {
+          "const": "server-derived-state"
+        },
+        "audit": {
+          "$ref": "#/$defs/publicMutationAuditCategory"
+        },
+        "outcomes": {
+          "const": ["accepted", "unchanged"]
+        }
+      }
+    },
+    "publicMutationIdentifierField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type", "required", "minLength", "maxLength"],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/componentFieldKey"
+        },
+        "type": {
+          "const": "identifier"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 160
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 160
+        }
+      }
+    },
+    "publicMutationPositiveIntegerField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type", "required", "minimum", "maximum"],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/componentFieldKey"
+        },
+        "type": {
+          "const": "positive-integer"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "minimum": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maximum": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "publicMutationTable": {
+      "type": "string",
+      "pattern": "^RED_Addon_[A-Za-z0-9_]{1,54}$"
+    },
+    "publicMutationAuditCategory": {
+      "type": "string",
+      "maxLength": 120,
+      "pattern": "^[a-z][a-z0-9.-]*$"
     },
     "componentField": {
       "type": "object",
