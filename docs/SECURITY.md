@@ -123,6 +123,13 @@ add-on packages without executing them.
   invalid encodings or controls, non-canonical numbers, values outside bounds,
   and malformed choice, URL, email, date, datetime, or media references return
   no normalized payload.
+- Package setting values pass a separate non-executing closed-schema
+  validator. Defaults must match the exact declared non-secret type; unknown,
+  nested, loosely coerced, malformed, oversized, or missing values return no
+  normalized configuration. Secret settings accept only bounded lowercase
+  `config:` reference identifiers and are separated from ordinary values;
+  core does not resolve or return secret material through this boundary. It
+  opens no database, form, permission, package runtime, or activation path.
 - The display-only administrator renderer accepts only an empty state or the
   validator's exact closed result. It maps fixed field types to core-owned
   namespaced controls, escapes every manifest label, help string, option, and
@@ -485,6 +492,8 @@ metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
+The data-only setting-value prerequisite does not supply Store Lite storage,
+settings permissions/UI, secret availability, or enablement readiness.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and

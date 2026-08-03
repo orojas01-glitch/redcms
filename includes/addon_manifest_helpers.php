@@ -332,6 +332,225 @@ if (!function_exists('red_addon_valid_component_field_key')) {
     }
 }
 
+if (!function_exists('red_addon_setting_string_is_valid')) {
+    function red_addon_setting_string_is_valid($type, $value)
+    {
+        if (!is_string($value)
+            || preg_match('//u', $value) !== 1
+            || preg_match('/[\x00-\x1F\x7F]/', $value) === 1
+        ) {
+            return false;
+        }
+        if ($type === 'text') {
+            return strlen($value) <= 2000;
+        }
+        if ($type === 'select') {
+            return $value !== ''
+                && trim($value) === $value
+                && strlen($value) <= 120;
+        }
+        if ($type === 'url') {
+            if ($value === ''
+                || trim($value) !== $value
+                || strlen($value) > 2048
+                || filter_var($value, FILTER_VALIDATE_URL) === false
+            ) {
+                return false;
+            }
+            $parts = parse_url($value);
+            return is_array($parts)
+                && in_array(
+                    strtolower((string) ($parts['scheme'] ?? '')),
+                    ['http', 'https'],
+                    true
+                )
+                && is_string($parts['host'] ?? null)
+                && $parts['host'] !== ''
+                && !isset($parts['user'])
+                && !isset($parts['pass']);
+        }
+        if ($type === 'email') {
+            return $value !== ''
+                && trim($value) === $value
+                && strlen($value) <= 254
+                && filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+        }
+        if ($type === 'secret-reference') {
+            return strlen($value) <= 160
+                && preg_match(
+                    '/\Aconfig:[a-z0-9][a-z0-9.-]*\z/',
+                    $value
+                ) === 1;
+        }
+        return false;
+    }
+}
+
+if (!function_exists('red_addon_validate_settings')) {
+    function red_addon_validate_settings($settings, array &$result)
+    {
+        if (!is_array($settings) || !array_is_list($settings)) {
+            red_addon_add_error($result, 'Settings must be an array.');
+            return [];
+        }
+        if (count($settings) > 200) {
+            red_addon_add_error($result, 'Settings exceeds 200 entries.');
+        }
+
+        $normalized = [];
+        $settingKeys = [];
+        $allowedTypes = [
+            'text',
+            'boolean',
+            'integer',
+            'select',
+            'url',
+            'email',
+            'secret-reference',
+        ];
+        foreach ($settings as $index => $setting) {
+            $context = 'Setting[' . $index . ']';
+            if (!red_addon_validate_object_keys(
+                $setting,
+                ['key', 'label', 'type', 'secret'],
+                ['key', 'label', 'type', 'secret', 'default', 'options'],
+                $context,
+                $result
+            )) {
+                continue;
+            }
+            $key = is_string($setting['key'] ?? null)
+                ? $setting['key']
+                : '';
+            if (!red_addon_valid_permission($key)) {
+                red_addon_add_error($result, $context . ' key is invalid.');
+            } elseif (isset($settingKeys[$key])) {
+                red_addon_add_error(
+                    $result,
+                    'Setting key "' . $key . '" is duplicated.'
+                );
+            } else {
+                $settingKeys[$key] = true;
+            }
+            $label = red_addon_required_string(
+                $setting,
+                'label',
+                $context,
+                120,
+                $result
+            );
+            $type = is_string($setting['type'] ?? null)
+                ? $setting['type']
+                : '';
+            if (!in_array($type, $allowedTypes, true)) {
+                red_addon_add_error($result, $context . ' type is unsupported.');
+            }
+            $secret = $setting['secret'] ?? null;
+            if (!is_bool($secret)) {
+                red_addon_add_error($result, $context . ' secret must be boolean.');
+            } elseif (($type === 'secret-reference') !== $secret) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' must use secret-reference exactly when secret is true.'
+                );
+            }
+
+            $options = [];
+            if ($type === 'select') {
+                $options = red_addon_validate_string_list(
+                    $setting['options'] ?? null,
+                    $context . ' options',
+                    100,
+                    static function ($value) {
+                        return red_addon_setting_string_is_valid(
+                            'select',
+                            $value
+                        );
+                    },
+                    $result
+                );
+                if ($options === []) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' options must not be empty.'
+                    );
+                }
+            } elseif (array_key_exists('options', $setting)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' options are allowed only for select settings.'
+                );
+            }
+
+            $hasDefault = array_key_exists('default', $setting);
+            $default = $hasDefault ? $setting['default'] : null;
+            $defaultValid = $default === null;
+            if ($secret === true && $hasDefault) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' must not contain a secret default.'
+                );
+                $defaultValid = false;
+            } elseif ($default !== null) {
+                if ($type === 'boolean') {
+                    $defaultValid = is_bool($default);
+                } elseif ($type === 'integer') {
+                    $defaultValid = is_int($default)
+                        && $default >= -2147483648
+                        && $default <= 2147483647;
+                } elseif ($type === 'select') {
+                    $defaultValid = is_string($default)
+                        && in_array($default, $options, true);
+                } elseif (in_array(
+                    $type,
+                    ['text', 'url', 'email'],
+                    true
+                )) {
+                    $defaultValid = red_addon_setting_string_is_valid(
+                        $type,
+                        $default
+                    );
+                } else {
+                    $defaultValid = false;
+                }
+                if (!$defaultValid) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' default is invalid for its type.'
+                    );
+                }
+            }
+
+            $definition = [
+                'key' => $key,
+                'label' => $label,
+                'type' => $type,
+                'secret' => is_bool($secret) ? $secret : false,
+            ];
+            if ($hasDefault && $secret !== true && $defaultValid) {
+                $definition['default'] = $default;
+            }
+            if ($type === 'select') {
+                $definition['options'] = $options;
+            }
+            $normalized[] = $definition;
+        }
+        return $normalized;
+    }
+}
+
+if (!function_exists('red_addon_settings_schema')) {
+    function red_addon_settings_schema(array $manifest)
+    {
+        $result = ['errors' => [], 'warnings' => []];
+        $settings = red_addon_validate_settings(
+            $manifest['settings'] ?? null,
+            $result
+        );
+        return $result['errors'] === [] ? $settings : null;
+    }
+}
+
 if (!function_exists('red_addon_validate_admin_tool_contracts')) {
     function red_addon_validate_admin_tool_contracts(
         $contracts,
@@ -1295,77 +1514,7 @@ if (!function_exists('red_addon_validate_manifest')) {
             );
         }
 
-        $settings = $manifest['settings'] ?? null;
-        $settingKeys = [];
-        if (!is_array($settings) || !array_is_list($settings)) {
-            red_addon_add_error($result, 'Settings must be an array.');
-        } else {
-            if (count($settings) > 200) {
-                red_addon_add_error($result, 'Settings exceeds 200 entries.');
-            }
-            foreach ($settings as $index => $setting) {
-                $settingContext = 'Setting[' . $index . ']';
-                if (!red_addon_validate_object_keys(
-                    $setting,
-                    ['key', 'label', 'type', 'secret'],
-                    ['key', 'label', 'type', 'secret', 'default', 'options'],
-                    $settingContext,
-                    $result
-                )) {
-                    continue;
-                }
-                $key = isset($setting['key']) && is_string($setting['key']) ? $setting['key'] : '';
-                if (!red_addon_valid_permission($key)) {
-                    red_addon_add_error($result, $settingContext . ' key is invalid.');
-                } elseif (isset($settingKeys[$key])) {
-                    red_addon_add_error($result, 'Setting key "' . $key . '" is duplicated.');
-                } else {
-                    $settingKeys[$key] = true;
-                }
-                red_addon_required_string($setting, 'label', $settingContext, 120, $result);
-                $settingType = isset($setting['type']) && is_string($setting['type']) ? $setting['type'] : '';
-                $allowedSettingTypes = ['text', 'boolean', 'integer', 'select', 'url', 'email', 'secret-reference'];
-                if (!in_array($settingType, $allowedSettingTypes, true)) {
-                    red_addon_add_error($result, $settingContext . ' type is unsupported.');
-                }
-                $secret = $setting['secret'] ?? null;
-                if (!is_bool($secret)) {
-                    red_addon_add_error($result, $settingContext . ' secret must be boolean.');
-                } elseif (($settingType === 'secret-reference') !== $secret) {
-                    red_addon_add_error(
-                        $result,
-                        $settingContext . ' must use secret-reference exactly when secret is true.'
-                    );
-                }
-                if ($secret === true && array_key_exists('default', $setting)) {
-                    red_addon_add_error($result, $settingContext . ' must not contain a secret default.');
-                }
-                if (array_key_exists('default', $setting)
-                    && !is_null($setting['default'])
-                    && !is_string($setting['default'])
-                    && !is_int($setting['default'])
-                    && !is_bool($setting['default'])
-                ) {
-                    red_addon_add_error(
-                        $result,
-                        $settingContext . ' default must be a string, integer, boolean, or null.'
-                    );
-                }
-                if ($settingType === 'select') {
-                    red_addon_validate_string_list(
-                        $setting['options'] ?? null,
-                        $settingContext . ' options',
-                        100,
-                        static function ($value) {
-                            return is_string($value) && trim($value) !== '' && strlen($value) <= 120;
-                        },
-                        $result
-                    );
-                } elseif (array_key_exists('options', $setting)) {
-                    red_addon_add_error($result, $settingContext . ' options are allowed only for select settings.');
-                }
-            }
-        }
+        red_addon_validate_settings($manifest['settings'] ?? null, $result);
 
         $integrityReferences = [];
         $migrationIds = [];

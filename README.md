@@ -86,15 +86,22 @@ now revalidates the value-free plan under shared lifecycle/theme and exact
 binding locks, records core and package `delete` snapshots, invokes only the
 registered deleter, and removes the package row, SEO row, and inactive parent
 together. Partial deletion, callback failure, stale evidence, or either ledger
-failure rolls back; both immutable ledgers remain after success. Public
-placement, create/delete controls and endpoints, restore action, audit
-workflow, uninstall/purge, and activation eligibility remain absent.
+failure rolls back; both immutable ledgers remain after success. Create/delete
+controls and endpoints, restore action, uninstall/purge, and richer package
+activation eligibility remain absent.
+Manifest-declared package settings now also have a non-executing typed value
+contract: core validates one closed configuration object, applies only
+type-correct non-secret defaults, and separates opaque `config:` secret
+references without resolving or exposing secret material. No settings table,
+administrator form, package execution, or activation path is added.
 Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
-remains separate. Service, route, adapter, and administrator-tool dispatch,
-upgrade, uninstall/purge, payment, member access, editorial workflow,
-notifications, the broader role model, and social publishing integrations are
-not active features.
+remains separate. Typed internal service invocation, exact static public
+`GET` JSON routes, and display-only administrator tools have narrow core
+boundaries. Adapter dispatch, writable route/tool actions, upgrade,
+uninstall/purge, payment, member access, editorial workflow, notifications,
+the broader role model, and social publishing integrations are not active
+features.
 
 ## Highlights
 
@@ -162,6 +169,8 @@ not active features.
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint
+- Non-executing typed package-setting normalization with fail-closed defaults,
+  exact missing/unknown reporting, and separate opaque secret references
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -228,6 +237,7 @@ Run the non-executing add-on trust gate and isolated runtime-contract check:
 
 ```bash
 php scripts/addon-trust-self-test.php
+php scripts/addon-setting-values-self-test.php
 php scripts/addon-component-editor-self-test.php
 php scripts/addon-component-editor-renderer-self-test.php
 php scripts/addon-runtime-self-test.php

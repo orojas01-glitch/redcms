@@ -22,7 +22,8 @@ flowchart TD
     F12 --> F13["Typed internal service invocation"]
     F13 --> F14["Public GET route dispatch"]
     F14 --> F15["Read-only administrator-tool dispatch"]
-    F15 --> C["CURRENT / NEXT<br/>Settings and package assets"]
+    F15 --> F16["Typed setting values and secret references"]
+    F16 --> C["CURRENT / NEXT<br/>Per-client settings storage and package assets"]
     C --> G4["Writable tool and route actions"]
     G4 --> G5["Live-data and richer enablement gates"]
     G5 --> S["TARGET<br/>Store Lite optional package"]
@@ -35,7 +36,7 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15 complete;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16 complete;
     class C current;
     class G4,G5,E,A,D,R remaining;
     class S target;
@@ -44,8 +45,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Display-only administrator-tool dispatch with data-only manifest mapping, fresh exact package grants, typed text results, escaped core rendering, and POST/CSRF protection. |
-| Current milestone | Define package settings and namespaced assets while route-bearing/tool-bearing package enablement remains blocked. |
+| Latest completed slice | Non-executing typed setting values with exact defaults, closed validation, missing/unknown reporting, and separate opaque secret references. |
+| Current milestone | Add per-client settings storage and secret-availability evidence, then define namespaced package assets; settings/asset-bearing package enablement remains blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

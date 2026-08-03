@@ -162,6 +162,15 @@ migrations, settings, media, or business data. Richer route/tool actions,
 adapter dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
+The first settings prerequisite is now implemented without storage or package
+execution. Core normalizes only a valid data-only settings array, requires
+defaults to match their exact declared non-secret type, and validates one
+closed configuration object with bounded values and exact missing/unknown
+reporting. Secret settings accept only opaque lowercase `config:` references
+and remain separate from ordinary values; core does not resolve secret
+material. Per-client persistence, package settings permissions/UI, secret
+availability, assets, and settings-bearing package enablement remain blocked.
+
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
 component id, reviewed package migrations may declare only an exact foreign
@@ -341,7 +350,8 @@ existing-record package updates and immutable revision snapshots are
 implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
-while route, administrator-tool, settings, asset, live-data, and richer package persistence
+while writable route/administrator-tool actions, per-client settings storage,
+secret availability, asset, live-data, and richer package persistence
 contracts must still be implemented and accepted with disposable fixtures
 before the separately distributed package can be enabled.
 
