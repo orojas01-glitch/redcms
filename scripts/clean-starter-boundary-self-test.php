@@ -164,7 +164,8 @@ try {
         str_contains($runtimeConfig, "getenv(\$envKey)")
             && str_contains($runtimeConfig, "config.local.php")
             && str_contains($configExample, "'LEGACY_MAIL_OWNER' => ''")
-            && str_contains($configExample, "'PAYPAL_CONFIRMATION_FROM_EMAIL' => ''"),
+            && str_contains($configExample, "'PAYPAL_CONFIRMATION_FROM_EMAIL' => ''")
+            && str_contains($configExample, "'ADDON_SECRET_REFERENCES' => []"),
         'outbound legacy mail settings stay server-local and default disabled'
     );
     require_once $repositoryRoot . '/includes/runtime_config_helpers.php';

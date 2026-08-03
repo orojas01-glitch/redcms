@@ -358,8 +358,7 @@ non-default settings exactly. On success it returns non-secret values and
 secret-reference identifiers in separate maps. It never resolves a secret,
 reads or writes a database, authorizes an actor, renders a form, executes
 package PHP, or changes package lifecycle state. Per-client storage,
-permissioned editing, secret-availability checks, and activation readiness are
-later contracts.
+permissioned editing, and activation readiness are later contracts.
 
 Operational setting definitions may add one `permission` that must exactly
 match a permission declared by the package. The clean installer provides an
@@ -386,6 +385,18 @@ secret references. Exact state returns `unchanged` without a duplicate audit.
 Stale plans, drift, replacement/postcondition/audit failure, or injected late
 failure roll back completely. It resolves no secret, executes no package code,
 renders no form, exposes no endpoint, and does not change activation.
+
+`red_addon_secret_reference_declarations()` reads only the operator's bounded
+server-local list of opaque `config:` identifiers from
+`ADDON_SECRET_REFERENCES` and `RED_ADDON_SECRET_REFERENCES`; neither source
+contains secret values. `red_addon_secret_availability_evidence()` revalidates
+the exact typed configuration and binds the package id, configuration,
+declaration inventory, and per-setting availability into deterministic hashes.
+It returns counts, missing setting keys, and fingerprints but no `config:`
+identifier or secret value. Invalid, changed, or forged declarations fail
+closed. This is non-executing availability evidence, not secret resolution: it
+reads no database or secret, invokes no package, renders no control, persists
+nothing, and does not change lifecycle or activation eligibility.
 
 The exact Version 1 schema is
 `docs/addon-manifest.schema.json`; the read-only PHP validation contract is
@@ -945,6 +956,9 @@ richer package.
   environment variables or server-local ignored configuration.
 - The implemented value prerequisite accepts only opaque `config:` identifiers
   for secret references and never reads or returns the referenced secret.
+- Server-local availability declarations contain only those opaque identifiers;
+  the evidence result contains only counts, missing setting keys, and hashes.
+  Secret values remain outside RED-CMS and are not read through this boundary.
 - Client exports never replace `db-structure.sql`.
 - The starter may contain empty generic add-on registry tables after their
   migration is approved, but it contains no enabled client package, client
@@ -1235,7 +1249,8 @@ responses, or structured data.
    execution are also implemented. Data-only setting definitions now have
    type-correct defaults plus closed value and secret-reference normalization;
    empty per-client storage, exact permissioned write preflight, and atomic
-   internal persistence are implemented; editing UI, secret availability, and
+   internal persistence plus non-executing server-local availability evidence
+   are implemented; editing UI, actual secret lookup, package assets, and
    activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are

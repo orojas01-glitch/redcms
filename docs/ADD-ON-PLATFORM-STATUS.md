@@ -25,7 +25,8 @@ flowchart TD
     F15 --> F16["Typed setting values and secret references"]
     F16 --> F17["Settings storage and write preflight"]
     F17 --> F18["Atomic setting persistence"]
-    F18 --> C["CURRENT / NEXT<br/>Secret availability and package assets"]
+    F18 --> F19["Secret-reference availability evidence"]
+    F19 --> C["CURRENT / NEXT<br/>Namespaced package assets"]
     C --> G4["Writable tool and route actions"]
     G4 --> G5["Live-data and richer enablement gates"]
     G5 --> S["TARGET<br/>Store Lite optional package"]
@@ -38,7 +39,7 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18 complete;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19 complete;
     class C current;
     class G4,G5,E,A,D,R remaining;
     class S target;
@@ -47,8 +48,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Atomic complete setting replacement under shared locks with exact plan/state revalidation, postcondition reload, bounded audit, no-op handling, and rollback. |
-| Current milestone | Add secret-reference availability evidence, then namespaced package assets; settings UI/endpoints and richer enablement remain blocked. |
+| Latest completed slice | Non-executing server-local secret-reference availability evidence with deterministic package/configuration/declaration fingerprints and no secret or reference disclosure. |
+| Current milestone | Add namespaced package assets; settings UI/endpoints, actual secret lookup, and richer enablement remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

@@ -27,6 +27,8 @@ Supported environment variables:
 - `RED_PAYPAL_PDT_AUTH_TOKEN`
 - `RED_PAYPAL_CONFIRMATION_FROM_EMAIL`
 - `RED_PAYPAL_CONFIRMATION_FROM_NAME`
+- `RED_ADDON_SECRET_REFERENCES` (comma-separated opaque `config:` references;
+  contains no secret values)
 
 The existing constants `DBHOST`, `DBUSER`, `DBPASS`, and `DBNAME` are preserved so current CMS classes continue to work.
 
@@ -146,6 +148,14 @@ add-on packages without executing them.
   audit fact. Ordinary JSON and opaque secret references remain physically
   separated. Exact no-ops add no audit. Any stale plan, drift, write,
   postcondition, audit, or injected failure rolls back all rows and audit state.
+- Server-local add-on secret availability is a separate non-executing
+  attestation. `ADDON_SECRET_REFERENCES` in ignored local configuration and
+  `RED_ADDON_SECRET_REFERENCES` may list only bounded lowercase `config:`
+  identifiers. Core validates and fingerprints the complete inventory and
+  typed configuration, then returns counts and missing setting keys without
+  returning any reference identifier or secret value. Malformed or stale
+  declarations fail closed. The boundary reads no secret or database, executes
+  no package, and grants no activation eligibility.
 - The display-only administrator renderer accepts only an empty state or the
   validator's exact closed result. It maps fixed field types to core-owned
   namespaced controls, escapes every manifest label, help string, option, and
@@ -508,8 +518,9 @@ metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
-The atomic setting helper does not supply Store Lite settings UI/endpoints,
-secret availability, or enablement readiness.
+The atomic setting helper and availability evidence do not supply Store Lite
+settings UI/endpoints, actual secret lookup, package assets, or enablement
+readiness.
 
 Internal typed service invocation is implemented without an HTTP or
 administrator endpoint. Core requires exact request-local runtime ownership and
