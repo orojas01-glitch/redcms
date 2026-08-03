@@ -448,9 +448,12 @@ bootstrap excludes the disabled package.
 
 No web endpoint consumes the installer, enable, or disable command. Component
 dispatch is limited to the bounded core-rendered contract described below.
-Service, administrator-tool, adapter, and route dispatch, upgrades, uninstall,
-purge, and client business packages require separate reviewed implementations
-with backup, dependency, live-data, and rollback or recovery gates.
+Typed internal service, exact static public-route, display-only
+administrator-tool, and non-executing administrator-action-preflight
+boundaries are separate reviewed implementations described below. Adapters,
+operational write actions and routes, upgrades, uninstall, purge, and client
+business packages still require distinct backup, dependency, live-data, and
+rollback or recovery gates.
 
 ### Add-On Runtime Registration Contract
 
@@ -478,9 +481,11 @@ packages never execute. Current enabled packages register into a request-local
 lookup context. Core may invoke an enabled manifest-declared component only
 through its fixed text view model and escaped default renderer; malformed
 values, emitted output, handler exceptions, and output-buffer tampering fail
-closed to static fallback content. Service, administrator-tool, adapter, and
-route handlers remain lookup-only. The clean starter contains no package
-directory or enabled state. The implemented enable command accepts only the
+closed to static fallback content. This component path never automatically
+invokes service, administrator-tool, administrator-action, adapter, or route
+handlers. Services and adapters remain lookup-only; routes, display tools, and
+action preflight can proceed only through their separate bounded cores. The
+clean starter contains no package directory or enabled state. The implemented enable command accepts only the
 constrained registration-only service, default public component, and combined
 default-component plus registration-only-service profiles.
 
@@ -511,9 +516,9 @@ separate work.
 
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
-registration is implemented, but Store Lite remains blocked until generic
-revision restore actions, routes, administrator tools, settings, and live-data
-compatibility pass separate
+registration is implemented, but Store Lite remains blocked until operational
+administrator actions, writable routes, protected tool UI/endpoints, settings,
+and live-data compatibility pass separate
 disposable-fixture reviews. The activation-blocked parent
 metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
@@ -591,6 +596,24 @@ Output, exceptions, malformed/oversized results, and buffer or HTTP-state
 changes fail closed. Permission revocation applies on the next catalog or
 dispatch lookup. Current enablement gates still reject every tool-bearing
 package.
+
+Administrator write actions have only a separate, non-executing preflight
+foundation. An optional closed `adminToolActionContracts` entry maps one
+provided tool to one unique action id, explicit package permission, bounded
+text metadata, `POST`, and `csrf: required`; other method/CSRF values,
+undeclared tools, duplicate actions, ungranted permissions, and executable
+metadata fail validation before package PHP is loaded. The enabled registrar
+must also bind that action id exactly once, but preflight never invokes it.
+
+The preflight requires matching request-local tool/action ownership, a fresh
+case-sensitive action permission in the current client database, and one
+positive integer target record id. It returns only deterministic contract and
+plan hashes. It reads no package record, starts no transaction, writes no
+state, accepts no request/session value, renders no control, exposes no
+endpoint, and emits no audit fact. Its declared CSRF policy is not a token
+check; a future protected endpoint and atomic runner must revalidate current
+ownership, permission, target state, CSRF, idempotency, transaction, and audit
+evidence before any package action can execute.
 
 ## Multi-User Authorization
 

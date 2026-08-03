@@ -262,8 +262,12 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   remain gated;
 - declared administrator routes;
 - display-only administrator-tool dispatch is complete with exact package
-  grants and core rendering; writable order/product actions and tool-bearing
-  package enablement remain gated;
+  grants and core rendering. A separate non-executing write-action preflight
+  now binds a declared action's exact runtime owner, package permission,
+  `POST`/CSRF policy, and numeric target into deterministic evidence without
+  invoking a package callback or writing state; atomic order/product actions,
+  their protected UI/endpoint, and tool-bearing package enablement remain
+  gated;
 - core-owned public/admin package-asset injection is complete: its planner
   revalidates current trusted manifest and enabled-registry evidence without
   invoking package PHP,

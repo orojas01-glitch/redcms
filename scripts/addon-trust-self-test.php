@@ -189,10 +189,12 @@ try {
                 === '#/$defs/componentEditor'
             && ($schema['properties']['adminToolContracts']['items']['$ref'] ?? '')
                 === '#/$defs/adminToolContract'
+            && ($schema['properties']['adminToolActionContracts']['items']['$ref'] ?? '')
+                === '#/$defs/adminToolActionContract'
             && ($schema['$defs']['setting']['properties']['options']['minItems'] ?? null)
                 === 1
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded editors, tools, and setting choices, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded editors, tools, write actions, and setting choices, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
@@ -346,8 +348,11 @@ try {
         static function (&$manifest) {
             $toolId = 'redcms.tool/orders';
             $permission = 'tool.orders.view';
+            $actionId = 'redcms.tool/mark-paid';
+            $actionPermission = 'tool.orders.transition';
             $manifest['provides']['adminTools'] = [$toolId];
             $manifest['permissions'][] = $permission;
+            $manifest['permissions'][] = $actionPermission;
             $manifest['adminToolContracts'] = [[
                 'tool' => $toolId,
                 'label' => 'Orders',
@@ -355,6 +360,15 @@ try {
                 'icon' => 'orders',
                 'permission' => $permission,
                 'mode' => 'read-only',
+            ]];
+            $manifest['adminToolActionContracts'] = [[
+                'tool' => $toolId,
+                'action' => $actionId,
+                'label' => 'Mark paid',
+                'description' => 'Record a manual payment for one order.',
+                'permission' => $actionPermission,
+                'method' => 'POST',
+                'csrf' => 'required',
             ]];
         }
     );
@@ -369,6 +383,13 @@ try {
             : [],
         'redcms.tool/orders'
     );
+    $toolActionContract = red_addon_admin_tool_action_contract(
+        is_array($toolResult['manifest'] ?? null)
+            ? $toolResult['manifest']
+            : [],
+        'redcms.tool/orders',
+        'redcms.tool/mark-paid'
+    );
     red_addon_test_assert(
         !empty($toolResult['valid'])
             && $toolContract === [
@@ -379,8 +400,17 @@ try {
                 'permission' => 'tool.orders.view',
                 'mode' => 'read-only',
             ]
+            && $toolActionContract === [
+                'tool' => 'redcms.tool/orders',
+                'action' => 'redcms.tool/mark-paid',
+                'label' => 'Mark paid',
+                'description' => 'Record a manual payment for one order.',
+                'permission' => 'tool.orders.transition',
+                'method' => 'POST',
+                'csrf' => 'required',
+            ]
             && !file_exists($executionMarker),
-        'administrator tool metadata maps one provided tool to one declared permission without package execution'
+        'administrator tool metadata maps one display tool and one POST/CSRF write action to declared permissions without package execution'
     );
 
     $invalidToolProject = red_addon_test_project(
@@ -403,6 +433,16 @@ try {
                 'icon' => '../unsafe',
                 'permission' => 'invalid.missing',
                 'mode' => 'write',
+                'callback' => 'dangerous',
+            ]];
+            $manifest['adminToolActionContracts'] = [[
+                'tool' => 'redcms.invalid-tool/undeclared',
+                'action' => 'redcms.invalid-tool/undeclared',
+                'label' => 'Invalid action',
+                'description' => 'Invalid administrator action fixture.',
+                'permission' => 'invalid.missing',
+                'method' => 'GET',
+                'csrf' => 'not-applicable',
                 'callback' => 'dangerous',
             ]];
         }
@@ -430,8 +470,20 @@ try {
                 $invalidTool,
                 'mode must be read-only'
             )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'action must differ from its tool'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'method must be POST'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'csrf must be required'
+            )
             && !file_exists($executionMarker),
-        'administrator tool contracts reject executable, undeclared, ungranted, and writable metadata'
+        'administrator tool and write-action contracts reject executable, undeclared, ungranted, and writable metadata'
     );
 
     $nullEditorProject = red_addon_test_project(

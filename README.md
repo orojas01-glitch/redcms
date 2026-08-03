@@ -136,7 +136,10 @@ Fresh isolated Adriana JSON-LD
 verification and hosted Schema.org validation pass; production deployment
 remains separate. Typed internal service invocation, exact static public
 `GET` JSON routes, and display-only administrator tools have narrow core
-boundaries. Adapter dispatch, writable route/tool actions, upgrade,
+boundaries. A separate non-executing administrator action preflight now binds
+one declared action's registered runtime owner, exact package grant, `POST` and
+CSRF policy, and numeric target into deterministic evidence without invoking
+the action or writing state. Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
 features.
@@ -207,6 +210,10 @@ features.
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint
+- Non-executing administrator tool-action preflight with separate declared
+  action contracts, exact runtime-owner and permission binding, fixed
+  `POST`/CSRF evidence, numeric target validation, deterministic hashes, and
+  no package action execution or state mutation
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
@@ -307,11 +314,11 @@ php scripts/admin-addon-enable.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
-The database-backed setting-storage preflight and immutable asset-endpoint
-fixtures run automatically in `scripts/dev-acceptance.sh` against its uniquely
-named disposable database and FrankenPHP CLI. The endpoint fixture verifies
-real HTTP headers and bytes plus checksum, traversal, lifecycle, and integrity
-refusal without a session or package-PHP execution.
+The database-backed setting-storage, administrator-action-preflight, and
+immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
+against its uniquely named disposable database and FrankenPHP CLI. The endpoint
+fixture verifies real HTTP headers and bytes plus checksum, traversal,
+lifecycle, and integrity refusal without a session or package-PHP execution.
 
 The install command is a dry run by default. Apply requires the exact database,
 package, version, plan digest, SHA-256 from a separately verified backup, and

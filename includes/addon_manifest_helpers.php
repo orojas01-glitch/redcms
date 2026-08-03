@@ -767,6 +767,212 @@ if (!function_exists('red_addon_admin_tool_contract')) {
     }
 }
 
+if (!function_exists('red_addon_validate_admin_tool_action_contracts')) {
+    function red_addon_validate_admin_tool_action_contracts(
+        $contracts,
+        array $providedTools,
+        array $declaredPermissions,
+        array &$result
+    ) {
+        if (!is_array($contracts) || !array_is_list($contracts)) {
+            red_addon_add_error(
+                $result,
+                'Administrator tool action contracts must be an array.'
+            );
+            return [];
+        }
+        if (count($contracts) > 200) {
+            red_addon_add_error(
+                $result,
+                'Administrator tool action contracts exceeds 200 entries.'
+            );
+        }
+
+        $normalized = [];
+        $seenActions = [];
+        foreach ($contracts as $index => $contract) {
+            $context = 'Administrator tool action contract[' . $index . ']';
+            if (!red_addon_validate_object_keys(
+                $contract,
+                [
+                    'tool',
+                    'action',
+                    'label',
+                    'description',
+                    'permission',
+                    'method',
+                    'csrf',
+                ],
+                [
+                    'tool',
+                    'action',
+                    'label',
+                    'description',
+                    'permission',
+                    'method',
+                    'csrf',
+                ],
+                $context,
+                $result
+            )) {
+                continue;
+            }
+
+            $tool = is_string($contract['tool'] ?? null)
+                ? $contract['tool']
+                : '';
+            if (!red_addon_valid_capability($tool)) {
+                red_addon_add_error($result, $context . ' tool is invalid.');
+            } elseif (!in_array($tool, $providedTools, true)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' tool must appear in Provides adminTools.'
+                );
+            }
+
+            $action = is_string($contract['action'] ?? null)
+                ? $contract['action']
+                : '';
+            if (!red_addon_valid_capability($action)) {
+                red_addon_add_error($result, $context . ' action is invalid.');
+            } elseif ($action === $tool) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' action must differ from its tool.'
+                );
+            } elseif (isset($seenActions[$action])) {
+                red_addon_add_error(
+                    $result,
+                    'Administrator tool action contract for "' . $action .
+                        '" is duplicated.'
+                );
+            } else {
+                $seenActions[$action] = true;
+            }
+
+            $label = red_addon_required_string(
+                $contract,
+                'label',
+                $context,
+                120,
+                $result
+            );
+            $description = red_addon_required_string(
+                $contract,
+                'description',
+                $context,
+                500,
+                $result
+            );
+            foreach (['label' => $label, 'description' => $description] as $key => $value) {
+                if (preg_match('//u', $value) !== 1
+                    || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $value)
+                        === 1
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' field "' . $key . '" contains unsafe text.'
+                    );
+                }
+            }
+
+            $permission = is_string($contract['permission'] ?? null)
+                ? $contract['permission']
+                : '';
+            if (!red_addon_valid_permission($permission)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' permission is invalid.'
+                );
+            } elseif (!in_array($permission, $declaredPermissions, true)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' permission must appear in Permissions.'
+                );
+            }
+
+            $method = is_string($contract['method'] ?? null)
+                ? $contract['method']
+                : '';
+            if ($method !== 'POST') {
+                red_addon_add_error(
+                    $result,
+                    $context . ' method must be POST.'
+                );
+            }
+            $csrf = is_string($contract['csrf'] ?? null)
+                ? $contract['csrf']
+                : '';
+            if ($csrf !== 'required') {
+                red_addon_add_error(
+                    $result,
+                    $context . ' csrf must be required.'
+                );
+            }
+
+            $normalized[] = [
+                'tool' => $tool,
+                'action' => $action,
+                'label' => $label,
+                'description' => $description,
+                'permission' => $permission,
+                'method' => $method,
+                'csrf' => $csrf,
+            ];
+        }
+        return $normalized;
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_action_contract')) {
+    function red_addon_admin_tool_action_contract(
+        array $manifest,
+        $toolId,
+        $actionId
+    ) {
+        if (!is_string($toolId)
+            || !red_addon_valid_capability($toolId)
+            || !is_string($actionId)
+            || !red_addon_valid_capability($actionId)
+            || !array_key_exists('adminToolActionContracts', $manifest)
+        ) {
+            return null;
+        }
+        $result = ['errors' => [], 'warnings' => []];
+        $tools = red_addon_validate_string_list(
+            $manifest['provides']['adminTools'] ?? null,
+            'Provides adminTools',
+            200,
+            'red_addon_valid_capability',
+            $result
+        );
+        $permissions = red_addon_validate_string_list(
+            $manifest['permissions'] ?? null,
+            'Permissions',
+            200,
+            'red_addon_valid_permission',
+            $result
+        );
+        $contracts = red_addon_validate_admin_tool_action_contracts(
+            $manifest['adminToolActionContracts'] ?? null,
+            $tools,
+            $permissions,
+            $result
+        );
+        if ($result['errors'] !== []) {
+            return null;
+        }
+        foreach ($contracts as $contract) {
+            if (hash_equals($toolId, $contract['tool'])
+                && hash_equals($actionId, $contract['action'])
+            ) {
+                return $contract;
+            }
+        }
+        return null;
+    }
+}
+
 if (!function_exists('red_addon_validate_component_editors')) {
     function red_addon_validate_component_editors(
         $editors,
@@ -1398,7 +1604,12 @@ if (!function_exists('red_addon_validate_manifest')) {
             $manifest,
             $requiredTopLevel,
             array_merge(
-                ['$schema', 'componentEditors', 'adminToolContracts'],
+                [
+                    '$schema',
+                    'componentEditors',
+                    'adminToolContracts',
+                    'adminToolActionContracts',
+                ],
                 $requiredTopLevel
             ),
             'Manifest',
@@ -1557,6 +1768,15 @@ if (!function_exists('red_addon_validate_manifest')) {
         if (array_key_exists('adminToolContracts', $manifest)) {
             red_addon_validate_admin_tool_contracts(
                 $manifest['adminToolContracts'],
+                $providedCapabilities['adminTools'],
+                $declaredPermissions,
+                $result
+            );
+        }
+
+        if (array_key_exists('adminToolActionContracts', $manifest)) {
+            red_addon_validate_admin_tool_action_contracts(
+                $manifest['adminToolActionContracts'],
                 $providedCapabilities['adminTools'],
                 $declaredPermissions,
                 $result

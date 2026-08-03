@@ -19,11 +19,14 @@ editor, validation, rendering, and cleanup contract, and a fail-closed
 migration manifest with explicit reporting and transaction guards. They also
 require closed, non-executing add-on discovery with exact path, compatibility,
 dependency, route, settings, and SHA-256 inventory validation.
-The 46-assertion trust fixture also validates optional administrator-tool
-contracts as data only: each contract must reference one provided tool, one
-already-requested permission, bounded label/description/icon metadata, and the
-fixed `read-only` mode. Executable, writable, undeclared, or ungranted metadata
-fails without running package PHP.
+The 46-assertion trust fixture also validates optional administrator-tool and
+administrator-action contracts as data only: each display contract references
+one provided tool, one already-requested permission, bounded
+label/description/icon metadata, and the fixed `read-only` mode. Each action
+contract references one provided tool, one unique action, one already-requested
+permission, bounded label/description metadata, and only `POST` with required
+CSRF. Executable, writable, undeclared, duplicate, ungranted, or weakened
+method/CSRF metadata fails without running package PHP.
 The separate 22-assertion setting-value fixture validates normalized manifest
 definitions, exact type-correct defaults, closed setting keys, required-value
 reporting, bounded text, strict booleans and integers, declared selections,
@@ -127,6 +130,14 @@ forms, buttons, scripts, or write actions. Output, exceptions, malformed
 results, buffer or HTTP-state changes fail closed; the endpoint is protected by
 administrator session and POST/CSRF checks; and all actor/role/grant fixtures
 are removed exactly.
+The separate 16-assertion administrator-action-preflight fixture requires one
+separately declared action and exactly matching registered tool/action owners.
+It proves a fresh exact action grant, no implicit Owner/lifecycle authority,
+case-sensitive revocation, strict positive integer target validation,
+deterministic contract/plan hashes, and plan change on target or contract
+drift. Both package callbacks remain uninvoked, the fixture tables remain
+unchanged across preflight, no action endpoint exists, and all temporary
+administrator/role/grant rows are removed exactly.
 The next 20-assertion disposable fixture requires exactly one loader for each
 declared editor and refuses undeclared or duplicate loaders. It proves exact
 view permission, enabled parent/runtime/manifest ownership, normalized returned
@@ -273,7 +284,7 @@ non-destructive atomic disablement foundations, fail-closed enabled-package
 request bootstrap, plus
 Milestone 5 content-version, direct page-structure, and custom Layout Builder
 foundations.
-The latest complete 2026-08-02 run passed the
+The latest complete 2026-08-03 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 46-assertion add-on trust contract, 22-assertion
 add-on setting-value contract, 18-assertion add-on secret-reference
@@ -287,12 +298,14 @@ drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
 23-assertion add-on setting storage, authorization preflight, and atomic writer,
 18-assertion permission-scoped administrator-tool dispatch,
+16-assertion non-executing administrator-action preflight,
 20-assertion bounded component-editor data-loader lifecycle,
 47-assertion operational component form, transactional component-editor update, history, restore-preflight,
 and atomic-restore lifecycle,
 85-assertion component-creation preflight/atomic-runner/parent-metadata/public-placement-preflight/atomic-placement/atomic-delete lifecycle,
 23-assertion add-on registry and immutable asset-delivery preflight, 8-assertion
-static immutable asset endpoint, 19-assertion disabled
+static immutable asset endpoint, 11-assertion core-owned public/admin asset
+injection, 19-assertion disabled
 installation/recovery, 23-assertion read-only enablement preflight,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component

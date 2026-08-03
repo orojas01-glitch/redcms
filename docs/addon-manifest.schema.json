@@ -134,6 +134,13 @@
         "$ref": "#/$defs/adminToolContract"
       }
     },
+    "adminToolActionContracts": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/adminToolActionContract"
+      }
+    },
     "settings": {
       "type": "array",
       "maxItems": 200,
@@ -379,6 +386,46 @@
         },
         "mode": {
           "const": "read-only"
+        }
+      }
+    },
+    "adminToolActionContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "action",
+        "label",
+        "description",
+        "permission",
+        "method",
+        "csrf"
+      ],
+      "properties": {
+        "tool": {
+          "$ref": "#/$defs/capability"
+        },
+        "action": {
+          "$ref": "#/$defs/capability"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "permission": {
+          "$ref": "#/$defs/permission"
+        },
+        "method": {
+          "const": "POST"
+        },
+        "csrf": {
+          "const": "required"
         }
       }
     },

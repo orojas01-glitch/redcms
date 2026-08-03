@@ -15,9 +15,10 @@ implemented as activation-blocked prerequisites. Read-only inactive component
 creation planning and its activation-blocked atomic runner are implemented.
 Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
-Typed internal services, exact static public `GET` routes, and display-only
-administrator tools now have separate fail-closed dispatch boundaries.
-Adapters, writable route/tool actions, settings UI/endpoints, actual secret
+Typed internal services, exact static public `GET` routes, display-only
+administrator tools, and non-executing administrator action preflight now have
+separate fail-closed boundaries. Adapters, operational writable route/tool
+actions, settings UI/endpoints, actual secret
 lookup, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
 
@@ -201,7 +202,7 @@ Every package declares:
 - Package type and provided capabilities
 - Required and optional package dependencies
 - Requested administrator permissions
-- Components, services, administrator tools, and adapters
+- Components, services, administrator tools, administrator actions, and adapters
 - Optional data-only component editor schemas
 - Settings schema, including which settings are secret references
 - Ordered immutable migrations and their checksums
@@ -255,6 +256,17 @@ An illustrative manifest shape is:
       "icon": "orders",
       "permission": "store.orders.view",
       "mode": "read-only"
+    }
+  ],
+  "adminToolActionContracts": [
+    {
+      "tool": "redcms.store-lite/orders",
+      "action": "redcms.store-lite/mark-order-paid",
+      "label": "Mark order paid",
+      "description": "Preflight a manual payment transition for one order.",
+      "permission": "store.orders.manage",
+      "method": "POST",
+      "csrf": "required"
     }
   ],
   "componentEditors": [
@@ -815,7 +827,7 @@ lifecycle transition or lifecycle CLI:
 - the entry point must return exactly one registrar callable; neither inclusion
   nor registrar invocation may emit output, and the registrar must return null;
 - registration accepts only manifest-declared component, service,
-  administrator-tool, adapter, and route identifiers;
+  administrator-tool, administrator-action, adapter, and route identifiers;
 - each declared component editor requires exactly one data loader and may bind
   at most one creator and one existing-record writer with closed package-table
   metadata; creator invocation is limited to the exact activation-blocked
@@ -841,8 +853,9 @@ above, and a declared writer only through the transaction/state/postcondition
 gate above. Services dispatch only through the typed internal boundary below.
 Exact static public `GET` routes may dispatch only through the core JSON
 boundary below. A declared read-only administrator tool may dispatch only
-through the fresh-permission/core-renderer boundary below; adapters remain
-non-dispatched.
+through the fresh-permission/core-renderer boundary below. A declared
+administrator action may only establish non-executing preflight evidence
+through the separate action boundary below; adapters remain non-dispatched.
 Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
@@ -999,12 +1012,34 @@ oversized results fail closed. `admin/bin/view_addon_tool.php` is POST-only,
 requires a current protected administrator session and CSRF token, bootstraps
 the enabled registrar, and invokes only this dispatcher.
 
-This first slice exposes no package HTML, links, forms, buttons, scripts,
-styles, actions, writes, database connection, session, request globals,
-uploads, redirects, arbitrary headers, audit event, or grant-management UI.
-The existing enablement profiles still reject packages that provide
-administrator tools, so this prerequisite does not activate Store Lite or any
-richer package.
+An optional `adminToolActionContracts` entry is separate data-only metadata for
+a future write action. It maps one provided tool to one unique action id, a
+bounded label and description, one explicitly declared permission, and only
+`POST` with `csrf: required`. The manifest validator rejects undeclared tools,
+duplicate or tool-equal action ids, ungranted permissions, executable fields,
+other methods, and any weaker CSRF declaration without loading package PHP.
+Each declared action must also have exactly one registrar-bound
+`registerAdminToolAction()` callback, but the callback is not invoked by this
+slice.
+
+`includes/addon_admin_tool_action_preflight_helpers.php` is a separate
+read-only gate. It requires the exact enabled request-local tool and action
+owners to agree, recreates the data-only contract, performs a fresh
+case-sensitive permission check in the current client database, accepts only a
+positive integer target record id, and returns deterministic contract and plan
+SHA-256 values. It reads no package record and writes no state. It does not
+start a transaction, invoke either package callback, accept request/session
+globals, render a form, or expose an endpoint. The declared CSRF policy is
+evidence for a later protected endpoint; it is not an authorization substitute
+and no CSRF token is consumed here.
+
+Display-only tool dispatch still exposes no package HTML, links, forms,
+buttons, scripts, styles, actions, writes, package-data connection, uploads,
+redirects, arbitrary headers, audit event, or grant-management UI. The new
+action preflight adds no action runner, UI, endpoint, transaction, audit fact,
+or enablement eligibility. Existing enablement profiles still reject packages
+that provide administrator tools, so neither boundary activates Store Lite or
+any richer package.
 
 ## Data, Migration, And Client Isolation
 
@@ -1318,8 +1353,10 @@ responses, or structured data.
    are implemented. Deterministic namespaced CSS/JavaScript asset planning,
    read-only immutable delivery preflight, and the core-owned static immutable
    delivery endpoint and core-owned public/admin document injection are also
-   implemented; editing UI, actual secret lookup, and activation readiness
-   remain separate. Read-only inactive component-creation
+   implemented. Data-only administrator action contracts and their exact
+   runtime-owner/permission/numeric-target preflight are also implemented,
+   without action execution, UI, or endpoint; editing UI, actual secret lookup,
+   and activation readiness remain separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
    implemented. Read-only delete planning and its atomic inactive runner are
