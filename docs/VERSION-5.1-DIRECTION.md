@@ -691,9 +691,16 @@ request bootstrap excludes the disabled package.
     declared InnoDB tables, and server-derived postconditions are then committed
     with package state and one value-free anonymous audit fact. Exact replay,
     conflicting commands, output/exception/rollback failures, drift, and audit
-    failure refuse or roll back. There remains no public dispatcher, response,
-    browser behavior, richer enablement profile, package fixture, or Store Lite
+    failure refuse or roll back. There remains no public dispatcher, response
+    emitter, browser behavior, richer enablement profile, package fixture, or Store Lite
     package.
+50. Completed the pure core-only public-mutation response contract: it maps
+    only the fixed `accepted` / `unchanged` outcomes and five generic refusal
+    cases to exact no-store/nosniff JSON envelopes with a closed header set.
+    A replay retains only the original outcome. The model reads no request,
+    cookie, session, database, or package state and emits no HTTP response; it
+    creates no route, dispatcher, enablement profile, package fixture, or Store
+    Lite behavior.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

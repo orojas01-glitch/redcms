@@ -244,8 +244,13 @@ features.
   opaque evidence from a future core dispatcher, then atomically verifies CSRF,
   idempotency, rate and server-derived state before committing declared package
   state, a bounded replay outcome, and a value-free audit fact. There is no
-  endpoint, response, browser cookie/header, public package execution, or
+  endpoint, emitted response, browser cookie/header, public package execution, or
   Store Lite package enabled by this foundation
+- Pure core-owned public-mutation response contract with exact JSON envelopes
+  for `accepted` / `unchanged` and five bounded refusals. It computes only
+  fixed no-store, nosniff, content-type, length, and POST-allow headers; it
+  does not parse a request, emit a header/cookie/body, load a package, or add a
+  public endpoint or Store Lite behavior
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

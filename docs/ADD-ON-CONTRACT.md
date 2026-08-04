@@ -1014,8 +1014,9 @@ continue to reject routes until richer package lifecycle gates are reviewed.
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic
 core-owned path for a narrowly declared static public POST mutation. The
-internal transaction runner is implemented, but no public dispatcher, response,
-or enablement profile can reach it.
+internal transaction runner and pure bounded response contract are implemented,
+but no public dispatcher, response emission, or enablement profile can reach
+them.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,
@@ -1089,6 +1090,18 @@ core-supplied active connection to reviewed first-party PHP, not a database
 sandbox. Package code must not commit, roll back, use globals, emit output, or
 write outside its declared tables. The empty clean-starter ledger stores no raw
 token, request, route, package, cart, order, secret, or client business value.
+
+`includes/addon_public_mutation_response_helpers.php` is a dependency-free,
+non-emitting core response model. It turns only the runner's fixed
+`accepted` / `unchanged` outcomes and a closed refusal map into exact JSON
+envelopes. Those envelopes contain fixed `Content-Type`, `Cache-Control:
+no-store`, `X-Content-Type-Options: nosniff`, `Content-Length`, and, only for
+method refusal, `Allow: POST` headers. They expose no package, route, mutation,
+subject, token, key, replay flag, state, cart, order, plan, secret, or internal
+failure detail. The helper has no request-global, cookie, session, database,
+package-load, header/cookie emission, or lifecycle path. A future core
+dispatcher must still select and emit only a valid envelope after all request
+validation and transaction work complete.
 
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
