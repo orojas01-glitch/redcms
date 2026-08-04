@@ -44,6 +44,7 @@ if (!function_exists('red_addon_install_audit_event_allowed')) {
             'addon.disable.completed',
             'addon.settings.updated',
             'addon.action.completed',
+            'addon.public-mutation.completed',
         ], true);
     }
 }
@@ -83,7 +84,9 @@ if (!function_exists('red_addon_install_audit_record')) {
             || !red_addon_install_audit_event_allowed($eventName)
             || !red_addon_valid_package_id($packageId)
             || !red_addon_valid_semantic_version($packageVersion)
-            || $actorAdminRecordId <= 0
+            || ($actorAdminRecordId <= 0
+                && !($actorAdminRecordId === 0
+                    && $eventName === 'addon.public-mutation.completed'))
             || !red_addon_install_audit_result_allowed($result)
             || !red_addon_install_audit_detail_valid($detailCode)
         ) {

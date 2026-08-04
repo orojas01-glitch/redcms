@@ -39,8 +39,9 @@ flowchart TD
     G6 --> G7["Core anonymous-subject + CSRF foundation"]
     G7 --> G8["Core fixed-window rate-limit foundation"]
     G8 --> G9["Core opaque idempotency-key foundation"]
-    G9 --> G10["CURRENT / NEXT<br/>Transaction, response, richer enablement"]
-    G10 --> S["TARGET<br/>Store Lite optional package"]
+    G9 --> G10["Core atomic transaction runner + replay ledger"]
+    G10 --> G11["CURRENT / NEXT<br/>Bounded response + richer enablement"]
+    G11 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -50,8 +51,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9 complete;
-    class G10 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10 complete;
+    class G11 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -59,8 +60,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-only opaque idempotency-key foundation: the fourth empty per-client core table records only an opaque subject relation, SHA-256 scope, SHA-256 key digest, and expiry facts. A 10-minute key can be issued/resolved for one client database, declared route, and subject; no key is consumed, and there is still no public endpoint, emitted cookie/header, browser-session access, package execution, Store Lite state, or enablement change. |
-| Current milestone | Public-request and richer-enablement gates: atomic key consumption with the transaction runner, bounded response, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-only atomic public-mutation runner: the fifth empty per-client core table relates one idempotency key to keyed HMAC command/state evidence and a bounded outcome. A trusted in-memory first-party binding can be transactionally verified, replayed, or rolled back with one value-free audit fact; there is still no public endpoint, response, emitted cookie/header, browser-session access, Store Lite state, or enablement change. |
+| Current milestone | Public-request and richer-enablement gates: bounded core response construction, dispatcher/request parsing, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

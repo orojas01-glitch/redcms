@@ -1012,8 +1012,10 @@ continue to reject routes until richer package lifecycle gates are reviewed.
 
 ## Public Mutation Declaration Boundary
 
-[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the future
-generic core-owned path for a narrowly declared static public POST mutation.
+[PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic
+core-owned path for a narrowly declared static public POST mutation. The
+internal transaction runner is implemented, but no public dispatcher, response,
+or enablement profile can reach it.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,
@@ -1044,9 +1046,10 @@ relax route-bearing enablement.
 `includes/addon_public_mutation_subject_helpers.php` is a separate internal
 core-only foundation, not a package API. The clean starter's empty
 `RED_Addon_Public_Mutation_Subjects`,
-`RED_Addon_Public_Mutation_CSRF_Tokens`, and
-`RED_Addon_Public_Mutation_Rate_Limits`, plus
-`RED_Addon_Public_Mutation_Idempotency_Keys` are reserved core tables, so a
+`RED_Addon_Public_Mutation_CSRF_Tokens`,
+`RED_Addon_Public_Mutation_Rate_Limits`,
+`RED_Addon_Public_Mutation_Idempotency_Keys`, and
+`RED_Addon_Public_Mutation_Executions` are reserved core tables, so a
 manifest cannot declare them as package-owned. The subject and CSRF tables
 retain SHA-256 digests of random 256-bit values only. A future core endpoint may
 use the returned host-only secure cookie descriptor and declaration/database-
@@ -1059,10 +1062,10 @@ short-lived fixed-window row per client database, validated declaration, and
 opaque anonymous subject. The row contains only the subject record relation, a
 SHA-256 scope, the window/expiry facts, and a bounded count. Its internal claim
 allows at most 12 requests per 60 seconds, refuses caller-owned transactions,
-and fails closed when the exact InnoDB storage shape is unavailable. It neither
-receives a browser request nor loads package code; its non-public result is only
-for a future core dispatcher. Replay/idempotency consumption remains a later
-transaction-runner responsibility.
+and fails closed when the exact InnoDB storage shape is unavailable. Its
+transaction-only primitive is used by the internal runner. Neither form
+receives a browser request nor loads package code; the standalone result is only
+for a future core dispatcher.
 
 `includes/addon_public_mutation_idempotency_helpers.php` separately retains one
 short-lived key row per client database, validated declaration, and opaque
@@ -1071,13 +1074,26 @@ SHA-256 key digest, and creation/expiry facts. Its internal issuer returns a
 fresh 256-bit opaque key with a fixed 10-minute lifetime; its resolver proves
 only that the active subject and declaration match. It refuses issuance inside a
 caller-owned transaction and fails closed when exact core storage is unavailable.
-It does not consume a key or record a replay result: those actions remain part of
-the later atomic transaction runner.
+It does not consume a key or record a replay result itself: those actions are
+reserved to the separate atomic transaction runner.
+
+`includes/addon_public_mutation_execution_helpers.php` is the internal
+core-owned runner. It accepts no HTTP request and constructs no public response.
+It requires a current trusted enabled runtime binding for both a declared
+mutation handler and its state loader, locks lifecycle/package state, verifies
+the opaque subject, CSRF, idempotency key, rate decision, and declared InnoDB
+tables, then commits only the package change, keyed HMAC command/state replay
+evidence, and one value-free audit fact. Exact replays return a bounded stored
+outcome without calling package code; changed commands are refused. It passes a
+core-supplied active connection to reviewed first-party PHP, not a database
+sandbox. Package code must not commit, roll back, use globals, emit output, or
+write outside its declared tables. The empty clean-starter ledger stores no raw
+token, request, route, package, cart, order, secret, or client business value.
 
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
-cookie/header or session access, consumed replay ledger, handler, browser form,
-route eligibility, package fixture, or Store Lite behavior. It leaves legacy
+cookie/header or session access, browser form, route eligibility, package
+fixture, or Store Lite behavior. It leaves legacy
 public form operations unchanged. Each later live request stage remains a
 separate disposable-fixture and richer enablement review.
 

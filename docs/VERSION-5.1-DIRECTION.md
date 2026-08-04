@@ -29,12 +29,13 @@ value-free bounded outcomes; it adds no UI or public route. The separately
 documented public-mutation boundary now validates optional closed declaration
 metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
-response constraints; it still adds no dispatcher, emitted cookie/header or
-session access, ledger, package behavior, or enablement change. The separate
+response constraints; the internal transaction runner and replay ledger are now
+implemented, but there is still no dispatcher, emitted cookie/header or session
+access, package behavior, or enablement change. The separate
 read-only live-data preflight now binds a trusted declaration from an
 `installed_disabled` package to current per-client migration, table,
 typed-setting, opaque secret-availability, and core
-subject/CSRF/rate-limit/idempotency storage evidence without enabling it or
+subject/CSRF/rate-limit/idempotency/execution storage evidence without enabling it or
 loading package PHP. A separate
 internal core foundation stores only SHA-256 digests of opaque anonymous-subject
 and CSRF values in empty per-client tables and returns a future endpoint's
@@ -45,8 +46,16 @@ declared route, and subject. Neither provides a public endpoint, emits a
 cookie/header, accesses a browser cookie/session, executes package code, or
 changes activation. A companion idempotency-key foundation stores only an
 opaque subject relation, declaration/database scope hash, SHA-256 key digest,
-and expiry facts; it can issue or resolve a 10-minute key, but cannot consume a
-key or record a replay result.
+and expiry facts; its issuer/resolver can issue or resolve a 10-minute key but
+does not consume it itself. The fifth empty core execution table records only
+an idempotency-key relation, keyed HMAC command/state evidence, a bounded
+outcome, and completion time. An internal atomic runner accepts only a current
+trusted in-memory first-party registrar binding and typed evidence from a future
+core dispatcher, then verifies CSRF, key, rate, declared tables, and server
+postconditions before committing package state, replay evidence, and a
+value-free anonymous audit fact together. It is not an endpoint, response
+builder, browser bridge, Store Lite package, or database sandbox for arbitrary
+PHP.
 Adapters, operational writable route/tool actions,
 settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
@@ -649,7 +658,7 @@ request bootstrap excludes the disabled package.
     joins current trusted `installed_disabled` package evidence with the
     declared migration, package-table, typed-setting, and opaque
     secret-availability state for one client, returning only hashes and
-    counts. It can attest exact core subject/CSRF/rate-limit/idempotency
+    counts. It can attest exact core subject/CSRF/rate-limit/idempotency/execution
     storage but does not itself issue values, dispatch a request, resolve a
     secret, execute package code, change lifecycle, or write package state.
 46. Completed the internal core-only anonymous-subject and CSRF foundation:
@@ -658,7 +667,7 @@ request bootstrap excludes the disabled package.
     descriptor expires after 30 minutes, and declaration/database-scoped CSRF
     values expire after 10 minutes. There is no public dispatcher or endpoint,
     emitted cookie/header, browser cookie/session access, package execution,
-    idempotency-consumption/rate-limit/transaction runner, Store Lite package, or activation
+    Store Lite package, or activation
     change.
 47. Completed the internal core-only fixed-window rate-limit foundation: one
     empty per-client core table stores only an opaque subject relation, a
@@ -666,16 +675,25 @@ request bootstrap excludes the disabled package.
     An internal core claim permits at most 12 requests per 60 seconds for one
     client, declared route, and subject; it rejects caller-owned transactions
     and unavailable storage. There is no request parser, dispatcher, emitted
-    cookie/header, package execution, consumed idempotency replay ledger, package mutation,
+    cookie/header, package execution, package mutation,
     Store Lite package, or activation change.
 48. Completed the internal core-only opaque idempotency-key foundation: one
     empty per-client core table stores only an opaque subject relation, a
     declaration/database SHA-256 scope, a SHA-256 key digest, and expiry facts.
     The internal issuer/resolver handles only a 10-minute key for one client,
     declared route, and subject; it refuses caller-owned issuance transactions.
-    There is no key consumption, replay result, request parser, dispatcher,
-    emitted cookie/header, package execution, package mutation, Store Lite
-    package, or activation change.
+    Its issuer/resolver does not itself consume a key or return a replay result.
+49. Completed the internal core-only atomic public-mutation transaction runner:
+    one fifth empty per-client ledger holds only the idempotency-key relation,
+    keyed HMAC command/state evidence, a bounded `accepted` / `unchanged`
+    outcome, and completion time. A current trusted first-party runtime binding
+    can be revalidated under lifecycle/package locks; subject, CSRF, key, rate,
+    declared InnoDB tables, and server-derived postconditions are then committed
+    with package state and one value-free anonymous audit fact. Exact replay,
+    conflicting commands, output/exception/rollback failures, drift, and audit
+    failure refuse or roll back. There remains no public dispatcher, response,
+    browser behavior, richer enablement profile, package fixture, or Store Lite
+    package.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

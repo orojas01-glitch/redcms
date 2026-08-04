@@ -225,8 +225,8 @@ features.
 - Read-only public-mutation declaration and live-data preflights that bind one
   trusted installed-disabled package to value-free per-client migration,
   InnoDB-table, typed-setting, opaque-secret-availability, and core
-  subject/CSRF/rate-limit/idempotency storage evidence without dispatch, secret resolution,
-  package execution, or state change
+  subject/CSRF/rate-limit/idempotency/execution storage evidence without
+  dispatch, secret resolution, package execution, or state change
 - Internal core-only anonymous-subject and CSRF storage with SHA-256-only
   persistence, a future host-only secure cookie descriptor, and declaration- and
   database-scoped expiry; no browser endpoint, header, session, package access,
@@ -237,8 +237,15 @@ features.
   reads, browser response, Store Lite state, or enablement change
 - Internal core-only opaque idempotency-key storage and issue/resolve helper:
   one 10-minute SHA-256-only key for one client database, declared package
-  route, and opaque anonymous subject; no public dispatcher, key consumption,
-  replay result, package access, Store Lite state, or enablement change
+  route, and opaque anonymous subject; its issuer/resolver has no public
+  dispatcher, browser access, Store Lite state, or enablement change
+- Internal core-only atomic public-mutation runner with keyed replay evidence:
+  it accepts only a trusted in-memory registrar binding plus typed command and
+  opaque evidence from a future core dispatcher, then atomically verifies CSRF,
+  idempotency, rate and server-derived state before committing declared package
+  state, a bounded replay outcome, and a value-free audit fact. There is no
+  endpoint, response, browser cookie/header, public package execution, or
+  Store Lite package enabled by this foundation
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

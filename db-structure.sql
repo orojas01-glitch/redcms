@@ -217,6 +217,28 @@ CREATE TABLE `RED_Addon_Public_Mutation_Idempotency_Keys` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Public_Mutation_Executions`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Public_Mutation_Executions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Public_Mutation_Executions` (
+  `RecordID` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `IdempotencyRecordID` int unsigned NOT NULL,
+  `CommandSHA256` char(64) NOT NULL,
+  `Outcome` varchar(16) NOT NULL,
+  `PreviousStateSHA256` char(64) NOT NULL,
+  `StateSHA256` char(64) NOT NULL,
+  `CompletedAt` datetime NOT NULL,
+  PRIMARY KEY (`RecordID`),
+  UNIQUE KEY `uq_red_addon_public_mutation_execution_idempotency` (`IdempotencyRecordID`),
+  KEY `idx_red_addon_public_mutation_execution_completed` (`CompletedAt`,`RecordID`),
+  CONSTRAINT `fk_red_addon_public_mutation_execution_idempotency` FOREIGN KEY (`IdempotencyRecordID`) REFERENCES `RED_Addon_Public_Mutation_Idempotency_Keys` (`RecordID`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Addon_Settings`
 --
 

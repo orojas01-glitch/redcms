@@ -242,6 +242,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, SubjectRecordID, ScopeSHA256, WindowStartedAt, RequestCount, ExpiresAt))), 0) FROM RED_Addon_Public_Mutation_Rate_Limits),
             (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Idempotency_Keys),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, SubjectRecordID, ScopeSHA256, KeySHA256, CreatedAt, ExpiresAt))), 0) FROM RED_Addon_Public_Mutation_Idempotency_Keys),
+            (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, IdempotencyRecordID, CommandSHA256, Outcome, PreviousStateSHA256, StateSHA256, CompletedAt))), 0) FROM RED_Addon_Public_Mutation_Executions),
             (SELECT COUNT(*) FROM RED_Articles),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, Title, Component, Alias, Sections, Categories, SubCategories, Layout, Active, Updated))), 0) FROM RED_Articles)
         );
@@ -1182,6 +1184,7 @@ red_acceptance_all_table_checksums() {
             RED_Addon_Public_Mutation_CSRF_Tokens,
             RED_Addon_Public_Mutation_Rate_Limits,
             RED_Addon_Public_Mutation_Idempotency_Keys,
+            RED_Addon_Public_Mutation_Executions,
             RED_Articles,
             RED_C_Form,
             RED_C_Gallery,
@@ -4669,8 +4672,8 @@ installer_admin_seed="$(red_acceptance_app_mysql --execute="
     SELECT CONCAT_WS(':', COUNT(*), SUM(CHAR_LENGTH(Password)=60), SUM(Email='')) FROM RED_Admin;
 ")"
 
-red_acceptance_assert_equals 'installer table count' '31' "$installer_table_count"
-red_acceptance_assert_equals 'installer InnoDB table count' '31' "$installer_innodb_count"
+red_acceptance_assert_equals 'installer table count' '32' "$installer_table_count"
+red_acceptance_assert_equals 'installer InnoDB table count' '32' "$installer_innodb_count"
 red_acceptance_assert_equals 'installer non-utf8mb4 character columns' '0' "$installer_non_utf8_count"
 red_acceptance_assert_equals 'installer migration ledger count' '0' "$installer_migration_count"
 red_acceptance_assert_equals 'installer sanitized administrator seeds' '2:2:2' "$installer_admin_seed"
@@ -4761,6 +4764,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running core-owned public-mutation idempotency-key checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-idempotency-self-test.php"
 
+printf '%s\n' 'Running atomic core-only public-mutation transaction-runner checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-execution-self-test.php"
+
 printf '%s\n' 'Running Owner-authorized atomic add-on enablement checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-enable-self-test.php"
 
@@ -4806,6 +4812,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_CSRF_Tokens),
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Rate_Limits),
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Idempotency_Keys),
+        (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions),
         (SELECT COUNT(*) FROM RED_Advanced),
         (SELECT COUNT(*) FROM RED_Articles),
         (SELECT COUNT(*) FROM RED_C_Form),
@@ -4872,10 +4879,10 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
       );
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '33:33:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '34:34:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"

@@ -50,6 +50,22 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->allowed['adminToolActionStateLoaders'] = $adminToolActions;
             $this->handlers['adminToolActionStateLoaders'] = [];
             $this->metadata['adminToolActionStateLoaders'] = [];
+            $publicMutations = [];
+            foreach ($manifest['publicMutationContracts'] ?? [] as $contract) {
+                $mutationId = is_array($contract)
+                    && is_string($contract['mutation'] ?? null)
+                        ? $contract['mutation']
+                        : '';
+                if (red_addon_valid_capability($mutationId)) {
+                    $publicMutations[$mutationId] = true;
+                }
+            }
+            $this->allowed['publicMutationHandlers'] = $publicMutations;
+            $this->handlers['publicMutationHandlers'] = [];
+            $this->metadata['publicMutationHandlers'] = [];
+            $this->allowed['publicMutationStateLoaders'] = $publicMutations;
+            $this->handlers['publicMutationStateLoaders'] = [];
+            $this->metadata['publicMutationStateLoaders'] = [];
             $componentDataLoaders = [];
             $componentEditors = is_array($manifest['componentEditors'] ?? null)
                 ? $manifest['componentEditors']
@@ -197,6 +213,29 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             return array_keys($normalized);
         }
 
+        private function publicMutationTransactionTables(array $tables): array
+        {
+            $normalized = [];
+            foreach ($tables as $table) {
+                if (!red_addon_valid_public_mutation_table($table)
+                    || isset($normalized[$table])
+                ) {
+                    throw new LogicException(
+                        'Public mutation transaction table is invalid.'
+                    );
+                }
+                $normalized[$table] = true;
+            }
+            if ($normalized === [] || count($normalized) > 8) {
+                throw new LogicException(
+                    'Public mutation persistence requires one to eight package tables.'
+                );
+            }
+            $tables = array_keys($normalized);
+            sort($tables, SORT_STRING);
+            return $tables;
+        }
+
         public function registerComponentDataCreator(
             string $id,
             callable $handler,
@@ -259,6 +298,26 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             callable $handler
         ): void {
             $this->register('adminToolActionStateLoaders', $id, $handler);
+        }
+
+        public function registerPublicMutation(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $this->register(
+                'publicMutationHandlers',
+                $id,
+                $handler,
+                ['tables' => $this->publicMutationTransactionTables($tables)]
+            );
+        }
+
+        public function registerPublicMutationStateLoader(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register('publicMutationStateLoaders', $id, $handler);
         }
 
         public function registerAdapter(string $id, callable $handler): void
@@ -349,6 +408,8 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'adminTools',
                     'adminToolActions',
                     'adminToolActionStateLoaders',
+                    'publicMutationHandlers',
+                    'publicMutationStateLoaders',
                     'adapters',
                     'routes',
                 ]
@@ -628,6 +689,22 @@ if (!function_exists('red_addon_runtime_namespace_errors')) {
                 if (isset($owners[$ownerKey])) {
                     $errors[] = 'enabled_runtime_capability_conflict:' .
                         'adminToolActions:' . $actionId;
+                    continue;
+                }
+                $owners[$ownerKey] = $packageId;
+            }
+            foreach ($manifest['publicMutationContracts'] ?? [] as $contract) {
+                $mutationId = is_array($contract)
+                    && is_string($contract['mutation'] ?? null)
+                        ? $contract['mutation']
+                        : '';
+                if (!red_addon_valid_capability($mutationId)) {
+                    continue;
+                }
+                $ownerKey = 'publicMutationHandlers' . "\0" . $mutationId;
+                if (isset($owners[$ownerKey])) {
+                    $errors[] = 'enabled_runtime_capability_conflict:' .
+                        'publicMutationHandlers:' . $mutationId;
                     continue;
                 }
                 $owners[$ownerKey] = $packageId;
