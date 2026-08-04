@@ -172,9 +172,10 @@ The generic boundary for a future add-to-cart request is documented in
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md). The generic core
 can now validate optional closed declaration metadata and, separately, inspect
 the current migration, table, setting, and opaque-secret-availability evidence
-for a trusted installed-disabled package without exposing values. Store Lite
-still has no public mutation route, anonymous cart cookie, package files,
-tables, or enablement profile.
+for a trusted installed-disabled package without exposing values. It also has
+an internal hash-only anonymous-subject/CSRF foundation for a later core
+dispatcher. Store Lite still has no public mutation route, browser cart cookie,
+package files, tables, or enablement profile.
 
 The initial order states should remain small:
 
@@ -268,10 +269,10 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - exact static public `GET` routes are complete as a core-owned JSON boundary,
   while unsafe/member/placeholder routes and route-bearing package enablement
   remain gated. The public-mutation declaration preflight plus separate
-  read-only live-data evidence reserve a future core-owned static POST path
-  and inspect only trusted installed-disabled client data readiness; they do
-  not dispatch it, create an anonymous cart subject, resolve secrets, or relax
-  any route/enablement gate;
+  read-only live-data evidence and internal hash-only subject/CSRF foundation
+  reserve a future core-owned static POST path and inspect only trusted
+  installed-disabled client data readiness; they do not dispatch it, emit a
+  browser cart cookie, resolve secrets, or relax any route/enablement gate;
 - declared administrator routes;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
@@ -344,28 +345,34 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Completed the optional public-mutation declaration preflight without adding
-   a dispatcher, cookie/session, ledger, package code, or Store Lite behavior.
+   a dispatcher, emitted cookie/header or session access, ledger, package code,
+   or Store Lite behavior.
    It remains a prerequisite for a later cart write path.
 5. Completed the separate read-only public-mutation live-data preflight. It
    checks current trusted installed-disabled migration, InnoDB-table,
    typed-setting, and opaque-secret-availability evidence through hashes and
-   counts only; it does not dispatch, enable, execute package code, issue a
-   cart subject/CSRF/idempotency value, resolve secrets, or write state.
-6. Continue with generic public-mutation request foundations and settings
-   UI/endpoints as separately reviewed batches. Typed internal service
+   counts only; it does not dispatch, enable, execute package code, resolve
+   secrets, or write package state.
+6. Completed the generic core-only anonymous-subject/CSRF foundation: two
+   empty per-client tables store hashes only, with a future secure host-only
+   cookie descriptor and declaration/database-scoped CSRF values. It adds no
+   endpoint, emitted cookie/header, cart identity, package behavior, or
+   enablement change.
+7. Continue with rate-limit/idempotency/transaction/response foundations and
+   settings UI/endpoints as separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
    internal atomic settings persistence, non-executing server-local secret
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-7. Create Store Lite in its separate distribution using only those accepted
+8. Create Store Lite in its separate distribution using only those accepted
    contracts.
-8. Add package-owned migrations, Product editing, catalog, cart, orders, and
+9. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-9. Validate disable/re-enable, failure recovery, migration, responsive
+10. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-10. Add a separately reviewed hosted-payment adapter only after the
+11. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

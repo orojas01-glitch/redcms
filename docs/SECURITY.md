@@ -667,11 +667,24 @@ tokens, check live table state, start a transaction, or invoke a handler.
 A separate read-only live-data preflight now uses that trusted declaration only
 after the package is current and `installed_disabled`. It reads the one
 client's existing migration ledger, declared package-table engines, typed
-setting state, and opaque secret-reference availability; its plan returns only
-counts and SHA-256 evidence, never table names, setting values, references, or
-secret material. It remains non-activating and non-executing: it does not
-dispatch a request, issue anonymous/CSRF/idempotency material, resolve a
-secret, load package PHP, mutate a table, or relax any enablement profile.
+setting state, opaque secret-reference availability, and exact core
+anonymous-subject/CSRF storage shape; its plan returns only counts and SHA-256
+evidence, never table names, setting values, references, or secret material. It
+remains non-activating and non-executing: it does not itself issue values,
+dispatch a request, resolve a secret, load package PHP, mutate package data, or
+relax any enablement profile.
+
+The separate internal subject/CSRF foundation is core-owned and client-scoped.
+Its two empty generic tables retain only SHA-256 digests of random 256-bit
+values, expiration facts, a scope hash, and an opaque subject relation; package
+manifest table declarations cannot claim them. The subject helper returns a
+future endpoint's host-only `Secure`, `HttpOnly`, `SameSite=Strict` cookie
+descriptor with a 30-minute lifetime, while CSRF values expire after 10 minutes
+and are bound to the current client database plus one validated declaration.
+It reads no `$_COOKIE`, starts no session, emits no header, logs no raw value,
+and gives no raw value to package code. Expired records are removed in bounded
+core cleanup; token consumption, replay prevention, and the containing
+transaction remain later work.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
@@ -679,9 +692,9 @@ scalar input validation, server-derived state, privacy-preserving rate and
 idempotency enforcement, package-table transaction containment, exact
 postcondition reload, and only bounded no-store/nosniff responses. It may not
 leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
-or payment data. No current enablement profile admits this capability; this
-foundation creates no dispatcher, cookie/session, ledger, package execution,
-Store Lite behavior, or client data.
+or payment data. No current enablement profile admits this capability; the
+foundation creates no public dispatcher or endpoint, emitted cookie/header or
+session access, ledger, package execution, Store Lite behavior, or client data.
 
 ## Multi-User Authorization
 

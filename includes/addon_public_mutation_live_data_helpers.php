@@ -14,6 +14,7 @@ require_once __DIR__ . '/addon_enable_preflight_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_preflight_helpers.php';
 require_once __DIR__ . '/addon_secret_availability_helpers.php';
 require_once __DIR__ . '/addon_setting_storage_helpers.php';
+require_once __DIR__ . '/addon_public_mutation_subject_helpers.php';
 
 if (!function_exists('red_addon_public_mutation_live_data_result')) {
     function red_addon_public_mutation_live_data_result(
@@ -584,6 +585,19 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight')) {
             return $result;
         }
         $result['databaseSha256'] = hash('sha256', $database);
+        if (red_addon_public_mutation_subject_storage_available($connection)) {
+            $result['gates']['anonymousSubject'] = 'passed';
+            $result['gates']['csrf'] = 'passed';
+        } else {
+            $result['gates']['anonymousSubject'] = 'blocked';
+            $result['gates']['csrf'] = 'blocked';
+            $result['blockers'][] = red_addon_public_mutation_live_data_blocker(
+                'anonymous_subject_storage_unavailable'
+            );
+            $result['blockers'][] = red_addon_public_mutation_live_data_blocker(
+                'public_csrf_storage_unavailable'
+            );
+        }
 
         $enablement = red_addon_enable_preflight_plan(
             $connection,
@@ -804,8 +818,6 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight')) {
         }
 
         foreach ([
-            ['anonymousSubject', 'anonymous_subject_contract_required'],
-            ['csrf', 'public_csrf_contract_required'],
             ['idempotency', 'public_idempotency_contract_required'],
             ['rateLimit', 'public_rate_limit_contract_required'],
             ['transactionRunner', 'public_mutation_transaction_runner_required'],
@@ -826,6 +838,8 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight')) {
             && $result['gates']['declaration'] === 'passed'
             && $result['gates']['migrations'] === 'passed'
             && $result['gates']['packageTables'] === 'passed'
+            && $result['gates']['anonymousSubject'] === 'passed'
+            && $result['gates']['csrf'] === 'passed'
             && in_array(
                 $result['gates']['settingsConfiguration'],
                 ['passed', 'not_applicable'],

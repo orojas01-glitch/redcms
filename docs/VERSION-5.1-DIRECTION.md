@@ -29,11 +29,17 @@ value-free bounded outcomes; it adds no UI or public route. The separately
 documented public-mutation boundary now validates optional closed declaration
 metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
-response constraints; it still adds no dispatcher, cookie/session, ledger,
-package behavior, or enablement change. The separate read-only live-data
+response constraints; it still adds no dispatcher, emitted cookie/header or
+session access, ledger, package behavior, or enablement change. The separate
+read-only live-data
 preflight now binds a trusted declaration from an `installed_disabled` package
-to current per-client migration, table, typed-setting, and opaque
-secret-availability evidence without enabling it or loading package PHP.
+to current per-client migration, table, typed-setting, opaque
+secret-availability, and core subject/CSRF storage evidence without enabling it
+or loading package PHP. A separate internal core foundation now stores only
+SHA-256 digests of opaque anonymous-subject and CSRF values in empty per-client
+tables and returns a future endpoint's secure host-only cookie descriptor. It
+does not provide a public endpoint, emit a cookie/header, access a browser
+cookie/session, execute package code, or change activation.
 Adapters, operational writable route/tool actions,
 settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
@@ -629,15 +635,24 @@ request bootstrap excludes the disabled package.
     value-free deterministic preflight: it binds one static public POST/CSRF
     route to fixed scalar, anonymous, idempotency, privacy, rate-limit,
     package-table, postcondition, audit, and outcome metadata; it invokes no
-    package code and adds no dispatcher, endpoint, cookie/session, database
-    access, ledger, package behavior, or enablement change.
+    package code and adds no dispatcher, endpoint, emitted cookie/header or
+    session access, database access, ledger, package behavior, or enablement
+    change.
 45. Completed a separate read-only public-mutation live-data preflight: it
     joins current trusted `installed_disabled` package evidence with the
     declared migration, package-table, typed-setting, and opaque
     secret-availability state for one client, returning only hashes and
-    counts. It adds no request dispatcher, anonymous subject, CSRF or
-    idempotency issuance, secret resolution, package execution, lifecycle
-    change, or database write.
+    counts. It can attest exact core subject/CSRF storage but does not itself
+    issue values, dispatch a request, resolve a secret, execute package code,
+    change lifecycle, or write package state.
+46. Completed the internal core-only anonymous-subject and CSRF foundation:
+    two empty per-client tables retain only SHA-256 digests of random 256-bit
+    values; a future host-only `Secure`, `HttpOnly`, `SameSite=Strict` cookie
+    descriptor expires after 30 minutes, and declaration/database-scoped CSRF
+    values expire after 10 minutes. There is no public dispatcher or endpoint,
+    emitted cookie/header, browser cookie/session access, package execution,
+    idempotency/rate-limit/transaction runner, Store Lite package, or activation
+    change.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

@@ -136,6 +136,45 @@ CREATE TABLE `RED_Addon_Admin_Action_Executions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Public_Mutation_Subjects`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Public_Mutation_Subjects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Public_Mutation_Subjects` (
+  `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
+  `SubjectTokenSHA256` char(64) NOT NULL,
+  `CreatedAt` datetime NOT NULL,
+  `ExpiresAt` datetime NOT NULL,
+  PRIMARY KEY (`RecordID`),
+  UNIQUE KEY `uq_red_addon_public_mutation_subject_token` (`SubjectTokenSHA256`),
+  KEY `idx_red_addon_public_mutation_subject_expiry` (`ExpiresAt`,`RecordID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `RED_Addon_Public_Mutation_CSRF_Tokens`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Public_Mutation_CSRF_Tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Public_Mutation_CSRF_Tokens` (
+  `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
+  `SubjectRecordID` int unsigned NOT NULL,
+  `ScopeSHA256` char(64) NOT NULL,
+  `TokenSHA256` char(64) NOT NULL,
+  `CreatedAt` datetime NOT NULL,
+  `ExpiresAt` datetime NOT NULL,
+  PRIMARY KEY (`RecordID`),
+  UNIQUE KEY `uq_red_addon_public_mutation_csrf_token` (`SubjectRecordID`,`ScopeSHA256`,`TokenSHA256`),
+  KEY `idx_red_addon_public_mutation_csrf_expiry` (`ExpiresAt`,`RecordID`),
+  CONSTRAINT `fk_red_addon_public_mutation_csrf_subject` FOREIGN KEY (`SubjectRecordID`) REFERENCES `RED_Addon_Public_Mutation_Subjects` (`RecordID`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Addon_Settings`
 --
 

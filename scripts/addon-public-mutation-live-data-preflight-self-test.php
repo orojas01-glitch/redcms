@@ -394,8 +394,9 @@ red_addon_public_mutation_live_data_test_cleanup(
 try {
     red_addon_public_mutation_live_data_test_assert(
         red_addon_registry_storage_available($connection)
-            && red_addon_setting_storage_available($connection),
-        'the disposable client has registry and generic setting storage'
+            && red_addon_setting_storage_available($connection)
+            && red_addon_public_mutation_subject_storage_available($connection),
+        'the disposable client has registry, settings, anonymous-subject, and CSRF storage'
     );
 
     $password = password_hash('MutationLiveData-2026!', PASSWORD_DEFAULT);
@@ -617,8 +618,8 @@ try {
             && $ready['gates']['secretAvailability'] === 'passed'
             && $ready['gates']['settingsEndpoint'] === 'not_implemented'
             && $ready['gates']['secretLookup'] === 'not_implemented'
-            && $ready['gates']['anonymousSubject'] === 'not_implemented'
-            && $ready['gates']['csrf'] === 'not_implemented'
+            && $ready['gates']['anonymousSubject'] === 'passed'
+            && $ready['gates']['csrf'] === 'passed'
             && $ready['gates']['idempotency'] === 'not_implemented'
             && $ready['gates']['rateLimit'] === 'not_implemented'
             && red_addon_public_mutation_live_data_preflight_is_valid($ready),
