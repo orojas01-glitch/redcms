@@ -388,7 +388,7 @@ try {
                     . 'WHERE SubjectRecordID=' .
                         (int) $subject['subjectRecordId']
             ) === '2',
-        'resolution is deliberately non-consuming until the later atomic transaction runner'
+        'resolution is deliberately non-consuming; only the separate atomic transaction runner may consume it'
     );
 
     mysqli_begin_transaction($connection);

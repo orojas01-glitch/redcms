@@ -169,12 +169,11 @@ no administrator control, form, or public route. The separately documented
 public-mutation boundary now validates optional closed declaration metadata and
 returns value-free non-executing preflight evidence for a future static-POST,
 anonymous, CSRF/idempotency/rate-limited core path. It still adds no dispatcher,
-emitted cookie/header or session access, consumed replay ledger, package
-behavior, or enablement change.
+emitted cookie/header or session access, package behavior, or enablement change.
 Its separate read-only live-data preflight can now bind one trusted,
 `installed_disabled` package declaration to current per-client migration,
 InnoDB-table, typed-setting, opaque-secret-availability, and exact core-owned
-anonymous-subject/CSRF/rate-limit/idempotency storage evidence. It returns
+anonymous-subject/CSRF/rate-limit/idempotency/execution storage evidence. It returns
 hashes and counts only, and still cannot enable, dispatch, resolve a secret,
 issue idempotency material, load package code, or write package state. The
 separate core-only subject/CSRF foundation stores only SHA-256 digests of opaque 256-bit values in
@@ -189,7 +188,16 @@ package code, or changes lifecycle or Store Lite state.
 The separate opaque idempotency-key foundation adds one empty core table holding
 only an opaque subject relation, a SHA-256 declaration/database scope, a
 SHA-256 key digest, and expiry facts. It can issue or resolve one 10-minute
-core key but cannot consume it or record a replay result.
+core key but cannot consume it or record a replay result itself. The new fifth
+empty core execution ledger holds only an idempotency-key relation, keyed HMAC
+command/state evidence, a bounded outcome, and completion time. Its internal
+atomic runner uses a trusted in-memory first-party registrar binding plus typed
+input from a future dispatcher, locks lifecycle/package state, verifies CSRF,
+key, rate, and server-derived postconditions, then commits package state,
+replay evidence, and a value-free anonymous audit fact together. It adds no
+endpoint, response, browser behavior, route execution, public package fixture,
+or Store Lite state; its callback connection is a reviewed first-party boundary,
+not a database sandbox.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -446,10 +454,10 @@ implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
 complete, a core-only authorized setting read model is complete, and the
-generic public-mutation subject/CSRF, fixed-window rate-limit, and opaque
-idempotency-key foundations are complete. Its protected settings UI/endpoint,
-actual public writable routes, atomic key consumption with
-transaction/response handling, actual secret lookup, live-data disable/upgrade
+generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
+idempotency-key, and atomic transaction-runner foundations are complete. Its
+protected settings UI/endpoint, bounded public request/response dispatcher,
+actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled.

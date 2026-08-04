@@ -172,12 +172,12 @@ The generic boundary for a future add-to-cart request is documented in
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md). The generic core
 can now validate optional closed declaration metadata and, separately, inspect
 the current migration, table, setting, opaque-secret-availability, and
-subject/CSRF/rate-limit/idempotency storage evidence for a trusted
+subject/CSRF/rate-limit/idempotency/execution storage evidence for a trusted
 installed-disabled package without exposing values. It also has internal
-hash-only anonymous-subject/CSRF, fixed-window rate-limit, and opaque
-idempotency-key foundations for a later core dispatcher. Store Lite still has
-no public mutation route, browser cart cookie, package files, tables, or
-enablement profile.
+hash-only anonymous-subject/CSRF, fixed-window rate-limit, opaque
+idempotency-key, and atomic transaction-runner foundations for a later core
+dispatcher. Store Lite still has no public mutation route, browser cart cookie,
+package files, tables, or enablement profile.
 
 The initial order states should remain small:
 
@@ -272,8 +272,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   while unsafe/member/placeholder routes and route-bearing package enablement
   remain gated. The public-mutation declaration preflight plus separate
   read-only live-data evidence, internal hash-only subject/CSRF foundation,
-  internal fixed-window rate-limit foundation, and opaque idempotency-key
-  foundation reserve a future core-owned static POST path and inspect only
+  internal fixed-window rate-limit foundation, opaque idempotency-key
+  foundation, and atomic transaction runner reserve a future core-owned static
+  POST path and inspect only
   trusted installed-disabled client data readiness; they do not dispatch it,
   emit a browser cart cookie, resolve secrets, or relax any route/enablement
   gate;
@@ -370,23 +371,30 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 8. Completed the generic core-only opaque idempotency-key foundation: one
    empty per-client table records only an opaque subject relation, SHA-256
    declaration/database scope, SHA-256 key digest, and expiry facts. It can
-   issue or resolve a 10-minute key, but cannot consume it, record a replay
-   result, dispatch a request, or change Store Lite state.
-9. Continue with atomic key consumption, transaction/response foundations and
-   settings UI/endpoints as separately reviewed batches. Typed internal service
+   issue or resolve a 10-minute key; its issuer/resolver cannot consume it or
+   record a replay result itself.
+9. Completed the generic core-only atomic transaction runner: one fifth empty
+   per-client ledger stores only an idempotency-key relation, keyed HMAC
+   command/state evidence, a bounded outcome, and completion time. A trusted
+   in-memory first-party binding can commit or roll back declared package state,
+   replay evidence, and one value-free audit fact together. It does not add a
+   dispatcher, response, browser cart cookie, enablement profile, or Store Lite
+   data.
+10. Continue with bounded request/response, richer-enablement, and settings
+   UI/endpoints as separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
    internal atomic settings persistence, non-executing server-local secret
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-10. Create Store Lite in its separate distribution using only those accepted
+11. Create Store Lite in its separate distribution using only those accepted
    contracts.
-11. Add package-owned migrations, Product editing, catalog, cart, orders, and
+12. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-12. Validate disable/re-enable, failure recovery, migration, responsive
+13. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-13. Add a separately reviewed hosted-payment adapter only after the
+14. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

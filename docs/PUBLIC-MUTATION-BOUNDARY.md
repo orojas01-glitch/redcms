@@ -3,12 +3,12 @@
 Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
-opaque idempotency-key foundation are implemented. This document records the
-prerequisite for a future public write dispatcher. It does **not** add a public
-dispatcher or endpoint, emitted
-cookie/header, browser session access, handler, package, permission, enablement
-profile, or Store Lite behavior. The four generic core tables remain empty in
-the clean starter.
+opaque idempotency-key foundation, and an internal atomic transaction runner
+are implemented. This document records the prerequisite for a future public
+write dispatcher. It does **not** add a public dispatcher or endpoint, emitted
+cookie/header, browser session access, package, permission, enablement profile,
+or Store Lite behavior. The five generic core tables remain empty in the clean
+starter.
 
 ## Purpose
 
@@ -34,12 +34,12 @@ changed by it.
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
-| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
+| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency/execution storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
 | Anonymous cart identity | Internal core subject issuance/resolution exists for a future endpoint; it is not a cart identity | No browser cookie read/write, session, package access, route, or client business data |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
-| Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject | No dispatcher, request parsing, package execution, idempotency, package-data mutation, or enablement |
-| Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No dispatcher, key consumption, replay result, package-data mutation, or enablement |
-| Public mutation ledger/audit | Does not exist | None |
+| Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
+| Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
+| Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No response, package fixture, browser behavior, or publicly reachable execution path |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
 The planned contract cannot make a route-bearing package eligible for the
@@ -94,7 +94,7 @@ only a current, trusted, `installed_disabled` package and one already-validated
 declaration, then reads the existing client migration ledger, the declaration's
 package-owned table engines, typed generic setting state, declared opaque
 secret-reference availability, and exact core-owned
-subject/CSRF/rate-limit/idempotency storage shape.
+subject/CSRF/rate-limit/idempotency/execution storage shape.
 
 Its deterministic plan returns no raw table name, setting value, opaque
 reference, or secret: it exposes only bounded counts, blocker codes, package
@@ -128,7 +128,7 @@ code.
 ## Implemented Core-Owned Rate-Limit Foundation
 
 `RED_Addon_Public_Mutation_Rate_Limits` is the third empty generic core table.
-The manifest validator reserves all four core table names, so an add-on cannot
+The manifest validator reserves all five core tables, so an add-on cannot
 claim any of them as package-owned storage. A rate row retains only an opaque
 subject record relation, SHA-256 scope, fixed window start/expiry facts, and a
 small request count. It never stores a raw subject or CSRF value, package id,
@@ -162,16 +162,50 @@ active anonymous subject and an already-valid declaration. The fixed lifetime
 is 10 minutes; expired evidence is removed in bounded cleanup, and parent
 subject expiry cascades related key rows. Issuance refuses a caller-owned
 transaction and fails closed when exact subject/CSRF/rate/idempotency storage is
-unavailable. Resolution remains deliberately non-consuming: a later core
-transaction runner must atomically reserve the key, package mutation, replay
-evidence, and audit fact together. No helper reads request/cookie/session
-globals, emits a response, loads package PHP, invokes a handler, changes
-lifecycle, or mutates package data.
+unavailable. Resolution remains deliberately non-consuming: the separate
+runner below is the only internal consumer. No helper reads request/cookie/
+session globals, emits a response, loads package PHP, invokes a handler,
+changes lifecycle, or mutates package data.
 
-## Future Core-Owned Request Path
+## Implemented Internal Atomic Runner
 
-When implementation is approved, core—not a theme, browser script, or package
-route file—must own this sequence:
+`RED_Addon_Public_Mutation_Executions` is the fifth empty generic core table.
+Its one-to-one relationship with an existing opaque idempotency-key record
+stores a keyed HMAC-SHA-256 command fingerprint, keyed previous/current
+server-derived state fingerprints, one of the bounded `accepted` / `unchanged`
+outcomes, and completion time. It stores no raw subject, CSRF value,
+idempotency key, package id, route, request body, secret, cart, order, or other
+business value. Parent-subject cleanup cascades through the key record to this
+ledger.
+
+`includes/addon_public_mutation_execution_helpers.php` is internal core code,
+not a public endpoint or a package API. Its entry point accepts only an
+already-typed command, a resolved opaque subject, raw CSRF/idempotency evidence
+from a future core dispatcher, and a current in-memory first-party runtime
+binding. Under the existing lifecycle and package locks it rechecks the enabled
+installation, subject, CSRF, key, declared InnoDB tables, fixed rate budget,
+state loader, postcondition, replay evidence, and one value-free audit fact in
+one transaction. Its in-transaction rate claim first performs the same bounded
+expired-rate cleanup, so the future runner path does not retain expired opaque
+rate evidence. Exact replay returns only its bounded stored outcome before a
+rate claim, state load, handler call, or second audit. A different command for
+the same key is refused. Output, exceptions, malformed results, transaction
+loss, postcondition drift, ledger/audit failure, and rate failure roll back or
+refuse as applicable.
+
+The registrar callback receives the core-supplied active transaction connection
+and final immutable request object. This is a reviewed first-party package
+boundary, not a database sandbox: a package is still forbidden to commit,
+roll back, alter output buffers, use request globals, or write outside its
+declared tables. The runner detects transaction loss and contains ordinary
+callback failure, but cannot make untrusted arbitrary PHP safe. There is no
+current public dispatcher, response builder, cookie/header emission, request
+parser, enabled package profile, or Store Lite package that can reach it.
+
+## Future Core-Owned Request And Response Path
+
+When a dispatcher and response contract are approved, core—not a theme, browser
+script, or package route file—must own this sequence:
 
 1. Recognize only a current trusted, enabled, static declaration in the
    reserved package namespace. It must reject every malformed, noncanonical,
@@ -197,17 +231,18 @@ route file—must own this sequence:
    package state on the server. A future request must be refused when rate-limit
    storage or required state evidence is unavailable; a client-provided retry
    flag cannot bypass a refusal.
-6. Invoke only one registrar-bound mutation handler through a future
-   core-owned transaction runner. The handler receives a final typed command
-   and controlled transaction context, never PHP request globals, raw cookies,
-   CSRF values, server headers, arbitrary SQL text, or a package-selected
-   connection. The runner must constrain writes to the declared package-owned
+6. Invoke only one registrar-bound mutation handler through the implemented
+   internal core-owned transaction runner. It receives a final typed command
+   and core-supplied active transaction connection, never PHP request globals,
+   raw cookies, CSRF values, or server headers. It remains reviewed first-party
+   PHP rather than a SQL sandbox, and must write only its declared package-owned
    InnoDB tables.
-7. Reserve the declared idempotency fact before mutation, reload the exact
-   server-derived postcondition afterward, and atomically commit the package
-   change, replay evidence, and one value-free audit fact. Output, exceptions,
-   buffer/header tampering, stale state, transaction loss, postcondition drift,
-   or ledger/audit failure must roll back or refuse the complete request.
+7. Use the implemented runner to reserve the declared idempotency fact before
+   mutation, reload the exact server-derived postcondition afterward, and
+   atomically commit the package change, replay evidence, and one value-free
+   audit fact. Output, exceptions, buffer tampering, stale state, transaction
+   loss, postcondition drift, or ledger/audit failure must roll back or refuse
+   the complete request.
 8. Construct the response in core. It may expose only a small documented
    success/refusal vocabulary with no-store and nosniff protections. It may
    not expose package/actor/cart/order/plan/state values, HTML, redirects,
@@ -258,19 +293,22 @@ mutation:
   asset injection, or mutation after disable, with client data retained.
 
 The live-data preflight now also attests exact generic
-subject/CSRF/rate-limit/idempotency storage in this list, but it supplies no key
-consumption, transaction, response, or richer-enablement evidence. No current
-enablement profile satisfies the complete set. The future validator must report
-a bounded, value-free refusal rather than silently downgrade a public write to a
-weaker route.
+subject/CSRF/rate-limit/idempotency/execution storage in this list, but it does
+not establish an enabled runtime binding, execute the runner, issue a response,
+or supply richer-enablement evidence. No current enablement profile satisfies
+the complete set. The future validator must report a bounded, value-free
+refusal rather than silently downgrade a public write to a weaker route.
 
 ## Required Future Acceptance Evidence
 
-The current 19-assertion subject/CSRF test, 15-assertion rate-limit test, and
-18-assertion idempotency test prove exact storage, hash-only/opaque persistence,
-declaration/database scope, the fixed 12-per-60-second cap, 10-minute key
-lifetime, subject-bound expiry, bounded cleanup, and absence of a package
-fixture. They are not HTTP, browser, or package-mutation acceptance.
+The current 19-assertion subject/CSRF test, 15-assertion rate-limit test,
+18-assertion idempotency test, and isolated atomic-runner fixture prove exact
+storage, hash-only/opaque persistence, declaration/database scope, the fixed
+12-per-60-second cap, 10-minute key lifetime, subject-bound expiry, bounded
+cleanup, replay/conflict handling, postcondition checks, and rollback of
+package/rate/ledger/audit state. The runner fixture uses only a disposable
+in-memory runtime context and temporary package table; it is not HTTP, browser,
+or package enablement acceptance.
 An implementation is not ready because a manifest validates or a route returns
 HTTP 200. A disposable, client-isolated acceptance suite must still prove:
 
@@ -335,10 +373,13 @@ This planning slice does not authorize:
    generic storage, client/declaration/subject scope, 10-minute expiry,
    hash-only persistence, bounded cleanup, and no consumption, dispatcher, or
    package behavior.
-7. A separate batch may add a transaction runner and core-owned bounded
-   responses, with disposable fixtures only.
-8. A separate richer enablement review may admit only packages that satisfy
+7. Completed the internal atomic transaction runner and keyed replay ledger
+   with disposable fixture-only package state. It still adds no dispatcher,
+   response, browser behavior, or enablement profile.
+8. A separate batch may add a core-owned bounded response contract and request
+   dispatcher, with disposable fixtures only.
+9. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-9. Store Lite can then implement its separately distributed catalog and cart
+10. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

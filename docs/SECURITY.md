@@ -668,7 +668,7 @@ A separate read-only live-data preflight now uses that trusted declaration only
 after the package is current and `installed_disabled`. It reads the one
 client's existing migration ledger, declared package-table engines, typed
 setting state, opaque secret-reference availability, and exact core
-anonymous-subject/CSRF/rate-limit/idempotency storage shape; its plan returns
+anonymous-subject/CSRF/rate-limit/idempotency/execution storage shape; its plan returns
 only counts and SHA-256 evidence, never table names, setting values, references,
 or secret material. It remains non-activating and non-executing: it does not
 itself issue values, dispatch a request, resolve a secret, load package PHP,
@@ -689,23 +689,40 @@ and are bound to the current client database plus one validated declaration.
 It reads no `$_COOKIE`, starts no session, emits no header, logs no raw value,
 and gives no raw value to package code. Expired records are removed in bounded
 core cleanup. The separate rate helper permits at most 12 requests per 60
-seconds per client, declared route, and opaque subject; it owns only a short
-InnoDB transaction, rejects caller-owned transactions, and fails closed on
-storage loss. The separate idempotency helper issues/resolves a 10-minute
+seconds per client, declared route, and opaque subject; its standalone claim
+owns a short InnoDB transaction, while the transaction runner invokes the same
+claim and bounded expired-rate cleanup inside its own transaction. Both reject
+unsafe transaction state and fail closed on storage loss. The separate
+idempotency helper issues/resolves a 10-minute
 256-bit opaque key only for the active subject and exact declaration, stores
 only its SHA-256 digest, and refuses issuance inside a caller-owned transaction.
-It does not consume a key or record a replay result. Token consumption, replay
-prevention, and the containing package transaction remain later work.
+It does not consume a key or record a replay result itself. The separate empty
+execution table retains only the idempotency-key relation, keyed HMAC command
+and state evidence, a bounded outcome, and completion time; it contains no raw
+request, token, package, cart, order, secret, or business value.
+
+The internal core-only transaction runner is not a public endpoint. It accepts
+only a typed command and opaque evidence from a later core dispatcher, plus a
+current trusted first-party runtime binding. Under lifecycle and package locks
+it validates the subject, CSRF, idempotency key, rate budget, declared InnoDB
+tables, server-derived state, replay ledger, and a value-free anonymous audit
+fact in one transaction. Replays return a bounded stored outcome; changed
+commands are refused. Output, exceptions, malformed results, state drift,
+transaction loss, ledger failure, and audit failure roll back or refuse.
+The callback receives a core-supplied transaction connection, so this is a
+reviewed first-party-PHP boundary rather than a database sandbox; package code
+must not commit, roll back, alter buffers, read request globals, or write
+outside its declared tables.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and
-idempotency enforcement, package-table transaction containment, exact
+idempotency enforcement, declared-package-table transaction support, exact
 postcondition reload, and only bounded no-store/nosniff responses. It may not
 leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
 or payment data. No current enablement profile admits this capability; the
 foundation creates no public dispatcher or endpoint, emitted cookie/header or
-session access, consumed replay ledger, package execution, Store Lite behavior,
+session access, public package execution, Store Lite behavior,
 or client data.
 
 ## Multi-User Authorization

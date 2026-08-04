@@ -622,6 +622,7 @@ try {
             && $ready['gates']['csrf'] === 'passed'
             && $ready['gates']['idempotency'] === 'passed'
             && $ready['gates']['rateLimit'] === 'passed'
+            && $ready['gates']['transactionRunner'] === 'passed'
             && red_addon_public_mutation_live_data_preflight_is_valid($ready),
         'complete current package, table, setting, and secret-availability evidence is deterministic but non-activating'
     );
@@ -705,7 +706,7 @@ try {
             && $unsupportedEngine['gates']['packageTables'] === 'blocked'
             && $unsupportedEngine['tableCount'] === 2
             && $unsupportedEngine['innoDbTableCount'] === 1,
-        'non-InnoDB declared tables block live-data readiness before any mutation runner exists'
+        'non-InnoDB declared tables block live-data readiness before a package can use the core runner'
     );
     mysqli_query($connection, "ALTER TABLE `$itemTable` ENGINE=InnoDB");
 

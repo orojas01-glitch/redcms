@@ -364,6 +364,151 @@ if (!function_exists('red_addon_public_mutation_rate_limit_locked_row')) {
     }
 }
 
+if (!function_exists('red_addon_public_mutation_rate_limit_claim_in_transaction')) {
+    function red_addon_public_mutation_rate_limit_claim_in_transaction(
+        $connection,
+        array $subject,
+        array $declarationPlan
+    ) {
+        $result = red_addon_public_mutation_rate_limit_result(
+            'rate_limit_unavailable'
+        );
+        $policy = red_addon_public_mutation_rate_limit_policy();
+        if (!red_addon_public_mutation_rate_limit_policy_valid($policy)
+            || !red_addon_public_mutation_rate_limit_storage_available($connection)
+        ) {
+            $result['reason'] = 'rate_limit_storage_unavailable';
+            return $result;
+        }
+        $subjectRecordId = red_addon_public_mutation_subject_record_id($subject);
+        if ($subjectRecordId < 1) {
+            $result['reason'] = 'rate_limit_subject_invalid';
+            return $result;
+        }
+        $scopeSha256 = red_addon_public_mutation_rate_limit_scope_sha256(
+            $connection,
+            $declarationPlan
+        );
+        if (!red_addon_valid_sha256($scopeSha256)) {
+            $result['reason'] = 'rate_limit_scope_invalid';
+            return $result;
+        }
+        $result['subjectRecordId'] = $subjectRecordId;
+        $result['scopeSha256'] = $scopeSha256;
+        $result['windowSeconds'] = (int) $policy['windowSeconds'];
+        $result['maxRequests'] = (int) $policy['maxRequests'];
+        if (!red_addon_public_mutation_rate_limit_transaction_active($connection)) {
+            $result['reason'] = 'transaction_required';
+            return $result;
+        }
+        if (!red_addon_public_mutation_rate_limit_cleanup($connection)) {
+            $result['reason'] = 'rate_limit_storage_unavailable';
+            return $result;
+        }
+        if (red_addon_public_mutation_rate_limit_locked_subject(
+            $connection,
+            $subjectRecordId
+        ) < 1) {
+            $result['reason'] = 'rate_limit_subject_invalid';
+            return $result;
+        }
+        $window = red_addon_public_mutation_rate_limit_current_window(
+            $connection
+        );
+        if ($window === []) {
+            $result['reason'] = 'rate_limit_storage_unavailable';
+            return $result;
+        }
+        $row = red_addon_public_mutation_rate_limit_locked_row(
+            $connection,
+            $subjectRecordId,
+            $scopeSha256,
+            $window['windowStartedAt']
+        );
+        if ($row === null) {
+            $result['reason'] = 'rate_limit_storage_unavailable';
+            return $result;
+        }
+        if ($row !== []) {
+            if ($row['requestCount'] >= $result['maxRequests']) {
+                $result['valid'] = true;
+                $result['retryAfterSeconds'] = max(
+                    1,
+                    min($result['windowSeconds'], $row['remainingSeconds'])
+                );
+                $result['reason'] = 'rate_limited';
+                return $result;
+            }
+            try {
+                $statement = mysqli_prepare(
+                    $connection,
+                    'UPDATE RED_Addon_Public_Mutation_Rate_Limits
+                     SET RequestCount=RequestCount+1
+                     WHERE RecordID=?'
+                );
+                if (!$statement) {
+                    $result['reason'] = 'rate_limit_storage_unavailable';
+                    return $result;
+                }
+                mysqli_stmt_bind_param($statement, 'i', $row['recordId']);
+                $updated = mysqli_stmt_execute($statement)
+                    && mysqli_stmt_affected_rows($statement) === 1;
+                mysqli_stmt_close($statement);
+            } catch (Throwable $throwable) {
+                $updated = false;
+            }
+            if (!$updated) {
+                $result['reason'] = 'rate_limit_storage_unavailable';
+                return $result;
+            }
+            $result['valid'] = true;
+            $result['allowed'] = true;
+            $result['reason'] = 'rate_limit_claimed';
+            return $result;
+        }
+
+        $requestCount = 1;
+        try {
+            $statement = mysqli_prepare(
+                $connection,
+                'INSERT INTO RED_Addon_Public_Mutation_Rate_Limits (
+                    SubjectRecordID, ScopeSHA256, WindowStartedAt,
+                    RequestCount, ExpiresAt
+                 ) VALUES (?, ?, ?, ?, ?)'
+            );
+            if (!$statement) {
+                $result['reason'] = 'rate_limit_storage_unavailable';
+                return $result;
+            }
+            mysqli_stmt_bind_param(
+                $statement,
+                'issis',
+                $subjectRecordId,
+                $scopeSha256,
+                $window['windowStartedAt'],
+                $requestCount,
+                $window['expiresAt']
+            );
+            $inserted = mysqli_stmt_execute($statement);
+            $errorCode = mysqli_stmt_errno($statement);
+            mysqli_stmt_close($statement);
+        } catch (Throwable $throwable) {
+            $inserted = false;
+            $errorCode = 0;
+        }
+        if ($inserted) {
+            $result['valid'] = true;
+            $result['allowed'] = true;
+            $result['reason'] = 'rate_limit_claimed';
+            return $result;
+        }
+        $result['reason'] = in_array($errorCode, [1062, 1213, 1205], true)
+            ? 'rate_limit_contention'
+            : 'rate_limit_storage_unavailable';
+        return $result;
+    }
+}
+
 if (!function_exists('red_addon_public_mutation_rate_limit_claim')) {
     function red_addon_public_mutation_rate_limit_claim(
         $connection,
@@ -401,11 +546,6 @@ if (!function_exists('red_addon_public_mutation_rate_limit_claim')) {
             $result['reason'] = 'transaction_already_active';
             return $result;
         }
-        if (!red_addon_public_mutation_rate_limit_cleanup($connection)) {
-            $result['reason'] = 'rate_limit_storage_unavailable';
-            return $result;
-        }
-
         for ($attempt = 0; $attempt < 3; $attempt++) {
             $transactionStarted = false;
             try {
@@ -414,130 +554,50 @@ if (!function_exists('red_addon_public_mutation_rate_limit_claim')) {
                     return $result;
                 }
                 $transactionStarted = true;
-                if (red_addon_public_mutation_rate_limit_locked_subject(
+                $claim = red_addon_public_mutation_rate_limit_claim_in_transaction(
                     $connection,
-                    $subjectRecordId
-                ) < 1) {
-                    mysqli_rollback($connection);
-                    $transactionStarted = false;
-                    $result['reason'] = 'rate_limit_subject_invalid';
-                    return $result;
-                }
-                $window = red_addon_public_mutation_rate_limit_current_window(
+                    $subject,
+                    $declarationPlan
+                );
+                if (!red_addon_public_mutation_rate_limit_transaction_active(
                     $connection
-                );
-                if ($window === []) {
-                    mysqli_rollback($connection);
-                    $transactionStarted = false;
-                    $result['reason'] = 'rate_limit_storage_unavailable';
-                    return $result;
-                }
-                $row = red_addon_public_mutation_rate_limit_locked_row(
-                    $connection,
-                    $subjectRecordId,
-                    $scopeSha256,
-                    $window['windowStartedAt']
-                );
-                if ($row === null) {
-                    mysqli_rollback($connection);
-                    $transactionStarted = false;
-                    $result['reason'] = 'rate_limit_storage_unavailable';
-                    return $result;
-                }
-                if ($row !== []) {
-                    if ($row['requestCount'] >= $result['maxRequests']) {
-                        if (!mysqli_commit($connection)) {
-                            mysqli_rollback($connection);
-                            $transactionStarted = false;
-                            $result['reason'] = 'rate_limit_transaction_failed';
-                            return $result;
-                        }
-                        $transactionStarted = false;
-                        $result['valid'] = true;
-                        $result['retryAfterSeconds'] = max(
-                            1,
-                            min(
-                                $result['windowSeconds'],
-                                $row['remainingSeconds']
-                            )
-                        );
-                        $result['reason'] = 'rate_limited';
-                        return $result;
-                    }
-                    $statement = mysqli_prepare(
-                        $connection,
-                        'UPDATE RED_Addon_Public_Mutation_Rate_Limits
-                         SET RequestCount=RequestCount+1
-                         WHERE RecordID=?'
-                    );
-                    if (!$statement) {
+                )) {
+                    try {
                         mysqli_rollback($connection);
-                        $transactionStarted = false;
-                        $result['reason'] = 'rate_limit_storage_unavailable';
-                        return $result;
-                    }
-                    mysqli_stmt_bind_param($statement, 'i', $row['recordId']);
-                    $updated = mysqli_stmt_execute($statement)
-                        && mysqli_stmt_affected_rows($statement) === 1;
-                    mysqli_stmt_close($statement);
-                    if (!$updated || !mysqli_commit($connection)) {
-                        mysqli_rollback($connection);
-                        $transactionStarted = false;
-                        $result['reason'] = 'rate_limit_transaction_failed';
-                        return $result;
+                    } catch (Throwable $rollbackFailure) {
+                        error_log('RED-CMS public-mutation rate rollback failed.');
                     }
                     $transactionStarted = false;
-                    $result['valid'] = true;
-                    $result['allowed'] = true;
-                    $result['reason'] = 'rate_limit_claimed';
+                    $result['reason'] = 'rate_limit_transaction_failed';
                     return $result;
                 }
-
-                $requestCount = 1;
-                $statement = mysqli_prepare(
-                    $connection,
-                    'INSERT INTO RED_Addon_Public_Mutation_Rate_Limits (
-                        SubjectRecordID, ScopeSHA256, WindowStartedAt,
-                        RequestCount, ExpiresAt
-                     ) VALUES (?, ?, ?, ?, ?)'
-                );
-                if (!$statement) {
+                if (($claim['reason'] ?? '') === 'rate_limit_contention') {
                     mysqli_rollback($connection);
                     $transactionStarted = false;
-                    $result['reason'] = 'rate_limit_storage_unavailable';
-                    return $result;
-                }
-                mysqli_stmt_bind_param(
-                    $statement,
-                    'issis',
-                    $subjectRecordId,
-                    $scopeSha256,
-                    $window['windowStartedAt'],
-                    $requestCount,
-                    $window['expiresAt']
-                );
-                $inserted = mysqli_stmt_execute($statement);
-                $errorCode = mysqli_stmt_errno($statement);
-                mysqli_stmt_close($statement);
-                if ($inserted && mysqli_commit($connection)) {
-                    $transactionStarted = false;
-                    $result['valid'] = true;
-                    $result['allowed'] = true;
-                    $result['reason'] = 'rate_limit_claimed';
-                    return $result;
-                }
-                mysqli_rollback($connection);
-                $transactionStarted = false;
-                if ($errorCode === 1062 || $errorCode === 1213 || $errorCode === 1205) {
                     continue;
                 }
-                $result['reason'] = $inserted
-                    ? 'rate_limit_transaction_failed'
-                    : 'rate_limit_storage_unavailable';
-                return $result;
+                if (($claim['reason'] ?? '') !== 'rate_limit_claimed'
+                    && ($claim['reason'] ?? '') !== 'rate_limited'
+                ) {
+                    mysqli_rollback($connection);
+                    $transactionStarted = false;
+                    return $claim;
+                }
+                if (!mysqli_commit($connection)) {
+                    mysqli_rollback($connection);
+                    $transactionStarted = false;
+                    $result['reason'] = 'rate_limit_transaction_failed';
+                    return $result;
+                }
+                $transactionStarted = false;
+                return $claim;
             } catch (Throwable $throwable) {
                 if ($transactionStarted) {
-                    mysqli_rollback($connection);
+                    try {
+                        mysqli_rollback($connection);
+                    } catch (Throwable $rollbackFailure) {
+                        error_log('RED-CMS public-mutation rate rollback failed.');
+                    }
                 }
                 $result['reason'] = 'rate_limit_transaction_failed';
                 return $result;
