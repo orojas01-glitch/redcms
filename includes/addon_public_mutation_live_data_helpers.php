@@ -15,6 +15,7 @@ require_once __DIR__ . '/addon_public_mutation_preflight_helpers.php';
 require_once __DIR__ . '/addon_secret_availability_helpers.php';
 require_once __DIR__ . '/addon_setting_storage_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_subject_helpers.php';
+require_once __DIR__ . '/addon_public_mutation_rate_limit_helpers.php';
 
 if (!function_exists('red_addon_public_mutation_live_data_result')) {
     function red_addon_public_mutation_live_data_result(
@@ -598,6 +599,14 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight')) {
                 'public_csrf_storage_unavailable'
             );
         }
+        if (red_addon_public_mutation_rate_limit_storage_available($connection)) {
+            $result['gates']['rateLimit'] = 'passed';
+        } else {
+            $result['gates']['rateLimit'] = 'blocked';
+            $result['blockers'][] = red_addon_public_mutation_live_data_blocker(
+                'public_rate_limit_storage_unavailable'
+            );
+        }
 
         $enablement = red_addon_enable_preflight_plan(
             $connection,
@@ -819,7 +828,6 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight')) {
 
         foreach ([
             ['idempotency', 'public_idempotency_contract_required'],
-            ['rateLimit', 'public_rate_limit_contract_required'],
             ['transactionRunner', 'public_mutation_transaction_runner_required'],
             ['responseRedaction', 'public_response_redaction_contract_required'],
             ['richerEnablement', 'richer_enablement_contract_required'],
@@ -840,6 +848,7 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight')) {
             && $result['gates']['packageTables'] === 'passed'
             && $result['gates']['anonymousSubject'] === 'passed'
             && $result['gates']['csrf'] === 'passed'
+            && $result['gates']['rateLimit'] === 'passed'
             && in_array(
                 $result['gates']['settingsConfiguration'],
                 ['passed', 'not_applicable'],

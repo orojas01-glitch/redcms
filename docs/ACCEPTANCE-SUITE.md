@@ -125,7 +125,7 @@ cleanup requirements before it can change that behavior.
 The separate 17-assertion public-mutation live-data-preflight fixture proves
 that a trusted `installed_disabled` package can be inspected only through
 current migration, declared InnoDB-table, typed-setting, and opaque
-secret-availability evidence plus exact core subject/CSRF storage. It proves
+secret-availability evidence plus exact core subject/CSRF/rate-limit storage. It proves
 missing tables, incomplete settings, missing opaque secret references, missing
 core storage, and unsupported table engines remain value-free blockers;
 unchanged evidence produces one deterministic plan; forged counts fail; and
@@ -134,6 +134,11 @@ global, transaction, runtime registration, lifecycle write, package execution,
 or residual package/table/authorization/filesystem fixture survives. It still
 cannot itself issue a subject, CSRF token, or idempotency key; resolve a secret;
 dispatch a request; or enable the package.
+The separate 15-assertion core-only rate-limit fixture proves exact InnoDB
+storage, a client/declaration/subject-scoped 12-per-60-second cap, opaque scope
+persistence, caller-owned transaction refusal, bounded expiry cleanup, subject
+cascade cleanup, and no request-global, browser-response, package-load, or
+runtime-registration path. It creates no public route or package fixture.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
@@ -255,21 +260,25 @@ The current compatibility foundation performs these checks through one command:
 3. Refuse the configured primary database, unsafe names, or any database that already exists.
 4. Create the disposable database and grant the existing application database account access only to it.
 5. Import `db-structure.sql`.
-6. Verify 29 InnoDB tables, utf8mb4 collations, an empty migration ledger, sanitized administrator seed placeholders, empty administrator role/capability tables, and empty add-on installation/migration/audit/action-execution/public-mutation subject/CSRF storage.
+6. Verify 30 InnoDB tables, utf8mb4 collations, an empty migration ledger, sanitized administrator seed placeholders, empty administrator role/capability tables, and empty add-on installation/migration/audit/action-execution/public-mutation subject/CSRF/rate-limit storage.
 7. Apply every checked-in migration and require the ledger count to match the migration-file count.
 8. Run migrations again and require `No pending migrations.` plus zero checksum drift. Then run the 16-assertion Owner authorization lifecycle, 11-assertion component-editor package-permission lifecycle, 20-assertion bounded component data-loader lifecycle, 47-assertion operational form, transactional component-update, history, restore-preflight, and atomic-restore lifecycle, 85-assertion component-creation preflight/atomic-runner/parent-metadata/public-placement-preflight/atomic-placement/atomic-delete lifecycle, 23-assertion add-on registry and immutable asset-delivery-preflight lifecycle, 8-assertion static immutable asset-endpoint lifecycle, 11-assertion request-bootstrap lifecycle, 17-assertion safe component-persistence/dispatch lifecycle, 19-assertion install lifecycle, 23-assertion read-only enablement-preflight lifecycle, 23-assertion atomic-enable lifecycle, and 18-assertion atomic-disable lifecycle. Component-editor permission checks require 160-character storage, exact case-sensitive manifest permission resolution, explicit non-Owner grants, no implicit Owner access, fresh revocation, zero package execution or state mutation, and exact cleanup. Component data loading requires exact declared registration, view permission, enabled persisted and runtime ownership, exact runtime-manifest identity, closed returned values and state hash, contained failures, zero writes, and exact cleanup. Component history/preflight requires bounded validated metadata, exact restore permission, current and target state evidence, deterministic plans, and zero restore execution. Atomic restore requires that exact plan under the locked enabled binding, the same registered writer and InnoDB tables, exact target reload, one source-linked immutable restore revision, stale-plan refusal, caller-owned transaction refusal, and rollback on writer or ledger failure. Component creation preflight requires exact create permission and enabled runtime ownership, closed inactive hidden parent metadata, normalized package values, an unused numeric id, active-theme layout, InnoDB package tables, deterministic evidence, callback non-invocation, and zero writes. Parent metadata requires exact view/edit permissions, an inactive hidden unrouted shell, current package and core-revision evidence, a caller state hash, lifecycle/theme/installation/parent serialization, title/layout/language-only postconditions, package-state preservation, unchanged no-op behavior, core revision rollback, and exact cleanup. Public-placement preflight requires the exact publish grant before package loading, the current parent/package hashes, one unique active Article destination, exact language agreement, active-theme position support, deterministic source/target/placement evidence, and zero activation or writes. Atomic placement revalidates that plan under lifecycle/theme/source/target locks, changes only seven derived parent fields, preserves package and destination state, commits one core move revision plus one bounded audit fact, refuses reuse, and rolls back permission, drift, transaction, postcondition, revision, or audit failure. Its core-owned form exposes only numeric placement choices, current parent/package hashes, and CSRF while package, component, manifest, grants, target ownership, and the exact plan remain server-derived. Component updates require exact writer ownership and package-table metadata, current view/edit grants, locked enabled binding, current state hash, normalized values, InnoDB transaction support, caller-owned transaction refusal, exact reloaded postconditions, atomic baseline/save revision snapshots, rollback on every contained or revision-ledger failure, preserved core placement state, and exact cleanup. Component persistence/dispatch requires non-executing discovery, disabled non-execution, enabled request-local registration, full manifest component-id storage, a package-owned table with only the exact numeric article-parent foreign key, orphan refusal, read-only parent/runtime-owner agreement, fixed non-executable placement data, core-owned escaped default markup, static fail-closed fallbacks for emitted output, malformed view models, handler exceptions, and output-buffer tampering, inactive non-rendering, unchanged legacy contexts, and exact cleanup. Enablement preflight requires exact Owner authority, current installed-disabled evidence, deterministic plans, dependency and namespace checks, declarative readiness for constrained registration-only service, core-rendered default public component, and combined default-component plus registration-only-service profiles, explicit richer-surface blockers including declarative component-editor metadata, zero state mutation or package execution, CLI-only boundaries, drift refusal, and exact cleanup. Atomic enablement separately requires exact Owner authority and plan evidence, registrar validation under the shared lifecycle lock and package lock, atomic compare-and-swap state plus audit, lifecycle reach from newly enabled standalone and combined default components to the safe core renderer, injected-failure rollback, later registration of every declared combined-package identifier, repeat refusal, and exact cleanup. Atomic disablement requires exact Owner authority, deterministic current-registry and enabled-dependent evidence, cross-connection lifecycle-lock exclusion, stale-plan refusal, atomic state/audit rollback and commit, zero package or migration execution, removal of both combined-package component and service registrations from later requests, repeat refusal, and exact cleanup. Then run the 38-assertion disposable SEO lifecycle, 29-assertion content-revision lifecycle, 21-assertion page-layout distribution lifecycle, and 36-assertion custom-layout lifecycle with their existing rollback and cleanup requirements.
    The 17-assertion public-mutation live-data preflight uses a temporary
    trusted installed-disabled package only in the disposable database. It
    proves current migration, declared InnoDB-table, typed-setting, and opaque
    secret-availability evidence can be inspected through counts and hashes,
-   together with exact generic subject/CSRF storage; missing or unsupported
+   together with exact generic subject/CSRF/rate-limit storage; missing or unsupported
    evidence remains a value-free blocker; and no route, package execution,
    lifecycle write, or fixture survives. The separate 19-assertion core-only
    anonymous-subject/CSRF test creates no package fixture. It proves the exact
    empty storage shape, SHA-256-only persistence, opaque distinct subjects,
    host-only secure cookie descriptor, declaration/database scope, forgery and
    cross-subject refusal, expiry, cascading bounded cleanup, and zero remaining
-   subject/CSRF rows. It does not exercise an HTTP endpoint or package handler.
+   subject/CSRF rows. The separate 15-assertion rate-limit fixture proves the
+   exact empty InnoDB shape, fixed 12-per-60-second client/declaration/subject
+   cap, opaque scope persistence, caller-owned transaction refusal, bounded
+   cleanup, subject cascade, and zero remaining rate rows. Neither test
+   exercises an HTTP endpoint or package handler.
 
    The atomic administrator-action runner and protected endpoint bridge additionally prove the fixed
    `once-per-target` contract, declared package-owned InnoDB table metadata,
@@ -279,7 +288,7 @@ The current compatibility foundation performs these checks through one command:
    exception, malformed result, or mismatch, and exact fixture cleanup. The
    core endpoint independently enforces POST/session/CSRF, exact fields, and
    value-free bounded results; it adds no browser action surface.
-9. Verify the final 31-table InnoDB/utf8mb4 state, canonical clean-installer row counts including zero SEO, administrator authorization, add-on installation, setting, migration, lifecycle-audit, action-execution, public-mutation subject/CSRF, and add-on component revision rows, and zero Form, Gallery, area, layout, and component relationship errors, then run the 14-assertion two-connection theme-contract suite against the disposable database. That suite proves database-scoped locking, reentrancy, cross-connection exclusion, exception-safe release, effective-theme agreement, safe inactive upload placeholders, and reserved active/previous theme rows.
+9. Verify the final 32-table InnoDB/utf8mb4 state, canonical clean-installer row counts including zero SEO, administrator authorization, add-on installation, setting, migration, lifecycle-audit, action-execution, public-mutation subject/CSRF/rate-limit, and add-on component revision rows, and zero Form, Gallery, area, layout, and component relationship errors, then run the 14-assertion two-connection theme-contract suite against the disposable database. That suite proves database-scoped locking, reentrancy, cross-connection exclusion, exception-safe release, effective-theme agreement, safe inactive upload placeholders, and reserved active/previous theme rows.
 10. Compare a normalized table/column/index manifest with the configured primary schema while ignoring data and auto-increment counters.
 11. Confirm the primary isolation snapshot is unchanged.
 12. Select an unused high local port while explicitly reserving port `8055` for the normal development site.
@@ -294,7 +303,7 @@ The current compatibility foundation performs these checks through one command:
 21. Insert and log in one narrowly assigned Guest with only Article component `#100` and Move Content tool `#1`.
 22. Require the Guest to render the assigned Article form and Move Content tool with their expected form/CSRF markers.
 23. Require HTTP 403 `no` for a valid-CSRF site-layout write, Administrator Users, unassigned Video component `#107`, and unassigned Filter Areas tool `#2`.
-24. Compare full checksums for all 31 tables before and after the allowed/denied permission requests and require no data changes.
+24. Compare full checksums for all 32 tables before and after the allowed/denied permission requests and require no data changes.
 25. Require Guest logout and account deletion to independently invalidate the formerly allowed Article render, then remove and verify zero Guest administrator, throttle, and activity rows.
 26. Insert and authenticate one separate disposable Webmaster plus one disposable active Section for the Section-delete lifecycle, upgrade its fixture password to bcrypt, and extract its valid CSRF token.
 27. Create one active and one already-inactive Article through the real protected endpoint, both assigned to that Section, and require exact relationship/count state.
@@ -328,8 +337,8 @@ The current compatibility foundation performs these checks through one command:
 55. Delete the paired metadata through `delete_label.php`, remove only the exact acceptance-owned image, require the public route to stop rendering it, and require the complete pre-existing Gallery media manifest to match its starting state.
 56. Remove and verify zero upload-lifecycle administrator, parent Article, child Gallery, failed-login, activity-audit, generated-source, and uploaded-file artifacts.
 57. Insert and authenticate one final disposable Webmaster, then create an exact subtype `#107` Video Gallery parent/child fixture through the real protected endpoint.
-58. Capture checksums for all 31 application tables, install a `BEFORE UPDATE` trigger only in the disposable database, and submit a real protected Gallery update whose parent write is attempted before the trigger rejects the later child write.
-59. Require HTTP 200 with the legacy response `no`, remove the trigger, require the complete 31-table checksum snapshot to match, require the exact initial parent/child values to remain, and require zero updated aliases.
+58. Capture checksums for all 32 application tables, install a `BEFORE UPDATE` trigger only in the disposable database, and submit a real protected Gallery update whose parent write is attempted before the trigger rejects the later child write.
+59. Require HTTP 200 with the legacy response `no`, remove the trigger, require the complete 32-table checksum snapshot to match, require the exact initial parent/child values to remain, and require zero updated aliases.
 60. Submit the same protected update after trigger removal and require `yes` plus exact updated parent/child values, then delete the pair through `delete_label.php` and restore canonical counts.
 61. Remove and verify zero rollback-lifecycle administrator, parent Article, child Gallery, failed-login, activity-audit, and trigger artifacts. An injected failure immediately after trigger creation must also remove the trigger, fixtures, isolated server, scoped grant, and database.
 62. Scan the isolated server log for PHP/runtime error markers.
@@ -353,8 +362,8 @@ public-mutation declaration contract, 13-assertion add-on component-editor value
 contract, 20-assertion display-only
 component-editor renderer contract, and
 17-assertion non-activating runtime contract, 15-assertion typed-service
-contract, and 20-assertion public-route contract, imported the 29-table installer,
-applied all 42 migrations to the expected 31-table schema with zero pending or
+contract, and 20-assertion public-route contract, imported the 30-table installer,
+applied all 43 migrations to the expected 32-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
 23-assertion add-on setting storage, authorization preflight, and atomic writer,
@@ -371,14 +380,15 @@ static immutable asset endpoint, 11-assertion core-owned public/admin asset
 injection, 19-assertion disabled
 installation/recovery, 23-assertion read-only enablement preflight,
 17-assertion read-only public-mutation live-data preflight, 19-assertion
-core-only anonymous-subject/CSRF foundation,
+core-only anonymous-subject/CSRF foundation, 15-assertion core-only fixed-window
+rate-limit foundation,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
 persistence/dispatch,
 38-assertion SEO database, 29-assertion content-revision, 21-assertion
 layout-distribution, and 36-assertion custom-layout lifecycles. The normalized
 schema matched signature
-`950e15db4ee94a6af78f2a16870a17081431fcf220d98f7c2fdba1952a2c28f4`.
+`8569c46eb170b376b74434ca9d16e8416561e5da44aee06162cc8990f27d4de2`.
 It also passed every authentication, permission, Move Content, Section archive,
 Article upload/CRUD, Form CRUD, Gallery CRUD/upload, and forced-rollback
 lifecycle with clean logs, preserved the tracked empty-media manifests, and
@@ -426,7 +436,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF foundation, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -512,10 +522,11 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Add-on request-bootstrap acceptance runs only in the uniquely named disposable database and uses temporary first-party packages outside the clean starter. It proves uninstalled and disabled packages never execute, enabled dependencies register first, exact handlers and owners remain lookup-only, lifecycle CLIs do not request-load packages, bootstrap writes no registry or audit state, drift and missing dependencies/code fail before execution, and every package/database/filesystem fixture is removed.
 - Add-on install acceptance runs only in the uniquely named disposable database and uses a temporary validated first-party fixture outside the clean starter. It proves exact Owner authorization and dependency state, stale-plan and audit fail-closed behavior before SQL, resumable partial DDL, immutable migration evidence, bounded audit data, disabled/unloaded completion, local-only confirmations, and zero residual package, SQL, authorization, audit, or code-execution artifacts.
 - Add-on enablement-preflight acceptance runs only in the uniquely named disposable database and uses temporary validated packages outside the clean starter. It requires exact Owner `addons.enable` authority, exact installed-disabled/current registry evidence, deterministic client-bound plans, required enabled dependencies, capability and route conflict reporting, registration-only service, core-rendered default component, and combined default-component plus registration-only-service profiles that clear their declarative gates, exact richer-surface theme/settings/live-data/component-editor blockers, no apply path, identical pre/post registry and authorization fingerprints, no package execution, and exact cleanup.
-- Public-mutation live-data-preflight acceptance runs only in the uniquely named disposable database and uses one temporary trusted installed-disabled package outside the clean starter. It requires exact Owner enable authority, a current closed declaration, applied package migration evidence, declared InnoDB tables, complete typed settings, and opaque secret-reference availability; it proves deterministic value-free hashes/counts, missing-table/setting/secret and unsupported-engine blockers, no table or reference disclosure, forged-plan refusal, zero request/transaction/runtime-registration/package-execution path, unchanged preflight state, and exact cleanup. It has no enable or dispatch path.
+- Public-mutation live-data-preflight acceptance runs only in the uniquely named disposable database and uses one temporary trusted installed-disabled package outside the clean starter. It requires exact Owner enable authority, a current closed declaration, applied package migration evidence, declared InnoDB tables, complete typed settings, opaque secret-reference availability, and exact core subject/CSRF/rate-limit storage; it proves deterministic value-free hashes/counts, missing-table/setting/secret and unsupported-engine blockers, no table or reference disclosure, forged-plan refusal, zero request/transaction/runtime-registration/package-execution path, unchanged preflight state, and exact cleanup. It has no enable or dispatch path.
+- Public-mutation rate-limit acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, an enforced 12-per-60-second fixed window, bounded collision/contention handling, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. It has no HTTP, package-data, or enablement path.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
-- A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 31 tables unchanged.
+- A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 32 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.
 - The Section-delete lifecycle uses a disposable Webmaster, Section, and two Articles only inside the disposable database. It requires count-aware confirmation, CSRF refusal with unchanged state, one transaction that archives every related Article before deleting the Section, exact response reporting, recovery through **Inactive Articles**, an active-theme 404 at the old route, and zero targeted artifacts. Form/Gallery child rows and media are deliberately left attached to their preserved parent Articles.
 - The Article lifecycle uses a hard-coded disposable Webmaster, Article ID, aliases, and body markers only inside the disposable database. Create, update, and delete must pass through the real protected CSRF endpoints; direct SQL is used only to install and remove the temporary administrator and as a cleanup backstop.
@@ -527,7 +538,7 @@ The command must return a nonzero status if installation, migration, schema, rel
 - The upload lifecycle uses Gallery subtype `#106` and a database-specific filename under `images/gallery`. It refuses to overwrite any existing path and will remove only the exact regular file whose name is returned by the protected upload endpoint.
 - Upload acceptance requires a valid generated PNG, matching source/stored/served hashes, exact database persistence, protected-editor and public-route markers, paired metadata deletion, zero targeted database/file artifacts, and an unchanged manifest for every pre-existing Gallery image.
 - The forced-rollback lifecycle uses hard-coded disposable IDs and Video subtype `#107`. Its trigger is created by the administrative test connection only after schema comparison and exists only in the uniquely named disposable database; the protected endpoint still runs under the normal application account.
-- Rollback acceptance requires the legacy `no` response, removal of the trigger, identical pre/post checksums across all 31 tables, exact initial parent/child values, a successful control update after trigger removal, canonical count restoration, and zero targeted database/trigger artifacts.
+- Rollback acceptance requires the legacy `no` response, removal of the trigger, identical pre/post checksums across all 32 tables, exact initial parent/child values, a successful control update after trigger removal, canonical count restoration, and zero targeted database/trigger artifacts.
 - Cleanup failure converts an otherwise successful run into a failure.
 - Cleanup re-reads the application account's grants after revoke/drop and fails if the disposable database grant is still present.
 - The primary database is re-read after cleanup and must match its starting isolation snapshot.

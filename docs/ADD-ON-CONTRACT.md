@@ -1043,15 +1043,25 @@ relax route-bearing enablement.
 
 `includes/addon_public_mutation_subject_helpers.php` is a separate internal
 core-only foundation, not a package API. The clean starter's empty
-`RED_Addon_Public_Mutation_Subjects` and
-`RED_Addon_Public_Mutation_CSRF_Tokens` tables are reserved core tables, so a
-manifest cannot declare them as package-owned. They retain SHA-256 digests of
-random 256-bit values only. A future core endpoint may use the returned
-host-only secure cookie descriptor and declaration/database-scoped CSRF value;
-no current endpoint emits it, reads a browser cookie/session, or exposes either
-raw value to package code. Subject expiry is 30 minutes, CSRF expiry is 10
-minutes, and replay/idempotency consumption remains a later transaction-runner
-responsibility.
+`RED_Addon_Public_Mutation_Subjects`,
+`RED_Addon_Public_Mutation_CSRF_Tokens`, and
+`RED_Addon_Public_Mutation_Rate_Limits` are reserved core tables, so a manifest
+cannot declare them as package-owned. The subject and CSRF tables retain
+SHA-256 digests of random 256-bit values only. A future core endpoint may use
+the returned host-only secure cookie descriptor and declaration/database-scoped
+CSRF value; no current endpoint emits it, reads a browser cookie/session, or
+exposes either raw value to package code. Subject expiry is 30 minutes and CSRF
+expiry is 10 minutes.
+
+`includes/addon_public_mutation_rate_limit_helpers.php` separately retains one
+short-lived fixed-window row per client database, validated declaration, and
+opaque anonymous subject. The row contains only the subject record relation, a
+SHA-256 scope, the window/expiry facts, and a bounded count. Its internal claim
+allows at most 12 requests per 60 seconds, refuses caller-owned transactions,
+and fails closed when the exact InnoDB storage shape is unavailable. It neither
+receives a browser request nor loads package code; its non-public result is only
+for a future core dispatcher. Replay/idempotency consumption remains a later
+transaction-runner responsibility.
 
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted

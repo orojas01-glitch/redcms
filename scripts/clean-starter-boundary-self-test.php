@@ -115,15 +115,19 @@ try {
                 $installer,
                 'CREATE TABLE `RED_Addon_Public_Mutation_CSRF_Tokens`'
             )
+            && str_contains(
+                $installer,
+                'CREATE TABLE `RED_Addon_Public_Mutation_Rate_Limits`'
+            )
             && preg_match(
                 '/`Component`\\s+varchar\\(160\\).*NOT NULL/i',
                 $installer
             ) === 1
             && !preg_match(
-                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations|Activity_Log|Settings|Admin_Action_Executions|Public_Mutation_Subjects|Public_Mutation_CSRF_Tokens)`?/i',
+                '/INSERT\\s+INTO\\s+`?RED_Addon_(?:Installations|Migrations|Activity_Log|Settings|Admin_Action_Executions|Public_Mutation_Subjects|Public_Mutation_CSRF_Tokens|Public_Mutation_Rate_Limits)`?/i',
                 $installer
             ),
-        'starter ships empty add-on registry, settings, public-mutation token storage, action-execution storage, and full component-id capacity with no package, setting, migration, lifecycle, or business state'
+        'starter ships empty add-on registry, settings, public-mutation token/rate storage, action-execution storage, and full component-id capacity with no package, setting, migration, lifecycle, or business state'
     );
 
     $productionFiles = array_merge(
