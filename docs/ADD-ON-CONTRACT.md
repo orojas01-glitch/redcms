@@ -1041,12 +1041,24 @@ activation authorization: `enableReady`, `activationSupported`, and
 idempotency material, resolve a secret, execute package code, write state, or
 relax route-bearing enablement.
 
+`includes/addon_public_mutation_subject_helpers.php` is a separate internal
+core-only foundation, not a package API. The clean starter's empty
+`RED_Addon_Public_Mutation_Subjects` and
+`RED_Addon_Public_Mutation_CSRF_Tokens` tables are reserved core tables, so a
+manifest cannot declare them as package-owned. They retain SHA-256 digests of
+random 256-bit values only. A future core endpoint may use the returned
+host-only secure cookie descriptor and declaration/database-scoped CSRF value;
+no current endpoint emits it, reads a browser cookie/session, or exposes either
+raw value to package code. Subject expiry is 30 minutes, CSRF expiry is 10
+minutes, and replay/idempotency consumption remains a later transaction-runner
+responsibility.
+
 The current routes schema and addon_public_route_helpers.php remain public
-GET-only. This contract does not add a dispatcher, cookie/session, ledger,
-handler, browser form, route eligibility, package fixture, or Store Lite
-behavior. It leaves legacy public form operations unchanged. Each later live
-request stage remains a separate disposable-fixture and richer enablement
-review.
+GET-only. This contract does not add a dispatcher or endpoint, emitted
+cookie/header or session access, ledger, handler, browser form, route
+eligibility, package fixture, or Store Lite behavior. It leaves legacy public
+form operations unchanged. Each later live request stage remains a separate
+disposable-fixture and richer enablement review.
 
 ## Administrator Tool Contract
 

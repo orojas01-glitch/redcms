@@ -36,8 +36,9 @@ flowchart TD
     A3 --> G4["Public-mutation contract"]
     G4 --> G5["Public-mutation declaration preflight"]
     G5 --> G6["Read-only public-mutation live-data preflight"]
-    G6 --> G7["CURRENT / NEXT<br/>Public-request and richer enablement gates"]
-    G7 --> S["TARGET<br/>Store Lite optional package"]
+    G6 --> G7["Core anonymous-subject + CSRF foundation"]
+    G7 --> G8["CURRENT / NEXT<br/>Rate limit, idempotency, transaction, response, richer enablement"]
+    G8 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -47,8 +48,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6 complete;
-    class G7 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7 complete;
+    class G8 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -56,8 +57,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-only authorized settings read model: one trusted current package is bound to the recorded identity/lifecycle, and every setting receives a fresh exact grant decision. Authorized non-secret values retain `stored`/`default`/`unset` state; secret settings expose only `configured`; there is no UI, endpoint, write, secret lookup, package execution, or enablement change. |
-| Current milestone | Public-request and richer-enablement gates; anonymous subject, CSRF/idempotency/rate-limit/transaction runner, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-only anonymous-subject and CSRF foundation: two empty per-client tables retain SHA-256 digests only; the subject descriptor is host-only, secure, `HttpOnly`, and `SameSite=Strict`, and CSRF values are declaration/database-scoped. There is no public endpoint, emitted cookie/header, browser-session access, package execution, Store Lite state, or enablement change. |
+| Current milestone | Public-request and richer-enablement gates: rate limit, idempotency, transaction runner, bounded response, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

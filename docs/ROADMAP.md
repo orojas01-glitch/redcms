@@ -169,13 +169,19 @@ no administrator control, form, or public route. The separately documented
 public-mutation boundary now validates optional closed declaration metadata and
 returns value-free non-executing preflight evidence for a future static-POST,
 anonymous, CSRF/idempotency/rate-limited core path. It still adds no dispatcher,
-cookie/session, ledger, package behavior, or enablement change.
+emitted cookie/header or session access, ledger, package behavior, or enablement
+change.
 Its separate read-only live-data preflight can now bind one trusted,
 `installed_disabled` package declaration to current per-client migration,
-InnoDB-table, typed-setting, and opaque-secret-availability evidence. It
-returns hashes and counts only, and still cannot enable, dispatch, resolve a
-secret, issue anonymous/CSRF/idempotency material, load package code, or write
-state.
+InnoDB-table, typed-setting, opaque-secret-availability, and exact core-owned
+anonymous-subject/CSRF storage evidence. It returns hashes and counts only, and
+still cannot enable, dispatch, resolve a secret, issue idempotency material,
+load package code, or write package state. The separate core-only subject/CSRF
+foundation stores only SHA-256 digests of opaque 256-bit values in two empty
+generic per-client tables. It returns a future endpoint's host-only secure
+cookie descriptor and a declaration/database-scoped CSRF value, but has no
+dispatcher or endpoint, emits no cookie/header, reads no browser cookie or
+session, executes no package, and changes no lifecycle or Store Lite state.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -431,11 +437,13 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
-complete, and a core-only authorized setting read model is complete. Its
-protected settings UI/endpoint, public writable routes, actual secret lookup,
-live-data, and richer package persistence contracts must still be implemented
-and accepted with disposable fixtures before the separately distributed package
-can be enabled.
+complete, a core-only authorized setting read model is complete, and the
+generic public-mutation subject/CSRF foundation is complete. Its protected
+settings UI/endpoint, actual public writable routes, rate limiting,
+idempotency, transaction/response handling, actual secret lookup, live-data
+disable/upgrade compatibility, and richer package persistence contracts must
+still be implemented and accepted with disposable fixtures before the
+separately distributed package can be enabled.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

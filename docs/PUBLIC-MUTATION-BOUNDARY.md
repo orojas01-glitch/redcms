@@ -1,10 +1,12 @@
 # RED-CMS Public Mutation Boundary
 
-Status: data-only declaration validation, its non-executing preflight, and a
-separate read-only live-data preflight are implemented. This document records
-the prerequisite for a future public write dispatcher. It does **not** add a
-dispatcher, endpoint, cookie, session, handler, database table, migration,
-package, permission, enablement profile, or Store Lite behavior.
+Status: data-only declaration validation, its non-executing preflight, a
+separate read-only live-data preflight, and an internal core-only
+anonymous-subject/CSRF foundation are implemented. This document records the
+prerequisite for a future public write dispatcher. It does **not** add a public
+dispatcher or endpoint, emitted cookie/header, browser session access, handler,
+package, permission, enablement profile, or Store Lite behavior. The two new
+generic core tables remain empty in the clean starter.
 
 ## Purpose
 
@@ -30,9 +32,9 @@ changed by it.
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
-| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, and opaque-secret-availability evidence | No dispatcher, token/subject issuance, secret resolution, package execution, lifecycle change, or write |
-| Anonymous cart identity | Does not exist | None |
-| Public CSRF issuance/validation | No add-on public-mutation path exists | None |
+| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
+| Anonymous cart identity | Internal core subject issuance/resolution exists for a future endpoint; it is not a cart identity | No browser cookie read/write, session, package access, route, or client business data |
+| Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public mutation ledger/audit | Does not exist | None |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -93,10 +95,31 @@ Its deterministic plan returns no raw table name, setting value, opaque
 reference, or secret: it exposes only bounded counts, blocker codes, package
 identity, and SHA-256 fingerprints. Even when its data-evidence gate clears,
 the plan remains non-activating and non-executing: `enableReady`,
-`activationSupported`, and `requestDispatch` are false. It does not issue an
-anonymous subject, CSRF token, or idempotency key; resolve a secret; start a
-transaction; load package PHP; mutate client state; claim a route; or change
-enablement.
+`activationSupported`, and `requestDispatch` are false. It does not itself
+issue an anonymous subject, CSRF token, or idempotency key; resolve a secret;
+start a transaction; load package PHP; mutate client state; claim a route; or
+change enablement.
+
+## Implemented Core-Owned Subject And CSRF Foundation
+
+`RED_Addon_Public_Mutation_Subjects` and
+`RED_Addon_Public_Mutation_CSRF_Tokens` are empty generic core tables in every
+new client database. They retain only SHA-256 digests of random 256-bit subject
+and CSRF values, created/expiry facts, a CSRF scope hash, and an opaque subject
+relationship. No raw token, cookie value, package id, cart, order, request body,
+secret, or business record is stored. The manifest validator reserves both
+table names so an add-on cannot declare them as package-owned storage.
+
+The internal helper accepts an explicit raw subject value only from a later
+core endpoint. It returns a future endpoint's host-only cookie descriptor
+(`Path=/`, `Secure`, `HttpOnly`, `SameSite=Strict`, 30 minutes) but does not
+call `setcookie`, read `$_COOKIE`, start a session, or emit a header. CSRF
+values expire after 10 minutes, are bound to the active subject plus the current
+client database and one already-valid declaration, and verify without returning
+the raw value. Expired rows are removed by bounded core cleanup. A later
+transaction runner must still consume the appropriate replay/idempotency fact;
+this helper does not dispatch, parse, rate-limit, mutate package tables, or
+execute package code.
 
 ## Future Core-Owned Request Path
 
@@ -106,17 +129,18 @@ route file—must own this sequence:
 1. Recognize only a current trusted, enabled, static declaration in the
    reserved package namespace. It must reject every malformed, noncanonical,
    disabled, stale, untrusted, or undeclared request before package code runs.
-2. Establish a core-owned, client-scoped anonymous subject. It must be an
-   opaque, unguessable cookie-bound reference; it is neither an administrator
-   session, a Member Access identity, a raw cookie value exposed to package
-   code, nor a client database/global identity. Cookie attributes, expiry,
-   rotation, and privacy retention must be specified and tested in the
-   implementation batch.
-3. Issue and verify a core-owned CSRF token bound to that anonymous subject
-   before semantic request parsing or handler invocation. The token, subject,
-   raw cookie, request body, and secrets must not enter general logs, package
-   output, audit rows, or public errors. The initial boundary is same-origin
-   only and emits no CORS policy that would widen access.
+2. Use the implemented core-owned, client-scoped anonymous subject foundation
+   only through the future dispatcher. It is an opaque, unguessable
+   cookie-bound reference; it is neither an administrator session, a Member
+   Access identity, a raw cookie value exposed to package code, nor a client
+   database/global identity. The dispatcher must serialize the supplied
+   host-only descriptor correctly, define rotation/retention, and prove those
+   browser behaviors separately.
+3. Use the implemented core-owned CSRF issue/verify foundation before semantic
+   request parsing or handler invocation. The token, subject, raw cookie,
+   request body, and secrets must not enter general logs, package output, audit
+   rows, or public errors. The actual dispatcher must enforce same-origin
+   behavior and emit no CORS policy that would widen access.
 4. Parse only the declared scalar form fields. Core rejects unknown, repeated,
    nested, noncanonical, malformed, oversized, or out-of-range values. A
    browser never supplies a package id, route owner, price, currency, total,
@@ -186,15 +210,19 @@ mutation:
 - disabled-state and later-disable proof: no route claim, runtime bootstrap,
   asset injection, or mutation after disable, with client data retained.
 
-The new live-data preflight supplies only the migration/table/setting/opaque
-availability evidence in this list. No current enablement profile satisfies
-the complete set. The future validator must report a bounded, value-free
-refusal rather than silently downgrade a public write to a weaker route.
+The live-data preflight now also attests exact generic subject/CSRF storage in
+this list, but it supplies no rate-limit, idempotency, transaction, response,
+or richer-enablement evidence. No current enablement profile satisfies the
+complete set. The future validator must report a bounded, value-free refusal
+rather than silently downgrade a public write to a weaker route.
 
 ## Required Future Acceptance Evidence
 
+The current 19-assertion core-only foundation test proves exact storage,
+hash-only persistence, subject/CSRF scope, expiry, bounded cleanup, and absence
+of a package fixture. It is not HTTP, browser, or package-mutation acceptance.
 An implementation is not ready because a manifest validates or a route returns
-HTTP 200. A disposable, client-isolated acceptance suite must prove:
+HTTP 200. A disposable, client-isolated acceptance suite must still prove:
 
 - malformed, duplicate, executable, unsafe, mismatched, and drifted
   declarations fail before package execution;
@@ -228,8 +256,8 @@ This planning slice does not authorize:
 
 - an endpoint, browser form, administrator control, package JavaScript, or
   Store Lite user interface;
-- package activation, a relaxed enablement profile, a live package fixture, or
-  a registry/migration change;
+- package activation, a relaxed enablement profile, a live package fixture,
+  package registry change, or package migration;
 - Member Access, checkout, payment adapters, webhooks, external network calls,
   file upload, e-mail, or PII collection;
 - a generic CMS hook system, arbitrary public PHP endpoint, raw package HTML,
@@ -247,10 +275,13 @@ This planning slice does not authorize:
    current trusted installed-disabled client evidence and returns counts and
    fingerprints; it does not issue tokens, dispatch, enable, execute, resolve
    secrets, or write.
-4. A separate batch may add the core-owned anonymous-subject/CSRF/rate-limit
-   foundation and transaction runner, with disposable fixtures only.
-5. A separate richer enablement review may admit only packages that satisfy
+4. Completed the core-owned anonymous-subject and CSRF foundation with empty
+   generic storage, hash-only persistence, bounded expiry cleanup, and no
+   request dispatcher or package behavior.
+5. A separate batch may add rate-limit and idempotency evidence, a transaction
+   runner, and core-owned bounded responses, with disposable fixtures only.
+6. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-6. Store Lite can then implement its separately distributed catalog and cart
+7. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.
