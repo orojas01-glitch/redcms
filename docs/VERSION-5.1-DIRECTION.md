@@ -31,15 +31,18 @@ metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
 response constraints; it still adds no dispatcher, emitted cookie/header or
 session access, ledger, package behavior, or enablement change. The separate
-read-only live-data
-preflight now binds a trusted declaration from an `installed_disabled` package
-to current per-client migration, table, typed-setting, opaque
-secret-availability, and core subject/CSRF storage evidence without enabling it
-or loading package PHP. A separate internal core foundation now stores only
-SHA-256 digests of opaque anonymous-subject and CSRF values in empty per-client
-tables and returns a future endpoint's secure host-only cookie descriptor. It
-does not provide a public endpoint, emit a cookie/header, access a browser
-cookie/session, execute package code, or change activation.
+read-only live-data preflight now binds a trusted declaration from an
+`installed_disabled` package to current per-client migration, table,
+typed-setting, opaque secret-availability, and core subject/CSRF/rate-limit
+storage evidence without enabling it or loading package PHP. A separate
+internal core foundation stores only SHA-256 digests of opaque anonymous-subject
+and CSRF values in empty per-client tables and returns a future endpoint's
+secure host-only cookie descriptor. A companion rate-limit foundation records
+only an opaque subject relation, declaration/database scope hash, window facts,
+and bounded count; it permits at most 12 requests per 60 seconds per client,
+declared route, and subject. Neither provides a public endpoint, emits a
+cookie/header, accesses a browser cookie/session, executes package code, or
+changes activation.
 Adapters, operational writable route/tool actions,
 settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
@@ -642,7 +645,7 @@ request bootstrap excludes the disabled package.
     joins current trusted `installed_disabled` package evidence with the
     declared migration, package-table, typed-setting, and opaque
     secret-availability state for one client, returning only hashes and
-    counts. It can attest exact core subject/CSRF storage but does not itself
+    counts. It can attest exact core subject/CSRF/rate-limit storage but does not itself
     issue values, dispatch a request, resolve a secret, execute package code,
     change lifecycle, or write package state.
 46. Completed the internal core-only anonymous-subject and CSRF foundation:
@@ -653,6 +656,14 @@ request bootstrap excludes the disabled package.
     emitted cookie/header, browser cookie/session access, package execution,
     idempotency/rate-limit/transaction runner, Store Lite package, or activation
     change.
+47. Completed the internal core-only fixed-window rate-limit foundation: one
+    empty per-client core table stores only an opaque subject relation, a
+    declaration/database SHA-256 scope, window/expiry facts, and bounded count.
+    An internal core claim permits at most 12 requests per 60 seconds for one
+    client, declared route, and subject; it rejects caller-owned transactions
+    and unavailable storage. There is no request parser, dispatcher, emitted
+    cookie/header, package execution, idempotency ledger, package mutation,
+    Store Lite package, or activation change.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

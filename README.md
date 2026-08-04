@@ -224,13 +224,17 @@ features.
   responses, and fail-closed package behavior
 - Read-only public-mutation declaration and live-data preflights that bind one
   trusted installed-disabled package to value-free per-client migration,
-  InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF
-  storage evidence without dispatch, secret resolution, package execution, or
-  state change
+  InnoDB-table, typed-setting, opaque-secret-availability, and core
+  subject/CSRF/rate-limit storage evidence without dispatch, secret resolution,
+  package execution, or state change
 - Internal core-only anonymous-subject and CSRF storage with SHA-256-only
   persistence, a future host-only secure cookie descriptor, and declaration- and
   database-scoped expiry; no browser endpoint, header, session, package access,
   or Store Lite behavior
+- Internal core-only fixed-window rate-limit storage and decision helper: 12
+  requests per 60 seconds for one client database, declared package route, and
+  opaque anonymous subject; no public dispatcher, package access, request-global
+  reads, browser response, Store Lite state, or enablement change
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

@@ -175,6 +175,27 @@ CREATE TABLE `RED_Addon_Public_Mutation_CSRF_Tokens` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `RED_Addon_Public_Mutation_Rate_Limits`
+--
+
+DROP TABLE IF EXISTS `RED_Addon_Public_Mutation_Rate_Limits`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `RED_Addon_Public_Mutation_Rate_Limits` (
+  `RecordID` int unsigned NOT NULL AUTO_INCREMENT,
+  `SubjectRecordID` int unsigned NOT NULL,
+  `ScopeSHA256` char(64) NOT NULL,
+  `WindowStartedAt` datetime NOT NULL,
+  `RequestCount` smallint unsigned NOT NULL,
+  `ExpiresAt` datetime NOT NULL,
+  PRIMARY KEY (`RecordID`),
+  UNIQUE KEY `uq_red_addon_public_mutation_rate_window` (`SubjectRecordID`,`ScopeSHA256`,`WindowStartedAt`),
+  KEY `idx_red_addon_public_mutation_rate_expiry` (`ExpiresAt`,`RecordID`),
+  CONSTRAINT `fk_red_addon_public_mutation_rate_subject` FOREIGN KEY (`SubjectRecordID`) REFERENCES `RED_Addon_Public_Mutation_Subjects` (`RecordID`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `RED_Addon_Settings`
 --
 

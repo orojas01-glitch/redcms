@@ -668,22 +668,28 @@ A separate read-only live-data preflight now uses that trusted declaration only
 after the package is current and `installed_disabled`. It reads the one
 client's existing migration ledger, declared package-table engines, typed
 setting state, opaque secret-reference availability, and exact core
-anonymous-subject/CSRF storage shape; its plan returns only counts and SHA-256
-evidence, never table names, setting values, references, or secret material. It
-remains non-activating and non-executing: it does not itself issue values,
-dispatch a request, resolve a secret, load package PHP, mutate package data, or
-relax any enablement profile.
+anonymous-subject/CSRF/rate-limit storage shape; its plan returns only counts
+and SHA-256 evidence, never table names, setting values, references, or secret
+material. It remains non-activating and non-executing: it does not itself issue
+values, dispatch a request, resolve a secret, load package PHP, mutate package
+data, or relax any enablement profile.
 
 The separate internal subject/CSRF foundation is core-owned and client-scoped.
 Its two empty generic tables retain only SHA-256 digests of random 256-bit
-values, expiration facts, a scope hash, and an opaque subject relation; package
-manifest table declarations cannot claim them. The subject helper returns a
+values, expiration facts, a scope hash, and an opaque subject relation. The
+companion empty rate-limit table retains only the opaque subject relation, a
+declaration/database SHA-256 scope, fixed window/expiry facts, and bounded
+count; package manifest table declarations cannot claim any of these core
+tables. The subject helper returns a
 future endpoint's host-only `Secure`, `HttpOnly`, `SameSite=Strict` cookie
 descriptor with a 30-minute lifetime, while CSRF values expire after 10 minutes
 and are bound to the current client database plus one validated declaration.
 It reads no `$_COOKIE`, starts no session, emits no header, logs no raw value,
 and gives no raw value to package code. Expired records are removed in bounded
-core cleanup; token consumption, replay prevention, and the containing
+core cleanup. The separate rate helper permits at most 12 requests per 60
+seconds per client, declared route, and opaque subject; it owns only a short
+InnoDB transaction, rejects caller-owned transactions, and fails closed on
+storage loss. Token consumption, replay prevention, and the containing package
 transaction remain later work.
 
 Any later implementation must use one static trusted declaration, a

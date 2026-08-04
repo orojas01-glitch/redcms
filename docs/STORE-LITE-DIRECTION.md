@@ -171,9 +171,10 @@ core settings tables.
 The generic boundary for a future add-to-cart request is documented in
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md). The generic core
 can now validate optional closed declaration metadata and, separately, inspect
-the current migration, table, setting, and opaque-secret-availability evidence
-for a trusted installed-disabled package without exposing values. It also has
-an internal hash-only anonymous-subject/CSRF foundation for a later core
+the current migration, table, setting, opaque-secret-availability, and
+subject/CSRF/rate-limit storage evidence for a trusted installed-disabled
+package without exposing values. It also has internal hash-only
+anonymous-subject/CSRF and fixed-window rate-limit foundations for a later core
 dispatcher. Store Lite still has no public mutation route, browser cart cookie,
 package files, tables, or enablement profile.
 
@@ -269,10 +270,11 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - exact static public `GET` routes are complete as a core-owned JSON boundary,
   while unsafe/member/placeholder routes and route-bearing package enablement
   remain gated. The public-mutation declaration preflight plus separate
-  read-only live-data evidence and internal hash-only subject/CSRF foundation
-  reserve a future core-owned static POST path and inspect only trusted
-  installed-disabled client data readiness; they do not dispatch it, emit a
-  browser cart cookie, resolve secrets, or relax any route/enablement gate;
+  read-only live-data evidence, internal hash-only subject/CSRF foundation, and
+  internal fixed-window rate-limit foundation reserve a future core-owned static
+  POST path and inspect only trusted installed-disabled client data readiness;
+  they do not dispatch it, emit a browser cart cookie, resolve secrets, or relax
+  any route/enablement gate;
 - declared administrator routes;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
@@ -358,7 +360,12 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    cookie descriptor and declaration/database-scoped CSRF values. It adds no
    endpoint, emitted cookie/header, cart identity, package behavior, or
    enablement change.
-7. Continue with rate-limit/idempotency/transaction/response foundations and
+7. Completed the generic core-only fixed-window rate-limit foundation: one
+   empty per-client table records only an opaque subject relation, SHA-256
+   declaration/database scope, window facts, and bounded count. It permits at
+   most 12 requests per 60 seconds for one client, declared route, and subject;
+   it adds no public route, cart state, package code, or enablement change.
+8. Continue with idempotency/transaction/response foundations and
    settings UI/endpoints as separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -366,13 +373,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-8. Create Store Lite in its separate distribution using only those accepted
+9. Create Store Lite in its separate distribution using only those accepted
    contracts.
-9. Add package-owned migrations, Product editing, catalog, cart, orders, and
+10. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-10. Validate disable/re-enable, failure recovery, migration, responsive
+11. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-11. Add a separately reviewed hosted-payment adapter only after the
+12. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

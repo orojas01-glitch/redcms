@@ -1,12 +1,13 @@
 # RED-CMS Public Mutation Boundary
 
 Status: data-only declaration validation, its non-executing preflight, a
-separate read-only live-data preflight, and an internal core-only
-anonymous-subject/CSRF foundation are implemented. This document records the
-prerequisite for a future public write dispatcher. It does **not** add a public
-dispatcher or endpoint, emitted cookie/header, browser session access, handler,
-package, permission, enablement profile, or Store Lite behavior. The two new
-generic core tables remain empty in the clean starter.
+separate read-only live-data preflight, an internal core-only
+anonymous-subject/CSRF foundation, and a fixed-window rate-limit foundation are
+implemented. This document records the prerequisite for a future public write
+dispatcher. It does **not** add a public dispatcher or endpoint, emitted
+cookie/header, browser session access, handler, package, permission, enablement
+profile, or Store Lite behavior. The three generic core tables remain empty in
+the clean starter.
 
 ## Purpose
 
@@ -32,9 +33,10 @@ changed by it.
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
-| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
+| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
 | Anonymous cart identity | Internal core subject issuance/resolution exists for a future endpoint; it is not a cart identity | No browser cookie read/write, session, package access, route, or client business data |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
+| Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject | No dispatcher, request parsing, package execution, idempotency, package-data mutation, or enablement |
 | Public mutation ledger/audit | Does not exist | None |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -88,8 +90,9 @@ remain closed until separately reviewed.
 than declaration validation but earlier than a public request path. It accepts
 only a current, trusted, `installed_disabled` package and one already-validated
 declaration, then reads the existing client migration ledger, the declaration's
-package-owned table engines, typed generic setting state, and declared opaque
-secret-reference availability.
+package-owned table engines, typed generic setting state, declared opaque
+secret-reference availability, and exact core-owned subject/CSRF/rate-limit
+storage shape.
 
 Its deterministic plan returns no raw table name, setting value, opaque
 reference, or secret: it exposes only bounded counts, blocker codes, package
@@ -107,8 +110,7 @@ change enablement.
 new client database. They retain only SHA-256 digests of random 256-bit subject
 and CSRF values, created/expiry facts, a CSRF scope hash, and an opaque subject
 relationship. No raw token, cookie value, package id, cart, order, request body,
-secret, or business record is stored. The manifest validator reserves both
-table names so an add-on cannot declare them as package-owned storage.
+secret, or business record is stored.
 
 The internal helper accepts an explicit raw subject value only from a later
 core endpoint. It returns a future endpoint's host-only cookie descriptor
@@ -118,8 +120,29 @@ values expire after 10 minutes, are bound to the active subject plus the current
 client database and one already-valid declaration, and verify without returning
 the raw value. Expired rows are removed by bounded core cleanup. A later
 transaction runner must still consume the appropriate replay/idempotency fact;
-this helper does not dispatch, parse, rate-limit, mutate package tables, or
-execute package code.
+this helper does not dispatch, parse, mutate package tables, or execute package
+code.
+
+## Implemented Core-Owned Rate-Limit Foundation
+
+`RED_Addon_Public_Mutation_Rate_Limits` is the third empty generic core table.
+The manifest validator reserves all three core table names, so an add-on cannot
+claim any of them as package-owned storage. A rate row retains only an opaque
+subject record relation, SHA-256 scope, fixed window start/expiry facts, and a
+small request count. It never stores a raw subject or CSRF value, package id,
+route, request body, secret, cart, order, or business record.
+
+`includes/addon_public_mutation_rate_limit_helpers.php` is internal core code,
+not a package API. It derives its opaque scope from the current client database,
+one already-valid declaration, and the fixed core policy. The policy is exactly
+12 requests per 60 seconds for one client database, declared package route, and
+opaque anonymous subject. Each claim uses a short internal InnoDB transaction,
+rejects a caller-owned transaction, handles bounded contention, and fails closed
+when exact subject/CSRF/rate storage is unavailable. Expired evidence is removed
+in bounded cleanup, while expiry of the parent subject cascades its rate rows.
+No helper reads request/cookie/session globals, emits a response, loads package
+PHP, invokes a handler, checks idempotency, changes lifecycle, or mutates
+package data.
 
 ## Future Core-Owned Request Path
 
@@ -146,10 +169,10 @@ route file—must own this sequence:
    browser never supplies a package id, route owner, price, currency, total,
    order state, cart owner, permission, plan, or database target.
 5. Re-derive the exact manifest, registry, enabled runtime owner, anonymous
-   subject, idempotency key, rate limit, and current package state on the
-   server. A future request must be refused when rate-limit storage or required
-   state evidence is unavailable; a client-provided retry flag cannot bypass a
-   refusal.
+   subject, idempotency key, current fixed-window rate decision, and current
+   package state on the server. A future request must be refused when rate-limit
+   storage or required state evidence is unavailable; a client-provided retry
+   flag cannot bypass a refusal.
 6. Invoke only one registrar-bound mutation handler through a future
    core-owned transaction runner. The handler receives a final typed command
    and controlled transaction context, never PHP request globals, raw cookies,
@@ -166,10 +189,10 @@ route file—must own this sequence:
    not expose package/actor/cart/order/plan/state values, HTML, redirects,
    arbitrary headers, payment data, or a privileged action token.
 
-The exact rate budget and short-lived rate-limit evidence/retention policy are
-an implementation gate, not a browser choice. They must be bounded per client,
-package, route, and anonymous subject, protect privacy, and fail closed when
-the required enforcement state is unavailable.
+The initial rate budget is a core decision, not a browser or package choice:
+12 requests per 60 seconds per client database, declared package route, and
+anonymous subject. A future scope expansion requires separate review; it cannot
+silently weaken privacy, retention, or failure-closed enforcement.
 
 ## Store Lite Mapping
 
@@ -210,17 +233,19 @@ mutation:
 - disabled-state and later-disable proof: no route claim, runtime bootstrap,
   asset injection, or mutation after disable, with client data retained.
 
-The live-data preflight now also attests exact generic subject/CSRF storage in
-this list, but it supplies no rate-limit, idempotency, transaction, response,
-or richer-enablement evidence. No current enablement profile satisfies the
-complete set. The future validator must report a bounded, value-free refusal
-rather than silently downgrade a public write to a weaker route.
+The live-data preflight now also attests exact generic subject/CSRF/rate-limit
+storage in this list, but it supplies no idempotency, transaction, response, or
+richer-enablement evidence. No current enablement profile satisfies the complete
+set. The future validator must report a bounded, value-free refusal rather than
+silently downgrade a public write to a weaker route.
 
 ## Required Future Acceptance Evidence
 
-The current 19-assertion core-only foundation test proves exact storage,
-hash-only persistence, subject/CSRF scope, expiry, bounded cleanup, and absence
-of a package fixture. It is not HTTP, browser, or package-mutation acceptance.
+The current 19-assertion subject/CSRF test and 15-assertion rate-limit test
+prove exact storage, hash-only/opaque persistence, declaration/database scope,
+the fixed 12-per-60-second cap, subject-bound expiry, bounded cleanup, and
+absence of a package fixture. They are not HTTP, browser, or package-mutation
+acceptance.
 An implementation is not ready because a manifest validates or a route returns
 HTTP 200. A disposable, client-isolated acceptance suite must still prove:
 
@@ -278,10 +303,13 @@ This planning slice does not authorize:
 4. Completed the core-owned anonymous-subject and CSRF foundation with empty
    generic storage, hash-only persistence, bounded expiry cleanup, and no
    request dispatcher or package behavior.
-5. A separate batch may add rate-limit and idempotency evidence, a transaction
-   runner, and core-owned bounded responses, with disposable fixtures only.
-6. A separate richer enablement review may admit only packages that satisfy
+5. Completed the core-owned fixed-window rate-limit foundation with empty
+   generic storage, client/declaration/subject scope, a 12-per-60-second cap,
+   bounded cleanup, and no request dispatcher or package behavior.
+6. A separate batch may add idempotency evidence, a transaction runner, and
+   core-owned bounded responses, with disposable fixtures only.
+7. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-7. Store Lite can then implement its separately distributed catalog and cart
+8. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

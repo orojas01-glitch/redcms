@@ -174,14 +174,18 @@ change.
 Its separate read-only live-data preflight can now bind one trusted,
 `installed_disabled` package declaration to current per-client migration,
 InnoDB-table, typed-setting, opaque-secret-availability, and exact core-owned
-anonymous-subject/CSRF storage evidence. It returns hashes and counts only, and
-still cannot enable, dispatch, resolve a secret, issue idempotency material,
-load package code, or write package state. The separate core-only subject/CSRF
-foundation stores only SHA-256 digests of opaque 256-bit values in two empty
-generic per-client tables. It returns a future endpoint's host-only secure
-cookie descriptor and a declaration/database-scoped CSRF value, but has no
-dispatcher or endpoint, emits no cookie/header, reads no browser cookie or
-session, executes no package, and changes no lifecycle or Store Lite state.
+anonymous-subject/CSRF/rate-limit storage evidence. It returns hashes and counts
+only, and still cannot enable, dispatch, resolve a secret, issue idempotency
+material, load package code, or write package state. The separate core-only
+subject/CSRF foundation stores only SHA-256 digests of opaque 256-bit values in
+two empty generic per-client tables. It returns a future endpoint's host-only
+secure cookie descriptor and a declaration/database-scoped CSRF value. The
+separate fixed-window rate-limit foundation adds one empty core table holding
+only an opaque subject relation, a SHA-256 declaration/database scope, window
+facts, and a bounded count; it admits at most 12 requests per 60 seconds for
+one client, declared route, and subject. Neither helper has a dispatcher or
+endpoint, emits a cookie/header, reads a browser cookie or session, executes
+package code, or changes lifecycle or Store Lite state.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -438,10 +442,10 @@ implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
 complete, a core-only authorized setting read model is complete, and the
-generic public-mutation subject/CSRF foundation is complete. Its protected
-settings UI/endpoint, actual public writable routes, rate limiting,
-idempotency, transaction/response handling, actual secret lookup, live-data
-disable/upgrade compatibility, and richer package persistence contracts must
+generic public-mutation subject/CSRF and fixed-window rate-limit foundations
+are complete. Its protected settings UI/endpoint, actual public writable
+routes, idempotency, transaction/response handling, actual secret lookup,
+live-data disable/upgrade compatibility, and richer package persistence contracts must
 still be implemented and accepted with disposable fixtures before the
 separately distributed package can be enabled.
 
