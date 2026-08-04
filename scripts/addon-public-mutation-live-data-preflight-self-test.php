@@ -620,7 +620,7 @@ try {
             && $ready['gates']['secretLookup'] === 'not_implemented'
             && $ready['gates']['anonymousSubject'] === 'passed'
             && $ready['gates']['csrf'] === 'passed'
-            && $ready['gates']['idempotency'] === 'not_implemented'
+            && $ready['gates']['idempotency'] === 'passed'
             && $ready['gates']['rateLimit'] === 'passed'
             && red_addon_public_mutation_live_data_preflight_is_valid($ready),
         'complete current package, table, setting, and secret-availability evidence is deterministic but non-activating'

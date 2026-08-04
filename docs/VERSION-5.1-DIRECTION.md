@@ -33,8 +33,9 @@ response constraints; it still adds no dispatcher, emitted cookie/header or
 session access, ledger, package behavior, or enablement change. The separate
 read-only live-data preflight now binds a trusted declaration from an
 `installed_disabled` package to current per-client migration, table,
-typed-setting, opaque secret-availability, and core subject/CSRF/rate-limit
-storage evidence without enabling it or loading package PHP. A separate
+typed-setting, opaque secret-availability, and core
+subject/CSRF/rate-limit/idempotency storage evidence without enabling it or
+loading package PHP. A separate
 internal core foundation stores only SHA-256 digests of opaque anonymous-subject
 and CSRF values in empty per-client tables and returns a future endpoint's
 secure host-only cookie descriptor. A companion rate-limit foundation records
@@ -42,7 +43,10 @@ only an opaque subject relation, declaration/database scope hash, window facts,
 and bounded count; it permits at most 12 requests per 60 seconds per client,
 declared route, and subject. Neither provides a public endpoint, emits a
 cookie/header, accesses a browser cookie/session, executes package code, or
-changes activation.
+changes activation. A companion idempotency-key foundation stores only an
+opaque subject relation, declaration/database scope hash, SHA-256 key digest,
+and expiry facts; it can issue or resolve a 10-minute key, but cannot consume a
+key or record a replay result.
 Adapters, operational writable route/tool actions,
 settings UI/endpoints, actual secret lookup,
 upgrades, uninstall/purge,
@@ -645,16 +649,16 @@ request bootstrap excludes the disabled package.
     joins current trusted `installed_disabled` package evidence with the
     declared migration, package-table, typed-setting, and opaque
     secret-availability state for one client, returning only hashes and
-    counts. It can attest exact core subject/CSRF/rate-limit storage but does not itself
-    issue values, dispatch a request, resolve a secret, execute package code,
-    change lifecycle, or write package state.
+    counts. It can attest exact core subject/CSRF/rate-limit/idempotency
+    storage but does not itself issue values, dispatch a request, resolve a
+    secret, execute package code, change lifecycle, or write package state.
 46. Completed the internal core-only anonymous-subject and CSRF foundation:
     two empty per-client tables retain only SHA-256 digests of random 256-bit
     values; a future host-only `Secure`, `HttpOnly`, `SameSite=Strict` cookie
     descriptor expires after 30 minutes, and declaration/database-scoped CSRF
     values expire after 10 minutes. There is no public dispatcher or endpoint,
     emitted cookie/header, browser cookie/session access, package execution,
-    idempotency/rate-limit/transaction runner, Store Lite package, or activation
+    idempotency-consumption/rate-limit/transaction runner, Store Lite package, or activation
     change.
 47. Completed the internal core-only fixed-window rate-limit foundation: one
     empty per-client core table stores only an opaque subject relation, a
@@ -662,8 +666,16 @@ request bootstrap excludes the disabled package.
     An internal core claim permits at most 12 requests per 60 seconds for one
     client, declared route, and subject; it rejects caller-owned transactions
     and unavailable storage. There is no request parser, dispatcher, emitted
-    cookie/header, package execution, idempotency ledger, package mutation,
+    cookie/header, package execution, consumed idempotency replay ledger, package mutation,
     Store Lite package, or activation change.
+48. Completed the internal core-only opaque idempotency-key foundation: one
+    empty per-client core table stores only an opaque subject relation, a
+    declaration/database SHA-256 scope, a SHA-256 key digest, and expiry facts.
+    The internal issuer/resolver handles only a 10-minute key for one client,
+    declared route, and subject; it refuses caller-owned issuance transactions.
+    There is no key consumption, replay result, request parser, dispatcher,
+    emitted cookie/header, package execution, package mutation, Store Lite
+    package, or activation change.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

@@ -1045,13 +1045,14 @@ relax route-bearing enablement.
 core-only foundation, not a package API. The clean starter's empty
 `RED_Addon_Public_Mutation_Subjects`,
 `RED_Addon_Public_Mutation_CSRF_Tokens`, and
-`RED_Addon_Public_Mutation_Rate_Limits` are reserved core tables, so a manifest
-cannot declare them as package-owned. The subject and CSRF tables retain
-SHA-256 digests of random 256-bit values only. A future core endpoint may use
-the returned host-only secure cookie descriptor and declaration/database-scoped
-CSRF value; no current endpoint emits it, reads a browser cookie/session, or
-exposes either raw value to package code. Subject expiry is 30 minutes and CSRF
-expiry is 10 minutes.
+`RED_Addon_Public_Mutation_Rate_Limits`, plus
+`RED_Addon_Public_Mutation_Idempotency_Keys` are reserved core tables, so a
+manifest cannot declare them as package-owned. The subject and CSRF tables
+retain SHA-256 digests of random 256-bit values only. A future core endpoint may
+use the returned host-only secure cookie descriptor and declaration/database-
+scoped CSRF value; no current endpoint emits it, reads a browser cookie/session,
+or exposes either raw value to package code. Subject expiry is 30 minutes and
+CSRF expiry is 10 minutes.
 
 `includes/addon_public_mutation_rate_limit_helpers.php` separately retains one
 short-lived fixed-window row per client database, validated declaration, and
@@ -1063,12 +1064,22 @@ receives a browser request nor loads package code; its non-public result is only
 for a future core dispatcher. Replay/idempotency consumption remains a later
 transaction-runner responsibility.
 
+`includes/addon_public_mutation_idempotency_helpers.php` separately retains one
+short-lived key row per client database, validated declaration, and opaque
+anonymous subject. The row contains only the subject relation, SHA-256 scope,
+SHA-256 key digest, and creation/expiry facts. Its internal issuer returns a
+fresh 256-bit opaque key with a fixed 10-minute lifetime; its resolver proves
+only that the active subject and declaration match. It refuses issuance inside a
+caller-owned transaction and fails closed when exact core storage is unavailable.
+It does not consume a key or record a replay result: those actions remain part of
+the later atomic transaction runner.
+
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
-cookie/header or session access, ledger, handler, browser form, route
-eligibility, package fixture, or Store Lite behavior. It leaves legacy public
-form operations unchanged. Each later live request stage remains a separate
-disposable-fixture and richer enablement review.
+cookie/header or session access, consumed replay ledger, handler, browser form,
+route eligibility, package fixture, or Store Lite behavior. It leaves legacy
+public form operations unchanged. Each later live request stage remains a
+separate disposable-fixture and richer enablement review.
 
 ## Administrator Tool Contract
 

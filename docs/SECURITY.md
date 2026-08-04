@@ -668,18 +668,20 @@ A separate read-only live-data preflight now uses that trusted declaration only
 after the package is current and `installed_disabled`. It reads the one
 client's existing migration ledger, declared package-table engines, typed
 setting state, opaque secret-reference availability, and exact core
-anonymous-subject/CSRF/rate-limit storage shape; its plan returns only counts
-and SHA-256 evidence, never table names, setting values, references, or secret
-material. It remains non-activating and non-executing: it does not itself issue
-values, dispatch a request, resolve a secret, load package PHP, mutate package
-data, or relax any enablement profile.
+anonymous-subject/CSRF/rate-limit/idempotency storage shape; its plan returns
+only counts and SHA-256 evidence, never table names, setting values, references,
+or secret material. It remains non-activating and non-executing: it does not
+itself issue values, dispatch a request, resolve a secret, load package PHP,
+mutate package data, or relax any enablement profile.
 
 The separate internal subject/CSRF foundation is core-owned and client-scoped.
 Its two empty generic tables retain only SHA-256 digests of random 256-bit
 values, expiration facts, a scope hash, and an opaque subject relation. The
 companion empty rate-limit table retains only the opaque subject relation, a
 declaration/database SHA-256 scope, fixed window/expiry facts, and bounded
-count; package manifest table declarations cannot claim any of these core
+count. The empty idempotency table retains only that subject relation, a
+declaration/database SHA-256 scope, a SHA-256 key digest, and creation/expiry
+facts; package manifest table declarations cannot claim any of these core
 tables. The subject helper returns a
 future endpoint's host-only `Secure`, `HttpOnly`, `SameSite=Strict` cookie
 descriptor with a 30-minute lifetime, while CSRF values expire after 10 minutes
@@ -689,8 +691,11 @@ and gives no raw value to package code. Expired records are removed in bounded
 core cleanup. The separate rate helper permits at most 12 requests per 60
 seconds per client, declared route, and opaque subject; it owns only a short
 InnoDB transaction, rejects caller-owned transactions, and fails closed on
-storage loss. Token consumption, replay prevention, and the containing package
-transaction remain later work.
+storage loss. The separate idempotency helper issues/resolves a 10-minute
+256-bit opaque key only for the active subject and exact declaration, stores
+only its SHA-256 digest, and refuses issuance inside a caller-owned transaction.
+It does not consume a key or record a replay result. Token consumption, replay
+prevention, and the containing package transaction remain later work.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
@@ -700,7 +705,8 @@ postcondition reload, and only bounded no-store/nosniff responses. It may not
 leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
 or payment data. No current enablement profile admits this capability; the
 foundation creates no public dispatcher or endpoint, emitted cookie/header or
-session access, ledger, package execution, Store Lite behavior, or client data.
+session access, consumed replay ledger, package execution, Store Lite behavior,
+or client data.
 
 ## Multi-User Authorization
 

@@ -999,6 +999,7 @@ if (!function_exists('red_addon_valid_public_mutation_table')) {
             'red_addon_public_mutation_subjects',
             'red_addon_public_mutation_csrf_tokens',
             'red_addon_public_mutation_rate_limits',
+            'red_addon_public_mutation_idempotency_keys',
         ];
         return is_string($value)
             && preg_match('/\ARED_Addon_[A-Za-z0-9_]{1,54}\z/', $value) === 1

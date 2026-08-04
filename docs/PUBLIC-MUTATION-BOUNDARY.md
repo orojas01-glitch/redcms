@@ -2,11 +2,12 @@
 
 Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
-anonymous-subject/CSRF foundation, and a fixed-window rate-limit foundation are
-implemented. This document records the prerequisite for a future public write
-dispatcher. It does **not** add a public dispatcher or endpoint, emitted
+anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
+opaque idempotency-key foundation are implemented. This document records the
+prerequisite for a future public write dispatcher. It does **not** add a public
+dispatcher or endpoint, emitted
 cookie/header, browser session access, handler, package, permission, enablement
-profile, or Store Lite behavior. The three generic core tables remain empty in
+profile, or Store Lite behavior. The four generic core tables remain empty in
 the clean starter.
 
 ## Purpose
@@ -33,10 +34,11 @@ changed by it.
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
-| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
+| Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
 | Anonymous cart identity | Internal core subject issuance/resolution exists for a future endpoint; it is not a cart identity | No browser cookie read/write, session, package access, route, or client business data |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject | No dispatcher, request parsing, package execution, idempotency, package-data mutation, or enablement |
+| Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No dispatcher, key consumption, replay result, package-data mutation, or enablement |
 | Public mutation ledger/audit | Does not exist | None |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -91,8 +93,8 @@ than declaration validation but earlier than a public request path. It accepts
 only a current, trusted, `installed_disabled` package and one already-validated
 declaration, then reads the existing client migration ledger, the declaration's
 package-owned table engines, typed generic setting state, declared opaque
-secret-reference availability, and exact core-owned subject/CSRF/rate-limit
-storage shape.
+secret-reference availability, and exact core-owned
+subject/CSRF/rate-limit/idempotency storage shape.
 
 Its deterministic plan returns no raw table name, setting value, opaque
 reference, or secret: it exposes only bounded counts, blocker codes, package
@@ -126,7 +128,7 @@ code.
 ## Implemented Core-Owned Rate-Limit Foundation
 
 `RED_Addon_Public_Mutation_Rate_Limits` is the third empty generic core table.
-The manifest validator reserves all three core table names, so an add-on cannot
+The manifest validator reserves all four core table names, so an add-on cannot
 claim any of them as package-owned storage. A rate row retains only an opaque
 subject record relation, SHA-256 scope, fixed window start/expiry facts, and a
 small request count. It never stores a raw subject or CSRF value, package id,
@@ -140,9 +142,31 @@ opaque anonymous subject. Each claim uses a short internal InnoDB transaction,
 rejects a caller-owned transaction, handles bounded contention, and fails closed
 when exact subject/CSRF/rate storage is unavailable. Expired evidence is removed
 in bounded cleanup, while expiry of the parent subject cascades its rate rows.
-No helper reads request/cookie/session globals, emits a response, loads package
-PHP, invokes a handler, checks idempotency, changes lifecycle, or mutates
-package data.
+The rate helper does not read request/cookie/session globals, emit a response,
+load package PHP, invoke a handler, inspect an idempotency key, change
+lifecycle, or mutate package data.
+
+## Implemented Core-Owned Idempotency Foundation
+
+`RED_Addon_Public_Mutation_Idempotency_Keys` is the fourth empty generic core
+table. The manifest validator reserves it with the other public-mutation core
+tables, so an add-on cannot claim it as package-owned storage. A row retains
+only an opaque subject record relation, a SHA-256 declaration/database scope, a
+SHA-256 digest of a core-issued key, and creation/expiry facts. It never stores
+a raw subject, CSRF value, idempotency key, package id, route, request body,
+secret, cart, order, or business record.
+
+`includes/addon_public_mutation_idempotency_helpers.php` is internal core code,
+not a package API. It issues or resolves a fresh 256-bit opaque key only for an
+active anonymous subject and an already-valid declaration. The fixed lifetime
+is 10 minutes; expired evidence is removed in bounded cleanup, and parent
+subject expiry cascades related key rows. Issuance refuses a caller-owned
+transaction and fails closed when exact subject/CSRF/rate/idempotency storage is
+unavailable. Resolution remains deliberately non-consuming: a later core
+transaction runner must atomically reserve the key, package mutation, replay
+evidence, and audit fact together. No helper reads request/cookie/session
+globals, emits a response, loads package PHP, invokes a handler, changes
+lifecycle, or mutates package data.
 
 ## Future Core-Owned Request Path
 
@@ -233,19 +257,20 @@ mutation:
 - disabled-state and later-disable proof: no route claim, runtime bootstrap,
   asset injection, or mutation after disable, with client data retained.
 
-The live-data preflight now also attests exact generic subject/CSRF/rate-limit
-storage in this list, but it supplies no idempotency, transaction, response, or
-richer-enablement evidence. No current enablement profile satisfies the complete
-set. The future validator must report a bounded, value-free refusal rather than
-silently downgrade a public write to a weaker route.
+The live-data preflight now also attests exact generic
+subject/CSRF/rate-limit/idempotency storage in this list, but it supplies no key
+consumption, transaction, response, or richer-enablement evidence. No current
+enablement profile satisfies the complete set. The future validator must report
+a bounded, value-free refusal rather than silently downgrade a public write to a
+weaker route.
 
 ## Required Future Acceptance Evidence
 
-The current 19-assertion subject/CSRF test and 15-assertion rate-limit test
-prove exact storage, hash-only/opaque persistence, declaration/database scope,
-the fixed 12-per-60-second cap, subject-bound expiry, bounded cleanup, and
-absence of a package fixture. They are not HTTP, browser, or package-mutation
-acceptance.
+The current 19-assertion subject/CSRF test, 15-assertion rate-limit test, and
+18-assertion idempotency test prove exact storage, hash-only/opaque persistence,
+declaration/database scope, the fixed 12-per-60-second cap, 10-minute key
+lifetime, subject-bound expiry, bounded cleanup, and absence of a package
+fixture. They are not HTTP, browser, or package-mutation acceptance.
 An implementation is not ready because a manifest validates or a route returns
 HTTP 200. A disposable, client-isolated acceptance suite must still prove:
 
@@ -306,10 +331,14 @@ This planning slice does not authorize:
 5. Completed the core-owned fixed-window rate-limit foundation with empty
    generic storage, client/declaration/subject scope, a 12-per-60-second cap,
    bounded cleanup, and no request dispatcher or package behavior.
-6. A separate batch may add idempotency evidence, a transaction runner, and
-   core-owned bounded responses, with disposable fixtures only.
-7. A separate richer enablement review may admit only packages that satisfy
+6. Completed the core-owned opaque idempotency-key foundation with empty
+   generic storage, client/declaration/subject scope, 10-minute expiry,
+   hash-only persistence, bounded cleanup, and no consumption, dispatcher, or
+   package behavior.
+7. A separate batch may add a transaction runner and core-owned bounded
+   responses, with disposable fixtures only.
+8. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-8. Store Lite can then implement its separately distributed catalog and cart
+9. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.
