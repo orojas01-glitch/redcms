@@ -1,6 +1,6 @@
 # RED-CMS Security Notes
 
-Date: 2026-07-25
+Date: 2026-08-05
 
 ## Configuration Secrets
 
@@ -31,6 +31,10 @@ Supported environment variables:
   future core-owned public-mutation dispatcher; it is not a secret and must
   not be supplied by `Host`, a request header, or a request-projected server
   value)
+- `RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` (one 64-lowercase-hex, 256-bit secret
+  shared only by an optional operator-built Caddy ingress handler and its
+  unlinked PHP verifier; never place it in a Caddyfile, `config.local.php`,
+  request header, client package, log, or diagnostic output)
 - `RED_ADDON_SECRET_REFERENCES` (comma-separated opaque `config:` references;
   contains no secret values)
 
@@ -770,12 +774,34 @@ The separate non-routable server request-facts adapter resolves the future
 canonical HTTPS origin only through the stricter server-local configuration
 path. It reads only the current `REQUEST_METHOD` and raw `REQUEST_URI`; a
 later supported web-server integration must provide raw body bytes plus a
-complete ordered list of raw header lines. It refuses associative header maps,
+complete ordered capture of fixed security-header families. It refuses associative header maps,
 including the generic PHP header API and `HTTP_*` server projections, because
 they cannot prove that duplicate critical wire headers were preserved. It has
 no body-stream reader, route selection/claim, runtime/bootstrap, database,
 cookie/session issuance, package invocation, response emission, front
 controller, enablement, Store Lite, or client-state path.
+
+The optional Caddy/FrankenPHP ingress-attestation source is a separate,
+operator-built middleware module, not a default server configuration. It
+removes `X-RED-Public-Mutation-Capture` and
+`X-RED-Public-Mutation-Signature` from every incoming request before PHP can
+observe them. Only a bounded `/addons/` `POST` with a known short unencoded
+body and non-duplicate fixed security headers can receive newly HMAC-signed
+replacement values. The signed payload contains only method, raw target, body
+length/hash, and a fixed security-header subset; it never exposes arbitrary
+request headers to PHP or package code. The paired PHP helper verifies the
+HMAC before reading `php://input`, rechecks current method/target/body facts,
+and remains unlinked from `index.php`.
+
+The handler source, Caddyfile placement example, and test command live under
+`server-integrations/frankenphp-public-mutation-attestation/`. A stock
+FrankenPHP binary cannot load the module dynamically: the operator must build
+and deploy a matching custom binary and keep it, its Caddyfile, the per-client
+environment key, certificates, and proxy configuration outside the clean
+starter. Until a separately reviewed dispatcher and deployment proof exist,
+invalid or missing attestation creates no public route, response, cookie,
+runtime/package invocation, lifecycle change, Store Lite behavior, or client
+state.
 
 The separate core-only response emitter accepts only an exact closed response
 envelope from the existing fixed core response contract. It rechecks the six

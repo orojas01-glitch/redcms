@@ -1,6 +1,6 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-08-04
+Date: 2026-08-05
 
 ## Purpose
 
@@ -417,7 +417,8 @@ bounded public-mutation response contract, 8-assertion closed core response
 emitter, 24-assertion declared
 public-mutation form decoder, 37-assertion pure HTTP request envelope,
 19-assertion private static mutation-route selector, 16-assertion
-non-routable server request-facts adapter,
+non-routable server request-facts adapter, 12-assertion optional
+FrankenPHP-ingress PHP verifier,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
 persistence/dispatch,
@@ -598,12 +599,28 @@ The command must return a nonzero status if installation, migration, schema, rel
   and creates no database, package, request, browser, route, or client
   fixture. It requires a canonical HTTPS origin from operating-system/local
   configuration only, ignores poisoned `Host`/request-projected server values,
-  preserves one explicit complete ordered header-line capture and raw body,
+  preserves one explicit complete ordered security-header capture and raw body,
   rejects associative/incomplete/reordered/duplicate header captures and
   malformed transport facts, and changes no request/session/response state.
   It has no generic PHP-header fallback, body-stream reader, package/runtime
   path, front-controller claim, endpoint, response emission, browser cookie,
   lifecycle, enablement, Store Lite, or client-state path.
+- Optional FrankenPHP ingress-verifier acceptance is dependency-free and
+  creates no database, package, browser, route, or client fixture. It accepts
+  only a fixed HMAC-signed Caddy capture from one process-environment key,
+  rechecks the current method/raw target and body length/SHA-256 before it
+  hands explicit facts to the existing adapter, and refuses forged signatures,
+  tokens, bodies, targets, duplicate/forbidden signed headers, or invalid key
+  shape without returning partial facts. One fixed Go/Caddy JSON-and-HMAC
+  fixture proves PHP verifier compatibility. Its invalid-current-capture path
+  reads no body and changes no request/session/response/buffer state. It has no front
+  controller, endpoint, cookie, package/runtime, database, lifecycle,
+  enablement, Store Lite, or client-state path. The separate
+  `scripts/frankenphp-public-mutation-ingress-self-test.sh` Go gate verifies
+  Caddy header stripping, bounded attestation, downstream body preservation,
+  duplicate/encoded/unknown/oversized withholding, and no handler response;
+  it is intentionally not part of the PHP/MySQL suite because it requires Go
+  and a separately built custom server binary remains a later deployment gate.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/
