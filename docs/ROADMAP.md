@@ -220,6 +220,12 @@ subject-cookie, CSRF, and idempotency ambiguity before it returns raw evidence
 to the form decoder. It never derives trust from `Host`, reads PHP globals,
 accesses a database/runtime/package, claims a route, emits a response, starts a
 session, or changes lifecycle, enablement, Store Lite, or client state.
+The separate private static mutation-route selector now maps one exact
+un-decoded path to one current registrar-bound route, mutation handler, and
+state loader. It reserves a query-bearing known path for later envelope
+refusal, but itself reads no request global, bootstraps no runtime, opens no
+database, invokes no package callback, and creates no route, endpoint,
+response, browser state, enablement change, or Store Lite behavior.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -477,9 +483,10 @@ inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
 complete, a core-only authorized setting read model is complete, and the
 generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
-idempotency-key, atomic transaction-runner, bounded response, and declared-form
-decoder, and pure HTTP request-envelope foundations are complete. Its protected
-settings UI/endpoint, bounded public HTTP dispatcher/response emitter,
+idempotency-key, atomic transaction-runner, bounded response, declared-form
+decoder, pure HTTP request-envelope, and private static route-selector
+foundations are complete. Its protected settings UI/endpoint, bounded public
+HTTP server adapter/dispatcher/response emitter,
 actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately

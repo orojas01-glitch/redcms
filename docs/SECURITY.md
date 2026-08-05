@@ -746,6 +746,16 @@ issues/resolves tokens, claims a route, emits a response, or changes client
 state. The final browser bridge must still prove that it passes the complete
 received header list and uses no user-controlled origin configuration.
 
+The separate private static mutation-route selector accepts only a bounded raw
+request target plus one already initialized core runtime context. It selects an
+exact un-decoded static path only when its public route, mutation handler, and
+state-loader ownership all agree. A duplicate candidate or missing binding is
+claimed and refused without revealing an owner. It does not read PHP request,
+cookie, or session globals; bootstrap a runtime; read package files; invoke a
+callback; open a database; issue browser evidence; emit a response; or change
+lifecycle, enablement, Store Lite, or client state. It is not wired to the
+front controller, so no public mutation endpoint exists yet.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

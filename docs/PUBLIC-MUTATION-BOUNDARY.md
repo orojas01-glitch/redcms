@@ -3,8 +3,9 @@
 Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
-opaque idempotency-key foundation, an internal atomic transaction runner, and a
-pure declared-form decoder plus HTTP request-envelope normalizer are
+opaque idempotency-key foundation, an internal atomic transaction runner, a
+pure declared-form decoder, HTTP request-envelope normalizer, and private
+static route selector are
 implemented. This document records the
 prerequisite for a future public write dispatcher. It does **not** add a public
 HTTP dispatcher or endpoint, emitted
@@ -44,6 +45,7 @@ changed by it.
 | Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No response, package fixture, browser behavior, or publicly reachable execution path |
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
+| Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
 The planned contract cannot make a route-bearing package eligible for the
@@ -283,14 +285,34 @@ no PHP request globals, does not start a session, access a database or runtime,
 issue/resolve a subject/CSRF/key, load package code, claim a route, run the
 transaction, or change lifecycle, enablement, Store Lite, or client state.
 
+## Implemented Static Mutation-Route Selector
+
+`includes/addon_public_mutation_route_helpers.php` accepts one raw request
+target and an already initialized core runtime context. It uses only the raw,
+un-decoded path portion to find an exact declared static mutation path, while a
+later normalizer still receives the complete target and therefore rejects a
+query-bearing target. A successful private selection binds one package id,
+route id, mutation id, and canonical path only when the current context has
+the exact registrar-owned public route, mutation handler, and state-loader
+bindings. Duplicate path candidates or a missing binding are claimed but fail
+closed without returning an owner.
+
+The selector does not read `$_SERVER` or any request/session/cookie global,
+open a database, bootstrap a runtime, read package files, invoke a route,
+mutation, or state-loader callback, issue browser evidence, emit a response,
+or change lifecycle, enablement, Store Lite, or client state. It is not wired
+into `index.php`; it creates no live route or endpoint.
+
 ## Future Core-Owned Request And Response Path
 
 When a dispatcher is approved, core—not a theme, browser script, or package
 route file—must own this sequence:
 
-1. Recognize only a current trusted, enabled, static declaration in the
-   reserved package namespace. It must reject every malformed, noncanonical,
-   disabled, stale, untrusted, or undeclared request before package code runs.
+1. Use the implemented private selector only after core has initialized one
+   current trusted enabled runtime context. The dispatcher must still bind that
+   selected declaration to the complete raw target and reject every malformed,
+   noncanonical, disabled, stale, untrusted, or undeclared request before a
+   package callback runs.
 2. Use the implemented core-owned, client-scoped anonymous subject foundation
    only through the future dispatcher. It is an opaque, unguessable
    cookie-bound reference; it is neither an administrator session, a Member
@@ -471,10 +493,13 @@ This planning slice does not authorize:
 10. Completed the pure HTTP request-envelope normalizer with a configured HTTPS
     origin, exact static POST path, fixed opaque browser evidence, and no
     request-global, endpoint, browser, package, or enablement path.
-11. A separate batch may add a core-owned HTTP request dispatcher and emitter, with
-   disposable fixtures only.
-12. A separate richer enablement review may admit only packages that satisfy
+11. Completed the private static mutation-route selector with exact
+    registrar-binding checks and no request-global, handler, endpoint, or
+    response path.
+12. A separate batch may add a core-owned server request adapter, HTTP
+    dispatcher, and emitter, with disposable fixtures only.
+13. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-13. Store Lite can then implement its separately distributed catalog and cart
+14. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

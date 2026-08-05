@@ -184,6 +184,10 @@ canonical form metadata, subject cookie, CSRF, and idempotency evidence before
 the decoder runs; none of these helpers owns a browser adapter, browser identity
 issuance, route, or response emission. Store Lite still has no public mutation
 route, browser cart cookie, package files, tables, or enablement profile.
+The separate private selector can now bind a known static path to one current
+registrar-owned route/mutation/state-loader identity without calling it. It
+does not create a request adapter, route claim, endpoint, browser evidence,
+response, Store Lite state, or enablement change.
 
 The initial order states should remain small:
 
@@ -399,7 +403,12 @@ Store Lite is releasable only after disposable isolated acceptance proves:
     and raw body, then releases only validated opaque subject/CSRF/idempotency
     evidence to the later core dispatcher. It has no PHP-global request adapter,
     endpoint, response, route, browser issuance, enablement, or Store Lite path.
-13. Continue with bounded HTTP request dispatch, richer-enablement, and settings
+13. Completed the private static mutation-route selector: it binds one exact
+    un-decoded path only to a current registrar-owned public route, mutation
+    handler, and state loader, with fail-closed ambiguity and missing-binding
+    refusal. It has no request-global adapter, package invocation, endpoint,
+    response, browser behavior, enablement, or Store Lite path.
+14. Continue with bounded HTTP server adapter/dispatch, richer-enablement, and settings
    UI/endpoints as separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -407,13 +416,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-14. Create Store Lite in its separate distribution using only those accepted
+15. Create Store Lite in its separate distribution using only those accepted
    contracts.
-15. Add package-owned migrations, Product editing, catalog, cart, orders, and
+16. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-16. Validate disable/re-enable, failure recovery, migration, responsive
+17. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-17. Add a separately reviewed hosted-payment adapter only after the
+18. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

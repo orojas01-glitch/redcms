@@ -714,6 +714,12 @@ request bootstrap excludes the disabled package.
     only after same-origin, canonical content metadata, fixed token, and
     body-size validation. It has no PHP-global, endpoint, response, session,
     database/runtime/package, route, enablement, fixture, or Store Lite path.
+53. Completed the private core-only static mutation-route selector: one exact
+    un-decoded path can bind only to a current registrar-owned public route,
+    mutation handler, and state loader. Ambiguous or incomplete bindings fail
+    closed without package invocation or owner disclosure. It has no request
+    globals, runtime bootstrap, database, front-controller route, response,
+    browser state, enablement, fixture, or Store Lite path.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
