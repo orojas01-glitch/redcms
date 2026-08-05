@@ -27,10 +27,20 @@ Supported environment variables:
 - `RED_PAYPAL_PDT_AUTH_TOKEN`
 - `RED_PAYPAL_CONFIRMATION_FROM_EMAIL`
 - `RED_PAYPAL_CONFIRMATION_FROM_NAME`
+- `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` (one canonical HTTPS origin for a
+  future core-owned public-mutation dispatcher; it is not a secret and must
+  not be supplied by `Host`, a request header, or a request-projected server
+  value)
 - `RED_ADDON_SECRET_REFERENCES` (comma-separated opaque `config:` references;
   contains no secret values)
 
 The existing constants `DBHOST`, `DBUSER`, `DBPASS`, and `DBNAME` are preserved so current CMS classes continue to work.
+
+The future public-mutation origin uses the stricter
+`red_server_config_value()` path. It accepts only an operating-system
+environment value or `config.local.php`; unlike compatibility configuration,
+it deliberately does not fall back to `$_ENV` or `$_SERVER`, because some
+SAPIs project request headers into server arrays.
 
 ## Admin Passwords
 
@@ -756,6 +766,17 @@ callback; open a database; issue browser evidence; emit a response; or change
 lifecycle, enablement, Store Lite, or client state. It is not wired to the
 front controller, so no public mutation endpoint exists yet.
 
+The separate non-routable server request-facts adapter resolves the future
+canonical HTTPS origin only through the stricter server-local configuration
+path. It reads only the current `REQUEST_METHOD` and raw `REQUEST_URI`; a
+later supported web-server integration must provide raw body bytes plus a
+complete ordered list of raw header lines. It refuses associative header maps,
+including the generic PHP header API and `HTTP_*` server projections, because
+they cannot prove that duplicate critical wire headers were preserved. It has
+no body-stream reader, route selection/claim, runtime/bootstrap, database,
+cookie/session issuance, package invocation, response emission, front
+controller, enablement, Store Lite, or client-state path.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and
@@ -765,7 +786,9 @@ leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
 or payment data. No current enablement profile admits this capability; the
 foundation creates no public dispatcher or endpoint, emitted cookie/header or
 session access, public package execution, Store Lite behavior,
-or client data.
+or client data. A live dispatcher must additionally prove that its supported
+web-server boundary preserves or rejects duplicate critical headers before PHP
+and cannot turn any request value into trusted-origin configuration.
 
 ## Multi-User Authorization
 

@@ -5,7 +5,7 @@ separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
 pure declared-form decoder, HTTP request-envelope normalizer, and private
-static route selector are
+static route selector plus a non-routable server request-facts adapter are
 implemented. This document records the
 prerequisite for a future public write dispatcher. It does **not** add a public
 HTTP dispatcher or endpoint, emitted
@@ -46,6 +46,7 @@ changed by it.
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
+| Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete header-line capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
 The planned contract cannot make a route-bearing package eligible for the
@@ -303,13 +304,43 @@ mutation, or state-loader callback, issue browser evidence, emit a response,
 or change lifecycle, enablement, Store Lite, or client state. It is not wired
 into `index.php`; it creates no live route or endpoint.
 
+## Implemented Server Request-Facts Adapter
+
+`includes/addon_public_mutation_server_request_helpers.php` establishes the
+smallest server-owned bridge needed before a future dispatcher can use the
+existing request-envelope normalizer. Its trusted canonical HTTPS origin comes
+only from `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` in the operating-system
+environment or `PUBLIC_MUTATION_TRUSTED_ORIGIN` in ignored local configuration.
+The dedicated `red_server_config_value()` deliberately does not inherit the
+compatibility helper's `$_ENV` or `$_SERVER` fallback, so `Host` and a
+request-projected server value cannot configure the origin.
+
+The adapter reads only the current `REQUEST_METHOD` and raw `REQUEST_URI`.
+A later web-server-specific integration must supply raw body bytes and an exact
+ordered `{ complete: true, headers: [{ name, value }, ...] }` capture. It
+rejects an associative header map, reordered capture shape, duplicate critical
+headers, malformed transport facts, and bodies above the generic 8,192-byte
+ceiling. The generic PHP header API and an `HTTP_*` server projection are not
+used because neither can demonstrate that duplicate wire-header evidence was
+retained for the existing envelope validation.
+
+This is still not a body reader, selector, dispatcher, or emitter. It is not
+wired into `index.php`; it does not bootstrap runtime state, inspect a manifest,
+open a database, read parsed fields/cookies/sessions, issue a subject or CSRF
+cookie, invoke package code, run a transaction, or change lifecycle,
+enablement, Store Lite, or client state. Its short-lived captured facts are
+private core input for a future dispatcher only.
+
 ## Future Core-Owned Request And Response Path
 
 When a dispatcher is approved, core—not a theme, browser script, or package
 route file—must own this sequence:
 
-1. Use the implemented private selector only after core has initialized one
-   current trusted enabled runtime context. The dispatcher must still bind that
+1. Use the implemented server request-facts adapter only with a
+   web-server-specific, line-preserving complete header capture, configured
+   canonical HTTPS origin, raw body, and current method/target. Then use the
+   implemented private selector only after core has initialized one current
+   trusted enabled runtime context. The dispatcher must still bind that
    selected declaration to the complete raw target and reject every malformed,
    noncanonical, disabled, stale, untrusted, or undeclared request before a
    package callback runs.
@@ -424,6 +455,9 @@ HTTP 200. A disposable, client-isolated acceptance suite must still prove:
   declarations fail before package execution;
 - current public GET routing still refuses unsafe methods until the new
   dispatcher is explicitly present;
+- a real supported web-server bridge preserves or rejects duplicate critical
+  request headers before PHP and cannot configure the trusted origin from
+  `Host`, a request header, or a request-projected server value;
 - anonymous subjects and CSRF tokens are opaque, scoped to one client, and
   unavailable to another client, administrator session, member session, or
   package request;
@@ -496,10 +530,15 @@ This planning slice does not authorize:
 11. Completed the private static mutation-route selector with exact
     registrar-binding checks and no request-global, handler, endpoint, or
     response path.
-12. A separate batch may add a core-owned server request adapter, HTTP
-    dispatcher, and emitter, with disposable fixtures only.
-13. A separate richer enablement review may admit only packages that satisfy
+12. Completed the non-routable server request-facts adapter with a dedicated
+    operating-system/local trusted-origin resolver, bounded current
+    method/target capture, and an explicit line-preserving complete-header
+    requirement. It has no body-reader, front-controller, dispatcher,
+    browser, response, package, or enablement path.
+13. A separate batch may add a core-owned HTTP dispatcher and emitter with a
+    supported server integration and disposable fixtures only.
+14. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-14. Store Lite can then implement its separately distributed catalog and cart
+15. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

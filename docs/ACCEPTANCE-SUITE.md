@@ -414,7 +414,8 @@ rate-limit foundation, 18-assertion core-only opaque idempotency-key foundation,
 21-assertion atomic core-only public-mutation transaction runner, 18-assertion
 bounded public-mutation response contract, 24-assertion declared
 public-mutation form decoder, 37-assertion pure HTTP request envelope,
-19-assertion private static mutation-route selector,
+19-assertion private static mutation-route selector, 16-assertion
+non-routable server request-facts adapter,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
 persistence/dispatch,
@@ -591,6 +592,16 @@ The command must return a nonzero status if installation, migration, schema, rel
   request-global adapter, database, package file, front-controller claim,
   endpoint, response, browser state, lifecycle, enablement, Store Lite, or
   client-state path.
+- Public-mutation server request-facts adapter acceptance is dependency-free
+  and creates no database, package, request, browser, route, or client
+  fixture. It requires a canonical HTTPS origin from operating-system/local
+  configuration only, ignores poisoned `Host`/request-projected server values,
+  preserves one explicit complete ordered header-line capture and raw body,
+  rejects associative/incomplete/reordered/duplicate header captures and
+  malformed transport facts, and changes no request/session/response state.
+  It has no generic PHP-header fallback, body-stream reader, package/runtime
+  path, front-controller claim, endpoint, response emission, browser cookie,
+  lifecycle, enablement, Store Lite, or client-state path.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

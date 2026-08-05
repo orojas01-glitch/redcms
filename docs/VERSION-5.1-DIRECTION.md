@@ -720,6 +720,13 @@ request bootstrap excludes the disabled package.
     closed without package invocation or owner disclosure. It has no request
     globals, runtime bootstrap, database, front-controller route, response,
     browser state, enablement, fixture, or Store Lite path.
+54. Completed the non-routable core-only server request-facts adapter: it
+    resolves a canonical HTTPS origin only from operating-system/local
+    configuration, reads only the current method/raw target, and requires a
+    later server integration to attest one complete raw header-line capture.
+    It rejects associative header maps and does not read a body stream, claim
+    a route, invoke a package, emit a response/cookie, create browser state,
+    or alter enablement, fixture, Store Lite, or client state.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
