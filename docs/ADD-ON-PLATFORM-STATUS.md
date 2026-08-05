@@ -41,8 +41,9 @@ flowchart TD
     G8 --> G9["Core opaque idempotency-key foundation"]
     G9 --> G10["Core atomic transaction runner + replay ledger"]
     G10 --> G11["Core public-mutation HTTP envelope"]
-    G11 --> G12["CURRENT / NEXT<br/>Bounded HTTP dispatch + richer enablement"]
-    G12 --> S["TARGET<br/>Store Lite optional package"]
+    G11 --> G12["Core static mutation-route selector"]
+    G12 --> G13["CURRENT / NEXT<br/>Server adapter, bounded HTTP dispatch + richer enablement"]
+    G13 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -52,8 +53,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11 complete;
-    class G12 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12 complete;
+    class G13 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -61,8 +62,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-only public-mutation HTTP request envelope: a trusted canonical HTTPS origin, static POST declaration, complete header list, and raw body yield opaque subject/CSRF/idempotency evidence only after same-origin, content metadata, and token validation. There is still no PHP-global request adapter, public endpoint, response emission, browser session, Store Lite state, or enablement change. |
-| Current milestone | Public HTTP dispatch and richer-enablement gates: static route claim, server-owned request adapter, subject-cookie issuance/rotation, response emission, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-only static public-mutation route selector: an exact un-decoded path binds only to a current registrar-owned route, mutation handler, and state loader; query-bearing known paths remain reserved for later envelope refusal, while ambiguity and missing bindings fail closed. There is still no PHP-global request adapter, public endpoint, response emission, browser session, Store Lite state, or enablement change. |
+| Current milestone | Public HTTP dispatch and richer-enablement gates: server-owned request adapter, subject-cookie issuance/rotation, response emission, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

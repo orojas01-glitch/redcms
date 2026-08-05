@@ -1129,6 +1129,17 @@ runner. It reads no PHP globals, database, runtime, package code, or browser
 state; it does not resolve/issue evidence, claim a route, emit a response, or
 alter lifecycle, enablement, or Store Lite behavior.
 
+`includes/addon_public_mutation_route_helpers.php` is a separate private
+selector for a later dispatcher. Given one raw request target and an already
+initialized core runtime context, it maps only an exact un-decoded static path
+to one package/route/mutation identity after confirming the exact registrar
+route, mutation-handler, and state-loader bindings. Query-bearing known paths
+remain reserved for later normalizer refusal. Ambiguous or incompletely bound
+paths fail closed without exposing an owner. The selector does not read request
+globals, bootstrap a runtime, open a database, invoke package callbacks, emit a
+response, or create a front-controller route, endpoint, browser state,
+enablement change, or Store Lite behavior.
+
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
 cookie/header or session access, browser form, route eligibility, package

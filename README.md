@@ -263,6 +263,11 @@ features.
   headers before returning raw body bytes to the separate decoder. It reads no
   PHP request globals, database, runtime, or package code, and creates no
   endpoint, response, session, Store Lite behavior, or client state
+- Core-only static public-mutation route selector that maps one exact
+  un-decoded path to one current registrar-bound route, mutation handler, and
+  state loader. It invokes no callback and reads no request global, database,
+  or package file; it creates no front-controller claim, endpoint, response,
+  browser behavior, Store Lite state, or enablement change
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint
