@@ -409,8 +409,9 @@ static immutable asset endpoint, 11-assertion core-owned public/admin asset
 injection, 19-assertion disabled
 installation/recovery, 23-assertion read-only enablement preflight,
 17-assertion read-only public-mutation live-data preflight, 19-assertion
-core-only anonymous-subject/CSRF foundation, 15-assertion core-only fixed-window
-rate-limit foundation, 18-assertion core-only opaque idempotency-key foundation,
+core-only anonymous-subject/CSRF foundation, 7-assertion pure subject-cookie
+serializer, 15-assertion core-only fixed-window rate-limit foundation,
+18-assertion core-only opaque idempotency-key foundation,
 21-assertion atomic core-only public-mutation transaction runner, 18-assertion
 bounded public-mutation response contract, 8-assertion closed core response
 emitter, 24-assertion declared
@@ -611,6 +612,16 @@ The command must return a nonzero status if installation, migration, schema, rel
   unreviewed statuses before changing response state. It has no request-global,
   browser-cookie, session, database/runtime/package, front-controller, route,
   endpoint, lifecycle, enablement, Store Lite, or client-state path.
+- Public-mutation subject-cookie serialization acceptance is dependency-free
+  and creates no database, package, request, browser, route, or client
+  fixture. It accepts only the exact core-issued descriptor shape and produces
+  one fixed host-only future cookie value with a 30-minute `Max-Age`,
+  `Path=/`, `Secure`, `HttpOnly`, and `SameSite=Strict`, no `Domain` or
+  `Expires`; it refuses forged descriptors, policy drift, token drift, domain
+  injection, and max-age drift. It emits no header/cookie and changes no
+  request/session/response/buffer state; it has no front-controller, endpoint,
+  browser issuance/rotation, lifecycle, enablement, Store Lite, or client-state
+  path.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

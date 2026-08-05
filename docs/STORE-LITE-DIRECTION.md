@@ -203,6 +203,12 @@ headers, and emits only the matching fixed bytes. It remains unlinked from the
 front controller and reads no request/cookie/session state, database, runtime,
 or package code, so it creates no public route, cart cookie, Store Lite state,
 or enablement path.
+The separate pure subject-cookie serializer can now construct only the exact
+future host-only cookie value for an exact core-issued descriptor shape: a
+30-minute `Max-Age`, `Path=/`, `Secure`, `HttpOnly`, and `SameSite=Strict`,
+without `Domain` or `Expires`. It emits no cookie/header and remains unlinked
+from the front controller, so it creates no browser cart identity, public
+route, Store Lite state, or enablement path.
 
 The initial order states should remain small:
 
@@ -433,8 +439,14 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    only fixed no-store/nosniff JSON headers, and emits only matching fixed
    bytes. It has no request, browser, package, front-controller, enablement,
    or Store Lite path.
-16. Continue with bounded HTTP dispatch, browser subject issuance/rotation,
-   richer-enablement, and settings UI/endpoints as
+16. Completed the pure non-emitting subject-cookie serializer: it accepts only
+   the exact core-issued descriptor shape and produces one fixed future
+   host-only cookie value with 30-minute `Max-Age`, `Path=/`, `Secure`,
+   `HttpOnly`, and `SameSite=Strict`, without `Domain` or `Expires`. It has no
+   request, browser, package, header-emission, front-controller, enablement,
+   or Store Lite path.
+17. Continue with bounded HTTP dispatch, actual browser subject
+   issuance/clearance/rotation, richer-enablement, and settings UI/endpoints as
    separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -442,13 +454,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-17. Create Store Lite in its separate distribution using only those accepted
+18. Create Store Lite in its separate distribution using only those accepted
    contracts.
-18. Add package-owned migrations, Product editing, catalog, cart, orders, and
+19. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-19. Validate disable/re-enable, failure recovery, migration, responsive
+20. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-20. Add a separately reviewed hosted-payment adapter only after the
+21. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

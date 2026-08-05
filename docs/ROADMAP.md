@@ -241,6 +241,13 @@ fixed body bytes. It reads no request/cookie/session state, database, runtime,
 or package code and remains outside the front controller. It creates no route,
 endpoint, browser cookie, Store Lite behavior, enablement change, or client
 data; a later dispatcher must return immediately after it uses the emitter.
+The separate pure subject-cookie serializer now accepts only the exact
+core-issued descriptor shape and constructs one fixed future host-only
+`Set-Cookie` value: `Max-Age=1800`, `Path=/`, `Secure`, `HttpOnly`, and
+`SameSite=Strict`, without `Domain` or `Expires`. It emits no header/cookie,
+reads no request/cookie/session state, database, runtime, or package code, and
+remains outside the front controller. It creates no endpoint, browser
+issuance/rotation, enablement change, Store Lite behavior, or client data.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -501,9 +508,9 @@ generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
 idempotency-key, atomic transaction-runner, bounded response, declared-form
 decoder, pure HTTP request-envelope, private static route-selector, and
 non-routable server request-facts adapter plus closed response-emitter
-foundations are complete. Its
+and non-emitting subject-cookie-serialization foundations are complete. Its
 protected settings UI/endpoint, supported public HTTP server integration,
-bounded dispatcher and browser subject-cookie issuance/rotation,
+bounded dispatcher and actual browser subject-cookie issuance/clearance/rotation,
 actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
