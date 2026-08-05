@@ -4,12 +4,12 @@ Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
-pure declared-form decoder, HTTP request-envelope normalizer, and private
-static route selector plus a non-routable server request-facts adapter are
-implemented. This document records the
+pure declared-form decoder, HTTP request-envelope normalizer, private static
+route selector, non-routable server request-facts adapter, and closed response
+emitter are implemented. This document records the
 prerequisite for a future public write dispatcher. It does **not** add a public
-HTTP dispatcher or endpoint, emitted
-cookie/header, browser session access, package, permission, enablement profile,
+HTTP dispatcher or endpoint, emitted cookie, browser session access, package,
+permission, enablement profile,
 or Store Lite behavior. The five generic core tables remain empty in the clean
 starter.
 
@@ -47,6 +47,7 @@ changed by it.
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete header-line capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
+| Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
 The planned contract cannot make a route-bearing package eligible for the
@@ -382,10 +383,10 @@ route file—must own this sequence:
    loss, postcondition drift, or ledger/audit failure must roll back or refuse
    the complete request.
 8. Select only the implemented valid core response envelope after the complete
-   request/transaction result is known. A later dispatcher/emitter may not
-   expose package/actor/cart/order/plan/state values, HTML, redirects,
-   arbitrary headers, payment data, a privileged action token, or replay
-   status.
+   request/transaction result is known, then use the separate core emitter and
+   return immediately. A later dispatcher/emitter may not expose package/
+   actor/cart/order/plan/state values, HTML, redirects, arbitrary headers,
+   payment data, a privileged action token, or replay status.
 
 The initial rate budget is a core decision, not a browser or package choice:
 12 requests per 60 seconds per client database, declared package route, and
@@ -535,10 +536,15 @@ This planning slice does not authorize:
     method/target capture, and an explicit line-preserving complete-header
     requirement. It has no body-reader, front-controller, dispatcher,
     browser, response, package, or enablement path.
-13. A separate batch may add a core-owned HTTP dispatcher and emitter with a
-    supported server integration and disposable fixtures only.
-14. A separate richer enablement review may admit only packages that satisfy
+13. Completed the core-only non-routable response emitter with exact closed
+    fixed-envelope validation, premature-output refusal, fixed no-store/
+    nosniff JSON headers, and exact body emission. It has no request,
+    cookie/session, database/runtime/package, route, browser, dispatcher,
+    enablement, or client-state path.
+14. A separate batch may add a core-owned HTTP dispatcher with a supported
+    server integration and disposable fixtures only.
+15. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-15. Store Lite can then implement its separately distributed catalog and cart
+16. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

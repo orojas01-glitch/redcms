@@ -276,6 +276,13 @@ features.
   does not read a body stream, claim a route, invoke a handler, access a
   database, emit a response/cookie, or add a public endpoint, Store Lite
   behavior, or enablement change
+- Core-only non-routable public-mutation response emitter. It accepts only the
+  existing exact fixed core envelopes, refuses to run after output starts,
+  clears and sets only their no-store/nosniff JSON headers, and emits only the
+  corresponding fixed bytes. It reads no request/cookie/session state,
+  database, runtime, or package code and remains unlinked from `index.php`, so
+  it creates no public endpoint, browser cookie, Store Lite behavior, or
+  enablement change
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

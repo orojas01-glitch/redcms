@@ -43,8 +43,9 @@ flowchart TD
     G10 --> G11["Core public-mutation HTTP envelope"]
     G11 --> G12["Core static mutation-route selector"]
     G12 --> G13["Core server request-facts adapter"]
-    G13 --> G14["CURRENT / NEXT<br/>Bounded HTTP dispatch + richer enablement"]
-    G14 --> S["TARGET<br/>Store Lite optional package"]
+    G13 --> G14["Core closed response emitter"]
+    G14 --> G15["CURRENT / NEXT<br/>Bounded HTTP dispatch + richer enablement"]
+    G15 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -54,8 +55,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13 complete;
-    class G14 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14 complete;
+    class G15 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -63,8 +64,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-only non-routable server request-facts adapter: a canonical HTTPS origin comes only from operating-system/local configuration, and a later server integration must provide an explicit complete header-line capture rather than an associative PHP header map. It can read only the current method/raw target and creates no route claim, endpoint, response, browser session, Store Lite state, or enablement change. |
-| Current milestone | Bounded public HTTP dispatch and richer-enablement gates: browser subject-cookie issuance/rotation, final HTTP server integration, response emission, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-only non-routable public-mutation response emitter: it accepts only an existing exact fixed core envelope, refuses to run after output starts, clears and sets only its no-store/nosniff JSON headers, and emits only matching fixed bytes. It reads no request/cookie/session, database, runtime, or package state and is not linked to the front controller, so no public endpoint, browser cookie, Store Lite state, or enablement change exists. |
+| Current milestone | Bounded public HTTP dispatch and richer-enablement gates: browser subject-cookie issuance/rotation, final supported HTTP server integration, bounded dispatcher routing/containment, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
