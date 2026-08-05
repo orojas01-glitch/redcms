@@ -1015,10 +1015,13 @@ continue to reject routes until richer package lifecycle gates are reviewed.
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic
 core-owned path for a narrowly declared static public POST mutation. The
 internal transaction runner, pure bounded response contract, closed core
-response emitter, and declared-form decoder are implemented, but no HTTP
-dispatcher or enablement profile can reach them. The emitter is not linked to
-the front controller and can output only an already-valid fixed core envelope;
-it does not make a public endpoint available.
+response emitter, pure subject-cookie serializer, and declared-form decoder are
+implemented, but no HTTP dispatcher or enablement profile can reach them. The
+emitter is not linked to the front controller and can output only an
+already-valid fixed core envelope; it does not make a public endpoint
+available. The serializer is likewise unlinked and can only construct the
+fixed future host-only cookie value; it does not emit a browser cookie or make
+a public endpoint available.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,

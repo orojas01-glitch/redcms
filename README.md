@@ -231,6 +231,13 @@ features.
   persistence, a future host-only secure cookie descriptor, and declaration- and
   database-scoped expiry; no browser endpoint, header, session, package access,
   or Store Lite behavior
+- Pure core-only public-mutation subject-cookie serializer. It accepts only the
+  exact core-issued descriptor shape and constructs one fixed future host-only
+  `Set-Cookie` value with `Max-Age=1800`, `Path=/`, `Secure`, `HttpOnly`, and
+  `SameSite=Strict`, without `Domain` or `Expires`. It emits no header/cookie
+  and reads no request/cookie/session, database, runtime, or package state; it
+  creates no endpoint, browser flow, enablement change, Store Lite behavior, or
+  client data
 - Internal core-only fixed-window rate-limit storage and decision helper: 12
   requests per 60 seconds for one client database, declared package route, and
   opaque anonymous subject; no public dispatcher, package access, request-global

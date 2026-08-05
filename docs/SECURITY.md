@@ -787,6 +787,17 @@ or claims a route, or changes lifecycle, enablement, Store Lite, or client
 state. It remains unlinked from the front controller, so it is an emission
 primitive rather than a public endpoint or dispatcher.
 
+The separate pure subject-cookie serializer accepts only the exact
+issuer-descriptor shape and derives one fixed future host-only `Set-Cookie`
+value. It has a 30-minute `Max-Age`, `Path=/`, `Secure`, `HttpOnly`, and
+`SameSite=Strict`, with no `Domain` or `Expires` attribute. It cannot acquire
+an unreviewed cross-subdomain scope or expiry behavior through this helper. It
+does not itself issue a subject, call `header()` or `setcookie()`, read
+request/cookie/session globals, access a database/runtime, invoke package
+code, select a route, or change lifecycle, enablement, Store Lite, or client
+state. It is not linked to the front controller; later browser issuance,
+clearing, retention, and rotation require a separate dispatcher review.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

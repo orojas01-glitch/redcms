@@ -5,11 +5,11 @@ separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
 pure declared-form decoder, HTTP request-envelope normalizer, private static
-route selector, non-routable server request-facts adapter, and closed response
-emitter are implemented. This document records the
-prerequisite for a future public write dispatcher. It does **not** add a public
-HTTP dispatcher or endpoint, emitted cookie, browser session access, package,
-permission, enablement profile,
+route selector, non-routable server request-facts adapter, closed response
+emitter, and pure subject-cookie serializer are implemented. This document
+records the prerequisite for a future public write dispatcher. It does **not**
+add a public HTTP dispatcher or endpoint, emitted cookie, browser session
+access, package, permission, enablement profile,
 or Store Lite behavior. The five generic core tables remain empty in the clean
 starter.
 
@@ -38,7 +38,7 @@ changed by it.
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
 | Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency/execution storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
-| Anonymous cart identity | Internal core subject issuance/resolution exists for a future endpoint; it is not a cart identity | No browser cookie read/write, session, package access, route, or client business data |
+| Anonymous cart identity | Internal core issuance/resolution exists, and a separate pure serializer can construct only a fixed host-only future cookie value from the exact core-issued descriptor shape | No browser cookie read/write/emission, issuance/clearance/rotation, session, package access, route, or client business data |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
@@ -349,9 +349,10 @@ route file—must own this sequence:
    only through the future dispatcher. It is an opaque, unguessable
    cookie-bound reference; it is neither an administrator session, a Member
    Access identity, a raw cookie value exposed to package code, nor a client
-   database/global identity. The dispatcher must serialize the supplied
-   host-only descriptor correctly, define rotation/retention, and prove those
-   browser behaviors separately.
+   database/global identity. The dispatcher must use the implemented serializer
+   only after it has rederived valid current subject state, then separately emit
+   the fixed value, define issuance/clearance/rotation/retention, and prove
+   those browser behaviors separately.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
    request body, and secrets must not enter general logs, package output, audit
@@ -541,10 +542,16 @@ This planning slice does not authorize:
     nosniff JSON headers, and exact body emission. It has no request,
     cookie/session, database/runtime/package, route, browser, dispatcher,
     enablement, or client-state path.
-14. A separate batch may add a core-owned HTTP dispatcher with a supported
+14. Completed the pure non-emitting subject-cookie serializer with exact
+    core-issued descriptor-shape validation and one fixed host-only future
+    cookie value: 30-minute `Max-Age`, `Path=/`, `Secure`, `HttpOnly`,
+    `SameSite=Strict`, and no `Domain` or `Expires`. It has no request,
+    database, header/cookie emission, browser, route, dispatcher, enablement,
+    or client-state path.
+15. A separate batch may add a core-owned HTTP dispatcher with a supported
     server integration and disposable fixtures only.
-15. A separate richer enablement review may admit only packages that satisfy
+16. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-16. Store Lite can then implement its separately distributed catalog and cart
+17. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

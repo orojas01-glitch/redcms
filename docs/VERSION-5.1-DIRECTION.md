@@ -734,6 +734,13 @@ request bootstrap excludes the disabled package.
     session state, database, runtime, or package code and is not linked to the
     front controller, so it creates no endpoint, browser cookie, enablement,
     fixture, Store Lite, or client-state path.
+56. Completed the pure core-only public-mutation subject-cookie serializer: it
+    accepts only the exact issuer descriptor shape and constructs one fixed
+    future host-only value with a 30-minute `Max-Age`, `Path=/`, `Secure`,
+    `HttpOnly`, and `SameSite=Strict`, without `Domain` or `Expires`. It emits
+    no cookie/header and reads no request/cookie/session, database, runtime,
+    or package state; it has no front-controller endpoint, browser
+    issuance/rotation, enablement, fixture, Store Lite, or client-state path.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
