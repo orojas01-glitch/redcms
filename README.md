@@ -251,6 +251,12 @@ features.
   fixed no-store, nosniff, content-type, length, and POST-allow headers; it
   does not parse a request, emit a header/cookie/body, load a package, or add a
   public endpoint or Store Lite behavior
+- Pure core-owned declared-form decoder for a future public mutation path. It
+  accepts only one validated in-memory manifest declaration and canonical URL-encoded
+  package-field bytes, returning sorted typed scalar fields or no values. It
+  rejects duplicate, nested, unknown, malformed, noncanonical, or oversized
+  input without reading HTTP globals, cookies, sessions, a database, runtime,
+  or package code, and without creating an endpoint or Store Lite behavior
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

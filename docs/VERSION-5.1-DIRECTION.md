@@ -701,6 +701,13 @@ request bootstrap excludes the disabled package.
     cookie, session, database, or package state and emits no HTTP response; it
     creates no route, dispatcher, enablement profile, package fixture, or Store
     Lite behavior.
+51. Completed the pure core-only declared-form decoder: one validated in-memory
+    manifest declaration plus canonical URL-encoded package fields yields only
+    a sorted typed scalar map or no values. Duplicate, nested, unknown,
+    malformed, noncanonical, out-of-bounds, and oversized input fails closed;
+    there is no HTTP metadata, request-global, cookie/session, database,
+    runtime/package, route, response, enablement, package fixture, or Store
+    Lite behavior.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

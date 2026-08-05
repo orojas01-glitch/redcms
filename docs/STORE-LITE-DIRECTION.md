@@ -177,8 +177,9 @@ installed-disabled package without exposing values. It also has internal
 hash-only anonymous-subject/CSRF, fixed-window rate-limit, opaque
 idempotency-key, and atomic transaction-runner foundations for a later core
 dispatcher. A pure core response contract can now construct fixed redacted
-success/refusal envelopes but cannot parse a request or emit a browser
-response. Store Lite still has no public mutation route, browser cart cookie,
+success/refusal envelopes, and a separate pure decoder can normalize only
+declared canonical package fields; neither owns HTTP metadata, browser identity,
+or response emission. Store Lite still has no public mutation route, browser cart cookie,
 package files, tables, or enablement profile.
 
 The initial order states should remain small:
@@ -386,7 +387,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    method-not-allowed, request-conflict, rate-limited, or temporary-unavailable
    refusals to exact no-store/nosniff JSON envelopes. It emits no response and
    has no request, cookie, session, package, enablement, or Store Lite path.
-11. Continue with bounded request parsing/dispatch, richer-enablement, and settings
+11. Completed the generic pure declared-form decoder: it accepts only one
+   validated declaration plus canonical URL-encoded package fields and returns a
+   sorted typed scalar map or no values. It has no HTTP metadata, cookie,
+   session, database, package, enablement, or Store Lite path.
+12. Continue with bounded HTTP request dispatch, richer-enablement, and settings
    UI/endpoints as separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -394,13 +399,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-12. Create Store Lite in its separate distribution using only those accepted
+13. Create Store Lite in its separate distribution using only those accepted
    contracts.
-13. Add package-owned migrations, Product editing, catalog, cart, orders, and
+14. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-14. Validate disable/re-enable, failure recovery, migration, responsive
+15. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-15. Add a separately reviewed hosted-payment adapter only after the
+16. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

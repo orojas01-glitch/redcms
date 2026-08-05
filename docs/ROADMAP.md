@@ -206,6 +206,12 @@ plan, and internal-failure evidence. It is not a dispatcher or emitter: it
 does not parse a request, read a cookie/session, access a database, load a
 package, set a header/cookie, or change lifecycle, enablement, or Store Lite
 state.
+The separate pure declared-form decoder accepts only one validated in-memory
+declaration plus canonical raw URL-encoded package fields, producing a sorted
+typed scalar map or no values. It rejects duplicate, nested, unknown,
+malformed, noncanonical, and oversized input, but owns no HTTP request metadata,
+origin, cookie/session, route claim, runtime/package access, database,
+response emission, lifecycle, enablement, or Store Lite state.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -463,8 +469,9 @@ inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
 complete, a core-only authorized setting read model is complete, and the
 generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
-idempotency-key, and atomic transaction-runner foundations are complete. Its
-protected settings UI/endpoint, bounded public request/response dispatcher,
+idempotency-key, atomic transaction-runner, bounded response, and declared-form
+decoder foundations are complete. Its protected settings UI/endpoint, bounded
+public HTTP dispatcher/response emitter,
 actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
