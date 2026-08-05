@@ -195,9 +195,17 @@ atomic runner uses a trusted in-memory first-party registrar binding plus typed
 input from a future dispatcher, locks lifecycle/package state, verifies CSRF,
 key, rate, and server-derived postconditions, then commits package state,
 replay evidence, and a value-free anonymous audit fact together. It adds no
-endpoint, response, browser behavior, route execution, public package fixture,
+endpoint, emitted response, browser behavior, route execution, public package fixture,
 or Store Lite state; its callback connection is a reviewed first-party boundary,
 not a database sandbox.
+The separate pure response contract now turns only the runner's two bounded
+outcomes and five generic refusal classes into fixed JSON envelopes with
+no-store, nosniff, content-type, length, and method-allow headers. It redacts
+all package, route, mutation, subject, token, key, replay, state, cart, order,
+plan, and internal-failure evidence. It is not a dispatcher or emitter: it
+does not parse a request, read a cookie/session, access a database, load a
+package, set a header/cookie, or change lifecycle, enablement, or Store Lite
+state.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to

@@ -714,6 +714,17 @@ reviewed first-party-PHP boundary rather than a database sandbox; package code
 must not commit, roll back, alter buffers, read request globals, or write
 outside its declared tables.
 
+The separate pure core response model maps only the runner's two bounded
+outcomes and a fixed future-dispatch refusal vocabulary to exact JSON envelopes.
+It supplies no-store, nosniff, content-type, length, and only a fixed
+`Allow: POST` method-refusal header; it exposes neither a replay signal nor any
+package, route, subject, token, key, state, cart, order, plan, secret, or
+internal failure detail. It does not read request/cookie/session state, access
+the database, load package code, emit HTTP state, or change lifecycle. A later
+core-owned dispatcher must still select and emit an exact valid envelope only
+after same-origin, CSRF, scalar-input, server-state, rate/idempotency, and
+transaction checks are complete.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

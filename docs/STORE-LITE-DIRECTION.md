@@ -176,7 +176,9 @@ subject/CSRF/rate-limit/idempotency/execution storage evidence for a trusted
 installed-disabled package without exposing values. It also has internal
 hash-only anonymous-subject/CSRF, fixed-window rate-limit, opaque
 idempotency-key, and atomic transaction-runner foundations for a later core
-dispatcher. Store Lite still has no public mutation route, browser cart cookie,
+dispatcher. A pure core response contract can now construct fixed redacted
+success/refusal envelopes but cannot parse a request or emit a browser
+response. Store Lite still has no public mutation route, browser cart cookie,
 package files, tables, or enablement profile.
 
 The initial order states should remain small:
@@ -378,9 +380,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    command/state evidence, a bounded outcome, and completion time. A trusted
    in-memory first-party binding can commit or roll back declared package state,
    replay evidence, and one value-free audit fact together. It does not add a
-   dispatcher, response, browser cart cookie, enablement profile, or Store Lite
-   data.
-10. Continue with bounded request/response, richer-enablement, and settings
+   dispatcher, browser cart cookie, enablement profile, or Store Lite data.
+10. Completed the generic pure core response contract: it maps only the fixed
+   `accepted` / `unchanged` outcomes and generic invalid-request,
+   method-not-allowed, request-conflict, rate-limited, or temporary-unavailable
+   refusals to exact no-store/nosniff JSON envelopes. It emits no response and
+   has no request, cookie, session, package, enablement, or Store Lite path.
+11. Continue with bounded request parsing/dispatch, richer-enablement, and settings
    UI/endpoints as separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -388,13 +394,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-11. Create Store Lite in its separate distribution using only those accepted
+12. Create Store Lite in its separate distribution using only those accepted
    contracts.
-12. Add package-owned migrations, Product editing, catalog, cart, orders, and
+13. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-13. Validate disable/re-enable, failure recovery, migration, responsive
+14. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-14. Add a separately reviewed hosted-payment adapter only after the
+15. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

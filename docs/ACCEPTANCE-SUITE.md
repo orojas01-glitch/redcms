@@ -122,6 +122,13 @@ the current public-route fixture must still refuse unsafe methods before a
 package handler. A later isolated fixture must prove anonymous-subject, CSRF,
 rate/idempotency, transaction, response-redaction, disablement, and exact
 cleanup requirements before it can change that behavior.
+The separate 18-assertion public-mutation response fixture proves that only
+the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
+can be constructed. It requires exact JSON, content type, no-store, nosniff,
+length, and POST-only method headers; maps replay to its original outcome; and
+rejects forged headers, bodies, and inconsistent runner results. It has no
+request parser, globals, cookie/session, database, package execution, response
+emission, route, enablement, Store Lite, or client-data path.
 The separate 17-assertion public-mutation live-data-preflight fixture proves
 that a trusted `installed_disabled` package can be inspected only through
 current migration, declared InnoDB-table, typed-setting, and opaque
@@ -404,7 +411,8 @@ installation/recovery, 23-assertion read-only enablement preflight,
 17-assertion read-only public-mutation live-data preflight, 19-assertion
 core-only anonymous-subject/CSRF foundation, 15-assertion core-only fixed-window
 rate-limit foundation, 18-assertion core-only opaque idempotency-key foundation,
-21-assertion atomic core-only public-mutation transaction runner,
+21-assertion atomic core-only public-mutation transaction runner, 18-assertion
+bounded public-mutation response contract,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
 persistence/dispatch,
@@ -459,7 +467,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -549,6 +557,14 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Public-mutation rate-limit acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, an enforced 12-per-60-second fixed window, bounded collision/contention handling, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. It has no HTTP, package-data, or enablement path.
 - Public-mutation idempotency-key acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, a 10-minute core-issued opaque key, correct subject/scope resolution, no raw-key persistence, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. The resolver itself remains non-consuming; the separate internal runner is its only consumer. It has no HTTP, package-data, or enablement path.
 - Atomic public-mutation runner acceptance runs only in the uniquely named disposable database with one temporary InnoDB table and in-memory trusted runtime context. It proves one declared handler/state-loader binding, typed field refusal, CSRF-before-rate ordering, exact replay/conflict outcomes, fixed-rate ordering, server-derived postconditions, keyed replay evidence, a value-free anonymous audit fact, contained output/exception/rollback failures, and exact database/runtime/constraint/table cleanup. It creates no package files, browser state, dispatcher, response, route execution, enablement profile, Store Lite data, or client artifact.
+- Public-mutation response acceptance is dependency-free and creates no
+  database, package, request, browser, route, or client fixture. It requires
+  only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,
+  method-not-allowed, request-conflict, rate-limited, and temporary-unavailable
+  refusals; exact JSON and no-store/nosniff/content-type/length/POST-allow
+  headers; replay redaction; forged-envelope refusal; and no request-global,
+  cookie/session, database, package-execution, response-emission, or lifecycle
+  path.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

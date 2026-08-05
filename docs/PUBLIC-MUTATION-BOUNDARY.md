@@ -199,13 +199,38 @@ boundary, not a database sandbox: a package is still forbidden to commit,
 roll back, alter output buffers, use request globals, or write outside its
 declared tables. The runner detects transaction loss and contains ordinary
 callback failure, but cannot make untrusted arbitrary PHP safe. There is no
-current public dispatcher, response builder, cookie/header emission, request
+current public dispatcher, response emission, cookie/header emission, request
 parser, enabled package profile, or Store Lite package that can reach it.
+
+## Implemented Bounded Response Contract
+
+`includes/addon_public_mutation_response_helpers.php` is a pure core-owned,
+dependency-free response model. It maps only the internal runner's exact
+`accepted` / `unchanged` outcomes and the future dispatcher's closed refusal
+inputs to fixed JSON envelopes:
+
+- HTTP `200`: `{ "ok": true, "outcome": "accepted" }` or
+  `{ "ok": true, "outcome": "unchanged" }`;
+- HTTP `400`: a generic `invalid_request` refusal, including CSRF, subject,
+  idempotency, origin, encoding, body-size, and field-validation failures;
+- HTTP `405`: `method_not_allowed` plus exact `Allow: POST`;
+- HTTP `409`: `request_conflict` for a conflicting idempotency key;
+- HTTP `429`: `rate_limited`; and
+- HTTP `503`: `temporarily_unavailable` for every unavailable, malformed, or
+  otherwise unmapped internal condition.
+
+Every envelope has exact JSON `Content-Type`, `Cache-Control: no-store`,
+`X-Content-Type-Options: nosniff`, and `Content-Length` fields. A replay maps
+to the original bounded outcome, without exposing that it was replayed. The
+model does not inspect a request, emit a header/cookie/body, start a session,
+load package code, access the database, or alter lifecycle, package, or Store
+Lite state. Its existence does not make a route claimable or a package
+enablement-eligible.
 
 ## Future Core-Owned Request And Response Path
 
-When a dispatcher and response contract are approved, core—not a theme, browser
-script, or package route file—must own this sequence:
+When a dispatcher is approved, core—not a theme, browser script, or package
+route file—must own this sequence:
 
 1. Recognize only a current trusted, enabled, static declaration in the
    reserved package namespace. It must reject every malformed, noncanonical,
@@ -243,10 +268,11 @@ script, or package route file—must own this sequence:
    audit fact. Output, exceptions, buffer tampering, stale state, transaction
    loss, postcondition drift, or ledger/audit failure must roll back or refuse
    the complete request.
-8. Construct the response in core. It may expose only a small documented
-   success/refusal vocabulary with no-store and nosniff protections. It may
-   not expose package/actor/cart/order/plan/state values, HTML, redirects,
-   arbitrary headers, payment data, or a privileged action token.
+8. Select only the implemented valid core response envelope after the complete
+   request/transaction result is known. A later dispatcher/emitter may not
+   expose package/actor/cart/order/plan/state values, HTML, redirects,
+   arbitrary headers, payment data, a privileged action token, or replay
+   status.
 
 The initial rate budget is a core decision, not a browser or package choice:
 12 requests per 60 seconds per client database, declared package route, and
@@ -375,11 +401,14 @@ This planning slice does not authorize:
    package behavior.
 7. Completed the internal atomic transaction runner and keyed replay ledger
    with disposable fixture-only package state. It still adds no dispatcher,
-   response, browser behavior, or enablement profile.
-8. A separate batch may add a core-owned bounded response contract and request
-   dispatcher, with disposable fixtures only.
-9. A separate richer enablement review may admit only packages that satisfy
+   response emission, browser behavior, or enablement profile.
+8. Completed the pure bounded response contract with fixed success/refusal
+   envelopes, replay redaction, and no request parsing, response emission,
+   browser behavior, or enablement profile.
+9. A separate batch may add a core-owned request dispatcher and emitter, with
+   disposable fixtures only.
+10. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-10. Store Lite can then implement its separately distributed catalog and cart
+11. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.
