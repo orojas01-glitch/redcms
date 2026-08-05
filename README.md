@@ -268,6 +268,14 @@ features.
   state loader. It invokes no callback and reads no request global, database,
   or package file; it creates no front-controller claim, endpoint, response,
   browser behavior, Store Lite state, or enablement change
+- Core-only non-routable public-mutation server request-facts adapter. It
+  reads only the current method and raw target, resolves a canonical HTTPS
+  origin from operating-system/local configuration rather than `Host` or a
+  request-projected server value, and accepts header lines only through an
+  upstream-attested complete capture. It rejects associative header maps and
+  does not read a body stream, claim a route, invoke a handler, access a
+  database, emit a response/cookie, or add a public endpoint, Store Lite
+  behavior, or enablement change
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

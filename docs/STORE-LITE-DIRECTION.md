@@ -188,6 +188,14 @@ The separate private selector can now bind a known static path to one current
 registrar-owned route/mutation/state-loader identity without calling it. It
 does not create a request adapter, route claim, endpoint, browser evidence,
 response, Store Lite state, or enablement change.
+The separate core-only server request-facts adapter now provides the next
+non-routable seam: its canonical HTTPS origin is available only from
+operating-system/local configuration, and a later server integration must pass
+an explicit complete list of raw header lines rather than an associative PHP
+header map. It can read only the current method/raw target and retains no
+browser or business state. It still does not claim a route, read a body stream,
+issue a cart cookie, invoke a package, emit a response, or create Store Lite
+state or enablement.
 
 The initial order states should remain small:
 
@@ -408,21 +416,27 @@ Store Lite is releasable only after disposable isolated acceptance proves:
     handler, and state loader, with fail-closed ambiguity and missing-binding
     refusal. It has no request-global adapter, package invocation, endpoint,
     response, browser behavior, enablement, or Store Lite path.
-14. Continue with bounded HTTP server adapter/dispatch, richer-enablement, and settings
-   UI/endpoints as separately reviewed batches. Typed internal service
+14. Completed the non-routable core-only server request-facts adapter: only
+   operating-system/local configuration can provide a canonical HTTPS origin;
+   a later server integration must attest an explicit complete header-line
+   capture. It reads only the current method/raw target and creates no route,
+   body-reader, browser, package, response, enablement, or Store Lite path.
+15. Continue with bounded HTTP dispatch, browser subject issuance/rotation,
+   response emission, richer-enablement, and settings UI/endpoints as
+   separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
    internal atomic settings persistence, non-executing server-local secret
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-15. Create Store Lite in its separate distribution using only those accepted
+16. Create Store Lite in its separate distribution using only those accepted
    contracts.
-16. Add package-owned migrations, Product editing, catalog, cart, orders, and
+17. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-17. Validate disable/re-enable, failure recovery, migration, responsive
+18. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-18. Add a separately reviewed hosted-payment adapter only after the
+19. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

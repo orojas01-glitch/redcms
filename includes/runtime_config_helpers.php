@@ -53,4 +53,39 @@ if (!function_exists('red_config_value')) {
     }
 }
 
+if (!function_exists('red_server_config_value')) {
+    /**
+     * Reads server-local configuration that must never be influenced by a
+     * request header projected into $_SERVER.
+     *
+     * This intentionally accepts operating-system environment values and the
+     * local ignored configuration file only. Compatibility configuration can
+     * continue to use red_config_value(), which preserves its older $_ENV and
+     * $_SERVER fallback behavior.
+     */
+    function red_server_config_value($localKey, $envKeys, $default = '')
+    {
+        if (!is_string($localKey) || $localKey === '') {
+            return $default;
+        }
+
+        foreach ((array) $envKeys as $envKey) {
+            if (!is_string($envKey) || $envKey === '') {
+                continue;
+            }
+            $envValue = getenv($envKey);
+            if (is_string($envValue) && $envValue !== '') {
+                return $envValue;
+            }
+        }
+
+        $localValues = red_local_config_values();
+        if (array_key_exists($localKey, $localValues)) {
+            return $localValues[$localKey];
+        }
+
+        return $default;
+    }
+}
+
 ?>

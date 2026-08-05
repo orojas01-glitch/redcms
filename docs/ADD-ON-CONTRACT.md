@@ -1140,6 +1140,20 @@ globals, bootstrap a runtime, open a database, invoke package callbacks, emit a
 response, or create a front-controller route, endpoint, browser state,
 enablement change, or Store Lite behavior.
 
+`includes/addon_public_mutation_server_request_helpers.php` is the separate
+non-routable core request-facts adapter. Its trusted canonical HTTPS origin
+comes only from `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` in the operating-system
+environment or `PUBLIC_MUTATION_TRUSTED_ORIGIN` in ignored local configuration;
+it never falls back to `Host`, `$_ENV`, or a request-projected `$_SERVER`
+value. A later web-server-specific integration must pass an explicit
+`complete` ordered list of `{ name, value }` header lines and raw body bytes.
+The adapter rejects associative header maps because they cannot demonstrate
+duplicate-wire-header safety. It reads only the current method and raw target,
+then returns bounded private facts for the existing envelope normalizer. It is
+not included by the front controller and does not read a body stream, select or
+claim a route, access a database/runtime/package, issue browser evidence, emit
+a response, or alter lifecycle, enablement, Store Lite, or client state.
+
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
 cookie/header or session access, browser form, route eligibility, package

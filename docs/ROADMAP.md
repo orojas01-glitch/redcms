@@ -226,6 +226,14 @@ state loader. It reserves a query-bearing known path for later envelope
 refusal, but itself reads no request global, bootstraps no runtime, opens no
 database, invokes no package callback, and creates no route, endpoint,
 response, browser state, enablement change, or Store Lite behavior.
+The separate non-routable core server request-facts adapter now resolves a
+canonical HTTPS origin only from operating-system/local configuration, reads
+only the current method/raw target, and requires a later web-server integration
+to attest a complete ordered raw header-line capture plus body bytes. It
+rejects associative PHP header maps, does not read a body stream, and remains
+outside the front controller. It creates no route, endpoint, browser state,
+package invocation, response, enablement change, Store Lite behavior, or
+client data.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -484,9 +492,10 @@ while the administrator action preflight and internal atomic runner are
 complete, a core-only authorized setting read model is complete, and the
 generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
 idempotency-key, atomic transaction-runner, bounded response, declared-form
-decoder, pure HTTP request-envelope, and private static route-selector
-foundations are complete. Its protected settings UI/endpoint, bounded public
-HTTP server adapter/dispatcher/response emitter,
+decoder, pure HTTP request-envelope, private static route-selector, and
+non-routable server request-facts adapter foundations are complete. Its
+protected settings UI/endpoint, supported public HTTP server integration,
+bounded dispatcher/response emitter,
 actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
