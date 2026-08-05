@@ -725,6 +725,15 @@ core-owned dispatcher must still select and emit an exact valid envelope only
 after same-origin, CSRF, scalar-input, server-state, rate/idempotency, and
 transaction checks are complete.
 
+The separate pure declared-form decoder accepts only one validated in-memory
+manifest declaration and raw canonical URL-encoded package-field bytes. It
+returns only sorted typed scalar values or no values, refusing duplicate,
+nested, unknown, malformed, noncanonical, out-of-bounds, and oversized input.
+It cannot inspect method, path, origin, content metadata, cookies, sessions, or
+server globals; access a database, runtime, or package code; issue/verify
+identity, CSRF, or idempotency material; claim a route; or emit a response.
+Those facts remain exclusive to a later core-owned HTTP dispatcher.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

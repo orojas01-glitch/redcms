@@ -40,7 +40,7 @@ flowchart TD
     G7 --> G8["Core fixed-window rate-limit foundation"]
     G8 --> G9["Core opaque idempotency-key foundation"]
     G9 --> G10["Core atomic transaction runner + replay ledger"]
-    G10 --> G11["CURRENT / NEXT<br/>Bounded request parsing + richer enablement"]
+    G10 --> G11["CURRENT / NEXT<br/>Bounded HTTP dispatch + richer enablement"]
     G11 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
@@ -60,8 +60,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-only bounded public-mutation response contract: fixed `accepted` / `unchanged` JSON outcomes and five generic refusal envelopes carry only exact no-store, nosniff, content-type, length, and POST-allow headers. It is pure construction only: there is still no request parser, public endpoint, response emission, cookie/header/browser-session access, Store Lite state, or enablement change. |
-| Current milestone | Public-request parsing/dispatch and richer-enablement gates: a core-owned dispatcher, response emission, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-only declared public-mutation form decoder: a validated in-memory declaration plus canonical URL-encoded package fields yields only sorted typed scalar values. It refuses duplicate, nested, unknown, malformed, noncanonical, or oversized input with no partial values; there is still no HTTP request ownership, public endpoint, response emission, cookie/header/browser-session access, Store Lite state, or enablement change. |
+| Current milestone | Public HTTP dispatch and richer-enablement gates: same-origin/content metadata validation, subject-cookie/CSRF ownership, static route claim, response emission, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

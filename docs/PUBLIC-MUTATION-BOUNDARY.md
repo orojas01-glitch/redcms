@@ -3,9 +3,10 @@
 Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
-opaque idempotency-key foundation, and an internal atomic transaction runner
-are implemented. This document records the prerequisite for a future public
-write dispatcher. It does **not** add a public dispatcher or endpoint, emitted
+opaque idempotency-key foundation, an internal atomic transaction runner, and a
+pure declared-form decoder are implemented. This document records the
+prerequisite for a future public write dispatcher. It does **not** add a public
+HTTP dispatcher or endpoint, emitted
 cookie/header, browser session access, package, permission, enablement profile,
 or Store Lite behavior. The five generic core tables remain empty in the clean
 starter.
@@ -40,6 +41,7 @@ changed by it.
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
 | Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No response, package fixture, browser behavior, or publicly reachable execution path |
+| Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
 The planned contract cannot make a route-bearing package eligible for the
@@ -227,6 +229,26 @@ load package code, access the database, or alter lifecycle, package, or Store
 Lite state. Its existence does not make a route claimable or a package
 enablement-eligible.
 
+## Implemented Declared Form Decoder
+
+`includes/addon_public_mutation_form_helpers.php` decodes only raw canonical
+`application/x-www-form-urlencoded` package-field bytes after its caller
+supplies one validated in-memory manifest, declared route, and declared mutation
+identity. It accepts only the contract's one-to-eight identifier or
+positive-integer fields and returns a sorted typed field map. It fails closed
+with no partial values for missing required fields, duplicates, PHP-style
+nested names, undeclared names, malformed segments, raw control bytes,
+noncanonical `%`/`+` encodings (apart from canonical `%7E` identifier bytes),
+noncanonical integers, out-of-bounds values, or
+an over-limit body.
+
+This is not an HTTP parser or a route dispatcher. It reads no PHP request,
+cookie, session, or server globals; it does not inspect origin, content type,
+content length, path, or method; it does not access a database, runtime,
+package code, or browser state; and it emits no response. A later core-owned
+HTTP dispatcher must establish those facts before it selects this decoder and
+then pass its result to the existing transaction runner.
+
 ## Future Core-Owned Request And Response Path
 
 When a dispatcher is approved, core—not a theme, browser script, or package
@@ -247,10 +269,12 @@ route file—must own this sequence:
    request body, and secrets must not enter general logs, package output, audit
    rows, or public errors. The actual dispatcher must enforce same-origin
    behavior and emit no CORS policy that would widen access.
-4. Parse only the declared scalar form fields. Core rejects unknown, repeated,
-   nested, noncanonical, malformed, oversized, or out-of-range values. A
-   browser never supplies a package id, route owner, price, currency, total,
-   order state, cart owner, permission, plan, or database target.
+4. After static route, same-origin, content-type, and body-size checks, invoke
+   the implemented decoder for only declared scalar form fields. Core rejects
+   unknown, repeated, nested, noncanonical, malformed, oversized, or
+   out-of-range values. A browser never supplies a package id, route owner,
+   price, currency, total, order state, cart owner, permission, plan, or
+   database target.
 5. Re-derive the exact manifest, registry, enabled runtime owner, anonymous
    subject, idempotency key, current fixed-window rate decision, and current
    package state on the server. A future request must be refused when rate-limit
@@ -403,12 +427,15 @@ This planning slice does not authorize:
    with disposable fixture-only package state. It still adds no dispatcher,
    response emission, browser behavior, or enablement profile.
 8. Completed the pure bounded response contract with fixed success/refusal
-   envelopes, replay redaction, and no request parsing, response emission,
+   envelopes, replay redaction, and no HTTP request ownership or response emission,
    browser behavior, or enablement profile.
-9. A separate batch may add a core-owned request dispatcher and emitter, with
+9. Completed the pure declared-form decoder with canonical package-field
+   validation and no HTTP request ownership, browser behavior, or enablement
+   profile.
+10. A separate batch may add a core-owned HTTP request dispatcher and emitter, with
    disposable fixtures only.
-10. A separate richer enablement review may admit only packages that satisfy
+11. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-11. Store Lite can then implement its separately distributed catalog and cart
+12. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

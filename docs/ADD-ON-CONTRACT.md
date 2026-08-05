@@ -1014,9 +1014,9 @@ continue to reject routes until richer package lifecycle gates are reviewed.
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic
 core-owned path for a narrowly declared static public POST mutation. The
-internal transaction runner and pure bounded response contract are implemented,
-but no public dispatcher, response emission, or enablement profile can reach
-them.
+internal transaction runner, pure bounded response contract, and declared-form
+decoder are implemented, but no HTTP dispatcher, response emission, or
+enablement profile can reach them.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,
@@ -1102,6 +1102,19 @@ failure detail. The helper has no request-global, cookie, session, database,
 package-load, header/cookie emission, or lifecycle path. A future core
 dispatcher must still select and emit only a valid envelope after all request
 validation and transaction work complete.
+
+`includes/addon_public_mutation_form_helpers.php` is a pure core-owned decoder
+for one already-validated in-memory declaration and raw
+`application/x-www-form-urlencoded` package-field bytes. It permits no
+PHP-style nested keys, duplicate or undeclared fields, noncanonical `%`/`+`
+encodings (except the browser-canonical `%7E` identifier escape), noncanonical
+integers, malformed identifiers, partial values, or
+body overflow. Valid output is only a sorted typed field map. It does not read
+PHP request globals, content headers, cookies, sessions, a database, a runtime
+context, or package code; it does not verify CSRF, issue/resolve identity or
+idempotency material, claim a route, emit a response, or alter lifecycle. A
+later HTTP dispatcher must own those remaining checks and pass only a trusted
+declaration and raw body to this decoder.
 
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
