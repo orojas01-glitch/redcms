@@ -5,10 +5,11 @@
  *
  * This helper owns the narrow translation boundary between server-local
  * configuration/current method-target facts and the already pure HTTP request
- * envelope. It accepts header lines only through an explicit complete capture
- * supplied by a later server integration. It deliberately does not use an
- * associative header API or an HTTP_* server projection, because either shape
- * can lose duplicate wire-header evidence needed by the envelope.
+ * envelope. It accepts security-relevant header facts only through an explicit
+ * complete capture supplied by a later server integration. It deliberately
+ * does not use an associative header API or an HTTP_* server projection,
+ * because either shape can lose duplicate wire-header evidence needed by the
+ * envelope.
  *
  * It does not select or claim a route, bootstrap a runtime, access a database,
  * read cookies or parsed fields, issue browser evidence, call a package,
@@ -64,7 +65,7 @@ if (!function_exists('red_addon_public_mutation_server_trusted_origin')) {
 
 if (!function_exists('red_addon_public_mutation_server_request_headers')) {
     /**
-     * Accepts only an upstream-attested, line-preserving complete header list.
+     * Accepts only an upstream-attested complete security-header capture.
      */
     function red_addon_public_mutation_server_request_headers($capture)
     {
@@ -155,7 +156,7 @@ if (!function_exists('red_addon_public_mutation_server_request_capture')) {
 if (!function_exists('red_addon_public_mutation_server_request_capture_current')) {
     /**
      * Reads only the current server method and raw target; a later web-server
-     * integration must supply the complete line-preserving headers and body.
+     * integration must supply the complete security-header capture and body.
      */
     function red_addon_public_mutation_server_request_capture_current(
         $headerCapture,

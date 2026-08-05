@@ -1,0 +1,20 @@
+# Optional operator-owned Caddyfile fragment for a future RED-CMS
+# public-mutation dispatcher. This nested example is not read by the default
+# scripts/dev-php-server.sh command and does not activate an endpoint.
+#
+# Build a FrankenPHP binary that contains this repository's
+# red_public_mutation_attestation Caddy module before using this directive.
+# Set RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY in the FrankenPHP process environment
+# to one 64-lowercase-hex, per-installation key. Do not put its value here.
+
+cms.example.test {
+	root * /srv/redcms
+
+	# route preserves the declared order: remove/attest internal request headers
+	# before FrankenPHP receives the request. The handler writes no response and
+	# still passes every request to php_server.
+	route {
+		red_public_mutation_attestation RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY
+		php_server
+	}
+}

@@ -6,7 +6,8 @@ anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
 pure declared-form decoder, HTTP request-envelope normalizer, private static
 route selector, non-routable server request-facts adapter, closed response
-emitter, and pure subject-cookie serializer are implemented. This document
+emitter, pure subject-cookie serializer, and an optional Caddy/FrankenPHP
+ingress-attestation source with an unlinked PHP verifier are implemented. This document
 records the prerequisite for a future public write dispatcher. It does **not**
 add a public HTTP dispatcher or endpoint, emitted cookie, browser session
 access, package, permission, enablement profile,
@@ -46,7 +47,8 @@ changed by it.
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
-| Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete header-line capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
+| Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
+| Optional Caddy/FrankenPHP ingress attestation | Separately built source strips spoofed internal headers, conditionally signs bounded candidate facts, and has an unlinked PHP HMAC verifier | No default-server change, custom binary, active Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -318,7 +320,8 @@ request-projected server value cannot configure the origin.
 
 The adapter reads only the current `REQUEST_METHOD` and raw `REQUEST_URI`.
 A later web-server-specific integration must supply raw body bytes and an exact
-ordered `{ complete: true, headers: [{ name, value }, ...] }` capture. It
+ordered `{ complete: true, headers: [{ name, value }, ...] }` capture of the
+fixed security-relevant header families. It
 rejects an associative header map, reordered capture shape, duplicate critical
 headers, malformed transport facts, and bodies above the generic 8,192-byte
 ceiling. The generic PHP header API and an `HTTP_*` server projection are not
@@ -332,15 +335,56 @@ cookie, invoke package code, run a transaction, or change lifecycle,
 enablement, Store Lite, or client state. Its short-lived captured facts are
 private core input for a future dispatcher only.
 
+## Implemented Optional Caddy/FrankenPHP Ingress Attestation
+
+`server-integrations/frankenphp-public-mutation-attestation/` contains source
+for one optional operator-built Caddy middleware module. It is not a compiled
+binary, root `Caddyfile`, or change to `scripts/dev-php-server.sh`. The module
+always removes client-provided internal capture/signature headers, then calls
+the next handler without writing a response. It conditionally replaces them
+only for a bounded `POST` candidate whose raw path begins `/addons/`, body has
+a known non-chunked length of at most 8,192 bytes, transfer/content encodings
+are absent, and each fixed security header family occurs at most once.
+
+The signed payload contains only `POST`, the raw request target, measured body
+length, SHA-256 body hash, and the ordered present subset of `Origin`,
+`Content-Type`, `Cookie`, `X-RED-CMS-CSRF`, and `Idempotency-Key`. It has no
+arbitrary PHP header map. Caddy/Go parses content length and transfer encoding
+before middleware; the attestation binds that accepted body with length/hash
+instead of asserting a raw `Content-Length` line. A missing, duplicate,
+encoded, unknown-length, oversized, or malformed candidate receives no
+attestation and still passes to the ordinary next handler.
+
+`includes/addon_public_mutation_frankenphp_ingress_helpers.php` is a separate
+unlinked future bridge. It accepts the internal capture only with the exact
+per-installation `RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` process-environment
+value, rechecks the current method/target and raw body length/hash, and then
+uses the existing explicit server request-facts adapter. It never accepts a
+key from `Host`, a request header, `$_SERVER`, `$_ENV`, or `config.local.php`.
+It reads `php://input` only after HMAC verification. It is not included by
+`index.php`, so it creates no endpoint, response, subject cookie, browser flow,
+route claim, runtime/package load, database access, enablement change, Store
+Lite behavior, or client data.
+
+The source, example Caddyfile, Go handler test, PHP verifier test, and build
+boundary are documented in
+[`server-integrations/frankenphp-public-mutation-attestation/README.md`](../server-integrations/frankenphp-public-mutation-attestation/README.md).
+An operator must separately build a matching FrankenPHP/Caddy binary and keep
+the binary, Caddyfile, HMAC key, certificate/proxy configuration, and each
+client's deployment configuration outside the clean starter and other client
+installations.
+
 ## Future Core-Owned Request And Response Path
 
 When a dispatcher is approved, core—not a theme, browser script, or package
 route file—must own this sequence:
 
-1. Use the implemented server request-facts adapter only with a
-   web-server-specific, line-preserving complete header capture, configured
-   canonical HTTPS origin, raw body, and current method/target. Then use the
-   implemented private selector only after core has initialized one current
+1. Use the implemented server request-facts adapter only with a supported
+   server-specific attestation, configured canonical HTTPS origin, raw body,
+   and current method/target. The optional Caddy bridge can provide only its
+   fixed signed security-header subset plus body length/hash; no dispatcher may
+   consult an arbitrary PHP header map. Then use the implemented private selector
+   only after core has initialized one current
    trusted enabled runtime context. The dispatcher must still bind that
    selected declaration to the complete raw target and reject every malformed,
    noncanonical, disabled, stale, untrusted, or undeclared request before a
@@ -457,9 +501,12 @@ HTTP 200. A disposable, client-isolated acceptance suite must still prove:
   declarations fail before package execution;
 - current public GET routing still refuses unsafe methods until the new
   dispatcher is explicitly present;
-- a real supported web-server bridge preserves or rejects duplicate critical
-  request headers before PHP and cannot configure the trusted origin from
-  `Host`, a request header, or a request-projected server value;
+- the optional Caddy handler unit gate proves spoofed internal-header stripping,
+  bounded HMAC capture, body preservation, duplicate/encoded/oversized
+  withholding, and no handler response; a later deployment gate must prove the
+  matching custom FrankenPHP binary and Caddyfile preserve that contract before
+  any dispatcher is linked; neither bridge may configure the trusted origin or
+  HMAC key from `Host`, a request header, or a request-projected server value;
 - anonymous subjects and CSRF tokens are opaque, scoped to one client, and
   unavailable to another client, administrator session, member session, or
   package request;
@@ -534,7 +581,7 @@ This planning slice does not authorize:
     response path.
 12. Completed the non-routable server request-facts adapter with a dedicated
     operating-system/local trusted-origin resolver, bounded current
-    method/target capture, and an explicit line-preserving complete-header
+    method/target capture, and an explicit complete fixed security-header
     requirement. It has no body-reader, front-controller, dispatcher,
     browser, response, package, or enablement path.
 13. Completed the core-only non-routable response emitter with exact closed
@@ -548,10 +595,16 @@ This planning slice does not authorize:
     `SameSite=Strict`, and no `Domain` or `Expires`. It has no request,
     database, header/cookie emission, browser, route, dispatcher, enablement,
     or client-state path.
-15. A separate batch may add a core-owned HTTP dispatcher with a supported
-    server integration and disposable fixtures only.
-16. A separate richer enablement review may admit only packages that satisfy
+15. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
+    source and unlinked PHP HMAC verifier. They remove spoofed internal
+    headers, conditionally attest only bounded candidate transport facts, and
+    add no default server configuration, custom binary, dispatcher, endpoint,
+    browser cookie, package execution, enablement, Store Lite, or client state.
+16. A separate batch may link a core-owned HTTP dispatcher only after the
+    custom-binary deployment gate and disposable fixtures prove the supported
+    server integration end to end.
+17. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-17. Store Lite can then implement its separately distributed catalog and cart
+18. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

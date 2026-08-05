@@ -723,7 +723,7 @@ request bootstrap excludes the disabled package.
 54. Completed the non-routable core-only server request-facts adapter: it
     resolves a canonical HTTPS origin only from operating-system/local
     configuration, reads only the current method/raw target, and requires a
-    later server integration to attest one complete raw header-line capture.
+    later server integration to attest one complete fixed security-header capture.
     It rejects associative header maps and does not read a body stream, claim
     a route, invoke a package, emit a response/cookie, create browser state,
     or alter enablement, fixture, Store Lite, or client state.
@@ -741,6 +741,14 @@ request bootstrap excludes the disabled package.
     no cookie/header and reads no request/cookie/session, database, runtime,
     or package state; it has no front-controller endpoint, browser
     issuance/rotation, enablement, fixture, Store Lite, or client-state path.
+57. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
+    source and paired unlinked PHP verifier. The handler strips client-supplied
+    internal capture headers on every request and conditionally HMAC-signs only
+    bounded `/addons/` POST method/target, body length/hash, and fixed
+    security-header facts. It has no compiled binary, active Caddyfile, default
+    server change, dispatcher, endpoint, cookie issuance, package invocation,
+    enablement, fixture, Store Lite, or client-state path; custom-binary
+    deployment proof remains a later dispatcher gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

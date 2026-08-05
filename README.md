@@ -279,10 +279,19 @@ features.
   reads only the current method and raw target, resolves a canonical HTTPS
   origin from operating-system/local configuration rather than `Host` or a
   request-projected server value, and accepts header lines only through an
-  upstream-attested complete capture. It rejects associative header maps and
+  upstream-attested complete fixed security-header capture. It rejects
+  associative header maps and
   does not read a body stream, claim a route, invoke a handler, access a
   database, emit a response/cookie, or add a public endpoint, Store Lite
   behavior, or enablement change
+- Optional operator-built Caddy/FrankenPHP public-mutation ingress attestation
+  source and paired unlinked PHP HMAC verifier. The handler strips spoofed
+  internal headers on every request and can sign only a bounded `/addons/`
+  `POST` candidate's method, raw target, body length/hash, and fixed
+  security-header subset. It is not a compiled binary, root Caddyfile, default
+  development-server change, dispatcher, endpoint, cookie flow, enablement
+  change, or Store Lite/client-data path. Its per-installation HMAC key and
+  deployment configuration remain external to the clean starter
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the

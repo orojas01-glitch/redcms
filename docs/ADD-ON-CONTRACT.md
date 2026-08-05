@@ -1022,6 +1022,14 @@ already-valid fixed core envelope; it does not make a public endpoint
 available. The serializer is likewise unlinked and can only construct the
 fixed future host-only cookie value; it does not emit a browser cookie or make
 a public endpoint available.
+An optional Caddy/FrankenPHP ingress-attestation source and paired unlinked PHP
+verifier now prepare one deployment-owned server seam: the handler strips
+spoofed internal headers, then conditionally HMAC-signs only bounded
+`/addons/` POST method/target, body length/hash, and fixed security-header
+facts. It is not a custom binary, active Caddyfile, dispatcher, endpoint,
+cookie flow, package execution, enablement profile, Store Lite package, or
+client-data path. A matching custom-binary deployment proof remains required
+before any future dispatcher may use the verifier.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,
@@ -1124,7 +1132,7 @@ declaration and raw body to this decoder.
 `includes/addon_public_mutation_http_request_helpers.php` is a separate pure
 core-owned transport normalizer for that future dispatcher. It accepts only an
 explicit trusted canonical HTTPS origin, exact declaration path/method, complete
-raw header list, and raw body. It requires matching `Origin`, canonical form
+security-relevant header capture, and raw body. It requires matching `Origin`, canonical form
 content type, matched optional content length, one opaque subject cookie, and
 the fixed `X-RED-CMS-CSRF` and `Idempotency-Key` header values; it rejects
 duplicate critical headers and transfer/content encoding. The configured origin
