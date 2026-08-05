@@ -212,6 +212,14 @@ typed scalar map or no values. It rejects duplicate, nested, unknown,
 malformed, noncanonical, and oversized input, but owns no HTTP request metadata,
 origin, cookie/session, route claim, runtime/package access, database,
 response emission, lifecycle, enablement, or Store Lite state.
+The separate pure HTTP request-envelope normalizer accepts only explicit
+transport values from a future core dispatcher: one trusted canonical HTTPS
+origin, exact static POST path, complete header list, and raw body. It rejects
+origin, content metadata, length, transfer/content encoding, opaque
+subject-cookie, CSRF, and idempotency ambiguity before it returns raw evidence
+to the form decoder. It never derives trust from `Host`, reads PHP globals,
+accesses a database/runtime/package, claims a route, emits a response, starts a
+session, or changes lifecycle, enablement, Store Lite, or client state.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -470,8 +478,8 @@ while the administrator action preflight and internal atomic runner are
 complete, a core-only authorized setting read model is complete, and the
 generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
 idempotency-key, atomic transaction-runner, bounded response, and declared-form
-decoder foundations are complete. Its protected settings UI/endpoint, bounded
-public HTTP dispatcher/response emitter,
+decoder, and pure HTTP request-envelope foundations are complete. Its protected
+settings UI/endpoint, bounded public HTTP dispatcher/response emitter,
 actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately

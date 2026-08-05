@@ -1116,6 +1116,19 @@ idempotency material, claim a route, emit a response, or alter lifecycle. A
 later HTTP dispatcher must own those remaining checks and pass only a trusted
 declaration and raw body to this decoder.
 
+`includes/addon_public_mutation_http_request_helpers.php` is a separate pure
+core-owned transport normalizer for that future dispatcher. It accepts only an
+explicit trusted canonical HTTPS origin, exact declaration path/method, complete
+raw header list, and raw body. It requires matching `Origin`, canonical form
+content type, matched optional content length, one opaque subject cookie, and
+the fixed `X-RED-CMS-CSRF` and `Idempotency-Key` header values; it rejects
+duplicate critical headers and transfer/content encoding. The configured origin
+must never be derived from `Host`. Valid output is only a private core envelope
+containing the raw body and opaque evidence for the form decoder and transaction
+runner. It reads no PHP globals, database, runtime, package code, or browser
+state; it does not resolve/issue evidence, claim a route, emit a response, or
+alter lifecycle, enablement, or Store Lite behavior.
+
 The current routes schema and addon_public_route_helpers.php remain public
 GET-only. This contract does not add a dispatcher or endpoint, emitted
 cookie/header or session access, browser form, route eligibility, package
