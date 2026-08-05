@@ -4,7 +4,8 @@ Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, and a
-pure declared-form decoder are implemented. This document records the
+pure declared-form decoder plus HTTP request-envelope normalizer are
+implemented. This document records the
 prerequisite for a future public write dispatcher. It does **not** add a public
 HTTP dispatcher or endpoint, emitted
 cookie/header, browser session access, package, permission, enablement profile,
@@ -42,6 +43,7 @@ changed by it.
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
 | Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No response, package fixture, browser behavior, or publicly reachable execution path |
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
+| HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
 The planned contract cannot make a route-bearing package eligible for the
@@ -249,6 +251,38 @@ package code, or browser state; and it emits no response. A later core-owned
 HTTP dispatcher must establish those facts before it selects this decoder and
 then pass its result to the existing transaction runner.
 
+## Implemented HTTP Request-Envelope Normalizer
+
+`includes/addon_public_mutation_http_request_helpers.php` accepts only explicit
+values supplied by a later core-owned request adapter: one validated in-memory
+manifest/declaration identity, a server-configured canonical HTTPS origin,
+method, raw request target, complete header list, and raw body bytes. The
+trusted origin is never derived from `Host` or another request value. The raw
+request target must equal the declaration's exact static unencoded path, and
+the only accepted method is `POST`.
+
+The normalizer requires an exact matching `Origin`, one canonical form content
+type (`application/x-www-form-urlencoded` with an optional canonical
+`charset=UTF-8` suffix), and an optional `Content-Length` only when its
+canonical decimal value equals the supplied raw-body length. It rejects
+duplicate critical headers, control bytes, transfer/content encoding, malformed
+metadata, and bodies over the declaration maximum. It does not decode form
+fields; the separate form decoder remains the only package-field parser.
+
+The header list must contain at most one raw `Cookie`, `X-RED-CMS-CSRF`, and
+`Idempotency-Key` field. Core extracts only one exact
+`redcms_public_mutation_subject` 256-bit opaque cookie value. The cookie,
+CSRF, and idempotency values must each use the fixed lowercase hexadecimal
+token shape. No arbitrary cookie, header, subject, token, or raw body value is
+returned on a refusal. The normalized output is only a future dispatcher’s
+short-lived private input; no package receives request headers, cookie/session
+globals, raw tokens, or the body.
+
+This helper is intentionally not a public endpoint or HTTP emitter. It reads
+no PHP request globals, does not start a session, access a database or runtime,
+issue/resolve a subject/CSRF/key, load package code, claim a route, run the
+transaction, or change lifecycle, enablement, Store Lite, or client state.
+
 ## Future Core-Owned Request And Response Path
 
 When a dispatcher is approved, core—not a theme, browser script, or package
@@ -269,12 +303,14 @@ route file—must own this sequence:
    request body, and secrets must not enter general logs, package output, audit
    rows, or public errors. The actual dispatcher must enforce same-origin
    behavior and emit no CORS policy that would widen access.
-4. After static route, same-origin, content-type, and body-size checks, invoke
-   the implemented decoder for only declared scalar form fields. Core rejects
-   unknown, repeated, nested, noncanonical, malformed, oversized, or
-   out-of-range values. A browser never supplies a package id, route owner,
-   price, currency, total, order state, cart owner, permission, plan, or
-   database target.
+4. After static route selection, invoke the implemented request-envelope
+   normalizer with a configured HTTPS origin and complete raw transport facts.
+   It validates same-origin, content type, body-size, opaque subject/CSRF/key,
+   and static path/method evidence before the dispatcher calls the implemented
+   decoder for only declared scalar form fields. Core rejects unknown, repeated,
+   nested, noncanonical, malformed, oversized, or out-of-range values. A
+   browser never supplies a package id, route owner, price, currency, total,
+   order state, cart owner, permission, plan, or database target.
 5. Re-derive the exact manifest, registry, enabled runtime owner, anonymous
    subject, idempotency key, current fixed-window rate decision, and current
    package state on the server. A future request must be refused when rate-limit
@@ -432,10 +468,13 @@ This planning slice does not authorize:
 9. Completed the pure declared-form decoder with canonical package-field
    validation and no HTTP request ownership, browser behavior, or enablement
    profile.
-10. A separate batch may add a core-owned HTTP request dispatcher and emitter, with
+10. Completed the pure HTTP request-envelope normalizer with a configured HTTPS
+    origin, exact static POST path, fixed opaque browser evidence, and no
+    request-global, endpoint, browser, package, or enablement path.
+11. A separate batch may add a core-owned HTTP request dispatcher and emitter, with
    disposable fixtures only.
-11. A separate richer enablement review may admit only packages that satisfy
+12. A separate richer enablement review may admit only packages that satisfy
    every declared prerequisite.
-12. Store Lite can then implement its separately distributed catalog and cart
+13. Store Lite can then implement its separately distributed catalog and cart
    behavior against the accepted generic contract. Checkout and payments stay
    later, provider-neutral work.

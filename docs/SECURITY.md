@@ -734,6 +734,18 @@ server globals; access a database, runtime, or package code; issue/verify
 identity, CSRF, or idempotency material; claim a route; or emit a response.
 Those facts remain exclusive to a later core-owned HTTP dispatcher.
 
+The separate pure HTTP request-envelope normalizer accepts only explicit values
+from that later dispatcher. It requires one server-configured canonical HTTPS
+origin rather than `Host` input, an exact static POST path, an exact matching
+`Origin`, canonical form content metadata, bounded raw body, one opaque subject
+cookie, and the fixed `X-RED-CMS-CSRF` plus `Idempotency-Key` headers. Duplicate
+critical headers, content/transfer encoding, malformed values, token drift, and
+body overflow fail closed before any raw value is returned. It neither reads
+PHP request/cookie/session globals nor accesses a database/runtime/package,
+issues/resolves tokens, claims a route, emits a response, or changes client
+state. The final browser bridge must still prove that it passes the complete
+received header list and uses no user-controlled origin configuration.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

@@ -708,6 +708,12 @@ request bootstrap excludes the disabled package.
     there is no HTTP metadata, request-global, cookie/session, database,
     runtime/package, route, response, enablement, package fixture, or Store
     Lite behavior.
+52. Completed the pure core-only HTTP request-envelope normalizer: one
+    server-configured canonical HTTPS origin, exact static POST path, complete
+    header list, and raw body yields opaque subject/CSRF/idempotency evidence
+    only after same-origin, canonical content metadata, fixed token, and
+    body-size validation. It has no PHP-global, endpoint, response, session,
+    database/runtime/package, route, enablement, fixture, or Store Lite path.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
