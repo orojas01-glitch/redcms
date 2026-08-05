@@ -777,6 +777,16 @@ no body-stream reader, route selection/claim, runtime/bootstrap, database,
 cookie/session issuance, package invocation, response emission, front
 controller, enablement, Store Lite, or client-state path.
 
+The separate core-only response emitter accepts only an exact closed response
+envelope from the existing fixed core response contract. It rechecks the six
+allowed statuses and exact no-store/nosniff JSON headers, refuses once output
+has begun, clears prior response headers, and emits only the fixed matching
+body bytes. It never accepts a request, reads request/cookie/session globals,
+accesses a database or runtime, invokes package code, issues a cookie, selects
+or claims a route, or changes lifecycle, enablement, Store Lite, or client
+state. It remains unlinked from the front controller, so it is an emission
+primitive rather than a public endpoint or dispatcher.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and
@@ -784,8 +794,8 @@ idempotency enforcement, declared-package-table transaction support, exact
 postcondition reload, and only bounded no-store/nosniff responses. It may not
 leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
 or payment data. No current enablement profile admits this capability; the
-foundation creates no public dispatcher or endpoint, emitted cookie/header or
-session access, public package execution, Store Lite behavior,
+foundation creates no public dispatcher or endpoint, emitted cookie or session
+access, public package execution, Store Lite behavior,
 or client data. A live dispatcher must additionally prove that its supported
 web-server boundary preserves or rejects duplicate critical headers before PHP
 and cannot turn any request value into trusted-origin configuration.

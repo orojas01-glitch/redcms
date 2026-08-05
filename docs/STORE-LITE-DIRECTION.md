@@ -196,6 +196,13 @@ header map. It can read only the current method/raw target and retains no
 browser or business state. It still does not claim a route, read a body stream,
 issue a cart cookie, invoke a package, emit a response, or create Store Lite
 state or enablement.
+The separate core-only response emitter may now emit only an already-valid
+fixed core response envelope after a future dispatcher finishes. It refuses
+once output has started, clears and sets only the fixed no-store/nosniff JSON
+headers, and emits only the matching fixed bytes. It remains unlinked from the
+front controller and reads no request/cookie/session state, database, runtime,
+or package code, so it creates no public route, cart cookie, Store Lite state,
+or enablement path.
 
 The initial order states should remain small:
 
@@ -421,8 +428,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    a later server integration must attest an explicit complete header-line
    capture. It reads only the current method/raw target and creates no route,
    body-reader, browser, package, response, enablement, or Store Lite path.
-15. Continue with bounded HTTP dispatch, browser subject issuance/rotation,
-   response emission, richer-enablement, and settings UI/endpoints as
+15. Completed the core-only non-routable response emitter: it accepts only
+   exact fixed core envelopes, refuses after output starts, clears and sets
+   only fixed no-store/nosniff JSON headers, and emits only matching fixed
+   bytes. It has no request, browser, package, front-controller, enablement,
+   or Store Lite path.
+16. Continue with bounded HTTP dispatch, browser subject issuance/rotation,
+   richer-enablement, and settings UI/endpoints as
    separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -430,13 +442,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-16. Create Store Lite in its separate distribution using only those accepted
+17. Create Store Lite in its separate distribution using only those accepted
    contracts.
-17. Add package-owned migrations, Product editing, catalog, cart, orders, and
+18. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-18. Validate disable/re-enable, failure recovery, migration, responsive
+19. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-19. Add a separately reviewed hosted-payment adapter only after the
+20. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite
