@@ -755,7 +755,7 @@ request bootstrap excludes the disabled package.
     security-header facts. It has no compiled binary, active Caddyfile, default
     server change, linked endpoint, cookie issuance, package invocation,
     enablement, fixture, Store Lite, or client-state path; per-client
-    deployment and browser subject-cookie review remain later gates.
+    deployment and response-owner review remain later gates.
 58. Completed the unlinked core-owned public-mutation dispatcher composition:
     explicit method/target/capture facts select one registrar-bound route,
     require attested POST transport, verify the opaque subject and CSRF before
@@ -763,8 +763,9 @@ request bootstrap excludes the disabled package.
     return only the fixed response model. Its focused fixture proves runtime,
     method, transport, binding, and callback isolation without linking the
     front controller, emitting a response/cookie, changing enablement, or
-    adding Store Lite/client state. The supported-server rehearsal is now
-    complete; per-client deployment and browser subject-cookie review remain.
+    adding Store Lite/client state. The supported-server rehearsal and the
+    separate core lifecycle bridge are complete; per-client deployment and
+    response-owner review remain.
 59. Completed the disposable supported-server dispatcher rehearsal: a temporary
     pinned FrankenPHP/Caddy image (with `mysqli` added only to that proof image)
     and fresh MySQL database carried a secret-guarded fixture request through
@@ -773,9 +774,20 @@ request bootstrap excludes the disabled package.
     withheld-attestation refusal, idempotency conflict, and exact execution,
     activity, subject, CSRF, idempotency, and rate evidence passed before all
     containers, network, image, database, package marker, and build context
-    were removed. It remains a test-only rehearsal; per-client deployment and
-    browser subject-cookie lifecycle review precede any front-controller link or
-    Store Lite enablement.
+    were removed. It remains a test-only rehearsal; the core-owned
+    subject-cookie lifecycle is now proven, while per-client deployment,
+    response ownership, and trusted-origin/HMAC review precede any
+    front-controller link or Store Lite enablement.
+60. Completed the core-owned browser subject-cookie lifecycle bridge. Its
+    transactional `ensure`, `clear`, and `rotate` operations return only fixed
+    host-only cookie descriptors, refuse malformed input and active caller
+    transactions, and expire the old subject and its CSRF evidence before
+    committing a distinct replacement. The 18-assertion disposable fixture and
+    supported-server HTTP proof cover issuance, resolve-without-reissue,
+    fixed clearance, old-token refusal, malformed input, and cleanup. This
+    does not emit a production header, link the front controller, or authorize
+    a client deployment; response ownership and deployment remain the next
+    gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

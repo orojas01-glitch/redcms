@@ -61,6 +61,25 @@ cleanup() {
 
 trap cleanup EXIT HUP INT TERM
 
+subject_cookie_from_headers() {
+    local headers_file="$1"
+    tr -d '\r' < "$headers_file" \
+        | sed -n 's/^Set-Cookie: redcms_public_mutation_subject=\([a-f0-9]\{64\}\);.*/\1/p' \
+        | head -n 1
+}
+
+subject_cookie_header_count() {
+    local headers_file="$1"
+    tr -d '\r' < "$headers_file" \
+        | grep -c '^Set-Cookie: redcms_public_mutation_subject=' || true
+}
+
+subject_clear_header_count() {
+    local headers_file="$1"
+    tr -d '\r' < "$headers_file" \
+        | grep -c '^Set-Cookie: redcms_public_mutation_subject=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Strict$' || true
+}
+
 BUILD_CONTEXT="$(mktemp -d "${TMPDIR:-/tmp}/redcms-public-dispatch.XXXXXX")"
 mkdir -p "$BUILD_CONTEXT/integration" "$BUILD_CONTEXT/includes"
 cp -R "$INTEGRATION_DIR/." "$BUILD_CONTEXT/integration/"
@@ -78,8 +97,10 @@ for include_file in \
     addon_service_helpers.php \
     addon_install_helpers.php \
     admin_transaction_helpers.php \
-    addon_public_mutation_preflight_helpers.php \
-    addon_public_mutation_subject_helpers.php \
+        addon_public_mutation_preflight_helpers.php \
+        addon_public_mutation_subject_helpers.php \
+        addon_public_mutation_subject_cookie_helpers.php \
+        addon_public_mutation_subject_cookie_lifecycle_helpers.php \
     addon_public_mutation_http_request_helpers.php \
     addon_public_mutation_route_helpers.php \
     addon_public_mutation_server_request_helpers.php \
@@ -219,7 +240,9 @@ if [[ "$health_status" != '204' ]]; then
 fi
 
 BOOTSTRAP_FILE="$BUILD_CONTEXT/bootstrap.json"
+BOOTSTRAP_HEADERS="$BUILD_CONTEXT/bootstrap.headers"
 bootstrap_status="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$BOOTSTRAP_HEADERS" \
     --output "$BOOTSTRAP_FILE" --write-out '%{http_code}' \
     --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
     "$BASE_URL/__fixture/bootstrap")"
@@ -229,7 +252,7 @@ if [[ "$bootstrap_status" != '200' ]]; then
     exit 1
 fi
 
-SUBJECT_TOKEN="$(sed -n 's/.*"subjectToken":"\([a-f0-9]\{64\}\)".*/\1/p' "$BOOTSTRAP_FILE")"
+SUBJECT_TOKEN="$(subject_cookie_from_headers "$BOOTSTRAP_HEADERS")"
 CSRF_TOKEN="$(sed -n 's/.*"csrfToken":"\([a-f0-9]\{64\}\)".*/\1/p' "$BOOTSTRAP_FILE")"
 IDEMPOTENCY_KEY="$(sed -n 's/.*"idempotencyKey":"\([a-f0-9]\{64\}\)".*/\1/p' "$BOOTSTRAP_FILE")"
 if [[ ! "$SUBJECT_TOKEN" =~ ^[a-f0-9]{64}$ \
@@ -237,6 +260,17 @@ if [[ ! "$SUBJECT_TOKEN" =~ ^[a-f0-9]{64}$ \
     || ! "$IDEMPOTENCY_KEY" =~ ^[a-f0-9]{64}$ ]]; then
     echo 'Dispatcher fixture did not return bounded opaque bootstrap values.' >&2
     sed -n '1,8p' "$BOOTSTRAP_FILE" >&2 || true
+    exit 1
+fi
+if [[ "$(subject_cookie_header_count "$BOOTSTRAP_HEADERS")" != '1' \
+    || "$(subject_clear_header_count "$BOOTSTRAP_HEADERS")" != '0' ]]; then
+    echo 'Dispatcher fixture did not issue exactly one non-disclosing subject cookie.' >&2
+    sed -n '1,12p' "$BOOTSTRAP_HEADERS" >&2 || true
+    sed -n '1,8p' "$BOOTSTRAP_FILE" >&2 || true
+    exit 1
+fi
+if grep -q '"subjectToken"' "$BOOTSTRAP_FILE"; then
+    echo 'Dispatcher fixture disclosed the subject token in its JSON bootstrap response.' >&2
     exit 1
 fi
 
@@ -323,6 +357,117 @@ if [[ "$DISPATCH_STATUS" != '409' \
     exit 1
 fi
 
+ROTATE_FILE="$BUILD_CONTEXT/rotate.response"
+ROTATE_HEADERS_FILE="$BUILD_CONTEXT/rotate.headers"
+ROTATE_STATUS="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$ROTATE_HEADERS_FILE" \
+    --output "$ROTATE_FILE" --write-out '%{http_code}' \
+    --request POST \
+    --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
+    --header "Cookie: redcms_public_mutation_subject=$SUBJECT_TOKEN" \
+    "$BASE_URL/__fixture/subject/rotate")"
+if [[ "$ROTATE_STATUS" != '200' \
+    || "$(<"$ROTATE_FILE")" != '{"ok":true,"state":"rotated"}' \
+    || "$(subject_cookie_header_count "$ROTATE_HEADERS_FILE")" != '2' \
+    || "$(subject_clear_header_count "$ROTATE_HEADERS_FILE")" != '1' ]]; then
+    echo 'Supported-server subject rotation did not emit one fixed clear and one new cookie.' >&2
+    sed -n '1,16p' "$ROTATE_HEADERS_FILE" >&2 || true
+    sed -n '1,8p' "$ROTATE_FILE" >&2 || true
+    exit 1
+fi
+ROTATED_SUBJECT_TOKEN="$(subject_cookie_from_headers "$ROTATE_HEADERS_FILE")"
+if [[ ! "$ROTATED_SUBJECT_TOKEN" =~ ^[a-f0-9]{64}$ \
+    || "$ROTATED_SUBJECT_TOKEN" == "$SUBJECT_TOKEN" ]]; then
+    echo 'Supported-server subject rotation did not return a distinct opaque token.' >&2
+    exit 1
+fi
+
+OLD_RESOLVE_FILE="$BUILD_CONTEXT/old-resolve.response"
+OLD_RESOLVE_HEADERS_FILE="$BUILD_CONTEXT/old-resolve.headers"
+OLD_RESOLVE_STATUS="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$OLD_RESOLVE_HEADERS_FILE" \
+    --output "$OLD_RESOLVE_FILE" --write-out '%{http_code}' \
+    --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
+    --header "Cookie: redcms_public_mutation_subject=$SUBJECT_TOKEN" \
+    "$BASE_URL/__fixture/subject/resolve")"
+if [[ "$OLD_RESOLVE_STATUS" != '200' \
+    || "$(<"$OLD_RESOLVE_FILE")" != '{"ok":false,"state":"invalid"}' \
+    || "$(subject_cookie_header_count "$OLD_RESOLVE_HEADERS_FILE")" != '0' ]]; then
+    echo 'Supported-server subject rotation did not invalidate the old token without reissuing.' >&2
+    exit 1
+fi
+
+NEW_RESOLVE_FILE="$BUILD_CONTEXT/new-resolve.response"
+NEW_RESOLVE_HEADERS_FILE="$BUILD_CONTEXT/new-resolve.headers"
+NEW_RESOLVE_STATUS="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$NEW_RESOLVE_HEADERS_FILE" \
+    --output "$NEW_RESOLVE_FILE" --write-out '%{http_code}' \
+    --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
+    --header "Cookie: redcms_public_mutation_subject=$ROTATED_SUBJECT_TOKEN" \
+    "$BASE_URL/__fixture/subject/resolve")"
+if [[ "$NEW_RESOLVE_STATUS" != '200' \
+    || "$(<"$NEW_RESOLVE_FILE")" != '{"ok":true,"state":"resolved"}' \
+    || "$(subject_cookie_header_count "$NEW_RESOLVE_HEADERS_FILE")" != '0' ]]; then
+    echo 'Supported-server subject rotation did not resolve the new token without reissuing.' >&2
+    exit 1
+fi
+
+ROTATED_BOOTSTRAP_FILE="$BUILD_CONTEXT/rotated-bootstrap.json"
+ROTATED_BOOTSTRAP_HEADERS="$BUILD_CONTEXT/rotated-bootstrap.headers"
+rotated_bootstrap_status="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$ROTATED_BOOTSTRAP_HEADERS" \
+    --output "$ROTATED_BOOTSTRAP_FILE" --write-out '%{http_code}' \
+    --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
+    --header "Cookie: redcms_public_mutation_subject=$ROTATED_SUBJECT_TOKEN" \
+    "$BASE_URL/__fixture/bootstrap")"
+if [[ "$rotated_bootstrap_status" != '200' \
+    || "$(subject_cookie_header_count "$ROTATED_BOOTSTRAP_HEADERS")" != '0' \
+    || "$(subject_clear_header_count "$ROTATED_BOOTSTRAP_HEADERS")" != '0' ]]; then
+    echo 'Supported-server bootstrap unexpectedly reissued a valid rotated subject cookie.' >&2
+    exit 1
+fi
+CSRF_TOKEN="$(sed -n 's/.*"csrfToken":"\([a-f0-9]\{64\}\)".*/\1/p' "$ROTATED_BOOTSTRAP_FILE")"
+IDEMPOTENCY_KEY="$(sed -n 's/.*"idempotencyKey":"\([a-f0-9]\{64\}\)".*/\1/p' "$ROTATED_BOOTSTRAP_FILE")"
+if [[ ! "$CSRF_TOKEN" =~ ^[a-f0-9]{64}$ \
+    || ! "$IDEMPOTENCY_KEY" =~ ^[a-f0-9]{64}$ ]]; then
+    echo 'Supported-server bootstrap did not issue fresh bounded mutation evidence after rotation.' >&2
+    exit 1
+fi
+
+CLEAR_FILE="$BUILD_CONTEXT/clear.response"
+CLEAR_HEADERS_FILE="$BUILD_CONTEXT/clear.headers"
+CLEAR_STATUS="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$CLEAR_HEADERS_FILE" \
+    --output "$CLEAR_FILE" --write-out '%{http_code}' \
+    --request POST \
+    --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
+    --header "Cookie: redcms_public_mutation_subject=$ROTATED_SUBJECT_TOKEN" \
+    "$BASE_URL/__fixture/subject/clear")"
+if [[ "$CLEAR_STATUS" != '200' \
+    || "$(<"$CLEAR_FILE")" != '{"ok":true,"state":"cleared"}' \
+    || "$(subject_cookie_header_count "$CLEAR_HEADERS_FILE")" != '1' \
+    || "$(subject_clear_header_count "$CLEAR_HEADERS_FILE")" != '1' ]]; then
+    echo 'Supported-server subject clear did not emit exactly one fixed deletion cookie.' >&2
+    sed -n '1,16p' "$CLEAR_HEADERS_FILE" >&2 || true
+    sed -n '1,8p' "$CLEAR_FILE" >&2 || true
+    exit 1
+fi
+
+CLEARED_RESOLVE_FILE="$BUILD_CONTEXT/cleared-resolve.response"
+CLEARED_RESOLVE_HEADERS_FILE="$BUILD_CONTEXT/cleared-resolve.headers"
+CLEARED_RESOLVE_STATUS="$(curl --silent --show-error --max-time 5 \
+    --dump-header "$CLEARED_RESOLVE_HEADERS_FILE" \
+    --output "$CLEARED_RESOLVE_FILE" --write-out '%{http_code}' \
+    --header "X-RED-CMS-Fixture-Secret: $BOOTSTRAP_SECRET" \
+    --header "Cookie: redcms_public_mutation_subject=$ROTATED_SUBJECT_TOKEN" \
+    "$BASE_URL/__fixture/subject/resolve")"
+if [[ "$CLEARED_RESOLVE_STATUS" != '200' \
+    || "$(<"$CLEARED_RESOLVE_FILE")" != '{"ok":false,"state":"invalid"}' \
+    || "$(subject_cookie_header_count "$CLEARED_RESOLVE_HEADERS_FILE")" != '0' ]]; then
+    echo 'Supported-server subject clear did not invalidate the browser token without reissuing.' >&2
+    exit 1
+fi
+
 cart_state="$(docker exec "$DB_CONTAINER" mysql \
     -u"$DB_USER" "-p$DB_PASSWORD" "$DB_NAME" \
     --batch --skip-column-names --execute="
@@ -348,12 +493,12 @@ rate_count="$(docker exec "$DB_CONTAINER" mysql \
     -u"$DB_USER" "-p$DB_PASSWORD" "$DB_NAME" \
     --batch --skip-column-names --execute='SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Rate_Limits;' 2>/dev/null)"
 if [[ "$cart_state" != '1:2' \
-    || "$execution_count" != '1' \
+    || "$execution_count" != '0' \
     || "$activity_count" != '1' \
     || "$subject_count" != '1' \
     || "$csrf_count" != '1' \
     || "$idempotency_count" != '1' \
-    || "$rate_count" != '1' ]]; then
+    || "$rate_count" != '0' ]]; then
     echo "Supported-server dispatcher fixture state is unexpected: cart=$cart_state execution=$execution_count activity=$activity_count subject=$subject_count csrf=$csrf_count idempotency=$idempotency_count rate=$rate_count" >&2
     exit 1
 fi

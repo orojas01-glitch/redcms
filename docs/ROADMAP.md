@@ -260,6 +260,15 @@ core-issued descriptor shape and constructs one fixed future host-only
 reads no request/cookie/session state, database, runtime, or package code, and
 remains outside the front controller. It creates no endpoint, browser
 issuance/rotation, enablement change, Store Lite behavior, or client data.
+The core-owned lifecycle bridge now provides transactional `ensure`, `clear`,
+and `rotate` operations over the hash-only subject store. It returns only the
+fixed serializer descriptors, refuses malformed rotation sources and active
+caller transactions, and expires the old subject (and therefore its CSRF
+evidence) before committing a distinct replacement. The 18-assertion
+disposable fixture and supported-server HTTP rehearsal prove issuance,
+resolve-without-reissue, fixed clearance, old-token refusal, and cleanup. It
+still has no front-controller link; client response ownership and deployment
+remain separate gates.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -522,11 +531,11 @@ decoder, pure HTTP request-envelope, private static route-selector, and
 non-routable server request-facts adapter plus closed response-emitter
 and non-emitting subject-cookie-serialization and optional
 Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
-dispatcher and supported-server disposable rehearsal are also complete. The
-rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
-MySQL database; it does not link the dispatcher to the front controller or
-deploy a client. Client-specific Caddyfile/TLS/proxy and trusted-origin/HMAC
-review, browser subject-cookie issuance/clearance/rotation, the protected
+dispatcher, supported-server disposable rehearsal, and core-owned browser
+subject-cookie lifecycle bridge are also complete. The rehearsal uses only a
+temporary custom binary, fixture endpoint, and fresh MySQL database; it does
+not link the dispatcher to the front controller or deploy a client. Client-
+specific Caddyfile/TLS/proxy, trusted-origin/HMAC, response-owner, protected
 settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately

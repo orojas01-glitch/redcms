@@ -121,8 +121,11 @@ It creates no route, handler, session/cookie, table, or enablement eligibility;
 the current public-route fixture must still refuse unsafe methods before a
 package handler. The supported-server rehearsal now proves the disposable
 anonymous-subject, CSRF, rate/idempotency, transaction, response-redaction, and
-exact-cleanup path; disablement, client deployment, and browser-cookie lifecycle
-gates still precede any behavior change.
+exact-cleanup path; disablement and client deployment still precede any
+production behavior change. The separate 18-assertion core-owned
+subject-cookie lifecycle fixture proves ensure/resolve, transactional
+rotation, fixed clearance, old-token and subject-bound CSRF invalidation,
+malformed-input refusal, active-transaction refusal, and exact cleanup.
 The separate 18-assertion public-mutation response fixture proves that only
 the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
 can be constructed. It requires exact JSON, content type, no-store, nosniff,
@@ -166,8 +169,9 @@ closed-result, and callback-isolation behavior; it has no database, request
 global, response-emission, front-controller, browser, package, enablement,
 Store Lite, or client-data path. The separate Docker-only supported-server
 rehearsal now proves the complete disposable request path; the dispatcher
-remains unlinked until the client deployment and browser subject-cookie gates
-pass.
+remains unlinked until the per-client deployment/trusted-origin/HMAC gate
+passes; the core browser subject-cookie lifecycle is separately proven but
+does not create a production endpoint.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
@@ -421,7 +425,8 @@ installation/recovery, 23-assertion read-only enablement preflight,
 17-assertion read-only public-mutation live-data preflight, 19-assertion
 core-only anonymous-subject/CSRF foundation, 7-assertion pure subject-cookie
 serializer, 15-assertion core-only fixed-window rate-limit foundation,
-18-assertion core-only opaque idempotency-key foundation,
+18-assertion core-only opaque idempotency-key foundation, 18-assertion
+core-owned browser subject-cookie lifecycle,
 21-assertion atomic core-only public-mutation transaction runner, 18-assertion
 bounded public-mutation response contract, 8-assertion closed core response
 emitter, 24-assertion declared
@@ -599,8 +604,9 @@ containers, network, image, database, package marker, and build context.
   non-POST refusal, missing-attestation refusal, incomplete-binding refusal,
   and zero package callback or HTTP-state changes. The dispatcher remains
   unlinked from `index.php`; the supported-server disposable rehearsal is
-  complete, but client deployment and browser subject-cookie review are still
-  required before linking it.
+  complete. The core subject-cookie lifecycle is now proven independently;
+  per-client deployment, trusted-origin/HMAC, and response-owner review are
+  still required before linking it.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,
@@ -673,10 +679,13 @@ containers, network, image, database, package marker, and build context.
   FrankenPHP/Caddy binary, adds `mysqli` only to the proof image, and exercises
   the complete attested dispatcher path against a fresh MySQL database. It
   proves accepted/replay/refusal/conflict behavior and exact execution,
-  activity, subject, CSRF, idempotency, and rate-limit evidence. Its endpoint,
-  bootstrap secret, package marker, database, image, network, and context are
-  removed on success or failure; it does not alter the default server, a client
-  installation, browser state, enablement, or Store Lite.
+  activity, subject, CSRF, idempotency, and rate-limit evidence. Its temporary
+  bootstrap also proves real HTTP subject-cookie issuance, resolve-without-
+  reissue, rotation with fixed deletion plus replacement, old-token refusal,
+  and clearance. Its endpoint, bootstrap secret, package marker, database,
+  image, network, and context are removed on success or failure; it does not
+  alter the default server, a client installation, production browser state,
+  enablement, or Store Lite.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/
@@ -692,9 +701,10 @@ containers, network, image, database, package marker, and build context.
   `Path=/`, `Secure`, `HttpOnly`, and `SameSite=Strict`, no `Domain` or
   `Expires`; it refuses forged descriptors, policy drift, token drift, domain
   injection, and max-age drift. It emits no header/cookie and changes no
-  request/session/response/buffer state; it has no front-controller, endpoint,
-  browser issuance/rotation, lifecycle, enablement, Store Lite, or client-state
-  path.
+  request/session/response/buffer state. The separate disposable lifecycle
+  fixture owns database-backed ensure/clear/rotate proof; neither fixture links
+  a front controller or creates a production endpoint, enablement, Store Lite,
+  or client-state path.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

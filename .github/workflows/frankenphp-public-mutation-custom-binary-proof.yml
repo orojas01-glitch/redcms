@@ -18,10 +18,13 @@ on:
       - 'includes/addon_public_mutation_route_helpers.php'
       - 'includes/addon_public_mutation_server_request_helpers.php'
       - 'includes/addon_public_mutation_subject_helpers.php'
+      - 'includes/addon_public_mutation_subject_cookie_helpers.php'
+      - 'includes/addon_public_mutation_subject_cookie_lifecycle_helpers.php'
       - 'includes/addon_runtime_helpers.php'
       - 'includes/runtime_config_helpers.php'
       - 'scripts/frankenphp-public-mutation-custom-binary-proof.sh'
       - 'scripts/frankenphp-public-mutation-dispatch-proof.sh'
+      - 'scripts/addon-public-mutation-subject-cookie-lifecycle-self-test.php'
       - 'server-integrations/frankenphp-public-mutation-attestation/**'
   push:
     branches:
@@ -42,10 +45,13 @@ on:
       - 'includes/addon_public_mutation_route_helpers.php'
       - 'includes/addon_public_mutation_server_request_helpers.php'
       - 'includes/addon_public_mutation_subject_helpers.php'
+      - 'includes/addon_public_mutation_subject_cookie_helpers.php'
+      - 'includes/addon_public_mutation_subject_cookie_lifecycle_helpers.php'
       - 'includes/addon_runtime_helpers.php'
       - 'includes/runtime_config_helpers.php'
       - 'scripts/frankenphp-public-mutation-custom-binary-proof.sh'
       - 'scripts/frankenphp-public-mutation-dispatch-proof.sh'
+      - 'scripts/addon-public-mutation-subject-cookie-lifecycle-self-test.php'
       - 'server-integrations/frankenphp-public-mutation-attestation/**'
   workflow_dispatch:
 

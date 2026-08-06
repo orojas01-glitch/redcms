@@ -828,8 +828,22 @@ an unreviewed cross-subdomain scope or expiry behavior through this helper. It
 does not itself issue a subject, call `header()` or `setcookie()`, read
 request/cookie/session globals, access a database/runtime, invoke package
 code, select a route, or change lifecycle, enablement, Store Lite, or client
-state. It is not linked to the front controller; later browser issuance,
-clearing, retention, and rotation require a separate dispatcher review.
+state. It is not linked to the front controller, so it remains an emission
+primitive rather than a public endpoint or dispatcher.
+
+The core-owned lifecycle bridge now uses that serializer for transactional
+`ensure`, `clear`, and `rotate` operations. It locks and resolves only the
+current installation's hash-only subject, refuses malformed rotation sources
+and active caller transactions, returns fixed set/clear descriptors without
+emitting them, and expires the old subject before committing a distinct
+replacement. Expiring the subject also invalidates its CSRF, rate, idempotency,
+and execution relations under the existing foreign-key/cleanup rules. The
+disposable 18-assertion fixture and supported-server rehearsal prove that a
+valid cookie is not reissued, rotation returns one deletion plus one
+replacement, the old token and CSRF fail closed, malformed input is safe, and
+cleanup leaves no temporary subject state. This remains a core lifecycle
+primitive; the per-client response owner and deployment boundary must still be
+reviewed before any front-controller link.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact

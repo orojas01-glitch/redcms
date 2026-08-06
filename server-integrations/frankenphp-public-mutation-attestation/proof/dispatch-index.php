@@ -18,6 +18,7 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/healthz') {
 require_once __DIR__ . '/includes/addon_public_mutation_dispatch_helpers.php';
 require_once __DIR__ . '/includes/addon_public_mutation_frankenphp_ingress_helpers.php';
 require_once __DIR__ . '/includes/addon_public_mutation_response_emitter_helpers.php';
+require_once __DIR__ . '/includes/addon_public_mutation_subject_cookie_lifecycle_helpers.php';
 
 if (!function_exists('red_dispatch_fixture_manifest')) {
     function red_dispatch_fixture_manifest()
@@ -230,19 +231,45 @@ if (!function_exists('red_dispatch_fixture_json')) {
     }
 }
 
+if (!function_exists('red_dispatch_fixture_secret_valid')) {
+    function red_dispatch_fixture_secret_valid()
+    {
+        $bootstrapSecret = getenv('RED_FIXTURE_BOOTSTRAP_SECRET');
+        $providedSecret = $_SERVER['HTTP_X_RED_CMS_FIXTURE_SECRET'] ?? '';
+        return is_string($bootstrapSecret)
+            && $bootstrapSecret !== ''
+            && is_string($providedSecret)
+            && hash_equals($bootstrapSecret, $providedSecret);
+    }
+}
+
+if (!function_exists('red_dispatch_fixture_subject_token')) {
+    function red_dispatch_fixture_subject_token()
+    {
+        return red_addon_public_mutation_http_request_subject_token(
+            $_SERVER['HTTP_COOKIE'] ?? null
+        );
+    }
+}
+
+if (!function_exists('red_dispatch_fixture_set_cookie')) {
+    function red_dispatch_fixture_set_cookie($value)
+    {
+        if (!is_string($value) || $value === '') {
+            return false;
+        }
+        header('Set-Cookie: ' . $value, false);
+        return true;
+    }
+}
+
 $manifest = red_dispatch_fixture_manifest();
 $packageId = $manifest['id'];
 $routeId = 'redcms.dispatch-fixture/cart-intent';
 $mutationId = 'redcms.dispatch-fixture/add-to-cart';
 
 if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/bootstrap') {
-    $bootstrapSecret = getenv('RED_FIXTURE_BOOTSTRAP_SECRET');
-    $providedSecret = $_SERVER['HTTP_X_RED_CMS_FIXTURE_SECRET'] ?? '';
-    if (!is_string($bootstrapSecret)
-        || $bootstrapSecret === ''
-        || !is_string($providedSecret)
-        || !hash_equals($bootstrapSecret, $providedSecret)
-    ) {
+    if (!red_dispatch_fixture_secret_valid()) {
         red_dispatch_fixture_json(404, ['ok' => false]);
     }
     $connection = red_dispatch_fixture_database();
@@ -258,7 +285,20 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/bootstrap') {
     if (!red_addon_public_mutation_declaration_preflight_is_valid($plan)) {
         red_dispatch_fixture_json(503, ['ok' => false]);
     }
-    $subject = red_addon_public_mutation_subject_issue($connection);
+    $subjectToken = red_dispatch_fixture_subject_token();
+    $subjectLifecycle = red_addon_public_mutation_subject_cookie_lifecycle(
+        $connection,
+        'ensure',
+        is_string($subjectToken) ? $subjectToken : ''
+    );
+    if (empty($subjectLifecycle['valid'])) {
+        red_dispatch_fixture_json(503, ['ok' => false]);
+    }
+    red_dispatch_fixture_set_cookie($subjectLifecycle['setCookieValue']);
+    $subject = [
+        'valid' => true,
+        'subjectRecordId' => (int) $subjectLifecycle['subjectRecordId'],
+    ];
     $csrf = red_addon_public_mutation_csrf_issue(
         $connection,
         $subject,
@@ -277,9 +317,87 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/bootstrap') {
     }
     red_dispatch_fixture_json(200, [
         'ok' => true,
-        'subjectToken' => $subject['cookie']['value'],
         'csrfToken' => $csrf['token'],
         'idempotencyKey' => $idempotency['key'],
+    ]);
+}
+
+if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/subject/resolve') {
+    if (!red_dispatch_fixture_secret_valid()) {
+        red_dispatch_fixture_json(404, ['ok' => false]);
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
+        red_dispatch_fixture_json(405, ['ok' => false]);
+    }
+    $connection = red_dispatch_fixture_database();
+    if (!$connection) {
+        red_dispatch_fixture_json(503, ['ok' => false]);
+    }
+    $subjectToken = red_dispatch_fixture_subject_token();
+    $subject = red_addon_public_mutation_subject_resolve(
+        $connection,
+        is_string($subjectToken) ? $subjectToken : ''
+    );
+    red_dispatch_fixture_json(
+        200,
+        !empty($subject['valid'])
+            ? ['ok' => true, 'state' => 'resolved']
+            : ['ok' => false, 'state' => 'invalid']
+    );
+}
+
+if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/subject/rotate') {
+    if (!red_dispatch_fixture_secret_valid()) {
+        red_dispatch_fixture_json(404, ['ok' => false]);
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        red_dispatch_fixture_json(405, ['ok' => false]);
+    }
+    $connection = red_dispatch_fixture_database();
+    if (!$connection) {
+        red_dispatch_fixture_json(503, ['ok' => false]);
+    }
+    $subjectToken = red_dispatch_fixture_subject_token();
+    $subjectLifecycle = red_addon_public_mutation_subject_cookie_lifecycle(
+        $connection,
+        'rotate',
+        is_string($subjectToken) ? $subjectToken : ''
+    );
+    if (empty($subjectLifecycle['valid'])) {
+        red_dispatch_fixture_json(409, ['ok' => false]);
+    }
+    red_dispatch_fixture_set_cookie($subjectLifecycle['clearCookieValue']);
+    red_dispatch_fixture_set_cookie($subjectLifecycle['setCookieValue']);
+    red_dispatch_fixture_json(200, [
+        'ok' => true,
+        'state' => 'rotated',
+    ]);
+}
+
+if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/subject/clear') {
+    if (!red_dispatch_fixture_secret_valid()) {
+        red_dispatch_fixture_json(404, ['ok' => false]);
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        red_dispatch_fixture_json(405, ['ok' => false]);
+    }
+    $connection = red_dispatch_fixture_database();
+    if (!$connection) {
+        red_dispatch_fixture_json(503, ['ok' => false]);
+    }
+    $subjectToken = red_dispatch_fixture_subject_token();
+    $subjectLifecycle = red_addon_public_mutation_subject_cookie_lifecycle(
+        $connection,
+        'clear',
+        is_string($subjectToken) ? $subjectToken : ''
+    );
+    if (empty($subjectLifecycle['valid'])) {
+        red_dispatch_fixture_json(503, ['ok' => false]);
+    }
+    red_dispatch_fixture_set_cookie($subjectLifecycle['clearCookieValue']);
+    red_dispatch_fixture_json(200, [
+        'ok' => true,
+        'state' => 'cleared',
     ]);
 }
 

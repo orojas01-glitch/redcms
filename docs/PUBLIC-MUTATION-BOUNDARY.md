@@ -6,12 +6,13 @@ anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
 pure declared-form decoder, HTTP request-envelope normalizer, private static
 route selector, non-routable server request-facts adapter, closed response
-emitter, pure subject-cookie serializer, and an optional Caddy/FrankenPHP
+emitter, pure subject-cookie serializer, core-owned subject-cookie lifecycle
+bridge, and an optional Caddy/FrankenPHP
 ingress-attestation source with an unlinked PHP verifier are implemented. An
 unlinked explicit-input core dispatcher and a disposable supported-server
 end-to-end proof are also implemented. The dispatcher composes those contracts
 but remains unlinked from the front controller. This document does **not** add
-a production public HTTP endpoint, emitted cookie, browser session access,
+a production public HTTP endpoint, production-emitted cookie, browser session access,
 package, permission, enablement profile, or Store Lite behavior. The five
 generic core tables remain empty in the clean starter.
 
@@ -40,7 +41,7 @@ changed by it.
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
 | Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency/execution storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
-| Anonymous cart identity | Internal core issuance/resolution exists, and a separate pure serializer can construct only a fixed host-only future cookie value from the exact core-issued descriptor shape | No browser cookie read/write/emission, issuance/clearance/rotation, session, package access, route, or client business data |
+| Anonymous cart identity | Core-owned lifecycle now validates/ensures, clears, and rotates one opaque subject with fixed host-only cookie descriptors; the pure serializer remains non-emitting and the lifecycle bridge remains unlinked | No production front-controller, client deployment, package access, route claim, session, or client business data |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
@@ -51,7 +52,7 @@ changed by it.
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the unlinked PHP HMAC bridge | No default-server change, deployed client binary, active client Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
 | Public-mutation dispatcher | Unlinked core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model | No front-controller link, response emission, browser issuance, package enablement, or Store Lite behavior |
-| Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, and emitter against a fresh MySQL database, and proves accepted/replay/refusal/conflict outcomes plus exact ledger/audit/rate state | No client database, default server, deployed binary, browser issuance, package installation, richer enablement, or Store Lite data |
+| Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -419,16 +420,44 @@ idempotency key through a secret-guarded test-only bootstrap path, then sends a
 real attested `POST` through Caddy, the PHP verifier, the core dispatcher, the
 atomic runner, and the fixed response emitter. It proves an accepted mutation,
 replay after forged internal headers are supplied, `GET` refusal, withheld
-attestation refusal, and idempotency conflict. It also checks one fixture cart
-row, one execution ledger row, one value-free activity row, and one each of the
-subject, CSRF, idempotency, and rate-limit rows. Temporary containers, network,
-image, build context, package marker, and database are removed by the script.
+attestation refusal, and idempotency conflict. The same temporary image also
+proves HTTP-owned subject-cookie `ensure`, `resolve`, `rotate`, and `clear`:
+issuance emits one fixed `Secure; HttpOnly; SameSite=Strict` cookie without
+disclosing the token in JSON, rotation emits one fixed deletion plus one
+distinct replacement, the old token fails closed, a valid token is not
+reissued, and clearing emits the fixed deletion value. It checks the resulting
+core cleanup state alongside one fixture cart row, one value-free activity row,
+and the bounded mutation ledgers. Temporary containers, network, image, build
+context, package marker, and database are removed by the script.
 
-The endpoint and bootstrap path exist only inside that temporary proof image;
-they are not a RED-CMS route, package, front-controller link, client deployment,
-or browser cookie-issuance implementation. The proof therefore authorizes the
-supported-server integration gate only; it does not authorize linking the
+The endpoint, bootstrap path, and subject lifecycle paths exist only inside
+that temporary proof image; they are not RED-CMS routes, package code,
+front-controller links, client deployments, or production browser-cookie
+implementations. The proof therefore authorizes the supported-server
+integration and core lifecycle gates only; it does not authorize linking the
 dispatcher or enabling Store Lite.
+
+## Implemented Core-Owned Browser Subject-Cookie Lifecycle
+
+`includes/addon_public_mutation_subject_cookie_lifecycle_helpers.php` is the
+explicit core bridge between the hash-only subject store and a future owner of
+the HTTP response. `ensure` resolves one active opaque value or issues a new
+subject; `clear` expires the active server subject and returns one fixed
+host-only deletion descriptor; and `rotate` expires the locked old subject,
+issues a distinct replacement in one transaction, and returns both descriptors.
+The bridge refuses an active caller transaction, malformed rotation sources,
+unavailable storage, and serialization drift. It never reads request globals,
+calls `setcookie()`, emits a header, starts a session, loads package code,
+migrates package state, or changes lifecycle/enablement. Related core CSRF,
+rate, idempotency, and execution rows remain governed by the existing subject
+foreign keys and bounded cleanup; no package data is migrated.
+
+The 18-assertion disposable self-test proves no request/cookie/session/header
+mutation, valid-cookie resolution without reissue, old-token and old-CSRF
+invalidation after rotation, fixed clearance, malformed-input fail-closed
+behavior, active-transaction refusal, and exact cleanup. The Docker rehearsal
+proves the same descriptors cross a temporary supported HTTP server. This is a
+core lifecycle gate, not a production endpoint or client browser deployment.
 
 ## Future Core-Owned Request And Response Path
 
@@ -449,17 +478,16 @@ route file—must own this sequence:
    only through the dispatcher. It is an opaque, unguessable cookie-bound
    reference; it is neither an administrator session, a Member Access identity,
    a raw cookie value exposed to package code, nor a client database/global
-   identity. The current unlinked dispatcher requires an existing subject and
-   does not issue or emit a cookie. A later browser-flow batch must use the
-   implemented serializer only after it has rederived valid current subject
-   state, then separately define issuance/clearance/rotation/retention and
-   prove those behaviors.
+   identity. The unlinked dispatcher still requires an existing subject. A
+   future response owner may call the implemented lifecycle bridge to ensure,
+   clear, or rotate that subject, then emit only its validated fixed descriptors
+   after the per-client deployment boundary is accepted.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
    request body, and secrets must not enter general logs, package output, audit
    rows, or public errors. The dispatcher enforces same-origin behavior and
-   emits no CORS policy that would widen access; token issuance remains a
-   separate browser-flow gate.
+   emits no CORS policy that would widen access; token issuance remains tied to
+   the accepted subject lifecycle and client response owner.
 4. After static route selection, invoke the implemented request-envelope
    normalizer with a configured HTTPS origin and complete raw transport facts.
    It validates same-origin, content type, body-size, opaque subject/CSRF/key,
@@ -567,10 +595,15 @@ HTTP 200. A disposable, client-isolated acceptance suite must still prove:
   HMAC key from `Host`, a request header, or a request-projected server value;
 - the separate Docker-only supported-server rehearsal builds the matching
   custom binary and temporary MySQL fixture, proves a real attested request
-  reaches the dispatcher/runner/emitter, refuses forged or withheld transport,
-  preserves the exact replay/conflict contract, and removes every temporary
-  container, image, database, package marker, and build context; it does not
-  count as a client deployment or browser-cookie acceptance;
+  reaches the dispatcher/runner/emitter, proves issuance/rotation/clearance of
+  the core subject-cookie descriptors over temporary HTTP, refuses forged or
+  withheld transport, preserves the exact replay/conflict contract, and removes
+  every temporary container, image, database, package marker, and build
+  context; it does not count as a client deployment;
+- the core lifecycle self-test proves exact secure host-only descriptors, no
+  token disclosure in JSON/logs, old-token and subject-bound CSRF invalidation,
+  malformed-input fail-closed behavior, active-transaction refusal, and exact
+  subject/CSRF cleanup before a client response owner is considered;
 - anonymous subjects and CSRF tokens are opaque, scoped to one client, and
   unavailable to another client, administrator session, member session, or
   package request;
@@ -597,8 +630,9 @@ used for that evidence.
 
 This planning slice does not authorize:
 
-- an endpoint, browser form, administrator control, package JavaScript, or
-  Store Lite user interface;
+- a production endpoint, browser form, administrator control, package
+  JavaScript, or Store Lite user interface; the rehearsal's lifecycle paths are
+  test-only and temporary;
 - package activation, a relaxed enablement profile, a live package fixture,
   package registry change, or package migration;
 - Member Access, checkout, payment adapters, webhooks, external network calls,
@@ -680,8 +714,12 @@ This planning slice does not authorize:
     a client or link the dispatcher. A separate batch may link it only after the
     later per-client Caddyfile/TLS/proxy, trusted-origin, HMAC-key, and browser
     subject-cookie deployment review.
-18. A separate richer enablement review may admit only packages that satisfy
+18. Completed the core-owned browser subject-cookie lifecycle bridge and its
+    18-assertion disposable plus supported-server HTTP proofs. Ensure, clear,
+    and rotate are transactional, fixed-descriptor, non-package operations;
+    client response ownership and deployment remain unaccepted.
+19. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-19. Store Lite can then implement its separately distributed catalog and cart
+20. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

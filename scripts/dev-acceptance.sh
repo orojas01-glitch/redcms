@@ -4767,6 +4767,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running core-owned public-mutation anonymous subject and CSRF checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-subject-csrf-self-test.php"
 
+printf '%s\n' 'Running core-owned browser subject-cookie lifecycle checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-subject-cookie-lifecycle-self-test.php"
+
 printf '%s\n' 'Running core-owned public-mutation fixed-window rate-limit checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-rate-limit-self-test.php"
 

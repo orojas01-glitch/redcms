@@ -59,9 +59,11 @@ The Caddyfile contains the environment *name*, never the secret value. The
 unlinked PHP verifier reads only the same process environment value; it does
 not use `$_SERVER`, `$_ENV`, `Host`, a request header, or
 `config.local.php` for this key. Keep the key out of source control, command
-history, logs, diagnostics, and client packages. Rotate it per installation as
-a later browser-subject lifecycle contract requires; rotation is not active in
-this slice.
+history, logs, diagnostics, and client packages. Rotate it per installation
+through the client deployment runbook. The core browser subject-cookie
+lifecycle bridge is now implemented and proven separately, but HMAC-key
+rotation and response-owner binding remain deployment gates in this integration
+slice.
 
 `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` remains a separately configured
 non-secret canonical HTTPS origin. It is never derived from `Host` or a

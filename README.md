@@ -310,6 +310,14 @@ features.
   network, and build context exist only for the proof and are removed after it;
   no client installation, default server, browser cookie, enablement, or Store
   Lite data is changed
+- Core-owned browser subject-cookie lifecycle bridge. Transactional `ensure`,
+  `clear`, and `rotate` operations return only fixed host-only cookie
+  descriptors, refuse malformed sources and active caller transactions, and
+  invalidate the old subject and CSRF evidence on rotation. Disposable and
+  supported-server proofs cover issuance, resolve-without-reissue, fixed
+  clearance, replacement, and cleanup; the bridge is not linked to `index.php`
+  and does not authorize a client deployment, package enablement, or Store Lite
+  route
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the
