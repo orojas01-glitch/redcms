@@ -126,6 +126,12 @@ production behavior change. The separate 18-assertion core-owned
 subject-cookie lifecycle fixture proves ensure/resolve, transactional
 rotation, fixed clearance, old-token and subject-bound CSRF invalidation,
 malformed-input refusal, active-transaction refusal, and exact cleanup.
+The separate 27-assertion non-executing deployment-profile fixture proves one
+closed client review packet with canonical HTTPS, pinned server versions,
+fixed HMAC/trusted-origin sources, attestation-before-PHP route order, core
+response/cookie ownership, host-only cookie policy, clean-starter isolation,
+secret-shaped-field refusal, and disabled activation flags. It reads no
+request, filesystem, database, package, secret, or response state.
 The separate 18-assertion public-mutation response fixture proves that only
 the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
 can be constructed. It requires exact JSON, content type, no-store, nosniff,
@@ -170,8 +176,8 @@ global, response-emission, front-controller, browser, package, enablement,
 Store Lite, or client-data path. The separate Docker-only supported-server
 rehearsal now proves the complete disposable request path; the dispatcher
 remains unlinked until the per-client deployment/trusted-origin/HMAC gate
-passes; the core browser subject-cookie lifecycle is separately proven but
-does not create a production endpoint.
+passes; the core browser subject-cookie lifecycle and non-executing deployment
+profile are separately proven but do not create a production endpoint.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
@@ -427,6 +433,7 @@ core-only anonymous-subject/CSRF foundation, 7-assertion pure subject-cookie
 serializer, 15-assertion core-only fixed-window rate-limit foundation,
 18-assertion core-only opaque idempotency-key foundation, 18-assertion
 core-owned browser subject-cookie lifecycle,
+27-assertion non-executing per-client deployment profile,
 21-assertion atomic core-only public-mutation transaction runner, 18-assertion
 bounded public-mutation response contract, 8-assertion closed core response
 emitter, 24-assertion declared
@@ -605,8 +612,18 @@ containers, network, image, database, package marker, and build context.
   and zero package callback or HTTP-state changes. The dispatcher remains
   unlinked from `index.php`; the supported-server disposable rehearsal is
   complete. The core subject-cookie lifecycle is now proven independently;
-  per-client deployment, trusted-origin/HMAC, and response-owner review are
-  still required before linking it.
+  the non-executing deployment profile is also proven; response-owner and
+  production deployment review remain required before linking it.
+- Public-mutation deployment-profile acceptance is dependency-free and creates
+  no database, package, request, browser, route, or client fixture. It accepts
+  only one non-secret operator review packet with a separate client database,
+  canonical HTTPS origin, pinned FrankenPHP/Caddy versions, fixed
+  HMAC/trusted-origin sources, attestation-before-PHP route order, core
+  response/cookie ownership, host-only cookie policy, explicit isolation, and
+  disabled activation flags. It rejects starter-database reuse, request-
+  derived trust, version/route/policy drift, secret-shaped fields, and any
+  dispatcher/package/Store Lite activation without loading a profile or
+  changing response, filesystem, database, or client state.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,

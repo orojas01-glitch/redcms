@@ -805,8 +805,9 @@ The supported-server rehearsal additionally carries one secret-guarded fixture
 request through the verifier, dispatcher, atomic runner, and fixed emitter
 against a fresh MySQL database, then removes its temporary database, image,
 network, package marker, and context. Neither proof deploys a binary or
-configuration for a client. Until the per-client deployment and browser
-subject-cookie decisions are reviewed, invalid or missing attestation creates
+configuration for a client. Until the validated profile is followed by actual
+per-client deployment, response-owner, and browser-deployment review, invalid
+or missing attestation creates
 no public route, response, cookie, runtime/package invocation, lifecycle
 change, Store Lite behavior, or client state.
 
@@ -844,6 +845,20 @@ replacement, the old token and CSRF fail closed, malformed input is safe, and
 cleanup leaves no temporary subject state. This remains a core lifecycle
 primitive; the per-client response owner and deployment boundary must still be
 reviewed before any front-controller link.
+
+The non-executing per-client deployment profile is the current core review
+boundary. It accepts only a closed operator packet with a separate client
+database name, canonical HTTPS origin, pinned FrankenPHP/Caddy versions, the
+fixed process-environment ingress-key name, a server-local trusted-origin
+source, attestation-before-PHP route order, and explicit operator-owned key
+rotation. It requires core—not a package or theme—to own response headers and
+browser-cookie descriptors, preserves the fixed host-only cookie policy, and
+requires configuration, binary, secret, media, and database isolation outside
+the clean starter. Any secret value, request-derived origin/key, version or
+route-order drift, cross-subdomain cookie, isolation gap, or activation flag
+fails closed. The validator returns only a deterministic non-secret hash; it
+does not load the profile, resolve a secret, access a database, or change
+deployment, lifecycle, enablement, response, or client state.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact

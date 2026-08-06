@@ -69,6 +69,24 @@ slice.
 non-secret canonical HTTPS origin. It is never derived from `Host` or a
 request value.
 
+## Per-client deployment review packet
+
+Before any client-specific dispatcher link, prepare an operator-owned profile
+and validate it with the dependency-free core helper:
+
+```sh
+php scripts/addon-public-mutation-deployment-profile-self-test.php
+```
+
+The profile is a review artifact, not a runtime configuration file. It records
+the separate client database, canonical HTTPS origin, pinned FrankenPHP/Caddy
+versions, process-environment HMAC-key name, server-local trusted-origin
+source, attestation-before-`php_server` route order, response/cookie ownership,
+fixed host-only cookie policy, and clean-starter isolation. It must keep the
+dispatcher, package, and Store Lite activation flags false. The validator
+returns only a deterministic non-secret hash; it does not load the profile,
+resolve a key, read a database, or deploy the client.
+
 ## Build and configuration boundary
 
 The module targets Caddy `v2.11.4`, which matches the local FrankenPHP

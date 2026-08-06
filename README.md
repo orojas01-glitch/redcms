@@ -318,6 +318,15 @@ features.
   clearance, replacement, and cleanup; the bridge is not linked to `index.php`
   and does not authorize a client deployment, package enablement, or Store Lite
   route
+- Non-executing per-client public-mutation deployment profile validator. It
+  accepts only an operator-owned review packet with one canonical HTTPS origin,
+  pinned FrankenPHP/Caddy versions, the fixed process-environment HMAC key
+  name, attestation-before-PHP route order, core response/cookie ownership,
+  host-only cookie policy, and explicit client-isolation flags. It returns a
+  deterministic non-secret profile hash and refuses starter-database reuse,
+  request-derived trust, package/theme response ownership, policy drift, and
+  all dispatcher/package/Store Lite activation flags; it reads no database,
+  secret, filesystem, request, or client state
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the

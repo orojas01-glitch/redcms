@@ -10,8 +10,10 @@ emitter, pure subject-cookie serializer, core-owned subject-cookie lifecycle
 bridge, and an optional Caddy/FrankenPHP
 ingress-attestation source with an unlinked PHP verifier are implemented. An
 unlinked explicit-input core dispatcher and a disposable supported-server
-end-to-end proof are also implemented. The dispatcher composes those contracts
-but remains unlinked from the front controller. This document does **not** add
+end-to-end proof are also implemented. A non-executing per-client deployment
+profile validator now covers the operator-owned deployment boundary without
+loading or applying a profile. The dispatcher composes those contracts but
+remains unlinked from the front controller. This document does **not** add
 a production public HTTP endpoint, production-emitted cookie, browser session access,
 package, permission, enablement profile, or Store Lite behavior. The five
 generic core tables remain empty in the clean starter.
@@ -53,6 +55,7 @@ changed by it.
 | Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the unlinked PHP HMAC bridge | No default-server change, deployed client binary, active client Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
 | Public-mutation dispatcher | Unlinked core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model | No front-controller link, response emission, browser issuance, package enablement, or Store Lite behavior |
 | Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
+| Per-client deployment profile | Pure validator accepts one non-secret operator review packet with canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags | No profile loading, secret resolution, filesystem/database access, deployment, dispatcher link, package enablement, or Store Lite data |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -459,6 +462,28 @@ behavior, active-transaction refusal, and exact cleanup. The Docker rehearsal
 proves the same descriptors cross a temporary supported HTTP server. This is a
 core lifecycle gate, not a production endpoint or client browser deployment.
 
+## Non-Executing Per-Client Deployment Profile
+
+`includes/addon_public_mutation_deployment_profile_helpers.php` validates one
+operator-owned review packet without loading or applying it. The packet binds a
+client slug to a separate database name and canonical HTTPS origin, pins the
+supported FrankenPHP/Caddy versions, requires the fixed process-environment
+HMAC key name and attestation-before-PHP route order, records the trusted-origin
+source and operator-owned key-rotation responsibility, and requires the core
+response emitter and lifecycle bridge to own all public headers/cookies. It
+also requires the fixed host-only subject-cookie policy, configuration/binary/
+secret/media isolation outside the clean starter, and all dispatcher/package/
+Store Lite activation flags to remain false.
+
+The validator returns only a normalized non-secret profile and deterministic
+SHA-256 profile hash. It rejects starter-database reuse, request-derived trust,
+server/version drift, reversed ingress order, package/theme response ownership,
+cookie policy drift, isolation gaps, secret-shaped fields, and any activation
+flag. It reads no PHP request/global state, filesystem, database, package,
+secret, lifecycle, or response state. The dependency-free 27-assertion fixture
+proves both direct and explicitly operator-trusted proxy profiles while keeping
+the deployment packet non-executing.
+
 ## Future Core-Owned Request And Response Path
 
 When the dispatcher is linked, core—not a theme, browser script, or package
@@ -481,7 +506,8 @@ route file—must own this sequence:
    identity. The unlinked dispatcher still requires an existing subject. A
    future response owner may call the implemented lifecycle bridge to ensure,
    clear, or rotate that subject, then emit only its validated fixed descriptors
-   after the per-client deployment boundary is accepted.
+   after the per-client deployment profile, response-owner, and production
+   deployment boundaries are accepted.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
    request body, and secrets must not enter general logs, package output, audit
@@ -718,8 +744,13 @@ This planning slice does not authorize:
     18-assertion disposable plus supported-server HTTP proofs. Ensure, clear,
     and rotate are transactional, fixed-descriptor, non-package operations;
     client response ownership and deployment remain unaccepted.
-19. A separate richer enablement review may admit only packages that satisfy
+19. Completed the non-executing per-client deployment profile and its
+    27-assertion dependency-free fixture. It validates the operator-owned
+    client database/origin, pinned server and ingress facts, core response and
+    cookie ownership, fixed host-only policy, clean-starter isolation, and
+    disabled activation flags without loading or applying a deployment.
+20. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-20. Store Lite can then implement its separately distributed catalog and cart
+21. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

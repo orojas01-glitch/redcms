@@ -764,8 +764,9 @@ request bootstrap excludes the disabled package.
     method, transport, binding, and callback isolation without linking the
     front controller, emitting a response/cookie, changing enablement, or
     adding Store Lite/client state. The supported-server rehearsal and the
-    separate core lifecycle bridge are complete; per-client deployment and
-    response-owner review remain.
+    separate core lifecycle bridge are complete; the non-executing deployment
+    profile is complete, while response-owner and production deployment review
+    remain.
 59. Completed the disposable supported-server dispatcher rehearsal: a temporary
     pinned FrankenPHP/Caddy image (with `mysqli` added only to that proof image)
     and fresh MySQL database carried a secret-guarded fixture request through
@@ -775,9 +776,10 @@ request bootstrap excludes the disabled package.
     activity, subject, CSRF, idempotency, and rate evidence passed before all
     containers, network, image, database, package marker, and build context
     were removed. It remains a test-only rehearsal; the core-owned
-    subject-cookie lifecycle is now proven, while per-client deployment,
-    response ownership, and trusted-origin/HMAC review precede any
-    front-controller link or Store Lite enablement.
+    subject-cookie lifecycle and non-executing deployment profile are now
+    proven, while response ownership, trusted-origin/HMAC provisioning, and
+    production deployment review precede any front-controller link or Store
+    Lite enablement.
 60. Completed the core-owned browser subject-cookie lifecycle bridge. Its
     transactional `ensure`, `clear`, and `rotate` operations return only fixed
     host-only cookie descriptors, refuse malformed input and active caller
@@ -788,6 +790,17 @@ request bootstrap excludes the disabled package.
     does not emit a production header, link the front controller, or authorize
     a client deployment; response ownership and deployment remain the next
     gate.
+61. Completed the non-executing per-client public-mutation deployment profile.
+    One operator-owned packet now validates a separate client database and
+    canonical HTTPS origin, pinned FrankenPHP/Caddy versions, fixed
+    process-environment HMAC and trusted-origin sources, attestation-before-
+    PHP route order, core response/cookie ownership, the fixed host-only
+    subject-cookie policy, clean-starter isolation, and disabled dispatcher,
+    package, and Store Lite flags. It returns only a deterministic non-secret
+    hash, refuses request-derived trust, policy/version/route drift, secret-
+    shaped fields, and starter-database reuse, and does not load or apply a
+    deployment. Response-owner and production deployment review remain before
+    any front-controller link.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
