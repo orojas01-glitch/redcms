@@ -155,9 +155,16 @@ cleanup, and no request-global, browser-response, package-load, or
 runtime-registration path. Its resolver is deliberately non-consuming until a
 internal transaction runner can couple consumption to package state. It creates
 no public route or package fixture. The separate disposable atomic-runner
-fixture proves keyed replay/conflict outcomes, rate claims, postcondition
-checks, and rollback of package/rate/ledger/audit state; it adds no HTTP,
-browser, dispatcher, response, or enablement path.
+  fixture proves keyed replay/conflict outcomes, rate claims, postcondition
+  checks, and rollback of package/rate/ledger/audit state; it adds no HTTP,
+  browser, dispatcher, response, or enablement path.
+The separate 6-assertion public-mutation dispatcher fixture composes only
+explicit method/target/capture facts with an in-memory registrar context. It
+proves runtime-unavailable, non-POST, missing-attestation, incomplete-binding,
+closed-result, and callback-isolation behavior; it has no database, request
+global, response-emission, front-controller, browser, package, enablement,
+Store Lite, or client-data path. A later supported-server fixture must prove
+the complete disposable request path before the dispatcher can be linked.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
@@ -418,7 +425,8 @@ emitter, 24-assertion declared
 public-mutation form decoder, 37-assertion pure HTTP request envelope,
 19-assertion private static mutation-route selector, 16-assertion
 non-routable server request-facts adapter, 12-assertion optional
-FrankenPHP-ingress PHP verifier,
+FrankenPHP-ingress PHP verifier, 6-assertion unlinked public-mutation
+dispatcher composition,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
 persistence/dispatch,
@@ -563,6 +571,13 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Public-mutation rate-limit acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, an enforced 12-per-60-second fixed window, bounded collision/contention handling, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. It has no HTTP, package-data, or enablement path.
 - Public-mutation idempotency-key acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, a 10-minute core-issued opaque key, correct subject/scope resolution, no raw-key persistence, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. The resolver itself remains non-consuming; the separate internal runner is its only consumer. It has no HTTP, package-data, or enablement path.
 - Atomic public-mutation runner acceptance runs only in the uniquely named disposable database with one temporary InnoDB table and in-memory trusted runtime context. It proves one declared handler/state-loader binding, typed field refusal, CSRF-before-rate ordering, exact replay/conflict outcomes, fixed-rate ordering, server-derived postconditions, keyed replay evidence, a value-free anonymous audit fact, contained output/exception/rollback failures, and exact database/runtime/constraint/table cleanup. It creates no package files, browser state, dispatcher, response, route execution, enablement profile, Store Lite data, or client artifact.
+- Public-mutation dispatcher acceptance runs before database creation and uses
+  only explicit transport fixtures plus an in-memory registrar context. It
+  proves one closed dispatcher/capture result, runtime-unavailable behavior,
+  non-POST refusal, missing-attestation refusal, incomplete-binding refusal,
+  and zero package callback or HTTP-state changes. The dispatcher remains
+  unlinked from `index.php`; a separate supported-server disposable fixture
+  and client deployment review are required before linking it.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,

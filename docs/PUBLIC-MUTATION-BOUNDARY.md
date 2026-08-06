@@ -8,11 +8,11 @@ pure declared-form decoder, HTTP request-envelope normalizer, private static
 route selector, non-routable server request-facts adapter, closed response
 emitter, pure subject-cookie serializer, and an optional Caddy/FrankenPHP
 ingress-attestation source with an unlinked PHP verifier are implemented. This document
-records the prerequisite for a future public write dispatcher. It does **not**
-add a public HTTP dispatcher or endpoint, emitted cookie, browser session
-access, package, permission, enablement profile,
-or Store Lite behavior. The five generic core tables remain empty in the clean
-starter.
+and an unlinked explicit-input core dispatcher are implemented. The dispatcher
+composes those contracts but remains unlinked from the front controller. This
+document does **not** add a public HTTP endpoint, emitted cookie, browser
+session access, package, permission, enablement profile, or Store Lite behavior.
+The five generic core tables remain empty in the clean starter.
 
 ## Purpose
 
@@ -43,12 +43,13 @@ changed by it.
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
-| Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No response, package fixture, browser behavior, or publicly reachable execution path |
+| Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No endpoint, package fixture, browser behavior, or public response-emission path |
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Optional Caddy/FrankenPHP ingress attestation | Separately built source plus an isolated temporary-image proof strips spoofed internal headers, conditionally signs bounded candidate facts, and verifies the unlinked PHP HMAC bridge | No default-server change, deployed client binary, active client Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
+| Public-mutation dispatcher | Unlinked core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model | No front-controller link, response emission, browser issuance, package enablement, or Store Lite behavior |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -382,9 +383,29 @@ the binary, Caddyfile, HMAC key, certificate/proxy configuration, and each
 client's deployment configuration outside the clean starter and other client
 installations.
 
+## Implemented Unlinked Core-Owned Dispatcher
+
+`includes/addon_public_mutation_dispatch_helpers.php` is the first core-owned
+composition point for the reviewed foundations. It accepts explicit method,
+raw target, and a complete server-integration capture; it does not read PHP
+request globals. It selects one exact registrar-bound mutation route, refuses
+incomplete or ambiguous bindings, requires an attested `POST` capture, runs
+the request-envelope normalizer, resolves the opaque subject, verifies CSRF
+before semantic field decoding, calls the existing atomic transaction runner,
+and returns only the closed response model. It never emits headers or bytes,
+starts a session, issues a browser cookie/token, or exposes package values.
+
+The focused dispatcher fixture covers the unlinked result/capture shape,
+runtime-unavailable behavior, non-`POST` refusal, missing-attestation refusal,
+incomplete registrar refusal, callback non-invocation, and source/front-controller
+isolation. The helper is intentionally not included by `index.php`. A later
+linking batch still requires a disposable supported-server fixture and an
+operator review of each client's custom binary, Caddyfile, TLS/proxy, trusted
+origin, and HMAC-key boundary.
+
 ## Future Core-Owned Request And Response Path
 
-When a dispatcher is approved, core—not a theme, browser script, or package
+When the dispatcher is linked, core—not a theme, browser script, or package
 route file—must own this sequence:
 
 1. Use the implemented server request-facts adapter only with a supported
@@ -398,18 +419,20 @@ route file—must own this sequence:
    noncanonical, disabled, stale, untrusted, or undeclared request before a
    package callback runs.
 2. Use the implemented core-owned, client-scoped anonymous subject foundation
-   only through the future dispatcher. It is an opaque, unguessable
-   cookie-bound reference; it is neither an administrator session, a Member
-   Access identity, a raw cookie value exposed to package code, nor a client
-   database/global identity. The dispatcher must use the implemented serializer
-   only after it has rederived valid current subject state, then separately emit
-   the fixed value, define issuance/clearance/rotation/retention, and prove
-   those browser behaviors separately.
+   only through the dispatcher. It is an opaque, unguessable cookie-bound
+   reference; it is neither an administrator session, a Member Access identity,
+   a raw cookie value exposed to package code, nor a client database/global
+   identity. The current unlinked dispatcher requires an existing subject and
+   does not issue or emit a cookie. A later browser-flow batch must use the
+   implemented serializer only after it has rederived valid current subject
+   state, then separately define issuance/clearance/rotation/retention and
+   prove those behaviors.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
    request body, and secrets must not enter general logs, package output, audit
-   rows, or public errors. The actual dispatcher must enforce same-origin
-   behavior and emit no CORS policy that would widen access.
+   rows, or public errors. The dispatcher enforces same-origin behavior and
+   emits no CORS policy that would widen access; token issuance remains a
+   separate browser-flow gate.
 4. After static route selection, invoke the implemented request-envelope
    normalizer with a configured HTTPS origin and complete raw transport facts.
    It validates same-origin, content type, body-size, opaque subject/CSRF/key,
@@ -610,12 +633,18 @@ This planning slice does not authorize:
     client deployment. It adds no default server configuration, client binary,
     dispatcher, endpoint, browser cookie, package execution, enablement, Store
     Lite, or client state.
-16. A separate batch may link a core-owned HTTP dispatcher only after the
-    custom-binary proof remains green, disposable fixtures prove the supported
-    server integration end to end, and the later client deployment review
-    accepts its own Caddyfile/TLS/proxy boundary.
-17. A separate richer enablement review may admit only packages that satisfy
-   every declared prerequisite.
-18. Store Lite can then implement its separately distributed catalog and cart
-   behavior against the accepted generic contract. Checkout and payments stay
-   later, provider-neutral work.
+16. Completed the unlinked core-owned public-mutation dispatcher composition:
+    explicit captured method/target facts select one registrar-bound route,
+    require attested POST transport, verify subject/CSRF before field decoding,
+    invoke the existing atomic runner, and return only the fixed response model.
+    Its focused fixture has no front-controller, response-emission, browser,
+    package, enablement, Store Lite, or client-state path.
+17. A separate batch may link the dispatcher only after the custom-binary proof
+    remains green, disposable fixtures prove the supported server integration
+    end to end, and the later client deployment review accepts each Caddyfile/
+    TLS/proxy, trusted-origin, and HMAC-key boundary.
+18. A separate richer enablement review may admit only packages that satisfy
+    every declared prerequisite.
+19. Store Lite can then implement its separately distributed catalog and cart
+    behavior against the accepted generic contract. Checkout and payments stay
+    later, provider-neutral work.

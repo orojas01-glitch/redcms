@@ -295,6 +295,12 @@ features.
   change, dispatcher, endpoint, cookie flow, enablement change, or Store
   Lite/client-data path. Its per-installation HMAC key and deployment
   configuration remain external to the clean starter
+- Unlinked core-owned public-mutation dispatcher composition. It accepts only
+  explicit attested method/target/capture facts, selects one registrar-bound
+  route, verifies the opaque subject and CSRF before decoding declared scalar
+  fields, invokes the atomic runner, and returns only the fixed response model.
+  It is not linked to `index.php`, emits no response or browser cookie, and
+  adds no package, enablement, Store Lite, or client-data behavior
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the

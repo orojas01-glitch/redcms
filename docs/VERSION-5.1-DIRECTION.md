@@ -30,7 +30,9 @@ documented public-mutation boundary now validates optional closed declaration
 metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
 response constraints; the internal transaction runner and replay ledger are now
-implemented, but there is still no dispatcher, emitted cookie/header or session
+implemented, and an unlinked core-owned dispatcher composes the explicit
+request, route, subject/CSRF, form, runner, and fixed-response contracts. It is
+not linked to the front controller and still emits no cookie/header or session
 access, package behavior, or enablement change. The separate
 read-only live-data preflight now binds a trusted declaration from an
 `installed_disabled` package to current per-client migration, table,
@@ -749,6 +751,15 @@ request bootstrap excludes the disabled package.
     server change, dispatcher, endpoint, cookie issuance, package invocation,
     enablement, fixture, Store Lite, or client-state path; custom-binary
     deployment proof remains a later dispatcher gate.
+58. Completed the unlinked core-owned public-mutation dispatcher composition:
+    explicit method/target/capture facts select one registrar-bound route,
+    require attested POST transport, verify the opaque subject and CSRF before
+    decoding declared scalar fields, invoke the existing atomic runner, and
+    return only the fixed response model. Its focused fixture proves runtime,
+    method, transport, binding, and callback isolation without linking the
+    front controller, emitting a response/cookie, changing enablement, or
+    adding Store Lite/client state. Supported-server end-to-end fixture and
+    per-client deployment review remain the next gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
