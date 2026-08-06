@@ -288,10 +288,13 @@ features.
   source and paired unlinked PHP HMAC verifier. The handler strips spoofed
   internal headers on every request and can sign only a bounded `/addons/`
   `POST` candidate's method, raw target, body length/hash, and fixed
-  security-header subset. It is not a compiled binary, root Caddyfile, default
-  development-server change, dispatcher, endpoint, cookie flow, enablement
-  change, or Store Lite/client-data path. Its per-installation HMAC key and
-  deployment configuration remain external to the clean starter
+  security-header subset. A separately runnable isolated Docker proof now
+  builds the matching custom binary, confirms the registered module, and
+  verifies Caddy-to-PHP body/capture behavior without a client installation.
+  It is not a deployed client binary, root Caddyfile, default development-server
+  change, dispatcher, endpoint, cookie flow, enablement change, or Store
+  Lite/client-data path. Its per-installation HMAC key and deployment
+  configuration remain external to the clean starter
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the

@@ -106,3 +106,30 @@ duplicate/encoded/oversized refusal, and no handler-generated response. The
 ordinary `scripts/dev-acceptance.sh` suite runs the paired dependency-free PHP
 verifier test, including one fixed Go/Caddy JSON-and-HMAC compatibility
 fixture, but does not require Go or build a server binary.
+
+## Isolated custom-binary proof
+
+The separately runnable command below stages only this module, its disposable
+probe, and the exact PHP-helper dependency set into a temporary Docker build
+context. It does not send local configuration, client files, media, database
+data, or a clean-starter package to Docker.
+
+```sh
+scripts/frankenphp-public-mutation-custom-binary-proof.sh
+```
+
+The proof builds a temporary versioned FrankenPHP `1.12.4`/Caddy `2.11.4` binary with
+this module, confirms that the binary lists
+`http.handlers.red_public_mutation_attestation`, adapts the nested proof
+Caddyfile, and makes local container-only requests through the real Caddy
+handler and unlinked PHP verifier. It proves a valid body reaches PHP, forged
+internal headers are replaced, and spoofed `GET`, duplicate-origin, and
+content-encoded requests receive no attestation. The image, container, and
+temporary context are removed after the proof.
+
+The repository workflow runs this proof on the relevant pull requests and on
+`main`. It is a generic build-and-request gate, not deployment authorization:
+an operator must still build a matching binary for the chosen client, preserve
+the client-specific Caddyfile/TLS/proxy configuration and per-installation key
+outside the starter, and obtain a later dispatcher review before enabling any
+public-mutation behavior.
