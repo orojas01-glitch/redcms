@@ -66,8 +66,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Optional Caddy/FrankenPHP ingress-attestation source and unlinked PHP verifier: it strips spoofed internal headers, signs only bounded candidate `/addons/` POST facts with a per-installation HMAC, and preserves ordinary downstream behavior. No custom binary, active Caddyfile, default server change, dispatcher, endpoint, browser issuance/rotation, Store Lite state, or enablement change exists. |
-| Current milestone | Bounded public HTTP dispatch and richer-enablement gates: custom-binary deployment proof for the supported ingress contract, actual browser subject-cookie issuance/clearance/rotation, bounded dispatcher routing/containment, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Optional Caddy/FrankenPHP ingress attestation now has a reproducible isolated custom-binary proof: it builds the exact module into a temporary FrankenPHP/Caddy image, verifies module registration/config adaptation, and sends bounded requests through Caddy and the unlinked PHP verifier. It changes no default server, client deployment, active Caddyfile, endpoint, browser issuance/rotation, Store Lite state, or enablement state. |
+| Current milestone | Bounded public HTTP dispatch and richer-enablement gates: a client-specific custom-binary deployment remains an operator decision, while actual browser subject-cookie issuance/clearance/rotation, bounded dispatcher routing/containment, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

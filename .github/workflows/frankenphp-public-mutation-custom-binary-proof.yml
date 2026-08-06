@@ -1,0 +1,43 @@
+name: FrankenPHP custom-binary ingress proof
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/frankenphp-public-mutation-custom-binary-proof.yml'
+      - 'includes/addon_manifest_helpers.php'
+      - 'includes/addon_public_mutation_frankenphp_ingress_helpers.php'
+      - 'includes/addon_public_mutation_http_request_helpers.php'
+      - 'includes/addon_public_mutation_preflight_helpers.php'
+      - 'includes/addon_public_mutation_server_request_helpers.php'
+      - 'includes/addon_public_mutation_subject_helpers.php'
+      - 'includes/runtime_config_helpers.php'
+      - 'scripts/frankenphp-public-mutation-custom-binary-proof.sh'
+      - 'server-integrations/frankenphp-public-mutation-attestation/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/frankenphp-public-mutation-custom-binary-proof.yml'
+      - 'includes/addon_manifest_helpers.php'
+      - 'includes/addon_public_mutation_frankenphp_ingress_helpers.php'
+      - 'includes/addon_public_mutation_http_request_helpers.php'
+      - 'includes/addon_public_mutation_preflight_helpers.php'
+      - 'includes/addon_public_mutation_server_request_helpers.php'
+      - 'includes/addon_public_mutation_subject_helpers.php'
+      - 'includes/runtime_config_helpers.php'
+      - 'scripts/frankenphp-public-mutation-custom-binary-proof.sh'
+      - 'server-integrations/frankenphp-public-mutation-attestation/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    name: Build and verify isolated ingress binary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run the custom-binary proof
+        run: scripts/frankenphp-public-mutation-custom-binary-proof.sh

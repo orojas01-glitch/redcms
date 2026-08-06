@@ -238,9 +238,12 @@ The optional Caddy/FrankenPHP ingress-attestation source now supplies one
 separately configured server-side seam without changing the default local
 server. It removes spoofed internal headers on every request and conditionally
 HMAC-signs only bounded `/addons/` POST method/target, body length/hash, and
-fixed security-header facts for an unlinked PHP verifier. It ships no custom
-binary or active Caddyfile and creates no dispatcher, endpoint, cookie flow,
-package invocation, enablement change, Store Lite behavior, or client data.
+fixed security-header facts for an unlinked PHP verifier. A separate isolated
+Docker proof builds the matching custom binary, confirms its module/configuration,
+and verifies Caddy-to-PHP capture/body behavior without client data. It ships
+no deployed client binary or active Caddyfile and creates no dispatcher,
+endpoint, cookie flow, package invocation, enablement change, Store Lite
+behavior, or client data.
 The separate core-only response emitter now accepts only the existing exact
 fixed core envelopes, rejects output that has already started, clears and sets
 only their fixed no-store/nosniff JSON headers, and emits only their matching
@@ -517,8 +520,8 @@ decoder, pure HTTP request-envelope, private static route-selector, and
 non-routable server request-facts adapter plus closed response-emitter
 and non-emitting subject-cookie-serialization and optional
 Caddy/FrankenPHP ingress-attestation foundations are complete. Its
-protected settings UI/endpoint, matching custom-binary deployment proof for
-the public HTTP ingress contract,
+protected settings UI/endpoint, client-specific custom-binary deployment
+decision for the public HTTP ingress contract,
 bounded dispatcher and actual browser subject-cookie issuance/clearance/rotation,
 actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be

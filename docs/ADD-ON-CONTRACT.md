@@ -1028,8 +1028,13 @@ spoofed internal headers, then conditionally HMAC-signs only bounded
 `/addons/` POST method/target, body length/hash, and fixed security-header
 facts. It is not a custom binary, active Caddyfile, dispatcher, endpoint,
 cookie flow, package execution, enablement profile, Store Lite package, or
-client-data path. A matching custom-binary deployment proof remains required
-before any future dispatcher may use the verifier.
+client-data path. The repository now supplies the required generic
+custom-binary build-and-request proof: it builds the module in an isolated
+temporary image, verifies module registration/configuration, and passes
+requests through Caddy to the unlinked PHP verifier. It is not a client
+deployment, so a later operator still owns the matching binary, Caddyfile,
+TLS/proxy boundary, and per-installation key before any future dispatcher may
+use the verifier.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,

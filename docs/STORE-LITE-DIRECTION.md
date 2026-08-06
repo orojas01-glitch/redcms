@@ -202,8 +202,10 @@ headers and conditionally HMAC-signs only bounded `/addons/` POST method/target,
 body length/hash, and fixed security-header facts for an unlinked PHP verifier.
 It is not a Store Lite package, custom binary, active Caddyfile, dispatcher,
 cart route, browser cookie, product/cart/order table, enablement change, or
-client artifact. A matching custom-binary deployment proof remains required
-before a later generic dispatcher can use it.
+client artifact. A separate isolated proof now builds the matching temporary
+binary and verifies the Caddy-to-PHP ingress contract without a client
+deployment. A later generic dispatcher still requires a client-specific
+deployment review.
 The separate core-only response emitter may now emit only an already-valid
 fixed core response envelope after a future dispatcher finishes. It refuses
 once output has started, clears and sets only the fixed no-store/nosniff JSON
@@ -454,11 +456,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    request, browser, package, header-emission, front-controller, enablement,
    or Store Lite path.
 17. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
-   source and unlinked PHP verifier. It strips spoofed internal headers and
-   conditionally signs only bounded candidate facts; it has no custom binary,
-   active Caddyfile, dispatcher, route, browser/cart cookie, package state,
+   source, unlinked PHP verifier, and isolated custom-binary proof. The proof
+   uses a temporary image only; it does not create a client binary, active
+   Caddyfile, dispatcher, route, browser/cart cookie, package state,
    enablement, or Store Lite path.
-18. Continue with matching custom-binary deployment proof, bounded HTTP dispatch, actual browser subject
+18. Continue with bounded HTTP dispatch, actual browser subject
    issuance/clearance/rotation, richer-enablement, and settings UI/endpoints as
    separately reviewed batches. Typed internal service
    invocation, exact static public `GET` routes, display-only administrator

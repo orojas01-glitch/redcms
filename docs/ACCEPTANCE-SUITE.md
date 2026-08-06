@@ -619,8 +619,16 @@ The command must return a nonzero status if installation, migration, schema, rel
   `scripts/frankenphp-public-mutation-ingress-self-test.sh` Go gate verifies
   Caddy header stripping, bounded attestation, downstream body preservation,
   duplicate/encoded/unknown/oversized withholding, and no handler response;
-  it is intentionally not part of the PHP/MySQL suite because it requires Go
-  and a separately built custom server binary remains a later deployment gate.
+  it is intentionally not part of the PHP/MySQL suite because it requires Go.
+  The separate Docker-only
+  `scripts/frankenphp-public-mutation-custom-binary-proof.sh` builds a
+  temporary FrankenPHP/Caddy binary, confirms module registration and
+  Caddyfile adaptation, and sends bounded requests through Caddy and the real
+  unlinked PHP verifier. It proves valid body preservation, spoofed-header
+  replacement, and spoofed/duplicate/encoded withholding without a database,
+  package, browser, endpoint, or client fixture. The workflow runs it for the
+  relevant pull requests; it remains a generic proof rather than a client
+  deployment or dispatcher authorization.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/

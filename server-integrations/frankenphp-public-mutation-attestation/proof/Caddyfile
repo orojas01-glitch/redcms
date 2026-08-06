@@ -1,0 +1,17 @@
+# Disposable proof configuration only. It is not copied into the RED-CMS root,
+# read by the default development server, or suitable as a client deployment.
+{
+	auto_https off
+	admin off
+}
+
+:8080 {
+	root * /app/public
+
+	# Keep the attester before FrankenPHP exactly as an operator deployment
+	# would. The following php_server sends every proof request to index.php.
+	route {
+		red_public_mutation_attestation RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY
+		php_server
+	}
+}

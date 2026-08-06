@@ -798,8 +798,12 @@ The handler source, Caddyfile placement example, and test command live under
 FrankenPHP binary cannot load the module dynamically: the operator must build
 and deploy a matching custom binary and keep it, its Caddyfile, the per-client
 environment key, certificates, and proxy configuration outside the clean
-starter. Until a separately reviewed dispatcher and deployment proof exist,
-invalid or missing attestation creates no public route, response, cookie,
+starter. The separate Docker proof builds a temporary matching binary and
+proves module registration, Caddyfile adaptation, signed body preservation,
+spoof stripping, and duplicate/encoded withholding through the unlinked PHP
+verifier. It does not deploy a binary or configuration for a client. Until a
+separately reviewed dispatcher and client deployment decision exist, invalid
+or missing attestation creates no public route, response, cookie,
 runtime/package invocation, lifecycle change, Store Lite behavior, or client
 state.
 
