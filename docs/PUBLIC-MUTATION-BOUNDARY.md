@@ -7,12 +7,13 @@ opaque idempotency-key foundation, an internal atomic transaction runner, a
 pure declared-form decoder, HTTP request-envelope normalizer, private static
 route selector, non-routable server request-facts adapter, closed response
 emitter, pure subject-cookie serializer, and an optional Caddy/FrankenPHP
-ingress-attestation source with an unlinked PHP verifier are implemented. This document
-and an unlinked explicit-input core dispatcher are implemented. The dispatcher
-composes those contracts but remains unlinked from the front controller. This
-document does **not** add a public HTTP endpoint, emitted cookie, browser
-session access, package, permission, enablement profile, or Store Lite behavior.
-The five generic core tables remain empty in the clean starter.
+ingress-attestation source with an unlinked PHP verifier are implemented. An
+unlinked explicit-input core dispatcher and a disposable supported-server
+end-to-end proof are also implemented. The dispatcher composes those contracts
+but remains unlinked from the front controller. This document does **not** add
+a production public HTTP endpoint, emitted cookie, browser session access,
+package, permission, enablement profile, or Store Lite behavior. The five
+generic core tables remain empty in the clean starter.
 
 ## Purpose
 
@@ -48,8 +49,9 @@ changed by it.
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
-| Optional Caddy/FrankenPHP ingress attestation | Separately built source plus an isolated temporary-image proof strips spoofed internal headers, conditionally signs bounded candidate facts, and verifies the unlinked PHP HMAC bridge | No default-server change, deployed client binary, active client Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
+| Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the unlinked PHP HMAC bridge | No default-server change, deployed client binary, active client Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
 | Public-mutation dispatcher | Unlinked core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model | No front-controller link, response emission, browser issuance, package enablement, or Store Lite behavior |
+| Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, and emitter against a fresh MySQL database, and proves accepted/replay/refusal/conflict outcomes plus exact ledger/audit/rate state | No client database, default server, deployed binary, browser issuance, package installation, richer enablement, or Store Lite data |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -399,9 +401,34 @@ The focused dispatcher fixture covers the unlinked result/capture shape,
 runtime-unavailable behavior, non-`POST` refusal, missing-attestation refusal,
 incomplete registrar refusal, callback non-invocation, and source/front-controller
 isolation. The helper is intentionally not included by `index.php`. A later
-linking batch still requires a disposable supported-server fixture and an
-operator review of each client's custom binary, Caddyfile, TLS/proxy, trusted
-origin, and HMAC-key boundary.
+linking batch still requires an operator review of each client's custom binary,
+Caddyfile, TLS/proxy, trusted origin, and HMAC-key boundary.
+
+## Implemented Supported-Server Dispatcher Rehearsal
+
+`scripts/frankenphp-public-mutation-dispatch-proof.sh` is a separate Docker-only
+proof for the supported-server boundary. It stages only the reviewed core
+helpers and test-only `dispatch-*` endpoint into a temporary context, builds the
+pinned FrankenPHP `1.12.4`/Caddy `2.11.4` binary, and starts a fresh MySQL `8.4`
+container with the current 45 migrations. The proof image adds `mysqli` only to
+that disposable stage because the stock FrankenPHP PHP image exposes mysqlnd
+but not the PHP `mysqli` extension required by the RED-CMS helpers.
+
+The fixture provisions an isolated anonymous subject, CSRF token, and
+idempotency key through a secret-guarded test-only bootstrap path, then sends a
+real attested `POST` through Caddy, the PHP verifier, the core dispatcher, the
+atomic runner, and the fixed response emitter. It proves an accepted mutation,
+replay after forged internal headers are supplied, `GET` refusal, withheld
+attestation refusal, and idempotency conflict. It also checks one fixture cart
+row, one execution ledger row, one value-free activity row, and one each of the
+subject, CSRF, idempotency, and rate-limit rows. Temporary containers, network,
+image, build context, package marker, and database are removed by the script.
+
+The endpoint and bootstrap path exist only inside that temporary proof image;
+they are not a RED-CMS route, package, front-controller link, client deployment,
+or browser cookie-issuance implementation. The proof therefore authorizes the
+supported-server integration gate only; it does not authorize linking the
+dispatcher or enabling Store Lite.
 
 ## Future Core-Owned Request And Response Path
 
@@ -538,6 +565,12 @@ HTTP 200. A disposable, client-isolated acceptance suite must still prove:
   matching custom FrankenPHP binary and Caddyfile preserve that contract before
   any dispatcher is linked; neither bridge may configure the trusted origin or
   HMAC key from `Host`, a request header, or a request-projected server value;
+- the separate Docker-only supported-server rehearsal builds the matching
+  custom binary and temporary MySQL fixture, proves a real attested request
+  reaches the dispatcher/runner/emitter, refuses forged or withheld transport,
+  preserves the exact replay/conflict contract, and removes every temporary
+  container, image, database, package marker, and build context; it does not
+  count as a client deployment or browser-cookie acceptance;
 - anonymous subjects and CSRF tokens are opaque, scoped to one client, and
   unavailable to another client, administrator session, member session, or
   package request;
@@ -639,10 +672,14 @@ This planning slice does not authorize:
     invoke the existing atomic runner, and return only the fixed response model.
     Its focused fixture has no front-controller, response-emission, browser,
     package, enablement, Store Lite, or client-state path.
-17. A separate batch may link the dispatcher only after the custom-binary proof
-    remains green, disposable fixtures prove the supported server integration
-    end to end, and the later client deployment review accepts each Caddyfile/
-    TLS/proxy, trusted-origin, and HMAC-key boundary.
+17. Completed the disposable supported-server dispatcher rehearsal: a temporary
+    pinned FrankenPHP/Caddy image and fresh MySQL database exercised the real
+    attester, PHP verifier, core dispatcher, atomic runner, and fixed emitter,
+    proving accepted/replay/refusal/conflict behavior and exact ledger/audit/
+    rate evidence before cleaning every temporary artifact. It does not deploy
+    a client or link the dispatcher. A separate batch may link it only after the
+    later per-client Caddyfile/TLS/proxy, trusted-origin, HMAC-key, and browser
+    subject-cookie deployment review.
 18. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
 19. Store Lite can then implement its separately distributed catalog and cart

@@ -460,9 +460,12 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    uses a temporary image only; it does not create a client binary, active
    Caddyfile, dispatcher, route, browser/cart cookie, package state,
    enablement, or Store Lite path.
-18. Continue with bounded HTTP dispatch, actual browser subject
-   issuance/clearance/rotation, richer-enablement, and settings UI/endpoints as
-   separately reviewed batches. Typed internal service
+18. The bounded dispatcher now has supported-server disposable rehearsal
+   evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
+   runner, and fixed emitter against fresh MySQL. Continue with per-client
+   deployment review, actual browser subject issuance/clearance/rotation,
+   richer-enablement, and settings UI/endpoints as separately reviewed batches.
+   Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
    internal atomic settings persistence, non-executing server-local secret

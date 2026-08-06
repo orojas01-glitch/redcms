@@ -47,7 +47,7 @@ flowchart TD
     G14 --> G15["Core subject-cookie serialization"]
     G15 --> G16["Caddy/FrankenPHP ingress attestation"]
     G16 --> G17["Unlinked bounded mutation dispatcher"]
-    G17 --> G18["CURRENT / NEXT<br/>Supported-server fixture + deployment review + richer enablement"]
+    G17 --> G18["CURRENT / NEXT<br/>Per-client deployment review + browser subject lifecycle + richer enablement"]
     G18 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
@@ -67,8 +67,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Unlinked core-owned public-mutation dispatcher composition: explicit attested method/target/capture facts select one registrar-bound route, verify subject/CSRF before declared scalar decoding, invoke the existing atomic runner, and return only the fixed response model. Its focused fixture proves refusal and callback isolation without linking `index.php`, emitting a response/cookie, changing enablement, or touching Store Lite/client data. |
-| Current milestone | Supported-server fixture and client deployment review: the custom-binary proof remains green, while a disposable end-to-end fixture, browser subject-cookie issuance/clearance/rotation, trusted-origin/HMAC deployment review, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Supported-server dispatcher rehearsal: a disposable Docker image with the pinned custom FrankenPHP/Caddy binary and fresh MySQL database carried a secret-guarded fixture request through the real attester, PHP verifier, core dispatcher, atomic runner, and fixed emitter. It proved accepted/replay/refusal/conflict behavior, forged-header replacement, and exact execution/activity/subject/CSRF/idempotency/rate evidence before cleanup; no client installation or Store Lite data was touched. |
+| Current milestone | Per-client deployment review and browser subject-cookie lifecycle: the generic dispatcher now has server rehearsal evidence, while client-specific Caddyfile/TLS/proxy and trusted-origin/HMAC review, browser subject-cookie issuance/clearance/rotation, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

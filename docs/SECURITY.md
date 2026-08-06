@@ -734,10 +734,10 @@ It supplies no-store, nosniff, content-type, length, and only a fixed
 `Allow: POST` method-refusal header; it exposes neither a replay signal nor any
 package, route, subject, token, key, state, cart, order, plan, secret, or
 internal failure detail. It does not read request/cookie/session state, access
-the database, load package code, emit HTTP state, or change lifecycle. A later
-core-owned dispatcher must still select and emit an exact valid envelope only
-after same-origin, CSRF, scalar-input, server-state, rate/idempotency, and
-transaction checks are complete.
+the database, load package code, emit HTTP state, or change lifecycle. The
+unlinked core-owned dispatcher selects and returns that envelope only after
+same-origin, CSRF, scalar-input, server-state, rate/idempotency, and transaction
+checks are complete; a front-controller link remains separately gated.
 
 The separate pure declared-form decoder accepts only one validated in-memory
 manifest declaration and raw canonical URL-encoded package-field bytes. It
@@ -798,14 +798,17 @@ The handler source, Caddyfile placement example, and test command live under
 FrankenPHP binary cannot load the module dynamically: the operator must build
 and deploy a matching custom binary and keep it, its Caddyfile, the per-client
 environment key, certificates, and proxy configuration outside the clean
-starter. The separate Docker proof builds a temporary matching binary and
-proves module registration, Caddyfile adaptation, signed body preservation,
-spoof stripping, and duplicate/encoded withholding through the unlinked PHP
-verifier. It does not deploy a binary or configuration for a client. Until a
-separately reviewed dispatcher and client deployment decision exist, invalid
-or missing attestation creates no public route, response, cookie,
-runtime/package invocation, lifecycle change, Store Lite behavior, or client
-state.
+starter. The separate Docker proofs build a temporary matching binary and prove
+module registration, Caddyfile adaptation, signed body preservation, spoof
+stripping, and duplicate/encoded withholding through the unlinked PHP verifier.
+The supported-server rehearsal additionally carries one secret-guarded fixture
+request through the verifier, dispatcher, atomic runner, and fixed emitter
+against a fresh MySQL database, then removes its temporary database, image,
+network, package marker, and context. Neither proof deploys a binary or
+configuration for a client. Until the per-client deployment and browser
+subject-cookie decisions are reviewed, invalid or missing attestation creates
+no public route, response, cookie, runtime/package invocation, lifecycle
+change, Store Lite behavior, or client state.
 
 The separate core-only response emitter accepts only an exact closed response
 envelope from the existing fixed core response contract. It rechecks the six

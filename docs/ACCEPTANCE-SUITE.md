@@ -119,9 +119,10 @@ malformed identities, and forged hashes fail closed. It also proves the helper
 has no database, request-global, package-execution, or filesystem-read path.
 It creates no route, handler, session/cookie, table, or enablement eligibility;
 the current public-route fixture must still refuse unsafe methods before a
-package handler. A later isolated fixture must prove anonymous-subject, CSRF,
-rate/idempotency, transaction, response-redaction, disablement, and exact
-cleanup requirements before it can change that behavior.
+package handler. The supported-server rehearsal now proves the disposable
+anonymous-subject, CSRF, rate/idempotency, transaction, response-redaction, and
+exact-cleanup path; disablement, client deployment, and browser-cookie lifecycle
+gates still precede any behavior change.
 The separate 18-assertion public-mutation response fixture proves that only
 the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
 can be constructed. It requires exact JSON, content type, no-store, nosniff,
@@ -163,8 +164,10 @@ explicit method/target/capture facts with an in-memory registrar context. It
 proves runtime-unavailable, non-POST, missing-attestation, incomplete-binding,
 closed-result, and callback-isolation behavior; it has no database, request
 global, response-emission, front-controller, browser, package, enablement,
-Store Lite, or client-data path. A later supported-server fixture must prove
-the complete disposable request path before the dispatcher can be linked.
+Store Lite, or client-data path. The separate Docker-only supported-server
+rehearsal now proves the complete disposable request path; the dispatcher
+remains unlinked until the client deployment and browser subject-cookie gates
+pass.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
@@ -459,6 +462,9 @@ contract only and does not open a restore action or operational endpoint.
 - The configured application database account must already exist.
 - A local MySQL administrative account must be able to create databases, grant/revoke access, and create/drop the suite's disposable trigger.
 - The documented FrankenPHP runtime and `curl` must be available.
+- Docker Desktop is required only for the separate supported-server dispatcher
+  rehearsal; that proof creates its own temporary MySQL container and does not
+  use the local application database.
 
 The local default administrative account is `root` with an empty password. Override it without placing the password on the command line:
 
@@ -486,6 +492,22 @@ Cleanup complete: stopped the isolated server and removed database/grant redcms_
 ```
 
 The command must return a nonzero status if installation, migration, schema, relationship, primary-isolation, runtime behavior, transaction rollback, or cleanup checks fail.
+
+The supported-server public-mutation rehearsal is intentionally separate from
+the normal PHP/MySQL suite because it builds a custom Caddy/FrankenPHP binary
+and requires Docker Desktop:
+
+```bash
+scripts/frankenphp-public-mutation-dispatch-proof.sh
+```
+
+It creates a fresh MySQL `8.4` container, applies the current migrations, and
+uses a secret-guarded fixture-only bootstrap path to exercise one real attested
+`POST` through Caddy, the PHP verifier, the core dispatcher, atomic runner, and
+fixed response emitter. It then checks accepted/replay, forged-header
+replacement, `GET` refusal, withheld-attestation refusal, idempotency conflict,
+and exact fixture ledger/audit/rate state before removing its temporary
+containers, network, image, database, package marker, and build context.
 
 ## Safety Boundaries
 
@@ -576,8 +598,9 @@ The command must return a nonzero status if installation, migration, schema, rel
   proves one closed dispatcher/capture result, runtime-unavailable behavior,
   non-POST refusal, missing-attestation refusal, incomplete-binding refusal,
   and zero package callback or HTTP-state changes. The dispatcher remains
-  unlinked from `index.php`; a separate supported-server disposable fixture
-  and client deployment review are required before linking it.
+  unlinked from `index.php`; the supported-server disposable rehearsal is
+  complete, but client deployment and browser subject-cookie review are still
+  required before linking it.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,
@@ -644,6 +667,16 @@ The command must return a nonzero status if installation, migration, schema, rel
   package, browser, endpoint, or client fixture. The workflow runs it for the
   relevant pull requests; it remains a generic proof rather than a client
   deployment or dispatcher authorization.
+- The separate Docker-only
+  `scripts/frankenphp-public-mutation-dispatch-proof.sh` stages only reviewed
+  core helpers and a disposable fixture endpoint, builds the same pinned
+  FrankenPHP/Caddy binary, adds `mysqli` only to the proof image, and exercises
+  the complete attested dispatcher path against a fresh MySQL database. It
+  proves accepted/replay/refusal/conflict behavior and exact execution,
+  activity, subject, CSRF, idempotency, and rate-limit evidence. Its endpoint,
+  bootstrap secret, package marker, database, image, network, and context are
+  removed on success or failure; it does not alter the default server, a client
+  installation, browser state, enablement, or Store Lite.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/

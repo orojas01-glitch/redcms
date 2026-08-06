@@ -301,6 +301,15 @@ features.
   fields, invokes the atomic runner, and returns only the fixed response model.
   It is not linked to `index.php`, emits no response or browser cookie, and
   adds no package, enablement, Store Lite, or client-data behavior
+- Disposable Docker supported-server dispatcher rehearsal. It builds the
+  pinned custom FrankenPHP/Caddy image, applies the current migrations to a
+  fresh temporary MySQL database, and proves the real attested request path
+  through the core dispatcher, atomic runner, and fixed emitter, including
+  accepted/replay/refusal/conflict and exact ledger/audit/rate evidence. The
+  fixture endpoint, `mysqli` extension, package marker, database, image,
+  network, and build context exist only for the proof and are removed after it;
+  no client installation, default server, browser cookie, enablement, or Store
+  Lite data is changed
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the
@@ -430,6 +439,17 @@ immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.s
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,
 lifecycle, and integrity refusal without a session or package-PHP execution.
+
+The supported-server public-mutation rehearsal is separate because it requires
+Docker Desktop and a custom Caddy/FrankenPHP build:
+
+```bash
+scripts/frankenphp-public-mutation-dispatch-proof.sh
+```
+
+It uses only a fresh temporary MySQL database and a fixture-only endpoint. It
+does not deploy the dispatcher, change the default local server, or touch any
+client installation.
 
 The install command is a dry run by default. Apply requires the exact database,
 package, version, plan digest, SHA-256 from a separately verified backup, and

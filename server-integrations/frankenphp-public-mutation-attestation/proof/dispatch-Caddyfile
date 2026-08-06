@@ -1,0 +1,16 @@
+# Disposable end-to-end dispatcher proof configuration.
+# It exists only in the temporary Docker image created by the paired proof
+# script. It is not a RED-CMS root Caddyfile or a client deployment.
+{
+	auto_https off
+	admin off
+}
+
+:8080 {
+	root * /app/public
+
+	route {
+		red_public_mutation_attestation RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY
+		php_server
+	}
+}

@@ -238,19 +238,21 @@ The optional Caddy/FrankenPHP ingress-attestation source now supplies one
 separately configured server-side seam without changing the default local
 server. It removes spoofed internal headers on every request and conditionally
 HMAC-signs only bounded `/addons/` POST method/target, body length/hash, and
-fixed security-header facts for an unlinked PHP verifier. A separate isolated
-Docker proof builds the matching custom binary, confirms its module/configuration,
-and verifies Caddy-to-PHP capture/body behavior without client data. It ships
-no deployed client binary or active Caddyfile and creates no dispatcher,
-endpoint, cookie flow, package invocation, enablement change, Store Lite
-behavior, or client data.
+fixed security-header facts for an unlinked PHP verifier. Separate isolated
+Docker proofs build the matching custom binary, confirm its
+module/configuration, verify Caddy-to-PHP capture/body behavior, and carry a
+fixture request through the unlinked dispatcher/runner/emitter against fresh
+MySQL without client data. They ship no deployed client binary or active
+Caddyfile and create no linked endpoint, cookie flow, package invocation,
+enablement change, Store Lite behavior, or client data.
 The separate core-only response emitter now accepts only the existing exact
 fixed core envelopes, rejects output that has already started, clears and sets
 only their fixed no-store/nosniff JSON headers, and emits only their matching
 fixed body bytes. It reads no request/cookie/session state, database, runtime,
 or package code and remains outside the front controller. It creates no route,
 endpoint, browser cookie, Store Lite behavior, enablement change, or client
-data; a later dispatcher must return immediately after it uses the emitter.
+data; the unlinked dispatcher returns immediately after it uses the emitter,
+while a front-controller link remains separately gated.
 The separate pure subject-cookie serializer now accepts only the exact
 core-issued descriptor shape and constructs one fixed future host-only
 `Set-Cookie` value: `Max-Age=1800`, `Path=/`, `Secure`, `HttpOnly`, and
@@ -519,11 +521,13 @@ idempotency-key, atomic transaction-runner, bounded response, declared-form
 decoder, pure HTTP request-envelope, private static route-selector, and
 non-routable server request-facts adapter plus closed response-emitter
 and non-emitting subject-cookie-serialization and optional
-Caddy/FrankenPHP ingress-attestation foundations are complete. Its
-protected settings UI/endpoint, client-specific custom-binary deployment
-decision for the public HTTP ingress contract,
-bounded dispatcher and actual browser subject-cookie issuance/clearance/rotation,
-actual secret lookup, live-data disable/upgrade
+Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
+dispatcher and supported-server disposable rehearsal are also complete. The
+rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
+MySQL database; it does not link the dispatcher to the front controller or
+deploy a client. Client-specific Caddyfile/TLS/proxy and trusted-origin/HMAC
+review, browser subject-cookie issuance/clearance/rotation, the protected
+settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled.

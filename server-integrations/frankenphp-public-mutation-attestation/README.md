@@ -133,3 +133,30 @@ an operator must still build a matching binary for the chosen client, preserve
 the client-specific Caddyfile/TLS/proxy configuration and per-installation key
 outside the starter, and obtain a later dispatcher review before enabling any
 public-mutation behavior.
+
+## Isolated supported-server dispatcher rehearsal
+
+After the custom-binary proof is green, the separate command below stages a
+test-only dispatcher endpoint and the reviewed core helpers into another
+temporary Docker context:
+
+```sh
+scripts/frankenphp-public-mutation-dispatch-proof.sh
+```
+
+It builds the same pinned FrankenPHP/Caddy binary, adds `mysqli` only to the
+disposable proof image because the stock PHP image does not expose that
+extension, starts a fresh MySQL `8.4` container, applies the current migrations,
+and carries one secret-guarded fixture request through Caddy attestation, the
+PHP verifier, the core dispatcher, atomic runner, and fixed response emitter.
+The proof checks accepted/replay, forged-header replacement, `GET` refusal,
+withheld-attestation refusal, idempotency conflict, and exact execution,
+activity, subject, CSRF, idempotency, and rate-limit evidence. Its fixture
+endpoint, bootstrap secret, package marker, database, image, network, and
+build context are removed on success or failure. This rehearsal does not link
+the dispatcher to `index.php`, deploy a client binary/Caddyfile, issue a browser
+cookie, change package enablement, or create Store Lite data.
+
+The repository's FrankenPHP proof workflow runs both the custom-binary ingress
+proof and this supported-server rehearsal when the integration or its reviewed
+core dependencies change.

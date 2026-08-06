@@ -33,7 +33,12 @@ response constraints; the internal transaction runner and replay ledger are now
 implemented, and an unlinked core-owned dispatcher composes the explicit
 request, route, subject/CSRF, form, runner, and fixed-response contracts. It is
 not linked to the front controller and still emits no cookie/header or session
-access, package behavior, or enablement change. The separate
+access, package behavior, or enablement change. A separate Docker-only
+supported-server rehearsal now carries a secret-guarded fixture request through
+the pinned custom FrankenPHP/Caddy binary, PHP verifier, dispatcher, atomic
+runner, and fixed emitter against a fresh MySQL database, then removes every
+temporary artifact. The rehearsal does not deploy a client or issue a browser
+cookie. The separate
 read-only live-data preflight now binds a trusted declaration from an
 `installed_disabled` package to current per-client migration, table,
 typed-setting, opaque secret-availability, and core
@@ -748,9 +753,9 @@ request bootstrap excludes the disabled package.
     internal capture headers on every request and conditionally HMAC-signs only
     bounded `/addons/` POST method/target, body length/hash, and fixed
     security-header facts. It has no compiled binary, active Caddyfile, default
-    server change, dispatcher, endpoint, cookie issuance, package invocation,
-    enablement, fixture, Store Lite, or client-state path; custom-binary
-    deployment proof remains a later dispatcher gate.
+    server change, linked endpoint, cookie issuance, package invocation,
+    enablement, fixture, Store Lite, or client-state path; per-client
+    deployment and browser subject-cookie review remain later gates.
 58. Completed the unlinked core-owned public-mutation dispatcher composition:
     explicit method/target/capture facts select one registrar-bound route,
     require attested POST transport, verify the opaque subject and CSRF before
@@ -758,8 +763,19 @@ request bootstrap excludes the disabled package.
     return only the fixed response model. Its focused fixture proves runtime,
     method, transport, binding, and callback isolation without linking the
     front controller, emitting a response/cookie, changing enablement, or
-    adding Store Lite/client state. Supported-server end-to-end fixture and
-    per-client deployment review remain the next gate.
+    adding Store Lite/client state. The supported-server rehearsal is now
+    complete; per-client deployment and browser subject-cookie review remain.
+59. Completed the disposable supported-server dispatcher rehearsal: a temporary
+    pinned FrankenPHP/Caddy image (with `mysqli` added only to that proof image)
+    and fresh MySQL database carried a secret-guarded fixture request through
+    the real attester, PHP verifier, core dispatcher, atomic runner, and fixed
+    emitter. Accepted/replay, forged-header replacement, `GET` refusal,
+    withheld-attestation refusal, idempotency conflict, and exact execution,
+    activity, subject, CSRF, idempotency, and rate evidence passed before all
+    containers, network, image, database, package marker, and build context
+    were removed. It remains a test-only rehearsal; per-client deployment and
+    browser subject-cookie lifecycle review precede any front-controller link or
+    Store Lite enablement.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

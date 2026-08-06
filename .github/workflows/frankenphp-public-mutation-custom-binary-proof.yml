@@ -5,13 +5,23 @@ on:
     paths:
       - '.github/workflows/frankenphp-public-mutation-custom-binary-proof.yml'
       - 'includes/addon_manifest_helpers.php'
+      - 'includes/addon_public_mutation_dispatch_helpers.php'
+      - 'includes/addon_public_mutation_execution_helpers.php'
+      - 'includes/addon_public_mutation_form_helpers.php'
       - 'includes/addon_public_mutation_frankenphp_ingress_helpers.php'
       - 'includes/addon_public_mutation_http_request_helpers.php'
+      - 'includes/addon_public_mutation_idempotency_helpers.php'
       - 'includes/addon_public_mutation_preflight_helpers.php'
+      - 'includes/addon_public_mutation_rate_limit_helpers.php'
+      - 'includes/addon_public_mutation_response_emitter_helpers.php'
+      - 'includes/addon_public_mutation_response_helpers.php'
+      - 'includes/addon_public_mutation_route_helpers.php'
       - 'includes/addon_public_mutation_server_request_helpers.php'
       - 'includes/addon_public_mutation_subject_helpers.php'
+      - 'includes/addon_runtime_helpers.php'
       - 'includes/runtime_config_helpers.php'
       - 'scripts/frankenphp-public-mutation-custom-binary-proof.sh'
+      - 'scripts/frankenphp-public-mutation-dispatch-proof.sh'
       - 'server-integrations/frankenphp-public-mutation-attestation/**'
   push:
     branches:
@@ -19,13 +29,23 @@ on:
     paths:
       - '.github/workflows/frankenphp-public-mutation-custom-binary-proof.yml'
       - 'includes/addon_manifest_helpers.php'
+      - 'includes/addon_public_mutation_dispatch_helpers.php'
+      - 'includes/addon_public_mutation_execution_helpers.php'
+      - 'includes/addon_public_mutation_form_helpers.php'
       - 'includes/addon_public_mutation_frankenphp_ingress_helpers.php'
       - 'includes/addon_public_mutation_http_request_helpers.php'
+      - 'includes/addon_public_mutation_idempotency_helpers.php'
       - 'includes/addon_public_mutation_preflight_helpers.php'
+      - 'includes/addon_public_mutation_rate_limit_helpers.php'
+      - 'includes/addon_public_mutation_response_emitter_helpers.php'
+      - 'includes/addon_public_mutation_response_helpers.php'
+      - 'includes/addon_public_mutation_route_helpers.php'
       - 'includes/addon_public_mutation_server_request_helpers.php'
       - 'includes/addon_public_mutation_subject_helpers.php'
+      - 'includes/addon_runtime_helpers.php'
       - 'includes/runtime_config_helpers.php'
       - 'scripts/frankenphp-public-mutation-custom-binary-proof.sh'
+      - 'scripts/frankenphp-public-mutation-dispatch-proof.sh'
       - 'server-integrations/frankenphp-public-mutation-attestation/**'
   workflow_dispatch:
 
@@ -41,3 +61,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and run the custom-binary proof
         run: scripts/frankenphp-public-mutation-custom-binary-proof.sh
+      - name: Run the supported-server dispatcher rehearsal
+        run: scripts/frankenphp-public-mutation-dispatch-proof.sh
