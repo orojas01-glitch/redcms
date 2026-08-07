@@ -564,11 +564,16 @@ Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
 dispatcher, supported-server disposable rehearsal, and core-owned browser
 subject-cookie lifecycle bridge, non-executing per-client deployment profile,
 response-owner composer, and deployment-review packet are also complete. The
-installation-shaped HTTPS deployment rehearsal harness is now available but
-remains a separate environment-dependent gate. The supported-server dispatcher
+installation-shaped HTTPS deployment rehearsal passed on 2026-08-07 in an
+isolated Docker environment with pinned FrankenPHP 1.12.4 and Caddy 2.11.4.
+The full disposable acceptance suite also passed against a separately built
+current-schema baseline, including all 45 migration files, idempotency,
+runtime/browser, lifecycle, settings foundations, CRUD/media cleanup, and
+rollback checks; its acceptance database and grant were removed afterward. The
 rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
-MySQL database; it does not link the dispatcher to
-the front controller or deploy a client. Actual client-specific Caddyfile/TLS/
+MySQL databases; it does not link the dispatcher to the front controller or
+deploy a client. The retained local starter database was not migrated because
+it is an older historical snapshot. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
 capture, protected
 settings UI/endpoint, actual secret lookup, live-data disable/upgrade
