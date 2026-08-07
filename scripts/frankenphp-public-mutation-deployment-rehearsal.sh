@@ -104,7 +104,7 @@ wait_ready() {
     local attempt=0
     local status=''
     while (( attempt < 40 )); do
-        status="$(curl --silent --show-error --insecure --max-time 1 --output /dev/null --write-out '%{http_code}' "$BASE_URL/healthz" || true)"
+        status="$(curl --silent --show-error --insecure --max-time 1 --output /dev/null --write-out '%{http_code}' "$BASE_URL/healthz" 2>/dev/null || true)"
         [[ "$status" == '204' ]] && return 0
         attempt=$((attempt + 1))
         sleep 1
@@ -219,7 +219,15 @@ JSON
 chmod 600 "$OUTPUT_DIR/profile.json"
 
 PHP_BIN="${RED_PHP_BIN:-}"
-[[ -n "$PHP_BIN" ]] || PHP_BIN="$(command -v php || true)"
+if [[ -z "$PHP_BIN" ]]; then
+    PHP_BIN="$(command -v php || true)"
+fi
+if [[ -z "$PHP_BIN" && -x "$PROJECT_ROOT/../red-cms-dev/php-8.5.8/bin/php" ]]; then
+    PHP_BIN="$PROJECT_ROOT/../red-cms-dev/php-8.5.8/bin/php"
+fi
+if [[ -z "$PHP_BIN" && -x "/Users/oscarrojas/Documents/red-cms-dev/php-8.5.8/bin/php" ]]; then
+    PHP_BIN="/Users/oscarrojas/Documents/red-cms-dev/php-8.5.8/bin/php"
+fi
 [[ -n "$PHP_BIN" && -x "$PHP_BIN" ]] || fail 'A PHP CLI is required to build the deployment review packet.'
 
 "$PHP_BIN" "$PROJECT_ROOT/scripts/addon-public-mutation-deployment-review-build.php" --profile "$OUTPUT_DIR/profile.json" --browser-report "$OUTPUT_DIR/browser/report.json" --rotation-evidence "$OUTPUT_DIR/rotation-evidence.json" --caddyfile "$OUTPUT_DIR/Caddyfile" --binary "$REHEARSAL_DIR/frankenphp" --certificate "$OUTPUT_DIR/certificate-chain.pem" --output "$OUTPUT_DIR/deployment-review.json"
