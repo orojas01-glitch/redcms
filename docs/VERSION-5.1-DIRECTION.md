@@ -815,6 +815,12 @@ request bootstrap excludes the disabled package.
     request-derived trust, browser errors/state changes, forged review hashes,
     deployment, and dispatcher linking. Actual deployment and browser capture
     remain the next gate.
+64. Added the installation-shaped HTTPS deployment rehearsal command. It
+    stages only the reviewed integration, uses an external generated
+    certificate, proves process-environment HMAC replacement across restart,
+    and captures fixed desktop/mobile browser evidence into a non-secret packet
+    outside the starter. A successful Docker/browser run and client-specific
+    review remain required; it does not touch Adriana or link the dispatcher.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

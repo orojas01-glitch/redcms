@@ -287,6 +287,12 @@ profile hash to non-secret server/artifact hashes, process-environment
 trusted-origin/HMAC and old-key-revocation evidence, and fixed desktop/mobile
 browser results without reading files, resolving secrets, or changing client
 state. Actual per-client deployment and browser capture remain.
+An installation-shaped HTTPS rehearsal command now stages only the reviewed
+attestation integration into a temporary Docker context, uses an external
+localhost certificate, proves process-environment HMAC replacement across a
+restart, and captures fixed desktop/mobile browser evidence into a non-secret
+external packet. A successful Docker/browser run and later client-specific
+review are still required; no client or Adriana installation is touched.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -552,8 +558,10 @@ Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
 dispatcher, supported-server disposable rehearsal, and core-owned browser
 subject-cookie lifecycle bridge, non-executing per-client deployment profile,
 response-owner composer, and deployment-review packet are also complete. The
-rehearsal uses only a temporary custom binary,
-fixture endpoint, and fresh MySQL database; it does not link the dispatcher to
+installation-shaped HTTPS deployment rehearsal harness is now available but
+remains a separate environment-dependent gate. The supported-server dispatcher
+rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
+MySQL database; it does not link the dispatcher to
 the front controller or deploy a client. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
 capture, protected

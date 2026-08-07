@@ -62,6 +62,7 @@ changed by it.
 | Per-client deployment profile | Pure validator accepts one non-secret operator review packet with canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags | No profile loading, secret resolution, filesystem/database access, deployment, dispatcher link, package enablement, or Store Lite data |
 | Response ownership/composition | Core accepts only a valid deployment profile and fixed response envelope, then appends zero, one, or an ordered clear/set subject-cookie descriptor from the lifecycle bridge; the result is non-emitting and deterministic | No arbitrary headers, package/theme ownership, cookie policy drift, request parsing, secret/database access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Per-client deployment review | Pure validator binds the profile hash to pinned server/artifact evidence, process-environment trusted-origin/HMAC and rotation evidence, and fixed desktop/mobile browser evidence | No secret resolution, file loading, deployment, browser session, response emission, dispatcher link, package enablement, or Store Lite/client state |
+| Installation-shaped HTTPS deployment rehearsal | Temporary Docker context builds the reviewed custom binary, mounts external TLS, proves restart-based process-key replacement, and captures fixed browser evidence | No Adriana/client installation, client database, starter data, dispatcher link, package enablement, Store Lite state, or retained private key/secret |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -528,6 +529,29 @@ browser action, and returns only normalized non-secret evidence plus a
 deterministic review hash. Actual per-client deployment and browser capture
 remain the next gate.
 
+## Installation-Shaped HTTPS Deployment Rehearsal
+
+`scripts/frankenphp-public-mutation-deployment-rehearsal.sh` is the next
+deployment gate without a client installation. It stages only the reviewed
+attestation integration and a static fixture into a temporary Docker context,
+builds the pinned FrankenPHP/Caddy binary, mounts a generated localhost
+certificate, and runs the attestation route before `php_server` over HTTPS.
+The fixture page is not `index.php`, a package route, or a dispatcher.
+
+The rehearsal starts with one process-environment HMAC key, verifies the
+static HTTPS page, removes that container, restarts the same installation-shaped
+fixture with a distinct key, and proves the old key is absent from the new
+process environment. It then captures Chrome desktop `1440x1000` and mobile
+`390x844` evidence: HTTPS 200, zero console/network errors, exact no-store and
+nosniff headers, no cookie, no opaque token, no dispatcher link, and no client
+state change. The external packet retains only hashes and booleans. The
+private key, secret values, image, container, and build context are removed;
+the rehearsal never accesses Adriana or another client installation.
+
+The command may be pointed at an external evidence directory with
+`RED_DEPLOYMENT_REHEARSAL_OUTPUT`. A successful Docker/browser run remains
+required before any client-specific deployment or front-controller link.
+
 ## Future Core-Owned Request And Response Path
 
 When the dispatcher is linked, core—not a theme, browser script, or package
@@ -805,8 +829,11 @@ This planning slice does not authorize:
     non-secret server/artifact, process-environment trust/rotation, and fixed
     desktop/mobile browser evidence while refusing secret values, deployment
     file loading, browser state, and dispatcher linking.
-22. A separate richer enablement review may admit only packages that satisfy
+22. Added the installation-shaped HTTPS deployment rehearsal harness. It
+    retains only non-secret external evidence, keeps the dispatcher and
+    front-controller links disabled, and refuses starter-resident output.
+23. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-23. Store Lite can then implement its separately distributed catalog and cart
+24. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

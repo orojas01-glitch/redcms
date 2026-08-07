@@ -113,6 +113,31 @@ does not open a browser or change client state, and cannot link the dispatcher.
 Actual per-client Caddy/TLS/proxy deployment and browser capture remain the
 next gate.
 
+## Installation-shaped HTTPS deployment rehearsal
+
+The next gate can be rehearsed without a client installation:
+
+```sh
+scripts/frankenphp-public-mutation-deployment-rehearsal.sh
+```
+
+The command stages only this integration and the static deployment fixture into
+a temporary Docker context, builds the pinned custom binary, mounts a generated
+localhost certificate, and runs Caddy over HTTPS before `php_server`. It starts
+once with one process-environment HMAC key, restarts with a distinct key, and
+proves that the previous key is absent from the new container environment. It
+then runs fixed Chrome desktop `1440x1000` and mobile `390x844` checks for HTTPS
+200, no console/network errors, exact no-store/nosniff headers, no cookies, no
+opaque token in the body, and no dispatcher/client-state change.
+
+The default evidence directory is outside the starter under `/tmp`; set
+`RED_DEPLOYMENT_REHEARSAL_OUTPUT` to retain it elsewhere outside the starter.
+Only the profile, Caddyfile, public certificate, browser report/screenshots,
+rotation booleans, and deterministic review packet are retained. The HMAC
+values, private key, temporary image/container, and build context are removed.
+This remains a local rehearsal, not a client or Adriana deployment, and it
+does not link the front controller.
+
 ## Build and configuration boundary
 
 The module targets Caddy `v2.11.4`, which matches the local FrankenPHP

@@ -881,6 +881,18 @@ or changes a response, cookie, database, package, lifecycle, or client state.
 The packet must keep the dispatcher unlinked and must prove zero client-state
 change; actual per-client deployment and browser capture remain required.
 
+The installation-shaped HTTPS rehearsal is deliberately separate from that
+pure validator. It creates a short-lived localhost certificate and two
+short-lived process-environment HMAC values only in an external temporary
+directory/container. It mounts the certificate read-only, restarts the same
+fixture with the replacement key, verifies the previous key is absent from the
+new process environment, and never records either secret or the private key in
+the review packet. Browser evidence is limited to fixed HTTPS 200 checks with
+zero console/network errors, no cookie, no opaque token in the body, and no
+client-state change. Cleanup removes the private key, container, image, and
+build context; retained evidence stays outside the starter and contains only
+non-secret hashes and booleans.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and

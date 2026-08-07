@@ -72,7 +72,7 @@ flowchart TD
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
 | Latest completed slice | Core-owned non-executing deployment review packet: a profile-bound, non-secret evidence contract now validates pinned Caddy/FrankenPHP/TLS/proxy facts, artifact hashes outside the starter, process-environment trust and key-rotation evidence, and bounded desktop/mobile browser results without deployment or dispatcher linking. |
-| Current milestone | Actual per-client deployment rehearsal: install the reviewed Caddy/TLS/proxy boundary, provision and rotate trusted-origin/HMAC secrets outside the starter, capture browser evidence, and complete client-isolation review before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Current milestone | Actual per-client deployment rehearsal: the isolated HTTPS runner now stages the reviewed Caddy/TLS/proxy boundary, rotates process-environment HMAC evidence, and captures browser proof outside the starter. A successful Docker/browser run and later client-specific review are still required before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

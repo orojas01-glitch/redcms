@@ -477,12 +477,18 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    the profile hash to non-secret server/artifact, process-environment
    trust/rotation, and fixed desktop/mobile browser evidence without loading
    deployment files, resolving secrets, or changing client state.
-21. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
+21. Added the installation-shaped HTTPS deployment rehearsal. It builds the
+   reviewed integration in a temporary context, mounts an external generated
+   certificate, proves process-environment key replacement across restart, and
+   captures fixed browser evidence without a client database, dispatcher link,
+   package, or Store Lite path. A successful Docker/browser run remains
+   required before the next gate.
+22. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
    source, unlinked PHP verifier, and isolated custom-binary proof. The proof
    uses a temporary image only; it does not create a client binary, active
    Caddyfile, dispatcher, route, browser/cart cookie, package state,
    enablement, or Store Lite path.
-22. The bounded dispatcher now has supported-server disposable rehearsal
+23. The bounded dispatcher now has supported-server disposable rehearsal
    evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
    runner, and fixed emitter against fresh MySQL. Continue with per-client
    Caddyfile/TLS/proxy, trusted-origin/HMAC, and browser-deployment review
@@ -496,13 +502,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-23. Create Store Lite in its separate distribution using only those accepted
+24. Create Store Lite in its separate distribution using only those accepted
    contracts.
-24. Add package-owned migrations, Product editing, catalog, cart, orders, and
+25. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-25. Validate disable/re-enable, failure recovery, migration, responsive
+26. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-26. Add a separately reviewed hosted-payment adapter only after the
+27. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

@@ -478,6 +478,22 @@ It uses only a fresh temporary MySQL database and a fixture-only endpoint. It
 does not deploy the dispatcher, change the default local server, or touch any
 client installation.
 
+The installation-shaped HTTPS deployment rehearsal is a separate, later gate:
+
+```bash
+scripts/frankenphp-public-mutation-deployment-rehearsal.sh
+```
+
+It stages only the reviewed integration into a temporary Docker build context,
+uses a generated localhost certificate outside the starter, restarts the
+container with a second process-environment HMAC key, and captures fixed
+Chrome desktop (`1440x1000`) and mobile (`390x844`) evidence. The retained
+packet contains only non-secret hashes and boolean evidence outside the
+starter; the private key, process secrets, container, image, and build context
+are removed. Set `RED_DEPLOYMENT_REHEARSAL_OUTPUT` to choose an external
+evidence directory. This is not an Adriana/client deployment and does not link
+the dispatcher or front controller.
+
 The install command is a dry run by default. Apply requires the exact database,
 package, version, plan digest, SHA-256 from a separately verified backup, and
 `installed_disabled` confirmations printed by the dry run. Package files are

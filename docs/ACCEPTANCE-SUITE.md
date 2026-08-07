@@ -152,6 +152,15 @@ and fixed desktop/mobile browser evidence. It rejects secret values, artifact
 placement in the starter, request-derived trust, unreviewed rotation, browser
 errors/state changes, forged review hashes, and any deployment or dispatcher
 path.
+The separate installation-shaped HTTPS rehearsal must be run with Docker when
+the pinned builder layers are available. It stages no client or starter data,
+uses a generated external certificate, proves the attestation-before-PHP route
+over HTTPS, rotates the process-environment HMAC key across a container
+restart, and captures fixed desktop/mobile browser evidence with zero console
+or network errors, no cookie, no opaque token, and no client-state change. Its
+retained output is non-secret and outside the starter; its private key, secret
+values, image, container, and build context are removed. It does not count as
+a client deployment or a front-controller link.
 The separate 17-assertion public-mutation live-data-preflight fixture proves
 that a trusted `installed_disabled` package can be inspected only through
 current migration, declared InnoDB-table, typed-setting, and opaque
@@ -646,6 +655,15 @@ containers, network, image, database, package marker, and build context.
   desktop/mobile HTTPS browser evidence. It rejects secret values, unreviewed
   proxy/TLS/rotation/browser facts, forged review hashes, file loading,
   browser sessions, deployment, response emission, and dispatcher linking.
+- Public-mutation installation-shaped HTTPS rehearsal acceptance is a Docker-
+  and browser-dependent gate. It requires a temporary custom FrankenPHP/Caddy
+  binary, explicit TLS certificate files outside the starter, process-
+  environment trusted-origin/HMAC values, attestation-before-`php_server`
+  ordering, a restart-based old-key absence proof, and fixed `1440x1000` /
+  `390x844` HTTPS evidence. It must retain only non-secret hashes and boolean
+  evidence outside the starter and remove the private key, secret values,
+  image, container, and build context. It cannot touch a client database,
+  install a package, link the dispatcher, or exercise Store Lite.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,
