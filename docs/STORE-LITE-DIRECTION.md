@@ -1,6 +1,8 @@
 # RED-CMS Store Lite Direction
 
-Status: implementation direction defined; package code has not started.
+Status: Gate 0 product direction approved for simple products and bounded
+variable products; exact option limits remain a pre-implementation decision;
+package code has not started.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -20,8 +22,12 @@ to accept orders without turning RED-CMS into a general commerce platform.
 The first release should support:
 
 - a simple public product catalog;
-- one sellable item per Product component record;
-- price, currency, availability, image, summary, and optional stock status;
+- simple products with one sellable item and variable products with bounded
+  option groups such as size or color;
+- one product parent per Product component record, with one resolved sellable
+  variant selected when the parent is variable;
+- product- and variant-level price, currency, availability, image, summary,
+  and optional stock status;
 - one cart per anonymous visitor session;
 - guest checkout;
 - orders and immutable order line snapshots;
@@ -31,9 +37,34 @@ The first release should support:
 - a bounded administrator order workspace; and
 - retained data when the package is disabled.
 
-It deliberately excludes variants, subscriptions, marketplace sellers,
-automatic tax calculation, complex shipping, restaurant modifiers,
-appointment scheduling, protected-content entitlements, and stored card data.
+It deliberately excludes unbounded variant matrices, subscriptions,
+marketplace sellers, weight-based pricing, automatic tax calculation, complex
+shipping, restaurant modifiers, appointment scheduling, protected-content
+entitlements, and stored card data.
+
+## Product Types And Variant Boundary
+
+Store Lite has two product paths that share one package and commerce service:
+
+- A **simple product** has one price and availability state, with optional
+  stock. A banana sold by unit or pack uses this path.
+- A **variable product** is a product parent with a bounded set of explicit
+  variants. Each variant may define its own option values, SKU, price,
+  availability, image, and optional stock. A T-shirt can therefore expose
+  Size and, when needed, Color without creating separate unrelated products.
+
+The Product component references the parent product. A variable product must
+resolve one valid variant before an add-to-cart action is issued. Cart lines
+store the selected variant, and order lines snapshot the selected option
+labels, SKU, price, currency, title, and quantity. Product and variant values
+are always revalidated by the server; browser-submitted totals are never
+authoritative.
+
+The first package release will use bounded option groups and explicit variant
+records. It will not support arbitrary modifiers, free-form personalization,
+variant-specific shipping rules, or weight-based pricing. The exact option
+and variant limits will be fixed in the package manifest and acceptance
+fixtures before implementation.
 
 ## Distribution And Isolation
 
@@ -89,10 +120,12 @@ the public fields required by the selected view.
 The initial public view model should contain bounded, typed values such as:
 
 - product identifier;
+- product type (`simple` or `variable`);
 - public title and summary;
 - canonical product URL;
 - image reference and alternative text;
-- price amount in minor currency units;
+- bounded variant choices and the selected variant identifier when applicable;
+- resolved price amount in minor currency units;
 - ISO 4217 currency code;
 - availability state;
 - call-to-action label; and
@@ -118,8 +151,9 @@ The initial service boundary should provide typed operations for:
 
 - reading a public product;
 - listing available products;
+- listing valid variant choices and resolving a selected variant;
 - creating or resolving an anonymous cart;
-- adding, updating, and removing a cart line;
+- adding, updating, and removing a cart line, including the selected variant;
 - recalculating authoritative totals;
 - creating an order from the current cart;
 - recording an administrator-approved status transition; and
@@ -135,7 +169,8 @@ currency values; client-submitted totals are never authoritative.
 All tables are package-owned and namespaced with `RED_Addon_StoreLite_`.
 The first data model should separate:
 
-- products and their publish/availability state;
+- product parents and their publish/availability state;
+- explicit product variants and bounded option values linked to one parent;
 - carts and cart lines;
 - orders and immutable order-line snapshots;
 - order status history;
@@ -161,8 +196,11 @@ core settings tables.
 - Cart ownership is checked before cart contents are read or mutated.
 - Add-to-cart requests use POST, CSRF protection, and server-side product
   lookup.
+- Variable-product cart lines must contain one valid current variant; missing,
+  stale, unavailable, or mismatched variant selections are refused.
 - Quantity and price limits are enforced server-side.
-- Order creation is idempotent and produces one immutable commercial snapshot.
+- Order creation is idempotent and produces one immutable commercial snapshot,
+  including the selected variant's option labels and SKU when applicable.
 - An order cannot become paid because a browser returns from a provider.
 - Status transitions follow a closed state machine and append audit history.
 - Duplicate submissions and replayed payment events cannot create duplicate
@@ -352,6 +390,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 - scoped product, order, and settings permissions;
 - package-owned migrations and exact cleanup of disposable fixtures;
 - safe Product placement, editing, revisions, and public rendering;
+- both simple-product and variable-product flows, including invalid or stale
+  variant-selection refusal and immutable variant order snapshots;
 - accessible keyboard and screen-reader behavior at desktop and mobile widths;
 - theme-independent fallback rendering and CSS/JavaScript isolation;
 - server-authoritative price, currency, quantity, and total calculations;
@@ -371,7 +411,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 
 ## Delivery Sequence
 
-1. Approve this Store Lite product and security boundary.
+1. Approved at Gate 0: Store Lite supports simple products and bounded
+   variable products; complex variant matrices and modifiers remain out of
+   scope.
 2. Completed: implement the generic combined-package activation contract with
    disposable component-plus-service fixtures.
 3. Started: implement generic package component persistence and bounded

@@ -89,6 +89,12 @@ its component/service split, data ownership, payment boundary, lifecycle, and
 release gates. These packages are not core features or bundled starter
 capabilities.
 
+Gate 0 decision: Store Lite v1 will support both simple products (for example,
+bananas sold by unit or pack) and bounded variable products (for example,
+T-shirts with size and optional color). Variant data remains package-owned;
+unbounded variant matrices, free-form modifiers, and weight-based pricing stay
+out of scope.
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any
