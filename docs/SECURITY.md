@@ -37,6 +37,9 @@ Supported environment variables:
   request header, client package, log, or diagnostic output)
 - `RED_ADDON_SECRET_REFERENCES` (comma-separated opaque `config:` references;
   contains no secret values)
+- `RED_ADDON_SECRET_VALUES_JSON` (server-local JSON object mapping exact opaque
+  `config:` references to values; read only from the operating-system
+  environment and never returned or logged)
 
 The existing constants `DBHOST`, `DBUSER`, `DBPASS`, and `DBNAME` are preserved so current CMS classes continue to work.
 
@@ -178,6 +181,22 @@ add-on packages without executing them.
   returning any reference identifier or secret value. Malformed or stale
   declarations fail closed. The boundary reads no secret or database, executes
   no package, and grants no activation eligibility.
+- Core-internal secret resolution is a separate boundary. The operator must
+  provide both the explicit opaque-reference allowlist and a server-local
+  value inventory from ignored `ADDON_SECRET_VALUES` or the operating-system
+  `RED_ADDON_SECRET_VALUES_JSON` object. Values are bounded, NUL-free, and
+  rejected on malformed, nested, list-shaped, unknown, or conflicting input.
+  Resolution returns only fixed status while the bytes travel through an
+  internal by-reference value; they are never serialized, logged, audited,
+  rendered, persisted, or sent to package PHP by this boundary.
+- The core-owned secret-reference replacement endpoint accepts only exact
+  `config:` identifiers for declared secret settings. It resolves proposed
+  references server-locally, preserves ordinary values, and delegates a
+  complete configuration to the existing locked atomic settings writer. It
+  records only the value-free `secret_reference_replaced` detail, refuses
+  stale or unavailable plans, and does not change lifecycle, enablement, or
+  package execution. The endpoint remains unlinked while runtime consumption
+  and the administrator secret-management UI are separately reviewed.
 - The display-only administrator renderer accepts only an empty state or the
   validator's exact closed result. It maps fixed field types to core-owned
   namespaced controls, escapes every manifest label, help string, option, and
@@ -546,8 +565,9 @@ metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
-The atomic setting helper and availability evidence do not supply Store Lite
-settings UI/endpoints, actual secret lookup, or enablement readiness. The
+  The atomic setting helper, availability evidence, and core-owned secret
+  replacement boundary do not supply Store Lite settings UI/endpoints,
+  package-runtime secret consumption, or enablement readiness. The
 CSS/JavaScript plan, read-only delivery preflight, static endpoint, and
 core-owned document injection are complete, but do not make Store Lite
 enablement-ready.

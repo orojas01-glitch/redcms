@@ -41,6 +41,11 @@ and integer forms, unknown/nested/secret submission refusal, escaped control
 rendering, stale-plan binding, masked secret state, and no package markup or
 disclosure. It performs no database access, package execution, secret lookup,
 or lifecycle mutation.
+The separate 8-assertion secret-resolution fixture validates bounded
+server-local value sources, exact allowlist-required resolution, environment
+and local conflict refusal, and an internal by-reference value boundary. It
+returns no secret bytes in its fixed result and performs no database access,
+request parsing, package execution, or lifecycle change.
 The separate 18-assertion secret-reference availability fixture validates an
 empty default, sorted local/environment declaration merging, deduplication,
 bounded fail-closed syntax, exact package/configuration binding, deterministic
@@ -74,15 +79,17 @@ exact fixture cleanup. The full suite then makes real anonymous and signed-in
 administrator HTTP requests against a temporary first-party package, verifies
 public tags remain separate from administrator tags, and proves injection adds
 no extra runtime registration before removing the package and administrator.
-The 25-assertion disposable setting-storage/editor and atomic-writer fixture requires
+The 31-assertion disposable setting-storage/editor, atomic-writer, and secret-
+replacement fixture requires
 the exact empty seven-column table and installation foreign key, explicit
 package-declared permission bindings, fresh binary grants, exact trusted
 filesystem/registry identity, installed-disabled or enabled state, complete
 typed target values, valid current stored rows, deterministic current/target
-and plan hashes, immediate revocation, zero package execution or secret
-resolution, exact full replacement, ordinary/secret column separation, one
-bounded audit fact, no-op handling, stale-target refusal, rollback after audit
-or injected failure, and exact package/administrator/grant/filesystem cleanup.
+and plan hashes, immediate revocation, zero package execution, exact full
+replacement, ordinary/secret column separation, one bounded audit fact,
+no-op handling, stale-target refusal, server-local secret resolution,
+initial missing-secret binding, unavailable-reference refusal, and exact
+package/administrator/grant/filesystem cleanup.
 Optional component-editor metadata is also validated as a fixed, data-only
 schema: declared components and permissions must resolve exactly, field types
 and constraints are allowlisted, and executable or storage-owned instructions
@@ -433,8 +440,9 @@ foundations.
 The latest complete 2026-08-04 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 48-assertion add-on trust contract, 22-assertion
-add-on setting-value contract, 18-assertion add-on secret-reference
-availability contract, 21-assertion add-on asset-plan contract, 17-assertion
+add-on setting-value contract, 8-assertion add-on secret-resolution
+contract, 18-assertion add-on secret-reference availability contract,
+21-assertion add-on asset-plan contract, 17-assertion
 public-mutation declaration contract, 13-assertion add-on component-editor value
 contract, 20-assertion display-only
 component-editor renderer contract, and
@@ -443,7 +451,8 @@ contract, and 20-assertion public-route contract, imported the 32-table installe
 applied all 45 migrations to the expected 34-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
-23-assertion add-on setting storage, authorization preflight, and atomic writer,
+31-assertion add-on setting storage/editor, authorization preflight, atomic
+writer, and secret replacement,
 13-assertion permission-scoped add-on setting read model,
 18-assertion permission-scoped administrator-tool dispatch,
 18-assertion non-executing administrator-action preflight,
@@ -601,17 +610,24 @@ containers, network, image, database, package marker, and build context.
   forged, disabled, drifted, invalid, or ambiguous state, no planner registrar
   invocation or registry mutation, real anonymous and signed-in HTTP documents,
   and exact package/administrator/filesystem cleanup.
-- Add-on setting storage/preflight/atomic-writer acceptance runs only in the uniquely
+- Add-on setting storage/editor/preflight/atomic-writer/secret-replacement acceptance runs only in the uniquely
   named disposable database. It requires the exact empty generic schema and
   restrictive installation foreign key, explicit package-declared permission
   bindings, fresh case-sensitive grants, exact trusted package and registry
   identity, supported lifecycle state, complete typed target values, valid
   current rows, deterministic value-free hashes, next-decision revocation, no
-  package execution, no secret resolution, and exact cleanup. Atomic
+  package execution, exact full replacement, and exact cleanup. Atomic
   replacement additionally requires shared locks, exact plan comparison,
-  complete rows, separate ordinary/secret columns, exact postcondition reload,
-  one value-free audit fact, no-op handling, and full rollback on audit or
-  injected late failure.
+  complete rows, separate ordinary/secret columns, server-local resolution,
+  initial missing-secret binding, unavailable-reference refusal, exact
+  postcondition reload, one value-free audit fact, no-op handling, and stale
+  or injected failure refusal without mutation.
+- Add-on secret-resolution acceptance runs before database creation. It requires
+  bounded ignored-local and operating-system value sources, exact lowercase
+  `config:` references, duplicate/conflict refusal, allowlist-required
+  resolution, and a fixed result with no secret bytes. The helper performs no
+  database access, request parsing, package execution, logging, rendering, or
+  lifecycle change.
 - Add-on setting-read-model acceptance runs only in the uniquely named
   disposable database and one temporary trusted package. It requires exact
   installed identity and supported lifecycle evidence, a declared permission

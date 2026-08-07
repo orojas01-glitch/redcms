@@ -201,7 +201,8 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
     function red_addon_setting_editor_current_configuration(
         $connection,
         array $manifest,
-        $packageId
+        $packageId,
+        $allowMissingSecrets = false
     ) {
         $invalid = [
             'valid' => false,
@@ -324,6 +325,10 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
                 continue;
             }
             if ($type === 'secret-reference') {
+                if ($allowMissingSecrets) {
+                    $secretConfigured[$key] = false;
+                    continue;
+                }
                 $invalid['errors'] = ['secret_unconfigured'];
                 return $invalid;
             }
@@ -341,6 +346,47 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
             $manifest,
             $configured
         );
+        if ($allowMissingSecrets && $validated['errors'] !== []) {
+            $missingSecrets = [];
+            foreach ($schema as $definition) {
+                if (($definition['type'] ?? '') !== 'secret-reference') {
+                    continue;
+                }
+                $key = $definition['key'];
+                if (!array_key_exists($key, $configured)) {
+                    $missingSecrets[] = $key;
+                }
+            }
+            if ($missingSecrets !== []) {
+                foreach ($schema as $definition) {
+                    if (($definition['type'] ?? '') === 'secret-reference') {
+                        continue;
+                    }
+                    $key = $definition['key'];
+                    if (!array_key_exists($key, $ordinary)) {
+                        $invalid['errors'] = ['setting_required'];
+                        return $invalid;
+                    }
+                    $check = red_addon_setting_value_result();
+                    $normalized = red_addon_setting_normalize_value(
+                        $definition,
+                        $ordinary[$key],
+                        $check
+                    );
+                    if ($check['errors'] !== []
+                        || $normalized !== $ordinary[$key]
+                    ) {
+                        $invalid['errors'] = ['stored_value_invalid'];
+                        return $invalid;
+                    }
+                }
+                sort($missingSecrets, SORT_STRING);
+                $validated = [
+                    'valid' => true,
+                    'values' => $ordinary,
+                ];
+            }
+        }
         $currentState = red_addon_setting_current_state(
             $connection,
             $manifest,

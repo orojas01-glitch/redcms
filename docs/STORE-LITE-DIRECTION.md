@@ -107,7 +107,8 @@ Its initial manifest contract should declare:
 The current Version 5.1 lifecycle can enable a constrained default component
 combined with registration-only services. It still cannot enable the complete
 Store Lite manifest because that package needs administrator tools,
-persistence, routes, settings editing, actual secret lookup, and assets. Store
+persistence, routes, settings editing, package-runtime secret consumption, and
+assets. Store
 Lite must remain blocked until
 each richer generic surface below is implemented and accepted independently.
 
@@ -373,8 +374,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   invalid, drifted, or ambiguous state emits no package markup;
 - typed validation, storage, read-only preflight, internal atomic persistence,
   core-only per-setting authorized reads, non-executing secret-reference
-  availability, and the core-owned permissioned ordinary-settings editor/
-  endpoint are complete; actual secret lookup/replacement remains gated; and
+  availability, the core-owned permissioned ordinary-settings editor/endpoint,
+  and the core-owned server-local secret-reference resolution/replacement
+  boundary are complete; package-runtime secret consumption remains gated; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures
@@ -534,8 +536,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
    runner, and fixed emitter against fresh MySQL. Continue with per-client
    Caddyfile/TLS/proxy, trusted-origin/HMAC, and browser-deployment review
-   before any front-controller link; richer enablement and actual secret
-   lookup/replacement remain separately reviewed batches. The core browser subject lifecycle is
+   before any front-controller link; richer enablement and package-runtime
+   secret consumption remain separately reviewed batches. The core browser subject lifecycle is
    already proven independently.
    Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
@@ -543,7 +545,7 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    internal atomic settings persistence, non-executing server-local secret
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
-   complete. Actual secret lookup remains blocked.
+   complete. Package-runtime secret consumption remains blocked.
 24. Create Store Lite in its separate distribution using only those accepted
    contracts.
 25. Add package-owned migrations, Product editing, catalog, cart, orders, and

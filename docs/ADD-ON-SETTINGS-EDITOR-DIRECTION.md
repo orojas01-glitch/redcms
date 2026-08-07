@@ -1,8 +1,10 @@
 # RED-CMS 5.1 Core-Owned Add-On Settings Editor
 
 Status: Gate 1B implementation complete and disposable acceptance-verified;
-the endpoints remain unlinked from administrator navigation and actual secret
-lookup/replacement remains gated.
+the ordinary settings endpoints remain unlinked from administrator navigation.
+The separate core-owned secret-reference resolution/replacement boundary is
+documented in [`ADD-ON-SECRET-RESOLUTION-DIRECTION.md`](ADD-ON-SECRET-RESOLUTION-DIRECTION.md)
+and remains unlinked while package-runtime consumption is gated.
 
 This slice is the smallest useful generic settings surface after the
 per-client storage, atomic writer, authorized read model, and non-executing
@@ -110,5 +112,6 @@ Before this slice is considered complete, disposable tests must prove:
 
 The full disposable acceptance suite and relevant authenticated desktop/mobile
 browser checks must pass before this contract can clear the settings UI/
-endpoint gate. Actual secret lookup/replacement, richer enablement, and the
-Store Lite package remain separate milestones.
+endpoint gate. Secret-reference resolution/replacement is a separate
+core-owned boundary; richer enablement, package-runtime secret consumption,
+and the Store Lite package remain separate milestones.

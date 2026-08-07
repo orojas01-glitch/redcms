@@ -64,7 +64,7 @@ value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
 Adapters, operational writable route/tool actions,
-actual secret lookup/replacement,
+package-runtime secret consumption,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -127,9 +127,11 @@ of opaque `config:` references declared by the operator, revalidates the
 complete typed configuration, and returns deterministic counts, missing
 setting keys, and fingerprints. It returns no reference identifier or secret
 value, reads no database or secret, executes no package, and changes no
-activation gate. Actual secret lookup/replacement remains unavailable; the
-ordinary core-owned settings editor is accepted separately and remains
-unlinked from administrator navigation.
+  activation gate. Core-owned server-local secret resolution/reference
+  replacement is accepted separately through an unlinked endpoint; package-
+  runtime secret consumption remains unavailable. The ordinary core-owned
+  settings editor is accepted separately and remains unlinked from
+  administrator navigation.
 The namespaced asset foundation is now complete through core-owned document
 injection. CSS must be beneath `assets/` and load at `head`; JavaScript must be
 beneath `assets/` and load at `body-end`. Core derives checksum-versioned
@@ -834,6 +836,19 @@ request bootstrap excludes the disabled package.
     and captures fixed desktop/mobile browser evidence into a non-secret packet
     outside the starter. A successful Docker/browser run and client-specific
     review remain required; it does not touch Adriana or link the dispatcher.
+65. Completed the core-owned server-local secret resolution and reference
+    replacement boundary: validate bounded ignored-local and operating-system
+    value inventories separately from the explicit opaque-reference allowlist;
+    resolve only a declared reference through an internal by-reference value;
+    and accept exact authenticated secret-setting maps through an unlinked
+    endpoint that revalidates trusted package identity, current grants, stale
+    plans, and complete typed configuration before delegating to the locked
+    atomic settings writer. Initial missing-secret binding, replacement,
+    unavailable-reference refusal, no-op behavior, value-free audit detail,
+    and cleanup are proven. It returns no secret bytes, executes no package
+    PHP, changes no lifecycle or enablement state, and does not make Store Lite
+    ready; package-runtime secret consumption and a polished secret UI remain
+    later gates.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

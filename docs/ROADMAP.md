@@ -326,8 +326,9 @@ the exact filesystem/registry identity, installed-disabled or enabled state,
 complete typed target configuration, fresh binary grant decisions, and current
 stored-state fingerprint. It writes no row and resolves no secret. Atomic
 persistence is complete, and the ordinary settings editor/endpoint is now
-accepted separately. Actual secret lookup/replacement and richer enablement
-remain blocked.
+accepted separately. The core-owned server-local secret resolution/reference
+replacement boundary is also accepted separately; package-runtime secret
+consumption and richer enablement remain blocked.
 
 Atomic per-client setting persistence is now implemented as an internal core
 helper. It refuses caller-owned transactions, acquires the shared lifecycle
@@ -336,8 +337,8 @@ the complete plan, replaces every normalized ordinary value or opaque secret
 reference, reloads the exact target hash/count, and commits one value-free
 `addon.settings.updated` audit fact. Exact no-ops add no audit. Audit,
 postcondition, injected, permission, identity, lifecycle, or state failure
-rolls the replacement back. Settings UI/endpoints, secret availability, and
-richer enablement remain blocked.
+rolls the replacement back. Settings UI/endpoints, package-runtime secret
+consumption, and richer enablement remain separate gates.
 
 A separate core-only current-setting read model is now implemented. It binds
 the same trusted package identity and supported installed-disabled/enabled
@@ -358,11 +359,16 @@ configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
 not relax activation. The core-owned ordinary settings editor/endpoint is now
 implemented and accepted separately: it is permission-scoped, CSRF-protected,
-stale-plan guarded, and secret-masked. Actual secret lookup/replacement and
-richer enablement remain blocked. The contract is documented in
+stale-plan guarded, and secret-masked. Core-owned server-local secret
+resolution/reference replacement is accepted separately; package-runtime
+secret consumption and richer enablement remain blocked. The contracts are
+documented in
 [`ADD-ON-SETTINGS-EDITOR-DIRECTION.md`](ADD-ON-SETTINGS-EDITOR-DIRECTION.md):
 ordinary typed settings are edited through a core-owned form while
-secret-reference state remains masked and unchanged.
+secret-reference state remains masked and unchanged. The separate
+[`ADD-ON-SECRET-RESOLUTION-DIRECTION.md`](ADD-ON-SECRET-RESOLUTION-DIRECTION.md)
+contract accepts only allowlisted, server-local references and never exposes
+secret bytes.
 
 The namespaced package-asset foundation is now complete through core-owned
 document injection. Trusted manifests form deterministic plans only for
@@ -377,8 +383,9 @@ planner revalidates the trusted catalog, registry, and both surfaces for every
 enabled package. It adds public tags at the document `head` and `body-end`, and
 adds administrator tags only when the existing signed-in overlay is present.
 Catalog, registry, integrity, plan, or document-boundary ambiguity emits no
-package markup. The ordinary core-owned settings editor is accepted separately;
-actual secret lookup/replacement and richer enablement remain blocked.
+package markup. The ordinary core-owned settings editor and core-owned
+secret-reference replacement boundary are accepted separately; package-runtime
+secret consumption and richer enablement remain blocked.
 
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
@@ -581,7 +588,7 @@ MySQL databases; it does not link the dispatcher to the front controller or
 deploy a client. The retained local starter database was not migrated because
 it is an older historical snapshot. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
-capture, actual secret lookup/replacement, live-data disable/upgrade
+capture, package-runtime secret consumption, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled. A separate read-only review of the demo
