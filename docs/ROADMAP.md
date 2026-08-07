@@ -356,7 +356,12 @@ and returns only counts, missing setting keys, and deterministic declaration,
 configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
 not relax activation. Settings UI/endpoints, actual secret lookup, and richer
-enablement remain blocked.
+enablement remain blocked. The smallest core-owned settings editor/endpoint
+contract is now documented in
+[`ADD-ON-SETTINGS-EDITOR-DIRECTION.md`](ADD-ON-SETTINGS-EDITOR-DIRECTION.md):
+ordinary typed settings may be edited through a permission-scoped, CSRF-
+protected form while secret-reference state remains masked and unchanged.
+Implementation and acceptance remain a separate Gate 1B batch.
 
 The namespaced package-asset foundation is now complete through core-owned
 document injection. Trusted manifests form deterministic plans only for
