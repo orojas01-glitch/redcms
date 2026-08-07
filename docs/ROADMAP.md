@@ -579,7 +579,11 @@ capture, protected
 settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
-distributed package can be enabled.
+distributed package can be enabled. A separate read-only review of the demo
+client confirmed its public and administrator-login routes return HTTPS 200
+from Apache without Store Lite/add-on/cart/checkout markers; the dispatcher
+remains intentionally unlinked. See
+[`ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md`](ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md).
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
