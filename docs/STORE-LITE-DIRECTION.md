@@ -372,9 +372,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   administrator counterparts are added only for the existing signed-in overlay;
   invalid, drifted, or ambiguous state emits no package markup;
 - typed validation, storage, read-only preflight, internal atomic persistence,
-  core-only per-setting authorized reads, and non-executing secret-reference
-  availability are complete; permissioned settings UI/endpoints and actual
-  secret lookup remain gated; and
+  core-only per-setting authorized reads, non-executing secret-reference
+  availability, and the core-owned permissioned ordinary-settings editor/
+  endpoint are complete; actual secret lookup/replacement remains gated; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures
@@ -534,8 +534,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
    runner, and fixed emitter against fresh MySQL. Continue with per-client
    Caddyfile/TLS/proxy, trusted-origin/HMAC, and browser-deployment review
-   before any front-controller link; richer enablement and settings UI/endpoints
-   remain separately reviewed batches. The core browser subject lifecycle is
+   before any front-controller link; richer enablement and actual secret
+   lookup/replacement remain separately reviewed batches. The core browser subject lifecycle is
    already proven independently.
    Typed internal service
    invocation, exact static public `GET` routes, display-only administrator

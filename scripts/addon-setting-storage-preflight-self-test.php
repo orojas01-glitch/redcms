@@ -13,6 +13,7 @@ $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/';
 $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
+require_once $projectRoot . '/includes/addon_setting_editor_helpers.php';
 require_once $projectRoot . '/includes/addon_setting_write_helpers.php';
 
 if (!preg_match(
@@ -528,6 +529,39 @@ try {
              )"
         ) === '"Fixture Store":false:1:config:redcms.storage-fixture.api-key',
         'ordinary defaults and opaque secret references persist in separate columns'
+    );
+
+    $editorContext = red_addon_setting_editor_context(
+        $connection,
+        $package,
+        $actorId
+    );
+    $editorHtml = red_addon_setting_editor_render(
+        $editorContext,
+        str_repeat('b', 64)
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($editorContext['ready'])
+            && red_addon_valid_sha256($editorContext['planSha256'])
+            && str_contains($editorHtml, 'Settings[store.name]')
+            && str_contains($editorHtml, 'data-red-addon-secret-state="configured"')
+            && !str_contains($editorHtml, 'config:redcms.storage-fixture.api-key'),
+        'authorized settings context renders ordinary controls and masks the stored secret reference'
+    );
+    $editorNoop = red_addon_setting_editor_update(
+        $connection,
+        $package,
+        $actorId,
+        [
+            'store.name' => 'Fixture Store',
+            'store.enabled' => '0',
+        ],
+        $editorContext['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($editorNoop['ok'])
+            && $editorNoop['status'] === 'unchanged',
+        'the core settings editor preserves the secret row on an exact no-op'
     );
 
     $repeatPlan = red_addon_setting_write_preflight(

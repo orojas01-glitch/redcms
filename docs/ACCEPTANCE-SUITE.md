@@ -35,6 +35,12 @@ credential-free HTTP/HTTPS URLs, email addresses, and opaque lowercase
 secret references. The fixture performs no database access, secret lookup,
 authorization, administrator rendering, package execution, or lifecycle
 change.
+The separate 12-assertion settings-editor fixture validates the core-owned
+authenticated request shape, strict ordinary scalar decoding, exact boolean
+and integer forms, unknown/nested/secret submission refusal, escaped control
+rendering, stale-plan binding, masked secret state, and no package markup or
+disclosure. It performs no database access, package execution, secret lookup,
+or lifecycle mutation.
 The separate 18-assertion secret-reference availability fixture validates an
 empty default, sorted local/environment declaration merging, deduplication,
 bounded fail-closed syntax, exact package/configuration binding, deterministic
@@ -68,7 +74,7 @@ exact fixture cleanup. The full suite then makes real anonymous and signed-in
 administrator HTTP requests against a temporary first-party package, verifies
 public tags remain separate from administrator tags, and proves injection adds
 no extra runtime registration before removing the package and administrator.
-The 23-assertion disposable setting-storage and atomic-writer fixture requires
+The 25-assertion disposable setting-storage/editor and atomic-writer fixture requires
 the exact empty seven-column table and installation foreign key, explicit
 package-declared permission bindings, fresh binary grants, exact trusted
 filesystem/registry identity, installed-disabled or enabled state, complete
@@ -521,7 +527,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 

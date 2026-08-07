@@ -1,7 +1,8 @@
 # RED-CMS 5.1 Core-Owned Add-On Settings Editor
 
-Status: Gate 1B contract approved for implementation planning; no settings UI
-or endpoint is active yet.
+Status: Gate 1B implementation complete and disposable acceptance-verified;
+the endpoints remain unlinked from administrator navigation and actual secret
+lookup/replacement remains gated.
 
 This slice is the smallest useful generic settings surface after the
 per-client storage, atomic writer, authorized read model, and non-executing
@@ -44,6 +45,12 @@ The rendered form must:
   secret field; and
 - remain available for `installed_disabled` and `enabled` packages without
   changing either state.
+
+For this first writer-backed slice, every declared setting must be authorized
+before a form is rendered or saved. A mixed-grant administrator receives the
+generic unavailable response rather than a partial form that could rewrite
+settings outside the current grant. Partial per-setting editing can be
+reviewed later without weakening the atomic complete-configuration writer.
 
 No package-provided HTML, JavaScript, CSS, or field renderer is accepted in
 this slice.

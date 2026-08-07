@@ -325,8 +325,9 @@ already declared by their package. The read-only write preflight revalidates
 the exact filesystem/registry identity, installed-disabled or enabled state,
 complete typed target configuration, fresh binary grant decisions, and current
 stored-state fingerprint. It writes no row and resolves no secret. Atomic
-persistence, settings UI/endpoints, secret availability, and richer
-enablement remain blocked.
+persistence is complete, and the ordinary settings editor/endpoint is now
+accepted separately. Actual secret lookup/replacement and richer enablement
+remain blocked.
 
 Atomic per-client setting persistence is now implemented as an internal core
 helper. It refuses caller-owned transactions, acquires the shared lifecycle
@@ -355,13 +356,13 @@ validates the inventory, revalidates the complete typed package configuration,
 and returns only counts, missing setting keys, and deterministic declaration,
 configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
-not relax activation. Settings UI/endpoints, actual secret lookup, and richer
-enablement remain blocked. The smallest core-owned settings editor/endpoint
-contract is now documented in
+not relax activation. The core-owned ordinary settings editor/endpoint is now
+implemented and accepted separately: it is permission-scoped, CSRF-protected,
+stale-plan guarded, and secret-masked. Actual secret lookup/replacement and
+richer enablement remain blocked. The contract is documented in
 [`ADD-ON-SETTINGS-EDITOR-DIRECTION.md`](ADD-ON-SETTINGS-EDITOR-DIRECTION.md):
-ordinary typed settings may be edited through a permission-scoped, CSRF-
-protected form while secret-reference state remains masked and unchanged.
-Implementation and acceptance remain a separate Gate 1B batch.
+ordinary typed settings are edited through a core-owned form while
+secret-reference state remains masked and unchanged.
 
 The namespaced package-asset foundation is now complete through core-owned
 document injection. Trusted manifests form deterministic plans only for
@@ -376,8 +377,8 @@ planner revalidates the trusted catalog, registry, and both surfaces for every
 enabled package. It adds public tags at the document `head` and `body-end`, and
 adds administrator tags only when the existing signed-in overlay is present.
 Catalog, registry, integrity, plan, or document-boundary ambiguity emits no
-package markup. Settings UI/endpoints, actual secret lookup, and richer
-enablement remain blocked.
+package markup. The ordinary core-owned settings editor is accepted separately;
+actual secret lookup/replacement and richer enablement remain blocked.
 
 The first generic persistence foundation is implemented without adding a
 package or business table to core. `RED_Articles` stores the full validated
@@ -580,8 +581,7 @@ MySQL databases; it does not link the dispatcher to the front controller or
 deploy a client. The retained local starter database was not migrated because
 it is an older historical snapshot. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
-capture, protected
-settings UI/endpoint, actual secret lookup, live-data disable/upgrade
+capture, actual secret lookup/replacement, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled. A separate read-only review of the demo

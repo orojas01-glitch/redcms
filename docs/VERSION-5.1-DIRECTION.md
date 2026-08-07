@@ -64,7 +64,7 @@ value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
 Adapters, operational writable route/tool actions,
-settings UI/endpoints, actual secret lookup,
+actual secret lookup/replacement,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -88,8 +88,9 @@ now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, restore action, or create/delete endpoint is
-implied by these prerequisites. Operational writable route/tool actions and
-settings UI/endpoints are not active.
+implied by these prerequisites. Operational writable route/tool actions remain
+inactive; the separate ordinary-settings editor is documented and accepted
+below.
 The first non-executing settings-value prerequisite now normalizes only valid
 data-only definitions, requires exact type-correct non-secret defaults, and
 validates one closed configuration object. Missing, unknown, nested, malformed,
@@ -109,8 +110,9 @@ the shared lifecycle/package plus installation/setting row locks, recreates
 the complete plan, replaces every typed setting, reloads the exact target
 hash/count, and atomically records one value-free `addon.settings.updated`
 fact. Exact no-ops add no audit. Stale plans, drift, postcondition/audit
-failure, or injected late failure roll back. No settings UI/endpoint or secret
-lookup is added.
+failure, or injected late failure roll back. The writer itself exposes no
+package UI, performs no secret lookup, and changes no activation eligibility;
+the separate ordinary settings editor now delegates to this boundary.
 The separate core-only current-setting read model rechecks exact trusted
 package/registry identity and installed-disabled or enabled state, requires an
 explicit declared permission for every operational setting, and makes fresh
@@ -125,8 +127,9 @@ of opaque `config:` references declared by the operator, revalidates the
 complete typed configuration, and returns deterministic counts, missing
 setting keys, and fingerprints. It returns no reference identifier or secret
 value, reads no database or secret, executes no package, and changes no
-activation gate. Actual secret lookup and settings UI/endpoints remain
-unavailable.
+activation gate. Actual secret lookup/replacement remains unavailable; the
+ordinary core-owned settings editor is accepted separately and remains
+unlinked from administrator navigation.
 The namespaced asset foundation is now complete through core-owned document
 injection. CSS must be beneath `assets/` and load at `head`; JavaScript must be
 beneath `assets/` and load at `body-end`. Core derives checksum-versioned
@@ -648,6 +651,16 @@ request bootstrap excludes the disabled package.
     state-aware plan only on the server; invoke only the scoped core bridge;
     return no package, actor, target, plan, or state values; and leave all
     administrator controls, forms, and public routes absent.
+43. Completed core-owned ordinary add-on settings editor and endpoint:
+    discover only validated data-only manifests; require an authenticated
+    administrator and current CSRF; render escaped core-owned controls for
+    exact package-declared permissions; bind a fresh plan hash; decode strict
+    ordinary scalar values; preserve opaque secret-reference rows without
+    disclosure; and delegate only to the existing atomic writer. Stale plans,
+    invalid/nested/unknown/secret-bearing submissions, permission drift,
+    storage drift, and writer failures fail closed. The endpoint remains
+    unlinked from administrator navigation, executes no package PHP, resolves
+    no secret, and changes no lifecycle or enablement state.
 43. Defined the generic public-mutation boundary: reserve any future
     static-POST anonymous add-on write for a separately declared and
     core-owned CSRF, scalar-validation, rate/idempotency, transaction, and
