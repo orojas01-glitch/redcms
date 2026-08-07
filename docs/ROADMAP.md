@@ -275,8 +275,13 @@ pinned FrankenPHP/Caddy versions, fixed process-environment HMAC and
 trusted-origin sources, attestation-before-PHP route order, core response and
 host-only cookie ownership, clean-starter isolation, and disabled activation
 flags. It returns only a deterministic non-secret hash and does not load or
-apply a client deployment; response-owner and production deployment review
-remain before any front-controller link.
+apply a client deployment; production deployment and browser review remain
+before any front-controller link.
+The core-owned response-owner composer is now complete as a non-emitting,
+profile-bound step. It accepts only the fixed response envelope and lifecycle
+cookie descriptors, preserves clear-before-set rotation ordering, rejects
+arbitrary headers and ownership/policy drift, and remains unlinked from the
+front controller. Actual per-client deployment and browser evidence remain.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -540,11 +545,12 @@ non-routable server request-facts adapter plus closed response-emitter
 and non-emitting subject-cookie-serialization and optional
 Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
 dispatcher, supported-server disposable rehearsal, and core-owned browser
-subject-cookie lifecycle bridge, and non-executing per-client deployment
-profile are also complete. The rehearsal uses only a temporary custom binary,
+subject-cookie lifecycle bridge, non-executing per-client deployment profile,
+and response-owner composer are also complete. The rehearsal uses only a
+temporary custom binary,
 fixture endpoint, and fresh MySQL database; it does not link the dispatcher to
 the front controller or deploy a client. Client-specific Caddyfile/TLS/proxy,
-trusted-origin/HMAC provisioning and rotation, response-owner, protected
+trusted-origin/HMAC provisioning and rotation, protected
 settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately

@@ -468,16 +468,21 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    order, core response/cookie ownership, the fixed host-only cookie policy,
    clean-starter isolation, and disabled activation flags. It returns only a
    deterministic non-secret hash and does not load or apply a deployment.
-19. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
+19. Completed the core-owned non-emitting response-owner composer. It binds a
+   valid deployment profile to the fixed response envelope and exact lifecycle
+   cookie descriptors, preserves clear-before-set rotation, rejects arbitrary
+   headers and ownership/policy drift, and remains unlinked from the front
+   controller.
+20. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
    source, unlinked PHP verifier, and isolated custom-binary proof. The proof
    uses a temporary image only; it does not create a client binary, active
    Caddyfile, dispatcher, route, browser/cart cookie, package state,
    enablement, or Store Lite path.
-20. The bounded dispatcher now has supported-server disposable rehearsal
+21. The bounded dispatcher now has supported-server disposable rehearsal
    evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
    runner, and fixed emitter against fresh MySQL. Continue with per-client
-   Caddyfile/TLS/proxy, trusted-origin/HMAC, and response-owner review before
-   any front-controller link; richer enablement and settings UI/endpoints
+   Caddyfile/TLS/proxy, trusted-origin/HMAC, and browser-deployment review
+   before any front-controller link; richer enablement and settings UI/endpoints
    remain separately reviewed batches. The core browser subject lifecycle is
    already proven independently.
    Typed internal service
@@ -487,13 +492,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Actual secret lookup remains blocked.
-21. Create Store Lite in its separate distribution using only those accepted
+22. Create Store Lite in its separate distribution using only those accepted
    contracts.
-22. Add package-owned migrations, Product editing, catalog, cart, orders, and
+23. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-23. Validate disable/re-enable, failure recovery, migration, responsive
+24. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-24. Add a separately reviewed hosted-payment adapter only after the
+25. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

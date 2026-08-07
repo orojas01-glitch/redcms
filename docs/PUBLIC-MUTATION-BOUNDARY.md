@@ -12,8 +12,10 @@ ingress-attestation source with an unlinked PHP verifier are implemented. An
 unlinked explicit-input core dispatcher and a disposable supported-server
 end-to-end proof are also implemented. A non-executing per-client deployment
 profile validator now covers the operator-owned deployment boundary without
-loading or applying a profile. The dispatcher composes those contracts but
-remains unlinked from the front controller. This document does **not** add
+loading or applying a profile. The core-owned response-owner composer now
+binds that profile to one exact response envelope and fixed lifecycle cookie
+descriptors without emitting them. The dispatcher composes those contracts
+but remains unlinked from the front controller. This document does **not** add
 a production public HTTP endpoint, production-emitted cookie, browser session access,
 package, permission, enablement profile, or Store Lite behavior. The five
 generic core tables remain empty in the clean starter.
@@ -56,6 +58,7 @@ changed by it.
 | Public-mutation dispatcher | Unlinked core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model | No front-controller link, response emission, browser issuance, package enablement, or Store Lite behavior |
 | Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
 | Per-client deployment profile | Pure validator accepts one non-secret operator review packet with canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags | No profile loading, secret resolution, filesystem/database access, deployment, dispatcher link, package enablement, or Store Lite data |
+| Response ownership/composition | Core accepts only a valid deployment profile and fixed response envelope, then appends zero, one, or an ordered clear/set subject-cookie descriptor from the lifecycle bridge; the result is non-emitting and deterministic | No arbitrary headers, package/theme ownership, cookie policy drift, request parsing, secret/database access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -484,6 +487,25 @@ secret, lifecycle, or response state. The dependency-free 27-assertion fixture
 proves both direct and explicitly operator-trusted proxy profiles while keeping
 the deployment packet non-executing.
 
+## Core-Owned Response-Owner Composition
+
+`includes/addon_public_mutation_response_owner_helpers.php` is the next
+non-emitting boundary. It requires a valid deployment-profile result, the
+existing fixed response envelope, and an optional valid lifecycle result. It
+returns the profile hash, unchanged core response, and only the lifecycle's
+fixed `Set-Cookie` descriptors: none for a resolved subject, one issuance or
+clearance line, or clear-then-set for rotation. Arbitrary response headers,
+package/theme ownership, linked-dispatcher profiles, malformed cookie
+attributes, and cookie-token body leakage fail closed.
+
+The response-owner composer does not call `header()`, `setcookie()`, `echo`,
+or `http_response_code()`. It reads no request/global/session state, secret,
+database, filesystem, package, or client state and remains outside `index.php`.
+The separate emitter remains the only future core HTTP emission primitive;
+actual per-client Caddy/TLS/proxy configuration, trusted-origin/HMAC
+provisioning and rotation, and browser deployment evidence remain required
+before any front-controller link.
+
 ## Future Core-Owned Request And Response Path
 
 When the dispatcher is linked, core—not a theme, browser script, or package
@@ -505,8 +527,9 @@ route file—must own this sequence:
    a raw cookie value exposed to package code, nor a client database/global
    identity. The unlinked dispatcher still requires an existing subject. A
    future response owner may call the implemented lifecycle bridge to ensure,
-   clear, or rotate that subject, then emit only its validated fixed descriptors
-   after the per-client deployment profile, response-owner, and production
+   clear, or rotate that subject, compose the exact fixed envelope and cookie
+   descriptors through the response-owner boundary, then emit only the
+   validated result after the per-client deployment profile and production
    deployment boundaries are accepted.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
@@ -540,8 +563,9 @@ route file—must own this sequence:
    loss, postcondition drift, or ledger/audit failure must roll back or refuse
    the complete request.
 8. Select only the implemented valid core response envelope after the complete
-   request/transaction result is known, then use the separate core emitter and
-   return immediately. A later dispatcher/emitter may not expose package/
+   request/transaction result is known, compose it with any lifecycle cookie
+   descriptors through the core response-owner boundary, then use the separate
+   core emitter and return immediately. A later dispatcher/emitter may not expose package/
    actor/cart/order/plan/state values, HTML, redirects, arbitrary headers,
    payment data, a privileged action token, or replay status.
 
@@ -743,14 +767,19 @@ This planning slice does not authorize:
 18. Completed the core-owned browser subject-cookie lifecycle bridge and its
     18-assertion disposable plus supported-server HTTP proofs. Ensure, clear,
     and rotate are transactional, fixed-descriptor, non-package operations;
-    client response ownership and deployment remain unaccepted.
+    client deployment remains unaccepted.
 19. Completed the non-executing per-client deployment profile and its
     27-assertion dependency-free fixture. It validates the operator-owned
     client database/origin, pinned server and ingress facts, core response and
     cookie ownership, fixed host-only policy, clean-starter isolation, and
     disabled activation flags without loading or applying a deployment.
-20. A separate richer enablement review may admit only packages that satisfy
+20. Completed the core-owned non-emitting response-owner composer and its
+    14-assertion dependency-free fixture. It binds the profile to the fixed
+    response envelope and zero, one, or ordered clear-then-set lifecycle
+    cookie descriptors while rejecting arbitrary headers, ownership/policy
+    drift, invalid lifecycle state, and front-controller linking.
+21. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-21. Store Lite can then implement its separately distributed catalog and cart
+22. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

@@ -334,6 +334,11 @@ features.
   database, runtime, or package code and remains unlinked from `index.php`, so
   it creates no public endpoint, browser cookie, Store Lite behavior, or
   enablement change
+- Core-owned non-emitting public-mutation response owner. It composes only an
+  already-valid fixed core envelope with the lifecycle bridge's exact subject-
+  cookie descriptors, rejects arbitrary headers, policy drift, and body token
+  leakage, and returns a deterministic pre-link result. It reads no request,
+  database, secret, package, or client state and remains outside `index.php`.
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

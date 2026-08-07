@@ -62,8 +62,8 @@ not use `$_SERVER`, `$_ENV`, `Host`, a request header, or
 history, logs, diagnostics, and client packages. Rotate it per installation
 through the client deployment runbook. The core browser subject-cookie
 lifecycle bridge is now implemented and proven separately, but HMAC-key
-rotation and response-owner binding remain deployment gates in this integration
-slice.
+rotation, production response binding, and browser evidence remain deployment
+gates in this integration slice.
 
 `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` remains a separately configured
 non-secret canonical HTTPS origin. It is never derived from `Host` or a
@@ -86,6 +86,19 @@ fixed host-only cookie policy, and clean-starter isolation. It must keep the
 dispatcher, package, and Store Lite activation flags false. The validator
 returns only a deterministic non-secret hash; it does not load the profile,
 resolve a key, read a database, or deploy the client.
+
+The core-only response-owner composition step is also dependency-free:
+
+```sh
+php scripts/addon-public-mutation-response-owner-self-test.php
+```
+
+The response-owner composer accepts that validated profile, one fixed core
+response envelope, and optional lifecycle descriptors. It returns only the
+allowed response plus zero, one, or ordered clear-then-set `Set-Cookie` lines;
+it emits no headers/body and remains unlinked. Actual per-client Caddy/TLS/
+proxy, trusted-origin/HMAC provisioning and rotation, and browser deployment
+review remain required before a front-controller link.
 
 ## Build and configuration boundary
 

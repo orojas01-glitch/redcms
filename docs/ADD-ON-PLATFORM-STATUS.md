@@ -49,8 +49,9 @@ flowchart TD
     G16 --> G17["Unlinked bounded mutation dispatcher"]
     G17 --> G18["Core-owned browser subject-cookie lifecycle"]
     G18 --> G19["Non-executing per-client deployment profile"]
-    G19 --> G20["CURRENT / NEXT<br/>Response-owner + production deployment review + richer enablement"]
-    G20 --> S["TARGET<br/>Store Lite optional package"]
+    G19 --> G20["Core-owned response-owner composition"]
+    G20 --> G21["CURRENT / NEXT<br/>Production deployment review + richer enablement"]
+    G21 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -60,8 +61,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19 complete;
-    class G20 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20 complete;
+    class G21 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -69,8 +70,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Non-executing per-client deployment profile: one deterministic review packet now validates canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, attestation-before-PHP route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags; no deployment or client data was touched. |
-| Current milestone | Response-owner and production deployment review: per-client Caddyfile/TLS/proxy configuration, trusted-origin/HMAC key provisioning/rotation, exact response header/cookie ownership, and final browser deployment evidence must be accepted before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-owned non-emitting response-owner composition: one validated deployment profile now binds an exact fixed response envelope to zero, one, or an ordered clear/set subject-cookie descriptor without arbitrary headers, body token leakage, request/global access, or front-controller linking. |
+| Current milestone | Production deployment review: per-client Caddyfile/TLS/proxy configuration, trusted-origin/HMAC key provisioning/rotation, browser response evidence, and final client-isolation review must be accepted before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

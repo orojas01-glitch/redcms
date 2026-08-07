@@ -806,7 +806,7 @@ request through the verifier, dispatcher, atomic runner, and fixed emitter
 against a fresh MySQL database, then removes its temporary database, image,
 network, package marker, and context. Neither proof deploys a binary or
 configuration for a client. Until the validated profile is followed by actual
-per-client deployment, response-owner, and browser-deployment review, invalid
+per-client deployment and browser-deployment review, invalid
 or missing attestation creates
 no public route, response, cookie, runtime/package invocation, lifecycle
 change, Store Lite behavior, or client state.
@@ -820,6 +820,16 @@ accesses a database or runtime, invokes package code, issues a cookie, selects
 or claims a route, or changes lifecycle, enablement, Store Lite, or client
 state. It remains unlinked from the front controller, so it is an emission
 primitive rather than a public endpoint or dispatcher.
+
+The core-owned response-owner composer now binds that emitter contract to a
+validated non-executing deployment profile and optional lifecycle result. It
+can return no cookie line, one fixed issuance/clearance line, or clear-then-set
+rotation lines, but it cannot accept arbitrary headers, package/theme response
+ownership, a linked-dispatcher profile, cookie-attribute drift, or a response
+body containing an opaque cookie token. It calls no output API and reads no
+request/global/session, secret, database, filesystem, package, or client state.
+The separate emitter remains the only future HTTP emission primitive; actual
+per-client deployment and browser evidence are still required.
 
 The separate pure subject-cookie serializer accepts only the exact
 issuer-descriptor shape and derives one fixed future host-only `Set-Cookie`
@@ -843,8 +853,8 @@ disposable 18-assertion fixture and supported-server rehearsal prove that a
 valid cookie is not reissued, rotation returns one deletion plus one
 replacement, the old token and CSRF fail closed, malformed input is safe, and
 cleanup leaves no temporary subject state. This remains a core lifecycle
-primitive; the per-client response owner and deployment boundary must still be
-reviewed before any front-controller link.
+primitive; the per-client deployment boundary must still be reviewed before
+any front-controller link.
 
 The non-executing per-client deployment profile is the current core review
 boundary. It accepts only a closed operator packet with a separate client

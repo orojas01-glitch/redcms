@@ -139,6 +139,12 @@ length, and POST-only method headers; maps replay to its original outcome; and
 rejects forged headers, bodies, and inconsistent runner results. It has no
 request parser, globals, cookie/session, database, package execution, response
 emission, route, enablement, Store Lite, or client-data path.
+The separate 14-assertion response-owner fixture proves that a valid deployment
+profile can compose that closed envelope with no cookie, one issuance/clearance
+descriptor, or ordered clear-then-set rotation descriptors. It rejects package
+ownership, linked-dispatcher profiles, arbitrary headers, cookie-policy drift,
+invalid lifecycle states, and any request/global/session/header mutation; it
+does not emit a response or link the front controller.
 The separate 17-assertion public-mutation live-data-preflight fixture proves
 that a trusted `installed_disabled` package can be inspected only through
 current migration, declared InnoDB-table, typed-setting, and opaque
@@ -612,8 +618,9 @@ containers, network, image, database, package marker, and build context.
   and zero package callback or HTTP-state changes. The dispatcher remains
   unlinked from `index.php`; the supported-server disposable rehearsal is
   complete. The core subject-cookie lifecycle is now proven independently;
-  the non-executing deployment profile is also proven; response-owner and
-  production deployment review remain required before linking it.
+  the non-executing deployment profile and response-owner composition are
+  also proven; production deployment review remains required before linking
+  it.
 - Public-mutation deployment-profile acceptance is dependency-free and creates
   no database, package, request, browser, route, or client fixture. It accepts
   only one non-secret operator review packet with a separate client database,
@@ -711,6 +718,14 @@ containers, network, image, database, package marker, and build context.
   unreviewed statuses before changing response state. It has no request-global,
   browser-cookie, session, database/runtime/package, front-controller, route,
   endpoint, lifecycle, enablement, Store Lite, or client-state path.
+- Public-mutation response-owner acceptance is dependency-free and creates no
+  database, package, request, browser, route, or client fixture. It requires a
+  valid non-executing deployment profile and exact core response envelope,
+  composes only fixed lifecycle cookie descriptors, proves issuance, clear,
+  resolve, and ordered rotation, and rejects arbitrary headers, package/theme
+  ownership, linked-dispatcher profiles, cookie-policy drift, malformed
+  lifecycle state, body token leakage, and any response/global/session state
+  change. It remains non-emitting and unlinked from the front controller.
 - Public-mutation subject-cookie serialization acceptance is dependency-free
   and creates no database, package, request, browser, route, or client
   fixture. It accepts only the exact core-issued descriptor shape and produces

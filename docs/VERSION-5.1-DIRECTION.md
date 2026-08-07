@@ -755,7 +755,7 @@ request bootstrap excludes the disabled package.
     security-header facts. It has no compiled binary, active Caddyfile, default
     server change, linked endpoint, cookie issuance, package invocation,
     enablement, fixture, Store Lite, or client-state path; per-client
-    deployment and response-owner review remain later gates.
+    deployment and production browser review remain later gates.
 58. Completed the unlinked core-owned public-mutation dispatcher composition:
     explicit method/target/capture facts select one registrar-bound route,
     require attested POST transport, verify the opaque subject and CSRF before
@@ -765,8 +765,8 @@ request bootstrap excludes the disabled package.
     front controller, emitting a response/cookie, changing enablement, or
     adding Store Lite/client state. The supported-server rehearsal and the
     separate core lifecycle bridge are complete; the non-executing deployment
-    profile is complete, while response-owner and production deployment review
-    remain.
+    profile and response-owner composition are complete, while production
+    deployment review remains.
 59. Completed the disposable supported-server dispatcher rehearsal: a temporary
     pinned FrankenPHP/Caddy image (with `mysqli` added only to that proof image)
     and fresh MySQL database carried a secret-guarded fixture request through
@@ -777,9 +777,9 @@ request bootstrap excludes the disabled package.
     containers, network, image, database, package marker, and build context
     were removed. It remains a test-only rehearsal; the core-owned
     subject-cookie lifecycle and non-executing deployment profile are now
-    proven, while response ownership, trusted-origin/HMAC provisioning, and
-    production deployment review precede any front-controller link or Store
-    Lite enablement.
+    proven, while trusted-origin/HMAC provisioning, production deployment, and
+    browser evidence precede any front-controller link or Store Lite
+    enablement.
 60. Completed the core-owned browser subject-cookie lifecycle bridge. Its
     transactional `ensure`, `clear`, and `rotate` operations return only fixed
     host-only cookie descriptors, refuse malformed input and active caller
@@ -788,8 +788,7 @@ request bootstrap excludes the disabled package.
     supported-server HTTP proof cover issuance, resolve-without-reissue,
     fixed clearance, old-token refusal, malformed input, and cleanup. This
     does not emit a production header, link the front controller, or authorize
-    a client deployment; response ownership and deployment remain the next
-    gate.
+    a client deployment; production deployment remains the next gate.
 61. Completed the non-executing per-client public-mutation deployment profile.
     One operator-owned packet now validates a separate client database and
     canonical HTTPS origin, pinned FrankenPHP/Caddy versions, fixed
@@ -799,8 +798,15 @@ request bootstrap excludes the disabled package.
     package, and Store Lite flags. It returns only a deterministic non-secret
     hash, refuses request-derived trust, policy/version/route drift, secret-
     shaped fields, and starter-database reuse, and does not load or apply a
-    deployment. Response-owner and production deployment review remain before
-    any front-controller link.
+    deployment. Production deployment and browser review remain before any
+    front-controller link.
+62. Completed the core-owned non-emitting response-owner composer. It binds a
+    valid deployment profile to the fixed response envelope and zero, one, or
+    ordered clear-then-set subject-cookie descriptors. Arbitrary headers,
+    package/theme ownership, linked-dispatcher profiles, cookie-policy drift,
+    invalid lifecycle state, and opaque cookie tokens in the response body
+    fail closed. The 14-assertion fixture proves no request/global/session/
+    header mutation; the composer remains outside the front controller.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
