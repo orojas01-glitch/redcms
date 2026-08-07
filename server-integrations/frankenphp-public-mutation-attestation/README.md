@@ -100,6 +100,19 @@ it emits no headers/body and remains unlinked. Actual per-client Caddy/TLS/
 proxy, trusted-origin/HMAC provisioning and rotation, and browser deployment
 review remain required before a front-controller link.
 
+The non-executing deployment-review packet can be checked independently:
+
+```sh
+php scripts/addon-public-mutation-deployment-review-self-test.php
+```
+
+It binds the profile hash to non-secret server/artifact hashes,
+process-environment trusted-origin/HMAC and old-key-revocation evidence, and
+fixed desktop/mobile browser results. It reads no deployment file or secret,
+does not open a browser or change client state, and cannot link the dispatcher.
+Actual per-client Caddy/TLS/proxy deployment and browser capture remain the
+next gate.
+
 ## Build and configuration boundary
 
 The module targets Caddy `v2.11.4`, which matches the local FrankenPHP

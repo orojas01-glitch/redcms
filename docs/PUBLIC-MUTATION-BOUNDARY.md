@@ -15,7 +15,9 @@ profile validator now covers the operator-owned deployment boundary without
 loading or applying a profile. The core-owned response-owner composer now
 binds that profile to one exact response envelope and fixed lifecycle cookie
 descriptors without emitting them. The dispatcher composes those contracts
-but remains unlinked from the front controller. This document does **not** add
+but remains unlinked from the front controller. A non-executing deployment
+review validator now binds a profile hash to non-secret server, trust, and
+browser evidence without loading or applying it. This document does **not** add
 a production public HTTP endpoint, production-emitted cookie, browser session access,
 package, permission, enablement profile, or Store Lite behavior. The five
 generic core tables remain empty in the clean starter.
@@ -59,6 +61,7 @@ changed by it.
 | Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
 | Per-client deployment profile | Pure validator accepts one non-secret operator review packet with canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags | No profile loading, secret resolution, filesystem/database access, deployment, dispatcher link, package enablement, or Store Lite data |
 | Response ownership/composition | Core accepts only a valid deployment profile and fixed response envelope, then appends zero, one, or an ordered clear/set subject-cookie descriptor from the lifecycle bridge; the result is non-emitting and deterministic | No arbitrary headers, package/theme ownership, cookie policy drift, request parsing, secret/database access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
+| Per-client deployment review | Pure validator binds the profile hash to pinned server/artifact evidence, process-environment trusted-origin/HMAC and rotation evidence, and fixed desktop/mobile browser evidence | No secret resolution, file loading, deployment, browser session, response emission, dispatcher link, package enablement, or Store Lite/client state |
 | Response emission | Core accepts only an existing fixed valid response envelope, rejects premature output, then clears and sets its exact no-store/nosniff JSON headers and matching fixed bytes | No request parsing, cookie/session access, database/runtime/package access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
 | Store Lite files, tables, or records | Absent from the clean starter | None |
 
@@ -506,6 +509,25 @@ actual per-client Caddy/TLS/proxy configuration, trusted-origin/HMAC
 provisioning and rotation, and browser deployment evidence remain required
 before any front-controller link.
 
+## Non-Executing Per-Client Deployment Review
+
+`includes/addon_public_mutation_deployment_review_helpers.php` binds one
+operator-owned review packet to the existing deployment-profile hash. It
+requires pinned FrankenPHP/Caddy/TLS/proxy facts, attestation-before-PHP route
+order, four deployment artifacts outside the clean starter, non-secret hashes
+for the Caddyfile/binary/certificate chain, process-environment trusted-origin
+and HMAC sources, explicit active-key/old-key rotation evidence, and no secret
+values in the packet.
+
+The packet also records bounded desktop `1440x1000` and mobile `390x844`
+browser evidence: HTTPS 200, zero console/network errors, exact response and
+cookie policy matches, no opaque token in the body, evidence hashes outside the
+starter, no dispatcher link, no mutation endpoint exercise, and no client
+state change. The validator reads no file or secret, performs no deployment or
+browser action, and returns only normalized non-secret evidence plus a
+deterministic review hash. Actual per-client deployment and browser capture
+remain the next gate.
+
 ## Future Core-Owned Request And Response Path
 
 When the dispatcher is linked, core—not a theme, browser script, or package
@@ -529,8 +551,8 @@ route file—must own this sequence:
    future response owner may call the implemented lifecycle bridge to ensure,
    clear, or rotate that subject, compose the exact fixed envelope and cookie
    descriptors through the response-owner boundary, then emit only the
-   validated result after the per-client deployment profile and production
-   deployment boundaries are accepted.
+   validated result after the per-client deployment profile and reviewed
+   production deployment boundaries are accepted.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
    request body, and secrets must not enter general logs, package output, audit
@@ -778,8 +800,13 @@ This planning slice does not authorize:
     response envelope and zero, one, or ordered clear-then-set lifecycle
     cookie descriptors while rejecting arbitrary headers, ownership/policy
     drift, invalid lifecycle state, and front-controller linking.
-21. A separate richer enablement review may admit only packages that satisfy
+21. Completed the non-executing per-client deployment review packet and its
+    17-assertion dependency-free fixture. It binds the profile hash to
+    non-secret server/artifact, process-environment trust/rotation, and fixed
+    desktop/mobile browser evidence while refusing secret values, deployment
+    file loading, browser state, and dispatcher linking.
+22. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-22. Store Lite can then implement its separately distributed catalog and cart
+23. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

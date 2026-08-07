@@ -145,6 +145,13 @@ descriptor, or ordered clear-then-set rotation descriptors. It rejects package
 ownership, linked-dispatcher profiles, arbitrary headers, cookie-policy drift,
 invalid lifecycle states, and any request/global/session/header mutation; it
 does not emit a response or link the front controller.
+The separate 17-assertion deployment-review fixture proves that a profile hash
+binds only non-secret Caddy/FrankenPHP/TLS/proxy artifact hashes, process-
+environment trusted-origin/HMAC provisioning and old-key-revocation evidence,
+and fixed desktop/mobile browser evidence. It rejects secret values, artifact
+placement in the starter, request-derived trust, unreviewed rotation, browser
+errors/state changes, forged review hashes, and any deployment or dispatcher
+path.
 The separate 17-assertion public-mutation live-data-preflight fixture proves
 that a trusted `installed_disabled` package can be inspected only through
 current migration, declared InnoDB-table, typed-setting, and opaque
@@ -631,6 +638,14 @@ containers, network, image, database, package marker, and build context.
   derived trust, version/route/policy drift, secret-shaped fields, and any
   dispatcher/package/Store Lite activation without loading a profile or
   changing response, filesystem, database, or client state.
+- Public-mutation deployment-review acceptance is dependency-free and creates
+  no database, package, request, browser, route, or client fixture. It binds
+  the profile hash to pinned server/TLS/proxy facts, non-secret Caddyfile/
+  binary/certificate hashes outside the starter, process-environment
+  trusted-origin/HMAC sources with verified old-key revocation, and bounded
+  desktop/mobile HTTPS browser evidence. It rejects secret values, unreviewed
+  proxy/TLS/rotation/browser facts, forged review hashes, file loading,
+  browser sessions, deployment, response emission, and dispatcher linking.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,

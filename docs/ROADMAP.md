@@ -282,6 +282,11 @@ profile-bound step. It accepts only the fixed response envelope and lifecycle
 cookie descriptors, preserves clear-before-set rotation ordering, rejects
 arbitrary headers and ownership/policy drift, and remains unlinked from the
 front controller. Actual per-client deployment and browser evidence remain.
+The non-executing deployment-review packet is now complete. It binds the
+profile hash to non-secret server/artifact hashes, process-environment
+trusted-origin/HMAC and old-key-revocation evidence, and fixed desktop/mobile
+browser results without reading files, resolving secrets, or changing client
+state. Actual per-client deployment and browser capture remain.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -546,11 +551,12 @@ and non-emitting subject-cookie-serialization and optional
 Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
 dispatcher, supported-server disposable rehearsal, and core-owned browser
 subject-cookie lifecycle bridge, non-executing per-client deployment profile,
-and response-owner composer are also complete. The rehearsal uses only a
-temporary custom binary,
+response-owner composer, and deployment-review packet are also complete. The
+rehearsal uses only a temporary custom binary,
 fixture endpoint, and fresh MySQL database; it does not link the dispatcher to
-the front controller or deploy a client. Client-specific Caddyfile/TLS/proxy,
-trusted-origin/HMAC provisioning and rotation, protected
+the front controller or deploy a client. Actual client-specific Caddyfile/TLS/
+proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
+capture, protected
 settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately

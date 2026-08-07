@@ -807,6 +807,14 @@ request bootstrap excludes the disabled package.
     invalid lifecycle state, and opaque cookie tokens in the response body
     fail closed. The 14-assertion fixture proves no request/global/session/
     header mutation; the composer remains outside the front controller.
+63. Completed the non-executing per-client deployment-review packet. It binds
+    the deployment-profile hash to non-secret Caddy/FrankenPHP/TLS/proxy
+    artifact hashes, process-environment trusted-origin/HMAC provisioning and
+    old-key-revocation evidence, and fixed desktop/mobile browser results. The
+    17-assertion fixture rejects secret values, starter-resident artifacts,
+    request-derived trust, browser errors/state changes, forged review hashes,
+    deployment, and dispatcher linking. Actual deployment and browser capture
+    remain the next gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

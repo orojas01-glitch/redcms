@@ -339,6 +339,11 @@ features.
   cookie descriptors, rejects arbitrary headers, policy drift, and body token
   leakage, and returns a deterministic pre-link result. It reads no request,
   database, secret, package, or client state and remains outside `index.php`.
+- Non-executing per-client deployment review validator. It binds a reviewed
+  profile hash to non-secret Caddy/FrankenPHP/TLS/proxy artifact evidence,
+  process-environment trusted-origin/HMAC provisioning and rotation facts, and
+  bounded desktop/mobile browser evidence. It reads no deployment file or
+  secret, changes no client state, and cannot link the dispatcher.
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

@@ -870,6 +870,17 @@ fails closed. The validator returns only a deterministic non-secret hash; it
 does not load the profile, resolve a secret, access a database, or change
 deployment, lifecycle, enablement, response, or client state.
 
+The non-executing deployment-review validator binds a second operator packet
+to that profile hash. It accepts only pinned Caddy/FrankenPHP/TLS/proxy facts,
+artifact hashes proved outside the starter, process-environment
+`RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` and
+`RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` sources, explicit active-key and
+old-key-revocation evidence, and bounded desktop/mobile browser results. It
+never accepts a secret value, reads a deployment file, opens a browser session,
+or changes a response, cookie, database, package, lifecycle, or client state.
+The packet must keep the dispatcher unlinked and must prove zero client-state
+change; actual per-client deployment and browser capture remain required.
+
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and
