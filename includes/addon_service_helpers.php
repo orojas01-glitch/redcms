@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/addon_runtime_helpers.php';
+require_once __DIR__ . '/addon_runtime_secret_helpers.php';
 
 if (!function_exists('red_addon_service_value')) {
     function red_addon_service_value($value, $depth, &$nodes)
@@ -79,11 +80,13 @@ if (!class_exists('RED_Addon_Service_Request', false)) {
         private string $service;
         private string $operation;
         private array $input;
+        private ?RED_Addon_Runtime_Secret_Access $secretAccess;
 
         public function __construct(
             string $service,
             string $operation,
-            array $input
+            array $input,
+            ?RED_Addon_Runtime_Secret_Access $secretAccess = null
         ) {
             if (!red_addon_valid_capability($service)
                 || preg_match(
@@ -105,6 +108,7 @@ if (!class_exists('RED_Addon_Service_Request', false)) {
             $this->service = $service;
             $this->operation = $operation;
             $this->input = $normalized;
+            $this->secretAccess = $secretAccess;
         }
 
         public function service(): string
@@ -120,6 +124,26 @@ if (!class_exists('RED_Addon_Service_Request', false)) {
         public function input(): array
         {
             return $this->input;
+        }
+
+        /**
+         * Resolve only this package's declared setting reference. The value
+         * is returned solely through the internal by-reference argument.
+         */
+        public function secret(string $settingKey, &$resolvedValue = null): array
+        {
+            if ($this->secretAccess === null) {
+                $resolvedValue = null;
+                return [
+                    'valid' => false,
+                    'resolved' => false,
+                    'reason' => 'secret_unavailable',
+                ];
+            }
+            return $this->secretAccess->resolve(
+                $settingKey,
+                $resolvedValue
+            );
         }
     }
 }
@@ -252,6 +276,17 @@ if (!function_exists('red_addon_service_invoke')) {
             return $result;
         }
         $result['package'] = $owner;
+        $secretAccess = red_addon_runtime_secret_access($owner);
+        try {
+            $request = new RED_Addon_Service_Request(
+                $service,
+                $operation,
+                $input,
+                $secretAccess
+            );
+        } catch (Throwable $throwable) {
+            return $result;
+        }
 
         $bufferLevel = ob_get_level();
         try {
@@ -277,6 +312,18 @@ if (!function_exists('red_addon_service_invoke')) {
         }
         if (!$serviceResult instanceof RED_Addon_Service_Result) {
             $result['reason'] = 'invalid_result';
+            return $result;
+        }
+        $nodes = 0;
+        if (!red_addon_runtime_secret_data_is_safe(
+            $serviceResult->data(),
+            $secretAccess,
+            0,
+            $nodes
+        ) || ($secretAccess !== null
+            && $secretAccess->containsValue($serviceResult->error())
+        )) {
+            $result['reason'] = 'secret_disclosure';
             return $result;
         }
         $result['success'] = $serviceResult->successState();

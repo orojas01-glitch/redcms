@@ -17,9 +17,11 @@ Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
 Typed internal services, exact static public `GET` routes, display-only
 administrator tools, and non-executing administrator action preflight now have
-separate fail-closed boundaries. Adapters, operational writable route/tool
-actions, settings UI/endpoints, actual secret
-lookup, and richer enablement remain blocked. RED-CMS does not
+separate fail-closed boundaries. A narrow secret-capable registration-only
+service profile permits package-specific server-local secret consumption
+through the typed service request, with core-owned result redaction. Adapters,
+operational writable route/tool actions, richer settings-bearing surfaces, and
+richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
 The generic public-mutation boundary now has optional closed manifest metadata,
 a value-free declaration preflight, and an unlinked core-owned dispatcher. A
@@ -812,14 +814,21 @@ false. Runtime registration is reported available. Declarative theme,
 settings, and live-data gates may clear only for these constrained profiles:
 
 - `registration_only_service`: at least one declared service and no component;
+- `registration_only_service_with_secrets`: at least one declared service, no
+  component, and one or more settings where every setting is a
+  `secret-reference`; the package has no editor, asset, migration, route, job,
+  administrator-tool/action, adapter, or outbound-host surface, and its
+  complete per-client settings plus server-local values must be available;
 - `default_public_component`: at least one declared component and no service,
   with theme compatibility supplied only by core's escaped default renderer;
 - `default_public_component_with_services`: at least one component and one
   service, with the same core-owned default component renderer and no automatic
   service invocation.
 
-All three profiles exclude migrations, settings, routes, jobs, public or
-administrator assets, administrator tools, adapters, and outbound hosts.
+The registration-only and component profiles exclude migrations, ordinary
+settings, routes, jobs, public or administrator assets, administrator tools,
+adapters, and outbound hosts. The secret-capable profile admits only its
+secret-reference settings and still excludes every other richer surface.
 Every richer surface remains explicitly blocked. The package registrar remains
 unexecuted. The separate CLI-only enable command must revalidate and execute
 that registrar before its state change. It accepts only these profiles, takes
@@ -895,6 +904,20 @@ bounds depth, nodes, keys, strings, and encoded size, and contains package
 output, exceptions, output-buffer changes, and malformed results. It supplies
 no database connection, HTTP request, session, administrator authority, or
 automatic invocation.
+
+For the admitted `registration_only_service_with_secrets` profile, the same
+boundary attaches one package-bound `RED_Addon_Runtime_Secret_Access` object to
+the request. Package code may call
+`RED_Addon_Service_Request::secret($settingKey, &$resolvedValue)` only for its
+own declared secret-reference setting. The status result is value-free and
+the bytes are available only through the internal by-reference variable. Core
+rejects a typed result whose keys or string values contain a resolved secret,
+returns `secret_disclosure`, and never places the access object or secret bytes
+in a runtime snapshot, plan, audit, response, or browser state. This narrow
+profile does not admit ordinary settings or any route, component, asset,
+administrator, migration, adapter, or outbound-host surface.
+The full boundary and its evidence are documented in
+[`ADD-ON-RUNTIME-SECRET-CONSUMPTION-DIRECTION.md`](ADD-ON-RUNTIME-SECRET-CONSUMPTION-DIRECTION.md).
 
 ## Component Contract
 
@@ -1514,6 +1537,9 @@ Every package must prove, in a disposable isolated installation:
 - Disablement with retained data
 - Uninstall and separately confirmed purge behavior
 - Client database, media, configuration, and secret isolation
+- For the secret-capable service profile, package-specific by-reference secret
+  access, preflight value-free evidence, fail-closed unavailable configuration,
+  and rejection of secret-bearing service result data
 - No change to the configured primary database during automated acceptance
 - No client data in the clean starter distribution
 
@@ -1547,13 +1573,18 @@ responses, or structured data.
    page-request bootstrap and safe enabled-component public dispatch are
    implemented without bundling a package or business data. The read-only plan
    now clears declarative gates only for registration-only service,
-   core-rendered default public component, and combined default-component plus
-   registration-only-service profiles. The registrar-validating atomic
+   secret-capable registration-only service, core-rendered default public
+   component, and combined default-component plus registration-only-service
+   profiles. The secret-capable profile requires complete per-client
+   secret-reference settings and server-local resolution but keeps all
+   evidence value-free. The registrar-validating atomic
    `enabled` transition for those constrained profiles is implemented. The
    component profiles add no operational editor form, persistence, package
    assets, business data, or client package. Services are callable only through
    the separate typed boundary with exact runtime ownership and final bounded
-   request/result objects.
+   request/result objects. Its service request exposes only the package's own
+   resolved secret references through a by-reference lookup, and core rejects
+   secret-bearing result data before returning it.
    Non-executing, data-retaining atomic disablement is also implemented with
    enabled-dependent refusal and later-request unload proof. Every richer
    package surface and every later lifecycle transition remain separate
@@ -1583,8 +1614,9 @@ responses, or structured data.
    delivery endpoint and core-owned public/admin document injection are also
    implemented. Data-only administrator action contracts and their exact
    runtime-owner/permission/numeric-target preflight are also implemented,
-   without action execution, UI, or endpoint; editing UI, actual secret lookup,
-   and activation readiness remain separate. Read-only inactive component-creation
+   without action execution, UI, or endpoint; richer editing UI, actual secret
+   lookup outside the narrow service profile, and activation readiness remain
+   separate. Read-only inactive component-creation
    preflight and its atomic runner plus permission-enforced inactive
    parent-metadata writes and the display-only value-free revision timeline are
    implemented. Read-only delete planning and its atomic inactive runner are

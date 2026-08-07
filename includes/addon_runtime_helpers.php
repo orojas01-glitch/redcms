@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/addon_registry_helpers.php';
+require_once __DIR__ . '/addon_runtime_secret_helpers.php';
 
 if (!class_exists('RED_Addon_Runtime_Registry', false)) {
     final class RED_Addon_Runtime_Registry
@@ -389,14 +390,33 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
     {
         private array $order;
         private array $packages;
+        private array $secrets;
         private array $handlers = [];
         private array $owners = [];
         private array $metadata = [];
 
-        public function __construct(array $order, array $packages)
+        public function __construct(
+            array $order,
+            array $packages,
+            array $secrets = []
+        )
         {
             $this->order = array_values($order);
             $this->packages = $packages;
+            $this->secrets = [];
+            foreach ($secrets as $packageId => $access) {
+                if (!is_string($packageId)
+                    || !red_addon_valid_package_id($packageId)
+                    || !$access instanceof RED_Addon_Runtime_Secret_Access
+                    || $access->packageId() !== $packageId
+                    || !in_array($packageId, $this->order, true)
+                ) {
+                    throw new LogicException(
+                        'Runtime secret context evidence is invalid.'
+                    );
+                }
+                $this->secrets[$packageId] = $access;
+            }
             foreach (
                 [
                     'components',
@@ -486,6 +506,12 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                 && $registry->packageId() === $packageId
                     ? $registry->manifest()
                     : null;
+        }
+
+        public function secretAccess(
+            string $packageId
+        ): ?RED_Addon_Runtime_Secret_Access {
+            return $this->secrets[$packageId] ?? null;
         }
 
         public function snapshot(): array
@@ -796,12 +822,31 @@ if (!function_exists('red_addon_runtime_bootstrap')) {
         }
 
         $registries = [];
+        $secretAccess = [];
         foreach ($order as $packageId) {
+            $secretResult = red_addon_runtime_secret_access_for_package(
+                $connection,
+                $catalog['packages'][$packageId]
+            );
+            if (empty($secretResult['valid'])) {
+                throw new RuntimeException(
+                    'Enabled add-on secret configuration is unavailable.'
+                );
+            }
+            if ($secretResult['access']
+                instanceof RED_Addon_Runtime_Secret_Access
+            ) {
+                $secretAccess[$packageId] = $secretResult['access'];
+            }
             $registries[$packageId] = red_addon_runtime_register_package(
                 $catalog['packages'][$packageId]
             );
         }
-        $context = new RED_Addon_Runtime_Context($order, $registries);
+        $context = new RED_Addon_Runtime_Context(
+            $order,
+            $registries,
+            $secretAccess
+        );
         return [
             'order' => $order,
             'packages' => $registries,
@@ -886,6 +931,17 @@ if (!function_exists('red_addon_runtime_manifest')) {
         $context = red_addon_runtime_current_context();
         return $context instanceof RED_Addon_Runtime_Context
             ? $context->manifest((string) $packageId)
+            : null;
+    }
+}
+
+if (!function_exists('red_addon_runtime_secret_access')) {
+    function red_addon_runtime_secret_access($packageId)
+    {
+        $context = red_addon_runtime_current_context();
+        return $context instanceof RED_Addon_Runtime_Context
+            && is_string($packageId)
+            ? $context->secretAccess($packageId)
             : null;
     }
 }

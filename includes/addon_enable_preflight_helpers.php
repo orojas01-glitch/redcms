@@ -285,6 +285,25 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
         $componentEditorRequired = $inventory['componentEditors'] > 0;
         $themeRequired = $inventory['publicAssets'] > 0;
         $settingsRequired = $inventory['settings'] > 0;
+        $secretSettingCount = 0;
+        $secretOnlySettings = $settingsRequired;
+        foreach ($manifest['settings'] ?? [] as $setting) {
+            if (!is_array($setting)) {
+                $secretOnlySettings = false;
+                continue;
+            }
+            if (($setting['type'] ?? '') === 'secret-reference') {
+                $secretSettingCount++;
+            } else {
+                $secretOnlySettings = false;
+            }
+        }
+        $secretServiceProfile = $hasServices
+            && !$hasComponents
+            && !$componentEditorRequired
+            && !$themeRequired
+            && $secretOnlySettings
+            && $secretSettingCount > 0;
         $operationalSurface = $liveDataSurface;
         $operationalSurface['services'] = 0;
         $liveDataRequired = array_sum($operationalSurface) > 0;
@@ -307,6 +326,7 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
             && !$settingsRequired
             && !$liveDataRequired;
         $eligible = $registrationOnly
+            || $secretServiceProfile
             || $defaultPublicComponent
             || $defaultPublicComponentWithServices;
         $blockers = [];
@@ -323,7 +343,7 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
                 'surface' => $themeSurface,
             ];
         }
-        if ($settingsRequired) {
+        if ($settingsRequired && !$secretServiceProfile) {
             $blockers[] = [
                 'code' => 'settings_configuration_required',
                 'settings' => $inventory['settings'],
@@ -342,8 +362,28 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
         }
         red_addon_enable_preflight_sort_records($blockers);
 
+        $gates = [
+            'componentEditor' => $componentEditorRequired
+                ? 'blocked'
+                : 'not_applicable',
+            'themeCompatibility' => $themeRequired
+                ? 'blocked'
+                : ($hasComponents ? 'passed' : 'not_applicable'),
+            'settings' => $secretServiceProfile
+                ? 'required'
+                : ($settingsRequired ? 'blocked' : 'passed'),
+            'liveData' => $liveDataRequired
+                ? 'blocked'
+                : 'not_applicable',
+        ];
+        if ($secretServiceProfile) {
+            $gates['secretRuntime'] = 'required';
+        }
+
         return [
-            'id' => $registrationOnly
+            'id' => $secretServiceProfile
+                ? 'registration_only_service_with_secrets'
+                : ($registrationOnly
                 ? 'registration_only_service'
                 : (
                     $defaultPublicComponent
@@ -353,20 +393,10 @@ if (!function_exists('red_addon_enable_preflight_activation_profile')) {
                                 ? 'default_public_component_with_services'
                                 : 'expanded_contract_required'
                         )
-                ),
+                )),
             'eligible' => $eligible,
-            'gates' => [
-                'componentEditor' => $componentEditorRequired
-                    ? 'blocked'
-                    : 'not_applicable',
-                'themeCompatibility' => $themeRequired
-                    ? 'blocked'
-                    : ($hasComponents ? 'passed' : 'not_applicable'),
-                'settings' => $settingsRequired ? 'blocked' : 'passed',
-                'liveData' => $liveDataRequired
-                    ? 'blocked'
-                    : 'not_applicable',
-            ],
+            'secretSettingCount' => $secretSettingCount,
+            'gates' => $gates,
             'blockers' => $blockers,
         ];
     }
@@ -401,6 +431,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             'routeConflicts' => [],
             'runtimeInventory' => [],
             'activationProfile' => [],
+            'secretRuntimeEvidence' => [],
             'gates' => [
                 'authorization' => 'not_checked',
                 'trust' => 'not_checked',
@@ -411,6 +442,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
                 'componentEditor' => 'not_implemented',
                 'themeCompatibility' => 'not_implemented',
                 'settings' => 'not_implemented',
+                'secretRuntime' => 'not_implemented',
                 'liveData' => 'not_implemented',
                 'runtimeRegistration' => 'available',
             ],
@@ -636,6 +668,29 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
         foreach ($plan['activationProfile']['gates'] as $gate => $status) {
             $plan['gates'][$gate] = $status;
         }
+        if (($plan['activationProfile']['id'] ?? '') ===
+            'registration_only_service_with_secrets'
+        ) {
+            $plan['secretRuntimeEvidence'] =
+                red_addon_runtime_secret_preflight_evidence(
+                    $connection,
+                    $package
+                );
+            if (!empty($plan['secretRuntimeEvidence']['ready'])) {
+                $plan['gates']['secretRuntime'] = 'passed';
+                $plan['gates']['settings'] = 'passed';
+            } else {
+                $plan['gates']['secretRuntime'] = 'blocked';
+                $plan['gates']['settings'] = 'blocked';
+                $plan['blockers'][] = [
+                    'code' => 'runtime_secret_configuration_required',
+                    'reason' => (string) (
+                        $plan['secretRuntimeEvidence']['reason']
+                        ?? 'runtime_secret_unavailable'
+                    ),
+                ];
+            }
+        }
         foreach ($plan['activationProfile']['blockers'] as $blocker) {
             $plan['blockers'][] = $blocker;
         }
@@ -648,6 +703,13 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             && $plan['gates']['dependencies'] === 'passed'
             && $plan['gates']['capabilityNamespace'] === 'passed'
             && $plan['gates']['routeNamespace'] === 'passed';
+        if (($plan['activationProfile']['id'] ?? '') ===
+            'registration_only_service_with_secrets'
+        ) {
+            $plan['declarativeGatesReady'] =
+                $plan['declarativeGatesReady']
+                && $plan['gates']['secretRuntime'] === 'passed';
+        }
 
         $planMaterial = [
             'database' => $plan['database'],
@@ -668,6 +730,7 @@ if (!function_exists('red_addon_enable_preflight_plan')) {
             'routeConflicts' => $plan['routeConflicts'],
             'runtimeInventory' => $plan['runtimeInventory'],
             'activationProfile' => $plan['activationProfile'],
+            'secretRuntimeEvidence' => $plan['secretRuntimeEvidence'],
             'gates' => $plan['gates'],
             'blockers' => $plan['blockers'],
             'declarativeGatesReady' => $plan['declarativeGatesReady'],

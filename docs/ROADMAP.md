@@ -139,19 +139,25 @@ remain non-dispatched. The clean starter has no package directory or enabled
 package state.
 
 The read-only enablement plan now resolves declarative theme, settings, and
-live-data gates for three deliberately constrained profiles: a
-registration-only service package, a core-rendered default public component
-package, and a default public component combined with registration-only
-services. All exclude migrations, settings, routes, jobs, public or
-administrator assets, administrator tools, adapters, and outbound hosts. Any
-richer package remains blocked behind its explicit contracts. The separate
+live-data gates for four deliberately constrained profiles: a registration-only
+service package, a secret-capable registration-only service package, a
+core-rendered default public component package, and a default public component
+combined with registration-only services. The secret-capable profile permits
+only secret-reference settings and requires complete client storage plus
+server-local values; it still excludes migrations, routes, jobs, assets,
+administrator tools/actions, adapters, and outbound hosts. The other profiles
+exclude settings as before. Any richer package remains blocked behind its
+explicit contracts. The separate
 Owner-authorized enable command revalidates that exact plan under the shared
 lifecycle lock and target package lock, validates the fixed registrar, and
 atomically records `enabled` with its bounded audit fact. Safe default
 component dispatch is implemented. Services can be invoked only through a
 non-HTTP core boundary that requires exact enabled request-local ownership,
 supplies one immutable typed request, accepts one typed result, and bounds all
-JSON-compatible values. Exact static public `GET` routes now have a separate
+JSON-compatible values. A secret-capable service request may resolve only its
+own declared server-local secret through an internal by-reference value; core
+rejects secret-bearing result data and keeps plans, context, audits, and
+responses value-free. Exact static public `GET` routes now have a separate
 core-owned JSON dispatcher with the same request-local ownership and
 containment discipline. It exposes no session, database, member,
 administrator, unsafe-method, placeholder, HTML, redirect, upload, or arbitrary
@@ -307,14 +313,14 @@ migrations, settings, media, or business data. Richer route/tool actions,
 adapter dispatch, upgrades, uninstall/purge, Member Access, Store
 Lite, and the other optional verticals remain later reviewed batches.
 
-The first settings prerequisite is now implemented without storage or package
-execution. Core normalizes only a valid data-only settings array, requires
-defaults to match their exact declared non-secret type, and validates one
-closed configuration object with bounded values and exact missing/unknown
-reporting. Secret settings accept only opaque lowercase `config:` references
-and remain separate from ordinary values; core does not resolve secret
-material. Per-client persistence, package settings permissions/UI, secret
-availability, and settings-bearing package enablement remain blocked.
+The first settings prerequisite is now implemented without package execution.
+Core normalizes only a valid data-only settings array, requires defaults to
+match their exact declared non-secret type, and validates one closed
+configuration object with bounded values and exact missing/unknown reporting.
+Secret settings accept only opaque lowercase `config:` references and remain
+separate from ordinary values. Per-client persistence, permissioned reads and
+writes, masked editor behavior, and non-executing secret availability are
+implemented; secret bytes remain outside this core-only data boundary.
 
 The per-client settings storage and authorization prerequisite is now
 implemented. The clean installer contains one empty generic
@@ -325,10 +331,11 @@ already declared by their package. The read-only write preflight revalidates
 the exact filesystem/registry identity, installed-disabled or enabled state,
 complete typed target configuration, fresh binary grant decisions, and current
 stored-state fingerprint. It writes no row and resolves no secret. Atomic
-persistence is complete, and the ordinary settings editor/endpoint is now
-accepted separately. The core-owned server-local secret resolution/reference
-replacement boundary is also accepted separately; package-runtime secret
-consumption and richer enablement remain blocked.
+persistence and the ordinary settings editor/endpoint are accepted separately.
+The core-owned server-local secret resolution/reference replacement boundary is
+also accepted separately. The narrow secret-capable registration-only service
+profile now consumes only its own resolved references through the typed service
+request; richer settings-bearing enablement remains blocked.
 
 Atomic per-client setting persistence is now implemented as an internal core
 helper. It refuses caller-owned transactions, acquires the shared lifecycle
@@ -337,8 +344,8 @@ the complete plan, replaces every normalized ordinary value or opaque secret
 reference, reloads the exact target hash/count, and commits one value-free
 `addon.settings.updated` audit fact. Exact no-ops add no audit. Audit,
 postcondition, injected, permission, identity, lifecycle, or state failure
-rolls the replacement back. Settings UI/endpoints, package-runtime secret
-consumption, and richer enablement remain separate gates.
+rolls the replacement back. The narrow secret-capable service path is separate
+from ordinary settings UI and does not admit richer package enablement.
 
 A separate core-only current-setting read model is now implemented. It binds
 the same trusted package identity and supported installed-disabled/enabled
@@ -347,8 +354,9 @@ permission, and makes a fresh binary decision per setting. Authorized readers
 receive only normalized non-secret stored/default/unset values plus a
 deterministic model hash; secret settings report only whether an opaque
 reference is configured. Identity, lifecycle, schema, stored-value, or grant
-drift fails closed with no partial model. It adds no administrator UI or
-endpoint, write, package execution, secret lookup, or enablement eligibility.
+drift fails closed with no partial model. It adds no package execution or
+secret lookup; the separate core-owned editor/endpoint remains permissioned,
+masked, and stale-plan guarded.
 
 Non-executing secret-reference availability evidence is now implemented.
 Each server may declare a bounded list of opaque `config:` references in its
@@ -357,11 +365,13 @@ validates the inventory, revalidates the complete typed package configuration,
 and returns only counts, missing setting keys, and deterministic declaration,
 configuration, and evidence hashes. The evidence contains no reference
 identifier or secret value, reads no database, executes no package, and does
-not relax activation. The core-owned ordinary settings editor/endpoint is now
+not relax activation. The core-owned ordinary settings editor/endpoint is
 implemented and accepted separately: it is permission-scoped, CSRF-protected,
 stale-plan guarded, and secret-masked. Core-owned server-local secret
-resolution/reference replacement is accepted separately; package-runtime
-secret consumption and richer enablement remain blocked. The contracts are
+resolution/reference replacement is accepted separately. The narrow
+secret-capable service profile now resolves only package-owned references at
+request time and rejects secret-bearing result data; richer enablement remains
+blocked. The contracts are
 documented in
 [`ADD-ON-SETTINGS-EDITOR-DIRECTION.md`](ADD-ON-SETTINGS-EDITOR-DIRECTION.md):
 ordinary typed settings are edited through a core-owned form while
@@ -567,8 +577,10 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
-complete, a core-only authorized setting read model is complete, and the
-generic public-mutation subject/CSRF, fixed-window rate-limit, opaque
+complete, a core-only authorized setting read model is complete, and the narrow
+secret-capable registration-only service profile now proves package-specific
+by-reference secret consumption plus core result redaction. The generic
+public-mutation subject/CSRF, fixed-window rate-limit, opaque
 idempotency-key, atomic transaction-runner, bounded response, declared-form
 decoder, pure HTTP request-envelope, private static route-selector, and
 non-routable server request-facts adapter plus closed response-emitter
@@ -588,8 +600,8 @@ MySQL databases; it does not link the dispatcher to the front controller or
 deploy a client. The retained local starter database was not migrated because
 it is an older historical snapshot. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
-capture, package-runtime secret consumption, live-data disable/upgrade
-compatibility, and richer package persistence contracts must still be
+capture, live-data disable/upgrade compatibility, and richer package
+persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled. A separate read-only review of the demo
 client confirmed its public and administrator-login routes return HTTPS 200
