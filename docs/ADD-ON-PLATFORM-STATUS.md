@@ -71,8 +71,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-owned non-executing deployment review packet: a profile-bound, non-secret evidence contract now validates pinned Caddy/FrankenPHP/TLS/proxy facts, artifact hashes outside the starter, process-environment trust and key-rotation evidence, and bounded desktop/mobile browser results without deployment or dispatcher linking. |
-| Current milestone | Actual per-client deployment rehearsal: the isolated HTTPS runner now stages the reviewed Caddy/TLS/proxy boundary, rotates process-environment HMAC evidence, and captures browser proof outside the starter. A successful Docker/browser run and later client-specific review are still required before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-owned non-executing deployment review packet plus the isolated HTTPS Docker/FrankenPHP rehearsal: the profile-bound evidence validates pinned Caddy/FrankenPHP/TLS/proxy facts, artifact hashes outside the starter, process-environment trust and key rotation, and bounded desktop/mobile browser results without deployment or dispatcher linking. |
+| Current milestone | The isolated Docker/browser rehearsal passed on 2026-08-07 with FrankenPHP 1.12.4 and Caddy 2.11.4: HTTPS loaded at desktop and mobile widths, both returned HTTP 200 with zero console/network errors, no opaque token or cookie was disclosed, and process-key rotation was verified. A separate client-specific deployment review is still required before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
