@@ -665,9 +665,8 @@ owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the
 form permission. It reads no body or request/session globals, consumes no CSRF,
 invokes no package callback, renders no HTML, opens no transaction, writes no
-state, and creates no endpoint. A later protected adapter must authenticate and
-verify CSRF before reading the bounded JSON body; the declaration is policy
-evidence, not a token check or activation path.
+state, and creates no endpoint. The declaration is policy evidence, not a token
+check or activation path.
 
 Optional administrator-form field metadata is also closed and non-executable.
 Core accepts only the existing scalar field vocabulary plus collections capped
@@ -686,6 +685,20 @@ schema-drifted values, and binds the normalized graph to
 package/tool/form/target/contract SHA-256 evidence before the renderer may
 display it. The renderer still adds no names, editable or submit controls,
 request body, CSRF operation, endpoint, or write path.
+
+The separate protected validation adapter is core-owned and remains unlinked
+from that renderer. Its endpoint requires POST and calls the authenticated
+administrator plus header-CSRF guard before opening the body stream. Only exact
+`application/json`, a canonical decimal content length, the 256 KiB global
+ceiling, and a canonical closed JSON root are admitted. After decoding, core
+repeats the fresh form grant, applies the manifest body limit before provider
+invocation, reloads current values through the exact registrar owner, refuses a
+stale state SHA-256, and validates every submitted nested value. The resulting
+opaque plan hash binds actor, package, tool, form, target, permission, contract,
+current state, and submitted-values evidence. Public output contains only a
+generic validated result or bounded refusal; it exposes no values or hashes.
+There is no form writer registration, transaction, package mutation, Save
+control, Store Lite provider, or Store Lite data.
 
 The loader is reviewed first-party PHP, not a database sandbox. It is required
 to be read-only and may query only its package-owned current-client data; it

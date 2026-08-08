@@ -590,8 +590,13 @@ complete, the closed JSON administrator-form declaration and non-executing
 permission-scoped form plan plus bounded two-level field schema are complete.
 The exact registrar-bound current-value loader now performs a fresh package
 grant check, validates a complete nested typed graph, binds record/contract
-state evidence, and may populate only escaped disabled core controls. There is
-still no editable control, request body, CSRF operation, write, or endpoint.
+state evidence, and may populate only escaped disabled core controls. A
+separate unlinked core endpoint now authenticates and verifies header CSRF
+before reading an exact canonical bounded JSON body, repeats the form preflight
+and current-value load, refuses stale state, validates the complete submitted
+graph, and derives opaque actor/contract/target/state-bound plan evidence. It
+returns only a generic validation result and invokes no writer. There is still
+no editable control, Save action, package mutation, or Store Lite provider.
 The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific
 by-reference secret consumption plus core result redaction. The generic

@@ -936,6 +936,19 @@ request bootstrap excludes the disabled package.
     identity reaches the provider, and no editable control, request body, CSRF
     operation, endpoint, write, Store Lite package, table, or state is added.
 
+71. Completed the validation-only administrator-form JSON adapter. The
+    unlinked core endpoint requires POST, an authenticated current
+    administrator, and header CSRF before it opens the request-body stream. It
+    accepts only exact `application/json`, canonical content length, the global
+    256 KiB ceiling, and one canonical closed root containing tool, form,
+    positive target, current-state SHA-256, and values. Core applies the
+    manifest body limit before value-provider invocation, repeats fresh form permission
+    and current-value checks, refuses stale state, validates the complete
+    nested value graph, and derives opaque values and actor/contract/target/
+    state-bound plan hashes. It returns only a bounded generic validation or
+    refusal envelope. No writer registration, package mutation, editable
+    control, Save action, Store Lite package, table, or state is added.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

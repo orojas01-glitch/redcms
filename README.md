@@ -154,7 +154,13 @@ ledger and value-free audit fact. A core-owned, unlinked administrator endpoint
 now validates the current session and CSRF token itself, accepts only an exact
 tool/action/positive-target request, derives the plan server-side, and returns
 only bounded executed, unchanged, or refusal outcomes. It exposes no UI, form,
-package values, package markup, or public route. Operational writable route/tool actions, upgrade,
+package values, package markup, or public route. A separate unlinked
+administrator-form JSON endpoint now authenticates and verifies header CSRF
+before body I/O, accepts only canonical bounded JSON, repeats the exact form
+grant and current-value load, refuses stale state, validates the complete
+nested value graph, and returns only a generic validation outcome. It invokes
+no package writer and remains disconnected from the disabled preview.
+Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
 features.
@@ -467,8 +473,8 @@ php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
 The dependency-free administrator-form schema/preview plus database-backed
-setting-storage, administrator-form preflight/current-value loading,
-administrator-action preflight, and
+setting storage, administrator-form preflight, current-value loading, JSON
+validation, administrator-action preflight, and
 immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,

@@ -1287,10 +1287,23 @@ encoded graph fits `maxBodyBytes`. Core contains output, exceptions,
 output-buffer drift, and HTTP-state drift, then binds normalized values to the
 package/tool/form/target/contract SHA-256 state. Only that exact loaded result
 may populate the core renderer. Current rows remain escaped, disabled, and
-nameless; there is still no `form`, editable or submit control, request parser,
-CSRF consumption, endpoint, or write. The provider is trusted reviewed
-first-party read-only PHP, not a database sandbox. A protected body adapter is
-a later separate review.
+nameless. The provider is trusted reviewed first-party read-only PHP, not a
+database sandbox.
+
+`red_addon_admin_tool_form_submission_prepare()` is the separate
+validation-only body adapter. The unlinked core endpoint authenticates the
+current administrator and verifies header CSRF before opening its input stream.
+Transport must be exact `application/json` with canonical decimal length and a
+maximum of 262144 bytes. The body must be canonical JSON with exactly `tool`,
+`form`, `targetRecordId`, `currentStateSha256`, and `values`. Core repeats the
+form preflight, enforces the manifest `maxBodyBytes` before invoking the
+current-value provider, reloads current state, refuses stale evidence,
+validates the complete submitted graph, and derives opaque submitted-values and
+actor/contract/target/state-bound plan hashes. The public response is only
+`validated` or a bounded generic refusal and discloses no values or evidence.
+This adapter registers and invokes no writer, opens no transaction, mutates no
+package data, and remains disconnected from the disabled preview; an editable
+form and atomic writer require a separate gate.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique
