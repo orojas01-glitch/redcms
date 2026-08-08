@@ -1360,6 +1360,14 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
             $normalizedCreate = null;
             if (array_key_exists('create', $contract)) {
                 $createContext = $context . ' create';
+                if (!is_array($normalizedFields)
+                    || $normalizedFields === []
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $createContext . ' requires a non-empty fields schema.'
+                    );
+                }
                 if (red_addon_validate_object_keys(
                     $contract['create'],
                     ['label', 'description'],

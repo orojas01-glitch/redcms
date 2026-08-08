@@ -205,6 +205,8 @@ try {
                 === '#/$defs/permission'
             && ($schema['$defs']['adminToolFormContract']['properties']['create']['$ref'] ?? '')
                 === '#/$defs/adminToolFormCreate'
+            && ($schema['$defs']['adminToolFormContract']['dependentRequired']['create'] ?? null)
+                === ['fields']
             && ($schema['$defs']['adminToolFormCreate']['additionalProperties'] ?? null) === false
             && ($schema['$defs']['adminToolFormCreate']['properties']['label']['maxLength'] ?? null)
                 === 120
@@ -411,6 +413,13 @@ try {
                 'csrf' => 'required',
                 'encoding' => 'application/json',
                 'maxBodyBytes' => 32768,
+                'fields' => [[
+                    'key' => 'reference',
+                    'label' => 'Reference',
+                    'type' => 'text',
+                    'required' => true,
+                    'maxLength' => 64,
+                ]],
                 'create' => [
                     'label' => 'Add order',
                     'description' => 'Prepare one new bounded order form.',
@@ -473,6 +482,13 @@ try {
                 'csrf' => 'required',
                 'encoding' => 'application/json',
                 'maxBodyBytes' => 32768,
+                'fields' => [[
+                    'key' => 'reference',
+                    'label' => 'Reference',
+                    'type' => 'text',
+                    'required' => true,
+                    'maxLength' => 64,
+                ]],
                 'create' => [
                     'label' => 'Add order',
                     'description' => 'Prepare one new bounded order form.',
@@ -525,8 +541,12 @@ try {
                 $invalidCreate,
                 'create contains unsupported field "callback"'
             )
+            && red_addon_test_error_contains(
+                $invalidCreate,
+                'create requires a non-empty fields schema'
+            )
             && !file_exists($executionMarker),
-        'administrator form creation metadata rejects executable fields without loading package PHP'
+        'administrator form creation metadata requires fields and rejects executable metadata without loading package PHP'
     );
 
     $invalidToolProject = red_addon_test_project(

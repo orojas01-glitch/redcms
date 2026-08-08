@@ -680,9 +680,17 @@ permissions, alternate methods/encodings, weakened CSRF, and invalid body
 bounds fail manifest validation without loading package PHP.
 
 An optional closed form `create` declaration contains only a bounded label and
-description. It reuses the exact form permission and is discovery evidence
-only: no callback, endpoint, renderer, record allocation, or write authority is
-created. Executable or unknown metadata fails before package PHP is loaded.
+description and requires a non-empty closed `fields` schema. It reuses the
+exact form permission and is discovery evidence only: no callback, endpoint,
+renderer, record allocation, or write authority is created. Executable or
+unknown metadata fails before package PHP is loaded.
+
+An enabled package that declares form creation must register one exact initial
+value loader and one exact creator; the creator is constrained to one through
+eight declared package tables. Missing, duplicate, undeclared, empty-table, or
+reserved-table registration fails bootstrap. Registration exposes no execution
+path by itself: no provider is invoked, no transaction begins, and no request or
+browser surface is added.
 
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and

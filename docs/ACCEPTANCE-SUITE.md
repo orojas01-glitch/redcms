@@ -660,6 +660,14 @@ containers, network, image, database, package marker, and build context.
   rejects unknown, secret, defaulted, or duplicate keys. It never opens a
   database, resolves a value, invokes package code, creates an endpoint, or
   changes enablement.
+- Add-on administrator-form creation-registration acceptance runs before
+  database creation. It requires a non-empty form schema plus closed creation
+  metadata, then exactly one initial-value loader and one atomic creator for the
+  declared form. The creator names one through eight package-owned transaction
+  tables. Missing, duplicate, undeclared, empty-table, and reserved-table
+  registrations fail closed. Exact handlers, table metadata, and package
+  ownership enter only the in-memory request context; no callback is invoked,
+  no transaction starts, and no endpoint or browser control exists.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared

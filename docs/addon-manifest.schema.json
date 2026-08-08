@@ -468,6 +468,11 @@
         "encoding",
         "maxBodyBytes"
       ],
+      "dependentRequired": {
+        "create": [
+          "fields"
+        ]
+      },
       "properties": {
         "tool": {
           "$ref": "#/$defs/capability"
