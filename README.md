@@ -465,7 +465,8 @@ php scripts/admin-addon-enable.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
-The database-backed setting-storage, administrator-form/action-preflight, and
+The dependency-free administrator-form schema/preview plus database-backed
+setting-storage, administrator-form/action-preflight, and
 immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,

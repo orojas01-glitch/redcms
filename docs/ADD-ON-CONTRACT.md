@@ -1252,6 +1252,17 @@ duplicate-form identity collisions, ungranted permissions, executable fields,
 other methods, weaker CSRF, alternate encodings, and invalid body bounds before
 package PHP is loaded.
 
+The declaration may now include an optional closed `fields` schema. Scalar
+fields use the same bounded text, textarea, integer, boolean, select, URL,
+email, date, datetime, and media-reference definitions as component editors.
+A `collection` field adds only `itemLabel`, `minItems`, `maxItems`, and its own
+closed `fields`. Core permits at most 100 top-level fields, 32 fields per
+collection row, 200 fields across the complete schema, 128 items per
+collection, and two collection levels. This is sufficient to describe a
+simple product and, separately, option groups with values plus variants with
+exact option selections. It is not an arbitrary JSON schema, template,
+conditional-expression language, or package renderer.
+
 `includes/addon_admin_tool_form_preflight_helpers.php` is the separate
 non-executing read-only gate. It requires exact request-local ownership of the
 declared display tool, performs a fresh case-sensitive package-permission
@@ -1259,8 +1270,12 @@ check, and returns deterministic contract and actor-bound plan SHA-256 values.
 It invokes no tool or form callback, accepts no body or request/session global,
 consumes no CSRF token, renders no control, starts no transaction, writes no
 state, and exposes no endpoint. The declaration and plan do not make a form
-operational; a later core-owned schema/renderer and protected body adapter
-remain separate reviews.
+operational. `includes/addon_admin_tool_form_ui_helpers.php` may render only
+that validated schema as escaped, disabled scalar controls and nested
+collection templates. It loads no values, performs no authorization, opens no
+`form`, supplies no control names or submit button, and has no provider or
+package callback. A later permission-scoped value provider and protected body
+adapter remain separate reviews.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique

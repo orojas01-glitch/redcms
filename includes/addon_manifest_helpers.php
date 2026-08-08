@@ -767,6 +767,352 @@ if (!function_exists('red_addon_admin_tool_contract')) {
     }
 }
 
+if (!function_exists('red_addon_validate_admin_tool_form_fields')) {
+    function red_addon_validate_admin_tool_form_fields(
+        $fields,
+        $context,
+        $depth,
+        array &$result,
+        int &$fieldCount
+    ) {
+        if (!is_array($fields) || !array_is_list($fields)) {
+            red_addon_add_error($result, $context . ' must be an array.');
+            return [];
+        }
+        $maximumAtLevel = $depth === 0 ? 100 : 32;
+        if ($fields === []) {
+            red_addon_add_error($result, $context . ' must not be empty.');
+        }
+        if (count($fields) > $maximumAtLevel) {
+            red_addon_add_error(
+                $result,
+                $context . ' exceeds ' . $maximumAtLevel . ' entries.'
+            );
+        }
+
+        $normalized = [];
+        $seenKeys = [];
+        foreach ($fields as $index => $field) {
+            $fieldCount++;
+            if ($fieldCount > 200) {
+                red_addon_add_error(
+                    $result,
+                    'Administrator tool form schema exceeds 200 total fields.'
+                );
+            }
+            $fieldContext = $context . '[' . $index . ']';
+            $fieldType = is_array($field)
+                && is_string($field['type'] ?? null)
+                    ? $field['type']
+                    : '';
+            $isCollection = $fieldType === 'collection';
+            $requiredKeys = $isCollection
+                ? [
+                    'key',
+                    'label',
+                    'type',
+                    'required',
+                    'itemLabel',
+                    'minItems',
+                    'maxItems',
+                    'fields',
+                ]
+                : ['key', 'label', 'type', 'required'];
+            $allowedKeys = $isCollection
+                ? array_merge($requiredKeys, ['help'])
+                : [
+                    'key',
+                    'label',
+                    'type',
+                    'required',
+                    'help',
+                    'minLength',
+                    'maxLength',
+                    'minimum',
+                    'maximum',
+                    'options',
+                ];
+            if (!red_addon_validate_object_keys(
+                $field,
+                $requiredKeys,
+                $allowedKeys,
+                $fieldContext,
+                $result
+            )) {
+                continue;
+            }
+
+            $fieldKey = is_string($field['key'] ?? null)
+                ? $field['key']
+                : '';
+            if (!red_addon_valid_component_field_key($fieldKey)) {
+                red_addon_add_error($result, $fieldContext . ' key is invalid.');
+            } elseif (isset($seenKeys[$fieldKey])) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' repeats field key "' . $fieldKey . '".'
+                );
+            } else {
+                $seenKeys[$fieldKey] = true;
+            }
+            $label = red_addon_required_string(
+                $field,
+                'label',
+                $fieldContext,
+                120,
+                $result
+            );
+            $required = $field['required'] ?? null;
+            if (!is_bool($required)) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' required must be boolean.'
+                );
+            }
+            $help = null;
+            if (array_key_exists('help', $field)) {
+                $help = red_addon_required_string(
+                    $field,
+                    'help',
+                    $fieldContext,
+                    500,
+                    $result
+                );
+            }
+
+            if ($isCollection) {
+                if ($depth >= 2) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' exceeds the two-level collection depth.'
+                    );
+                }
+                $itemLabel = red_addon_required_string(
+                    $field,
+                    'itemLabel',
+                    $fieldContext,
+                    120,
+                    $result
+                );
+                $minItems = $field['minItems'] ?? null;
+                $maxItems = $field['maxItems'] ?? null;
+                if (!is_int($minItems)
+                    || !is_int($maxItems)
+                    || $minItems < 0
+                    || $maxItems < 1
+                    || $maxItems > 128
+                    || $minItems > $maxItems
+                    || ($required === true && $minItems < 1)
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' collection bounds are invalid.'
+                    );
+                }
+                $childFields = red_addon_validate_admin_tool_form_fields(
+                    $field['fields'] ?? null,
+                    $fieldContext . ' fields',
+                    $depth + 1,
+                    $result,
+                    $fieldCount
+                );
+                $normalizedField = [
+                    'key' => $fieldKey,
+                    'label' => $label,
+                    'type' => 'collection',
+                    'required' => is_bool($required) ? $required : false,
+                    'itemLabel' => $itemLabel,
+                    'minItems' => is_int($minItems) ? $minItems : 0,
+                    'maxItems' => is_int($maxItems) ? $maxItems : 0,
+                    'fields' => $childFields,
+                ];
+                if ($help !== null) {
+                    $normalizedField['help'] = $help;
+                }
+                $normalized[] = $normalizedField;
+                continue;
+            }
+
+            $allowedTypes = [
+                'text',
+                'textarea',
+                'integer',
+                'boolean',
+                'select',
+                'url',
+                'email',
+                'date',
+                'datetime',
+                'media-reference',
+            ];
+            if (!in_array($fieldType, $allowedTypes, true)) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' type is unsupported.'
+                );
+            }
+            $lengthTypes = [
+                'text' => 500,
+                'textarea' => 10000,
+                'url' => 2048,
+                'email' => 254,
+                'media-reference' => 255,
+            ];
+            $minLength = $field['minLength'] ?? null;
+            $maxLength = $field['maxLength'] ?? null;
+            if (isset($lengthTypes[$fieldType])) {
+                if ($minLength !== null
+                    && (!is_int($minLength)
+                        || $minLength < 0
+                        || $minLength > $lengthTypes[$fieldType])
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' minLength is invalid.'
+                    );
+                }
+                if (!is_int($maxLength)
+                    || $maxLength < 1
+                    || $maxLength > $lengthTypes[$fieldType]
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' maxLength is invalid.'
+                    );
+                }
+                if (is_int($minLength)
+                    && is_int($maxLength)
+                    && $minLength > $maxLength
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' minLength must not exceed maxLength.'
+                    );
+                }
+            } elseif (array_key_exists('minLength', $field)
+                || array_key_exists('maxLength', $field)
+            ) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' length limits are unsupported for this type.'
+                );
+            }
+
+            $minimum = $field['minimum'] ?? null;
+            $maximum = $field['maximum'] ?? null;
+            if ($fieldType === 'integer') {
+                if (!is_int($minimum)
+                    || !is_int($maximum)
+                    || $minimum < -2147483648
+                    || $maximum > 2147483647
+                    || $minimum > $maximum
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' integer bounds are invalid.'
+                    );
+                }
+            } elseif (array_key_exists('minimum', $field)
+                || array_key_exists('maximum', $field)
+            ) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' numeric bounds are unsupported for this type.'
+                );
+            }
+
+            $normalizedOptions = [];
+            if ($fieldType === 'select') {
+                $options = $field['options'] ?? null;
+                if (!is_array($options) || !array_is_list($options)) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' options must be an array.'
+                    );
+                } else {
+                    if ($options === [] || count($options) > 100) {
+                        red_addon_add_error(
+                            $result,
+                            $fieldContext . ' options count is invalid.'
+                        );
+                    }
+                    $seenOptions = [];
+                    foreach ($options as $optionIndex => $option) {
+                        $optionContext = $fieldContext
+                            . ' option[' . $optionIndex . ']';
+                        if (!red_addon_validate_object_keys(
+                            $option,
+                            ['value', 'label'],
+                            ['value', 'label'],
+                            $optionContext,
+                            $result
+                        )) {
+                            continue;
+                        }
+                        $optionValue = red_addon_required_string(
+                            $option,
+                            'value',
+                            $optionContext,
+                            120,
+                            $result
+                        );
+                        $optionLabel = red_addon_required_string(
+                            $option,
+                            'label',
+                            $optionContext,
+                            120,
+                            $result
+                        );
+                        if (isset($seenOptions[$optionValue])) {
+                            red_addon_add_error(
+                                $result,
+                                $fieldContext . ' repeats option value "'
+                                    . $optionValue . '".'
+                            );
+                        } else {
+                            $seenOptions[$optionValue] = true;
+                        }
+                        $normalizedOptions[] = [
+                            'value' => $optionValue,
+                            'label' => $optionLabel,
+                        ];
+                    }
+                }
+            } elseif (array_key_exists('options', $field)) {
+                red_addon_add_error(
+                    $result,
+                    $fieldContext . ' options are allowed only for select fields.'
+                );
+            }
+
+            $normalizedField = [
+                'key' => $fieldKey,
+                'label' => $label,
+                'type' => $fieldType,
+                'required' => is_bool($required) ? $required : false,
+            ];
+            if ($help !== null) {
+                $normalizedField['help'] = $help;
+            }
+            if (isset($lengthTypes[$fieldType])) {
+                if ($minLength !== null) {
+                    $normalizedField['minLength'] = $minLength;
+                }
+                $normalizedField['maxLength'] = $maxLength;
+            }
+            if ($fieldType === 'integer') {
+                $normalizedField['minimum'] = $minimum;
+                $normalizedField['maximum'] = $maximum;
+            }
+            if ($fieldType === 'select') {
+                $normalizedField['options'] = $normalizedOptions;
+            }
+            $normalized[] = $normalizedField;
+        }
+        return $normalized;
+    }
+}
+
 if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
     function red_addon_validate_admin_tool_form_contracts(
         $contracts,
@@ -815,6 +1161,7 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                     'csrf',
                     'encoding',
                     'maxBodyBytes',
+                    'fields',
                 ],
                 $context,
                 $result
@@ -938,7 +1285,20 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                 );
             }
 
-            $normalized[] = [
+            $normalizedFields = null;
+            if (array_key_exists('fields', $contract)) {
+                $fieldCount = 0;
+                $normalizedFields =
+                    red_addon_validate_admin_tool_form_fields(
+                        $contract['fields'],
+                        $context . ' fields',
+                        0,
+                        $result,
+                        $fieldCount
+                    );
+            }
+
+            $normalizedContract = [
                 'tool' => $tool,
                 'form' => $form,
                 'label' => $label,
@@ -949,6 +1309,10 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                 'encoding' => $encoding,
                 'maxBodyBytes' => is_int($maxBodyBytes) ? $maxBodyBytes : 0,
             ];
+            if (is_array($normalizedFields)) {
+                $normalizedContract['fields'] = $normalizedFields;
+            }
+            $normalized[] = $normalizedContract;
         }
         return $normalized;
     }

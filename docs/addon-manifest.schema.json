@@ -135,7 +135,7 @@
       }
     },
     "adminToolFormContracts": {
-      "description": "Optional data-only declarations for future core-owned administrator forms. Declarations do not render controls, parse a body, consume CSRF, invoke package PHP, create an endpoint, or change enablement eligibility.",
+      "description": "Optional data-only declarations for future core-owned administrator forms. A declaration may add a bounded scalar and two-level collection field schema for a core-owned disabled preview. Declarations do not load values, render an editable form, parse a body, consume CSRF, invoke package PHP, create an endpoint, or change enablement eligibility.",
       "type": "array",
       "maxItems": 200,
       "items": {
@@ -501,6 +501,85 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 262144
+        },
+        "fields": {
+          "$ref": "#/$defs/adminToolFormFields"
+        }
+      }
+    },
+    "adminToolFormFields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/adminToolFormField"
+      }
+    },
+    "adminToolFormField": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/componentField"
+        },
+        {
+          "$ref": "#/$defs/adminToolFormCollectionField"
+        }
+      ]
+    },
+    "adminToolFormCollectionField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "type",
+        "required",
+        "itemLabel",
+        "minItems",
+        "maxItems",
+        "fields"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/componentFieldKey"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "type": {
+          "const": "collection"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "itemLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "help": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 128
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/adminToolFormField"
+          }
         }
       }
     },

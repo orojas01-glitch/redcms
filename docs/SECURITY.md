@@ -669,6 +669,16 @@ state, and creates no endpoint. A later protected adapter must authenticate and
 verify CSRF before reading the bounded JSON body; the declaration is policy
 evidence, not a token check or activation path.
 
+Optional administrator-form field metadata is also closed and non-executable.
+Core accepts only the existing scalar field vocabulary plus collections capped
+at 128 rows, two collection levels, 32 fields per row, and 200 total declared
+fields. This admits bounded product options and variants without admitting
+package HTML, templates, conditions, JavaScript, callbacks, or an arbitrary
+schema language. A pure core renderer escapes labels/help/options and emits
+only disabled controls and collection templates. It receives no values or
+actor, performs no permission decision, adds no names or submit control, and
+cannot turn the form declaration into an operational endpoint.
+
 Administrator write actions have a split metadata and internal execution
 foundation. An optional closed `adminToolActionContracts` entry maps one
 provided tool to one unique action id, explicit package permission, bounded

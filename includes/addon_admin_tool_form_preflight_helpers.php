@@ -68,6 +68,7 @@ if (!function_exists('red_addon_admin_tool_form_contract_fingerprint')) {
                 'csrf' => $contract['csrf'] ?? null,
                 'encoding' => $contract['encoding'] ?? null,
                 'maxBodyBytes' => $contract['maxBodyBytes'] ?? null,
+                'fields' => $contract['fields'] ?? null,
             ],
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );

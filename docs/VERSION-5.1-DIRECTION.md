@@ -913,6 +913,17 @@ request bootstrap excludes the disabled package.
     rendering HTML, starting a transaction, writing state, exposing an
     endpoint, changing enablement eligibility, or adding Store Lite behavior.
 
+69. Completed the bounded administrator-form field schema and core-owned
+    display-only preview. The closed vocabulary reuses scalar editor controls
+    and permits at most two collection levels, 128 rows per collection, 32
+    fields per row, and 200 fields across the schema. It can represent a simple
+    product or option groups, values, variants, and exact option selections
+    without admitting arbitrary JSON schema, conditions, package templates,
+    HTML, JavaScript, or callbacks. Core renders only escaped disabled controls
+    and collection templates; it loads no values, performs no authorization,
+    creates no `form`, names, submit control, endpoint, request parser, CSRF
+    operation, package execution, database access, or Store Lite behavior.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
