@@ -383,6 +383,10 @@ features.
   authenticated header-CSRF endpoint to the atomic form runner. Public Save
   outcomes are value-free; Store Lite target selection, navigation, provider
   code, tables, and product data remain outside the starter
+- Planned generic runtime-setting resolver for one configured non-secret
+  per-client package scalar under an exact enabled request-local binding. It
+  will not expose a route, setting editor, package execution, or Store Lite
+  behavior; see [Runtime Setting Resolver Direction](docs/RUNTIME-SETTING-RESOLVER-DIRECTION.md)
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
