@@ -903,6 +903,16 @@ request bootstrap excludes the disabled package.
     reference; no route, package, table, migration, or Store Lite state was
     added to core.
 
+68. Completed the non-executing operational administrator-form declaration
+    and read-only plan. The closed manifest metadata binds one provided tool to
+    a unique form id, exact package permission, `POST`, required CSRF policy,
+    fixed JSON encoding, and a body limit no larger than 256 KiB. The plan
+    requires current request-local tool ownership and a fresh exact grant, then
+    returns deterministic value-free evidence without invoking a package
+    callback, reading a body or request/session global, consuming CSRF,
+    rendering HTML, starting a transaction, writing state, exposing an
+    endpoint, changing enablement eligibility, or adding Store Lite behavior.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

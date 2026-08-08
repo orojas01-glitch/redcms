@@ -767,6 +767,242 @@ if (!function_exists('red_addon_admin_tool_contract')) {
     }
 }
 
+if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
+    function red_addon_validate_admin_tool_form_contracts(
+        $contracts,
+        array $providedTools,
+        array $declaredPermissions,
+        array &$result
+    ) {
+        if (!is_array($contracts) || !array_is_list($contracts)) {
+            red_addon_add_error(
+                $result,
+                'Administrator tool form contracts must be an array.'
+            );
+            return [];
+        }
+        if (count($contracts) > 200) {
+            red_addon_add_error(
+                $result,
+                'Administrator tool form contracts exceeds 200 entries.'
+            );
+        }
+
+        $normalized = [];
+        $seenForms = [];
+        foreach ($contracts as $index => $contract) {
+            $context = 'Administrator tool form contract[' . $index . ']';
+            if (!red_addon_validate_object_keys(
+                $contract,
+                [
+                    'tool',
+                    'form',
+                    'label',
+                    'description',
+                    'permission',
+                    'method',
+                    'csrf',
+                    'encoding',
+                    'maxBodyBytes',
+                ],
+                [
+                    'tool',
+                    'form',
+                    'label',
+                    'description',
+                    'permission',
+                    'method',
+                    'csrf',
+                    'encoding',
+                    'maxBodyBytes',
+                ],
+                $context,
+                $result
+            )) {
+                continue;
+            }
+
+            $tool = is_string($contract['tool'] ?? null)
+                ? $contract['tool']
+                : '';
+            if (!red_addon_valid_capability($tool)) {
+                red_addon_add_error($result, $context . ' tool is invalid.');
+            } elseif (!in_array($tool, $providedTools, true)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' tool must appear in Provides adminTools.'
+                );
+            }
+
+            $form = is_string($contract['form'] ?? null)
+                ? $contract['form']
+                : '';
+            if (!red_addon_valid_capability($form)) {
+                red_addon_add_error($result, $context . ' form is invalid.');
+            } elseif (in_array($form, $providedTools, true)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' form must differ from provided tool identifiers.'
+                );
+            } elseif (isset($seenForms[$form])) {
+                red_addon_add_error(
+                    $result,
+                    'Administrator tool form contract for "' . $form .
+                        '" is duplicated.'
+                );
+            } else {
+                $seenForms[$form] = true;
+            }
+
+            $label = red_addon_required_string(
+                $contract,
+                'label',
+                $context,
+                120,
+                $result
+            );
+            $description = red_addon_required_string(
+                $contract,
+                'description',
+                $context,
+                500,
+                $result
+            );
+            foreach (
+                ['label' => $label, 'description' => $description]
+                as $key => $value
+            ) {
+                if (preg_match('//u', $value) !== 1
+                    || preg_match(
+                        '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/',
+                        $value
+                    ) === 1
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' field "' . $key . '" contains unsafe text.'
+                    );
+                }
+            }
+
+            $permission = is_string($contract['permission'] ?? null)
+                ? $contract['permission']
+                : '';
+            if (!red_addon_valid_permission($permission)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' permission is invalid.'
+                );
+            } elseif (!in_array($permission, $declaredPermissions, true)) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' permission must appear in Permissions.'
+                );
+            }
+
+            $method = is_string($contract['method'] ?? null)
+                ? $contract['method']
+                : '';
+            if ($method !== 'POST') {
+                red_addon_add_error(
+                    $result,
+                    $context . ' method must be POST.'
+                );
+            }
+            $csrf = is_string($contract['csrf'] ?? null)
+                ? $contract['csrf']
+                : '';
+            if ($csrf !== 'required') {
+                red_addon_add_error(
+                    $result,
+                    $context . ' csrf must be required.'
+                );
+            }
+            $encoding = is_string($contract['encoding'] ?? null)
+                ? $contract['encoding']
+                : '';
+            if ($encoding !== 'application/json') {
+                red_addon_add_error(
+                    $result,
+                    $context . ' encoding must be application/json.'
+                );
+            }
+            $maxBodyBytes = $contract['maxBodyBytes'] ?? null;
+            if (!is_int($maxBodyBytes)
+                || $maxBodyBytes < 1
+                || $maxBodyBytes > 262144
+            ) {
+                red_addon_add_error(
+                    $result,
+                    $context . ' maxBodyBytes must be between 1 and 262144.'
+                );
+            }
+
+            $normalized[] = [
+                'tool' => $tool,
+                'form' => $form,
+                'label' => $label,
+                'description' => $description,
+                'permission' => $permission,
+                'method' => $method,
+                'csrf' => $csrf,
+                'encoding' => $encoding,
+                'maxBodyBytes' => is_int($maxBodyBytes) ? $maxBodyBytes : 0,
+            ];
+        }
+        return $normalized;
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_form_contract')) {
+    function red_addon_admin_tool_form_contract(
+        array $manifest,
+        $toolId,
+        $formId
+    ) {
+        if (!is_string($toolId)
+            || !red_addon_valid_capability($toolId)
+            || !is_string($formId)
+            || !red_addon_valid_capability($formId)
+            || !array_key_exists('adminToolFormContracts', $manifest)
+        ) {
+            return null;
+        }
+        $result = ['errors' => [], 'warnings' => []];
+        $tools = red_addon_validate_string_list(
+            $manifest['provides']['adminTools'] ?? null,
+            'Provides adminTools',
+            200,
+            'red_addon_valid_capability',
+            $result
+        );
+        $permissions = red_addon_validate_string_list(
+            $manifest['permissions'] ?? null,
+            'Permissions',
+            200,
+            'red_addon_valid_permission',
+            $result
+        );
+        $contracts = red_addon_validate_admin_tool_form_contracts(
+            $manifest['adminToolFormContracts'] ?? null,
+            $tools,
+            $permissions,
+            $result
+        );
+        if ($result['errors'] !== []) {
+            return null;
+        }
+        foreach ($contracts as $contract) {
+            if (hash_equals($toolId, $contract['tool'])
+                && hash_equals($formId, $contract['form'])
+            ) {
+                return $contract;
+            }
+        }
+        return null;
+    }
+}
+
 if (!function_exists('red_addon_validate_admin_tool_action_contracts')) {
     function red_addon_validate_admin_tool_action_contracts(
         $contracts,
@@ -2283,6 +2519,7 @@ if (!function_exists('red_addon_validate_manifest')) {
                     '$schema',
                     'componentEditors',
                     'adminToolContracts',
+                    'adminToolFormContracts',
                     'adminToolActionContracts',
                     'publicMutationContracts',
                 ],
@@ -2453,6 +2690,15 @@ if (!function_exists('red_addon_validate_manifest')) {
         if (array_key_exists('adminToolActionContracts', $manifest)) {
             red_addon_validate_admin_tool_action_contracts(
                 $manifest['adminToolActionContracts'],
+                $providedCapabilities['adminTools'],
+                $declaredPermissions,
+                $result
+            );
+        }
+
+        if (array_key_exists('adminToolFormContracts', $manifest)) {
+            red_addon_validate_admin_tool_form_contracts(
+                $manifest['adminToolFormContracts'],
                 $providedCapabilities['adminTools'],
                 $declaredPermissions,
                 $result

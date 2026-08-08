@@ -279,6 +279,19 @@ An illustrative manifest shape is:
       "idempotency": "once-per-target"
     }
   ],
+  "adminToolFormContracts": [
+    {
+      "tool": "redcms.store-lite/orders",
+      "form": "redcms.store-lite/order-editor",
+      "label": "Edit order",
+      "description": "Prepare one bounded order form.",
+      "permission": "store.orders.manage",
+      "method": "POST",
+      "csrf": "required",
+      "encoding": "application/json",
+      "maxBodyBytes": 32768
+    }
+  ],
   "componentEditors": [
     {
       "component": "redcms.store-lite/product",
@@ -1229,6 +1242,25 @@ that model. Package output, exceptions, buffer/HTTP-state changes, malformed or
 oversized results fail closed. `admin/bin/view_addon_tool.php` is POST-only,
 requires a current protected administrator session and CSRF token, bootstraps
 the enabled registrar, and invokes only this dispatcher.
+
+An optional `adminToolFormContracts` entry is separate data-only metadata for
+a future core-owned operational form. It maps one provided tool to one unique
+form id, bounded label and description, one declared package permission, only
+`POST` with `csrf: required`, fixed `application/json`, and a body limit from
+1 through 262,144 bytes. The validator rejects undeclared tools, form/tool or
+duplicate-form identity collisions, ungranted permissions, executable fields,
+other methods, weaker CSRF, alternate encodings, and invalid body bounds before
+package PHP is loaded.
+
+`includes/addon_admin_tool_form_preflight_helpers.php` is the separate
+non-executing read-only gate. It requires exact request-local ownership of the
+declared display tool, performs a fresh case-sensitive package-permission
+check, and returns deterministic contract and actor-bound plan SHA-256 values.
+It invokes no tool or form callback, accepts no body or request/session global,
+consumes no CSRF token, renders no control, starts no transaction, writes no
+state, and exposes no endpoint. The declaration and plan do not make a form
+operational; a later core-owned schema/renderer and protected body adapter
+remain separate reviews.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique

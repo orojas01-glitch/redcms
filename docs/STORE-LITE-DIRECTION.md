@@ -363,6 +363,9 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   emit a browser cart cookie, resolve secrets, or relax any route/enablement
   gate;
 - declared administrator routes;
+- non-executing operational administrator-form metadata and permission-scoped
+  planning are complete, but no form schema/provider, renderer, body adapter,
+  CSRF endpoint, or linked control exists;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
   now binds a declared action's exact runtime owner, package permission,

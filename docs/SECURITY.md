@@ -652,6 +652,23 @@ changes fail closed. Permission revocation applies on the next catalog or
 dispatch lookup. Current enablement gates still reject every tool-bearing
 package.
 
+Operational administrator forms have a separate declaration and non-executing
+planning boundary. A closed `adminToolFormContracts` entry binds one provided
+tool to a unique form id, declared package permission, `POST`, required CSRF
+policy, fixed `application/json`, and a body limit no larger than 256 KiB.
+Executable fields, identity collisions, undeclared tools, ungranted
+permissions, alternate methods/encodings, weakened CSRF, and invalid body
+bounds fail manifest validation without loading package PHP.
+
+The read-only form preflight requires the exact enabled request-local tool
+owner and a fresh case-sensitive grant, then returns only bounded metadata and
+deterministic contract/plan hashes. Owner and lifecycle access do not imply the
+form permission. It reads no body or request/session globals, consumes no CSRF,
+invokes no package callback, renders no HTML, opens no transaction, writes no
+state, and creates no endpoint. A later protected adapter must authenticate and
+verify CSRF before reading the bounded JSON body; the declaration is policy
+evidence, not a token check or activation path.
+
 Administrator write actions have a split metadata and internal execution
 foundation. An optional closed `adminToolActionContracts` entry maps one
 provided tool to one unique action id, explicit package permission, bounded
