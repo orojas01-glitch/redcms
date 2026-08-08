@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/db-common.sh"
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs an authenticated Store Lite Products-to-Save rehearsal in one disposable database.'
+    printf '%s\n' 'Runs authenticated Store Lite Create and Save rehearsal paths in one disposable database.'
 }
 
 if [[ $# -gt 0 ]]; then
@@ -289,6 +289,13 @@ RED_DB_USER="$RED_DB_USER_RESOLVED" \
 RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
 RED_DB_NAME="$REHEARSAL_DATABASE" \
     "$STAGED_PROJECT/scripts/db-migrate.sh"
+
+RED_DB_HOST="$RED_DB_HOST_RESOLVED:$RED_DB_PORT_RESOLVED" \
+RED_DB_USER="$RED_DB_USER_RESOLVED" \
+RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
+RED_DB_NAME="$REHEARSAL_DATABASE" \
+    "$FRANKENPHP_BIN" php-cli \
+    "$STAGED_PROJECT/scripts/addon-admin-tool-form-save-bridge-self-test.php"
 
 for migration in \
     '2026-08-07-create-catalog.sql' \

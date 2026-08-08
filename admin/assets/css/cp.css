@@ -3094,6 +3094,13 @@ div#cp_ftp{background-color: #63C}
 	border-top: 1px solid #d7e0e7;
 }
 
+#advanced .red-admin-addon-tool__targets > header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+
 #advanced .red-admin-addon-tool__targets header h3,
 #advanced .red-admin-addon-tool__targets header p,
 #advanced .red-admin-addon-tool__target h4,
@@ -3168,7 +3175,8 @@ div#cp_ftp{background-color: #63C}
 	font-weight: 700;
 }
 
-#advanced .red-admin-addon-tool__target button {
+#advanced .red-admin-addon-tool__target button,
+#advanced .red-admin-addon-tool__create {
 	flex: 0 0 auto;
 	min-width: 72px;
 	padding: 8px 12px;
@@ -3180,7 +3188,8 @@ div#cp_ftp{background-color: #63C}
 	cursor: pointer;
 }
 
-#advanced .red-admin-addon-tool__target button:disabled {
+#advanced .red-admin-addon-tool__target button:disabled,
+#advanced .red-admin-addon-tool__create:disabled {
 	opacity: .55;
 	cursor: wait;
 }
@@ -3355,7 +3364,13 @@ div#cp_ftp{background-color: #63C}
 		flex-direction: column;
 	}
 
-	#advanced .red-admin-addon-tool__target button {
+	#advanced .red-admin-addon-tool__targets > header {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	#advanced .red-admin-addon-tool__target button,
+	#advanced .red-admin-addon-tool__create {
 		width: 100%;
 	}
 

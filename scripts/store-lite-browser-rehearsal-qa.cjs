@@ -47,7 +47,7 @@ async function login(page) {
     check((await response.text()).trim() === 'yes', 'disposable administrator login succeeds');
 }
 
-async function openProducts(page, persistedDesktopChange) {
+async function openProducts(page, persistedDesktopChange, createdProduct) {
     await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
     await page.locator('#content_third a').click();
     await page.locator('#toolscontent').waitFor({state: 'visible'});
@@ -68,8 +68,17 @@ async function openProducts(page, persistedDesktopChange) {
     );
     await tool.waitFor({state: 'visible'});
     await page.waitForTimeout(250);
-    check(await tool.locator('[data-red-addon-admin-form-target]').count() === 2,
-        'Products tool lists exactly two editable targets');
+    const expectedTargets = createdProduct ? 3 : 2;
+    check(
+        await tool.locator('[data-red-addon-admin-form-target]').count()
+            === expectedTargets,
+        `Products tool lists exactly ${expectedTargets} editable targets`
+    );
+    check(
+        await tool.locator('[data-red-addon-admin-form-create-target]').count()
+            === 1,
+        'Products tool exposes one core-owned Add product control'
+    );
     const bananaTitle = persistedDesktopChange
         ? 'Banana bunch browser-verified'
         : 'Banana bunch';
@@ -88,6 +97,15 @@ async function openProducts(page, persistedDesktopChange) {
         'simple product minor-unit price is explicit');
     check(targetFacts.includes('USD 2,499 minor units–USD 2,699 minor units'),
         'variable product price range is explicit');
+    if (createdProduct) {
+        check(await tool.getByRole('heading', {
+            name: 'Browser-created shirt',
+            exact: true,
+        }).count() === 1,
+        'browser-created simple product is listed');
+        check(targetFacts.includes('USD 3,200 minor units'),
+            'browser-created product price is explicit');
+    }
     return tool;
 }
 
@@ -120,7 +138,11 @@ async function runCase(browser, definition) {
     });
 
     await login(page);
-    let tool = await openProducts(page, !definition.mutate);
+    let tool = await openProducts(
+        page,
+        !definition.mutate,
+        !definition.mutate
+    );
     await tool.screenshot({
         path: path.join(evidenceDir, `${definition.name}-products.png`),
     });
@@ -132,6 +154,52 @@ async function runCase(browser, definition) {
     check(toolOverflow.scrollWidth <= toolOverflow.clientWidth + 1,
         `${definition.name} product target list has no horizontal overflow`,
         JSON.stringify(toolOverflow));
+
+    if (definition.mutate) {
+        await tool.getByRole('button', {name: 'Add product'}).click();
+        let createWorkspace = page.locator(
+            '[data-red-addon-admin-form-workspace]'
+        );
+        await createWorkspace.waitFor({state: 'visible'});
+        const createField = (key) => createWorkspace.locator(
+            `[data-red-addon-admin-form-field][data-field-key="${key}"] `
+                + '[data-red-addon-admin-form-control]'
+        );
+        check(await createField('id').inputValue() === '',
+            'Create starts with a blank product ID');
+        check(await createField('type').inputValue() === 'simple',
+            'Create defaults to a simple product');
+        check(await createField('currency').inputValue() === 'USD',
+            'Create derives the installation currency');
+        check(await createField('state').inputValue() === 'draft',
+            'Create defaults to draft state');
+        check(await createField('availability').inputValue() === 'unavailable',
+            'Create defaults to unavailable');
+        await createField('id').fill('browser-created-shirt');
+        await createField('title').fill('Browser-created shirt');
+        await createField('sku').fill('BROWSER-SHIRT');
+        await createField('price-minor').fill('3200');
+        await createField('stock').fill('12');
+        await createWorkspace.getByRole('button', {name: 'Add product'}).click();
+        createWorkspace = page.locator(
+            '[data-red-addon-admin-form-workspace]'
+        );
+        await createWorkspace.getByText('Record created.').waitFor({
+            state: 'visible',
+        });
+        check(await createWorkspace.locator(
+            '[data-field-key="id"] [data-red-addon-admin-form-control]'
+        ).inputValue() === 'browser-created-shirt',
+        'Create reloads the allocated product target');
+        check(await createWorkspace.locator(
+            '[data-field-key="price-minor"] [data-red-addon-admin-form-control]'
+        ).inputValue() === '3200',
+        'Create reloads the persisted minor-unit price');
+        await createWorkspace.screenshot({
+            path: path.join(evidenceDir, 'desktop-created-product.png'),
+        });
+        tool = await openProducts(page, false, true);
+    }
 
     const bananaTarget = tool.locator('.red-admin-addon-tool__target').filter({
         hasText: 'Banana bunch',

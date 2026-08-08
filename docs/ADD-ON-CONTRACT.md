@@ -1344,7 +1344,17 @@ Wrong plans, permission/configuration/version/contract drift, active caller
 transactions, output or buffer/HTTP drift, exceptions, invalid results,
 partial writes, wrong reloaded values, non-InnoDB tables, audit failure, and
 commit failure roll back. The caller cannot choose or receive a record id until
-postconditions succeed, and there is still no HTTP or browser execution path.
+postconditions succeed.
+
+The core-owned browser execution path is deliberately split. A protected HTML
+endpoint accepts only target-free tool/form identity after administrator and
+header-CSRF verification, reloads the typed initial draft, and renders the same
+closed core controls used for editing. A separate protected JSON endpoint
+authenticates and verifies header CSRF before reading the canonical Create body,
+then invokes only the atomic create runner. Packages supply no markup, script,
+URL, session decision, or record id. The response exposes only `created` plus
+the positive target id after the full postcondition and audit commit, allowing
+core to reopen that exact record through the existing edit loader.
 
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,

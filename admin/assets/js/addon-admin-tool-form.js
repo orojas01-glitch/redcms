@@ -109,6 +109,9 @@
             }
             return control.value === 'true';
         }
+        if (control.value === '' && !control.required) {
+            return null;
+        }
         if (control.value === '' && [
             'select',
             'url',
@@ -164,11 +167,14 @@
         });
     }
 
-    function reloadEditor(form) {
+    function reloadEditor(form, targetRecordId) {
         var body = new URLSearchParams();
         body.append('tool', form.dataset.tool || '');
         body.append('form', form.dataset.form || '');
-        body.append('targetRecordId', form.dataset.targetRecordId || '');
+        body.append(
+            'targetRecordId',
+            String(targetRecordId || form.dataset.targetRecordId || '')
+        );
         return fetch(form.dataset.editAction || '', {
             method: 'POST',
             credentials: 'same-origin',
@@ -203,17 +209,23 @@
         });
     }
 
-    function failureMessage(reason) {
+    function failureMessage(reason, creating) {
         if (reason === 'state_conflict') {
-            return 'This form changed after it was opened. Reopen it before saving.';
+            return creating
+                ? 'This draft changed after it was opened. Start again before creating.'
+                : 'This form changed after it was opened. Reopen it before saving.';
         }
         if (reason === 'invalid_values') {
             return 'Review the highlighted values and try again.';
         }
         if (reason === 'permission_denied') {
-            return 'You no longer have permission to save this form.';
+            return creating
+                ? 'You no longer have permission to create this record.'
+                : 'You no longer have permission to save this form.';
         }
-        return 'The form could not be saved. No changes were applied.';
+        return creating
+            ? 'The record could not be created. No changes were applied.'
+            : 'The form could not be saved. No changes were applied.';
     }
 
     function openTarget(button) {
@@ -252,6 +264,47 @@
         });
     }
 
+    function openCreate(button) {
+        var body = new URLSearchParams();
+        body.append('tool', button.dataset.tool || '');
+        body.append('form', button.dataset.form || '');
+        button.disabled = true;
+        return fetch(button.dataset.createAction || '', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'X-CSRF-Token': csrfToken()},
+            body: body
+        }).then(function (response) {
+            return response.text().then(function (html) {
+                if (!response.ok) {
+                    throw new Error('open_failed');
+                }
+                var wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                var workspace = wrapper.firstElementChild;
+                var tool = button.closest('.red-admin-addon-tool');
+                if (!workspace
+                    || !workspace.hasAttribute(
+                        'data-red-addon-admin-form-workspace'
+                    )
+                    || !tool
+                ) {
+                    throw new Error('open_failed');
+                }
+                tool.replaceWith(workspace);
+                ensureMinimumCollections(workspace);
+                var first = workspace.querySelector(
+                    '[data-red-addon-admin-form-control]'
+                );
+                if (first) {
+                    first.focus();
+                }
+            });
+        }).catch(function () {
+            button.disabled = false;
+        });
+    }
+
     document.addEventListener('click', function (event) {
         var target = event.target.closest(
             '[data-red-addon-admin-form-target]'
@@ -259,6 +312,14 @@
         if (target) {
             event.preventDefault();
             openTarget(target);
+            return;
+        }
+        var create = event.target.closest(
+            '[data-red-addon-admin-form-create-target]'
+        );
+        if (create) {
+            event.preventDefault();
+            openCreate(create);
             return;
         }
         var add = event.target.closest('[data-red-addon-admin-form-add]');
@@ -300,10 +361,14 @@
     });
 
     document.addEventListener('submit', function (event) {
-        var form = event.target.closest('[data-red-addon-admin-form-edit]');
+        var form = event.target.closest(
+            '[data-red-addon-admin-form-edit],'
+                + '[data-red-addon-admin-form-create]'
+        );
         if (!form) {
             return;
         }
+        var creating = form.hasAttribute('data-red-addon-admin-form-create');
         event.preventDefault();
         if (!form.checkValidity()) {
             form.reportValidity();
@@ -318,7 +383,9 @@
         }
         if (status) {
             status.hidden = false;
-            status.textContent = 'Saving changes…';
+            status.textContent = creating
+                ? 'Creating record…'
+                : 'Saving changes…';
         }
         var root = directChildren(
             form,
@@ -326,7 +393,12 @@
         )[0];
         var payload;
         try {
-            payload = {
+            payload = creating ? {
+                tool: form.dataset.tool || '',
+                form: form.dataset.form || '',
+                initialStateSha256: form.dataset.initialStateSha256 || '',
+                values: objectValues(root)
+            } : {
                 tool: form.dataset.tool || '',
                 form: form.dataset.form || '',
                 targetRecordId: Number(form.dataset.targetRecordId || '0'),
@@ -335,7 +407,7 @@
             };
         } catch (error) {
             if (status) {
-                status.textContent = failureMessage(error.message);
+                status.textContent = failureMessage(error.message, creating);
             }
             if (submit) {
                 submit.disabled = false;
@@ -351,6 +423,22 @@
             },
             body: JSON.stringify(payload)
         }).then(responseJson).then(function (data) {
+            if (creating) {
+                if (data.status !== 'created'
+                    || !Number.isSafeInteger(data.targetRecordId)
+                    || data.targetRecordId < 1
+                ) {
+                    throw new Error('create_failed');
+                }
+                return reloadEditor(form, data.targetRecordId).then(
+                    function (nextStatus) {
+                        if (nextStatus) {
+                            nextStatus.hidden = false;
+                            nextStatus.textContent = 'Record created.';
+                        }
+                    }
+                );
+            }
             if (data.status === 'unchanged') {
                 if (status) {
                     status.textContent = 'No changes to save.';
@@ -368,7 +456,10 @@
             });
         }).catch(function (error) {
             if (status) {
-                status.textContent = failureMessage(error.reason || error.message);
+                status.textContent = failureMessage(
+                    error.reason || error.message,
+                    creating
+                );
             }
             if (submit) {
                 submit.disabled = false;
@@ -376,7 +467,10 @@
         });
     });
 
-    document.querySelectorAll('[data-red-addon-admin-form-edit]').forEach(
+    document.querySelectorAll(
+        '[data-red-addon-admin-form-edit],'
+            + '[data-red-addon-admin-form-create]'
+    ).forEach(
         function (form) {
             ensureMinimumCollections(form);
         }

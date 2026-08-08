@@ -610,11 +610,12 @@ a second authenticated Save endpoint to that atomic runner. Its public result
 is only `saved`, `unchanged`, or a bounded refusal. Chrome desktop/mobile
 rendered inspection passes with zero horizontal overflow and no console, page,
 or failed-request errors. A separate clean-core-plus-package rehearsal now
-stages Store Lite 0.1.8 outside the starter, validates its exact inventory,
+stages Store Lite 0.1.9 outside the starter, validates its exact inventory,
 creates a fresh per-client schema, records one acceptance-only enabled
-installation, and proves authenticated Products -> existing target -> Edit ->
-Save -> reload behavior for a simple banana alongside an unchanged variable
-T-shirt. Its 47 desktop/mobile Chrome checks and exact package/core audit
+installation, and proves authenticated Products -> Add product -> Create ->
+reload plus existing target -> Edit -> Save -> reload behavior for simple
+products alongside an unchanged variable T-shirt. Its 68 desktop/mobile Chrome
+checks and exact package/core create/update audit
 postconditions pass before the temporary server, schema, grant, and staged
 package are removed. This proof does not relax normal richer-package
 enablement blockers or add Store Lite files, migrations, tables, or product

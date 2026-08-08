@@ -17,7 +17,7 @@ require_once $projectRoot
     . '/includes/addon_admin_tool_form_endpoint_helpers.php';
 
 if (!preg_match(
-    '/\Aredcms_(?:acceptance|addon_form_bridge|rev_base)_[A-Za-z0-9_]+\z/',
+    '/\Aredcms_(?:acceptance|addon_form_bridge|rev_base|store_lite_browser)_[A-Za-z0-9_]+\z/',
     (string) DBNAME
 )) {
     fwrite(
@@ -36,7 +36,13 @@ $toolId = $packageId . '/products';
 $formId = $packageId . '/product-editor';
 $permission = 'fixture.products.manage';
 $table = 'RED_Addon_Admin_Form_Bridge_Fixture';
-$calls = ['tool' => 0, 'loader' => 0, 'writer' => 0];
+$calls = [
+    'tool' => 0,
+    'loader' => 0,
+    'initial' => 0,
+    'creator' => 0,
+    'writer' => 0,
+];
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 $browserMarkup = '';
@@ -122,6 +128,10 @@ function red_addon_admin_form_bridge_test_manifest(
             'form' => $formId,
             'label' => 'Product <editor>',
             'description' => 'Edit one bounded product & its options.',
+            'create' => [
+                'label' => 'Add product',
+                'description' => 'Create one bounded product.',
+            ],
             'permission' => $permission,
             'method' => 'POST',
             'csrf' => 'required',
@@ -250,6 +260,52 @@ function red_addon_admin_form_bridge_test_context(
                 )
             );
         }
+    );
+    $registry->registerAdminToolFormInitialValueLoader(
+        $formId,
+        static function () use (&$calls) {
+            $calls['initial']++;
+            return RED_Addon_Admin_Tool_Form_Initial_Values::draft([
+                'id' => '',
+                'price-minor' => null,
+                'active' => false,
+                'options' => [],
+            ]);
+        }
+    );
+    $registry->registerAdminToolFormCreator(
+        $formId,
+        static function ($connection, $request) use (&$calls) {
+            $calls['creator']++;
+            $values = $request->values();
+            $options = json_encode(
+                $values['options'],
+                JSON_UNESCAPED_SLASHES
+                    | JSON_UNESCAPED_UNICODE
+                    | JSON_THROW_ON_ERROR
+            );
+            $nextId = (int) red_addon_admin_form_bridge_test_scalar(
+                $connection,
+                'SELECT COALESCE(MAX(RecordID), 0) + 1
+                 FROM RED_Addon_Admin_Form_Bridge_Fixture'
+            );
+            red_addon_admin_form_bridge_test_execute(
+                $connection,
+                'INSERT INTO RED_Addon_Admin_Form_Bridge_Fixture
+                    (RecordID, ProductKey, PriceMinor, Active, OptionsJSON)
+                 VALUES (?, ?, ?, ?, ?)',
+                'isiis',
+                [
+                    $nextId,
+                    $values['id'],
+                    $values['price-minor'],
+                    $values['active'] ? 1 : 0,
+                    $options,
+                ]
+            );
+            return RED_Addon_Admin_Tool_Form_Created_Record::created($nextId);
+        },
+        [$table]
     );
     if ($withWriter) {
         $registry->registerAdminToolFormWriter(
@@ -653,6 +709,90 @@ try {
         'unchanged browser submissions invoke neither writer nor audit'
     );
 
+    red_addon_admin_form_bridge_test_assert(
+        red_addon_admin_tool_form_create_endpoint_request([
+            'tool' => $toolId,
+            'form' => $formId,
+        ]) === ['tool' => $toolId, 'form' => $formId]
+            && red_addon_admin_tool_form_create_endpoint_request([
+                'tool' => $toolId,
+                'form' => $formId,
+                'targetRecordId' => '72',
+            ]) === null,
+        'the Create editor accepts only canonical target-free form identity'
+    );
+    $createContext = red_addon_admin_tool_form_create_endpoint_context(
+        $connection,
+        $toolId,
+        $formId,
+        $actorId
+    );
+    $createHtml = red_addon_admin_tool_form_create_endpoint_render(
+        $createContext
+    );
+    red_addon_admin_form_bridge_test_assert(
+        $createContext['ready'] === true
+            && $createContext['values'] === [
+                'id' => '',
+                'price-minor' => null,
+                'active' => false,
+                'options' => [],
+            ]
+            && red_addon_valid_sha256(
+                $createContext['initialStateSha256']
+            )
+            && str_contains(
+                $createHtml,
+                'data-red-addon-admin-form-create'
+            )
+            && str_contains(
+                $createHtml,
+                '/admin/bin/create_addon_tool_form.php'
+            )
+            && str_contains($createHtml, '>Add product</button>')
+            && !str_contains($createHtml, 'data-target-record-id'),
+        'core renders one escaped target-free draft from the package loader'
+    );
+    $createdValues = $createContext['values'];
+    $createdValues['id'] = 'new-shirt';
+    $createdValues['price-minor'] = 3100;
+    $createdBody = red_addon_admin_form_bridge_test_encode([
+        'tool' => $toolId,
+        'form' => $formId,
+        'initialStateSha256' => $createContext['initialStateSha256'],
+        'values' => $createdValues,
+    ]);
+    $created = red_addon_admin_tool_form_create_dispatch(
+        $connection,
+        $createdBody,
+        $actorId
+    );
+    $createdTargetId = (int) ($created['body']['targetRecordId'] ?? 0);
+    red_addon_admin_form_bridge_test_assert(
+        $created['httpStatus'] === 200
+            && ($created['body']['ok'] ?? false) === true
+            && ($created['body']['status'] ?? '') === 'created'
+            && $createdTargetId > 0
+            && red_addon_admin_form_bridge_test_values(
+                $connection,
+                $createdTargetId
+            ) === $createdValues
+            && $calls['creator'] === 1,
+        'the Create bridge commits one exact record and returns only its target id'
+    );
+    red_addon_admin_form_bridge_test_assert(
+        (int) red_addon_admin_form_bridge_test_scalar(
+            $connection,
+            "SELECT COUNT(*) FROM RED_Addon_Activity_Log
+             WHERE PackageID=? AND EventName='addon.form.created'",
+            's',
+            [$packageId]
+        ) === 1
+            && !str_contains(json_encode($created), 'new-shirt')
+            && !str_contains(json_encode($created), 'initialStateSha256'),
+        'the public Create response and atomic audit remain value and evidence free'
+    );
+
     red_addon_admin_form_bridge_test_execute(
         $connection,
         'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID=?',
@@ -678,6 +818,12 @@ try {
     );
     $saveSource = file_get_contents(
         $projectRoot . '/admin/bin/save_addon_tool_form.php'
+    );
+    $newSource = file_get_contents(
+        $projectRoot . '/admin/bin/new_addon_tool_form.php'
+    );
+    $createSource = file_get_contents(
+        $projectRoot . '/admin/bin/create_addon_tool_form.php'
     );
     $validationSource = file_get_contents(
         $projectRoot . '/admin/bin/validate_addon_tool_form.php'
@@ -706,6 +852,20 @@ try {
             && !str_contains($validationSource, 'form_write'),
         'the Save endpoint alone bridges authenticated canonical JSON to the writer'
     );
+    red_addon_admin_form_bridge_test_assert(
+        is_string($newSource)
+            && strpos($newSource, "red_require_admin(true);")
+                < strpos($newSource, 'create_endpoint_request($_POST)')
+            && str_contains($newSource, 'runtime_request_bootstrap')
+            && str_contains($newSource, 'create_endpoint_context')
+            && str_contains($newSource, 'create_endpoint_render')
+            && is_string($createSource)
+            && strpos($createSource, "red_require_admin(true);")
+                < strpos($createSource, "fopen('php://input'")
+            && str_contains($createSource, 'submission_read_body')
+            && str_contains($createSource, 'form_create_dispatch'),
+        'Create endpoints authenticate and consume CSRF before draft or body work'
+    );
 
     $scriptSource = file_get_contents(
         $projectRoot . '/admin/assets/js/addon-admin-tool-form.js'
@@ -720,6 +880,15 @@ try {
             && str_contains($scriptSource, 'ensureMinimumCollections')
             && str_contains($scriptSource, 'data-red-addon-admin-form-add')
             && str_contains($scriptSource, 'data-red-addon-admin-form-remove')
+            && str_contains(
+                $scriptSource,
+                'data-red-addon-admin-form-create-target'
+            )
+            && str_contains(
+                $scriptSource,
+                'data-red-addon-admin-form-create'
+            )
+            && str_contains($scriptSource, 'initialStateSha256')
             && !str_contains($scriptSource, 'eval('),
         'the core controller serializes typed nested values and enforces collection bounds'
     );

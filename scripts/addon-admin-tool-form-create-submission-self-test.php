@@ -212,11 +212,18 @@ try {
             && !str_contains($createSource, '$_GET')
             && !str_contains($createSource, '$_SESSION')
             && !str_contains($createSource, 'adminToolFormWriters')
-            && !str_contains($createSource, 'insert_id')
-            && !is_file(
-                $projectRoot . '/admin/bin/create_addon_tool_form.php'
-            ),
-        'the atomic runner accepts no request globals, writer fallback, caller id allocation, or endpoint'
+            && !str_contains($createSource, 'insert_id'),
+        'the atomic runner accepts no request globals, writer fallback, or caller id allocation'
+    );
+    $endpointSource = (string) file_get_contents(
+        $projectRoot . '/admin/bin/create_addon_tool_form.php'
+    );
+    red_addon_create_submission_assert(
+        strpos($endpointSource, 'red_require_admin(true);')
+            < strpos($endpointSource, "fopen('php://input'")
+            && str_contains($endpointSource, 'form_create_dispatch')
+            && !str_contains($endpointSource, 'insert_id'),
+        'the separate Create endpoint authenticates before body I/O and delegates allocation'
     );
 
     printf(

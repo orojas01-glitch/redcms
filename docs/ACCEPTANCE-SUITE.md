@@ -683,8 +683,10 @@ containers, network, image, database, package marker, and build context.
   unknown keys, malformed hashes, and noncanonical bodies fail closed. Fresh
   permission, current draft/configuration state, manifest body limits, and
   strict required-field validation precede deterministic actor-bound plan
-  evidence. Source and runtime checks prove no creator lookup or invocation,
-  transaction, record allocation, request global, endpoint, or database write.
+  evidence. Source and runtime checks prove the preparation helper has no
+  creator lookup or invocation, transaction, record allocation, request global,
+  or database write. A separate protected endpoint must authenticate and verify
+  header CSRF before body I/O and delegate only the canonical body.
 - Add-on administrator-form atomic-creation acceptance runs only in the
   uniquely named disposable current/initial-value lifecycle. It requires the
   exact actor/version/contract/configuration/values/table-bound plan, refuses a
@@ -696,8 +698,19 @@ containers, network, image, database, package marker, and build context.
   malformed results, partial writes, wrong postconditions, and provider
   failures roll back package and audit rows. Cleanup removes successful
   fixtures and proves zero disposable schema and grant artifacts. No request
-  global, caller-selected id, writer fallback, HTTP endpoint, or retained
-  installation participates.
+  global, caller-selected id, writer fallback, or retained installation
+  participates. The protected endpoint returns the new numeric target only
+  after this lifecycle succeeds.
+- Add-on administrator-form Create browser acceptance stages the clean core and
+  Store Lite package only in a fresh disposable installation. Authenticated
+  desktop Chrome opens the core-owned Add product draft, verifies installation
+  currency plus unavailable/draft defaults, submits one complete simple product,
+  reloads the allocated target, and then exercises the existing Save path.
+  Mobile Chrome verifies the three-record catalog, responsive controls, and
+  persisted values. The run requires zero console/page/network/HTTP errors,
+  Store and core create/update activity facts, no horizontal overflow, unchanged
+  variable-product data, exact primary fingerprint preservation, and zero
+  disposable schema/grant/staged-package residue.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared

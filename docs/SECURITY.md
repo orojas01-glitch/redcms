@@ -681,9 +681,9 @@ bounds fail manifest validation without loading package PHP.
 
 An optional closed form `create` declaration contains only a bounded label and
 description and requires a non-empty closed `fields` schema. It reuses the
-exact form permission and is discovery evidence only: no callback, endpoint,
-renderer, record allocation, or write authority is created. Executable or
-unknown metadata fails before package PHP is loaded.
+exact form permission and remains data-only discovery evidence: the declaration
+itself creates no callback, record allocation, or write authority. Executable
+or unknown metadata fails before package PHP is loaded.
 
 An enabled package that declares form creation must register one exact initial
 value loader and one exact creator; the creator is constrained to one through
@@ -724,8 +724,17 @@ that id through the exact current-value owner and compares the full normalized
 graph before a value-free `addon.form.created` audit fact may commit. Provider
 output, exception, buffer/HTTP drift, malformed results, partial or wrong
 writes, drift, audit failure, and commit failure roll back both package and
-audit state. The runner reads no request global and is not linked to an
-endpoint.
+audit state. The runner reads no request global.
+
+The operational browser bridge keeps draft opening and creation separate from
+edit/save. Core renders the Add control only when the exact enabled package owns
+the target, current-value, initial-value, and creator registrations. The draft
+endpoint accepts only target-free tool/form identity after administrator
+authentication and header CSRF. The JSON Create endpoint authenticates and
+consumes header CSRF before body I/O, accepts only the canonical target-free
+submission, and delegates to the atomic runner. A positive target id is returned
+only after package postconditions and both package/core activity facts commit;
+responses contain no submitted values, plan hashes, or draft-state evidence.
 
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
