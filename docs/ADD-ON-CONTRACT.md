@@ -1243,6 +1243,18 @@ oversized results fail closed. `admin/bin/view_addon_tool.php` is POST-only,
 requires a current protected administrator session and CSRF token, bootstraps
 the enabled registrar, and invokes only this dispatcher.
 
+A schema-bearing form may optionally register one separate
+`registerAdminToolFormTargetLoader()` callback. This does not broaden the
+display handler: core repeats the exact form permission, resolves only the
+form's declared runtime settings, and supplies the current-client connection
+plus a final request capped at 25 targets. The loader returns only positive
+numeric target ids, bounded plain-text labels/descriptions, up to four bounded
+facts, and an optional safe continuation cursor. Core escapes every value and
+generates the Edit buttons and protected POST itself. Package HTML, URLs,
+scripts, styles, arbitrary identifiers, writes, and transaction control remain
+forbidden. The first page is operational; continuation UI remains a later
+bounded slice.
+
 An optional `adminToolFormContracts` entry is separate data-only metadata for
 a future core-owned operational form. It maps one provided tool to one unique
 form id, bounded label and description, one declared package permission, only
@@ -1355,8 +1367,10 @@ runtime owner, writer/table declaration, enabled package version, permission,
 manifest contract, and current typed values. Only that complete current graph
 may enter `red_addon_admin_tool_form_endpoint_render()`, which emits escaped
 core controls for the closed scalar and two-level collection schema. Package
-markup, scripts, styles, actions, names, target lists, and navigation are not
-part of this result.
+markup, scripts, styles, actions, and control names are not part of this result.
+If the optional target loader is registered, the display-tool dispatcher may
+render only its validated numeric targets and core-owned Edit controls before
+this endpoint independently reloads and reauthorizes the selected record.
 
 `admin/bin/save_addon_tool_form.php` is POST-only and verifies the current
 administrator plus header CSRF before body I/O. It accepts only the existing

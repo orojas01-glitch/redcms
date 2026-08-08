@@ -67,6 +67,10 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 $adminToolFormValueLoaders;
             $this->handlers['adminToolFormValueLoaders'] = [];
             $this->metadata['adminToolFormValueLoaders'] = [];
+            $this->allowed['adminToolFormTargetLoaders'] =
+                $adminToolFormValueLoaders;
+            $this->handlers['adminToolFormTargetLoaders'] = [];
+            $this->metadata['adminToolFormTargetLoaders'] = [];
             $this->allowed['adminToolFormWriters'] =
                 $adminToolFormValueLoaders;
             $this->handlers['adminToolFormWriters'] = [];
@@ -361,6 +365,13 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->register('adminToolFormValueLoaders', $id, $handler);
         }
 
+        public function registerAdminToolFormTargetLoader(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register('adminToolFormTargetLoaders', $id, $handler);
+        }
+
         public function registerAdminToolFormWriter(
             string $id,
             callable $handler,
@@ -413,6 +424,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                         'componentDataCreators',
                         'componentDataWriters',
                         'componentDataDeleters',
+                        'adminToolFormTargetLoaders',
                         'adminToolFormWriters',
                     ],
                     true
@@ -500,6 +512,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'componentDataDeleters',
                     'services',
                     'adminTools',
+                    'adminToolFormTargetLoaders',
                     'adminToolFormValueLoaders',
                     'adminToolFormWriters',
                     'adminToolActions',

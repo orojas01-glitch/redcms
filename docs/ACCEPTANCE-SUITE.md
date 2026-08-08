@@ -274,14 +274,17 @@ permission capacity, exact operation-to-permission resolution, non-Owner
 package grants, no implicit Owner access, case-sensitive matching, immediate
 revocation, read-only decisions, and exact actor/grant cleanup. Its grants are
 test setup only; no operational grant-management workflow exists.
-The separate 18-assertion administrator-tool fixture requires an enabled
+The separate administrator-tool fixture requires an enabled
 request-local registrar, one valid data-only tool contract, and a fresh exact
 case-sensitive package grant. It proves Owner/lifecycle authority does not
 imply tool access, revocation applies on the next request, only granted tools
 enter the core chooser, and handlers receive one final actor/tool request.
 Core escapes the bounded text view model and emits no package HTML, links,
-forms, buttons, scripts, or write actions. Output, exceptions, malformed
-results, buffer or HTTP-state changes fail closed; the endpoint is protected by
+forms, scripts, or write actions. Its separate optional form-target loader is
+permission-scoped, runtime-setting-bound, capped at 25 unique positive numeric
+records, and limited to bounded text facts plus a safe cursor; only core emits
+the Edit buttons and protected POST. Output, exceptions, malformed results,
+buffer or HTTP-state changes fail closed; the endpoint is protected by
 administrator session and POST/CSRF checks; and all actor/role/grant fixtures
 are removed exactly.
 The separate 18-assertion administrator-action-preflight fixture requires one

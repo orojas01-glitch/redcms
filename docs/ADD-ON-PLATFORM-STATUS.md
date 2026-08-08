@@ -61,7 +61,8 @@ flowchart TD
     AF3 --> AF4["Validation-only JSON adapter"]
     AF4 --> AF5["Atomic internal administrator-form writer"]
     AF5 --> AF6["Operational edit + Save bridge"]
-    AF6 --> S2["CURRENT / NEXT<br/>Separate Store Lite package implementation"]
+    AF6 --> AF7["Bounded form-target selection + core navigation"]
+    AF7 --> S2["CURRENT / NEXT<br/>Separate Store Lite package implementation"]
     S2 -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -74,7 +75,7 @@ flowchart TD
     class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F19A,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20,G21 complete;
     class G22 complete;
     class S target;
-    class S1,AF1,AF2,AF3,AF4,AF5,AF6 complete;
+    class S1,AF1,AF2,AF3,AF4,AF5,AF6,AF7 complete;
     class S2 current;
     class E,A,D,R remaining;
 ```
@@ -82,8 +83,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | The generic runtime-setting gate now permits only closed, declared, non-secret, configured-later setting keys on a form. Core derives the exact enabled package binding, validates its stored scalar types, injects an immutable typed view into that form's loader and writer, and binds configuration state into stale-form evidence. Missing, secret, malformed, drifted, or changed configuration fails closed. The 25 focused loader assertions and full 45-migration disposable suite pass with unchanged primary isolation and exact schema/grant cleanup. No Store Lite package or business data was added. |
-| Current milestone | Wire the separate Store Lite package's installation currency and product form adapter to this generic contract, then add bounded product target selection/navigation. Commerce behavior, tables, and product data remain in the optional package. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification uses uniquely named disposable databases. |
+| Latest completed slice | A schema-bearing administrator form may now register one separate read-only target loader. Core repeats the exact permission, resolves only that form's declared runtime settings, caps the typed page at 25 unique positive numeric records, escapes every bounded text fact, and generates the protected Edit controls itself. The Store Lite package uses this boundary to map its isolated product `RecordID` values to the existing product editor without returning markup, URLs, or client-selected identifiers. Continuation pagination remains deferred. |
+| Current milestone | Complete isolated Store Lite installation rehearsal for the first bounded product page and editor navigation, then define the separately authorized product-creation flow. Commerce behavior, tables, and product data remain in the optional package. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification uses uniquely named disposable databases. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
