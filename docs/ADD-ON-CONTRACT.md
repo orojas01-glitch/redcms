@@ -1331,6 +1331,21 @@ opens no transaction, allocates no id, writes no audit, reads no request global,
 and exposes no endpoint; its evidence is preparation, not authorization to
 mutate.
 
+The atomic create runner is internal and requires that exact prepared plan. It
+repeats preparation before and after lifecycle/package locking, locks the
+enabled installation row, verifies the package version and declared InnoDB
+tables, and resolves the same runtime-setting state inside one transaction.
+The creator receives one final typed request and must return only
+`RED_Addon_Admin_Tool_Form_Created_Record::created()` with a positive numeric
+record id. Core then reloads that exact id through the existing form value
+loader and requires its complete normalized values to equal the prepared
+submission before committing one value-free `addon.form.created` audit fact.
+Wrong plans, permission/configuration/version/contract drift, active caller
+transactions, output or buffer/HTTP drift, exceptions, invalid results,
+partial writes, wrong reloaded values, non-InnoDB tables, audit failure, and
+commit failure roll back. The caller cannot choose or receive a record id until
+postconditions succeed, and there is still no HTTP or browser execution path.
+
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,
 email, date, datetime, and media-reference definitions as component editors.

@@ -685,6 +685,19 @@ containers, network, image, database, package marker, and build context.
   strict required-field validation precede deterministic actor-bound plan
   evidence. Source and runtime checks prove no creator lookup or invocation,
   transaction, record allocation, request global, endpoint, or database write.
+- Add-on administrator-form atomic-creation acceptance runs only in the
+  uniquely named disposable current/initial-value lifecycle. It requires the
+  exact actor/version/contract/configuration/values/table-bound plan, refuses a
+  caller-owned transaction, serializes lifecycle/package/installation state,
+  invokes one exact creator with a final typed request, accepts only one typed
+  positive record id, reloads that id through the exact value-loader owner, and
+  requires complete value equality before one value-free
+  `addon.form.created` audit fact commits. Wrong plans, creator output,
+  malformed results, partial writes, wrong postconditions, and provider
+  failures roll back package and audit rows. Cleanup removes successful
+  fixtures and proves zero disposable schema and grant artifacts. No request
+  global, caller-selected id, writer fallback, HTTP endpoint, or retained
+  installation participates.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared

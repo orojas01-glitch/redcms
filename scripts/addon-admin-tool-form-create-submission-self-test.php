@@ -10,7 +10,7 @@ if (PHP_SAPI !== 'cli') {
 
 $projectRoot = dirname(__DIR__);
 require_once $projectRoot .
-    '/includes/addon_admin_tool_form_create_submission_helpers.php';
+    '/includes/addon_admin_tool_form_create_helpers.php';
 
 $assertions = 0;
 $toolId = 'redcms.create-submission/products';
@@ -151,6 +151,46 @@ try {
         'public results expose only bounded validation status and reason'
     );
 
+    $settings = new RED_Addon_Admin_Tool_Form_Runtime_Settings(
+        ['store.currency' => 'USD'],
+        hash('sha256', 'create-runtime-settings')
+    );
+    $request = new RED_Addon_Admin_Tool_Form_Create_Request(
+        'redcms.create-submission',
+        '1.0.0',
+        $toolId,
+        $formId,
+        41,
+        $stateSha256,
+        $planSha256,
+        ['id' => 'shirt'],
+        $settings
+    );
+    red_addon_create_submission_assert(
+        $request->package() === 'redcms.create-submission'
+            && $request->packageVersion() === '1.0.0'
+            && $request->tool() === $toolId
+            && $request->form() === $formId
+            && $request->actorRecordId() === 41
+            && $request->initialStateSha256() === $stateSha256
+            && $request->planSha256() === $planSha256
+            && $request->values() === ['id' => 'shirt']
+            && $request->runtimeSettings() === $settings,
+        'creator receives one immutable server-derived typed request'
+    );
+
+    $created = RED_Addon_Admin_Tool_Form_Created_Record::created(43);
+    $invalidRecordRefused = false;
+    try {
+        RED_Addon_Admin_Tool_Form_Created_Record::created(0);
+    } catch (InvalidArgumentException $exception) {
+        $invalidRecordRefused = true;
+    }
+    red_addon_create_submission_assert(
+        $created->recordId() === 43 && $invalidRecordRefused,
+        'creator results contain exactly one bounded positive record id'
+    );
+
     $source = (string) file_get_contents(
         $projectRoot .
             '/includes/addon_admin_tool_form_create_submission_helpers.php'
@@ -163,6 +203,20 @@ try {
             && !str_contains($source, 'begin_transaction')
             && !str_contains($source, 'insert_id'),
         'the adapter has no request globals, creator lookup, transaction, or record allocation'
+    );
+    $createSource = (string) file_get_contents(
+        $projectRoot . '/includes/addon_admin_tool_form_create_helpers.php'
+    );
+    red_addon_create_submission_assert(
+        !str_contains($createSource, '$_POST')
+            && !str_contains($createSource, '$_GET')
+            && !str_contains($createSource, '$_SESSION')
+            && !str_contains($createSource, 'adminToolFormWriters')
+            && !str_contains($createSource, 'insert_id')
+            && !is_file(
+                $projectRoot . '/admin/bin/create_addon_tool_form.php'
+            ),
+        'the atomic runner accepts no request globals, writer fallback, caller id allocation, or endpoint'
     );
 
     printf(

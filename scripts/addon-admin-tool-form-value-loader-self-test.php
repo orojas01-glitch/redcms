@@ -18,6 +18,8 @@ require_once $projectRoot .
     '/includes/addon_admin_tool_form_initial_value_helpers.php';
 require_once $projectRoot .
     '/includes/addon_admin_tool_form_create_submission_helpers.php';
+require_once $projectRoot .
+    '/includes/addon_admin_tool_form_create_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_admin_tool_form_value|rev_base)_[A-Za-z0-9_]+\z/',
@@ -40,6 +42,9 @@ $permission = 'fixture.products.manage';
 $calls = ['tool' => 0, 'loader' => 0];
 $initialCalls = 0;
 $initialMode = 'normal';
+$creatorCalls = 0;
+$creatorMode = 'normal';
+$creatorRecordId = 43;
 $loaderMode = 'normal';
 $runtimeCurrency = 'USD';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
@@ -243,19 +248,23 @@ function red_addon_admin_form_value_test_values($recordId)
     if (!is_array($row)) {
         throw new RuntimeException('Product record is unavailable.');
     }
-    return [
+    $values = [
         'id' => $row['ProductKey'],
         'type' => $row['ProductType'],
         'active' => ((int) $row['IsActive']) === 1,
         'description' => $row['Description'],
-        'options' => [[
+        'options' => [],
+    ];
+    if ($row['ProductType'] === 'variable') {
+        $values['options'] = [[
             'key' => 'size',
             'values' => [
                 ['label' => 'Small'],
                 ['label' => 'Large & Tall'],
             ],
-        ]],
-    ];
+        ]];
+    }
+    return $values;
 }
 
 function red_addon_admin_form_value_test_context(
@@ -264,7 +273,8 @@ function red_addon_admin_form_value_test_context(
     $toolId,
     $formId
 ) {
-    global $calls, $loaderMode, $runtimeCurrency, $initialCalls, $initialMode;
+    global $calls, $loaderMode, $runtimeCurrency, $initialCalls, $initialMode,
+        $creatorCalls, $creatorMode, $creatorRecordId;
     $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
     $registry->registerAdminTool(
         $toolId,
@@ -359,9 +369,62 @@ function red_addon_admin_form_value_test_context(
     );
     $registry->registerAdminToolFormCreator(
         $formId,
-        static function () {
-            throw new RuntimeException(
-                'Creator must remain uninvoked during value loading.'
+        static function ($connection, $request) use (
+            &$runtimeCurrency,
+            &$creatorCalls,
+            &$creatorMode,
+            &$creatorRecordId
+        ) {
+            $creatorCalls++;
+            if (!$connection
+                || !$request instanceof
+                    RED_Addon_Admin_Tool_Form_Create_Request
+                || $request->runtimeSettings()->value('fixture.currency')
+                    !== $runtimeCurrency
+            ) {
+                throw new RuntimeException('Creator arguments are invalid.');
+            }
+            if ($creatorMode === 'output') {
+                echo 'unexpected creator output';
+            } elseif ($creatorMode === 'throw') {
+                throw new RuntimeException('Fixture creator failure.');
+            } elseif ($creatorMode === 'invalid-result') {
+                return true;
+            }
+            $values = $request->values();
+            $description = $values['description'];
+            if ($creatorMode === 'wrong-postcondition') {
+                $description = 'wrong saved value';
+            }
+            $statement = mysqli_prepare(
+                $connection,
+                'INSERT INTO RED_Addon_Admin_Form_Value_Fixture
+                    (RecordID, ProductKey, ProductType, IsActive, Description)
+                 VALUES (?, ?, ?, ?, ?)'
+            );
+            if (!$statement) {
+                throw new RuntimeException('Creator insert prepare failed.');
+            }
+            $active = $values['active'] ? 1 : 0;
+            mysqli_stmt_bind_param(
+                $statement,
+                'issis',
+                $creatorRecordId,
+                $values['id'],
+                $values['type'],
+                $active,
+                $description
+            );
+            if (!mysqli_stmt_execute($statement)) {
+                mysqli_stmt_close($statement);
+                throw new RuntimeException('Creator insert failed.');
+            }
+            mysqli_stmt_close($statement);
+            if ($creatorMode === 'partial') {
+                return true;
+            }
+            return RED_Addon_Admin_Tool_Form_Created_Record::created(
+                $creatorRecordId
             );
         },
         ['RED_Addon_Admin_Form_Value_Fixture']
@@ -376,6 +439,11 @@ function red_addon_admin_form_value_test_context(
 function red_addon_admin_form_value_test_cleanup($connection, $actorId)
 {
     try {
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Addon_Activity_Log
+             WHERE PackageID='redcms.tool-form-value-fixture'"
+        );
         mysqli_query(
             $connection,
             "DELETE FROM RED_Addon_Settings
@@ -760,6 +828,217 @@ try {
             && $loaded['reason'] === 'loaded'
             && $calls === ['tool' => 0, 'loader' => 1],
         'exact grant loads one complete nested typed value graph without invoking the tool'
+    );
+
+    $createPreflight = red_addon_admin_tool_form_create_preflight(
+        $connection,
+        $createBody,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        $createPreflight['authorized'] === true
+            && $createPreflight['prepared'] === true
+            && empty($createPreflight['creatorInvoked'])
+            && empty($createPreflight['executed'])
+            && $createPreflight['packageVersion'] === '1.0.0'
+            && $createPreflight['targetRecordId'] === 0
+            && red_addon_valid_sha256($createPreflight['planSha256'])
+            && $createPreflight['reason'] === 'preflight_ready'
+            && $creatorCalls === 0,
+        'atomic creation preflight binds package tables and version without invoking the creator or allocating an id'
+    );
+
+    mysqli_begin_transaction($connection);
+    $nestedCreate = red_addon_admin_tool_form_create_preflight(
+        $connection,
+        $createBody,
+        $actorId
+    );
+    mysqli_rollback($connection);
+    red_addon_admin_form_value_test_assert(
+        empty($nestedCreate['prepared'])
+            && empty($nestedCreate['creatorInvoked'])
+            && $nestedCreate['reason'] === 'transaction_already_active'
+            && $creatorCalls === 0,
+        'caller-owned transactions are refused before creation preparation or provider invocation'
+    );
+
+    $wrongPlan = red_addon_admin_tool_form_create(
+        $connection,
+        $createBody,
+        $actorId,
+        hash('sha256', 'wrong-create-plan')
+    );
+    red_addon_admin_form_value_test_assert(
+        empty($wrongPlan['prepared'])
+            && empty($wrongPlan['creatorInvoked'])
+            && empty($wrongPlan['executed'])
+            && $wrongPlan['reason'] === 'plan_mismatch'
+            && $creatorCalls === 0,
+        'caller plan mismatch refuses before locks, transaction, or creator invocation'
+    );
+
+    $created = red_addon_admin_tool_form_create(
+        $connection,
+        $createBody,
+        $actorId,
+        $createPreflight['planSha256']
+    );
+    red_addon_admin_form_value_test_assert(
+        $created['authorized'] === true
+            && $created['prepared'] === true
+            && $created['creatorInvoked'] === true
+            && $created['executed'] === true
+            && $created['targetRecordId'] === 43
+            && red_addon_valid_sha256($created['stateSha256'])
+            && $created['reason'] === 'executed'
+            && $creatorCalls === 1
+            && (int) red_addon_admin_form_value_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Admin_Form_Value_Fixture
+                 WHERE RecordID=43 AND ProductKey='new-shirt'
+                   AND ProductType='simple' AND IsActive=0
+                   AND Description IS NULL"
+            ) === 1
+            && (int) red_addon_admin_form_value_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                 WHERE PackageID='redcms.tool-form-value-fixture'
+                   AND EventName='addon.form.created'
+                   AND Result='succeeded'"
+            ) === 1,
+        'exact plan atomically creates one record, reloads exact values, and commits one value-free audit fact'
+    );
+
+    foreach (
+        [
+            'partial' => 'creator_failed',
+            'output' => 'creator_failed',
+            'invalid-result' => 'creator_failed',
+            'wrong-postcondition' => 'postcondition_failed',
+        ] as $failureMode => $failureReason
+    ) {
+        $creatorMode = $failureMode;
+        $creatorRecordId = 44;
+        $failureValues = $createValues;
+        $failureValues['id'] = 'rollback-' . $failureMode;
+        $failureBody = json_encode(
+            [
+                'tool' => $toolId,
+                'form' => $formId,
+                'initialStateSha256' => $initial['stateSha256'],
+                'values' => $failureValues,
+            ],
+            JSON_UNESCAPED_SLASHES
+                | JSON_UNESCAPED_UNICODE
+                | JSON_PRESERVE_ZERO_FRACTION
+                | JSON_THROW_ON_ERROR
+        );
+        $failurePreflight = red_addon_admin_tool_form_create_preflight(
+            $connection,
+            $failureBody,
+            $actorId
+        );
+        $failure = red_addon_admin_tool_form_create(
+            $connection,
+            $failureBody,
+            $actorId,
+            $failurePreflight['planSha256']
+        );
+        red_addon_admin_form_value_test_assert(
+            empty($failure['prepared'])
+                && $failure['creatorInvoked'] === true
+                && empty($failure['executed'])
+                && $failure['targetRecordId'] === 0
+                && $failure['reason'] === $failureReason
+                && (int) red_addon_admin_form_value_test_scalar(
+                    $connection,
+                    'SELECT COUNT(*)
+                     FROM RED_Addon_Admin_Form_Value_Fixture
+                     WHERE RecordID=44'
+                ) === 0
+                && (int) red_addon_admin_form_value_test_scalar(
+                    $connection,
+                    "SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                     WHERE PackageID='redcms.tool-form-value-fixture'
+                       AND EventName='addon.form.created'"
+                ) === 1,
+            'creator failure or mismatched reload rolls back package and audit state'
+        );
+    }
+    $creatorMode = 'normal';
+    $creatorRecordId = 44;
+    $auditFailureValues = $createValues;
+    $auditFailureValues['id'] = 'rollback-audit';
+    $auditFailureBody = json_encode(
+        [
+            'tool' => $toolId,
+            'form' => $formId,
+            'initialStateSha256' => $initial['stateSha256'],
+            'values' => $auditFailureValues,
+        ],
+        JSON_UNESCAPED_SLASHES
+            | JSON_UNESCAPED_UNICODE
+            | JSON_PRESERVE_ZERO_FRACTION
+            | JSON_THROW_ON_ERROR
+    );
+    $auditFailurePlan = red_addon_admin_tool_form_create_preflight(
+        $connection,
+        $auditFailureBody,
+        $actorId
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "DELETE FROM RED_Addon_Activity_Log
+         WHERE PackageID='redcms.tool-form-value-fixture'
+           AND EventName='addon.form.created'"
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "ALTER TABLE RED_Addon_Activity_Log
+         ADD CONSTRAINT `red_addon_form_create_audit_fixture`
+         CHECK (EventName <> 'addon.form.created')"
+    );
+    $auditFailure = red_addon_admin_tool_form_create(
+        $connection,
+        $auditFailureBody,
+        $actorId,
+        $auditFailurePlan['planSha256']
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "ALTER TABLE RED_Addon_Activity_Log
+         DROP CHECK `red_addon_form_create_audit_fixture`"
+    );
+    red_addon_admin_form_value_test_assert(
+        empty($auditFailure['prepared'])
+            && $auditFailure['creatorInvoked'] === true
+            && empty($auditFailure['executed'])
+            && $auditFailure['reason'] === 'audit_failed'
+            && (int) red_addon_admin_form_value_test_scalar(
+                $connection,
+                'SELECT COUNT(*) FROM RED_Addon_Admin_Form_Value_Fixture
+                 WHERE RecordID=44'
+            ) === 0
+            && (int) red_addon_admin_form_value_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                 WHERE PackageID='redcms.tool-form-value-fixture'
+                   AND EventName='addon.form.created'"
+            ) === 0,
+        'forced core audit failure rolls the created record back atomically'
+    );
+    $creatorMode = 'normal';
+    $creatorRecordId = 43;
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        'DELETE FROM RED_Addon_Admin_Form_Value_Fixture WHERE RecordID=43'
+    );
+    mysqli_query(
+        $connection,
+        "DELETE FROM RED_Addon_Activity_Log
+         WHERE PackageID='redcms.tool-form-value-fixture'
+           AND EventName='addon.form.created'"
     );
 
     $runtimeCurrency = 'EUR';

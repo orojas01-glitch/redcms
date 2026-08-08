@@ -716,6 +716,17 @@ plan is actor, permission, contract, configuration, initial-state, and values
 bound. No package or table selector enters the body, and the validation helper
 contains no creator lookup, record allocation, transaction, audit, or endpoint.
 
+Atomic creation requires the exact opaque preflight plan and serializes with
+the add-on lifecycle, package, and enabled installation. Only declared
+package-owned InnoDB tables enter the transaction. The creator returns one
+typed positive record id; core never accepts a caller-selected id. Core reloads
+that id through the exact current-value owner and compares the full normalized
+graph before a value-free `addon.form.created` audit fact may commit. Provider
+output, exception, buffer/HTTP drift, malformed results, partial or wrong
+writes, drift, audit failure, and commit failure roll back both package and
+audit state. The runner reads no request global and is not linked to an
+endpoint.
+
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the
