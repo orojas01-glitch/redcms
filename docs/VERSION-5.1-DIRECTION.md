@@ -976,9 +976,10 @@ request bootstrap excludes the disabled package.
     the accepted atomic runner and returns `saved`, `unchanged`, or a bounded
     value-free refusal before the editor reloads current state. The 21 focused
     assertions, real authenticated HTTP guards, full 45-migration disposable
-    acceptance, and exact cleanup pass. Direct desktop/mobile rendered-browser
-    evidence remains pending because the local Chrome launch permission was
-    unavailable. No Store Lite navigation, target provider, package, migration,
+    acceptance, exact cleanup, and local Chrome desktop/mobile rendered-browser
+    inspection pass. The 1280px and 390px checks show zero horizontal overflow,
+    successful collection add/remove plus typed Save/reload behavior, and zero
+    console, page, or failed-request errors. No Store Lite navigation, target provider, package, migration,
     table, or product state is added.
 
 Each phase requires its own migration, rollback path, relevant authorization

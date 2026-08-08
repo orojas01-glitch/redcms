@@ -581,8 +581,9 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    disabled core preview. The separate unlinked validation-only JSON adapter is
    complete, and the separate internal exact-writer/atomic-runner boundary now
    passes rollback acceptance. The generic operational editor and authenticated
-   Save bridge also pass focused and full disposable/HTTP acceptance; direct
-   rendered desktop/mobile browser evidence remains pending. No Store Lite
+   Save bridge also pass focused and full disposable/HTTP acceptance, plus
+   Chrome desktop/mobile rendered inspection with zero overflow and no
+   console, page, or failed-request errors. No Store Lite
    provider, target list, navigation, migration, table, or product data is
    present. Store Lite remains blocked.
 25. Create Store Lite in its separate distribution using only those accepted

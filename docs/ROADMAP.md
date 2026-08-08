@@ -607,8 +607,9 @@ tool/form/positive-target edit request after administrator session and header
 CSRF checks, reloads the authorized current state, renders escaped editable
 scalar and bounded nested-collection controls, and sends canonical JSON through
 a second authenticated Save endpoint to that atomic runner. Its public result
-is only `saved`, `unchanged`, or a bounded refusal. Direct rendered desktop and
-mobile browser evidence remains pending; no Store Lite provider, target list,
+is only `saved`, `unchanged`, or a bounded refusal. Chrome desktop/mobile
+rendered inspection passes with zero horizontal overflow and no console, page,
+or failed-request errors; no Store Lite provider, target list,
 navigation, package, migration, table, or product state is added.
 The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific

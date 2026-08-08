@@ -60,8 +60,8 @@ flowchart TD
     AF2 --> AF3["Permission-scoped current-value loader"]
     AF3 --> AF4["Validation-only JSON adapter"]
     AF4 --> AF5["Atomic internal administrator-form writer"]
-    AF5 --> AF6["CURRENT<br/>Edit + Save implemented<br/>Rendered browser QA pending"]
-    AF6 --> S2["Separate Store Lite package implementation"]
+    AF5 --> AF6["Operational edit + Save bridge"]
+    AF6 --> S2["CURRENT / NEXT<br/>Separate Store Lite package implementation"]
     S2 -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -74,16 +74,16 @@ flowchart TD
     class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F19A,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20,G21 complete;
     class G22 complete;
     class S target;
-    class S1,AF1,AF2,AF3,AF4,AF5 complete;
-    class AF6 current;
-    class S2,E,A,D,R remaining;
+    class S1,AF1,AF2,AF3,AF4,AF5,AF6 complete;
+    class S2 current;
+    class E,A,D,R remaining;
 ```
 
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Gate 26L implements the generic operational administrator-form bridge: exact tool/form/positive-target editing, fresh permission plus enabled writer/table ownership, escaped typed scalar and bounded nested-collection controls, canonical JSON with header CSRF, atomic value-free Save outcomes, stale replay refusal, and reload after success. The 21 focused assertions, real authenticated HTTP guards, full 45-migration disposable suite, and exact cleanup pass. No Store Lite package or data was added. |
-| Current milestone | Direct rendered desktop/mobile browser inspection is the remaining Gate 26L check; the local Chrome launch was blocked by the desktop permission boundary, so no visual claim is made yet. After that check, the next milestone is the separately distributed Store Lite package foundation and its target list/navigation—still without placing commerce behavior in core. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification used uniquely named disposable databases. |
+| Latest completed slice | Gate 26L implements the generic operational administrator-form bridge: exact tool/form/positive-target editing, fresh permission plus enabled writer/table ownership, escaped typed scalar and bounded nested-collection controls, canonical JSON with header CSRF, atomic value-free Save outcomes, stale replay refusal, and reload after success. The 21 focused assertions, real authenticated HTTP guards, full 45-migration disposable suite, exact cleanup, and local Chrome desktop/mobile interaction inspection pass. The 1280px and 390px captures have zero horizontal overflow; add/remove, typed JSON/CSRF, `unchanged`, and `saved` reload behavior passed with zero console, page, or failed-request errors. No Store Lite package or data was added. |
+| Current milestone | Begin the separately distributed Store Lite package foundation and its target list/navigation—still without placing commerce behavior in core. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification used uniquely named disposable databases. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
