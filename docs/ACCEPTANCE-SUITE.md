@@ -139,6 +139,12 @@ production behavior change. The separate 18-assertion core-owned
 subject-cookie lifecycle fixture proves ensure/resolve, transactional
 rotation, fixed clearance, old-token and subject-bound CSRF invalidation,
 malformed-input refusal, active-transaction refusal, and exact cleanup.
+The separate 20-assertion Store Lite product-contract fixture locks the
+package-owned simple-product and bounded variable-product shape before any
+database is created. It covers integer minor-unit money, one installation
+currency, explicit Size/Color variants, unique identifiers/SKUs/option tuples,
+three option groups, sixteen values per group, and 128 variants per parent.
+It performs no database, request, package, lifecycle, or runtime work.
 The separate 27-assertion non-executing deployment-profile fixture proves one
 closed client review packet with canonical HTTPS, pinned server versions,
 fixed HMAC/trusted-origin sources, attestation-before-PHP route order, core
@@ -437,12 +443,13 @@ non-destructive atomic disablement foundations, fail-closed enabled-package
 request bootstrap, plus
 Milestone 5 content-version, direct page-structure, and custom Layout Builder
 foundations.
-The latest complete 2026-08-04 run passed the
+The latest complete 2026-08-07 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 48-assertion add-on trust contract, 22-assertion
 add-on setting-value contract, 8-assertion add-on secret-resolution
 contract, 18-assertion add-on secret-reference availability contract,
-21-assertion add-on asset-plan contract, 17-assertion
+21-assertion add-on asset-plan contract, 20-assertion Store Lite
+product-contract, 17-assertion
 public-mutation declaration contract, 13-assertion add-on component-editor value
 contract, 20-assertion display-only
 component-editor renderer contract, and
@@ -536,7 +543,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Store Lite product/variant contract, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -578,6 +585,7 @@ containers, network, image, database, package marker, and build context.
 - Add-on registry and immutable asset-delivery-preflight acceptance run only in the uniquely named disposable database and execute no package PHP or SQL. They require empty default storage, deterministic identity snapshots, exact Owner capability mapping, pending/checksum/version/missing-code failure reports, enabled/current load eligibility, immutable migration identity, protected ledger ownership, exact public/admin CSS/JavaScript evidence, canonical checksum-version refusal, disabled and whole-package-integrity refusal, no output or registry write, and exact cleanup.
 - Static immutable asset-endpoint acceptance runs only in the uniquely named disposable database. Its disposable fixture proves pre-bootstrap dispatch, exact `GET`/`HEAD` delivery, fixed immutable/safety headers, generic `404`/`405`/`503` refusals, no session or package execution, no registry write, and no partial response. The live HTTP fixture creates an exact marker-bound first-party package beneath `addons/` only for the acceptance run, checks checksum/length/header evidence and stale, traversal, disabled, and tampered refusal, then removes the package and marker before cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
+- Store Lite product-contract acceptance runs before database creation. It requires the package-owned simple/variable split, one installation currency, integer minor-unit pricing, bounded identifiers/SKUs/text, explicit complete variant option tuples, unique variant identities, and the fixed three-group/16-value/128-variant limits. Invalid parent/child field mixing, unknown fields, duplicate tuples, stale option values, floats, and partial normalized results fail closed. It performs no database, request, package, lifecycle, or runtime work.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared

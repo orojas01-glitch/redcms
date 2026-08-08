@@ -95,6 +95,15 @@ T-shirts with size and optional color). Variant data remains package-owned;
 unbounded variant matrices, free-form modifiers, and weight-based pricing stay
 out of scope.
 
+Gate 2A is now complete as a package-contract checkpoint. The exact first
+release bounds are three option groups, sixteen values per group, and 128
+explicit variants per product parent, with bounded identifiers/SKUs, integer
+minor-unit money, one installation currency, and fail-closed simple/variable
+record normalization. The 20-assertion fixture covers both banana-style and
+Size/Color shirt data without adding Store Lite code, tables, routes, or state
+to the clean starter. See
+[`STORE-LITE-PRODUCT-CONTRACT.md`](STORE-LITE-PRODUCT-CONTRACT.md).
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any

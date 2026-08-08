@@ -58,6 +58,13 @@ function red_addon_public_mutation_test_manifest()
                     'minimum' => 1,
                     'maximum' => 100,
                 ],
+                [
+                    'key' => 'variant',
+                    'type' => 'identifier',
+                    'required' => false,
+                    'minLength' => 1,
+                    'maxLength' => 120,
+                ],
             ],
             'subject' => 'anonymous',
             'idempotency' => 'core-issued-key',
@@ -87,6 +94,7 @@ try {
             && array_column($contract['requestFields'], 'key') === [
                 'product',
                 'quantity',
+                'variant',
             ]
             && $contract['tables'] === [
                 'RED_Addon_StoreLite_Cart_Items',
@@ -109,7 +117,7 @@ try {
             && $plan['method'] === 'POST'
             && $plan['csrf'] === 'required'
             && $plan['encoding'] === 'application/x-www-form-urlencoded'
-            && $plan['requestFieldCount'] === 2
+            && $plan['requestFieldCount'] === 3
             && $plan['tableCount'] === 2
             && $plan['outcomes'] === ['accepted', 'unchanged']
             && red_addon_public_mutation_declaration_preflight_is_valid($plan),

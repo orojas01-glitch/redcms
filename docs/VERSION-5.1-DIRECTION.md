@@ -70,7 +70,14 @@ Adapters, operational writable route/tool actions, richer package-runtime
 secret surfaces,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
-The Store Lite product and security boundary is defined. The first generic
+The Store Lite product and security boundary is defined. Gate 2A now fixes the
+package-owned simple/variable Product record contract: three option groups,
+sixteen values per group, 128 explicit variants, integer minor-unit money, one
+installation currency, and fail-closed identifiers, SKUs, option tuples, and
+parent/variant fields. Its dependency-free 20-assertion fixture covers a
+banana-style simple product and a Size/Color shirt without adding commerce
+tables, package files, or client state. The complete shape is documented in
+`docs/STORE-LITE-PRODUCT-CONTRACT.md`. The first generic
 component-persistence foundation now provides full
 component-id storage, a narrowly guarded package-table relationship to the
 numeric placement parent, and fail-closed read-only public binding resolution.
@@ -297,7 +304,9 @@ package required before private content is enabled. The full boundary is
 defined in `docs/ADD-ON-CONTRACT.md`. The first optional package's component,
 commerce-service, persistence, payment-adapter, lifecycle, and acceptance
 contract is defined in `docs/STORE-LITE-DIRECTION.md`. Store Lite remains
-separately distributed and is not bundled with the clean starter.
+separately distributed and is not bundled with the clean starter. The fixed
+product/variant boundary is also recorded in
+`docs/STORE-LITE-PRODUCT-CONTRACT.md`.
 
 Social publishing should be an optional adapter layer:
 
@@ -881,6 +890,18 @@ request bootstrap excludes the disabled package.
     migration acceptance suite passed, with temporary databases and grants
     removed. Store Lite remains blocked behind richer persistence, editor,
     route, asset, administrator, and commerce contracts.
+
+67. Completed the Store Lite Gate 2A product/variant contract fixture. The
+    package-owned record boundary now distinguishes a simple product with one
+    sellable SKU/price from a variable parent with explicit complete option
+    tuples. It fixes one installation currency, integer minor-unit money,
+    bounded text and identifiers, three option groups, sixteen values per
+    group, and 128 variants per parent. The dependency-free 20-assertion
+    fixture rejects floats, unknown fields, mismatched currencies, duplicate
+    identities/SKUs/tuples, stale option values, and partial normalized output.
+    The future cart declaration also carries only an optional public variant
+    reference; no route, package, table, migration, or Store Lite state was
+    added to core.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

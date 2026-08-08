@@ -379,6 +379,10 @@ features.
 - Core-owned public/admin document asset injection with current manifest and
   registry revalidation, exact boundary insertion, and no additional package-PHP
   execution
+- Store Lite Gate 2A package contract fixture for simple products and bounded
+  Size/Color variants: one installation currency, integer minor-unit money,
+  unique option tuples, three option groups, sixteen values per group, and 128
+  explicit variants, without Store Lite code, tables, routes, or starter state
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -562,6 +566,7 @@ database.
 - [Version 5.1 Add-On Contract](docs/ADD-ON-CONTRACT.md)
 - [Public Mutation Boundary](docs/PUBLIC-MUTATION-BOUNDARY.md)
 - [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
+- [Store Lite Product Contract](docs/STORE-LITE-PRODUCT-CONTRACT.md)
 - [Version 5.1 Direction](docs/VERSION-5.1-DIRECTION.md)
 - [Security Notes](docs/SECURITY.md)
 

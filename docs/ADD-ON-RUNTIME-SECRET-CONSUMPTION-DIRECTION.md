@@ -115,9 +115,14 @@ Gate 1D is accepted only with:
 
 ## Next boundary
 
-The next milestone is richer package persistence for Store Lite: bounded
-Product records and variants, core-owned editor/create/update/delete and public
-placement contracts, catalog/cart/order services, and pay-on-receipt. Payment
-providers, Events Calendar, Appointments, Donations, Restaurant Ordering,
-Member Access, upgrades, uninstall, and purge remain later independent
-packages or lifecycle gates.
+The next milestone after this runtime boundary is the separately distributed
+Store Lite package implementation. Gate 2A has already fixed its bounded
+package-owned Product contract: simple products use one sellable SKU/price,
+variable products use explicit Size/Color-style option tuples, and the package
+caps option groups, values, variants, identifiers, integer minor-unit money,
+and one installation currency. The package still needs its own migrations,
+core-owned editor/create/update/delete and public-placement integration,
+catalog/cart/order services, and pay-on-receipt flow. Payment providers,
+Events Calendar, Appointments, Donations, Restaurant Ordering, Member Access,
+upgrades, uninstall, and purge remain later independent packages or lifecycle
+gates.
