@@ -637,6 +637,13 @@ containers, network, image, database, package marker, and build context.
 - Static immutable asset-endpoint acceptance runs only in the uniquely named disposable database. Its disposable fixture proves pre-bootstrap dispatch, exact `GET`/`HEAD` delivery, fixed immutable/safety headers, generic `404`/`405`/`503` refusals, no session or package execution, no registry write, and no partial response. The live HTTP fixture creates an exact marker-bound first-party package beneath `addons/` only for the acceptance run, checks checksum/length/header evidence and stale, traversal, disabled, and tampered refusal, then removes the package and marker before cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
 - Store Lite product-contract acceptance runs before database creation. It requires the package-owned simple/variable split, one installation currency, integer minor-unit pricing, bounded identifiers/SKUs/text, explicit complete variant option tuples, unique variant identities, and the fixed three-group/16-value/128-variant limits. Invalid parent/child field mixing, unknown fields, duplicate tuples, stale option values, floats, and partial normalized results fail closed. It performs no database, request, package, lifecycle, or runtime work.
+- Add-on administrator-form runtime-setting declaration acceptance runs before
+  database creation. It requires each optional non-empty bounded declaration to
+  name only package-declared, non-secret settings with no non-null manifest
+  default, preserves the normalized exact key list for the selected form, and
+  rejects unknown, secret, defaulted, or duplicate keys. It never opens a
+  database, resolves a value, invokes package code, creates an endpoint, or
+  changes enablement.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared

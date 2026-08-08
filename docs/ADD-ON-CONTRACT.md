@@ -1263,6 +1263,15 @@ simple product and, separately, option groups with values plus variants with
 exact option selections. It is not an arbitrary JSON schema, template,
 conditional-expression language, or package renderer.
 
+An operational form may also declare up to 32 exact `runtimeSettings` keys.
+Each key must name a package-declared, non-secret setting and it must have no
+non-null manifest default, so the installation must configure the value later.
+This is a closed ownership declaration: it does not read a setting row, expose
+a general lookup to package code, resolve a value, create an endpoint, or alter
+enablement. A later core-owned resolver must derive the enabled package from
+this exact form binding and inject only the declared typed values into the
+corresponding handler.
+
 `includes/addon_admin_tool_form_preflight_helpers.php` is the separate
 non-executing read-only gate. It requires exact request-local ownership of the
 declared display tool, performs a fresh case-sensitive package-permission
