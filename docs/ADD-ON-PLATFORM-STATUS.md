@@ -54,8 +54,14 @@ flowchart TD
     G20 --> G21["Core-owned deployment review packet"]
     G21 --> G22["CURRENT / NEXT<br/>Actual deployment + browser evidence + richer enablement"]
     G22 --> S["TARGET<br/>Store Lite optional package"]
-    S --> S1["CURRENT<br/>Gate 2A product/variant contract"]
-    S1 --> S2["NEXT<br/>Separate package implementation"]
+    S --> S1["Gate 2A product/variant contract"]
+    S1 --> AF1["Administrator-form declaration + preflight"]
+    AF1 --> AF2["Core-owned disabled schema preview"]
+    AF2 --> AF3["Permission-scoped current-value loader"]
+    AF3 --> AF4["Validation-only JSON adapter"]
+    AF4 --> AF5["Atomic internal administrator-form writer"]
+    AF5 --> AF6["CURRENT / NEXT<br/>Editable core form + protected Save bridge"]
+    AF6 --> S2["Separate Store Lite package implementation"]
     S2 -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -68,15 +74,16 @@ flowchart TD
     class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F19A,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20,G21 complete;
     class G22 complete;
     class S target;
-    class S1 current;
+    class S1,AF1,AF2,AF3,AF4,AF5 complete;
+    class AF6 current;
     class S2,E,A,D,R remaining;
 ```
 
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Core-owned non-executing deployment review, isolated HTTPS Docker/FrankenPHP rehearsal, core-owned settings editor/endpoint, server-local secret resolution/reference replacement, the secret-capable registration-only service profile, and Store Lite Gate 2A's package-owned Product/variant contract fixture. The typed service request can resolve only its own declared secret-reference settings through an internal by-reference value, while core rejects secret bytes in returned data and keeps plans, audits, context snapshots, and responses value-free. The product fixture locks simple products, explicit Size/Color variants, integer minor-unit money, one installation currency, and bounded option/variant counts without creating commerce state. |
-| Current milestone | Gate 2A is complete as a focused contract checkpoint: 20 product/variant assertions pass, while Store Lite package code, migrations, routes, tables, settings, and enablement remain blocked. The prior isolated deployment, full acceptance, settings-editor, secret-reference, and secret-capable service gates passed on 2026-08-07 with FrankenPHP 1.12.4, Caddy 2.11.4, and all 45 migrations; the retained local `redcms_v51_starter` database remains an older 20-table snapshot and was intentionally not migrated. The separate demo boundary review also passed read-only with no Store Lite/add-on/cart/checkout markers. Next: build the separately distributed package against this contract; full Store Lite remains blocked. |
+| Latest completed slice | Gate 26K completes the generic administrator-form persistence boundary: exact optional writer ownership, declared package tables, deterministic value-free write plans, lifecycle/package serialization, locked permission/version/state revalidation, exact postcondition reload, unchanged no-op behavior, and one atomic value-free audit fact. The protected JSON adapter remains validation-only and disconnected from the writer. The 27 focused writer assertions and the full 45-migration disposable acceptance suite pass with exact cleanup. |
+| Current milestone | The core can now declare, preview, load, validate, and internally persist a package-owned administrator form without adding Store Lite behavior to the starter. Next is Gate 26L: a core-owned editable form plus authenticated, CSRF-protected Save endpoint bridge. Store Lite package code, migrations, routes, tables, settings, and enablement remain blocked until that generic bridge is accepted. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification used uniquely named disposable databases. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

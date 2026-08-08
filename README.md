@@ -159,7 +159,14 @@ administrator-form JSON endpoint now authenticates and verifies header CSRF
 before body I/O, accepts only canonical bounded JSON, repeats the exact form
 grant and current-value load, refuses stale state, validates the complete
 nested value graph, and returns only a generic validation outcome. It invokes
-no package writer and remains disconnected from the disabled preview.
+no package writer and remains disconnected from the disabled preview. A
+separate internal boundary now permits one optional exact registrar-bound form
+writer with one to eight package-owned InnoDB tables. Its read-only write plan
+binds the validation evidence, package version, table set, actor, and target.
+The atomic runner recreates that plan under lifecycle/package locks, reloads
+current state, refuses stale or substituted evidence, contains the trusted
+writer, verifies the exact postcondition, and commits one value-free audit fact
+with the package mutation. The validation endpoint still does not call it.
 Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
@@ -474,7 +481,7 @@ php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 
 The dependency-free administrator-form schema/preview plus database-backed
 setting storage, administrator-form preflight, current-value loading, JSON
-validation, administrator-action preflight, and
+validation, atomic form writing, administrator-action preflight, and
 immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,

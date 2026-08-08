@@ -371,8 +371,11 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   separate unlinked validation-only core JSON endpoint now authenticates and
   verifies header CSRF before body I/O, reloads current state, refuses stale or
   invalid submissions, and derives opaque preparation evidence without
-  invoking a writer. No Store Lite provider/package, editable renderer, Save
-  action, write, or linked control exists;
+  invoking a writer. A separate internal core boundary now accepts one exact
+  optional form writer with declared package-owned InnoDB tables and atomically
+  revalidates, writes, reloads, and audits an exact changed postcondition. No
+  Store Lite provider/package, editable renderer, Save action, endpoint bridge,
+  or linked control exists;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
   now binds a declared action's exact runtime owner, package permission,
@@ -573,8 +576,10 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    current-value loader is also complete as a generic read-only boundary with
    fresh exact grants, closed nested values, record-bound evidence, and a
    disabled core preview. The separate unlinked validation-only JSON adapter is
-   complete, but it has no writer or Save control; no Store Lite provider or
-   data is present. Store Lite remains blocked.
+   complete, and the separate internal exact-writer/atomic-runner boundary now
+   passes rollback acceptance. Neither is connected to an editable form or Save
+   endpoint; no Store Lite provider or data is present. Store Lite remains
+   blocked.
 25. Create Store Lite in its separate distribution using only those accepted
    contracts.
 26. Add package-owned migrations, Product editing, catalog, cart, orders, and

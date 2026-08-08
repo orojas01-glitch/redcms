@@ -697,8 +697,32 @@ stale state SHA-256, and validates every submitted nested value. The resulting
 opaque plan hash binds actor, package, tool, form, target, permission, contract,
 current state, and submitted-values evidence. Public output contains only a
 generic validated result or bounded refusal; it exposes no values or hashes.
-There is no form writer registration, transaction, package mutation, Save
+That endpoint has no writer invocation, transaction, package mutation, Save
 control, Store Lite provider, or Store Lite data.
+
+Administrator-form persistence is a separate internal boundary. A package may
+optionally bind one `registerAdminToolFormWriter()` callback only to its own
+schema-bearing form and must declare one to eight package-owned InnoDB tables.
+Core rejects undeclared or duplicate form writers, reserved/core tables,
+noncanonical table names, missing exact loader/writer ownership, non-InnoDB
+storage, and caller-owned transactions before mutation. Its write preflight
+contains no values and binds the validation plan, package version, sorted table
+set, actor, target, permission, contract, current state, and submitted-values
+hash into a deterministic plan.
+
+The internal runner acquires the database-scoped lifecycle and package locks,
+locks the enabled installation row, repeats the full validation/current-value
+preparation, and requires the exact write plan before invoking one immutable
+typed writer request. Package output, exceptions, buffer drift, HTTP-state
+changes, false returns, permission revocation, stale/replayed state, version or
+contract drift, incomplete/wrong postconditions, transaction loss, and audit
+failure fail closed. Core reloads the current values and requires them to equal
+the complete normalized submission before the package mutation and one
+value-free `addon.form.saved` audit fact commit together. Unchanged values roll
+back without writer or audit work. The reviewed first-party writer must not
+manage transactions or write outside its declared tables; it is not a database
+sandbox. The validation endpoint remains disconnected, so no browser Save path
+or Store Lite behavior is active.
 
 The loader is reviewed first-party PHP, not a database sandbox. It is required
 to be read-only and may query only its package-owned current-client data; it

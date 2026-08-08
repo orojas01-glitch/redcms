@@ -1302,8 +1302,39 @@ validates the complete submitted graph, and derives opaque submitted-values and
 actor/contract/target/state-bound plan hashes. The public response is only
 `validated` or a bounded generic refusal and discloses no values or evidence.
 This adapter registers and invokes no writer, opens no transaction, mutates no
-package data, and remains disconnected from the disabled preview; an editable
-form and atomic writer require a separate gate.
+package data, and remains disconnected from the disabled preview.
+
+`registerAdminToolFormWriter($formId, $handler, $tables)` is the separate
+optional persistence registration. The form id must be one schema-bearing form
+declared by the same package, the handler must be unique, and `$tables` must be
+one to eight unique package-owned `RED_Addon_*` InnoDB tables. Core lifecycle,
+migration, audit, revision, and administrator-action tables are reserved. A
+read-only form remains valid without a writer, but every write preflight then
+returns `writer_unavailable`.
+
+`red_addon_admin_tool_form_write_preflight()` first repeats the validation-only
+preparation and exact loader/writer binding. It returns no submitted values; its
+deterministic write plan binds the validation plan, enabled package version,
+sorted writer table set, actor, target, permission, contract, previous state,
+and submitted-values hash. `red_addon_admin_tool_form_write()` requires that
+exact plan, refuses caller-owned transactions, acquires the shared lifecycle
+and package locks, locks the enabled installation row, and recreates the plan.
+Only then does it give reviewed first-party package code the current-client
+connection and an immutable request containing package/tool/form/actor/target,
+previous-state, plan, and normalized submitted values.
+
+The writer must return exactly `true`, emit no output, leave buffers and HTTP
+state unchanged, preserve the core-owned transaction, and write only its
+declared package tables. Core reloads through the exact value loader and
+requires the complete postcondition to equal the normalized submission before
+one value-free `addon.form.saved` audit fact commits in the same transaction.
+Unchanged submissions invoke neither writer nor audit. Revoked grants, stale or
+replayed state, substituted plans, package-version/contract/table drift,
+writer failure, incomplete or wrong writes, transaction loss, postcondition
+failure, and audit failure are refused. The writer is trusted reviewed PHP, not
+a database sandbox, and must not commit, roll back, or start transactions. The
+validation endpoint still does not invoke this runner; an editable form and
+Save bridge require a separate gate.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique

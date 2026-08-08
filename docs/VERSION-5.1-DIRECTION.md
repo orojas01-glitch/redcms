@@ -949,6 +949,21 @@ request bootstrap excludes the disabled package.
     refusal envelope. No writer registration, package mutation, editable
     control, Save action, Store Lite package, table, or state is added.
 
+72. Completed optional administrator-form writer registration and the internal
+    atomic stale-state runner. Only a schema-bearing declared form may register
+    one writer, and that writer must declare one to eight package-owned InnoDB
+    tables; reserved, duplicate, undeclared, and nontransactional storage fails
+    closed. The value-free write plan binds the validation plan, package
+    version, sorted table set, actor, target, permission, contract, current
+    state, and submitted-values evidence. The runner recreates it under shared
+    lifecycle and package locks, repeats fresh grant/current-value checks,
+    refuses stale, replayed, substituted, version-drifted, and contract-drifted
+    evidence, contains one immutable typed writer request, reloads the exact
+    postcondition, and commits one value-free `addon.form.saved` audit fact in
+    the same transaction. Unchanged submissions invoke no writer or audit.
+    The validation endpoint remains disconnected, and no editable renderer,
+    Save control, Store Lite package, migration, table, or state is added.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

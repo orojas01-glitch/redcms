@@ -595,8 +595,15 @@ separate unlinked core endpoint now authenticates and verifies header CSRF
 before reading an exact canonical bounded JSON body, repeats the form preflight
 and current-value load, refuses stale state, validates the complete submitted
 graph, and derives opaque actor/contract/target/state-bound plan evidence. It
-returns only a generic validation result and invokes no writer. There is still
-no editable control, Save action, package mutation, or Store Lite provider.
+returns only a generic validation result and invokes no writer. A separate
+internal write preflight now requires one exact registrar-bound writer and one
+to eight declared package-owned InnoDB tables, then binds the validation plan,
+package version, table set, actor, and target. Its atomic runner recreates the
+plan under lifecycle/package locks, repeats grant and state checks, refuses
+stale/replayed/drifted evidence, contains the trusted writer, reloads the exact
+postcondition, and commits one value-free audit fact with the package mutation.
+There is still no editable control, Save action, endpoint-to-writer bridge, or
+Store Lite provider.
 The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific
 by-reference secret consumption plus core result redaction. The generic
