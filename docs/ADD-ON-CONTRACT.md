@@ -1266,11 +1266,14 @@ conditional-expression language, or package renderer.
 An operational form may also declare up to 32 exact `runtimeSettings` keys.
 Each key must name a package-declared, non-secret setting and it must have no
 non-null manifest default, so the installation must configure the value later.
-This is a closed ownership declaration: it does not read a setting row, expose
-a general lookup to package code, resolve a value, create an endpoint, or alter
-enablement. A later core-owned resolver must derive the enabled package from
-this exact form binding and inject only the declared typed values into the
-corresponding handler.
+This is a closed ownership declaration. The core-owned resolver derives the
+enabled package from this exact form binding, validates stored value types, and
+injects one immutable typed view into only the corresponding value loader and
+atomic writer request. The opaque runtime-settings state hash participates in
+form state and plan evidence, so configuration changes invalidate stale edits.
+Missing, secret, malformed, schema-drifted, or cross-binding state fails before
+the provider is invoked. There is no general lookup, endpoint, setting write,
+or enablement change.
 
 `includes/addon_admin_tool_form_preflight_helpers.php` is the separate
 non-executing read-only gate. It requires exact request-local ownership of the

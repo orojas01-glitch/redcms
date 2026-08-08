@@ -686,6 +686,15 @@ package/tool/form/target/contract SHA-256 evidence before the renderer may
 display it. The renderer still adds no names, editable or submit controls,
 request body, CSRF operation, endpoint, or write path.
 
+Form runtime settings are core-derived from the exact enabled tool/form owner
+and the form's closed `runtimeSettings` declaration. Only configured,
+non-secret, type-valid values with no manifest value default enter one final
+immutable request object for that form's loader and writer. Missing or drifted
+configuration refuses before provider invocation. An opaque configuration hash
+is included in form-state and writer-plan evidence so changing configuration
+invalidates stale edits. Package selection, arbitrary setting lookup, raw JSON,
+secret references, endpoints, and setting writes are not exposed by this path.
+
 The separate protected validation adapter is core-owned and remains unlinked
 from that renderer. Its endpoint requires POST and calls the authenticated
 administrator plus header-CSRF guard before opening the body stream. Only exact

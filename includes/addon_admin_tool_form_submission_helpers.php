@@ -186,6 +186,7 @@ if (!function_exists('red_addon_admin_tool_form_submission_result')) {
             ),
             'permission' => '',
             'contractSha256' => '',
+            'runtimeSettingsSha256' => '',
             'currentStateSha256' => '',
             'submittedValuesSha256' => '',
             'planSha256' => '',
@@ -219,7 +220,7 @@ if (!function_exists('red_addon_admin_tool_form_submission_plan_hash')) {
         try {
             $encoded = json_encode(
                 [
-                    'schema' => 1,
+                    'schema' => 2,
                     'package' => $result['package'] ?? null,
                     'tool' => $result['tool'] ?? null,
                     'form' => $result['form'] ?? null,
@@ -227,6 +228,8 @@ if (!function_exists('red_addon_admin_tool_form_submission_plan_hash')) {
                     'actorRecordId' => $result['actorRecordId'] ?? null,
                     'permission' => $result['permission'] ?? null,
                     'contractSha256' => $result['contractSha256'] ?? null,
+                    'runtimeSettingsSha256' =>
+                        $result['runtimeSettingsSha256'] ?? null,
                     'currentStateSha256' =>
                         $result['currentStateSha256'] ?? null,
                     'submittedValuesSha256' =>
@@ -308,7 +311,13 @@ if (!function_exists('red_addon_admin_tool_form_submission_prepare')) {
         $result['currentStateSha256'] = is_string(
             $loaded['stateSha256'] ?? null
         ) ? $loaded['stateSha256'] : '';
+        $result['runtimeSettingsSha256'] = is_string(
+            $loaded['runtimeSettingsSha256'] ?? null
+        ) ? $loaded['runtimeSettingsSha256'] : '';
         if (!red_addon_valid_sha256($result['currentStateSha256'])
+            || !red_addon_valid_sha256(
+                $result['runtimeSettingsSha256']
+            )
             || !hash_equals(
                 $result['currentStateSha256'],
                 $request['currentStateSha256']

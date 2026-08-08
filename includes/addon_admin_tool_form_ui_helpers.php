@@ -329,6 +329,7 @@ if (!function_exists('red_addon_admin_tool_form_ui_render')) {
                     $formId,
                     $valueResult['targetRecordId'] ?? null,
                     $contractSha256,
+                    $valueResult['runtimeSettingsSha256'] ?? null,
                     is_array($validated['values'] ?? null)
                         ? $validated['values']
                         : []

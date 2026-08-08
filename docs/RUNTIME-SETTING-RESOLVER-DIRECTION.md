@@ -1,8 +1,8 @@
 # Add-On Runtime Setting Resolver Direction
 
-Status: Gate 26H design contract. This is a generic RED-CMS core prerequisite
-for an optional package that needs one typed, non-secret per-client setting
-while executing an already authorized internal loader or writer.
+Status: implemented generic core contract. This is a RED-CMS prerequisite for
+an optional package that needs typed, non-secret per-client settings while
+executing an already authorized internal form loader or writer.
 
 ## Problem
 
@@ -14,26 +14,29 @@ no administrator identity and must not query the core-owned
 browser form or allowing a loader to infer it from package data would weaken
 the isolation boundary.
 
-## Proposed core-only boundary
+## Implemented core-only boundary
 
-`red_addon_runtime_setting_resolve()` will be a non-executing internal core
-helper. It accepts a current client connection, the exact package identity from
-the enabled request-local runtime, and one declared setting key. It returns
-only a final typed result for an already validated, stored non-secret setting.
+An `adminToolFormContracts` entry may declare up to 32 `runtimeSettings` keys.
+The core resolver accepts the current client connection and the already-derived
+form binding. Package identity and keys therefore come from the exact enabled
+request-local owners and normalized manifest contract, not from browser input
+or a package callback argument.
 
 Before it reads a setting row, core must require all of the following:
 
-1. Exact trusted runtime package id, version, manifest hash, and inventory
-   hash, with a matching enabled installation in the current client database.
-2. One exact manifest setting definition and a non-secret supported scalar
-   type.
-3. One configured, normalized row with a matching type and no secret reference.
-4. A call from the already loaded package's registered internal handler; it is
-   not an administrator, public-route, HTTP, template, or generic package API.
+1. Exact enabled request-local tool and form-loader ownership established by
+   normal runtime bootstrap, after its persisted installation identity checks.
+2. An unchanged normalized form contract and its declared setting-key list.
+3. Exact manifest definitions using non-secret supported scalar types and no
+   non-null defaults.
+4. One configured normalized row per declared key, with matching types and no
+   secret reference.
 
-The result contains only `found`, a typed scalar value, and bounded identity
-evidence. It must not disclose another package's setting, stored JSON, secret
-references, setting-write evidence, installation inventory, or raw SQL state.
+The loader and writer receive one final immutable
+`RED_Addon_Admin_Tool_Form_Runtime_Settings` object through their existing
+request. It exposes only the declared typed values and an opaque state hash.
+That hash participates in form-state, submission-plan, and atomic-writer
+evidence, so a configuration change invalidates an already-open edit.
 
 ## Boundaries
 
@@ -41,21 +44,23 @@ references, setting-write evidence, installation inventory, or raw SQL state.
   execution, migration, registry mutation, audit, or setting write.
 - No secret-reference setting, arbitrary key, default fallback, or access to an
   installed-disabled package.
-- No caller-supplied package id; the enabled runtime owner is server-derived.
+- No caller-selected package or setting lookup in the loader/writer request;
+  the enabled form owner and declaration are server-derived.
 - A missing, malformed, unconfigured, stale, disabled, mismatched, or
   secret-bearing row returns a generic unavailable result with no partial value.
 
-Store Lite may use this only after its own `catalog.currency` setting is
-declared. Its product loader and writer must require a configured three-letter
-currency through this core resolver, rather than trusting an existing product
-row. The resolver itself adds no Store Lite setting, table, package, or client
-state.
+Store Lite may now declare its own `catalog.currency` setting. Its product
+loader and writer must require a configured three-letter currency from the
+injected request object, rather than trusting an existing product row. The
+resolver itself adds no Store Lite setting, table, package, or client state.
 
 ## Acceptance gate
 
-Disposable-database acceptance must prove exact enabled runtime/installation
-identity, package and key isolation, typed stored-value normalization, missing
-and malformed-row refusal, secret/default/unconfigured refusal, disabled and
-version/inventory/manifest drift refusal, cross-package refusal, zero writes,
-zero package execution, and exact fixture cleanup. Browser or endpoint claims
-remain out of scope for this core-only helper.
+Disposable-database acceptance proves enabled owner/form binding, typed stored
+value injection, missing-setting refusal before provider invocation,
+configuration-bound state changes, unchanged forms without declarations,
+zero resolver writes, and exact installation/setting/package fixture cleanup.
+The full runtime, setting-storage, stale-plan, atomic writer, and rollback suites
+continue to cover installation identity, schema drift, malformed values,
+transaction containment, and primary-database isolation. Browser or endpoint
+claims remain out of scope for this core-only helper.

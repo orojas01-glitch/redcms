@@ -10,7 +10,7 @@
  * write path.
  */
 
-require_once __DIR__ . '/addon_admin_tool_form_preflight_helpers.php';
+require_once __DIR__ . '/addon_admin_tool_form_runtime_setting_helpers.php';
 
 if (!class_exists('RED_Addon_Admin_Tool_Form_Value_Request', false)) {
     final class RED_Addon_Admin_Tool_Form_Value_Request
@@ -18,11 +18,13 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Value_Request', false)) {
         private string $tool;
         private string $form;
         private int $targetRecordId;
+        private RED_Addon_Admin_Tool_Form_Runtime_Settings $runtimeSettings;
 
         public function __construct(
             string $tool,
             string $form,
-            int $targetRecordId
+            int $targetRecordId,
+            ?RED_Addon_Admin_Tool_Form_Runtime_Settings $runtimeSettings = null
         ) {
             if (!red_addon_valid_capability($tool)
                 || !red_addon_valid_capability($form)
@@ -36,6 +38,18 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Value_Request', false)) {
             $this->tool = $tool;
             $this->form = $form;
             $this->targetRecordId = $targetRecordId;
+            if ($runtimeSettings === null) {
+                $stateSha256 = hash(
+                    'sha256',
+                    $tool . "\0" . $form . "\0empty-runtime-settings"
+                );
+                $runtimeSettings =
+                    new RED_Addon_Admin_Tool_Form_Runtime_Settings(
+                        [],
+                        $stateSha256
+                    );
+            }
+            $this->runtimeSettings = $runtimeSettings;
         }
 
         public function tool(): string
@@ -51,6 +65,11 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Value_Request', false)) {
         public function targetRecordId(): int
         {
             return $this->targetRecordId;
+        }
+
+        public function runtimeSettings(): RED_Addon_Admin_Tool_Form_Runtime_Settings
+        {
+            return $this->runtimeSettings;
         }
     }
 }
@@ -345,6 +364,7 @@ if (!function_exists('red_addon_admin_tool_form_value_state_hash')) {
         $formId,
         $targetRecordId,
         $contractSha256,
+        $runtimeSettingsSha256,
         array $values
     ) {
         if (!is_string($packageId)
@@ -357,17 +377,19 @@ if (!function_exists('red_addon_admin_tool_form_value_state_hash')) {
             || $targetRecordId < 1
             || $targetRecordId > 2147483647
             || !red_addon_valid_sha256($contractSha256)
+            || !red_addon_valid_sha256($runtimeSettingsSha256)
         ) {
             return '';
         }
         $encoded = json_encode(
             [
-                'schema' => 1,
+                'schema' => 2,
                 'package' => $packageId,
                 'tool' => $toolId,
                 'form' => $formId,
                 'targetRecordId' => (string) $targetRecordId,
                 'contractSha256' => $contractSha256,
+                'runtimeSettingsSha256' => $runtimeSettingsSha256,
                 'values' => $values,
             ],
             JSON_UNESCAPED_SLASHES
@@ -410,6 +432,7 @@ if (!function_exists('red_addon_admin_tool_form_value_result')) {
             'permission' => '',
             'contractSha256' => '',
             'planSha256' => '',
+            'runtimeSettingsSha256' => '',
             'stateSha256' => '',
             'values' => [],
             'reason' => (string) $reason,
@@ -493,11 +516,34 @@ if (!function_exists('red_addon_admin_tool_form_load_values')) {
             $result['reason'] = 'loader_unavailable';
             return $result;
         }
+        $binding = red_addon_admin_tool_form_preflight_binding(
+            $result['tool'],
+            $result['form']
+        );
+        $runtimeSettings = is_array($binding)
+            ? red_addon_admin_tool_form_runtime_settings_resolve(
+                $connection,
+                $binding
+            )
+            : ['resolved' => false, 'reason' => 'binding_invalid'];
+        if (($runtimeSettings['resolved'] ?? false) !== true
+            || !($runtimeSettings['settings']
+                instanceof RED_Addon_Admin_Tool_Form_Runtime_Settings)
+            || !red_addon_valid_sha256(
+                $runtimeSettings['stateSha256'] ?? null
+            )
+        ) {
+            $result['reason'] = 'runtime_settings_unavailable';
+            return $result;
+        }
+        $result['runtimeSettingsSha256'] =
+            $runtimeSettings['stateSha256'];
         try {
             $request = new RED_Addon_Admin_Tool_Form_Value_Request(
                 $result['tool'],
                 $result['form'],
-                $result['targetRecordId']
+                $result['targetRecordId'],
+                $runtimeSettings['settings']
             );
         } catch (Throwable $throwable) {
             $result['reason'] = 'invalid_request';
@@ -560,6 +606,7 @@ if (!function_exists('red_addon_admin_tool_form_load_values')) {
             $result['form'],
             $result['targetRecordId'],
             $result['contractSha256'],
+            $result['runtimeSettingsSha256'],
             $validated['values']
         );
         if (!red_addon_valid_sha256($stateSha256)) {
