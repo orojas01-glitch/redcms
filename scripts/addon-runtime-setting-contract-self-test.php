@@ -13,6 +13,7 @@ if (PHP_SAPI !== 'cli') {
 
 $projectRoot = dirname(__DIR__);
 require_once $projectRoot . '/includes/addon_manifest_helpers.php';
+require_once $projectRoot . '/includes/addon_admin_tool_form_preflight_helpers.php';
 
 $assertions = 0;
 $temporaryRoot = sys_get_temp_dir() . '/redcms-runtime-setting-contract-' .
@@ -175,6 +176,17 @@ try {
         is_array($contract)
             && ($contract['runtimeSettings'] ?? null) === ['fixture.currency'],
         'the closed runtime setting declaration is preserved by form lookup'
+    );
+    $withoutRuntimeContract = $contract;
+    unset($withoutRuntimeContract['runtimeSettings']);
+    red_addon_runtime_setting_contract_assert(
+        !hash_equals(
+            red_addon_admin_tool_form_contract_fingerprint($contract),
+            red_addon_admin_tool_form_contract_fingerprint(
+                $withoutRuntimeContract
+            )
+        ),
+        'runtime setting declaration changes invalidate form contract evidence'
     );
 
     $withoutRuntime = $validManifest;
