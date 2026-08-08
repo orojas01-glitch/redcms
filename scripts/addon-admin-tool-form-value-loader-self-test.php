@@ -16,6 +16,8 @@ require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot . '/includes/addon_admin_tool_form_ui_helpers.php';
 require_once $projectRoot .
     '/includes/addon_admin_tool_form_initial_value_helpers.php';
+require_once $projectRoot .
+    '/includes/addon_admin_tool_form_create_submission_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_admin_tool_form_value|rev_base)_[A-Za-z0-9_]+\z/',
@@ -141,7 +143,7 @@ function red_addon_admin_form_value_test_manifest(
             'method' => 'POST',
             'csrf' => 'required',
             'encoding' => 'application/json',
-            'maxBodyBytes' => 256,
+            'maxBodyBytes' => 1024,
             'runtimeSettings' => ['fixture.currency'],
             'create' => [
                 'label' => 'Add product',
@@ -314,7 +316,7 @@ function red_addon_admin_form_value_test_context(
             } elseif ($loaderMode === 'extra') {
                 $values['undeclared'] = 'blocked';
             } elseif ($loaderMode === 'oversized') {
-                $values['description'] = str_repeat('x', 200);
+                $values['description'] = str_repeat('x', 301);
             }
             return RED_Addon_Admin_Tool_Form_Values::current($values);
         }
@@ -626,6 +628,109 @@ try {
         );
     }
     $initialMode = 'normal';
+
+    $createValues = [
+        'id' => 'new-shirt',
+        'type' => 'simple',
+        'active' => false,
+        'description' => null,
+        'options' => [],
+    ];
+    $createBody = json_encode(
+        [
+            'tool' => $toolId,
+            'form' => $formId,
+            'initialStateSha256' => $initial['stateSha256'],
+            'values' => $createValues,
+        ],
+        JSON_UNESCAPED_SLASHES
+            | JSON_UNESCAPED_UNICODE
+            | JSON_PRESERVE_ZERO_FRACTION
+            | JSON_THROW_ON_ERROR
+    );
+    $preparedCreate =
+        red_addon_admin_tool_form_create_submission_prepare(
+            $connection,
+            $createBody,
+            $actorId
+        );
+    red_addon_admin_form_value_test_assert(
+        $preparedCreate['authorized'] === true
+            && $preparedCreate['invoked'] === true
+            && $preparedCreate['prepared'] === true
+            && $preparedCreate['package'] === $packageId
+            && $preparedCreate['actorRecordId'] === $actorId
+            && $preparedCreate['permission'] === $permission
+            && $preparedCreate['values'] === $createValues
+            && $preparedCreate['initialStateSha256']
+                === $initial['stateSha256']
+            && $preparedCreate['runtimeSettingsSha256']
+                === $initial['runtimeSettingsSha256']
+            && red_addon_valid_sha256(
+                $preparedCreate['submittedValuesSha256']
+            )
+            && red_addon_valid_sha256($preparedCreate['planSha256'])
+            && $preparedCreate['reason'] === 'prepared',
+        'canonical target-free creation values prepare opaque evidence without invoking the creator'
+    );
+
+    $staleCreate = json_decode(
+        $createBody,
+        true,
+        12,
+        JSON_THROW_ON_ERROR
+    );
+    $staleCreate['initialStateSha256'] = hash('sha256', 'stale-initial');
+    $staleCreate = json_encode(
+        $staleCreate,
+        JSON_UNESCAPED_SLASHES
+            | JSON_UNESCAPED_UNICODE
+            | JSON_PRESERVE_ZERO_FRACTION
+            | JSON_THROW_ON_ERROR
+    );
+    $staleCreateResult =
+        red_addon_admin_tool_form_create_submission_prepare(
+            $connection,
+            $staleCreate,
+            $actorId
+        );
+    red_addon_admin_form_value_test_assert(
+        $staleCreateResult['authorized'] === true
+            && $staleCreateResult['invoked'] === true
+            && empty($staleCreateResult['prepared'])
+            && $staleCreateResult['reason'] === 'state_conflict'
+            && $staleCreateResult['values'] === [],
+        'stale draft or configuration evidence refuses creation preparation'
+    );
+
+    $invalidCreate = json_decode(
+        $createBody,
+        true,
+        12,
+        JSON_THROW_ON_ERROR
+    );
+    $invalidCreate['values']['id'] = '';
+    $invalidCreate = json_encode(
+        $invalidCreate,
+        JSON_UNESCAPED_SLASHES
+            | JSON_UNESCAPED_UNICODE
+            | JSON_PRESERVE_ZERO_FRACTION
+            | JSON_THROW_ON_ERROR
+    );
+    $invalidCreateResult =
+        red_addon_admin_tool_form_create_submission_prepare(
+            $connection,
+            $invalidCreate,
+            $actorId
+        );
+    red_addon_admin_form_value_test_assert(
+        $invalidCreateResult['authorized'] === true
+            && $invalidCreateResult['invoked'] === true
+            && empty($invalidCreateResult['prepared'])
+            && $invalidCreateResult['reason'] === 'invalid_values'
+            && $invalidCreateResult['values'] === [],
+        'creation preparation restores strict required-field validation'
+    );
 
     $loaded = red_addon_admin_tool_form_load_values(
         $connection,

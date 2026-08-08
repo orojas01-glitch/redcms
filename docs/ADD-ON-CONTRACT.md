@@ -1318,6 +1318,19 @@ manifest drift, undeclared creation, malformed results, and provider side
 effects fail closed. The runner has no target id, transaction, creator lookup,
 request global, CSRF operation, endpoint, form, or button.
 
+Creation submission preparation is a separate validation-only adapter and
+cannot reuse the edit body. Its canonical JSON object contains exactly `tool`,
+`form`, `initialStateSha256`, and the complete `values`; it contains no package,
+permission, actor, target record, creator, or table identity. Core repeats form
+preflight and the manifest body limit before reloading the current target-free
+draft, refuses stale contract/configuration/draft state, then restores the
+ordinary strict field validator so every required value must be complete. The
+opaque plan binds package, form, actor, permission, contract, runtime settings,
+initial state, and submitted-value hashes. This adapter invokes no creator,
+opens no transaction, allocates no id, writes no audit, reads no request global,
+and exposes no endpoint; its evidence is preparation, not authorization to
+mutate.
+
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,
 email, date, datetime, and media-reference definitions as component editors.

@@ -708,6 +708,14 @@ are contained or refused. It loads no current target and exposes no actor to
 package code. It does not resolve or invoke the creator, open a transaction,
 consume CSRF, read request globals, or create an endpoint.
 
+Create preparation accepts a separate canonical target-free JSON body. Edit
+state and numeric target ids are rejected rather than translated. Core checks
+the body limit before loading the current initial draft, compares exact draft
+state, and then applies strict completed-value validation. The resulting opaque
+plan is actor, permission, contract, configuration, initial-state, and values
+bound. No package or table selector enters the body, and the validation helper
+contains no creator lookup, record allocation, transaction, audit, or endpoint.
+
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the

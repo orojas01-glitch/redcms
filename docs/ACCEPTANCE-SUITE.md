@@ -676,6 +676,15 @@ containers, network, image, database, package marker, and build context.
   typed request exposes only exact tool/form identity and immutable runtime
   settings; deterministic draft state uses no synthetic record id. No provider,
   authorization, database, transaction, endpoint, or browser control is used.
+- Add-on administrator-form create-submission acceptance runs before database
+  creation and again inside the disposable current/initial-value lifecycle. It
+  accepts only canonical JSON with exact tool/form identity, target-free initial
+  state, and complete values; edit state, numeric targets, package identity,
+  unknown keys, malformed hashes, and noncanonical bodies fail closed. Fresh
+  permission, current draft/configuration state, manifest body limits, and
+  strict required-field validation precede deterministic actor-bound plan
+  evidence. Source and runtime checks prove no creator lookup or invocation,
+  transaction, record allocation, request global, endpoint, or database write.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared
