@@ -373,9 +373,12 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   invalid submissions, and derives opaque preparation evidence without
   invoking a writer. A separate internal core boundary now accepts one exact
   optional form writer with declared package-owned InnoDB tables and atomically
-  revalidates, writes, reloads, and audits an exact changed postcondition. No
-  Store Lite provider/package, editable renderer, Save action, endpoint bridge,
-  or linked control exists;
+  revalidates, writes, reloads, and audits an exact changed postcondition. A
+  core-owned operational editor and authenticated JSON Save endpoint now bridge
+  one exact tool/form/positive-target identity to that runner with typed scalar
+  and bounded nested-collection controls. No Store Lite provider/package,
+  product target list, package navigation, migration, table, or linked Store
+  control exists;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
   now binds a declared action's exact runtime owner, package permission,
@@ -577,9 +580,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    fresh exact grants, closed nested values, record-bound evidence, and a
    disabled core preview. The separate unlinked validation-only JSON adapter is
    complete, and the separate internal exact-writer/atomic-runner boundary now
-   passes rollback acceptance. Neither is connected to an editable form or Save
-   endpoint; no Store Lite provider or data is present. Store Lite remains
-   blocked.
+   passes rollback acceptance. The generic operational editor and authenticated
+   Save bridge also pass focused and full disposable/HTTP acceptance; direct
+   rendered desktop/mobile browser evidence remains pending. No Store Lite
+   provider, target list, navigation, migration, table, or product data is
+   present. Store Lite remains blocked.
 25. Create Store Lite in its separate distribution using only those accepted
    contracts.
 26. Add package-owned migrations, Product editing, catalog, cart, orders, and

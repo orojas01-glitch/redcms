@@ -167,6 +167,11 @@ The atomic runner recreates that plan under lifecycle/package locks, reloads
 current state, refuses stale or substituted evidence, contains the trusted
 writer, verifies the exact postcondition, and commits one value-free audit fact
 with the package mutation. The validation endpoint still does not call it.
+A separate core-owned edit endpoint now reloads one exact authorized
+tool/form/positive target into escaped typed controls, while a distinct
+authenticated header-CSRF JSON Save endpoint delegates only to that atomic
+runner and returns a bounded value-free outcome. Target discovery, package
+navigation, and Store Lite behavior remain separate package work.
 Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
@@ -371,6 +376,13 @@ features.
 - Core-owned, unlinked administrator action endpoint with independent
   POST/session/CSRF validation, exact request fields, server-derived plans, and
   value-free bounded outcomes—without an administrator control or public route
+- Core-owned operational administrator-form editor and Save bridge. One exact
+  tool/form/positive-target request reloads current values after fresh package
+  authorization and exact writer ownership, renders only escaped scalar and
+  bounded nested-collection controls, and submits canonical JSON through an
+  authenticated header-CSRF endpoint to the atomic form runner. Public Save
+  outcomes are value-free; Store Lite target selection, navigation, provider
+  code, tables, and product data remain outside the starter
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
@@ -481,7 +493,8 @@ php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 
 The dependency-free administrator-form schema/preview plus database-backed
 setting storage, administrator-form preflight, current-value loading, JSON
-validation, atomic form writing, administrator-action preflight, and
+validation, atomic form writing, the operational edit-and-Save bridge,
+administrator-action preflight, and
 immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,

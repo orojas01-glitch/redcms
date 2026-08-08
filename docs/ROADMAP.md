@@ -602,8 +602,14 @@ package version, table set, actor, and target. Its atomic runner recreates the
 plan under lifecycle/package locks, repeats grant and state checks, refuses
 stale/replayed/drifted evidence, contains the trusted writer, reloads the exact
 postcondition, and commits one value-free audit fact with the package mutation.
-There is still no editable control, Save action, endpoint-to-writer bridge, or
-Store Lite provider.
+The separate core-owned operational bridge now accepts only an exact
+tool/form/positive-target edit request after administrator session and header
+CSRF checks, reloads the authorized current state, renders escaped editable
+scalar and bounded nested-collection controls, and sends canonical JSON through
+a second authenticated Save endpoint to that atomic runner. Its public result
+is only `saved`, `unchanged`, or a bounded refusal. Direct rendered desktop and
+mobile browser evidence remains pending; no Store Lite provider, target list,
+navigation, package, migration, table, or product state is added.
 The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific
 by-reference secret consumption plus core result redaction. The generic

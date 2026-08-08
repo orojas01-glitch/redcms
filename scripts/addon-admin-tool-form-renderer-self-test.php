@@ -510,11 +510,8 @@ try {
             && !str_contains($source, 'mysqli')
             && !str_contains($source, 'red_csrf_token(')
             && !str_contains($source, 'red_verify_csrf(')
-            && !str_contains($source, 'red_addon_runtime_handler(')
-            && !is_file(
-                $projectRoot . '/admin/bin/edit_addon_tool_form.php'
-            ),
-        'preview has no request, database, CSRF, callback, or endpoint path'
+            && !str_contains($source, 'red_addon_runtime_handler('),
+        'the display-only preview helper keeps no request, database, CSRF, or callback path'
     );
 } finally {
     fwrite(

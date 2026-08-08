@@ -60,7 +60,7 @@ flowchart TD
     AF2 --> AF3["Permission-scoped current-value loader"]
     AF3 --> AF4["Validation-only JSON adapter"]
     AF4 --> AF5["Atomic internal administrator-form writer"]
-    AF5 --> AF6["CURRENT / NEXT<br/>Editable core form + protected Save bridge"]
+    AF5 --> AF6["CURRENT<br/>Edit + Save implemented<br/>Rendered browser QA pending"]
     AF6 --> S2["Separate Store Lite package implementation"]
     S2 -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
@@ -82,8 +82,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Gate 26K completes the generic administrator-form persistence boundary: exact optional writer ownership, declared package tables, deterministic value-free write plans, lifecycle/package serialization, locked permission/version/state revalidation, exact postcondition reload, unchanged no-op behavior, and one atomic value-free audit fact. The protected JSON adapter remains validation-only and disconnected from the writer. The 27 focused writer assertions and the full 45-migration disposable acceptance suite pass with exact cleanup. |
-| Current milestone | The core can now declare, preview, load, validate, and internally persist a package-owned administrator form without adding Store Lite behavior to the starter. Next is Gate 26L: a core-owned editable form plus authenticated, CSRF-protected Save endpoint bridge. Store Lite package code, migrations, routes, tables, settings, and enablement remain blocked until that generic bridge is accepted. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification used uniquely named disposable databases. |
+| Latest completed slice | Gate 26L implements the generic operational administrator-form bridge: exact tool/form/positive-target editing, fresh permission plus enabled writer/table ownership, escaped typed scalar and bounded nested-collection controls, canonical JSON with header CSRF, atomic value-free Save outcomes, stale replay refusal, and reload after success. The 21 focused assertions, real authenticated HTTP guards, full 45-migration disposable suite, and exact cleanup pass. No Store Lite package or data was added. |
+| Current milestone | Direct rendered desktop/mobile browser inspection is the remaining Gate 26L check; the local Chrome launch was blocked by the desktop permission boundary, so no visual claim is made yet. After that check, the next milestone is the separately distributed Store Lite package foundation and its target list/navigation—still without placing commerce behavior in core. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification used uniquely named disposable databases. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

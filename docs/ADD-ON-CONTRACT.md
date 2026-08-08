@@ -1333,8 +1333,30 @@ replayed state, substituted plans, package-version/contract/table drift,
 writer failure, incomplete or wrong writes, transaction loss, postcondition
 failure, and audit failure are refused. The writer is trusted reviewed PHP, not
 a database sandbox, and must not commit, roll back, or start transactions. The
-validation endpoint still does not invoke this runner; an editable form and
-Save bridge require a separate gate.
+validation endpoint still does not invoke this runner.
+
+`red_addon_admin_tool_form_endpoint_context()` is the separate operational edit
+boundary. After its HTTP endpoint has required POST, a current database-backed
+administrator session, and header CSRF, it accepts exactly one declared tool,
+form, and canonical positive numeric target. Core re-derives the exact current
+runtime owner, writer/table declaration, enabled package version, permission,
+manifest contract, and current typed values. Only that complete current graph
+may enter `red_addon_admin_tool_form_endpoint_render()`, which emits escaped
+core controls for the closed scalar and two-level collection schema. Package
+markup, scripts, styles, actions, names, target lists, and navigation are not
+part of this result.
+
+`admin/bin/save_addon_tool_form.php` is POST-only and verifies the current
+administrator plus header CSRF before body I/O. It accepts only the existing
+canonical `application/json` submission shape and delegates through
+`red_addon_admin_tool_form_save_dispatch()` to the exact internal write
+preflight and atomic runner. Its response is only `{ok:true,status:saved}`,
+`{ok:true,status:unchanged}`, or a bounded generic refusal. It returns no
+submitted values, state/plan hash, package/table identity, or audit evidence.
+The core browser controller reloads the editor after a successful write and
+never treats its own typed serialization or collection bounds as a replacement
+for server validation. This generic bridge adds no Store Lite provider,
+business table, target chooser, or enablement exception.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique

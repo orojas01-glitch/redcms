@@ -721,8 +721,26 @@ the complete normalized submission before the package mutation and one
 value-free `addon.form.saved` audit fact commit together. Unchanged values roll
 back without writer or audit work. The reviewed first-party writer must not
 manage transactions or write outside its declared tables; it is not a database
-sandbox. The validation endpoint remains disconnected, so no browser Save path
-or Store Lite behavior is active.
+sandbox. The validation-only endpoint remains disconnected from this runner.
+
+The operational browser bridge is a separate core-owned surface. Its edit
+endpoint is POST-only and performs database-backed administrator-session plus
+header-CSRF checks before accepting exactly `tool`, `form`, and one canonical
+positive `targetRecordId`. It derives package, permission, manifest, contract,
+writer, declared tables, and enabled version from the current request runtime;
+none is trusted from browser input. Only a complete freshly loaded value graph
+may populate escaped core controls. Package HTML, JavaScript, CSS, field names,
+actions, and response markup are never accepted.
+
+The Save endpoint repeats method, administrator, and header-CSRF checks before
+opening the bounded exact `application/json` body. The controller preserves
+integer, boolean, nullable scalar, object, and ordered collection types and
+applies the manifest's collection bounds, but server validation and locked
+revalidation remain authoritative. Public results contain only `saved`,
+`unchanged`, or a bounded refusal—never values, package identity, state or plan
+hashes, table names, or audit evidence. A successful Save reloads the editor
+instead of trusting client-derived state. The bridge does not select targets,
+add navigation, enable a richer package, or add Store Lite behavior.
 
 The loader is reviewed first-party PHP, not a database sandbox. It is required
 to be read-only and may query only its package-owned current-client data; it

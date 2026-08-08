@@ -964,6 +964,23 @@ request bootstrap excludes the disabled package.
     The validation endpoint remains disconnected, and no editable renderer,
     Save control, Store Lite package, migration, table, or state is added.
 
+73. Implemented the core-owned operational administrator-form editor and Save
+    bridge. The POST-only edit endpoint requires a current administrator and
+    header CSRF before accepting exactly one tool, form, and positive target;
+    it repeats exact enabled writer/table ownership plus fresh form permission,
+    reloads the complete current value graph, and renders only escaped core
+    scalar and bounded two-level collection controls. The core controller
+    preserves integer, boolean, nullable, object, and ordered-list types,
+    enforces manifest collection bounds, and sends canonical JSON with header
+    CSRF to a separate POST-only Save endpoint. That endpoint delegates only to
+    the accepted atomic runner and returns `saved`, `unchanged`, or a bounded
+    value-free refusal before the editor reloads current state. The 21 focused
+    assertions, real authenticated HTTP guards, full 45-migration disposable
+    acceptance, and exact cleanup pass. Direct desktop/mobile rendered-browser
+    evidence remains pending because the local Chrome launch permission was
+    unavailable. No Store Lite navigation, target provider, package, migration,
+    table, or product state is added.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
