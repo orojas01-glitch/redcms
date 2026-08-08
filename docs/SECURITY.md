@@ -692,6 +692,14 @@ reserved-table registration fails bootstrap. Registration exposes no execution
 path by itself: no provider is invoked, no transaction begins, and no request or
 browser surface is added.
 
+Draft initial values use a separate typed result and validation mode. The full
+closed field graph, scalar types, options, collection limits, node ceiling, and
+body-size limit still apply; only required scalar emptiness is relaxed before
+the author has entered data. Normal edit/save validation stays strict. Draft
+state is bound to package, tool, form, contract, runtime settings, and values
+without accepting or fabricating a record id. This type definition invokes no
+registered loader and performs no authorization or database access.
+
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the

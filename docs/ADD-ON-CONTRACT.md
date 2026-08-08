@@ -1292,8 +1292,20 @@ exactly one `registerAdminToolFormInitialValueLoader()` and one
 eight package-owned InnoDB transaction tables using the same reserved-table
 rules as the existing form writer. Missing, duplicate, or undeclared bindings
 fail request bootstrap. These registrations remain lookup-only in this slice:
-core has not yet defined the initial-value result, creator request/result,
-transaction runner, browser control, or HTTP endpoint.
+core has not yet defined the initial-value loader runner, creator
+request/result, transaction runner, browser control, or HTTP endpoint.
+
+The initial-value provider must eventually return the dedicated
+`RED_Addon_Admin_Tool_Form_Initial_Values::draft()` result. Draft validation
+requires every declared field key and rejects extra keys, type coercion,
+invalid choices, unsafe text, collection-bound violations, schema drift, and
+body-limit overflow. Required scalar fields alone may begin empty so a new
+product can be authored; the ordinary current-value and submission validators
+remain strict. The corresponding request carries only the exact tool/form ids
+and immutable declared runtime settings—never an administrator identity,
+record id, session, request global, package selector, or secret. Core can bind
+the normalized draft to contract and runtime-setting state without inventing a
+synthetic target record id.
 
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,

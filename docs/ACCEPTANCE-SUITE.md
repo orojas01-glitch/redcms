@@ -668,6 +668,14 @@ containers, network, image, database, package marker, and build context.
   registrations fail closed. Exact handlers, table metadata, and package
   ownership enter only the in-memory request context; no callback is invoked,
   no transaction starts, and no endpoint or browser control exists.
+- Add-on administrator-form initial-value acceptance runs before database
+  creation. It requires the complete closed draft graph while allowing only
+  required scalar fields to begin empty. Missing or extra keys, coercion,
+  invalid select values, bounds, collection, node, and body-size violations
+  fail closed, while the ordinary edit/save validator remains strict. The
+  typed request exposes only exact tool/form identity and immutable runtime
+  settings; deterministic draft state uses no synthetic record id. No provider,
+  authorization, database, transaction, endpoint, or browser control is used.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared
