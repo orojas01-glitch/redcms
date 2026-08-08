@@ -14,6 +14,8 @@ $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot . '/includes/addon_admin_tool_form_ui_helpers.php';
+require_once $projectRoot .
+    '/includes/addon_admin_tool_form_initial_value_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_admin_tool_form_value|rev_base)_[A-Za-z0-9_]+\z/',
@@ -34,6 +36,8 @@ $toolId = $packageId . '/products';
 $formId = $packageId . '/product-editor';
 $permission = 'fixture.products.manage';
 $calls = ['tool' => 0, 'loader' => 0];
+$initialCalls = 0;
+$initialMode = 'normal';
 $loaderMode = 'normal';
 $runtimeCurrency = 'USD';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
@@ -139,6 +143,10 @@ function red_addon_admin_form_value_test_manifest(
             'encoding' => 'application/json',
             'maxBodyBytes' => 256,
             'runtimeSettings' => ['fixture.currency'],
+            'create' => [
+                'label' => 'Add product',
+                'description' => 'Create one bounded product.',
+            ],
             'fields' => [
                 [
                     'key' => 'id',
@@ -254,7 +262,7 @@ function red_addon_admin_form_value_test_context(
     $toolId,
     $formId
 ) {
-    global $calls, $loaderMode, $runtimeCurrency;
+    global $calls, $loaderMode, $runtimeCurrency, $initialCalls, $initialMode;
     $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
     $registry->registerAdminTool(
         $toolId,
@@ -310,6 +318,51 @@ function red_addon_admin_form_value_test_context(
             }
             return RED_Addon_Admin_Tool_Form_Values::current($values);
         }
+    );
+    $registry->registerAdminToolFormInitialValueLoader(
+        $formId,
+        static function ($connection, $request) use (
+            &$runtimeCurrency,
+            &$initialCalls,
+            &$initialMode
+        ) {
+            $initialCalls++;
+            if (!$connection
+                || !$request instanceof
+                    RED_Addon_Admin_Tool_Form_Initial_Value_Request
+                || $request->runtimeSettings()->value('fixture.currency')
+                    !== $runtimeCurrency
+            ) {
+                throw new RuntimeException(
+                    'Initial-value loader arguments are invalid.'
+                );
+            }
+            if ($initialMode === 'output') {
+                echo 'unexpected initial output';
+            } elseif ($initialMode === 'throw') {
+                throw new RuntimeException('Initial-value fixture failure.');
+            }
+            $values = [
+                'id' => '',
+                'type' => 'simple',
+                'active' => false,
+                'description' => null,
+                'options' => [],
+            ];
+            if ($initialMode === 'invalid') {
+                $values['type'] = 'forged';
+            }
+            return RED_Addon_Admin_Tool_Form_Initial_Values::draft($values);
+        }
+    );
+    $registry->registerAdminToolFormCreator(
+        $formId,
+        static function () {
+            throw new RuntimeException(
+                'Creator must remain uninvoked during value loading.'
+            );
+        },
+        ['RED_Addon_Admin_Form_Value_Fixture']
     );
     $registry->assertComplete();
     return new RED_Addon_Runtime_Context(
@@ -452,8 +505,12 @@ try {
         );
     red_addon_admin_form_value_test_assert(
         red_addon_runtime_owner('adminToolFormValueLoaders', $formId)
-            === $packageId,
-        'schema-bearing form has one exact runtime value-loader owner'
+            === $packageId
+            && red_addon_runtime_owner(
+                'adminToolFormInitialValueLoaders',
+                $formId
+            ) === $packageId,
+        'schema-bearing create form has exact current and initial value-loader owners'
     );
 
     $denied = red_addon_admin_tool_form_load_values(
@@ -470,6 +527,20 @@ try {
             && $denied['reason'] === 'permission_denied'
             && $calls === ['tool' => 0, 'loader' => 0],
         'missing exact permission refuses before package loader invocation'
+    );
+    $deniedInitial = red_addon_admin_tool_form_load_initial_values(
+        $connection,
+        $toolId,
+        $formId,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        empty($deniedInitial['authorized'])
+            && empty($deniedInitial['invoked'])
+            && empty($deniedInitial['loaded'])
+            && $deniedInitial['reason'] === 'permission_denied'
+            && $initialCalls === 0,
+        'missing exact permission refuses before initial-value loader invocation'
     );
 
     red_addon_admin_form_value_test_execute(
@@ -494,6 +565,67 @@ try {
             ProductType, IsActive, Description) ORDER BY RecordID SEPARATOR \'|\')
          FROM RED_Addon_Admin_Form_Value_Fixture'
     );
+
+    $initial = red_addon_admin_tool_form_load_initial_values(
+        $connection,
+        $toolId,
+        $formId,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        $initial['authorized'] === true
+            && $initial['invoked'] === true
+            && $initial['loaded'] === true
+            && $initial['package'] === $packageId
+            && $initial['actorRecordId'] === $actorId
+            && $initial['permission'] === $permission
+            && $initial['values'] === [
+                'id' => '',
+                'type' => 'simple',
+                'active' => false,
+                'description' => null,
+                'options' => [],
+            ]
+            && red_addon_valid_sha256($initial['contractSha256'])
+            && red_addon_valid_sha256($initial['planSha256'])
+            && red_addon_valid_sha256(
+                $initial['runtimeSettingsSha256']
+            )
+            && red_addon_valid_sha256($initial['stateSha256'])
+            && $initial['reason'] === 'loaded'
+            && $initialCalls === 1,
+        'exact grant loads one complete typed draft without a target record or write'
+    );
+
+    foreach (['invalid', 'output', 'throw'] as $failureMode) {
+        $initialMode = $failureMode;
+        $bufferBefore = ob_get_level();
+        $failure = red_addon_admin_tool_form_load_initial_values(
+            $connection,
+            $toolId,
+            $formId,
+            $actorId
+        );
+        red_addon_admin_form_value_test_assert(
+            $failure['authorized'] === true
+                && $failure['invoked'] === true
+                && empty($failure['loaded'])
+                && $failure['values'] === []
+                && $failure['stateSha256'] === ''
+                && in_array(
+                    $failure['reason'],
+                    [
+                        'invalid_initial_values',
+                        'initial_loader_output',
+                        'initial_loader_failed',
+                    ],
+                    true
+                )
+                && ob_get_level() === $bufferBefore,
+            'invalid draft values, output, and exceptions remain contained'
+        );
+    }
+    $initialMode = 'normal';
 
     $loaded = red_addon_admin_tool_form_load_values(
         $connection,
@@ -775,6 +907,21 @@ try {
             && $calls['loader'] === $callsBeforeRevoke,
         'permission revocation applies before the next loader call'
     );
+    $initialCallsBeforeRevoke = $initialCalls;
+    $revokedInitial = red_addon_admin_tool_form_load_initial_values(
+        $connection,
+        $toolId,
+        $formId,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        empty($revokedInitial['authorized'])
+            && empty($revokedInitial['invoked'])
+            && empty($revokedInitial['loaded'])
+            && $revokedInitial['reason'] === 'permission_denied'
+            && $initialCalls === $initialCallsBeforeRevoke,
+        'permission revocation applies before the next initial-value load'
+    );
 
     foreach ([0, '41', 2147483648] as $invalidTarget) {
         $invalid = red_addon_admin_tool_form_load_values(
@@ -806,13 +953,21 @@ try {
     $source = (string) file_get_contents(
         $projectRoot . '/includes/addon_admin_tool_form_value_helpers.php'
     );
+    $initialSource = (string) file_get_contents(
+        $projectRoot .
+            '/includes/addon_admin_tool_form_initial_value_helpers.php'
+    );
     red_addon_admin_form_value_test_assert(
         !str_contains($source, '$_POST')
             && !str_contains($source, '$_GET')
             && !str_contains($source, '$_SESSION')
             && !str_contains($source, 'red_verify_csrf(')
+            && !str_contains($initialSource, '$_POST')
+            && !str_contains($initialSource, '$_GET')
+            && !str_contains($initialSource, '$_SESSION')
+            && !str_contains($initialSource, 'red_verify_csrf(')
             && !is_file($projectRoot . '/admin/bin/load_addon_tool_form.php'),
-        'value loading adds no request, session, CSRF, or endpoint surface'
+        'current and initial value loading add no request, session, CSRF, or endpoint surface'
     );
 } finally {
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);

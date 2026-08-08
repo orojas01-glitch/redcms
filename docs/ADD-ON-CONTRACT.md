@@ -1292,8 +1292,8 @@ exactly one `registerAdminToolFormInitialValueLoader()` and one
 eight package-owned InnoDB transaction tables using the same reserved-table
 rules as the existing form writer. Missing, duplicate, or undeclared bindings
 fail request bootstrap. These registrations remain lookup-only in this slice:
-core has not yet defined the initial-value loader runner, creator
-request/result, transaction runner, browser control, or HTTP endpoint.
+core has not yet defined the creator request/result, transaction runner,
+browser control, or HTTP endpoint.
 
 The initial-value provider must eventually return the dedicated
 `RED_Addon_Admin_Tool_Form_Initial_Values::draft()` result. Draft validation
@@ -1306,6 +1306,17 @@ and immutable declared runtime settings—never an administrator identity,
 record id, session, request global, package selector, or secret. Core can bind
 the normalized draft to contract and runtime-setting state without inventing a
 synthetic target record id.
+
+`red_addon_admin_tool_form_load_initial_values()` is the separate read-only
+runner. It repeats the existing form preflight, exact enabled package/form
+ownership, fresh binary permission, current manifest contract, and declared
+runtime-setting resolution before invoking only the registered initial-value
+loader. Core contains output, exceptions, nested-buffer drift, and HTTP-state
+changes, then validates the dedicated draft result and binds it to contract and
+configuration state. Permission revocation, missing configuration, owner or
+manifest drift, undeclared creation, malformed results, and provider side
+effects fail closed. The runner has no target id, transaction, creator lookup,
+request global, CSRF operation, endpoint, form, or button.
 
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,

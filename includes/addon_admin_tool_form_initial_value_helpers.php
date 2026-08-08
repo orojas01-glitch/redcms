@@ -195,3 +195,214 @@ if (!function_exists('red_addon_admin_tool_form_initial_value_state_hash')) {
         return is_string($encoded) ? hash('sha256', $encoded) : '';
     }
 }
+
+if (!function_exists('red_addon_admin_tool_form_initial_value_result')) {
+    function red_addon_admin_tool_form_initial_value_result(
+        $toolId,
+        $formId,
+        $actorRecordId,
+        $reason = 'invalid_request'
+    ) {
+        return [
+            'authorized' => false,
+            'invoked' => false,
+            'loaded' => false,
+            'tool' => is_string($toolId)
+                && red_addon_valid_capability($toolId)
+                    ? $toolId
+                    : '',
+            'form' => is_string($formId)
+                && red_addon_valid_capability($formId)
+                    ? $formId
+                    : '',
+            'package' => '',
+            'actorRecordId' => red_addon_admin_tool_form_actor_record_id(
+                $actorRecordId
+            ),
+            'permission' => '',
+            'contractSha256' => '',
+            'planSha256' => '',
+            'runtimeSettingsSha256' => '',
+            'stateSha256' => '',
+            'values' => [],
+            'reason' => (string) $reason,
+        ];
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_form_load_initial_values')) {
+    function red_addon_admin_tool_form_load_initial_values(
+        $connection,
+        $toolId,
+        $formId,
+        $actorRecordId
+    ) {
+        $result = red_addon_admin_tool_form_initial_value_result(
+            $toolId,
+            $formId,
+            $actorRecordId
+        );
+        if (!$connection
+            || $result['tool'] === ''
+            || $result['form'] === ''
+            || $result['actorRecordId'] < 1
+        ) {
+            return $result;
+        }
+        $preflight = red_addon_admin_tool_form_preflight(
+            $connection,
+            $result['tool'],
+            $result['form'],
+            $result['actorRecordId']
+        );
+        $result['authorized'] = ($preflight['authorized'] ?? false) === true;
+        $result['package'] = is_string($preflight['package'] ?? null)
+            ? $preflight['package']
+            : '';
+        $result['permission'] = is_string($preflight['permission'] ?? null)
+            ? $preflight['permission']
+            : '';
+        $result['contractSha256'] =
+            is_string($preflight['contractSha256'] ?? null)
+                ? $preflight['contractSha256']
+                : '';
+        $result['planSha256'] =
+            is_string($preflight['planSha256'] ?? null)
+                ? $preflight['planSha256']
+                : '';
+        if (($preflight['ready'] ?? false) !== true) {
+            $result['reason'] = (string) (
+                $preflight['reason'] ?? 'preflight_failed'
+            );
+            return $result;
+        }
+
+        $loaderOwner = red_addon_runtime_owner(
+            'adminToolFormInitialValueLoaders',
+            $result['form']
+        );
+        $loader = red_addon_runtime_handler(
+            'adminToolFormInitialValueLoaders',
+            $result['form']
+        );
+        $manifest = red_addon_runtime_manifest($result['package']);
+        $contract = is_array($manifest)
+            ? red_addon_admin_tool_form_contract(
+                $manifest,
+                $result['tool'],
+                $result['form']
+            )
+            : null;
+        if (!is_string($loaderOwner)
+            || !hash_equals($result['package'], $loaderOwner)
+            || !is_callable($loader)
+            || !is_array($contract)
+            || !is_array($contract['fields'] ?? null)
+            || $contract['fields'] === []
+            || !is_array($contract['create'] ?? null)
+        ) {
+            $result['reason'] = 'initial_loader_unavailable';
+            return $result;
+        }
+        $binding = red_addon_admin_tool_form_preflight_binding(
+            $result['tool'],
+            $result['form']
+        );
+        $runtimeSettings = is_array($binding)
+            ? red_addon_admin_tool_form_runtime_settings_resolve(
+                $connection,
+                $binding
+            )
+            : ['resolved' => false, 'reason' => 'binding_invalid'];
+        if (($runtimeSettings['resolved'] ?? false) !== true
+            || !($runtimeSettings['settings']
+                instanceof RED_Addon_Admin_Tool_Form_Runtime_Settings)
+            || !red_addon_valid_sha256(
+                $runtimeSettings['stateSha256'] ?? null
+            )
+        ) {
+            $result['reason'] = 'runtime_settings_unavailable';
+            return $result;
+        }
+        $result['runtimeSettingsSha256'] =
+            $runtimeSettings['stateSha256'];
+        try {
+            $request = new RED_Addon_Admin_Tool_Form_Initial_Value_Request(
+                $result['tool'],
+                $result['form'],
+                $runtimeSettings['settings']
+            );
+        } catch (Throwable $throwable) {
+            $result['reason'] = 'invalid_request';
+            return $result;
+        }
+
+        $bufferLevel = ob_get_level();
+        $headersBefore = headers_list();
+        $statusBefore = http_response_code();
+        try {
+            ob_start();
+            $result['invoked'] = true;
+            $loaded = $loader($connection, $request);
+            if (ob_get_level() !== $bufferLevel + 1) {
+                throw new RuntimeException(
+                    'Administrator form initial-value loader altered output buffers.'
+                );
+            }
+            if (headers_list() !== $headersBefore
+                || http_response_code() !== $statusBefore
+            ) {
+                throw new RuntimeException(
+                    'Administrator form initial-value loader altered HTTP state.'
+                );
+            }
+            $output = (string) ob_get_clean();
+            if ($output !== '') {
+                $result['reason'] = 'initial_loader_output';
+                return $result;
+            }
+        } catch (Throwable $throwable) {
+            while (ob_get_level() > $bufferLevel) {
+                ob_end_clean();
+            }
+            red_addon_admin_tool_restore_http_state(
+                $headersBefore,
+                $statusBefore
+            );
+            error_log('RED-CMS administrator form initial-value loading failed.');
+            $result['reason'] = 'initial_loader_failed';
+            return $result;
+        }
+        if (!$loaded instanceof RED_Addon_Admin_Tool_Form_Initial_Values) {
+            $result['reason'] = 'invalid_result';
+            return $result;
+        }
+        $validated = red_addon_admin_tool_form_validate_initial_values(
+            $contract,
+            $loaded->values()
+        );
+        if (($validated['valid'] ?? false) !== true
+            || !is_array($validated['values'] ?? null)
+        ) {
+            $result['reason'] = 'invalid_initial_values';
+            return $result;
+        }
+        $stateSha256 = red_addon_admin_tool_form_initial_value_state_hash(
+            $result['package'],
+            $result['tool'],
+            $result['form'],
+            $result['contractSha256'],
+            $result['runtimeSettingsSha256'],
+            $validated['values']
+        );
+        if (!red_addon_valid_sha256($stateSha256)) {
+            $result['reason'] = 'invalid_initial_values';
+            return $result;
+        }
+        $result['loaded'] = true;
+        $result['values'] = $validated['values'];
+        $result['stateSha256'] = $stateSha256;
+        $result['reason'] = 'loaded';
+        return $result;
+    }
+}

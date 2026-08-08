@@ -700,6 +700,14 @@ state is bound to package, tool, form, contract, runtime settings, and values
 without accepting or fabricating a record id. This type definition invokes no
 registered loader and performs no authorization or database access.
 
+The dedicated initial-value runner performs the same exact enabled owner,
+fresh binary form-permission, manifest-contract, and runtime-setting checks as
+current-value loading before invoking the initial loader. Output, exceptions,
+buffer drift, HTTP-state drift, malformed results, and configuration changes
+are contained or refused. It loads no current target and exposes no actor to
+package code. It does not resolve or invoke the creator, open a transaction,
+consume CSRF, read request globals, or create an endpoint.
+
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the
