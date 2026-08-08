@@ -203,6 +203,13 @@ try {
                 === 32
             && ($schema['$defs']['adminToolFormContract']['properties']['runtimeSettings']['items']['$ref'] ?? '')
                 === '#/$defs/permission'
+            && ($schema['$defs']['adminToolFormContract']['properties']['create']['$ref'] ?? '')
+                === '#/$defs/adminToolFormCreate'
+            && ($schema['$defs']['adminToolFormCreate']['additionalProperties'] ?? null) === false
+            && ($schema['$defs']['adminToolFormCreate']['properties']['label']['maxLength'] ?? null)
+                === 120
+            && ($schema['$defs']['adminToolFormCreate']['properties']['description']['maxLength'] ?? null)
+                === 500
             && ($schema['$defs']['adminToolFormCollectionField']['properties']['maxItems']['maximum'] ?? null)
                 === 128
             && ($schema['$defs']['adminToolFormCollectionField']['properties']['fields']['items']['$ref'] ?? '')
@@ -404,6 +411,10 @@ try {
                 'csrf' => 'required',
                 'encoding' => 'application/json',
                 'maxBodyBytes' => 32768,
+                'create' => [
+                    'label' => 'Add order',
+                    'description' => 'Prepare one new bounded order form.',
+                ],
             ]];
         }
     );
@@ -462,9 +473,60 @@ try {
                 'csrf' => 'required',
                 'encoding' => 'application/json',
                 'maxBodyBytes' => 32768,
+                'create' => [
+                    'label' => 'Add order',
+                    'description' => 'Prepare one new bounded order form.',
+                ],
             ]
             && !file_exists($executionMarker),
         'administrator tool metadata maps one display tool, one JSON/CSRF form plan, and one write action to declared permissions without package execution'
+    );
+
+    $invalidCreateProject = red_addon_test_project(
+        $temporaryRoot,
+        'invalid-administrator-tool-form-create-project'
+    );
+    red_addon_test_write_package(
+        $invalidCreateProject,
+        'redcms.invalid-create',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $toolId = 'redcms.invalid-create/products';
+            $permission = 'invalid-create.products.manage';
+            $manifest['provides']['adminTools'] = [$toolId];
+            $manifest['permissions'][] = $permission;
+            $manifest['adminToolFormContracts'] = [[
+                'tool' => $toolId,
+                'form' => 'redcms.invalid-create/product-editor',
+                'label' => 'Edit product',
+                'description' => 'Prepare one bounded product form.',
+                'permission' => $permission,
+                'method' => 'POST',
+                'csrf' => 'required',
+                'encoding' => 'application/json',
+                'maxBodyBytes' => 32768,
+                'create' => [
+                    'label' => 'Add product',
+                    'description' => 'Prepare one new bounded product form.',
+                    'callback' => 'dangerous',
+                ],
+            ]];
+        }
+    );
+    $invalidCreate = red_addon_validate_manifest(
+        'redcms.invalid-create',
+        $invalidCreateProject,
+        ['cmsVersion' => '5.1.0']
+    );
+    red_addon_test_assert(
+        empty($invalidCreate['valid'])
+            && red_addon_test_error_contains(
+                $invalidCreate,
+                'create contains unsupported field "callback"'
+            )
+            && !file_exists($executionMarker),
+        'administrator form creation metadata rejects executable fields without loading package PHP'
     );
 
     $invalidToolProject = red_addon_test_project(

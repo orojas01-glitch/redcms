@@ -514,6 +514,30 @@
           "items": {
             "$ref": "#/$defs/permission"
           }
+        },
+        "create": {
+          "$ref": "#/$defs/adminToolFormCreate"
+        }
+      }
+    },
+    "adminToolFormCreate": {
+      "description": "Optional non-executing declaration that the core-owned administrator form may later offer a separate create workflow. It grants no callback or write authority.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "description"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
         }
       }
     },

@@ -289,7 +289,11 @@ An illustrative manifest shape is:
       "method": "POST",
       "csrf": "required",
       "encoding": "application/json",
-      "maxBodyBytes": 32768
+      "maxBodyBytes": 32768,
+      "create": {
+        "label": "Add order",
+        "description": "Prepare one new bounded order form."
+      }
     }
   ],
   "componentEditors": [
@@ -1263,6 +1267,14 @@ form id, bounded label and description, one declared package permission, only
 duplicate-form identity collisions, ungranted permissions, executable fields,
 other methods, weaker CSRF, alternate encodings, and invalid body bounds before
 package PHP is loaded.
+
+The same declaration may include one optional closed `create` object containing
+only a bounded label and description. This is non-executing discovery metadata:
+it declares that a later core-owned workflow may offer creation for the exact
+form, reusing the form permission and transport limits. It does not register a
+creator, render a button, accept a request, allocate a record id, or authorize a
+write. Unknown keys, callbacks, templates, scripts, URLs, and unsafe text fail
+manifest validation before package PHP is loaded.
 
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,

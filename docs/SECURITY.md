@@ -679,6 +679,11 @@ Executable fields, identity collisions, undeclared tools, ungranted
 permissions, alternate methods/encodings, weakened CSRF, and invalid body
 bounds fail manifest validation without loading package PHP.
 
+An optional closed form `create` declaration contains only a bounded label and
+description. It reuses the exact form permission and is discovery evidence
+only: no callback, endpoint, renderer, record allocation, or write authority is
+created. Executable or unknown metadata fails before package PHP is loaded.
+
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the
