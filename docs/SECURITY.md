@@ -663,6 +663,14 @@ package/form identities remain unavailable. Output, exceptions, response-state
 changes, invalid targets, runtime-setting drift, and permission revocation fail
 closed.
 
+The Store Lite browser rehearsal may record an enabled installation only in a
+uniquely named disposable schema after staging the separately distributed
+package outside the clean starter. That fixture is acceptance-only: it does not
+call or weaken the Owner enablement runner, does not authorize a retained
+client installation, and must remove the exact server, schema, scoped grant,
+and staged package while proving the configured primary fingerprint is
+unchanged.
+
 Operational administrator forms have a separate declaration and non-executing
 planning boundary. A closed `adminToolFormContracts` entry binds one provided
 tool to a unique form id, declared package permission, `POST`, required CSRF

@@ -609,8 +609,16 @@ scalar and bounded nested-collection controls, and sends canonical JSON through
 a second authenticated Save endpoint to that atomic runner. Its public result
 is only `saved`, `unchanged`, or a bounded refusal. Chrome desktop/mobile
 rendered inspection passes with zero horizontal overflow and no console, page,
-or failed-request errors; no Store Lite provider, target list,
-navigation, package, migration, table, or product state is added.
+or failed-request errors. A separate clean-core-plus-package rehearsal now
+stages Store Lite 0.1.8 outside the starter, validates its exact inventory,
+creates a fresh per-client schema, records one acceptance-only enabled
+installation, and proves authenticated Products -> existing target -> Edit ->
+Save -> reload behavior for a simple banana alongside an unchanged variable
+T-shirt. Its 47 desktop/mobile Chrome checks and exact package/core audit
+postconditions pass before the temporary server, schema, grant, and staged
+package are removed. This proof does not relax normal richer-package
+enablement blockers or add Store Lite files, migrations, tables, or product
+state to the starter.
 The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific
 by-reference secret consumption plus core result redaction. The generic
