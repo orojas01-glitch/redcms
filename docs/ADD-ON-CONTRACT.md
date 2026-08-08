@@ -1272,10 +1272,25 @@ consumes no CSRF token, renders no control, starts no transaction, writes no
 state, and exposes no endpoint. The declaration and plan do not make a form
 operational. `includes/addon_admin_tool_form_ui_helpers.php` may render only
 that validated schema as escaped, disabled scalar controls and nested
-collection templates. It loads no values, performs no authorization, opens no
-`form`, supplies no control names or submit button, and has no provider or
-package callback. A later permission-scoped value provider and protected body
-adapter remain separate reviews.
+collection templates. For a schema-bearing form the registrar must now bind
+exactly one `registerAdminToolFormValueLoader()` callback to the declared form
+id. The separate core loader repeats the exact enabled owner and fresh binary
+package-permission checks, then passes only the current-client connection and
+a final request containing tool id, form id, and positive numeric target record
+id. It does not disclose the administrator identity to package code.
+
+The provider must return `RED_Addon_Admin_Tool_Form_Values::current()` with a
+complete object: every declared key is present, no undeclared key is accepted,
+scalar types and bounds match exactly, collections are ordered lists within
+their declared bounds, nesting remains within the manifest limit, and the
+encoded graph fits `maxBodyBytes`. Core contains output, exceptions,
+output-buffer drift, and HTTP-state drift, then binds normalized values to the
+package/tool/form/target/contract SHA-256 state. Only that exact loaded result
+may populate the core renderer. Current rows remain escaped, disabled, and
+nameless; there is still no `form`, editable or submit control, request parser,
+CSRF consumption, endpoint, or write. The provider is trusted reviewed
+first-party read-only PHP, not a database sandbox. A protected body adapter is
+a later separate review.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique

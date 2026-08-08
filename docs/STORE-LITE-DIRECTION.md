@@ -365,9 +365,11 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
 - declared administrator routes;
 - non-executing operational administrator-form metadata and permission-scoped
   planning are complete. The closed scalar/two-level collection schema and
-  core-owned disabled preview now represent both simple and variable-product
-  structures, but no package value provider, editable renderer, body adapter,
-  CSRF endpoint, or linked control exists;
+  core-owned preview now represent both simple and variable-product
+  structures. A registrar-bound, permission-scoped read-only value provider
+  can populate complete current values into escaped disabled controls, but no
+  Store Lite provider/package, editable renderer, body adapter, CSRF endpoint,
+  write, or linked control exists;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
   now binds a declared action's exact runtime owner, package permission,
@@ -564,7 +566,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Secret-capable registration-only service consumption is accepted
-   only through its value-free typed boundary; Store Lite remains blocked.
+   only through its value-free typed boundary. The administrator-form
+   current-value loader is also complete as a generic read-only boundary with
+   fresh exact grants, closed nested values, record-bound evidence, and a
+   disabled core preview; no Store Lite provider or data is present. Store Lite
+   remains blocked.
 25. Create Store Lite in its separate distribution using only those accepted
    contracts.
 26. Add package-owned migrations, Product editing, catalog, cart, orders, and

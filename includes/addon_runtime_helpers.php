@@ -51,6 +51,22 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->allowed['adminToolActionStateLoaders'] = $adminToolActions;
             $this->handlers['adminToolActionStateLoaders'] = [];
             $this->metadata['adminToolActionStateLoaders'] = [];
+            $adminToolFormValueLoaders = [];
+            foreach ($manifest['adminToolFormContracts'] ?? [] as $contract) {
+                $formId = is_array($contract)
+                    && is_string($contract['form'] ?? null)
+                    && is_array($contract['fields'] ?? null)
+                    && $contract['fields'] !== []
+                        ? $contract['form']
+                        : '';
+                if (red_addon_valid_capability($formId)) {
+                    $adminToolFormValueLoaders[$formId] = true;
+                }
+            }
+            $this->allowed['adminToolFormValueLoaders'] =
+                $adminToolFormValueLoaders;
+            $this->handlers['adminToolFormValueLoaders'] = [];
+            $this->metadata['adminToolFormValueLoaders'] = [];
             $publicMutations = [];
             foreach ($manifest['publicMutationContracts'] ?? [] as $contract) {
                 $mutationId = is_array($contract)
@@ -301,6 +317,13 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->register('adminToolActionStateLoaders', $id, $handler);
         }
 
+        public function registerAdminToolFormValueLoader(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register('adminToolFormValueLoaders', $id, $handler);
+        }
+
         public function registerPublicMutation(
             string $id,
             callable $handler,
@@ -426,6 +449,7 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'componentDataDeleters',
                     'services',
                     'adminTools',
+                    'adminToolFormValueLoaders',
                     'adminToolActions',
                     'adminToolActionStateLoaders',
                     'publicMutationHandlers',
@@ -715,6 +739,24 @@ if (!function_exists('red_addon_runtime_namespace_errors')) {
                 if (isset($owners[$ownerKey])) {
                     $errors[] = 'enabled_runtime_capability_conflict:' .
                         'adminToolActions:' . $actionId;
+                    continue;
+                }
+                $owners[$ownerKey] = $packageId;
+            }
+            foreach ($manifest['adminToolFormContracts'] ?? [] as $contract) {
+                $formId = is_array($contract)
+                    && is_string($contract['form'] ?? null)
+                    && is_array($contract['fields'] ?? null)
+                    && $contract['fields'] !== []
+                        ? $contract['form']
+                        : '';
+                if (!red_addon_valid_capability($formId)) {
+                    continue;
+                }
+                $ownerKey = 'adminToolFormValueLoaders' . "\0" . $formId;
+                if (isset($owners[$ownerKey])) {
+                    $errors[] = 'enabled_runtime_capability_conflict:'
+                        . 'adminToolFormValueLoaders:' . $formId;
                     continue;
                 }
                 $owners[$ownerKey] = $packageId;

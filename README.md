@@ -454,6 +454,7 @@ php scripts/addon-secret-availability-self-test.php
 php scripts/addon-asset-plan-self-test.php
 php scripts/addon-component-editor-self-test.php
 php scripts/addon-component-editor-renderer-self-test.php
+php scripts/addon-admin-tool-form-renderer-self-test.php
 php scripts/addon-runtime-self-test.php
 php scripts/addon-service-invocation-self-test.php
 php scripts/addon-validate.php --all
@@ -466,7 +467,8 @@ php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
 The dependency-free administrator-form schema/preview plus database-backed
-setting-storage, administrator-form/action-preflight, and
+setting-storage, administrator-form preflight/current-value loading,
+administrator-action preflight, and
 immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,

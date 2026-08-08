@@ -924,6 +924,18 @@ request bootstrap excludes the disabled package.
     creates no `form`, names, submit control, endpoint, request parser, CSRF
     operation, package execution, database access, or Store Lite behavior.
 
+70. Completed permission-scoped administrator-form current-value loading. A
+    schema-bearing form now requires one exact registrar-bound loader. Core
+    repeats current enabled ownership and fresh binary package-permission
+    checks, gives trusted first-party package code only the current-client
+    connection plus tool/form/positive numeric target identity, validates one
+    complete closed nested typed graph, contains output/HTTP-state failures,
+    and binds the normalized values to package/tool/form/target/contract
+    SHA-256 evidence. Only that exact result may populate escaped disabled
+    nameless core controls and current collection rows. No administrator
+    identity reaches the provider, and no editable control, request body, CSRF
+    operation, endpoint, write, Store Lite package, table, or state is added.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

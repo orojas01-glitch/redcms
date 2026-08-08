@@ -675,9 +675,24 @@ at 128 rows, two collection levels, 32 fields per row, and 200 total declared
 fields. This admits bounded product options and variants without admitting
 package HTML, templates, conditions, JavaScript, callbacks, or an arbitrary
 schema language. A pure core renderer escapes labels/help/options and emits
-only disabled controls and collection templates. It receives no values or
-actor, performs no permission decision, adds no names or submit control, and
-cannot turn the form declaration into an operational endpoint.
+only disabled controls and collection templates. A separate current-value
+loader may now provide one complete typed value graph for a positive numeric
+target after the same exact enabled ownership and fresh case-sensitive
+permission checks. The registrar binds one loader to each schema-bearing form
+id; core passes only the database connection plus a final request containing
+tool, form, and target—no actor or session data. Core contains output and
+HTTP-state changes, rejects missing, extra, malformed, oversized, or
+schema-drifted values, and binds the normalized graph to
+package/tool/form/target/contract SHA-256 evidence before the renderer may
+display it. The renderer still adds no names, editable or submit controls,
+request body, CSRF operation, endpoint, or write path.
+
+The loader is reviewed first-party PHP, not a database sandbox. It is required
+to be read-only and may query only its package-owned current-client data; it
+must not mutate state, manage transactions, expose secrets, or derive access
+from the omitted actor. Permission revocation applies before the next loader
+invocation. Store Lite remains blocked from activation and no Store Lite
+package or table is included in core.
 
 Administrator write actions have a split metadata and internal execution
 foundation. An optional closed `adminToolActionContracts` entry maps one

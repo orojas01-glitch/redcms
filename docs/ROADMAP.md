@@ -587,10 +587,12 @@ implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
 complete, the closed JSON administrator-form declaration and non-executing
-permission-scoped form plan plus bounded two-level field schema and core-owned
-disabled preview are complete without values, a provider, editable controls,
-or an endpoint, a
-core-only authorized setting read model is complete, and the narrow
+permission-scoped form plan plus bounded two-level field schema are complete.
+The exact registrar-bound current-value loader now performs a fresh package
+grant check, validates a complete nested typed graph, binds record/contract
+state evidence, and may populate only escaped disabled core controls. There is
+still no editable control, request body, CSRF operation, write, or endpoint.
+The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific
 by-reference secret consumption plus core result redaction. The generic
 public-mutation subject/CSRF, fixed-window rate-limit, opaque
