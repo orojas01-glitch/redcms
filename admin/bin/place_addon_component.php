@@ -35,7 +35,7 @@ $integer = static function ($key, $minimum, $maximum = null) {
     );
 };
 $contentRecordId = $integer('ContentRecordID', 1);
-$targetPageRecordId = $integer('TargetPageRecordID', 1);
+$targetPageRecordId = $integer('TargetPageRecordID', 0);
 $pagePosition = $integer('PagePosition', 1, 99);
 $pagePositionOrder = $integer('PagePositionOrder', 0, 2147483647);
 $parentStateHash = is_string($_POST['ParentStateHash'] ?? null)

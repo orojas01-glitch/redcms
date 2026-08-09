@@ -297,6 +297,13 @@ RED_DB_NAME="$REHEARSAL_DATABASE" \
     "$FRANKENPHP_BIN" php-cli \
     "$STAGED_PROJECT/scripts/addon-admin-tool-form-save-bridge-self-test.php"
 
+RED_DB_HOST="$RED_DB_HOST_RESOLVED:$RED_DB_PORT_RESOLVED" \
+RED_DB_USER="$RED_DB_USER_RESOLVED" \
+RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
+RED_DB_NAME="$REHEARSAL_DATABASE" \
+    "$FRANKENPHP_BIN" php-cli \
+    "$STAGED_PROJECT/scripts/addon-component-editor-create-preflight-self-test.php"
+
 for migration in \
     '2026-08-07-create-catalog.sql' \
     '2026-08-07-align-media-reference-contract.sql' \

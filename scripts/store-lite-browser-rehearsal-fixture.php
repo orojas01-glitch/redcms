@@ -36,7 +36,6 @@ require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot . '/includes/addon_registry_helpers.php';
 require_once $projectRoot . '/addons/redcms/store-lite/src/CatalogPersistence.php';
-require_once $projectRoot . '/addons/redcms/store-lite/src/ProductComponentBridge.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -223,104 +222,6 @@ function red_store_lite_browser_seed_products(mysqli $connection): array
     return [$bananaResult, $shirtResult];
 }
 
-function red_store_lite_browser_seed_product_component(
-    mysqli $connection,
-    int $actorRecordId
-): int {
-    $contentRecordId = 20260808;
-    $result = mysqli_query(
-        $connection,
-        'SELECT * FROM RED_Articles ORDER BY RecordID ASC LIMIT 1'
-    );
-    $row = $result ? mysqli_fetch_assoc($result) : null;
-    if ($result) {
-        mysqli_free_result($result);
-    }
-    if (!is_array($row) || $row === []) {
-        throw new RuntimeException('Could not read the disposable article seed.');
-    }
-    $row['RecordID'] = (string) $contentRecordId;
-    $row['Title'] = 'Store Lite homepage product';
-    $row['Component'] =
-        RED_CMS_Store_Lite_Product_Component_Bridge::COMPONENT;
-    $row['Alias'] = 'store-lite-homepage-product';
-    $row['Sections'] = 'Home';
-    $row['HomePosition'] = '1';
-    $row['HomePositionOrder'] = '90';
-    $row['SectionPosition'] = '0';
-    $row['SectionPositionOrder'] = '0';
-    $row['Categories'] = '';
-    $row['CategoryPosition'] = '0';
-    $row['CategoryPositionOrder'] = '0';
-    $row['SubCategories'] = '';
-    $row['SubCategoryPosition'] = '0';
-    $row['SubCategoryPositionOrder'] = '0';
-    $row['Article'] = '';
-    $row['PagePosition'] = '1';
-    $row['PagePositionOrder'] = '0';
-    $row['Active'] = 'Y';
-    $row['HomeFeature'] = '';
-    $row['StartDate'] = '1970-01-01 00:00:01';
-    $row['EventDate'] = '1970-01-01 00:00:01';
-    $row['ExpDate'] = '2099-12-31 23:59:59';
-    $row['Language'] = 'sp';
-    $columns = array_keys($row);
-    $values = array_map(
-        static fn($value): string => $value === null
-            ? 'NULL'
-            : "'" . mysqli_real_escape_string(
-                $connection,
-                (string) $value
-            ) . "'",
-        array_values($row)
-    );
-
-    mysqli_begin_transaction($connection);
-    try {
-        if (!mysqli_query(
-            $connection,
-            'INSERT INTO RED_Articles (`' . implode('`,`', $columns)
-                . '`) VALUES (' . implode(',', $values) . ')'
-        )) {
-            throw new RuntimeException(
-                'Could not create the disposable Product component parent.'
-            );
-        }
-        if (!RED_CMS_Store_Lite_Product_Component_Bridge::create(
-            $connection,
-            [
-                'component' =>
-                    RED_CMS_Store_Lite_Product_Component_Bridge::COMPONENT,
-                'contentRecordId' => $contentRecordId,
-                'actorRecordId' => $actorRecordId,
-                'planHash' => hash('sha256', 'browser-product-placement'),
-            ],
-            ['product-id' => 'banana-bunch']
-        )) {
-            throw new RuntimeException(
-                'Could not bind the disposable Product component.'
-            );
-        }
-        mysqli_commit($connection);
-    } catch (Throwable $throwable) {
-        mysqli_rollback($connection);
-        throw $throwable;
-    }
-
-    red_store_lite_browser_assert(
-        RED_CMS_Store_Lite_Product_Component_Bridge::load(
-            $connection,
-            [
-                'component' =>
-                    RED_CMS_Store_Lite_Product_Component_Bridge::COMPONENT,
-                'contentRecordId' => $contentRecordId,
-            ]
-        ) === ['product-id' => 'banana-bunch'],
-        'fixture binds the homepage Product component through the package callback'
-    );
-    return $contentRecordId;
-}
-
 try {
     if ($command === 'prepare') {
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -384,10 +285,6 @@ try {
             $actorRecordId
         );
         red_store_lite_browser_seed_products($connection);
-        $contentRecordId = red_store_lite_browser_seed_product_component(
-            $connection,
-            $actorRecordId
-        );
         red_store_lite_browser_assert(
             red_store_lite_browser_scalar(
                 $connection,
@@ -399,15 +296,14 @@ try {
                     (SELECT COUNT(*) FROM RED_Addon_StoreLite_Product_Activity),
                     (SELECT COUNT(*) FROM RED_Addon_Activity_Log
                      WHERE PackageID='redcms.store-lite'))"
-            ) === '2:2:2:1:0:0',
-            'fixture contains two products, one homepage placement, and no pre-browser activity'
+            ) === '2:2:2:0:0:0',
+            'fixture contains two products and no component placement or pre-browser activity'
         );
         echo json_encode([
             'ok' => true,
             'packageVersion' => $snapshot['version'],
             'username' => $username,
             'productCount' => 2,
-            'contentRecordId' => $contentRecordId,
             'assertions' => $assertions,
         ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
     } else {
@@ -485,15 +381,38 @@ try {
             'package and core recorded one browser create and one update'
         );
         red_store_lite_browser_assert(
-            RED_CMS_Store_Lite_Product_Component_Bridge::load(
+            red_store_lite_browser_scalar(
                 $connection,
-                [
-                    'component' =>
-                        RED_CMS_Store_Lite_Product_Component_Bridge::COMPONENT,
-                    'contentRecordId' => 20260808,
-                ]
-            ) === ['product-id' => 'banana-bunch'],
-            'browser product edits preserve the independent homepage placement'
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_StoreLite_Product_Placements p
+                     INNER JOIN RED_Articles a
+                       ON a.RecordID=p.ContentRecordID
+                     INNER JOIN RED_Addon_StoreLite_Products product
+                       ON product.RecordID=p.ProductRecordID
+                     WHERE product.ProductID='banana-bunch'
+                       AND a.Component='redcms.store-lite/product'
+                       AND LOWER(a.Sections)='home'
+                       AND a.HomePosition=1
+                       AND a.HomePositionOrder=90
+                       AND a.PagePosition=0
+                       AND a.Active='Y'),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE Operation='create'
+                       AND ContentType='redcms.store-lite/product'),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE Operation='move'
+                       AND ContentType='redcms.store-lite/product'),
+                    (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                     WHERE PackageID='redcms.store-lite'
+                       AND ComponentID='redcms.store-lite/product'
+                       AND Operation='baseline'),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE EventName='component.public_placed'
+                       AND TargetType='component'
+                       AND ActorAdminRecordID=1))"
+            ) === '1:1:1:1:1',
+            'browser component creation and homepage placement retain exact revision and audit evidence'
         );
         echo json_encode([
             'ok' => true,

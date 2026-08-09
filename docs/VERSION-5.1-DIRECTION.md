@@ -170,8 +170,11 @@ creator and without reserving or writing anything. Its separate
 activation-blocked atomic runner now revalidates that plan under lifecycle and
 theme serialization, creates the parent and package row, verifies the exact
 loader postcondition, and commits initial core/package revisions together.
-Create/delete endpoints and activation eligibility remain absent. Audited
-public placement is available only through the core-owned POST/CSRF control
+Delete endpoints and activation eligibility remain absent. Core now exposes a
+permission-scoped Add Content card and protected component-creation form; its
+POST/CSRF Create endpoint allocates the unused numeric parent id server-side
+and delegates only to the existing exact atomic runner. Audited public
+placement is available only through the core-owned POST/CSRF control
 and exact atomic plan. Atomic deletion is available only behind the exact
 activation-blocked preflight plan. The activation-blocked parent
 metadata prerequisite now provides a read-only state gate and atomic writer.
@@ -1047,6 +1050,26 @@ request bootstrap excludes the disabled package.
     configured primary fingerprint. This does not make the richer manifest
     normally enableable and does not add the still-missing user-facing Add
     component workflow, cart, order, route, or public mutation.
+
+78. Implemented the generic core-owned Add component workflow and explicit
+    language-homepage placement. Add Content advertises only components whose
+    enabled request-local owner, manifest editor, loader, creator/table
+    metadata, and fresh actor create grant all agree. The protected form is
+    generated entirely by core, accepts only component/title/layout/language
+    plus declared values, and allocates the unused positive content id on the
+    server before delegating to the existing atomic inactive-creation runner.
+    The separate placement plan now accepts either the unique active homepage
+    for the component language or the existing unique active Article target;
+    Homepage activation changes only `Sections`, `HomePosition`,
+    `HomePositionOrder`, and `Active`, under the same lifecycle/theme/package/
+    source/destination serialization and revision/audit postconditions. The
+    Store Lite rehearsal starts with zero placements, follows Add Content ->
+    Product -> Create component -> Homepage -> Place component, and then proves
+    the public Product card at 1280x900 and 390x844. Eighty-seven Chrome checks,
+    85 focused generic creation/article-placement assertions, exact create/
+    baseline/move/audit evidence, and disposable cleanup pass. Store Lite
+    remains separately distributed and not normally enableable; cart, orders,
+    checkout, public mutation, and hosted payment remain later gates.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
