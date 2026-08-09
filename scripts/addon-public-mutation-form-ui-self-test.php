@@ -143,6 +143,22 @@ function red_addon_public_mutation_form_ui_test_variable_fields()
     ]];
 }
 
+function red_addon_public_mutation_form_ui_test_variant_fields(
+    int $count
+): array {
+    $fields = red_addon_public_mutation_form_ui_test_variable_fields();
+    $options = [];
+    for ($index = 1; $index <= $count; $index++) {
+        $options[] = [
+            'value' => sprintf('variant-%03d', $index),
+            'label' => 'Variant ' . $index,
+        ];
+    }
+    $fields[2]['value'] = 'variant-001';
+    $fields[2]['options'] = $options;
+    return $fields;
+}
+
 try {
     $manifest = red_addon_public_mutation_form_ui_test_manifest();
     $routeId = 'redcms.form-ui-fixture/cart-intent';
@@ -192,6 +208,42 @@ try {
             && $variable['fields'][2]['value'] === 'shirt-medium'
             && count($variable['fields'][2]['options']) === 2,
         'a declared optional identifier can become one bounded required select'
+    );
+
+    $maximumVariants = red_addon_public_mutation_form_ui_compose(
+        $manifest,
+        $routeId,
+        $mutationId,
+        'product-128',
+        'Add to cart',
+        red_addon_public_mutation_form_ui_test_variant_fields(128),
+        $csrf,
+        $idempotency
+    );
+    $maximumVariantHtml = red_addon_public_mutation_form_ui_render(
+        $maximumVariants
+    );
+    red_addon_public_mutation_form_ui_test_assert(
+        $maximumVariants['valid'] === true
+            && substr_count($maximumVariantHtml, '<option ') === 128,
+        'the form preserves every variant in the approved 128-variant product bound'
+    );
+
+    $tooManyVariants = red_addon_public_mutation_form_ui_compose(
+        $manifest,
+        $routeId,
+        $mutationId,
+        'product-129',
+        'Add to cart',
+        red_addon_public_mutation_form_ui_test_variant_fields(129),
+        $csrf,
+        $idempotency
+    );
+    red_addon_public_mutation_form_ui_test_assert(
+        $tooManyVariants === red_addon_public_mutation_form_ui_result(
+            'fields_invalid'
+        ),
+        'a 129th select option fails closed without truncating the model'
     );
 
     $html = red_addon_public_mutation_form_ui_render($variable);

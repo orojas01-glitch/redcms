@@ -1026,8 +1026,9 @@ The separate pure public-mutation form UI helper is also not an endpoint. It
 accepts only that same closed declaration, a bounded package presentation
 model, one core form-instance id, and exact same-subject issued CSRF and
 idempotency result shapes. Core derives the static action and permits only
-declared hidden identifiers, bounded positive-integer controls, and bounded
-identifier selects; labels and options are escaped into semantic form markup.
+declared hidden identifiers, bounded positive-integer controls, and identifier
+selects capped at 128 choices; labels and options are escaped into semantic form
+markup.
 The two opaque values appear only in dedicated fetch-controller data
 attributes and never as submitted package fields, visible copy, logs, or
 package input. A later integration must additionally own `Cache-Control:

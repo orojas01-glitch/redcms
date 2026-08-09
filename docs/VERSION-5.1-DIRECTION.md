@@ -1112,9 +1112,10 @@ request bootstrap excludes the disabled package.
     identifiers, bounded integer inputs, declared identifier selects, one
     submit control, a polite status region, and a no-script notice. Opaque
     evidence stays in fetch-controller attributes rather than package form
-    fields. The 18-assertion dependency-free fixture covers simple and variable
+    fields. The 20-assertion dependency-free fixture covers simple and variable
     shapes, accessibility, escaping, declaration drift, unknown/commercial
-    fields, malformed controls/options, cross-subject evidence, tampering, and
+    fields, exact 128-choice acceptance and 129-choice refusal, malformed
+    controls/options, cross-subject evidence, tampering, and
     zero request/database/emission/front-controller behavior. This slice does
     not load Store Lite, issue tokens/cookies, inject JavaScript, render a live
     Product control, link the dispatcher, or execute a public mutation. The
