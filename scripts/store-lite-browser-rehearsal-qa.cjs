@@ -47,11 +47,16 @@ async function login(page) {
     check((await response.text()).trim() === 'yes', 'disposable administrator login succeeds');
 }
 
-async function verifyHomepageProduct(page, definition) {
+async function verifyHomepageProduct(page, definition, expectedPresent = true) {
     await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
     const product = page.locator(
         '[data-red-addon-component="redcms.store-lite/product"]'
     );
+    if (!expectedPresent) {
+        check(await product.count() === 0,
+            'homepage starts without a fixture-created Product component');
+        return;
+    }
     await product.waitFor({state: 'visible'});
     const expectedTitle = definition.mutate
         ? 'Banana bunch'
@@ -79,6 +84,74 @@ async function verifyHomepageProduct(page, definition) {
         JSON.stringify(overflow));
     await product.screenshot({
         path: path.join(evidenceDir, `${definition.name}-home-product.png`),
+    });
+}
+
+async function createHomepageProduct(page) {
+    await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
+    await page.locator('#content_second a').click();
+    await page.locator('#addcontent').waitFor({state: 'visible'});
+    const card = page.locator(
+        '[data-red-addon-component-add]'
+            + '[data-component-id="redcms.store-lite/product"]:visible'
+    );
+    await card.waitFor({state: 'visible'});
+    check(await card.count() === 1,
+        'Add Content exposes one authorized Store Lite Product card');
+    check((await card.textContent() || '').includes('Product'),
+        'Product card uses the manifest-declared label');
+    await card.click();
+
+    const createWorkspace = page.locator(
+        '[data-red-addon-component-create-workspace]:visible'
+    );
+    await createWorkspace.waitFor({state: 'visible'});
+    check(await createWorkspace.locator(
+        '[data-red-addon-component-editor="redcms.store-lite/product"]'
+    ).count() === 1,
+    'core renders the manifest-declared Product component fields');
+    await createWorkspace.locator('[name="Title"]').fill(
+        'Store Lite homepage product'
+    );
+    await createWorkspace.locator(
+        '[name="componentValues[product-id]"]'
+    ).fill('banana-bunch');
+    await createWorkspace.screenshot({
+        path: path.join(evidenceDir, 'desktop-create-component.png'),
+    });
+    await createWorkspace.getByRole('button', {
+        name: 'Create component',
+    }).click();
+
+    const componentWorkspace = page.locator(
+        '[data-red-addon-component-workspace]:visible'
+    );
+    await componentWorkspace.waitFor({state: 'visible'});
+    check(await componentWorkspace.locator(
+        '[name="componentValues[product-id]"]'
+    ).inputValue() === 'banana-bunch',
+    'created component reloads its package-owned Product ID');
+    const placement = page.locator(
+        '[data-red-addon-placement-form]:visible'
+    );
+    await placement.waitFor({state: 'visible'});
+    check(await placement.locator(
+        '[name="TargetPageRecordID"] option[value="0"]'
+    ).count() === 1,
+    'placement control offers the language homepage explicitly');
+    await placement.locator('[name="TargetPageRecordID"]').selectOption('0');
+    await placement.locator('[name="PagePosition"]').selectOption('1');
+    await placement.locator('[name="PagePositionOrder"]').fill('90');
+    await placement.getByRole('button', {name: 'Place component'}).click();
+    await placement.getByText('Component placed and published.').waitFor({
+        state: 'visible',
+    });
+    check(await placement.getAttribute(
+        'data-red-addon-placement-complete'
+    ) === 'true',
+    'homepage placement completes through the core transaction runner');
+    await placement.screenshot({
+        path: path.join(evidenceDir, 'desktop-homepage-placement.png'),
     });
 }
 
@@ -172,8 +245,12 @@ async function runCase(browser, definition) {
         }
     });
 
-    await verifyHomepageProduct(page, definition);
+    await verifyHomepageProduct(page, definition, !definition.mutate);
     await login(page);
+    if (definition.mutate) {
+        await createHomepageProduct(page);
+        await verifyHomepageProduct(page, definition);
+    }
     let tool = await openProducts(
         page,
         !definition.mutate,

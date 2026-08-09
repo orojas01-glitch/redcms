@@ -3,8 +3,9 @@
 Status: the separately distributed package now implements catalog migrations,
 normalization, persistence, product administration, core-owned Add/Edit/Save
 bridges, Product placement storage, and the enabled runtime Product component.
-The user-facing Add component workflow remains next; cart and orders remain
-later.
+The core-owned user-facing Add component and explicit Homepage placement
+workflow now pass isolated desktop/mobile rehearsal. The first
+server-authoritative cart line is next; orders remain later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -455,7 +456,7 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    scope.
 2. Completed: implement the generic combined-package activation contract with
    disposable component-plus-service fixtures.
-3. Started: implement generic package component persistence and bounded
+3. Completed: implement generic package component persistence and bounded
    editor/public view contracts. Full component-id storage, the exact numeric
    package-table parent relationship, and read-only public binding resolution
    are complete. Bounded data-only editor-schema validation and normalized
@@ -467,14 +468,15 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    preflight and its atomic runner plus permission-enforced inactive parent
    metadata writes and the display-only value-free revision timeline are also
    complete. Read-only delete planning and atomic inactive deletion are
-   complete; restore UI actions, operational editing, and public
-   placement/activation remain. The core default renderer now also accepts an
+   complete; operational editing and audited public placement are complete.
+   Restore UI actions remain later. The core default renderer now also accepts an
    optional bounded label/value fact list while preserving the original
    title/summary output and refusing package HTML. Store Lite 0.1.11 now
    supplies the package-owned placement relationship and runtime Product
-   binding on top of the 0.1.10 presenter. Transactional package callbacks and
-   disposable desktop/mobile public rendering pass; an operational core-owned
-   Add component workflow remains next. The creation preflight
+   binding on top of the 0.1.10 presenter. Transactional package callbacks,
+   the core-owned Add component workflow, explicit language-homepage
+   placement, and disposable desktop/mobile public rendering pass. The
+   creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Completed Gate 2A: lock the package-owned Product record contract for
@@ -603,13 +605,14 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    passes rollback acceptance. The generic operational editor and authenticated
    Save bridge also pass focused and full disposable/HTTP acceptance, plus
    Chrome desktop/mobile rendered inspection with zero overflow and no
-   console, page, or failed-request errors. No Store Lite
-   provider, target list, navigation, migration, table, or product data is
-   present. Store Lite remains blocked.
-25. Create Store Lite in its separate distribution using only those accepted
-   contracts.
-26. Add package-owned migrations, Product editing, catalog, cart, orders, and
-   pay-on-receipt.
+   console, page, or failed-request errors. Store Lite remains outside the
+   clean starter and blocked from normal richer-package enablement.
+25. Completed: create Store Lite in its separate distribution using only the
+   accepted contracts.
+26. In progress: package-owned Product migrations, simple/variable Product
+   administration, Product component persistence, administrator creation,
+   Homepage placement, and public rendering are complete. Implement the first
+   server-authoritative cart line next; orders and pay-on-receipt remain later.
 27. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
 28. Add a separately reviewed hosted-payment adapter only after the

@@ -1,6 +1,7 @@
 <?php 
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/bootstrap.php";
 require_once $_SERVER["DOCUMENT_ROOT"]."/includes/admin_tool_helpers.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/includes/addon_component_editor_create_endpoint_helpers.php";
 red_start_session();
 red_require_admin();
 /**
@@ -87,6 +88,10 @@ class add_menu
 		// FOR EACH COMPONENT ADD BUTTON.
 		$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 		$components = red_admin_tool_components_for_admin($db->connection, red_admin_tool_admin_component_ids($_SESSION['AdminComponents'] ?? ''));
+		$addonComponents = red_addon_component_editor_create_catalog(
+			$db->connection,
+			(int) ($_SESSION['AdminRecordID'] ?? 0)
+		);
 		$publicFormRows = [];
 		$loginFormRow = null;
 		$displayComponents = [];
@@ -137,7 +142,7 @@ class add_menu
 				red_admin_tool_text(($right['UniqueName'] ?? '') . ' ' . ($right['Layout'] ?? ''))
 			);
 		});
-		$componentCount = count($components);
+		$componentCount = count($components) + count($addonComponents);
 		$db->close();
 	?>
 	<div class="red-admin-card-chooser">
@@ -156,7 +161,7 @@ class add_menu
 	    <?php
 		$cardNumber = 0;
 		$renderedAddFunctions = [];
-	        foreach ($components as $row)
+		foreach ($components as $row)
 	        {
 			$UniqueName=red_admin_tool_identifier($row['UniqueName'] ?? '');
 			if ($UniqueName === '') {
@@ -215,6 +220,37 @@ class add_menu
 			echo '<a href="#atop" onClick="'.red_admin_tool_html($buttonOnClick).'" class="cp_addcontent_button red-admin-add-card__link" aria-label="Add '.$ButtonTag.'">';
 			echo '<span class="red-admin-add-card__icon" aria-hidden="true">'.$CardIcon.'</span>';
 			echo '<span class="red-admin-add-card__copy"><span class="red-admin-add-card__label">'.$ButtonTag.'</span><span class="red-admin-add-card__description">'.red_admin_tool_html($CardDescription).'</span></span>';
+			echo '<span class="red-admin-add-card__action" aria-hidden="true">+</span>';
+			echo '</a></div>';
+			$cardNumber++;
+		}
+		foreach ($addonComponents as $addonComponent) {
+			$componentId = red_admin_tool_text(
+				$addonComponent['component'] ?? ''
+			);
+			$label = red_admin_tool_text($addonComponent['label'] ?? '');
+			$description = red_admin_tool_text(
+				$addonComponent['description'] ?? ''
+			);
+			if ($componentId === '' || $label === '' || $description === '') {
+				continue;
+			}
+			$cardId = 'cp_addcontent-addon-' . $cardNumber;
+			echo '<div class="cp_addcontent red-admin-add-card red-admin-add-card--addon" id="'
+				. red_admin_tool_html($cardId) . '" role="listitem"'
+				. ' data-content-type="' . red_admin_tool_html($componentId) . '">';
+			echo '<a href="#atop" class="cp_addcontent_button red-admin-add-card__link"'
+				. ' data-red-addon-component-add'
+				. ' data-component-id="' . red_admin_tool_html($componentId) . '"'
+				. ' data-layout="' . red_admin_tool_html(red_admin_tool_text($layout)) . '"'
+				. ' data-language="' . red_admin_tool_html(red_admin_tool_text($Language)) . '"'
+				. ' aria-label="Add ' . red_admin_tool_html($label) . '">';
+			echo '<span class="red-admin-add-card__icon" aria-hidden="true">'
+				. $this->add_content_card_icon('default') . '</span>';
+			echo '<span class="red-admin-add-card__copy"><span class="red-admin-add-card__label">'
+				. red_admin_tool_html($label) . '</span>'
+				. '<span class="red-admin-add-card__description">'
+				. red_admin_tool_html($description) . '</span></span>';
 			echo '<span class="red-admin-add-card__action" aria-hidden="true">+</span>';
 			echo '</a></div>';
 			$cardNumber++;

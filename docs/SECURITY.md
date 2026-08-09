@@ -306,6 +306,16 @@ add-on packages without executing them.
   mismatch, and either ledger failure fail closed. The callback is still
   trusted in-process PHP and must not issue transaction controls, DDL, or
   writes outside declared package tables.
+- The operational component creator is core-owned. Add Content lists a
+  component only after current enabled runtime/manifest/loader/creator
+  ownership, declared package tables, and the actor's exact create grant are
+  re-derived. The form endpoint requires the authenticated administrator and
+  CSRF before accepting the closed component/layout/language request. The
+  Create endpoint repeats those checks, accepts only core title metadata plus
+  manifest-declared values, allocates an unused positive parent id with bounded
+  cryptographic randomness on the server, and delegates only to the atomic
+  inactive-creation runner. Browser input cannot select a package, handler,
+  permission, table, plan hash, or record id.
 - Parent metadata uses a separate core-owned activation-blocked boundary.
   Read-only state requires the exact view grant, enabled manifest/runtime and
   persisted binding, a closed inactive hidden unrouted shell, a valid package
@@ -323,17 +333,21 @@ add-on packages without executing them.
 - Public-placement planning is separately read-only. It requires the exact
   publish grant before package loading and then the complete view-authorized
   inactive parent, enabled binding, package-state, and current revision
-  evidence. Core accepts only numeric source/target ids plus bounded position
-  and order values, derives one unique active `Article` route, requires exact
-  language agreement, validates hierarchy and the active-theme position
-  contract, and hashes the actor, package, component, both states, and closed
-  placement values. It performs no activation, update, package write, audit,
-  endpoint, or transaction.
+  evidence. Core accepts only the numeric source id, the closed homepage
+  sentinel or a positive Article target id, plus bounded position and order
+  values. It derives either the one unique active homepage for the source
+  language or one unique active `Article` route, requires exact language
+  agreement, validates hierarchy and the active-theme position contract, and
+  hashes the actor, package, component, both states, and closed placement
+  values. It performs no activation, update, package write, audit, endpoint,
+  or transaction.
 - Atomic public placement revalidates the exact deterministic plan under the
   shared lifecycle and theme locks plus enabled-installation, source-parent,
-  and destination-page row locks. Only the seven derived placement fields may
-  change; package data and the destination route must remain byte-for-byte
-  equivalent to their planned states. Success requires one explicit-actor
+  and destination row locks. Article placement may change only its seven
+  derived page fields; homepage placement may change only `Sections`,
+  `HomePosition`, `HomePositionOrder`, and `Active`. Package data and the
+  destination must remain byte-for-byte equivalent to their planned states.
+  Success requires one explicit-actor
   core `move` revision and one allowlisted `component.public_placed` audit fact
   containing only the numeric actor and component-parent identifiers. The
   revision, audit row, and seven parent fields share one transaction; an audit

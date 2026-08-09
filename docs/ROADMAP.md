@@ -149,10 +149,16 @@ every other handler type remain non-dispatched. This generic fact-card contract
 is consumed by Store Lite's separately distributed pure public-product
 presenter. Store Lite 0.1.11 now adds its restrictive Product-placement table,
 transactional component-data callbacks, and read-only runtime Product handler.
-An acceptance-only enabled installation renders the bound homepage product at
-desktop and mobile widths; normal richer-package enablement and the user-facing
-Add component workflow remain blocked. The clean starter has no package
-directory or enabled package state.
+The core Add Content catalog now advertises an add-on component only after
+re-deriving current runtime ownership, enabled installation evidence, its
+manifest editor schema, exact creator/loader bindings, and the actor's fresh
+create grant. The protected core form creates an inactive component with a
+server-allocated numeric id and then offers the language homepage or an
+existing public Article as an independently authorized placement. A fresh
+clean-core-plus-package rehearsal proves Product creation, Homepage placement,
+and public rendering at desktop and mobile widths without a fixture-created
+placement. Normal richer-package enablement remains blocked. The clean starter
+has no package directory or enabled package state.
 
 The read-only enablement plan now resolves declarative theme, settings, and
 live-data gates for four deliberately constrained profiles: a registration-only
@@ -621,12 +627,13 @@ stages Store Lite 0.1.11 outside the starter, validates its exact inventory,
 creates a fresh per-client schema, records one acceptance-only enabled
 installation, and proves authenticated Products -> Add product -> Create ->
 reload plus existing target -> Edit -> Save -> reload behavior for simple
-products alongside an unchanged variable T-shirt. It also creates one homepage
-Product placement through the package callback and proves its public semantic
-fact card before login. Its 80 desktop/mobile Chrome checks and exact package/
-core create/update audit
-postconditions pass before the temporary server, schema, grant, and staged
-package are removed. This proof does not relax normal richer-package
+products alongside an unchanged variable T-shirt. The browser now also follows
+Add Content -> Product -> Create component -> Homepage -> Place component,
+starting from zero Product placements and proving the resulting public semantic
+fact card. Its 87 desktop/mobile Chrome checks, 85 focused generic component
+creation/article-placement assertions, and exact core/package revision and
+audit postconditions pass before the temporary server, schema, grant, and
+staged package are removed. This proof does not relax normal richer-package
 enablement blockers or add Store Lite files, migrations, tables, or product
 state to the starter.
 The core-only authorized setting read model is complete, and the narrow

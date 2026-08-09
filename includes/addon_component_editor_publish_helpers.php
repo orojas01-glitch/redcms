@@ -3,7 +3,8 @@
  * Read-only public-placement preflight for add-on component editor records.
  *
  * This helper binds an exact inactive package-owned parent state to one
- * existing public Article route and one active-theme page position. It never
+ * existing public Article route or the language homepage and one active-theme
+ * position. It never
  * updates the parent, activates content, invokes a package writer, or opens an
  * endpoint. A later atomic runner must revalidate the complete plan.
  */
@@ -192,6 +193,18 @@ if (!function_exists('red_addon_component_editor_publish_control_context')) {
             return $result;
         }
         $targets = [];
+        $homeTarget = red_addon_component_editor_publish_target(
+            $connection,
+            0,
+            $language
+        );
+        if (is_array($homeTarget)) {
+            $targets[] = [
+                'recordId' => 0,
+                'title' => 'Homepage',
+                'alias' => '',
+            ];
+        }
         foreach ($targetRows as $targetRow) {
             $targetId = (int) ($targetRow['RecordID'] ?? 0);
             $target = red_addon_component_editor_publish_target(
@@ -272,7 +285,7 @@ if (!function_exists('red_addon_component_editor_publish_control_render')) {
             if (!is_array($target)
                 || array_keys($target) !== ['recordId', 'title', 'alias']
                 || !is_int($target['recordId'])
-                || $target['recordId'] < 1
+                || $target['recordId'] < 0
                 || !is_string($target['title'])
                 || !is_string($target['alias'])
             ) {
@@ -282,8 +295,11 @@ if (!function_exists('red_addon_component_editor_publish_control_render')) {
                 ? $target['title']
                 : '/' . $target['alias'] . '/';
             $targetOptions .= '<option value="' . (int) $target['recordId']
-                . '">' . $escape($label) . ' — /'
-                . $escape($target['alias']) . '/</option>';
+                . '">' . $escape($label)
+                . ($target['recordId'] === 0
+                    ? ' — /'
+                    : ' — /' . $escape($target['alias']) . '/')
+                . '</option>';
         }
         $positionOptions = '';
         foreach ($context['positions'] as $position) {
@@ -371,8 +387,69 @@ if (!function_exists('red_addon_component_editor_publish_hash')) {
 if (!function_exists('red_addon_component_editor_publish_target')) {
     function red_addon_component_editor_publish_target(
         $connection,
-        $targetPageRecordId
+        $targetPageRecordId,
+        $language = ''
     ) {
+        if ($targetPageRecordId === 0) {
+            if (!is_string($language)
+                || preg_match('/\A[a-z]{2}\z/D', $language) !== 1
+            ) {
+                return null;
+            }
+            try {
+                $statement = mysqli_prepare(
+                    $connection,
+                    "SELECT RecordID, Sections, Layout, Language
+                     FROM RED_Sections
+                     WHERE LOWER(Sections)='home' AND Active='Y'
+                       AND BINARY Language=BINARY ?
+                     ORDER BY RecordID ASC LIMIT 2"
+                );
+                if (!$statement) {
+                    return null;
+                }
+                mysqli_stmt_bind_param($statement, 's', $language);
+                mysqli_stmt_execute($statement);
+                $queryResult = mysqli_stmt_get_result($statement);
+                $rows = [];
+                while ($queryResult && ($homeRow = mysqli_fetch_assoc($queryResult))) {
+                    $rows[] = $homeRow;
+                }
+                if ($queryResult) {
+                    mysqli_free_result($queryResult);
+                }
+                mysqli_stmt_close($statement);
+            } catch (Throwable $throwable) {
+                return null;
+            }
+            if (count($rows) !== 1
+                || (int) ($rows[0]['RecordID'] ?? 0) < 1
+                || (string) ($rows[0]['Language'] ?? '') !== $language
+                || red_admin_area_layout_definition(
+                    $connection,
+                    (string) ($rows[0]['Layout'] ?? '')
+                ) === null
+            ) {
+                return null;
+            }
+            $target = [
+                'recordId' => 0,
+                'sectionRecordId' => (int) $rows[0]['RecordID'],
+                'component' => 'Home',
+                'active' => 'Y',
+                'alias' => '',
+                'sections' => (string) $rows[0]['Sections'],
+                'categories' => '',
+                'subCategories' => '',
+                'layout' => (string) $rows[0]['Layout'],
+                'language' => $language,
+                'pagePosition' => 0,
+            ];
+            $target['stateHash'] = red_addon_component_editor_publish_hash(
+                $target
+            );
+            return $target['stateHash'] === '' ? null : $target;
+        }
         $row = red_admin_article_full_record($connection, $targetPageRecordId);
         if (!is_array($row)
             || (int) ($row['RecordID'] ?? 0) !== $targetPageRecordId
@@ -476,7 +553,7 @@ if (!function_exists('red_addon_component_editor_publish_preflight')) {
         $targetPageRecordId = filter_var(
             $targetPageRecordId,
             FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
+            ['options' => ['min_range' => 0]]
         );
         $pagePosition = filter_var(
             $pagePosition,
@@ -571,7 +648,8 @@ if (!function_exists('red_addon_component_editor_publish_preflight')) {
 
         $target = red_addon_component_editor_publish_target(
             $connection,
-            $targetPageRecordId
+            $targetPageRecordId,
+            (string) ($parent['parentValues']['language'] ?? '')
         );
         if (!is_array($target)) {
             $result['reason'] = 'target_page_unavailable';
@@ -594,15 +672,22 @@ if (!function_exists('red_addon_component_editor_publish_preflight')) {
             $result['reason'] = 'parent_state_unavailable';
             return $result;
         }
-        $placement = [
-            'Sections' => $target['sections'],
-            'Categories' => $target['categories'],
-            'SubCategories' => $target['subCategories'],
-            'Article' => $target['alias'],
-            'PagePosition' => $pagePosition,
-            'PagePositionOrder' => $pagePositionOrder,
-            'Active' => 'Y',
-        ];
+        $placement = $targetPageRecordId === 0
+            ? [
+                'Sections' => $target['sections'],
+                'HomePosition' => $pagePosition,
+                'HomePositionOrder' => $pagePositionOrder,
+                'Active' => 'Y',
+            ]
+            : [
+                'Sections' => $target['sections'],
+                'Categories' => $target['categories'],
+                'SubCategories' => $target['subCategories'],
+                'Article' => $target['alias'],
+                'PagePosition' => $pagePosition,
+                'PagePositionOrder' => $pagePositionOrder,
+                'Active' => 'Y',
+            ];
         $candidate = array_merge($existing, $placement);
         if (!red_admin_article_hierarchy_valid($connection, $candidate)
             || !red_admin_article_validate_position_changes(
@@ -669,8 +754,50 @@ if (!function_exists('red_addon_component_editor_publication_result')) {
 if (!function_exists('red_addon_component_editor_publish_lock_target')) {
     function red_addon_component_editor_publish_lock_target(
         $connection,
-        $targetPageRecordId
+        $targetPageRecordId,
+        $language = ''
     ) {
+        if ($targetPageRecordId === 0) {
+            if (!is_string($language)
+                || preg_match('/\A[a-z]{2}\z/D', $language) !== 1
+            ) {
+                return false;
+            }
+            try {
+                $statement = mysqli_prepare(
+                    $connection,
+                    "SELECT RecordID FROM RED_Sections
+                     WHERE LOWER(Sections)='home' AND Active='Y'
+                       AND BINARY Language=BINARY ?
+                     ORDER BY RecordID ASC FOR UPDATE"
+                );
+                if (!$statement) {
+                    return false;
+                }
+                mysqli_stmt_bind_param($statement, 's', $language);
+                $executed = mysqli_stmt_execute($statement);
+                $queryResult = $executed
+                    ? mysqli_stmt_get_result($statement)
+                    : null;
+                $recordIds = [];
+                while ($queryResult && ($row = mysqli_fetch_assoc($queryResult))) {
+                    $recordIds[] = (int) ($row['RecordID'] ?? 0);
+                }
+                if ($queryResult) {
+                    mysqli_free_result($queryResult);
+                }
+                mysqli_stmt_close($statement);
+                $target = red_addon_component_editor_publish_target(
+                    $connection,
+                    0,
+                    $language
+                );
+                return is_array($target)
+                    && $recordIds === [$target['sectionRecordId']];
+            } catch (Throwable $throwable) {
+                return false;
+            }
+        }
         try {
             $statement = mysqli_prepare(
                 $connection,
@@ -777,7 +904,7 @@ if (!function_exists('red_addon_component_editor_publish_parent')) {
         $contentRecordId,
         array $placement
     ) {
-        if (array_keys($placement) !== [
+        $articleKeys = [
             'Sections',
             'Categories',
             'SubCategories',
@@ -785,7 +912,47 @@ if (!function_exists('red_addon_component_editor_publish_parent')) {
             'PagePosition',
             'PagePositionOrder',
             'Active',
-        ]) {
+        ];
+        $homeKeys = [
+            'Sections',
+            'HomePosition',
+            'HomePositionOrder',
+            'Active',
+        ];
+        if (array_keys($placement) === $homeKeys) {
+            try {
+                $statement = mysqli_prepare(
+                    $connection,
+                    "UPDATE RED_Articles
+                     SET Sections=?, HomePosition=?, HomePositionOrder=?,
+                         Active=?
+                     WHERE RecordID=? AND Component=?
+                       AND Active='N' AND PagePosition=0
+                       AND HomePosition=0 AND Alias=''"
+                );
+                if (!$statement) {
+                    return false;
+                }
+                mysqli_stmt_bind_param(
+                    $statement,
+                    'siisis',
+                    $placement['Sections'],
+                    $placement['HomePosition'],
+                    $placement['HomePositionOrder'],
+                    $placement['Active'],
+                    $contentRecordId,
+                    $componentId
+                );
+                $executed = mysqli_stmt_execute($statement);
+                $updated = $executed
+                    && mysqli_stmt_affected_rows($statement) === 1;
+                mysqli_stmt_close($statement);
+                return $updated;
+            } catch (Throwable $throwable) {
+                return false;
+            }
+        }
+        if (array_keys($placement) !== $articleKeys) {
             return false;
         }
         try {
@@ -851,7 +1018,7 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
         $targetPageRecordId = filter_var(
             $targetPageRecordId,
             FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
+            ['options' => ['min_range' => 0]]
         );
         $result = red_addon_component_editor_publication_result(
             $adminRecordId === false ? 0 : $adminRecordId,
@@ -882,6 +1049,7 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
             $connection,
             [
                 'RED_Articles',
+                'RED_Sections',
                 'RED_Content_Revisions',
                 'RED_Admin_Activity_Log',
             ]
@@ -966,9 +1134,20 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
                             $packageId,
                             $componentId,
                             $contentRecordId
-                        ) || !red_addon_component_editor_publish_lock_target(
+                        )) {
+                            $transactionReason = 'binding_unavailable';
+                            throw new RuntimeException($transactionReason);
+                        }
+                        $beforeShell = red_addon_component_editor_parent_shell(
                             $connection,
-                            $targetPageRecordId
+                            $componentId,
+                            $contentRecordId
+                        );
+                        if (!is_array($beforeShell)
+                            || !red_addon_component_editor_publish_lock_target(
+                            $connection,
+                            $targetPageRecordId,
+                            (string) $beforeShell['metadata']['language']
                         )) {
                             $transactionReason = 'binding_unavailable';
                             throw new RuntimeException($transactionReason);
@@ -999,15 +1178,11 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
                                 : 'stale_plan';
                             throw new RuntimeException($transactionReason);
                         }
-                        $beforeShell = red_addon_component_editor_parent_shell(
-                            $connection,
-                            $componentId,
-                            $contentRecordId
-                        );
                         $targetBefore =
                             red_addon_component_editor_publish_target(
                                 $connection,
-                                $targetPageRecordId
+                                $targetPageRecordId,
+                                (string) $beforeShell['metadata']['language']
                             );
                         if (!is_array($beforeShell)
                             || !is_array($targetBefore)
@@ -1056,7 +1231,8 @@ if (!function_exists('red_addon_component_editor_publish_values')) {
                         $targetAfter =
                             red_addon_component_editor_publish_target(
                                 $connection,
-                                $targetPageRecordId
+                                $targetPageRecordId,
+                                (string) $beforeShell['metadata']['language']
                             );
                         if (empty($package['loaded'])
                             || !hash_equals(

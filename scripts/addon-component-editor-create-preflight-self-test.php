@@ -23,7 +23,7 @@ require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
-    '/\Aredcms_(?:acceptance|addon_editor_create|rev_base)_[A-Za-z0-9_]+\z/',
+    '/\Aredcms_(?:acceptance|addon_editor_create|rev_base|store_lite_browser)_[A-Za-z0-9_]+\z/',
     (string) DBNAME
 )) {
     fwrite(

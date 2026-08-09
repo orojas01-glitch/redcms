@@ -696,8 +696,18 @@ parent and package postconditions. The parent, package row, core-owned
 transaction. Caller-owned transactions, stale evidence, callback output,
 exceptions, buffer changes, false returns, partial writes, postcondition
 mismatch, and either ledger failure fail closed. The runner remains
-activation-blocked and exposes no form, route, audit event, parent-metadata
-editor, public placement, delete, or activation eligibility.
+activation-blocked and exposes no route, audit event, parent-metadata editor,
+public placement, delete, or activation eligibility.
+`red_addon_component_editor_create_catalog()` and the two protected component
+creation endpoints are the separate operational browser boundary. Add Content
+lists only a manifest-declared component whose current enabled runtime owner,
+loader, creator/table metadata, and fresh actor create grant agree. Core renders
+the fixed title field plus the existing escaped manifest controls. The POST/CSRF
+Create endpoint repeats every binding and permission decision, allocates an
+unused positive numeric content id server-side with bounded `random_int()`
+attempts, builds the exact inactive plan, and delegates only to the atomic
+runner. Browser input cannot choose the package, handler, permission, table,
+content id, or plan evidence.
 `red_addon_component_editor_parent_state()` and
 `red_addon_component_editor_parent_update()` implement the separate
 activation-blocked parent-metadata prerequisite. Read-only state requires the
@@ -718,22 +728,25 @@ package-value write.
 public-placement prerequisite. It requires the exact publish grant before
 package loading, then reuses the exact view-authorized inactive parent,
 enabled runtime/binding, package-state, and current core-revision evidence.
-The caller supplies only numeric source and target ids, a page position and
-order, plus the current parent/package hashes. Core derives one uniquely owned,
-active `Article` destination route, its hierarchy, alias, layout, and language;
-requires source/destination language agreement; and validates the resulting
-candidate against the active theme's page-position contract. The deterministic
-plan binds the exact actor, package, component, source state, destination state,
-and closed placement values. It invokes no package writer, opens no transaction
-or endpoint, and writes or activates nothing.
+The caller supplies only the numeric source id, the closed homepage sentinel or
+a positive Article target id, a position and order, plus the current parent/
+package hashes. Core derives either the unique active homepage for the source
+language or one uniquely owned active `Article` destination route with its
+hierarchy, alias, layout, and language. It requires source/destination language
+agreement and validates the resulting candidate against the active theme's
+destination position contract. The deterministic plan binds the exact actor,
+package, component, source state, destination state, and closed placement
+values. It invokes no package writer, opens no transaction or endpoint, and
+writes or activates nothing.
 `red_addon_component_editor_publish_values()` implements the separate atomic
 runner behind that exact plan. It refuses caller-owned transactions, acquires
 the database-wide add-on lifecycle and active-theme locks, then locks the
-enabled installation, exact inactive source parent, and numeric destination
-page. The complete preflight and plan hash are revalidated under those locks.
-Core updates only `Sections`, `Categories`, `SubCategories`, `Article`,
-`PagePosition`, `PagePositionOrder`, and `Active`; no package writer or
-mutating package callback runs.
+enabled installation, exact inactive source parent, and destination row. The
+complete preflight and plan hash are revalidated under those locks. Article
+placement updates only `Sections`, `Categories`, `SubCategories`, `Article`,
+`PagePosition`, `PagePositionOrder`, and `Active`; homepage placement updates
+only `Sections`, `HomePosition`, `HomePositionOrder`, and `Active`. No package
+writer or mutating package callback runs.
 The complete source row, unchanged package state, unchanged destination state,
 fresh publish grant, one explicit-actor core `move` revision, and one bounded
 `component.public_placed` administrator audit fact are required postconditions.

@@ -18,6 +18,54 @@
         return document.getElementById('msggbox_edit_content');
     }
 
+    function createTarget() {
+        return document.getElementById('msggbox_add_content');
+    }
+
+    function showContentTypes() {
+        var grid = document.getElementById('add_content_grid');
+        var target = createTarget();
+        if (target) {
+            target.innerHTML = '';
+            target.style.display = 'none';
+            target.removeAttribute('aria-busy');
+        }
+        if (grid) {
+            grid.style.display = '';
+        }
+    }
+
+    function loadCreateForm(button) {
+        var body = new URLSearchParams();
+        body.append('Component', button.dataset.componentId || '');
+        body.append('Layout', button.dataset.layout || '');
+        body.append('Language', button.dataset.language || '');
+        var target = createTarget();
+        if (!target) {
+            return Promise.reject(new Error('create-target-unavailable'));
+        }
+        target.setAttribute('aria-busy', 'true');
+        return post('/admin/bin/new_addon_component.php', body).then(function (response) {
+            return response.text().then(function (html) {
+                if (!response.ok) {
+                    throw new Error('create-form-unavailable');
+                }
+                var grid = document.getElementById('add_content_grid');
+                if (grid) {
+                    grid.style.display = 'none';
+                }
+                target.innerHTML = html;
+                target.style.display = '';
+                target.removeAttribute('aria-busy');
+            });
+        }).catch(function (error) {
+            target.removeAttribute('aria-busy');
+            target.textContent = 'The component creator is unavailable.';
+            target.style.display = '';
+            throw error;
+        });
+    }
+
     function loadEditor(recordId) {
         var body = new URLSearchParams();
         body.append('ContentRecordID', String(recordId));
@@ -48,6 +96,21 @@
     }
 
     document.addEventListener('click', function (event) {
+        var addButton = event.target.closest('[data-red-addon-component-add]');
+        if (addButton) {
+            event.preventDefault();
+            addButton.setAttribute('aria-disabled', 'true');
+            loadCreateForm(addButton).catch(function () {
+                addButton.removeAttribute('aria-disabled');
+            });
+            return;
+        }
+        var returnButton = event.target.closest('[data-red-addon-create-return]');
+        if (returnButton) {
+            event.preventDefault();
+            showContentTypes();
+            return;
+        }
         var button = event.target.closest('[data-red-addon-component-edit]');
         if (!button) {
             return;
@@ -56,6 +119,48 @@
         button.disabled = true;
         loadEditor(button.dataset.contentRecordId).catch(function () {
             button.disabled = false;
+        });
+    });
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target.closest('[data-red-addon-component-create-form]');
+        if (!form) {
+            return;
+        }
+        event.preventDefault();
+        var submit = form.querySelector('button[type="submit"]');
+        var status = form.querySelector('[data-red-addon-create-status]');
+        if (submit) {
+            submit.disabled = true;
+        }
+        if (status) {
+            status.hidden = false;
+            status.textContent = 'Creating component…';
+        }
+        post(form.action, new FormData(form)).then(function (response) {
+            return response.json().catch(function () {
+                return {ok: false, reason: 'invalid_response'};
+            }).then(function (data) {
+                if (!response.ok || !data.ok || !data.contentRecordId) {
+                    var error = new Error(data.reason || 'create_failed');
+                    error.reason = data.reason || 'create_failed';
+                    throw error;
+                }
+                var editTab = document.querySelector('a[href="#editcontent"]');
+                if (editTab) {
+                    editTab.click();
+                }
+                return loadEditor(data.contentRecordId);
+            });
+        }).catch(function (error) {
+            if (status) {
+                status.textContent = error.reason === 'invalid_values'
+                    ? 'Check the component fields and try again.'
+                    : 'The component could not be created. No changes were applied.';
+            }
+            if (submit) {
+                submit.disabled = false;
+            }
         });
     });
 
@@ -126,7 +231,10 @@
                     error.reason = data.reason || 'placement_failed';
                     throw error;
                 }
-                return loadEditor(form.querySelector('[name="ContentRecordID"]').value);
+                if (status) {
+                    status.textContent = 'Component placed and published.';
+                }
+                form.setAttribute('data-red-addon-placement-complete', 'true');
             });
         }).catch(function (error) {
             if (status) {
