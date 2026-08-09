@@ -652,6 +652,17 @@ changes fail closed. Permission revocation applies on the next catalog or
 dispatch lookup. Current enablement gates still reject every tool-bearing
 package.
 
+An optional form-target loader is a separate reviewed read-only callback, not
+an expansion of that display handler. Core binds it to one declared
+schema-bearing form, repeats the exact permission, resolves only that form's
+closed runtime settings, and caps each page at 25 records. Its typed result may
+contain only unique positive numeric targets, bounded text facts, and one safe
+cursor. Core creates the Edit controls and protected POST; package markup,
+links, request globals, writes, secrets, transaction control, and caller-chosen
+package/form identities remain unavailable. Output, exceptions, response-state
+changes, invalid targets, runtime-setting drift, and permission revocation fail
+closed.
+
 Operational administrator forms have a separate declaration and non-executing
 planning boundary. A closed `adminToolFormContracts` entry binds one provided
 tool to a unique form id, declared package permission, `POST`, required CSRF
@@ -685,6 +696,15 @@ schema-drifted values, and binds the normalized graph to
 package/tool/form/target/contract SHA-256 evidence before the renderer may
 display it. The renderer still adds no names, editable or submit controls,
 request body, CSRF operation, endpoint, or write path.
+
+Form runtime settings are core-derived from the exact enabled tool/form owner
+and the form's closed `runtimeSettings` declaration. Only configured,
+non-secret, type-valid values with no manifest value default enter one final
+immutable request object for that form's loader and writer. Missing or drifted
+configuration refuses before provider invocation. An opaque configuration hash
+is included in form-state and writer-plan evidence so changing configuration
+invalidates stale edits. Package selection, arbitrary setting lookup, raw JSON,
+secret references, endpoints, and setting writes are not exposed by this path.
 
 The separate protected validation adapter is core-owned and remains unlinked
 from that renderer. Its endpoint requires POST and calls the authenticated
@@ -740,7 +760,9 @@ revalidation remain authoritative. Public results contain only `saved`,
 `unchanged`, or a bounded refusal—never values, package identity, state or plan
 hashes, table names, or audit evidence. A successful Save reloads the editor
 instead of trusting client-derived state. The bridge does not select targets,
-add navigation, enable a richer package, or add Store Lite behavior.
+enable a richer package, or add Store Lite behavior. Target selection, when a
+package separately registers it, remains a bounded read-only core-rendered
+predecessor to this independently authorized edit bridge.
 
 The loader is reviewed first-party PHP, not a database sandbox. It is required
 to be read-only and may query only its package-owned current-client data; it

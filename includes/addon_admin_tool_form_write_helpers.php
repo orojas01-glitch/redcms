@@ -25,6 +25,7 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Write_Request', false)) {
         private string $previousStateSha256;
         private string $planSha256;
         private array $values;
+        private RED_Addon_Admin_Tool_Form_Runtime_Settings $runtimeSettings;
 
         public function __construct(
             string $package,
@@ -35,7 +36,8 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Write_Request', false)) {
             int $targetRecordId,
             string $previousStateSha256,
             string $planSha256,
-            array $values
+            array $values,
+            RED_Addon_Admin_Tool_Form_Runtime_Settings $runtimeSettings
         ) {
             if (!red_addon_valid_package_id($package)
                 || !red_addon_valid_semantic_version($packageVersion)
@@ -62,6 +64,7 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Write_Request', false)) {
             $this->previousStateSha256 = $previousStateSha256;
             $this->planSha256 = $planSha256;
             $this->values = $values;
+            $this->runtimeSettings = $runtimeSettings;
         }
 
         public function package(): string
@@ -108,6 +111,11 @@ if (!class_exists('RED_Addon_Admin_Tool_Form_Write_Request', false)) {
         {
             return $this->values;
         }
+
+        public function runtimeSettings(): RED_Addon_Admin_Tool_Form_Runtime_Settings
+        {
+            return $this->runtimeSettings;
+        }
     }
 }
 
@@ -132,6 +140,7 @@ if (!function_exists('red_addon_admin_tool_form_write_result')) {
             ),
             'permission' => '',
             'contractSha256' => '',
+            'runtimeSettingsSha256' => '',
             'previousStateSha256' => '',
             'submittedValuesSha256' => '',
             'submissionPlanSha256' => '',
@@ -158,6 +167,7 @@ if (!function_exists('red_addon_admin_tool_form_write_copy_preparation')) {
                 'actorRecordId',
                 'permission',
                 'contractSha256',
+                'runtimeSettingsSha256',
                 'submittedValuesSha256',
             ] as $key
         ) {
@@ -185,7 +195,7 @@ if (!function_exists('red_addon_admin_tool_form_write_plan_sha256')) {
         try {
             $encoded = json_encode(
                 [
-                    'schema' => 1,
+                    'schema' => 2,
                     'package' => $result['package'] ?? null,
                     'packageVersion' => $result['packageVersion'] ?? null,
                     'tool' => $result['tool'] ?? null,
@@ -194,6 +204,8 @@ if (!function_exists('red_addon_admin_tool_form_write_plan_sha256')) {
                     'actorRecordId' => $result['actorRecordId'] ?? null,
                     'permission' => $result['permission'] ?? null,
                     'contractSha256' => $result['contractSha256'] ?? null,
+                    'runtimeSettingsSha256' =>
+                        $result['runtimeSettingsSha256'] ?? null,
                     'previousStateSha256' =>
                         $result['previousStateSha256'] ?? null,
                     'submittedValuesSha256' =>
@@ -617,12 +629,30 @@ if (!function_exists('red_addon_admin_tool_form_write')) {
                 $transactionReason = 'plan_mismatch';
                 throw new RuntimeException($transactionReason);
             }
+            $runtimeSettings =
+                red_addon_admin_tool_form_runtime_settings_resolve(
+                    $connection,
+                    $lockedBinding
+                );
+            if (($runtimeSettings['resolved'] ?? false) !== true
+                || !($runtimeSettings['settings']
+                    instanceof RED_Addon_Admin_Tool_Form_Runtime_Settings)
+                || !is_string($runtimeSettings['stateSha256'] ?? null)
+                || !hash_equals(
+                    $result['runtimeSettingsSha256'],
+                    $runtimeSettings['stateSha256']
+                )
+            ) {
+                $transactionReason = 'runtime_settings_unavailable';
+                throw new RuntimeException($transactionReason);
+            }
             $submittedStateSha256 = red_addon_admin_tool_form_value_state_hash(
                 $result['package'],
                 $result['tool'],
                 $result['form'],
                 $result['targetRecordId'],
                 $result['contractSha256'],
+                $result['runtimeSettingsSha256'],
                 $locked['values']
             );
             if (!red_addon_valid_sha256($submittedStateSha256)) {
@@ -652,7 +682,8 @@ if (!function_exists('red_addon_admin_tool_form_write')) {
                 $result['targetRecordId'],
                 $result['previousStateSha256'],
                 $result['planSha256'],
-                $locked['values']
+                $locked['values'],
+                $runtimeSettings['settings']
             );
             $result['writerInvoked'] = true;
             if (!red_addon_admin_tool_form_write_invoke(

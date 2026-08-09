@@ -293,6 +293,15 @@ function red_addon_admin_form_write_test_context(
                 if (!$request instanceof RED_Addon_Admin_Tool_Form_Write_Request) {
                     throw new RuntimeException('Writer request type is invalid.');
                 }
+                if ($request->runtimeSettings()->values() !== []
+                    || !red_addon_valid_sha256(
+                        $request->runtimeSettings()->stateSha256()
+                    )
+                ) {
+                    throw new RuntimeException(
+                        'Writer runtime settings are invalid.'
+                    );
+                }
                 $values = $request->values();
                 red_addon_admin_form_write_test_update(
                     $connection,

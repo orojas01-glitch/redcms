@@ -35,6 +35,7 @@ $formId = $packageId . '/product-editor';
 $permission = 'fixture.products.manage';
 $calls = ['tool' => 0, 'loader' => 0];
 $loaderMode = 'normal';
+$runtimeCurrency = 'USD';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -110,7 +111,15 @@ function red_addon_admin_form_value_test_manifest(
             'adminTools' => [$toolId],
             'adapters' => [],
         ],
-        'permissions' => [$permission],
+        'permissions' => [$permission, 'fixture.settings.manage'],
+        'settings' => [[
+            'key' => 'fixture.currency',
+            'label' => 'Catalog currency',
+            'type' => 'text',
+            'secret' => false,
+            'permission' => 'fixture.settings.manage',
+            'default' => null,
+        ]],
         'adminToolContracts' => [[
             'tool' => $toolId,
             'label' => 'Products',
@@ -129,6 +138,7 @@ function red_addon_admin_form_value_test_manifest(
             'csrf' => 'required',
             'encoding' => 'application/json',
             'maxBodyBytes' => 256,
+            'runtimeSettings' => ['fixture.currency'],
             'fields' => [
                 [
                     'key' => 'id',
@@ -244,7 +254,7 @@ function red_addon_admin_form_value_test_context(
     $toolId,
     $formId
 ) {
-    global $calls, $loaderMode;
+    global $calls, $loaderMode, $runtimeCurrency;
     $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
     $registry->registerAdminTool(
         $toolId,
@@ -255,12 +265,31 @@ function red_addon_admin_form_value_test_context(
     );
     $registry->registerAdminToolFormValueLoader(
         $formId,
-        static function ($connection, $request) use (&$calls, &$loaderMode) {
+        static function ($connection, $request) use (
+            &$calls,
+            &$loaderMode,
+            &$runtimeCurrency
+        ) {
             $calls['loader']++;
             if (!$request instanceof RED_Addon_Admin_Tool_Form_Value_Request
                 || !$connection
             ) {
                 throw new RuntimeException('Loader arguments are invalid.');
+            }
+            $runtimeSettings = $request->runtimeSettings();
+            if (!$runtimeSettings->has('fixture.currency')
+                || $runtimeSettings->value('fixture.currency')
+                    !== $runtimeCurrency
+                || $runtimeSettings->values() !== [
+                    'fixture.currency' => $runtimeCurrency,
+                ]
+                || !red_addon_valid_sha256(
+                    $runtimeSettings->stateSha256()
+                )
+            ) {
+                throw new RuntimeException(
+                    'Loader runtime settings are invalid.'
+                );
             }
             if ($loaderMode === 'output') {
                 echo 'unexpected output';
@@ -292,6 +321,16 @@ function red_addon_admin_form_value_test_context(
 function red_addon_admin_form_value_test_cleanup($connection, $actorId)
 {
     try {
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Addon_Settings
+             WHERE PackageID='redcms.tool-form-value-fixture'"
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Addon_Installations
+             WHERE PackageID='redcms.tool-form-value-fixture'"
+        );
         red_addon_admin_form_value_test_execute(
             $connection,
             'DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID=?',
@@ -351,6 +390,31 @@ try {
             'N', 'to', 'N', 'to')",
         'is',
         [$actorId, $password]
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "INSERT INTO RED_Addon_Installations (
+            PackageID, PackageVersion, PackageType, ManifestSHA256,
+            InventorySHA256, LifecycleState, InstalledByAdminRecordID,
+            UpdatedByAdminRecordID
+         ) VALUES (
+            'redcms.tool-form-value-fixture', '1.0.0', 'service',
+            REPEAT('a', 64), REPEAT('b', 64), 'enabled', ?, ?
+         )",
+        'ii',
+        [$actorId, $actorId]
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "INSERT INTO RED_Addon_Settings (
+            PackageID, SettingKey, ValueType, ValueJSON,
+            SecretReference, UpdatedByAdminRecordID
+         ) VALUES (
+            'redcms.tool-form-value-fixture', 'fixture.currency', 'text',
+            '\"USD\"', NULL, ?
+         )",
+        'i',
+        [$actorId]
     );
 
     $manifest = red_addon_admin_form_value_test_manifest(
@@ -452,11 +516,39 @@ try {
                 === 'Large & Tall'
             && red_addon_valid_sha256($loaded['contractSha256'])
             && red_addon_valid_sha256($loaded['planSha256'])
+            && red_addon_valid_sha256(
+                $loaded['runtimeSettingsSha256']
+            )
             && red_addon_valid_sha256($loaded['stateSha256'])
             && $loaded['reason'] === 'loaded'
             && $calls === ['tool' => 0, 'loader' => 1],
         'exact grant loads one complete nested typed value graph without invoking the tool'
     );
+
+    $runtimeCurrency = 'EUR';
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "UPDATE RED_Addon_Settings SET ValueJSON='\"EUR\"'
+         WHERE PackageID=? AND SettingKey='fixture.currency'",
+        's',
+        [$packageId]
+    );
+    $changedSetting = red_addon_admin_tool_form_load_values(
+        $connection,
+        $toolId,
+        $formId,
+        41,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        $changedSetting['loaded'] === true
+            && $changedSetting['values'] === $loaded['values']
+            && $changedSetting['runtimeSettingsSha256']
+                !== $loaded['runtimeSettingsSha256']
+            && $changedSetting['stateSha256'] !== $loaded['stateSha256'],
+        'a typed runtime-setting change reaches the loader and invalidates form state evidence'
+    );
+    $loaded = $changedSetting;
 
     $repeat = red_addon_admin_tool_form_load_values(
         $connection,
@@ -478,6 +570,69 @@ try {
             && $otherTarget['values'] === $loaded['values']
             && $otherTarget['stateSha256'] !== $loaded['stateSha256'],
         'value evidence is deterministic and binds the numeric target identity'
+    );
+
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        'DELETE FROM RED_Addon_Settings WHERE PackageID=? AND SettingKey=?',
+        'ss',
+        [$packageId, 'fixture.currency']
+    );
+    $callsBeforeMissingSetting = $calls['loader'];
+    $missingSetting = red_addon_admin_tool_form_load_values(
+        $connection,
+        $toolId,
+        $formId,
+        41,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        $missingSetting['authorized'] === true
+            && empty($missingSetting['invoked'])
+            && empty($missingSetting['loaded'])
+            && $missingSetting['reason'] === 'runtime_settings_unavailable'
+            && $calls['loader'] === $callsBeforeMissingSetting,
+        'an unconfigured declared runtime setting refuses before loader invocation'
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "INSERT INTO RED_Addon_Settings (
+            PackageID, SettingKey, ValueType, ValueJSON,
+            SecretReference, UpdatedByAdminRecordID
+         ) VALUES (?, 'fixture.currency', 'text', '\"EUR\"', NULL, ?)",
+        'si',
+        [$packageId, $actorId]
+    );
+
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "UPDATE RED_Addon_Settings SET ValueJSON='[]'
+         WHERE PackageID=? AND SettingKey='fixture.currency'",
+        's',
+        [$packageId]
+    );
+    $callsBeforeMalformedSetting = $calls['loader'];
+    $malformedSetting = red_addon_admin_tool_form_load_values(
+        $connection,
+        $toolId,
+        $formId,
+        41,
+        $actorId
+    );
+    red_addon_admin_form_value_test_assert(
+        $malformedSetting['authorized'] === true
+            && empty($malformedSetting['invoked'])
+            && empty($malformedSetting['loaded'])
+            && $malformedSetting['reason'] === 'runtime_settings_unavailable'
+            && $calls['loader'] === $callsBeforeMalformedSetting,
+        'a malformed stored runtime setting refuses before loader invocation'
+    );
+    red_addon_admin_form_value_test_execute(
+        $connection,
+        "UPDATE RED_Addon_Settings SET ValueJSON='\"EUR\"'
+         WHERE PackageID=? AND SettingKey='fixture.currency'",
+        's',
+        [$packageId]
     );
 
     $html = red_addon_admin_tool_form_ui_render(
@@ -668,7 +823,17 @@ try {
             "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA=DATABASE()
                AND TABLE_NAME='RED_Addon_Admin_Form_Value_Fixture'"
-        ) === 0
+            ) === 0
+            && (int) red_addon_admin_form_value_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.tool-form-value-fixture'"
+            ) === 0
+            && (int) red_addon_admin_form_value_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Installations
+                 WHERE PackageID='redcms.tool-form-value-fixture'"
+            ) === 0
             && (int) red_addon_admin_form_value_test_scalar(
                 $connection,
                 'SELECT COUNT(*) FROM RED_Admin WHERE RecordID=' . (int) $actorId

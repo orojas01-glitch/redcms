@@ -216,7 +216,51 @@
         return 'The form could not be saved. No changes were applied.';
     }
 
+    function openTarget(button) {
+        var body = new URLSearchParams();
+        body.append('tool', button.dataset.tool || '');
+        body.append('form', button.dataset.form || '');
+        body.append('targetRecordId', button.dataset.targetRecordId || '');
+        button.disabled = true;
+        return fetch(button.dataset.editAction || '', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'X-CSRF-Token': csrfToken()},
+            body: body
+        }).then(function (response) {
+            return response.text().then(function (html) {
+                if (!response.ok) {
+                    throw new Error('open_failed');
+                }
+                var wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                var workspace = wrapper.firstElementChild;
+                var tool = button.closest('.red-admin-addon-tool');
+                if (!workspace
+                    || !workspace.hasAttribute(
+                        'data-red-addon-admin-form-workspace'
+                    )
+                    || !tool
+                ) {
+                    throw new Error('open_failed');
+                }
+                tool.replaceWith(workspace);
+                ensureMinimumCollections(workspace);
+            });
+        }).catch(function () {
+            button.disabled = false;
+        });
+    }
+
     document.addEventListener('click', function (event) {
+        var target = event.target.closest(
+            '[data-red-addon-admin-form-target]'
+        );
+        if (target) {
+            event.preventDefault();
+            openTarget(target);
+            return;
+        }
         var add = event.target.closest('[data-red-addon-admin-form-add]');
         if (add) {
             event.preventDefault();

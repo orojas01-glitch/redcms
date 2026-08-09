@@ -274,14 +274,17 @@ permission capacity, exact operation-to-permission resolution, non-Owner
 package grants, no implicit Owner access, case-sensitive matching, immediate
 revocation, read-only decisions, and exact actor/grant cleanup. Its grants are
 test setup only; no operational grant-management workflow exists.
-The separate 18-assertion administrator-tool fixture requires an enabled
+The separate administrator-tool fixture requires an enabled
 request-local registrar, one valid data-only tool contract, and a fresh exact
 case-sensitive package grant. It proves Owner/lifecycle authority does not
 imply tool access, revocation applies on the next request, only granted tools
 enter the core chooser, and handlers receive one final actor/tool request.
 Core escapes the bounded text view model and emits no package HTML, links,
-forms, buttons, scripts, or write actions. Output, exceptions, malformed
-results, buffer or HTTP-state changes fail closed; the endpoint is protected by
+forms, scripts, or write actions. Its separate optional form-target loader is
+permission-scoped, runtime-setting-bound, capped at 25 unique positive numeric
+records, and limited to bounded text facts plus a safe cursor; only core emits
+the Edit buttons and protected POST. Output, exceptions, malformed results,
+buffer or HTTP-state changes fail closed; the endpoint is protected by
 administrator session and POST/CSRF checks; and all actor/role/grant fixtures
 are removed exactly.
 The separate 18-assertion administrator-action-preflight fixture requires one
@@ -509,7 +512,8 @@ writer, and secret replacement,
 13-assertion permission-scoped add-on setting read model,
 18-assertion permission-scoped administrator-tool dispatch,
 16-assertion non-executing administrator-form preflight,
-22-assertion permission-scoped administrator-form current-value loader,
+25-assertion permission-scoped administrator-form current-value loader with
+typed runtime-setting injection and configuration-bound state evidence,
 26-assertion validation-only administrator-form JSON adapter,
 27-assertion atomic administrator-form writer,
 21-assertion operational administrator-form edit-and-Save bridge,
@@ -637,6 +641,13 @@ containers, network, image, database, package marker, and build context.
 - Static immutable asset-endpoint acceptance runs only in the uniquely named disposable database. Its disposable fixture proves pre-bootstrap dispatch, exact `GET`/`HEAD` delivery, fixed immutable/safety headers, generic `404`/`405`/`503` refusals, no session or package execution, no registry write, and no partial response. The live HTTP fixture creates an exact marker-bound first-party package beneath `addons/` only for the acceptance run, checks checksum/length/header evidence and stale, traversal, disabled, and tampered refusal, then removes the package and marker before cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
 - Store Lite product-contract acceptance runs before database creation. It requires the package-owned simple/variable split, one installation currency, integer minor-unit pricing, bounded identifiers/SKUs/text, explicit complete variant option tuples, unique variant identities, and the fixed three-group/16-value/128-variant limits. Invalid parent/child field mixing, unknown fields, duplicate tuples, stale option values, floats, and partial normalized results fail closed. It performs no database, request, package, lifecycle, or runtime work.
+- Add-on administrator-form runtime-setting declaration acceptance runs before
+  database creation. It requires each optional non-empty bounded declaration to
+  name only package-declared, non-secret settings with no non-null manifest
+  default, preserves the normalized exact key list for the selected form, and
+  rejects unknown, secret, defaulted, or duplicate keys. It never opens a
+  database, resolves a value, invokes package code, creates an endpoint, or
+  changes enablement.
 - Add-on setting-value acceptance runs before database creation. It requires
   exact normalized definitions, defaults matching the declared non-secret
   type, one closed object, strict scalar types, bounded UTF-8 text, declared

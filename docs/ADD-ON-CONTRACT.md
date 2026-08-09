@@ -1243,6 +1243,18 @@ oversized results fail closed. `admin/bin/view_addon_tool.php` is POST-only,
 requires a current protected administrator session and CSRF token, bootstraps
 the enabled registrar, and invokes only this dispatcher.
 
+A schema-bearing form may optionally register one separate
+`registerAdminToolFormTargetLoader()` callback. This does not broaden the
+display handler: core repeats the exact form permission, resolves only the
+form's declared runtime settings, and supplies the current-client connection
+plus a final request capped at 25 targets. The loader returns only positive
+numeric target ids, bounded plain-text labels/descriptions, up to four bounded
+facts, and an optional safe continuation cursor. Core escapes every value and
+generates the Edit buttons and protected POST itself. Package HTML, URLs,
+scripts, styles, arbitrary identifiers, writes, and transaction control remain
+forbidden. The first page is operational; continuation UI remains a later
+bounded slice.
+
 An optional `adminToolFormContracts` entry is separate data-only metadata for
 a future core-owned operational form. It maps one provided tool to one unique
 form id, bounded label and description, one declared package permission, only
@@ -1262,6 +1274,18 @@ collection, and two collection levels. This is sufficient to describe a
 simple product and, separately, option groups with values plus variants with
 exact option selections. It is not an arbitrary JSON schema, template,
 conditional-expression language, or package renderer.
+
+An operational form may also declare up to 32 exact `runtimeSettings` keys.
+Each key must name a package-declared, non-secret setting and it must have no
+non-null manifest default, so the installation must configure the value later.
+This is a closed ownership declaration. The core-owned resolver derives the
+enabled package from this exact form binding, validates stored value types, and
+injects one immutable typed view into only the corresponding value loader and
+atomic writer request. The opaque runtime-settings state hash participates in
+form state and plan evidence, so configuration changes invalidate stale edits.
+Missing, secret, malformed, schema-drifted, or cross-binding state fails before
+the provider is invoked. There is no general lookup, endpoint, setting write,
+or enablement change.
 
 `includes/addon_admin_tool_form_preflight_helpers.php` is the separate
 non-executing read-only gate. It requires exact request-local ownership of the
@@ -1343,8 +1367,10 @@ runtime owner, writer/table declaration, enabled package version, permission,
 manifest contract, and current typed values. Only that complete current graph
 may enter `red_addon_admin_tool_form_endpoint_render()`, which emits escaped
 core controls for the closed scalar and two-level collection schema. Package
-markup, scripts, styles, actions, names, target lists, and navigation are not
-part of this result.
+markup, scripts, styles, actions, and control names are not part of this result.
+If the optional target loader is registered, the display-tool dispatcher may
+render only its validated numeric targets and core-owned Edit controls before
+this endpoint independently reloads and reauthorizes the selected record.
 
 `admin/bin/save_addon_tool_form.php` is POST-only and verifies the current
 administrator plus header CSRF before body I/O. It accepts only the existing

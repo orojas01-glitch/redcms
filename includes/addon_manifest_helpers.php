@@ -1118,7 +1118,8 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
         $contracts,
         array $providedTools,
         array $declaredPermissions,
-        array &$result
+        array &$result,
+        array $declaredSettings = []
     ) {
         if (!is_array($contracts) || !array_is_list($contracts)) {
             red_addon_add_error(
@@ -1162,6 +1163,7 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                     'encoding',
                     'maxBodyBytes',
                     'fields',
+                    'runtimeSettings',
                 ],
                 $context,
                 $result
@@ -1298,6 +1300,62 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                     );
             }
 
+            $normalizedRuntimeSettings = null;
+            if (array_key_exists('runtimeSettings', $contract)) {
+                $runtimeSettings = red_addon_validate_string_list(
+                    $contract['runtimeSettings'],
+                    $context . ' runtimeSettings',
+                    32,
+                    'red_addon_valid_permission',
+                    $result
+                );
+                if ($runtimeSettings === []) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' runtimeSettings must not be empty.'
+                    );
+                }
+
+                $settingsByKey = [];
+                foreach ($declaredSettings as $setting) {
+                    if (is_array($setting)
+                        && is_string($setting['key'] ?? null)
+                    ) {
+                        $settingsByKey[$setting['key']] = $setting;
+                    }
+                }
+                foreach ($runtimeSettings as $settingKey) {
+                    $setting = $settingsByKey[$settingKey] ?? null;
+                    if (!is_array($setting)) {
+                        red_addon_add_error(
+                            $result,
+                            $context . ' runtime setting "' . $settingKey .
+                                '" must be declared by the package.'
+                        );
+                        continue;
+                    }
+                    if (($setting['secret'] ?? false) === true
+                        || ($setting['type'] ?? '') === 'secret-reference'
+                    ) {
+                        red_addon_add_error(
+                            $result,
+                            $context . ' runtime setting "' . $settingKey .
+                                '" must be non-secret.'
+                        );
+                    }
+                    if (array_key_exists('default', $setting)
+                        && $setting['default'] !== null
+                    ) {
+                        red_addon_add_error(
+                            $result,
+                            $context . ' runtime setting "' . $settingKey .
+                                '" must not have a non-null default.'
+                        );
+                    }
+                }
+                $normalizedRuntimeSettings = $runtimeSettings;
+            }
+
             $normalizedContract = [
                 'tool' => $tool,
                 'form' => $form,
@@ -1311,6 +1369,10 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
             ];
             if (is_array($normalizedFields)) {
                 $normalizedContract['fields'] = $normalizedFields;
+            }
+            if (is_array($normalizedRuntimeSettings)) {
+                $normalizedContract['runtimeSettings'] =
+                    $normalizedRuntimeSettings;
             }
             $normalized[] = $normalizedContract;
         }
@@ -1347,11 +1409,29 @@ if (!function_exists('red_addon_admin_tool_form_contract')) {
             'red_addon_valid_permission',
             $result
         );
+        $settings = [];
+        $hasRuntimeSettings = false;
+        foreach ($manifest['adminToolFormContracts'] as $contract) {
+            if (is_array($contract)
+                && array_key_exists('runtimeSettings', $contract)
+            ) {
+                $hasRuntimeSettings = true;
+                break;
+            }
+        }
+        if ($hasRuntimeSettings) {
+            $settings = red_addon_validate_settings(
+                $manifest['settings'] ?? null,
+                $result,
+                $permissions
+            );
+        }
         $contracts = red_addon_validate_admin_tool_form_contracts(
             $manifest['adminToolFormContracts'] ?? null,
             $tools,
             $permissions,
-            $result
+            $result,
+            $settings
         );
         if ($result['errors'] !== []) {
             return null;
@@ -3060,20 +3140,21 @@ if (!function_exists('red_addon_validate_manifest')) {
             );
         }
 
+        $declaredSettings = red_addon_validate_settings(
+            $manifest['settings'] ?? null,
+            $result,
+            $declaredPermissions
+        );
+
         if (array_key_exists('adminToolFormContracts', $manifest)) {
             red_addon_validate_admin_tool_form_contracts(
                 $manifest['adminToolFormContracts'],
                 $providedCapabilities['adminTools'],
                 $declaredPermissions,
-                $result
+                $result,
+                $declaredSettings
             );
         }
-
-        red_addon_validate_settings(
-            $manifest['settings'] ?? null,
-            $result,
-            $declaredPermissions
-        );
 
         $integrityReferences = [];
         $migrationIds = [];

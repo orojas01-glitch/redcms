@@ -199,6 +199,10 @@ try {
                 === 262144
             && ($schema['$defs']['adminToolFormContract']['properties']['fields']['$ref'] ?? '')
                 === '#/$defs/adminToolFormFields'
+            && ($schema['$defs']['adminToolFormContract']['properties']['runtimeSettings']['maxItems'] ?? null)
+                === 32
+            && ($schema['$defs']['adminToolFormContract']['properties']['runtimeSettings']['items']['$ref'] ?? '')
+                === '#/$defs/permission'
             && ($schema['$defs']['adminToolFormCollectionField']['properties']['maxItems']['maximum'] ?? null)
                 === 128
             && ($schema['$defs']['adminToolFormCollectionField']['properties']['fields']['items']['$ref'] ?? '')
@@ -212,7 +216,7 @@ try {
             && ($schema['$defs']['setting']['properties']['options']['minItems'] ?? null)
                 === 1
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded editors, tools, nested operational-form previews, write actions, public-mutation declarations, and setting choices, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded editors, tools, non-secret runtime-setting declarations, nested operational-form previews, write actions, public-mutation declarations, and setting choices, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
