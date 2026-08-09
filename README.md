@@ -154,7 +154,25 @@ ledger and value-free audit fact. A core-owned, unlinked administrator endpoint
 now validates the current session and CSRF token itself, accepts only an exact
 tool/action/positive-target request, derives the plan server-side, and returns
 only bounded executed, unchanged, or refusal outcomes. It exposes no UI, form,
-package values, package markup, or public route. Operational writable route/tool actions, upgrade,
+package values, package markup, or public route. A separate unlinked
+administrator-form JSON endpoint now authenticates and verifies header CSRF
+before body I/O, accepts only canonical bounded JSON, repeats the exact form
+grant and current-value load, refuses stale state, validates the complete
+nested value graph, and returns only a generic validation outcome. It invokes
+no package writer and remains disconnected from the disabled preview. A
+separate internal boundary now permits one optional exact registrar-bound form
+writer with one to eight package-owned InnoDB tables. Its read-only write plan
+binds the validation evidence, package version, table set, actor, and target.
+The atomic runner recreates that plan under lifecycle/package locks, reloads
+current state, refuses stale or substituted evidence, contains the trusted
+writer, verifies the exact postcondition, and commits one value-free audit fact
+with the package mutation. The validation endpoint still does not call it.
+A separate core-owned edit endpoint now reloads one exact authorized
+tool/form/positive target into escaped typed controls, while a distinct
+authenticated header-CSRF JSON Save endpoint delegates only to that atomic
+runner and returns a bounded value-free outcome. Target discovery, package
+navigation, and Store Lite behavior remain separate package work.
+Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
 features.
@@ -358,6 +376,13 @@ features.
 - Core-owned, unlinked administrator action endpoint with independent
   POST/session/CSRF validation, exact request fields, server-derived plans, and
   value-free bounded outcomes—without an administrator control or public route
+- Core-owned operational administrator-form editor and Save bridge. One exact
+  tool/form/positive-target request reloads current values after fresh package
+  authorization and exact writer ownership, renders only escaped scalar and
+  bounded nested-collection controls, and submits canonical JSON through an
+  authenticated header-CSRF endpoint to the atomic form runner. Public Save
+  outcomes are value-free; Store Lite target selection, navigation, provider
+  code, tables, and product data remain outside the starter
 - Non-executing typed package-setting normalization with fail-closed defaults,
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
@@ -379,6 +404,10 @@ features.
 - Core-owned public/admin document asset injection with current manifest and
   registry revalidation, exact boundary insertion, and no additional package-PHP
   execution
+- Store Lite Gate 2A package contract fixture for simple products and bounded
+  Size/Color variants: one installation currency, integer minor-unit money,
+  unique option tuples, three option groups, sixteen values per group, and 128
+  explicit variants, without Store Lite code, tables, routes, or starter state
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -450,6 +479,7 @@ php scripts/addon-secret-availability-self-test.php
 php scripts/addon-asset-plan-self-test.php
 php scripts/addon-component-editor-self-test.php
 php scripts/addon-component-editor-renderer-self-test.php
+php scripts/addon-admin-tool-form-renderer-self-test.php
 php scripts/addon-runtime-self-test.php
 php scripts/addon-service-invocation-self-test.php
 php scripts/addon-validate.php --all
@@ -461,7 +491,10 @@ php scripts/admin-addon-enable.php --package=vendor.package --actor-admin=ID
 php scripts/admin-addon-disable.php --package=vendor.package --actor-admin=ID
 ```
 
-The database-backed setting-storage, administrator-action-preflight, and
+The dependency-free administrator-form schema/preview plus database-backed
+setting storage, administrator-form preflight, current-value loading, JSON
+validation, atomic form writing, the operational edit-and-Save bridge,
+administrator-action preflight, and
 immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.sh`
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,
@@ -562,6 +595,7 @@ database.
 - [Version 5.1 Add-On Contract](docs/ADD-ON-CONTRACT.md)
 - [Public Mutation Boundary](docs/PUBLIC-MUTATION-BOUNDARY.md)
 - [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
+- [Store Lite Product Contract](docs/STORE-LITE-PRODUCT-CONTRACT.md)
 - [Version 5.1 Direction](docs/VERSION-5.1-DIRECTION.md)
 - [Security Notes](docs/SECURITY.md)
 

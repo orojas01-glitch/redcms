@@ -95,6 +95,15 @@ T-shirts with size and optional color). Variant data remains package-owned;
 unbounded variant matrices, free-form modifiers, and weight-based pricing stay
 out of scope.
 
+Gate 2A is now complete as a package-contract checkpoint. The exact first
+release bounds are three option groups, sixteen values per group, and 128
+explicit variants per product parent, with bounded identifiers/SKUs, integer
+minor-unit money, one installation currency, and fail-closed simple/variable
+record normalization. The 20-assertion fixture covers both banana-style and
+Size/Color shirt data without adding Store Lite code, tables, routes, or state
+to the clean starter. See
+[`STORE-LITE-PRODUCT-CONTRACT.md`](STORE-LITE-PRODUCT-CONTRACT.md).
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any
@@ -577,7 +586,32 @@ implemented; component-creation planning and its atomic inactive runner are
 implemented, and the activation-blocked parent-metadata writer plus atomic
 inactive delete runner and operational existing-record form are implemented,
 while the administrator action preflight and internal atomic runner are
-complete, a core-only authorized setting read model is complete, and the narrow
+complete, the closed JSON administrator-form declaration and non-executing
+permission-scoped form plan plus bounded two-level field schema are complete.
+The exact registrar-bound current-value loader now performs a fresh package
+grant check, validates a complete nested typed graph, binds record/contract
+state evidence, and may populate only escaped disabled core controls. A
+separate unlinked core endpoint now authenticates and verifies header CSRF
+before reading an exact canonical bounded JSON body, repeats the form preflight
+and current-value load, refuses stale state, validates the complete submitted
+graph, and derives opaque actor/contract/target/state-bound plan evidence. It
+returns only a generic validation result and invokes no writer. A separate
+internal write preflight now requires one exact registrar-bound writer and one
+to eight declared package-owned InnoDB tables, then binds the validation plan,
+package version, table set, actor, and target. Its atomic runner recreates the
+plan under lifecycle/package locks, repeats grant and state checks, refuses
+stale/replayed/drifted evidence, contains the trusted writer, reloads the exact
+postcondition, and commits one value-free audit fact with the package mutation.
+The separate core-owned operational bridge now accepts only an exact
+tool/form/positive-target edit request after administrator session and header
+CSRF checks, reloads the authorized current state, renders escaped editable
+scalar and bounded nested-collection controls, and sends canonical JSON through
+a second authenticated Save endpoint to that atomic runner. Its public result
+is only `saved`, `unchanged`, or a bounded refusal. Chrome desktop/mobile
+rendered inspection passes with zero horizontal overflow and no console, page,
+or failed-request errors; no Store Lite provider, target list,
+navigation, package, migration, table, or product state is added.
+The core-only authorized setting read model is complete, and the narrow
 secret-capable registration-only service profile now proves package-specific
 by-reference secret consumption plus core result redaction. The generic
 public-mutation subject/CSRF, fixed-window rate-limit, opaque

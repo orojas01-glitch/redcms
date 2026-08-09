@@ -51,6 +51,26 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->allowed['adminToolActionStateLoaders'] = $adminToolActions;
             $this->handlers['adminToolActionStateLoaders'] = [];
             $this->metadata['adminToolActionStateLoaders'] = [];
+            $adminToolFormValueLoaders = [];
+            foreach ($manifest['adminToolFormContracts'] ?? [] as $contract) {
+                $formId = is_array($contract)
+                    && is_string($contract['form'] ?? null)
+                    && is_array($contract['fields'] ?? null)
+                    && $contract['fields'] !== []
+                        ? $contract['form']
+                        : '';
+                if (red_addon_valid_capability($formId)) {
+                    $adminToolFormValueLoaders[$formId] = true;
+                }
+            }
+            $this->allowed['adminToolFormValueLoaders'] =
+                $adminToolFormValueLoaders;
+            $this->handlers['adminToolFormValueLoaders'] = [];
+            $this->metadata['adminToolFormValueLoaders'] = [];
+            $this->allowed['adminToolFormWriters'] =
+                $adminToolFormValueLoaders;
+            $this->handlers['adminToolFormWriters'] = [];
+            $this->metadata['adminToolFormWriters'] = [];
             $publicMutations = [];
             foreach ($manifest['publicMutationContracts'] ?? [] as $contract) {
                 $mutationId = is_array($contract)
@@ -214,6 +234,39 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             return array_keys($normalized);
         }
 
+        private function adminToolFormTransactionTables(array $tables): array
+        {
+            $normalized = [];
+            $reserved = [
+                'red_addon_installations',
+                'red_addon_migrations',
+                'red_addon_activity_log',
+                'red_addon_component_revisions',
+                'red_addon_admin_action_executions',
+            ];
+            foreach ($tables as $table) {
+                if (!is_string($table)
+                    || preg_match('/\ARED_Addon_[A-Za-z0-9_]{1,54}\z/', $table)
+                        !== 1
+                    || in_array(strtolower($table), $reserved, true)
+                    || isset($normalized[$table])
+                ) {
+                    throw new LogicException(
+                        'Administrator form transaction table is invalid.'
+                    );
+                }
+                $normalized[$table] = true;
+            }
+            if ($normalized === [] || count($normalized) > 8) {
+                throw new LogicException(
+                    'Administrator form persistence requires one to eight package tables.'
+                );
+            }
+            $tables = array_keys($normalized);
+            sort($tables, SORT_STRING);
+            return $tables;
+        }
+
         private function publicMutationTransactionTables(array $tables): array
         {
             $normalized = [];
@@ -301,6 +354,26 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             $this->register('adminToolActionStateLoaders', $id, $handler);
         }
 
+        public function registerAdminToolFormValueLoader(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register('adminToolFormValueLoaders', $id, $handler);
+        }
+
+        public function registerAdminToolFormWriter(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $this->register(
+                'adminToolFormWriters',
+                $id,
+                $handler,
+                ['tables' => $this->adminToolFormTransactionTables($tables)]
+            );
+        }
+
         public function registerPublicMutation(
             string $id,
             callable $handler,
@@ -340,6 +413,7 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                         'componentDataCreators',
                         'componentDataWriters',
                         'componentDataDeleters',
+                        'adminToolFormWriters',
                     ],
                     true
                 )) {
@@ -426,6 +500,8 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'componentDataDeleters',
                     'services',
                     'adminTools',
+                    'adminToolFormValueLoaders',
+                    'adminToolFormWriters',
                     'adminToolActions',
                     'adminToolActionStateLoaders',
                     'publicMutationHandlers',
@@ -715,6 +791,24 @@ if (!function_exists('red_addon_runtime_namespace_errors')) {
                 if (isset($owners[$ownerKey])) {
                     $errors[] = 'enabled_runtime_capability_conflict:' .
                         'adminToolActions:' . $actionId;
+                    continue;
+                }
+                $owners[$ownerKey] = $packageId;
+            }
+            foreach ($manifest['adminToolFormContracts'] ?? [] as $contract) {
+                $formId = is_array($contract)
+                    && is_string($contract['form'] ?? null)
+                    && is_array($contract['fields'] ?? null)
+                    && $contract['fields'] !== []
+                        ? $contract['form']
+                        : '';
+                if (!red_addon_valid_capability($formId)) {
+                    continue;
+                }
+                $ownerKey = 'adminToolFormValueLoaders' . "\0" . $formId;
+                if (isset($owners[$ownerKey])) {
+                    $errors[] = 'enabled_runtime_capability_conflict:'
+                        . 'adminToolFormValueLoaders:' . $formId;
                     continue;
                 }
                 $owners[$ownerKey] = $packageId;

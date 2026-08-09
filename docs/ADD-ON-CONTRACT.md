@@ -279,6 +279,19 @@ An illustrative manifest shape is:
       "idempotency": "once-per-target"
     }
   ],
+  "adminToolFormContracts": [
+    {
+      "tool": "redcms.store-lite/orders",
+      "form": "redcms.store-lite/order-editor",
+      "label": "Edit order",
+      "description": "Prepare one bounded order form.",
+      "permission": "store.orders.manage",
+      "method": "POST",
+      "csrf": "required",
+      "encoding": "application/json",
+      "maxBodyBytes": 32768
+    }
+  ],
   "componentEditors": [
     {
       "component": "redcms.store-lite/product",
@@ -1229,6 +1242,121 @@ that model. Package output, exceptions, buffer/HTTP-state changes, malformed or
 oversized results fail closed. `admin/bin/view_addon_tool.php` is POST-only,
 requires a current protected administrator session and CSRF token, bootstraps
 the enabled registrar, and invokes only this dispatcher.
+
+An optional `adminToolFormContracts` entry is separate data-only metadata for
+a future core-owned operational form. It maps one provided tool to one unique
+form id, bounded label and description, one declared package permission, only
+`POST` with `csrf: required`, fixed `application/json`, and a body limit from
+1 through 262,144 bytes. The validator rejects undeclared tools, form/tool or
+duplicate-form identity collisions, ungranted permissions, executable fields,
+other methods, weaker CSRF, alternate encodings, and invalid body bounds before
+package PHP is loaded.
+
+The declaration may now include an optional closed `fields` schema. Scalar
+fields use the same bounded text, textarea, integer, boolean, select, URL,
+email, date, datetime, and media-reference definitions as component editors.
+A `collection` field adds only `itemLabel`, `minItems`, `maxItems`, and its own
+closed `fields`. Core permits at most 100 top-level fields, 32 fields per
+collection row, 200 fields across the complete schema, 128 items per
+collection, and two collection levels. This is sufficient to describe a
+simple product and, separately, option groups with values plus variants with
+exact option selections. It is not an arbitrary JSON schema, template,
+conditional-expression language, or package renderer.
+
+`includes/addon_admin_tool_form_preflight_helpers.php` is the separate
+non-executing read-only gate. It requires exact request-local ownership of the
+declared display tool, performs a fresh case-sensitive package-permission
+check, and returns deterministic contract and actor-bound plan SHA-256 values.
+It invokes no tool or form callback, accepts no body or request/session global,
+consumes no CSRF token, renders no control, starts no transaction, writes no
+state, and exposes no endpoint. The declaration and plan do not make a form
+operational. `includes/addon_admin_tool_form_ui_helpers.php` may render only
+that validated schema as escaped, disabled scalar controls and nested
+collection templates. For a schema-bearing form the registrar must now bind
+exactly one `registerAdminToolFormValueLoader()` callback to the declared form
+id. The separate core loader repeats the exact enabled owner and fresh binary
+package-permission checks, then passes only the current-client connection and
+a final request containing tool id, form id, and positive numeric target record
+id. It does not disclose the administrator identity to package code.
+
+The provider must return `RED_Addon_Admin_Tool_Form_Values::current()` with a
+complete object: every declared key is present, no undeclared key is accepted,
+scalar types and bounds match exactly, collections are ordered lists within
+their declared bounds, nesting remains within the manifest limit, and the
+encoded graph fits `maxBodyBytes`. Core contains output, exceptions,
+output-buffer drift, and HTTP-state drift, then binds normalized values to the
+package/tool/form/target/contract SHA-256 state. Only that exact loaded result
+may populate the core renderer. Current rows remain escaped, disabled, and
+nameless. The provider is trusted reviewed first-party read-only PHP, not a
+database sandbox.
+
+`red_addon_admin_tool_form_submission_prepare()` is the separate
+validation-only body adapter. The unlinked core endpoint authenticates the
+current administrator and verifies header CSRF before opening its input stream.
+Transport must be exact `application/json` with canonical decimal length and a
+maximum of 262144 bytes. The body must be canonical JSON with exactly `tool`,
+`form`, `targetRecordId`, `currentStateSha256`, and `values`. Core repeats the
+form preflight, enforces the manifest `maxBodyBytes` before invoking the
+current-value provider, reloads current state, refuses stale evidence,
+validates the complete submitted graph, and derives opaque submitted-values and
+actor/contract/target/state-bound plan hashes. The public response is only
+`validated` or a bounded generic refusal and discloses no values or evidence.
+This adapter registers and invokes no writer, opens no transaction, mutates no
+package data, and remains disconnected from the disabled preview.
+
+`registerAdminToolFormWriter($formId, $handler, $tables)` is the separate
+optional persistence registration. The form id must be one schema-bearing form
+declared by the same package, the handler must be unique, and `$tables` must be
+one to eight unique package-owned `RED_Addon_*` InnoDB tables. Core lifecycle,
+migration, audit, revision, and administrator-action tables are reserved. A
+read-only form remains valid without a writer, but every write preflight then
+returns `writer_unavailable`.
+
+`red_addon_admin_tool_form_write_preflight()` first repeats the validation-only
+preparation and exact loader/writer binding. It returns no submitted values; its
+deterministic write plan binds the validation plan, enabled package version,
+sorted writer table set, actor, target, permission, contract, previous state,
+and submitted-values hash. `red_addon_admin_tool_form_write()` requires that
+exact plan, refuses caller-owned transactions, acquires the shared lifecycle
+and package locks, locks the enabled installation row, and recreates the plan.
+Only then does it give reviewed first-party package code the current-client
+connection and an immutable request containing package/tool/form/actor/target,
+previous-state, plan, and normalized submitted values.
+
+The writer must return exactly `true`, emit no output, leave buffers and HTTP
+state unchanged, preserve the core-owned transaction, and write only its
+declared package tables. Core reloads through the exact value loader and
+requires the complete postcondition to equal the normalized submission before
+one value-free `addon.form.saved` audit fact commits in the same transaction.
+Unchanged submissions invoke neither writer nor audit. Revoked grants, stale or
+replayed state, substituted plans, package-version/contract/table drift,
+writer failure, incomplete or wrong writes, transaction loss, postcondition
+failure, and audit failure are refused. The writer is trusted reviewed PHP, not
+a database sandbox, and must not commit, roll back, or start transactions. The
+validation endpoint still does not invoke this runner.
+
+`red_addon_admin_tool_form_endpoint_context()` is the separate operational edit
+boundary. After its HTTP endpoint has required POST, a current database-backed
+administrator session, and header CSRF, it accepts exactly one declared tool,
+form, and canonical positive numeric target. Core re-derives the exact current
+runtime owner, writer/table declaration, enabled package version, permission,
+manifest contract, and current typed values. Only that complete current graph
+may enter `red_addon_admin_tool_form_endpoint_render()`, which emits escaped
+core controls for the closed scalar and two-level collection schema. Package
+markup, scripts, styles, actions, names, target lists, and navigation are not
+part of this result.
+
+`admin/bin/save_addon_tool_form.php` is POST-only and verifies the current
+administrator plus header CSRF before body I/O. It accepts only the existing
+canonical `application/json` submission shape and delegates through
+`red_addon_admin_tool_form_save_dispatch()` to the exact internal write
+preflight and atomic runner. Its response is only `{ok:true,status:saved}`,
+`{ok:true,status:unchanged}`, or a bounded generic refusal. It returns no
+submitted values, state/plan hash, package/table identity, or audit evidence.
+The core browser controller reloads the editor after a successful write and
+never treats its own typed serialization or collection bounds as a replacement
+for server validation. This generic bridge adds no Store Lite provider,
+business table, target chooser, or enablement exception.
 
 An optional `adminToolActionContracts` entry is separate data-only metadata for
 one bounded administrative transition. It maps one provided tool to one unique

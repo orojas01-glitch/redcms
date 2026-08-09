@@ -70,7 +70,14 @@ Adapters, operational writable route/tool actions, richer package-runtime
 secret surfaces,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
-The Store Lite product and security boundary is defined. The first generic
+The Store Lite product and security boundary is defined. Gate 2A now fixes the
+package-owned simple/variable Product record contract: three option groups,
+sixteen values per group, 128 explicit variants, integer minor-unit money, one
+installation currency, and fail-closed identifiers, SKUs, option tuples, and
+parent/variant fields. Its dependency-free 20-assertion fixture covers a
+banana-style simple product and a Size/Color shirt without adding commerce
+tables, package files, or client state. The complete shape is documented in
+`docs/STORE-LITE-PRODUCT-CONTRACT.md`. The first generic
 component-persistence foundation now provides full
 component-id storage, a narrowly guarded package-table relationship to the
 numeric placement parent, and fail-closed read-only public binding resolution.
@@ -297,7 +304,9 @@ package required before private content is enabled. The full boundary is
 defined in `docs/ADD-ON-CONTRACT.md`. The first optional package's component,
 commerce-service, persistence, payment-adapter, lifecycle, and acceptance
 contract is defined in `docs/STORE-LITE-DIRECTION.md`. Store Lite remains
-separately distributed and is not bundled with the clean starter.
+separately distributed and is not bundled with the clean starter. The fixed
+product/variant boundary is also recorded in
+`docs/STORE-LITE-PRODUCT-CONTRACT.md`.
 
 Social publishing should be an optional adapter layer:
 
@@ -881,6 +890,97 @@ request bootstrap excludes the disabled package.
     migration acceptance suite passed, with temporary databases and grants
     removed. Store Lite remains blocked behind richer persistence, editor,
     route, asset, administrator, and commerce contracts.
+
+67. Completed the Store Lite Gate 2A product/variant contract fixture. The
+    package-owned record boundary now distinguishes a simple product with one
+    sellable SKU/price from a variable parent with explicit complete option
+    tuples. It fixes one installation currency, integer minor-unit money,
+    bounded text and identifiers, three option groups, sixteen values per
+    group, and 128 variants per parent. The dependency-free 20-assertion
+    fixture rejects floats, unknown fields, mismatched currencies, duplicate
+    identities/SKUs/tuples, stale option values, and partial normalized output.
+    The future cart declaration also carries only an optional public variant
+    reference; no route, package, table, migration, or Store Lite state was
+    added to core.
+
+68. Completed the non-executing operational administrator-form declaration
+    and read-only plan. The closed manifest metadata binds one provided tool to
+    a unique form id, exact package permission, `POST`, required CSRF policy,
+    fixed JSON encoding, and a body limit no larger than 256 KiB. The plan
+    requires current request-local tool ownership and a fresh exact grant, then
+    returns deterministic value-free evidence without invoking a package
+    callback, reading a body or request/session global, consuming CSRF,
+    rendering HTML, starting a transaction, writing state, exposing an
+    endpoint, changing enablement eligibility, or adding Store Lite behavior.
+
+69. Completed the bounded administrator-form field schema and core-owned
+    display-only preview. The closed vocabulary reuses scalar editor controls
+    and permits at most two collection levels, 128 rows per collection, 32
+    fields per row, and 200 fields across the schema. It can represent a simple
+    product or option groups, values, variants, and exact option selections
+    without admitting arbitrary JSON schema, conditions, package templates,
+    HTML, JavaScript, or callbacks. Core renders only escaped disabled controls
+    and collection templates; it loads no values, performs no authorization,
+    creates no `form`, names, submit control, endpoint, request parser, CSRF
+    operation, package execution, database access, or Store Lite behavior.
+
+70. Completed permission-scoped administrator-form current-value loading. A
+    schema-bearing form now requires one exact registrar-bound loader. Core
+    repeats current enabled ownership and fresh binary package-permission
+    checks, gives trusted first-party package code only the current-client
+    connection plus tool/form/positive numeric target identity, validates one
+    complete closed nested typed graph, contains output/HTTP-state failures,
+    and binds the normalized values to package/tool/form/target/contract
+    SHA-256 evidence. Only that exact result may populate escaped disabled
+    nameless core controls and current collection rows. No administrator
+    identity reaches the provider, and no editable control, request body, CSRF
+    operation, endpoint, write, Store Lite package, table, or state is added.
+
+71. Completed the validation-only administrator-form JSON adapter. The
+    unlinked core endpoint requires POST, an authenticated current
+    administrator, and header CSRF before it opens the request-body stream. It
+    accepts only exact `application/json`, canonical content length, the global
+    256 KiB ceiling, and one canonical closed root containing tool, form,
+    positive target, current-state SHA-256, and values. Core applies the
+    manifest body limit before value-provider invocation, repeats fresh form permission
+    and current-value checks, refuses stale state, validates the complete
+    nested value graph, and derives opaque values and actor/contract/target/
+    state-bound plan hashes. It returns only a bounded generic validation or
+    refusal envelope. No writer registration, package mutation, editable
+    control, Save action, Store Lite package, table, or state is added.
+
+72. Completed optional administrator-form writer registration and the internal
+    atomic stale-state runner. Only a schema-bearing declared form may register
+    one writer, and that writer must declare one to eight package-owned InnoDB
+    tables; reserved, duplicate, undeclared, and nontransactional storage fails
+    closed. The value-free write plan binds the validation plan, package
+    version, sorted table set, actor, target, permission, contract, current
+    state, and submitted-values evidence. The runner recreates it under shared
+    lifecycle and package locks, repeats fresh grant/current-value checks,
+    refuses stale, replayed, substituted, version-drifted, and contract-drifted
+    evidence, contains one immutable typed writer request, reloads the exact
+    postcondition, and commits one value-free `addon.form.saved` audit fact in
+    the same transaction. Unchanged submissions invoke no writer or audit.
+    The validation endpoint remains disconnected, and no editable renderer,
+    Save control, Store Lite package, migration, table, or state is added.
+
+73. Implemented the core-owned operational administrator-form editor and Save
+    bridge. The POST-only edit endpoint requires a current administrator and
+    header CSRF before accepting exactly one tool, form, and positive target;
+    it repeats exact enabled writer/table ownership plus fresh form permission,
+    reloads the complete current value graph, and renders only escaped core
+    scalar and bounded two-level collection controls. The core controller
+    preserves integer, boolean, nullable, object, and ordered-list types,
+    enforces manifest collection bounds, and sends canonical JSON with header
+    CSRF to a separate POST-only Save endpoint. That endpoint delegates only to
+    the accepted atomic runner and returns `saved`, `unchanged`, or a bounded
+    value-free refusal before the editor reloads current state. The 21 focused
+    assertions, real authenticated HTTP guards, full 45-migration disposable
+    acceptance, exact cleanup, and local Chrome desktop/mobile rendered-browser
+    inspection pass. The 1280px and 390px checks show zero horizontal overflow,
+    successful collection add/remove plus typed Save/reload behavior, and zero
+    console, page, or failed-request errors. No Store Lite navigation, target provider, package, migration,
+    table, or product state is added.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

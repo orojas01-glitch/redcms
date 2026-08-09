@@ -624,9 +624,10 @@ silently weaken privacy, retention, or failure-closed enforcement.
 
 The first Store Lite use of this boundary is limited to cart intent. A future
 add-to-cart command may carry only a public product reference, bounded
-quantity, and core-issued idempotency/CSRF evidence. Core and the commerce
-service must resolve current product availability, price, currency, cart
-ownership, and authoritative total server-side.
+quantity, an optional public variant reference for a variable product, and
+core-issued idempotency/CSRF evidence. Core and the commerce service must
+resolve current product availability, the selected option tuple, price,
+currency, cart ownership, and authoritative total server-side.
 
 Update-cart and remove-cart need the same opaque-cart ownership and
 idempotency protections. Initial checkout, customer fulfillment fields,

@@ -46,6 +46,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-migration-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/store-lite-product-contract-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-trust-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-values-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-editor-self-test.php"
@@ -67,6 +68,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-dispatch-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-component-editor-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-component-editor-renderer-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-admin-tool-form-renderer-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-runtime-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-service-invocation-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-runtime-secret-self-test.php"
@@ -895,6 +897,19 @@ red_acceptance_run_authentication() {
     local addon_action_method_denial="$ACCEPTANCE_RESPONSE_DIR/addon-action-method.json"
     local addon_action_csrf_denial="$ACCEPTANCE_RESPONSE_DIR/addon-action-csrf.txt"
     local addon_action_invalid_request="$ACCEPTANCE_RESPONSE_DIR/addon-action-invalid.json"
+    local addon_form_method_headers="$ACCEPTANCE_RESPONSE_DIR/addon-form-method.headers"
+    local addon_form_method_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-method.json"
+    local addon_form_csrf_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-csrf.txt"
+    local addon_form_content_type_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-content-type.json"
+    local addon_form_invalid_request="$ACCEPTANCE_RESPONSE_DIR/addon-form-invalid.json"
+    local addon_form_edit_method_headers="$ACCEPTANCE_RESPONSE_DIR/addon-form-edit-method.headers"
+    local addon_form_edit_method_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-edit-method.txt"
+    local addon_form_edit_csrf_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-edit-csrf.txt"
+    local addon_form_edit_unavailable="$ACCEPTANCE_RESPONSE_DIR/addon-form-edit-unavailable.html"
+    local addon_form_save_method_headers="$ACCEPTANCE_RESPONSE_DIR/addon-form-save-method.headers"
+    local addon_form_save_method_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-save-method.json"
+    local addon_form_save_csrf_denial="$ACCEPTANCE_RESPONSE_DIR/addon-form-save-csrf.txt"
+    local addon_form_save_invalid_request="$ACCEPTANCE_RESPONSE_DIR/addon-form-save-invalid.json"
     local logout_headers="$ACCEPTANCE_RESPONSE_DIR/logout-headers.txt"
     local logout_body="$ACCEPTANCE_RESPONSE_DIR/logout-body.txt"
     local logout_denial="$ACCEPTANCE_RESPONSE_DIR/logout-denial.txt"
@@ -1071,6 +1086,175 @@ red_acceptance_run_authentication() {
         '{"ok":false,"reason":"invalid_request"}' \
         "$body"
     printf '%s\n' 'PASS: unlinked administrator action endpoint enforces POST, current session CSRF, and exact request fields.'
+
+    metrics="$(curl -sS --max-time 10 \
+        -D "$addon_form_method_headers" \
+        -o "$addon_form_method_denial" \
+        -w '%{http_code}:%{size_download}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/validate_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_method_denial")"
+    red_acceptance_assert_equals 'administrator form JSON endpoint method HTTP status' '405' "$status"
+    red_acceptance_assert_equals \
+        'administrator form JSON endpoint method body' \
+        '{"ok":false,"reason":"method_not_allowed"}' \
+        "$body"
+    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_method_headers" \
+        || grep -Eqi '^Set-Cookie:' "$addon_form_method_headers"; then
+        printf '%s\n' 'FAIL: administrator form JSON method refusal is not request-free.' >&2
+        return 1
+    fi
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_csrf_denial" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        --data-binary '{}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/validate_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_csrf_denial")"
+    red_acceptance_assert_equals 'administrator form JSON endpoint missing-CSRF HTTP status' '403' "$status"
+    red_acceptance_assert_equals 'administrator form JSON endpoint missing-CSRF response' 'csrf' "$body"
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_content_type_denial" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        -H "X-CSRF-Token: $csrf_token" \
+        -H 'Content-Type: text/plain' \
+        --data-binary '{}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/validate_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_content_type_denial")"
+    red_acceptance_assert_equals 'administrator form JSON endpoint content-type HTTP status' '415' "$status"
+    red_acceptance_assert_equals \
+        'administrator form JSON endpoint content-type body' \
+        '{"ok":false,"reason":"content_type_invalid"}' \
+        "$body"
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_invalid_request" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        -H "X-CSRF-Token: $csrf_token" \
+        -H 'Content-Type: application/json' \
+        --data-binary '{}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/validate_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_invalid_request")"
+    red_acceptance_assert_equals 'administrator form JSON endpoint invalid-request HTTP status' '400' "$status"
+    red_acceptance_assert_equals \
+        'administrator form JSON endpoint invalid-request body' \
+        '{"ok":false,"reason":"invalid_request"}' \
+        "$body"
+    printf '%s\n' 'PASS: unlinked administrator form JSON endpoint authenticates and verifies header CSRF before bounded body validation.'
+
+    metrics="$(curl -sS --max-time 10 \
+        -D "$addon_form_edit_method_headers" \
+        -o "$addon_form_edit_method_denial" \
+        -w '%{http_code}:%{size_download}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/edit_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_edit_method_denial")"
+    red_acceptance_assert_equals 'administrator form editor method HTTP status' '405' "$status"
+    red_acceptance_assert_equals 'administrator form editor method body' 'no' "$body"
+    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_edit_method_headers" \
+        || grep -Eqi '^Set-Cookie:' "$addon_form_edit_method_headers"; then
+        printf '%s\n' 'FAIL: administrator form editor method refusal is not request-free.' >&2
+        return 1
+    fi
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_edit_csrf_denial" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        --data-urlencode 'tool=redcms.missing/tool' \
+        --data-urlencode 'form=redcms.missing/form' \
+        --data-urlencode 'targetRecordId=1' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/edit_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_edit_csrf_denial")"
+    red_acceptance_assert_equals 'administrator form editor missing-CSRF HTTP status' '403' "$status"
+    red_acceptance_assert_equals 'administrator form editor missing-CSRF body' 'csrf' "$body"
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_edit_unavailable" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        -H "X-CSRF-Token: $csrf_token" \
+        --data-urlencode 'tool=redcms.missing/tool' \
+        --data-urlencode 'form=redcms.missing/form' \
+        --data-urlencode 'targetRecordId=1' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/edit_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_edit_unavailable")"
+    red_acceptance_assert_equals 'administrator form editor unavailable HTTP status' '422' "$status"
+    if [[ "$body" != *'data-red-addon-admin-tool-form-unavailable'* ]]; then
+        printf '%s\n' 'FAIL: administrator form editor did not return its static unavailable state.' >&2
+        return 1
+    fi
+
+    metrics="$(curl -sS --max-time 10 \
+        -D "$addon_form_save_method_headers" \
+        -o "$addon_form_save_method_denial" \
+        -w '%{http_code}:%{size_download}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/save_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_save_method_denial")"
+    red_acceptance_assert_equals 'administrator form Save method HTTP status' '405' "$status"
+    red_acceptance_assert_equals \
+        'administrator form Save method body' \
+        '{"ok":false,"reason":"method_not_allowed"}' \
+        "$body"
+    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_save_method_headers" \
+        || grep -Eqi '^Set-Cookie:' "$addon_form_save_method_headers"; then
+        printf '%s\n' 'FAIL: administrator form Save method refusal is not request-free.' >&2
+        return 1
+    fi
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_save_csrf_denial" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        --data-binary '{}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/save_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_save_csrf_denial")"
+    red_acceptance_assert_equals 'administrator form Save missing-CSRF HTTP status' '403' "$status"
+    red_acceptance_assert_equals 'administrator form Save missing-CSRF body' 'csrf' "$body"
+
+    metrics="$(curl -sS --max-time 10 \
+        -b "$ACCEPTANCE_COOKIE_JAR" \
+        -c "$ACCEPTANCE_COOKIE_JAR" \
+        -o "$addon_form_save_invalid_request" \
+        -w '%{http_code}:%{size_download}' \
+        -X POST \
+        -H "X-CSRF-Token: $csrf_token" \
+        -H 'Content-Type: application/json' \
+        --data-binary '{}' \
+        "$ACCEPTANCE_BASE_URL/admin/bin/save_addon_tool_form.php")"
+    status="${metrics%%:*}"
+    body="$(red_acceptance_response_text "$addon_form_save_invalid_request")"
+    red_acceptance_assert_equals 'administrator form Save invalid-request HTTP status' '400' "$status"
+    red_acceptance_assert_equals \
+        'administrator form Save invalid-request body' \
+        '{"ok":false,"reason":"invalid_request"}' \
+        "$body"
+    printf '%s\n' 'PASS: administrator form edit and Save endpoints enforce method, session, header CSRF, exact identity, and canonical JSON before runtime work.'
 
     metrics="$(curl -sS --max-time 10 \
         -b "$ACCEPTANCE_COOKIE_JAR" \
@@ -4732,6 +4916,21 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running permission-scoped administrator tool dispatch checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-dispatch-self-test.php"
 
+printf '%s\n' 'Running non-executing administrator tool form-preflight checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-form-preflight-self-test.php"
+
+printf '%s\n' 'Running permission-scoped administrator tool form value-loader checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-form-value-loader-self-test.php"
+
+printf '%s\n' 'Running protected administrator tool form JSON-adapter checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-form-json-adapter-self-test.php"
+
+printf '%s\n' 'Running atomic administrator tool form writer checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-form-write-self-test.php"
+
+printf '%s\n' 'Running operational administrator tool form Save-bridge checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-form-save-bridge-self-test.php"
+
 printf '%s\n' 'Running non-executing administrator tool action-preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-action-preflight-self-test.php"
 
@@ -4982,4 +5181,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/editor/secret resolution/availability/asset plan/storage/write preflight/atomic writer/replacement/permission-scoped settings read model, secret-capable service runtime/by-reference access/result redaction, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Store Lite product/variant contract, Owner authorization, add-on setting values/editor/secret resolution/availability/asset plan/storage/write preflight/atomic writer/replacement/permission-scoped settings read model, secret-capable service runtime/by-reference access/result redaction, add-on administrator tool form schema/preview/planning/current-value loading/JSON validation/atomic writer/edit-and-Save bridge, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

@@ -1,8 +1,7 @@
 # RED-CMS Store Lite Direction
 
-Status: Gate 0 product direction approved for simple products and bounded
-variable products; exact option limits remain a pre-implementation decision;
-package code has not started.
+Status: Gate 2A product/variant contract accepted for simple products and
+bounded variable products; package code and migrations have not started.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -62,9 +61,13 @@ authoritative.
 
 The first package release will use bounded option groups and explicit variant
 records. It will not support arbitrary modifiers, free-form personalization,
-variant-specific shipping rules, or weight-based pricing. The exact option
-and variant limits will be fixed in the package manifest and acceptance
-fixtures before implementation.
+variant-specific shipping rules, or weight-based pricing. Gate 2A fixes the
+package limits at three option groups, sixteen values per group, and 128
+explicit variants per product parent, with 64-character identifiers and SKUs,
+integer minor-unit prices, one uppercase three-letter installation currency,
+and bounded UTF-8 title/summary text. The complete package-owned shape and
+fail-closed normalization rules are in
+[`STORE-LITE-PRODUCT-CONTRACT.md`](STORE-LITE-PRODUCT-CONTRACT.md).
 
 ## Distribution And Isolation
 
@@ -360,6 +363,22 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   emit a browser cart cookie, resolve secrets, or relax any route/enablement
   gate;
 - declared administrator routes;
+- non-executing operational administrator-form metadata and permission-scoped
+  planning are complete. The closed scalar/two-level collection schema and
+  core-owned preview now represent both simple and variable-product
+  structures. A registrar-bound, permission-scoped read-only value provider
+  can populate complete current values into escaped disabled controls. A
+  separate unlinked validation-only core JSON endpoint now authenticates and
+  verifies header CSRF before body I/O, reloads current state, refuses stale or
+  invalid submissions, and derives opaque preparation evidence without
+  invoking a writer. A separate internal core boundary now accepts one exact
+  optional form writer with declared package-owned InnoDB tables and atomically
+  revalidates, writes, reloads, and audits an exact changed postcondition. A
+  core-owned operational editor and authenticated JSON Save endpoint now bridge
+  one exact tool/form/positive-target identity to that runner with typed scalar
+  and bounded nested-collection controls. No Store Lite provider/package,
+  product target list, package navigation, migration, table, or linked Store
+  control exists;
 - display-only administrator-tool dispatch is complete with exact package
   grants and core rendering. A separate non-executing write-action preflight
   now binds a declared action's exact runtime owner, package permission,
@@ -438,105 +457,111 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    placement/activation remain. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
-4. Completed the optional public-mutation declaration preflight without adding
+4. Completed Gate 2A: lock the package-owned Product record contract for
+   simple products and explicit bounded variants. The dependency-free fixture
+   proves banana-style simple products, Size/Color shirt variants, integer
+   minor-unit money, one installation currency, unique option tuples, and the
+   three-group/16-value/128-variant limits without creating a package, table,
+   migration, route, or Store Lite state.
+5. Completed the optional public-mutation declaration preflight without adding
    a dispatcher, emitted cookie/header or session access, ledger, package code,
    or Store Lite behavior.
    It remains a prerequisite for a later cart write path.
-5. Completed the separate read-only public-mutation live-data preflight. It
+6. Completed the separate read-only public-mutation live-data preflight. It
    checks current trusted installed-disabled migration, InnoDB-table,
    typed-setting, and opaque-secret-availability evidence through hashes and
    counts only; it does not dispatch, enable, execute package code, resolve
    secrets, or write package state.
-6. Completed the generic core-only anonymous-subject/CSRF foundation: two
+7. Completed the generic core-only anonymous-subject/CSRF foundation: two
    empty per-client tables store hashes only, with a future secure host-only
    cookie descriptor and declaration/database-scoped CSRF values. It adds no
    endpoint, emitted cookie/header, cart identity, package behavior, or
    enablement change.
-7. Completed the generic core-only fixed-window rate-limit foundation: one
+8. Completed the generic core-only fixed-window rate-limit foundation: one
    empty per-client table records only an opaque subject relation, SHA-256
    declaration/database scope, window facts, and bounded count. It permits at
    most 12 requests per 60 seconds for one client, declared route, and subject;
    it adds no public route, cart state, package code, or enablement change.
-8. Completed the generic core-only opaque idempotency-key foundation: one
+9. Completed the generic core-only opaque idempotency-key foundation: one
    empty per-client table records only an opaque subject relation, SHA-256
    declaration/database scope, SHA-256 key digest, and expiry facts. It can
    issue or resolve a 10-minute key; its issuer/resolver cannot consume it or
    record a replay result itself.
-9. Completed the generic core-only atomic transaction runner: one fifth empty
+10. Completed the generic core-only atomic transaction runner: one fifth empty
    per-client ledger stores only an idempotency-key relation, keyed HMAC
    command/state evidence, a bounded outcome, and completion time. A trusted
    in-memory first-party binding can commit or roll back declared package state,
    replay evidence, and one value-free audit fact together. It does not add a
    dispatcher, browser cart cookie, enablement profile, or Store Lite data.
-10. Completed the generic pure core response contract: it maps only the fixed
+11. Completed the generic pure core response contract: it maps only the fixed
    `accepted` / `unchanged` outcomes and generic invalid-request,
    method-not-allowed, request-conflict, rate-limited, or temporary-unavailable
    refusals to exact no-store/nosniff JSON envelopes. It emits no response and
    has no request, cookie, session, package, enablement, or Store Lite path.
-11. Completed the generic pure declared-form decoder: it accepts only one
+12. Completed the generic pure declared-form decoder: it accepts only one
     validated declaration plus canonical URL-encoded package fields and returns a
     sorted typed scalar map or no values. It has no HTTP metadata, cookie,
     session, database, package, enablement, or Store Lite path.
-12. Completed the generic pure HTTP request-envelope normalizer: it accepts one
+13. Completed the generic pure HTTP request-envelope normalizer: it accepts one
     trusted canonical HTTPS origin, exact static POST path, complete header list,
     and raw body, then releases only validated opaque subject/CSRF/idempotency
     evidence to the later core dispatcher. It has no PHP-global request adapter,
     endpoint, response, route, browser issuance, enablement, or Store Lite path.
-13. Completed the private static mutation-route selector: it binds one exact
+14. Completed the private static mutation-route selector: it binds one exact
     un-decoded path only to a current registrar-owned public route, mutation
     handler, and state loader, with fail-closed ambiguity and missing-binding
     refusal. It has no request-global adapter, package invocation, endpoint,
     response, browser behavior, enablement, or Store Lite path.
-14. Completed the non-routable core-only server request-facts adapter: only
+15. Completed the non-routable core-only server request-facts adapter: only
    operating-system/local configuration can provide a canonical HTTPS origin;
    a later server integration must attest an explicit complete fixed security-header
    capture. It reads only the current method/raw target and creates no route,
    body-reader, browser, package, response, enablement, or Store Lite path.
-15. Completed the core-only non-routable response emitter: it accepts only
+16. Completed the core-only non-routable response emitter: it accepts only
    exact fixed core envelopes, refuses after output starts, clears and sets
    only fixed no-store/nosniff JSON headers, and emits only matching fixed
    bytes. It has no request, browser, package, front-controller, enablement,
    or Store Lite path.
-16. Completed the pure non-emitting subject-cookie serializer: it accepts only
+17. Completed the pure non-emitting subject-cookie serializer: it accepts only
    the exact core-issued descriptor shape and produces one fixed future
    host-only cookie value with 30-minute `Max-Age`, `Path=/`, `Secure`,
    `HttpOnly`, and `SameSite=Strict`, without `Domain` or `Expires`. It has no
    request, browser, package, header-emission, front-controller, enablement,
    or Store Lite path.
-17. Completed the core-owned browser subject-cookie lifecycle bridge. Its
+18. Completed the core-owned browser subject-cookie lifecycle bridge. Its
    transactional `ensure`, `clear`, and `rotate` operations return only fixed
    host-only descriptors, refuse malformed input and active caller
    transactions, and invalidate the old subject and CSRF evidence on rotation.
    The 18-assertion disposable fixture and supported-server HTTP proof cover
    issuance, resolve-without-reissue, fixed clearance, replacement, and
    cleanup; response ownership and client deployment remain separate gates.
-18. Completed the non-executing per-client deployment profile. It validates a
+19. Completed the non-executing per-client deployment profile. It validates a
    separate client database and canonical HTTPS origin, pinned FrankenPHP/Caddy
    versions, fixed HMAC/trusted-origin sources, attestation-before-PHP route
    order, core response/cookie ownership, the fixed host-only cookie policy,
    clean-starter isolation, and disabled activation flags. It returns only a
    deterministic non-secret hash and does not load or apply a deployment.
-19. Completed the core-owned non-emitting response-owner composer. It binds a
+20. Completed the core-owned non-emitting response-owner composer. It binds a
    valid deployment profile to the fixed response envelope and exact lifecycle
    cookie descriptors, preserves clear-before-set rotation, rejects arbitrary
    headers and ownership/policy drift, and remains unlinked from the front
    controller.
-20. Completed the non-executing per-client deployment-review packet. It binds
+21. Completed the non-executing per-client deployment-review packet. It binds
    the profile hash to non-secret server/artifact, process-environment
    trust/rotation, and fixed desktop/mobile browser evidence without loading
    deployment files, resolving secrets, or changing client state.
-21. Added the installation-shaped HTTPS deployment rehearsal. It builds the
+22. Added the installation-shaped HTTPS deployment rehearsal. It builds the
    reviewed integration in a temporary context, mounts an external generated
    certificate, proves process-environment key replacement across restart, and
    captures fixed browser evidence without a client database, dispatcher link,
    package, or Store Lite path. A successful Docker/browser run remains
    required before the next gate.
-22. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
+23. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
    source, unlinked PHP verifier, and isolated custom-binary proof. The proof
    uses a temporary image only; it does not create a client binary, active
    Caddyfile, dispatcher, route, browser/cart cookie, package state,
    enablement, or Store Lite path.
-23. The bounded dispatcher now has supported-server disposable rehearsal
+24. The bounded dispatcher now has supported-server disposable rehearsal
    evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
    runner, and fixed emitter against fresh MySQL. Continue with per-client
    Caddyfile/TLS/proxy, trusted-origin/HMAC, and browser-deployment review
@@ -550,14 +575,24 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
    complete. Secret-capable registration-only service consumption is accepted
-   only through its value-free typed boundary; Store Lite remains blocked.
-24. Create Store Lite in its separate distribution using only those accepted
+   only through its value-free typed boundary. The administrator-form
+   current-value loader is also complete as a generic read-only boundary with
+   fresh exact grants, closed nested values, record-bound evidence, and a
+   disabled core preview. The separate unlinked validation-only JSON adapter is
+   complete, and the separate internal exact-writer/atomic-runner boundary now
+   passes rollback acceptance. The generic operational editor and authenticated
+   Save bridge also pass focused and full disposable/HTTP acceptance, plus
+   Chrome desktop/mobile rendered inspection with zero overflow and no
+   console, page, or failed-request errors. No Store Lite
+   provider, target list, navigation, migration, table, or product data is
+   present. Store Lite remains blocked.
+25. Create Store Lite in its separate distribution using only those accepted
    contracts.
-25. Add package-owned migrations, Product editing, catalog, cart, orders, and
+26. Add package-owned migrations, Product editing, catalog, cart, orders, and
    pay-on-receipt.
-26. Validate disable/re-enable, failure recovery, migration, responsive
+27. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-27. Add a separately reviewed hosted-payment adapter only after the
+28. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

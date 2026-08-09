@@ -652,6 +652,103 @@ changes fail closed. Permission revocation applies on the next catalog or
 dispatch lookup. Current enablement gates still reject every tool-bearing
 package.
 
+Operational administrator forms have a separate declaration and non-executing
+planning boundary. A closed `adminToolFormContracts` entry binds one provided
+tool to a unique form id, declared package permission, `POST`, required CSRF
+policy, fixed `application/json`, and a body limit no larger than 256 KiB.
+Executable fields, identity collisions, undeclared tools, ungranted
+permissions, alternate methods/encodings, weakened CSRF, and invalid body
+bounds fail manifest validation without loading package PHP.
+
+The read-only form preflight requires the exact enabled request-local tool
+owner and a fresh case-sensitive grant, then returns only bounded metadata and
+deterministic contract/plan hashes. Owner and lifecycle access do not imply the
+form permission. It reads no body or request/session globals, consumes no CSRF,
+invokes no package callback, renders no HTML, opens no transaction, writes no
+state, and creates no endpoint. The declaration is policy evidence, not a token
+check or activation path.
+
+Optional administrator-form field metadata is also closed and non-executable.
+Core accepts only the existing scalar field vocabulary plus collections capped
+at 128 rows, two collection levels, 32 fields per row, and 200 total declared
+fields. This admits bounded product options and variants without admitting
+package HTML, templates, conditions, JavaScript, callbacks, or an arbitrary
+schema language. A pure core renderer escapes labels/help/options and emits
+only disabled controls and collection templates. A separate current-value
+loader may now provide one complete typed value graph for a positive numeric
+target after the same exact enabled ownership and fresh case-sensitive
+permission checks. The registrar binds one loader to each schema-bearing form
+id; core passes only the database connection plus a final request containing
+tool, form, and target—no actor or session data. Core contains output and
+HTTP-state changes, rejects missing, extra, malformed, oversized, or
+schema-drifted values, and binds the normalized graph to
+package/tool/form/target/contract SHA-256 evidence before the renderer may
+display it. The renderer still adds no names, editable or submit controls,
+request body, CSRF operation, endpoint, or write path.
+
+The separate protected validation adapter is core-owned and remains unlinked
+from that renderer. Its endpoint requires POST and calls the authenticated
+administrator plus header-CSRF guard before opening the body stream. Only exact
+`application/json`, a canonical decimal content length, the 256 KiB global
+ceiling, and a canonical closed JSON root are admitted. After decoding, core
+repeats the fresh form grant, applies the manifest body limit before provider
+invocation, reloads current values through the exact registrar owner, refuses a
+stale state SHA-256, and validates every submitted nested value. The resulting
+opaque plan hash binds actor, package, tool, form, target, permission, contract,
+current state, and submitted-values evidence. Public output contains only a
+generic validated result or bounded refusal; it exposes no values or hashes.
+That endpoint has no writer invocation, transaction, package mutation, Save
+control, Store Lite provider, or Store Lite data.
+
+Administrator-form persistence is a separate internal boundary. A package may
+optionally bind one `registerAdminToolFormWriter()` callback only to its own
+schema-bearing form and must declare one to eight package-owned InnoDB tables.
+Core rejects undeclared or duplicate form writers, reserved/core tables,
+noncanonical table names, missing exact loader/writer ownership, non-InnoDB
+storage, and caller-owned transactions before mutation. Its write preflight
+contains no values and binds the validation plan, package version, sorted table
+set, actor, target, permission, contract, current state, and submitted-values
+hash into a deterministic plan.
+
+The internal runner acquires the database-scoped lifecycle and package locks,
+locks the enabled installation row, repeats the full validation/current-value
+preparation, and requires the exact write plan before invoking one immutable
+typed writer request. Package output, exceptions, buffer drift, HTTP-state
+changes, false returns, permission revocation, stale/replayed state, version or
+contract drift, incomplete/wrong postconditions, transaction loss, and audit
+failure fail closed. Core reloads the current values and requires them to equal
+the complete normalized submission before the package mutation and one
+value-free `addon.form.saved` audit fact commit together. Unchanged values roll
+back without writer or audit work. The reviewed first-party writer must not
+manage transactions or write outside its declared tables; it is not a database
+sandbox. The validation-only endpoint remains disconnected from this runner.
+
+The operational browser bridge is a separate core-owned surface. Its edit
+endpoint is POST-only and performs database-backed administrator-session plus
+header-CSRF checks before accepting exactly `tool`, `form`, and one canonical
+positive `targetRecordId`. It derives package, permission, manifest, contract,
+writer, declared tables, and enabled version from the current request runtime;
+none is trusted from browser input. Only a complete freshly loaded value graph
+may populate escaped core controls. Package HTML, JavaScript, CSS, field names,
+actions, and response markup are never accepted.
+
+The Save endpoint repeats method, administrator, and header-CSRF checks before
+opening the bounded exact `application/json` body. The controller preserves
+integer, boolean, nullable scalar, object, and ordered collection types and
+applies the manifest's collection bounds, but server validation and locked
+revalidation remain authoritative. Public results contain only `saved`,
+`unchanged`, or a bounded refusal—never values, package identity, state or plan
+hashes, table names, or audit evidence. A successful Save reloads the editor
+instead of trusting client-derived state. The bridge does not select targets,
+add navigation, enable a richer package, or add Store Lite behavior.
+
+The loader is reviewed first-party PHP, not a database sandbox. It is required
+to be read-only and may query only its package-owned current-client data; it
+must not mutate state, manage transactions, expose secrets, or derive access
+from the omitted actor. Permission revocation applies before the next loader
+invocation. Store Lite remains blocked from activation and no Store Lite
+package or table is included in core.
+
 Administrator write actions have a split metadata and internal execution
 foundation. An optional closed `adminToolActionContracts` entry maps one
 provided tool to one unique action id, explicit package permission, bounded

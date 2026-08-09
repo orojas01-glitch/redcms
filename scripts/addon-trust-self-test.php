@@ -189,8 +189,20 @@ try {
                 === '#/$defs/componentEditor'
             && ($schema['properties']['adminToolContracts']['items']['$ref'] ?? '')
                 === '#/$defs/adminToolContract'
+            && ($schema['properties']['adminToolFormContracts']['items']['$ref'] ?? '')
+                === '#/$defs/adminToolFormContract'
             && ($schema['properties']['adminToolActionContracts']['items']['$ref'] ?? '')
                 === '#/$defs/adminToolActionContract'
+            && ($schema['$defs']['adminToolFormContract']['properties']['encoding']['const'] ?? '')
+                === 'application/json'
+            && ($schema['$defs']['adminToolFormContract']['properties']['maxBodyBytes']['maximum'] ?? null)
+                === 262144
+            && ($schema['$defs']['adminToolFormContract']['properties']['fields']['$ref'] ?? '')
+                === '#/$defs/adminToolFormFields'
+            && ($schema['$defs']['adminToolFormCollectionField']['properties']['maxItems']['maximum'] ?? null)
+                === 128
+            && ($schema['$defs']['adminToolFormCollectionField']['properties']['fields']['items']['$ref'] ?? '')
+                === '#/$defs/adminToolFormField'
             && ($schema['properties']['publicMutationContracts']['items']['$ref'] ?? '')
                 === '#/$defs/publicMutationContract'
             && ($schema['$defs']['publicMutationContract']['properties']['method']['const'] ?? '')
@@ -200,7 +212,7 @@ try {
             && ($schema['$defs']['setting']['properties']['options']['minItems'] ?? null)
                 === 1
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded editors, tools, write actions, public-mutation declarations, and setting choices, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded editors, tools, nested operational-form previews, write actions, public-mutation declarations, and setting choices, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');
@@ -354,6 +366,7 @@ try {
         static function (&$manifest) {
             $toolId = 'redcms.tool/orders';
             $permission = 'tool.orders.view';
+            $formId = 'redcms.tool/order-editor';
             $actionId = 'redcms.tool/mark-paid';
             $actionPermission = 'tool.orders.transition';
             $manifest['provides']['adminTools'] = [$toolId];
@@ -377,6 +390,17 @@ try {
                 'csrf' => 'required',
                 'idempotency' => 'once-per-target',
             ]];
+            $manifest['adminToolFormContracts'] = [[
+                'tool' => $toolId,
+                'form' => $formId,
+                'label' => 'Edit order',
+                'description' => 'Prepare one bounded order form.',
+                'permission' => $actionPermission,
+                'method' => 'POST',
+                'csrf' => 'required',
+                'encoding' => 'application/json',
+                'maxBodyBytes' => 32768,
+            ]];
         }
     );
     $toolResult = red_addon_validate_manifest(
@@ -396,6 +420,13 @@ try {
             : [],
         'redcms.tool/orders',
         'redcms.tool/mark-paid'
+    );
+    $toolFormContract = red_addon_admin_tool_form_contract(
+        is_array($toolResult['manifest'] ?? null)
+            ? $toolResult['manifest']
+            : [],
+        'redcms.tool/orders',
+        'redcms.tool/order-editor'
     );
     red_addon_test_assert(
         !empty($toolResult['valid'])
@@ -417,8 +448,19 @@ try {
                 'csrf' => 'required',
                 'idempotency' => 'once-per-target',
             ]
+            && $toolFormContract === [
+                'tool' => 'redcms.tool/orders',
+                'form' => 'redcms.tool/order-editor',
+                'label' => 'Edit order',
+                'description' => 'Prepare one bounded order form.',
+                'permission' => 'tool.orders.transition',
+                'method' => 'POST',
+                'csrf' => 'required',
+                'encoding' => 'application/json',
+                'maxBodyBytes' => 32768,
+            ]
             && !file_exists($executionMarker),
-        'administrator tool metadata maps one display tool and one POST/CSRF write action to declared permissions without package execution'
+        'administrator tool metadata maps one display tool, one JSON/CSRF form plan, and one write action to declared permissions without package execution'
     );
 
     $invalidToolProject = red_addon_test_project(
@@ -453,6 +495,18 @@ try {
                 'csrf' => 'not-applicable',
                 'idempotency' => 'many-per-target',
                 'callback' => 'dangerous',
+            ]];
+            $manifest['adminToolFormContracts'] = [[
+                'tool' => 'redcms.invalid-tool/undeclared',
+                'form' => 'redcms.invalid-tool/declared',
+                'label' => 'Invalid form',
+                'description' => 'Invalid administrator form fixture.',
+                'permission' => 'invalid.missing',
+                'method' => 'GET',
+                'csrf' => 'not-applicable',
+                'encoding' => 'multipart/form-data',
+                'maxBodyBytes' => 262145,
+                'renderer' => 'dangerous',
             ]];
         }
     );
@@ -495,8 +549,24 @@ try {
                 $invalidTool,
                 'idempotency must be once-per-target'
             )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'contains unsupported field "renderer"'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'form must differ from provided tool identifiers'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'encoding must be application/json'
+            )
+            && red_addon_test_error_contains(
+                $invalidTool,
+                'maxBodyBytes must be between 1 and 262144'
+            )
             && !file_exists($executionMarker),
-        'administrator tool and write-action contracts reject executable, undeclared, ungranted, and writable metadata'
+        'administrator tool, form, and write-action contracts reject executable, undeclared, ungranted, and writable metadata'
     );
 
     $nullEditorProject = red_addon_test_project(
