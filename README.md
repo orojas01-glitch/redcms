@@ -294,6 +294,13 @@ features.
   rejects duplicate, nested, unknown, malformed, noncanonical, or oversized
   input without reading HTTP globals, cookies, sessions, a database, runtime,
   or package code, and without creating an endpoint or Store Lite behavior
+- Pure core-owned public-mutation form UI composition. It derives one static
+  action and only declared hidden identifier, bounded positive-integer, and
+  identifier-select controls from a validated declaration, a bounded package
+  presentation model, and same-subject issued CSRF/idempotency result shapes.
+  Core escapes all markup; the opaque values are fetch-controller attributes,
+  not package form fields. It reads no request/database/package state, emits
+  no output/header, and is not linked from the front controller
 - Pure core-owned public-mutation HTTP request envelope for a future dispatcher.
   It validates explicit canonical HTTPS origin, exact static POST path, form
   content metadata, one opaque subject cookie, and fixed CSRF/idempotency

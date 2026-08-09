@@ -833,8 +833,16 @@ This planning slice does not authorize:
 22. Added the installation-shaped HTTPS deployment rehearsal harness. It
     retains only non-secret external evidence, keeps the dispatcher and
     front-controller links disabled, and refuses starter-resident output.
-23. A separate richer enablement review may admit only packages that satisfy
+23. Completed the pure core-owned public-mutation form UI boundary. It derives
+    one static action and exact allowed controls from the validated declaration,
+    accepts only a bounded package presentation model plus same-subject issued
+    CSRF/idempotency evidence, and renders escaped labels, hidden identifiers,
+    bounded integer controls, variant selects, a live status region, and a
+    no-script notice. Security evidence is carried only as fetch-controller
+    attributes, never package form fields. It reads no request/database/package
+    state, emits nothing, and remains absent from the front controller.
+24. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-24. Store Lite can then implement its separately distributed catalog and cart
+25. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

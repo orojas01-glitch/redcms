@@ -1105,6 +1105,22 @@ request bootstrap excludes the disabled package.
     cookie/browser behavior, inventory mutation, orders, and checkout remain
     later gates.
 
+81. Began Gate 2D2 with the generic core-owned form UI boundary. Given one
+    validated public-mutation declaration, a bounded presentation model, a
+    core form-instance id, and exact same-subject issued CSRF/idempotency
+    results, core derives the static action and renders only escaped hidden
+    identifiers, bounded integer inputs, declared identifier selects, one
+    submit control, a polite status region, and a no-script notice. Opaque
+    evidence stays in fetch-controller attributes rather than package form
+    fields. The 18-assertion dependency-free fixture covers simple and variable
+    shapes, accessibility, escaping, declaration drift, unknown/commercial
+    fields, malformed controls/options, cross-subject evidence, tampering, and
+    zero request/database/emission/front-controller behavior. This slice does
+    not load Store Lite, issue tokens/cookies, inject JavaScript, render a live
+    Product control, link the dispatcher, or execute a public mutation. The
+    separately distributed Store Lite field model and browser bootstrap remain
+    the next Gate 2D2 steps.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

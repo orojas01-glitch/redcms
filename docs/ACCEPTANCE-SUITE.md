@@ -190,6 +190,15 @@ desktop/mobile run retains 87/87 checks with empty console, page-error,
 failed-request, and HTTP-error evidence. The configured primary fingerprint is
 unchanged and the temporary schema, grant, server, and staged package are
 removed.
+The separate 18-assertion public-mutation form UI fixture runs before any
+database is created. It requires a manifest-derived static POST action,
+same-subject issued CSRF/idempotency evidence, only declared product/quantity/
+optional-variant controls, escaped labels/options, unique form-control ids,
+bounded number/select semantics, one polite status region, and a no-script
+notice. Missing, unknown, duplicate, malformed, out-of-range, cross-subject,
+or post-composition-invalid models render no partial form or token. The helper
+reads no request globals, database, package, filesystem, or front-controller
+state and emits no output or headers.
 The separate 16-assertion administrator-tool form-preflight fixture proves one
 closed JSON/CSRF form declaration, exact request-local tool ownership, fresh
 binary package permission, deterministic actor-bound hashes, contract-drift
@@ -642,7 +651,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, administrator-tool form schema/preview/planning/current-value loading/JSON validation/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, administrator-tool form schema/preview/planning/current-value loading/JSON validation/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/form-UI/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -902,6 +911,14 @@ containers, network, image, database, package marker, and build context.
   nested, unknown, noncanonical, malformed, missing, or oversized input with
   no partial values. It has no PHP request-global, cookie/session, database,
   runtime/package-load, response-emission, endpoint, or lifecycle path.
+- Public-mutation form UI acceptance is dependency-free and creates no
+  database, package, request, browser, route, or client fixture. It derives the
+  action and controls only from one declaration, requires same-subject issued
+  CSRF/idempotency shapes, escapes simple/variant labels and options, and
+  refuses unknown commercial fields, malformed controls, invalid selections,
+  cross-subject evidence, and tampered models without partial markup or token
+  output. It has no request-global, database, package-load, emission,
+  controller, front-controller, or lifecycle path.
 - Public-mutation HTTP request-envelope acceptance is dependency-free and
   creates no database, package, request-global, browser, route, or client
   fixture. It accepts only one validated declaration, configured canonical HTTPS
