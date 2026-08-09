@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/db-common.sh"
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs authenticated Store Lite Create and Save rehearsal paths in one disposable database.'
+    printf '%s\n' 'Runs Store Lite atomic cart mutation plus authenticated Create and Save paths in one disposable database.'
 }
 
 if [[ $# -gt 0 ]]; then

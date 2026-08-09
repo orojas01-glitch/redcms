@@ -208,6 +208,16 @@ Product/variant deletion is restrictive and a cart cascades only its own lines.
 The class remains unregistered and non-routable. See
 [`STORE-LITE-CART-PERSISTENCE-CONTRACT.md`](STORE-LITE-CART-PERSISTENCE-CONTRACT.md).
 
+Store Lite 0.1.14 binds that persistence to the generic core atomic runner.
+The package declares one Add-to-cart route/mutation with only product, integer
+quantity, and optional variant fields, then registers a fail-closed route
+callback, mutation handler, state loader, and exact eight package tables. Core
+continues to own subject, CSRF, idempotency, rate limit, transaction, replay,
+postcondition, audit, and response authority. The binding is proven only in a
+disposable rehearsal; no production endpoint, browser control, or operational
+`commerce.cart` service exists. See
+[`STORE-LITE-CART-MUTATION-CONTRACT.md`](STORE-LITE-CART-MUTATION-CONTRACT.md).
+
 ## Data Ownership
 
 All tables are package-owned and namespaced with `RED_Addon_StoreLite_`.
@@ -264,8 +274,10 @@ declared canonical package fields. A further pure HTTP request-envelope
 normalizer now validates only explicit trusted HTTPS origin, static POST,
 canonical form metadata, subject cookie, CSRF, and idempotency evidence before
 the decoder runs; none of these helpers owns a browser adapter, browser identity
-issuance, route, or response emission. Store Lite still has no public mutation
-route, browser cart cookie, package files, tables, or enablement profile.
+issuance, route, or response emission. Store Lite now has one separately
+distributed declared route and internal runtime binding, but still has no core
+production endpoint, browser cart cookie/control, package files in the clean
+starter, or general enablement profile.
 The separate private selector can now bind a known static path to one current
 registrar-owned route/mutation/state-loader identity without calling it. It
 does not create a request adapter, route claim, endpoint, browser evidence,

@@ -130,6 +130,19 @@ inventory. Public mutation registration, Add-to-cart UI, cookies, orders,
 checkout, and payment remain later. See
 [`STORE-LITE-CART-PERSISTENCE-CONTRACT.md`](STORE-LITE-CART-PERSISTENCE-CONTRACT.md).
 
+Gate 2D1 is now complete as the first package-to-core cart mutation binding.
+The separately distributed Store Lite 0.1.14 package declares one closed
+Add-to-cart POST contract and registers its fail-closed route callback, handler,
+state loader, and exact eight-table transaction set. The disposable rehearsal
+proves simple and explicit-variant acceptance, exact replay, changed-command
+idempotency conflict, invalid-variant rollback, server-derived postconditions,
+and atomic package/core audit evidence while retaining the existing 87/87
+desktop/mobile browser result. RED-CMS still has no production public-mutation
+endpoint, browser subject/token bootstrap, Add-to-cart form, cart display,
+checkout, order, or payment flow. Gate 2D2 owns that browser/server integration.
+See
+[`STORE-LITE-CART-MUTATION-CONTRACT.md`](STORE-LITE-CART-MUTATION-CONTRACT.md).
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any

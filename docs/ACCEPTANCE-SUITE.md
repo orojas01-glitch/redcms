@@ -180,6 +180,16 @@ late-activity rollback, restrictive deletion, exact schema/grant cleanup, and
 an unchanged configured-primary fingerprint. These suites run from the
 separate package repository; the clean-core `dev-acceptance.sh` does not load
 or execute Store Lite package code.
+The separately distributed Store Lite 0.1.14 package adds one real-runner gate
+inside the existing disposable browser rehearsal. It proves one accepted
+simple-product add, exact idempotent replay, changed-command key conflict, one
+accepted explicit variable-product variant, invalid-variant rollback, exact
+two-cart/two-line/quantity-three package state, two package activity rows, two
+core execution rows, and two value-free core audits. The same Google Chrome
+desktop/mobile run retains 87/87 checks with empty console, page-error,
+failed-request, and HTTP-error evidence. The configured primary fingerprint is
+unchanged and the temporary schema, grant, server, and staged package are
+removed.
 The separate 16-assertion administrator-tool form-preflight fixture proves one
 closed JSON/CSRF form declaration, exact request-local tool ownership, fresh
 binary package permission, deterministic actor-bound hashes, contract-drift
