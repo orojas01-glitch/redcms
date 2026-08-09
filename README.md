@@ -43,8 +43,11 @@ the persisted parent/runtime owner match, contained execution, and schema-valid
 returned values before exposing a state hash. Core now exposes a CSRF-protected
 existing-record editor for an already-enabled, already-persisted component;
 the endpoint derives package and component ownership from current server-side
-state and requires fresh exact view/edit grants. No component create/delete
-endpoint exists. A separate activation-blocked
+state and requires fresh exact view/edit grants. Core now also exposes one
+protected package-component create form/endpoint only after current runtime,
+manifest schema, loader/creator/table ownership, and fresh create permission
+agree; it allocates the core parent identifier on the server. No component
+delete endpoint exists. A separate activation-blocked
 helper can now apply an existing package record update only after the exact
 view and edit grants, current state hash, locked placement parent, enabled
 runtime ownership, declared InnoDB tables, contained writer execution, and
@@ -86,9 +89,11 @@ now revalidates the value-free plan under shared lifecycle/theme and exact
 binding locks, records core and package `delete` snapshots, invokes only the
 registered deleter, and removes the package row, SEO row, and inactive parent
 together. Partial deletion, callback failure, stale evidence, or either ledger
-failure rolls back; both immutable ledgers remain after success. Create/delete
-controls and endpoints, restore action, uninstall/purge, and richer package
-activation eligibility remain absent.
+failure rolls back; both immutable ledgers remain after success. Delete
+controls/endpoints, restore action, uninstall/purge, and richer package
+activation eligibility remain absent. A separate protected placement control
+can publish the created component to either the unique language homepage or an
+existing active Article target through the exact atomic placement runner.
 Manifest-declared package settings now also have a non-executing typed value
 contract: core validates one closed configuration object, applies only
 type-correct non-secret defaults, and separates opaque `config:` secret
@@ -420,6 +425,12 @@ features.
   Size/Color variants: one installation currency, integer minor-unit money,
   unique option tuples, three option groups, sixteen values per group, and 128
   explicit variants, without Store Lite code, tables, routes, or starter state
+- Store Lite Gate 2B pure server-authoritative cart-line contract: browser
+  intent contains only product, integer quantity 1–100, and optional variant;
+  the separate Store Lite 0.1.12 package derives SKU, option labels, integer
+  unit price/total, currency, stock sufficiency, and product-state evidence
+  from current normalized server data, with no cart table, route, cookie,
+  runtime registration, or partial refusal line in the clean starter
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -608,6 +619,7 @@ database.
 - [Public Mutation Boundary](docs/PUBLIC-MUTATION-BOUNDARY.md)
 - [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
 - [Store Lite Product Contract](docs/STORE-LITE-PRODUCT-CONTRACT.md)
+- [Store Lite Cart-Line Contract](docs/STORE-LITE-CART-LINE-CONTRACT.md)
 - [Version 5.1 Direction](docs/VERSION-5.1-DIRECTION.md)
 - [Security Notes](docs/SECURITY.md)
 

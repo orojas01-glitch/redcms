@@ -5,7 +5,9 @@ normalization, persistence, product administration, core-owned Add/Edit/Save
 bridges, Product placement storage, and the enabled runtime Product component.
 The core-owned user-facing Add component and explicit Homepage placement
 workflow now pass isolated desktop/mobile rehearsal. The first
-server-authoritative cart line is next; orders remain later.
+pure server-authoritative cart-line resolver now passes its package and
+clean-core contract fixtures. Package-owned cart persistence and transaction
+integration are next; orders remain later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -182,6 +184,17 @@ Every write requires validated input, prepared database operations, a narrow
 transaction boundary, an actor or anonymous-session identifier, and bounded
 audit evidence. Public requests must use server-side product price and
 currency values; client-submitted totals are never authoritative.
+
+Store Lite 0.1.12 implements the first non-writing commerce calculation. Its
+pure resolver accepts only product, integer quantity 1–100, and an optional
+variant declaration; the caller separately supplies the current server-loaded
+product and installation currency. It re-normalizes that product, resolves one
+sellable simple record or exact current variable variant, derives SKU, option
+labels, integer unit price/total, currency, and stock evidence, and binds the
+result to a product-state SHA-256. It is not registered as `commerce.cart` and
+creates no database, route, cookie, response, inventory reservation, cart, or
+order. See
+[`STORE-LITE-CART-LINE-CONTRACT.md`](STORE-LITE-CART-LINE-CONTRACT.md).
 
 ## Data Ownership
 
@@ -611,8 +624,10 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    accepted contracts.
 26. In progress: package-owned Product migrations, simple/variable Product
    administration, Product component persistence, administrator creation,
-   Homepage placement, and public rendering are complete. Implement the first
-   server-authoritative cart line next; orders and pay-on-receipt remain later.
+   Homepage placement, public rendering, and the pure server-authoritative
+   cart-line resolver are complete. Implement package-owned cart/cart-line
+   persistence plus atomic anonymous ownership and postcondition rules next;
+   the resolver remains unregistered and orders/pay-on-receipt remain later.
 27. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
 28. Add a separately reviewed hosted-payment adapter only after the

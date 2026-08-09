@@ -1071,6 +1071,23 @@ request bootstrap excludes the disabled package.
     remains separately distributed and not normally enableable; cart, orders,
     checkout, public mutation, and hosted payment remain later gates.
 
+79. Completed Store Lite Gate 2B as a pure server-authoritative cart-line
+    contract. The separately distributed Store Lite 0.1.12 resolver accepts
+    only a public product identifier, integer quantity 1–100, and one required
+    variant identifier for a variable product. The caller separately supplies
+    the current complete server-loaded product and installation currency. The
+    resolver repeats Gate 2A normalization, requires a published/available
+    product and exact current sellable variant, and derives SKU, option labels,
+    integer unit price/total, currency, stock evidence, and product-state
+    SHA-256 without accepting browser-owned commercial values. Draft,
+    unavailable, currency-drifted, malformed, mismatched, stale-variant,
+    invalid-quantity, and insufficient-stock cases return no partial line. The
+    package's 26 assertions and clean-core 21-assertion fixture pass without a
+    database, route, request/session/cookie state, runtime service registration,
+    cart persistence, inventory reservation, order, checkout, or enablement
+    change. Package-owned cart/cart-line storage and atomic anonymous ownership
+    remain the next Store Lite gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

@@ -104,6 +104,19 @@ Size/Color shirt data without adding Store Lite code, tables, routes, or state
 to the clean starter. See
 [`STORE-LITE-PRODUCT-CONTRACT.md`](STORE-LITE-PRODUCT-CONTRACT.md).
 
+Gate 2B is now complete as the first pure server-authoritative commerce
+calculation. The browser-shaped declaration contains only product, integer
+quantity 1–100, and an optional variant. The separately distributed Store Lite
+0.1.12 resolver repeats product normalization and derives the current SKU,
+option labels, integer unit price/total, currency, stock sufficiency, and
+product-state SHA-256 from server-loaded data. Its 26 package assertions and
+the clean-core 21-assertion contract fixture refuse unknown commercial fields,
+draft/unavailable/mismatched products, missing/stale/unavailable variants,
+invalid quantity, and insufficient tracked stock without a partial line. No
+cart table, route, cookie, service registration, response, order, Store Lite
+business data, or activation path was added to core. See
+[`STORE-LITE-CART-LINE-CONTRACT.md`](STORE-LITE-CART-LINE-CONTRACT.md).
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any
