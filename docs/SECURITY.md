@@ -1074,6 +1074,20 @@ connection and optional cookie scalar, reads no request globals, emits no
 output/header/cookie, and is not linked from `index.php`; response ownership
 and browser dispatch remain mandatory later gates.
 
+The separate public-mutation browser controller remains an unlinked static
+core asset. It accepts only one same-origin, query-free, fragment-free path;
+the exact POST/form encoding; the fixed CSRF and idempotency header names; and
+lowercase 64-hex evidence. Initialization copies evidence into one closure and
+removes it from DOM attributes. On first submit, it serializes only bounded
+identifier/integer controls, captures the canonical form bytes, disables every
+mutable control, and never recomputes that command for the same idempotency
+key. Only exact-body retry is allowed after a network, `429`, or `503` result.
+The controller accepts only the closed core JSON status/body pairs, places
+generic messages with `textContent`, and uses no cookie API, browser storage,
+logging, dynamic code, HTML sink, redirect, or external URL. It is not included
+by `index.php` or either core theme adapter until response and endpoint
+ownership are activated together.
+
 The separate pure HTTP request-envelope normalizer accepts only explicit values
 from that later dispatcher. It requires one server-configured canonical HTTPS
 origin rather than `Host` input, an exact static POST path, an exact matching

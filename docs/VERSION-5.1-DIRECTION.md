@@ -1167,6 +1167,20 @@ request bootstrap excludes the disabled package.
     front-controller wiring, endpoint dispatch, and browser mutation remain
     Gate 2D2D3.
 
+86. Completed Gate 2D2D3A as an unlinked core-owned browser controller. It
+    validates the exact same-origin action, fixed header names, opaque evidence,
+    POST encoding, and declared scalar form body before sending. The first
+    submission captures and freezes one canonical command; only that exact body
+    may retry with the same idempotency key after a transient network, rate, or
+    availability failure. Opaque evidence is removed from DOM attributes after
+    initialization and never enters cookie/storage/log/HTML sinks. A 19-
+    assertion real-Chrome proof passed at `1440x1000` and `390x844`, covering
+    accepted, unchanged retry, conflict, foreign-action, malformed-evidence,
+    canonical `%7E` encoding, and zero page errors. A separate 9-assertion
+    dependency-free source contract keeps the script unlinked. Response/cookie
+    ownership and endpoint/front-controller activation remain Gate 2D2D3B;
+    real Store Lite mutation QA remains Gate 2D2D3C.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

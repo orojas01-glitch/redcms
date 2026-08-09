@@ -661,7 +661,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, administrator-tool form schema/preview/planning/current-value loading/JSON validation/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/form-UI/component-presentation/component-form-integration/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, administrator-tool form schema/preview/planning/current-value loading/JSON validation/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/form-UI/component-presentation/component-form-integration/browser-controller/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -947,6 +947,16 @@ containers, network, image, database, package marker, and build context.
   invocation. Cleanup leaves zero subject, CSRF, idempotency, schema, or grant
   residue and the helper has no request-global, emission, package-load, or
   endpoint path.
+- Public-mutation browser-controller source acceptance is dependency-free. It
+  requires the exact form/status selectors, fixed evidence/content headers,
+  same-origin/no-store/redirect-error fetch policy, one WeakMap-held frozen
+  command body, immediate DOM evidence removal, no cookie/storage/log/dynamic-
+  code/HTML-sink/external-URL path, and continued absence from the front
+  controller and theme adapters. The separate Playwright self-test uses an
+  intercepted local origin and real Chrome at `1440x1000` and `390x844`; it
+  proves canonical body/header delivery, accepted completion, exact-body retry,
+  conflict closure, invalid foreign configuration refusal, DOM evidence
+  removal, frozen controls, generic status copy, and zero page errors.
 - Public-mutation HTTP request-envelope acceptance is dependency-free and
   creates no database, package, request-global, browser, route, or client
   fixture. It accepts only one validated declaration, configured canonical HTTPS
