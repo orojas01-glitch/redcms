@@ -324,6 +324,13 @@ features.
   evidence, and returns escaped markup plus a lifecycle descriptor. It invokes
   no package callback, reads no request global, emits no output/header/cookie,
   and remains unlinked from the front controller and mutation endpoint
+- Unlinked core-owned public-mutation browser controller. It validates one
+  same-origin form configuration, removes opaque evidence from DOM attributes,
+  captures and freezes one canonical command per idempotency key, and permits
+  only exact-body retry after transient network, rate, or availability failure.
+  It accepts only the closed JSON response vocabulary and writes generic text
+  through `textContent`; it uses no storage, cookies, logs, dynamic code, HTML
+  sinks, or external URL and is not delivered to public pages yet
 - Pure core-owned public-mutation HTTP request envelope for a future dispatcher.
   It validates explicit canonical HTTPS origin, exact static POST path, form
   content metadata, one opaque subject cookie, and fixed CSRF/idempotency
