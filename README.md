@@ -302,6 +302,12 @@ features.
   Core escapes all markup; the opaque values are fetch-controller attributes,
   not package form fields. It reads no request/database/package state, emits
   no output/header, and is not linked from the front controller
+- Core-owned public-mutation form evidence bootstrap. It validates the entire
+  declaration and package presentation before ensuring one opaque browser
+  subject and issuing same-subject CSRF/idempotency evidence, then composes the
+  existing pure form model. Any partial issuance is exactly compensated; it
+  reads no request/session/cookie globals, loads no package code, emits no
+  header or HTML, and remains unlinked from the front controller
 - Pure core-owned public-mutation HTTP request envelope for a future dispatcher.
   It validates explicit canonical HTTPS origin, exact static POST path, form
   content metadata, one opaque subject cookie, and fixed CSRF/idempotency

@@ -730,6 +730,14 @@ from Apache without Store Lite/add-on/cart/checkout markers; the dispatcher
 remains intentionally unlinked. See
 [`ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md`](ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md).
 
+Gate 2D2 now also has the pure core form renderer, the separately distributed
+Store Lite 0.1.15 simple/variant field presenter, and the core-owned evidence
+bootstrap that validates before issuing an opaque subject plus same-subject
+CSRF/idempotency values. The bootstrap compensates exact partial issuance and
+remains unlinked from the front controller. Live Product-component integration,
+the browser fetch controller, response ownership/emission, and desktop/mobile
+mutation QA remain the next gate.
+
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
 and later optional vertical packages without changing their scope.

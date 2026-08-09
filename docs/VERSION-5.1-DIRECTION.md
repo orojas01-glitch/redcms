@@ -1122,6 +1122,26 @@ request bootstrap excludes the disabled package.
     separately distributed Store Lite field model and browser bootstrap remain
     the next Gate 2D2 steps.
 
+82. Completed Store Lite Gate 2D2B in the separately distributed 0.1.15
+    package. Its pure public cart-form presenter revalidates one complete
+    product and returns only the declared product, quantity, and optional
+    sellable-variant controls. Simple products and variable products with up
+    to 128 explicit choices are supported; draft, unavailable, zero-stock,
+    malformed, currency-drifted, or label-unsafe records fail closed. It emits
+    no HTML, issues no browser authority, exposes no commercial facts, and is
+    not yet invoked by the public Product component.
+
+83. Completed Gate 2D2C as a core-owned form evidence bootstrap. Core validates
+    the full declaration and presentation before ensuring or resolving an
+    opaque subject, issuing one same-subject declaration/database-scoped CSRF
+    token and idempotency key, and composing the existing form model. Exact
+    compensation removes only evidence created by a failed attempt; forged
+    lifecycle cleanup and caller-owned transactions are refused. The focused
+    12-assertion disposable current-schema proof finishes with zero subject,
+    CSRF, idempotency, schema, and grant residue. This remains unlinked from
+    `index.php`: no package load, live Product control, JavaScript controller,
+    response emission, or public mutation endpoint is added.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
