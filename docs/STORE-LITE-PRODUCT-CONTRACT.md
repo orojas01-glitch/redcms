@@ -123,8 +123,9 @@ not emit HTML or modify cart, order, inventory, or payment state.
 
 - The browser sends only a public product reference, bounded quantity, and an
   optional public variant reference for a variable product.
-- The commerce service resolves the current product, option tuple, price,
-  currency, availability, stock, and cart ownership server-side.
+- Store Lite 0.1.12 now resolves the current product, option tuple, price,
+  currency, availability, and stock into one pure internal cart-line result;
+  cart ownership and persistence remain the next separate gate.
 - A missing, stale, unavailable, or mismatched variant is refused.
 - Browser-submitted price, currency, stock, totals, and option labels are never
   authoritative.
@@ -132,6 +133,9 @@ not emit HTML or modify cart, order, inventory, or payment state.
   does not create a Store Lite route, cookie, cart, or database state.
 - Pay-on-receipt is the first checkout mode. Hosted payment providers remain
   separate provider-neutral adapters.
+
+The exact completed non-writing resolution boundary is in
+[`STORE-LITE-CART-LINE-CONTRACT.md`](STORE-LITE-CART-LINE-CONTRACT.md).
 
 ## Acceptance evidence
 

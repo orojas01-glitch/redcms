@@ -573,7 +573,11 @@ Atomic inactive creation is also implemented behind the exact plan. The
 authenticated existing-record editor accepts only a core record id, current
 state hash, CSRF token, and schema values; it derives package/component
 ownership again and requires fresh exact view/edit grants before invoking the
-atomic writer. Restore UI and create/delete controls/endpoints remain absent.
+atomic writer. Restore UI and delete controls/endpoints remain absent. The
+core-owned create form/endpoint advertises only a current enabled runtime,
+manifest schema, exact loader/creator/table ownership, and fresh create grant;
+it allocates the numeric parent identifier on the server and delegates only to
+the exact atomic inactive-creation runner before separate protected placement.
 Read-only planning, atomic public placement/activation, and atomic inactive
 deletion are implemented only
 behind an exact preflight plan. The bounded component-editor data loader may
@@ -588,6 +592,33 @@ handler performs only a bound-product read, reconstructs and re-normalizes the
 complete catalog graph, and returns the closed core fact model. It emits no
 markup and cannot mutate cart, order, inventory, payment, lifecycle, or core
 placement state.
+
+Store Lite 0.1.12 adds a pure, unregistered cart-line resolver that accepts
+only product, integer quantity 1–100, and an optional variant intent. The
+caller must separately load the current complete product and installation
+currency. The resolver repeats product normalization, requires current
+published/available state, resolves one exact sellable simple record or
+variable variant, checks tracked stock, and derives SKU, option labels,
+integer unit price/total, currency, and product-state SHA-256. It rejects
+browser-owned commercial fields and returns no partial line on any refusal.
+It opens no database or request/session/cookie state, registers no commerce
+service, reserves no inventory, and creates no route, response, cart, order,
+checkout, or enablement path.
+
+Store Lite 0.1.13 adds an internal, unregistered cart persistence boundary.
+The package accepts only a positive core-issued numeric anonymous-subject
+relation, never the raw subject token or cookie. One unique cart belongs to one
+relation, but it deliberately has no foreign key to the expiring core subject
+table so core rotation/cleanup cannot silently cascade-delete package business
+data. An already-active caller-owned InnoDB transaction is mandatory. The
+package locks cart and line state plus the current product/selected variant,
+requires a fresh expected cart-state hash, re-resolves commercial facts from
+server storage, verifies the complete postcondition, and records one value-free
+before/after activity fact. It never begins, commits, or rolls back; core must
+roll back every non-success result, including late activity failure. Product
+and variant references restrict deletion. The class reads no request/session/
+cookie state, registers no service, and creates no route, response, inventory
+reservation, order, checkout, or enablement path.
 
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Migrations, live data,

@@ -160,6 +160,26 @@ database is created. It covers integer minor-unit money, one installation
 currency, explicit Size/Color variants, unique identifiers/SKUs/option tuples,
 three option groups, sixteen values per group, and 128 variants per parent.
 It performs no database, request, package, lifecycle, or runtime work.
+The separate 21-assertion Store Lite cart-line contract fixture then consumes
+only Gate 2A-normalized product-shaped arrays. It accepts only product,
+quantity, and optional variant intent, derives SKU, option labels, integer
+price/total, currency, stock evidence, and product-state SHA-256 from current
+server product state, and returns no partial line for draft, unavailable,
+currency-drifted, malformed, stale-variant, out-of-stock, unknown-field, or
+invalid-quantity input. It loads no package or core runtime and opens no
+database, request, session, cookie, route, or commerce service.
+The separately distributed Store Lite 0.1.13 package has two additional
+cross-repository disposable database gates. Its 38-assertion migration suite
+applies the exact five manifest migrations and proves ten package-owned InnoDB
+tables, numeric subject ownership with no core foreign key, exact cart-line
+product/variant relationships, and value-free activity columns. Its 79-
+assertion combined catalog/cart persistence suite proves caller transaction
+ownership, simple and explicit-variant lines, additive quantity, server-derived
+money, fresh/stale cart state, subject isolation, refusal without drift, forced
+late-activity rollback, restrictive deletion, exact schema/grant cleanup, and
+an unchanged configured-primary fingerprint. These suites run from the
+separate package repository; the clean-core `dev-acceptance.sh` does not load
+or execute Store Lite package code.
 The separate 16-assertion administrator-tool form-preflight fixture proves one
 closed JSON/CSRF form declaration, exact request-local tool ownership, fresh
 binary package permission, deterministic actor-bound hashes, contract-drift
@@ -612,7 +632,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Store Lite product/variant contract, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, administrator-tool form schema/preview/planning/current-value loading/JSON validation/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, administrator-tool form schema/preview/planning/current-value loading/JSON validation/atomic writer, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -655,6 +675,7 @@ containers, network, image, database, package marker, and build context.
 - Static immutable asset-endpoint acceptance runs only in the uniquely named disposable database. Its disposable fixture proves pre-bootstrap dispatch, exact `GET`/`HEAD` delivery, fixed immutable/safety headers, generic `404`/`405`/`503` refusals, no session or package execution, no registry write, and no partial response. The live HTTP fixture creates an exact marker-bound first-party package beneath `addons/` only for the acceptance run, checks checksum/length/header evidence and stale, traversal, disabled, and tampered refusal, then removes the package and marker before cleanup.
 - Add-on component-editor value acceptance runs before database creation. It requires an exact validated component schema, object-shaped scalar input, closed field keys and types, canonical integer/boolean/select values, bounded valid UTF-8 text, narrow URL/email/date/datetime/media references, null handling for omitted optional fields, fail-closed empty normalized output on every error, and no package execution, authorization, rendering, or state access.
 - Store Lite product-contract acceptance runs before database creation. It requires the package-owned simple/variable split, one installation currency, integer minor-unit pricing, bounded identifiers/SKUs/text, explicit complete variant option tuples, unique variant identities, and the fixed three-group/16-value/128-variant limits. Invalid parent/child field mixing, unknown fields, duplicate tuples, stale option values, floats, and partial normalized results fail closed. It performs no database, request, package, lifecycle, or runtime work.
+- Store Lite cart-line contract acceptance runs immediately after the product contract and before database creation. It permits only a lowercase public product reference, integer quantity 1–100, and one required current variant for variable products. Current normalized server product state is the sole source of SKU, option labels, integer unit price and total, currency, stock sufficiency, and product-state evidence. Browser-owned commercial fields, draft/unavailable/mismatched/currency-drifted/malformed products, missing/stale/unavailable variants, invalid quantities, and insufficient tracked stock return no partial line. It creates no database, package load, request/session/cookie state, route, runtime service, cart, order, or enablement path.
 - Add-on administrator-form runtime-setting declaration acceptance runs before
   database creation. It requires each optional non-empty bounded declaration to
   name only package-declared, non-secret settings with no non-null manifest
@@ -782,7 +803,7 @@ containers, network, image, database, package marker, and build context.
 - Add-on administrator-tool form Save-bridge acceptance runs only in the uniquely named disposable database with one temporary package-owned InnoDB table, enabled installation, explicit package grant, and in-memory trusted runtime context. It requires exact tool/form/canonical-positive-target edit identity, fresh permission and enabled-version checks, exact loader/writer/table ownership, complete current values, escaped core-only editable scalar and two-level collection markup, bounded add/remove templates, typed canonical JSON with header CSRF, an atomic value-free `saved` result, no-op `unchanged`, stale replay and next-decision revocation refusal, and exact administrator/role/grant/package/audit/table cleanup. Source and real HTTP checks require POST, database-backed session, and header CSRF before edit parsing or Save body I/O; public responses disclose no values, state/plan evidence, package identity, or tables. Local Chrome captures at 1280px and 390px verify no horizontal overflow, the collection interaction path, typed Save/reload states, and zero console, page, or failed-request errors.
 - The Store Lite browser rehearsal is a separate opt-in cross-repository gate.
   It requires an integrity-valid Store Lite package outside the starter, all 45
-  core migrations plus the exact package migration inventory in a fresh
+  core migrations plus the exact five-package-migration inventory in a fresh
   schema, one acceptance-only enabled registry fixture, only the exact Products
   capability, a simple banana and bounded variable T-shirt, zero initial
   Product placements, the visible authenticated Add Content -> Product ->

@@ -1683,13 +1683,34 @@ Initial scope:
 - Order status and bounded audit history
 - Guest checkout, with optional Member Access integration later
 
+The first Store Lite commerce calculation is package-owned rather than core
+business logic. Store Lite 0.1.12 accepts only product, integer quantity
+1–100, and optional variant intent, then repeats normalization against the
+current server-loaded product and installation currency. It derives the exact
+SKU, option labels, integer unit price/total, currency, stock sufficiency, and
+product-state evidence or returns no line. The resolver is pure and
+unregistered: it adds no `commerce.cart` invocation, database, route, cookie,
+response, inventory reservation, cart, order, checkout, or enablement path.
+The clean-core mirror contract is
+[`STORE-LITE-CART-LINE-CONTRACT.md`](STORE-LITE-CART-LINE-CONTRACT.md).
+
+Store Lite 0.1.13 then persists that closed result only inside an already-
+active core-owned transaction. One core-issued numeric anonymous-subject
+relation owns one package cart; raw subject tokens and cookies never cross the
+package boundary. Store Lite locks current cart/line/product/variant state,
+requires fresh cart-state evidence, re-runs the resolver, verifies the complete
+postcondition, and records value-free activity without beginning, committing,
+or rolling back. It remains unregistered and disconnected from the public
+dispatcher. The clean-core mirror is
+[`STORE-LITE-CART-PERSISTENCE-CONTRACT.md`](STORE-LITE-CART-PERSISTENCE-CONTRACT.md).
+
 Initial exclusions:
 
 - Stored card data
 - Marketplace/multi-vendor behavior
 - Automatic tax calculation
 - Complex shipping fulfillment
-- Product variants and subscriptions
+- Unbounded variant matrices, free-form modifiers, and subscriptions
 - Restaurant modifiers, pickup windows, and table service
 
 ### 2. Events Calendar

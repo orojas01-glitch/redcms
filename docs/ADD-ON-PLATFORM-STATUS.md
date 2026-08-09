@@ -65,8 +65,10 @@ flowchart TD
     AF7 --> S2["Store Lite catalog + Product administration"]
     S2 --> S3["Product placement + public runtime"]
     S3 --> S4["Add Content creation + Homepage placement"]
-    S4 --> S5["CURRENT / NEXT<br/>Server-authoritative cart line"]
-    S5 -. later optional packages .-> E["Events Calendar"]
+    S4 --> S5["Pure server-authoritative cart-line resolver"]
+    S5 --> S6["Cart persistence + atomic ownership"]
+    S6 --> S7["CURRENT / NEXT<br/>Public mutation + Add-to-cart browser path"]
+    S7 -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
     D -.-> R["Restaurant Ordering"]
@@ -78,16 +80,16 @@ flowchart TD
     class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F19A,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20,G21 complete;
     class G22 complete;
     class S target;
-    class S1,AF1,AF2,AF3,AF4,AF5,AF6,AF7,S2,S3,S4 complete;
-    class S5 current;
+    class S1,AF1,AF2,AF3,AF4,AF5,AF6,AF7,S2,S3,S4,S5 complete;
+    class S6 current;
     class E,A,D,R remaining;
 ```
 
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | The generic Add Content catalog now discovers only enabled, manifest-declared, permission-authorized add-on components. A core form creates one inactive Product component with a server-allocated id, then the separate placement control can bind it to the unique language homepage. The Store Lite rehearsal starts with zero placements and proves the complete administrator-to-public path with exact create, baseline, move, and audit evidence. |
-| Current milestone | Define and implement the first server-authoritative Store Lite cart line against the accepted simple/variant Product contract. Browser input may reference only public product/variant ids and quantity; price, currency, availability, SKU, and stock must be re-resolved from the isolated client database. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification uses uniquely named disposable databases. |
+| Latest completed slice | Store Lite 0.1.13 adds internal, unregistered cart persistence. Five package migrations create ten namespaced InnoDB tables in a disposable client schema; cart writes use only a numeric core-issued subject relation, fresh state, locked current product/variant data, server-derived money, caller-owned transaction, verified postcondition, and value-free activity. The 38 migration and 79 combined persistence assertions pass with exact cleanup and unchanged configured-primary evidence. |
+| Current milestone | Connect the internal cart operation to the generic core public-mutation runner and prove the host-only anonymous cookie, CSRF, rate, idempotency, response-owner, rollback, and desktop/mobile Add-to-cart path in one disposable installation. Store Lite remains disconnected and normally activation-blocked until that separate integration gate passes. The retained local `redcms_v51_starter` database remains intentionally unmigrated. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
