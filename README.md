@@ -308,6 +308,15 @@ features.
   existing pure form model. Any partial issuance is exactly compensated; it
   reads no request/session/cookie globals, loads no package code, emits no
   header or HTML, and remains unlinked from the front controller
+- Core-owned public-component mutation-presentation boundary. An enabled
+  component may now return one exact data-only route/mutation/label/field model
+  beside its existing title, summary, and optional facts. Core accepts only
+  hidden identifiers, bounded positive integers, and identifier selects capped
+  at 128 unique choices; reserved commercial/authority keys, extra values,
+  malformed labels, duplicates, and forged selections fail the entire view.
+  The current renderer deliberately emits only the existing product display:
+  it creates no form, evidence, endpoint, script, response state, or Store Lite
+  behavior
 - Pure core-owned public-mutation HTTP request envelope for a future dispatcher.
   It validates explicit canonical HTTPS origin, exact static POST path, form
   content metadata, one opaque subject cookie, and fixed CSRF/idempotency
