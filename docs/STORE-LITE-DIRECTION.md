@@ -104,11 +104,12 @@ Its initial manifest contract should declare:
   and
 - retained data as the default uninstall behavior.
 
-The current Version 5.1 lifecycle can enable a constrained default component
-combined with registration-only services. It still cannot enable the complete
-Store Lite manifest because that package needs administrator tools,
-persistence, routes, settings editing, actual secret lookup, and assets. Store
-Lite must remain blocked until
+The current Version 5.1 lifecycle can enable constrained registration-only
+services, including the secret-capable service profile, and a default
+component combined with registration-only services. It still cannot enable the
+complete Store Lite manifest because that package needs administrator tools,
+persistence, routes, settings editing, ordinary settings, commerce state, and
+assets. Store Lite must remain blocked until
 each richer generic surface below is implemented and accepted independently.
 
 ## Component Contract
@@ -321,8 +322,9 @@ follow the generic add-on lifecycle:
 6. Disablement refuses enabled dependents, records `installed_disabled`
    atomically, unloads the package on later requests, and retains data.
 
-Store Lite still cannot use the current minimal enablement profile. Generic
-combined component-plus-service registration is complete, but before Store
+Store Lite still cannot use the current constrained enablement profiles.
+Generic combined component-plus-service registration and the narrow
+secret-capable service profile are complete, but before Store
 Lite's first release RED-CMS needs separate reviewed core batches for:
 
 - an operational editor endpoint and form; read-only delete planning and the
@@ -372,9 +374,13 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   administrator counterparts are added only for the existing signed-in overlay;
   invalid, drifted, or ambiguous state emits no package markup;
 - typed validation, storage, read-only preflight, internal atomic persistence,
-  core-only per-setting authorized reads, and non-executing secret-reference
-  availability are complete; permissioned settings UI/endpoints and actual
-  secret lookup remain gated; and
+  core-only per-setting authorized reads, non-executing secret-reference
+  availability, the core-owned permissioned ordinary-settings editor/endpoint,
+  and the core-owned server-local secret-reference resolution/replacement
+  boundary are complete. The narrow secret-capable registration-only service
+  profile is also complete: it resolves only package-owned server-local
+  references through the typed request and rejects secret-bearing results;
+  Store Lite's richer settings and commerce surfaces remain gated; and
 - live-data disable/upgrade compatibility checks.
 
 Each core batch must remain generic and must be proven with disposable fixtures
@@ -534,8 +540,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    evidence through the pinned FrankenPHP/Caddy binary, PHP verifier, atomic
    runner, and fixed emitter against fresh MySQL. Continue with per-client
    Caddyfile/TLS/proxy, trusted-origin/HMAC, and browser-deployment review
-   before any front-controller link; richer enablement and settings UI/endpoints
-   remain separately reviewed batches. The core browser subject lifecycle is
+   before any front-controller link; richer enablement remains a separately
+   reviewed batch. The core browser subject lifecycle is
    already proven independently.
    Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
@@ -543,7 +549,8 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    internal atomic settings persistence, non-executing server-local secret
    availability evidence, read-only immutable asset-delivery preflight, static
    immutable endpoint, and core-owned public/admin document injection are
-   complete. Actual secret lookup remains blocked.
+   complete. Secret-capable registration-only service consumption is accepted
+   only through its value-free typed boundary; Store Lite remains blocked.
 24. Create Store Lite in its separate distribution using only those accepted
    contracts.
 25. Add package-owned migrations, Product editing, catalog, cart, orders, and

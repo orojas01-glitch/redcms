@@ -20,4 +20,7 @@ return [
     'PUBLIC_MUTATION_TRUSTED_ORIGIN' => '',
     // Opaque references only. Secret values remain in their provider.
     'ADDON_SECRET_REFERENCES' => [],
+    // Optional local-only values keyed by the exact opaque references above.
+    // Never commit config.local.php or place secret values in tracked files.
+    'ADDON_SECRET_VALUES' => [],
 ];

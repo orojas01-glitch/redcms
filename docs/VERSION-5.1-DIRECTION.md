@@ -5,8 +5,11 @@ approved constrained JSON-LD core, non-executing add-on trust validation,
 persisted Owner authorization, per-client registry/migration-ledger storage,
 read-only reconciliation, guarded server-local installation into a disabled
 state, and constrained Owner-authorized atomic enablement for registration-only
-service, core-rendered default public component, and combined default-component
-plus registration-only-service profiles are implemented.
+service, secret-capable registration-only service, core-rendered default public
+component, and combined default-component plus registration-only-service
+profiles are implemented. The secret-capable profile resolves only each
+package's own server-local secret-reference settings through the typed service
+request and rejects secret-bearing results before they leave core.
 Owner-authorized non-executing atomic disablement with enabled-dependent
 refusal is also implemented. Fresh isolated Adriana JSON-LD verification
 and hosted Schema.org validation also pass. The separate Adriana production
@@ -63,8 +66,8 @@ postconditions before committing package state, replay evidence, and a
 value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
-Adapters, operational writable route/tool actions,
-settings UI/endpoints, actual secret lookup,
+Adapters, operational writable route/tool actions, richer package-runtime
+secret surfaces,
 upgrades, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. The first generic
@@ -88,8 +91,9 @@ now requires exact view/edit grants, a current state hash, locked enabled
 ownership, declared InnoDB package tables, contained writer execution, and an
 exact reloaded postcondition before committing package-owned values. No
 permission grant/revoke workflow, restore action, or create/delete endpoint is
-implied by these prerequisites. Operational writable route/tool actions and
-settings UI/endpoints are not active.
+implied by these prerequisites. Operational writable route/tool actions remain
+inactive; the separate ordinary-settings editor is documented and accepted
+below.
 The first non-executing settings-value prerequisite now normalizes only valid
 data-only definitions, requires exact type-correct non-secret defaults, and
 validates one closed configuration object. Missing, unknown, nested, malformed,
@@ -109,8 +113,9 @@ the shared lifecycle/package plus installation/setting row locks, recreates
 the complete plan, replaces every typed setting, reloads the exact target
 hash/count, and atomically records one value-free `addon.settings.updated`
 fact. Exact no-ops add no audit. Stale plans, drift, postcondition/audit
-failure, or injected late failure roll back. No settings UI/endpoint or secret
-lookup is added.
+failure, or injected late failure roll back. The writer itself exposes no
+package UI, performs no secret lookup, and changes no activation eligibility;
+the separate ordinary settings editor now delegates to this boundary.
 The separate core-only current-setting read model rechecks exact trusted
 package/registry identity and installed-disabled or enabled state, requires an
 explicit declared permission for every operational setting, and makes fresh
@@ -125,8 +130,13 @@ of opaque `config:` references declared by the operator, revalidates the
 complete typed configuration, and returns deterministic counts, missing
 setting keys, and fingerprints. It returns no reference identifier or secret
 value, reads no database or secret, executes no package, and changes no
-activation gate. Actual secret lookup and settings UI/endpoints remain
-unavailable.
+  activation gate. Core-owned server-local secret resolution/reference
+  replacement is accepted separately through an unlinked endpoint. The narrow
+  secret-capable registration-only service profile now consumes only its own
+  resolved references through the typed service request and rejects
+  secret-bearing results. The ordinary core-owned
+  settings editor is accepted separately and remains unlinked from
+  administrator navigation.
 The namespaced asset foundation is now complete through core-owned document
 injection. CSS must be beneath `assets/` and load at `head`; JavaScript must be
 beneath `assets/` and load at `body-end`. Core derives checksum-versioned
@@ -336,10 +346,13 @@ write, and never includes `addon.php`. The plan always reports activation,
 state mutation, and package loading unavailable. Runtime registration is now
 an available core contract. The read-only plan clears declarative theme,
 settings, and live-data gates only for a registration-only service package, a
-default public component package, or a default public component combined with
-registration-only services. All exclude migrations, settings, routes, jobs,
-public or administrator assets, administrator tools, adapters, and outbound
-hosts. Either component profile clears theme compatibility only through core's
+secret-capable registration-only service package, a default public component
+package, or a default public component combined with registration-only
+services. The secret-capable profile admits only secret-reference settings and
+requires complete per-client storage plus server-local values; it still
+excludes migrations, routes, jobs, assets, administrator tools/actions,
+adapters, and outbound hosts. The other profiles exclude settings. Either
+component profile clears theme compatibility only through core's
 escaped default renderer. Packages with any richer surface retain exact
 contract blockers. The specific registrar remains unexecuted until the
 separate apply command revalidates it under the shared lifecycle lock and
@@ -358,6 +371,16 @@ register first, disabled packages never execute, and the resulting handlers
 are exposed through a core lookup context without being invoked automatically.
 Any enabled drift or missing code fails before public rendering. Lifecycle
 CLIs remain outside this request bootstrap.
+
+The secret-capable service runtime is a narrow follow-on to that bootstrap.
+Core builds a private package-bound access object only after enabled identity,
+settings storage, complete typed rows, state hash, opaque-reference allowlist,
+and server-local value inventory all pass. The typed
+`RED_Addon_Service_Request::secret()` lookup returns only status while the
+resolved bytes travel by internal reference. Core scans typed service results
+and rejects secret disclosure; no secret bytes enter the runtime context,
+preflight material, audit, response, or browser state. Missing or unavailable
+configuration fails before the registrar executes.
 
 The Owner-authorized disable command provides the reverse
 `enabled` to `installed_disabled` transition. Its deterministic dry run binds
@@ -648,6 +671,16 @@ request bootstrap excludes the disabled package.
     state-aware plan only on the server; invoke only the scoped core bridge;
     return no package, actor, target, plan, or state values; and leave all
     administrator controls, forms, and public routes absent.
+43. Completed core-owned ordinary add-on settings editor and endpoint:
+    discover only validated data-only manifests; require an authenticated
+    administrator and current CSRF; render escaped core-owned controls for
+    exact package-declared permissions; bind a fresh plan hash; decode strict
+    ordinary scalar values; preserve opaque secret-reference rows without
+    disclosure; and delegate only to the existing atomic writer. Stale plans,
+    invalid/nested/unknown/secret-bearing submissions, permission drift,
+    storage drift, and writer failures fail closed. The endpoint remains
+    unlinked from administrator navigation, executes no package PHP, resolves
+    no secret, and changes no lifecycle or enablement state.
 43. Defined the generic public-mutation boundary: reserve any future
     static-POST anonymous add-on write for a separately declared and
     core-owned CSRF, scalar-validation, rate/idempotency, transaction, and
@@ -821,6 +854,33 @@ request bootstrap excludes the disabled package.
     and captures fixed desktop/mobile browser evidence into a non-secret packet
     outside the starter. A successful Docker/browser run and client-specific
     review remain required; it does not touch Adriana or link the dispatcher.
+65. Completed the core-owned server-local secret resolution and reference
+    replacement boundary: validate bounded ignored-local and operating-system
+    value inventories separately from the explicit opaque-reference allowlist;
+    resolve only a declared reference through an internal by-reference value;
+    and accept exact authenticated secret-setting maps through an unlinked
+    endpoint that revalidates trusted package identity, current grants, stale
+    plans, and complete typed configuration before delegating to the locked
+    atomic settings writer. Initial missing-secret binding, replacement,
+    unavailable-reference refusal, no-op behavior, value-free audit detail,
+    and cleanup are proven. It returns no secret bytes, executes no package
+    PHP, changes no lifecycle or enablement state, and does not make Store Lite
+    ready; richer package-runtime secret surfaces and a polished secret UI
+    remain later gates.
+
+66. Completed the secret-capable registration-only service profile. Its
+    preflight requires a service-only manifest with secret-reference settings,
+    complete per-client storage, exact installed/registry identity, and
+    allowlisted server-local values, while returning only counts, hashes, and
+    readiness. Owner enablement revalidates those facts and the registrar under
+    the shared lifecycle lock. Enabled package services receive only their own
+    resolved settings through `RED_Addon_Service_Request::secret()`; core
+    rejects secret-bearing result keys or strings and keeps the access object
+    out of context snapshots, plans, audits, responses, and browser state.
+    Dependency-free and disposable bootstrap fixtures plus the full 45-
+    migration acceptance suite passed, with temporary databases and grants
+    removed. Store Lite remains blocked behind richer persistence, editor,
+    route, asset, administrator, and commerce contracts.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

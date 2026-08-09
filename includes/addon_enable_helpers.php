@@ -3,11 +3,11 @@
  * Guarded Owner-authorized transition from installed_disabled to enabled.
  *
  * The transition is intentionally narrower than the manifest contract. It
- * accepts only the preflight's registration-only service, core-rendered
- * default public component, or default component with registration-only
- * services profile. It validates the fixed first-party registrar under the
- * package advisory lock, then persists state plus its bounded audit fact in
- * one transaction.
+ * accepts only the preflight's registration-only service, secret-capable
+ * registration-only service, core-rendered default public component, or
+ * default component with registration-only services profile. It validates the
+ * fixed first-party registrar under the package advisory lock, then persists
+ * state plus its bounded audit fact in one transaction.
  */
 
 require_once __DIR__ . '/addon_enable_preflight_helpers.php';
@@ -53,6 +53,7 @@ if (!function_exists('red_addon_enable_transition_plan')) {
                 $activationProfileId,
                 [
                     'registration_only_service',
+                    'registration_only_service_with_secrets',
                     'default_public_component',
                     'default_public_component_with_services',
                 ],

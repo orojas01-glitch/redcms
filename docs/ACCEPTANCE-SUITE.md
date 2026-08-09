@@ -35,6 +35,17 @@ credential-free HTTP/HTTPS URLs, email addresses, and opaque lowercase
 secret references. The fixture performs no database access, secret lookup,
 authorization, administrator rendering, package execution, or lifecycle
 change.
+The separate 12-assertion settings-editor fixture validates the core-owned
+authenticated request shape, strict ordinary scalar decoding, exact boolean
+and integer forms, unknown/nested/secret submission refusal, escaped control
+rendering, stale-plan binding, masked secret state, and no package markup or
+disclosure. It performs no database access, package execution, secret lookup,
+or lifecycle mutation.
+The separate 8-assertion secret-resolution fixture validates bounded
+server-local value sources, exact allowlist-required resolution, environment
+and local conflict refusal, and an internal by-reference value boundary. It
+returns no secret bytes in its fixed result and performs no database access,
+request parsing, package execution, or lifecycle change.
 The separate 18-assertion secret-reference availability fixture validates an
 empty default, sorted local/environment declaration merging, deduplication,
 bounded fail-closed syntax, exact package/configuration binding, deterministic
@@ -68,15 +79,17 @@ exact fixture cleanup. The full suite then makes real anonymous and signed-in
 administrator HTTP requests against a temporary first-party package, verifies
 public tags remain separate from administrator tags, and proves injection adds
 no extra runtime registration before removing the package and administrator.
-The 23-assertion disposable setting-storage and atomic-writer fixture requires
+The 31-assertion disposable setting-storage/editor, atomic-writer, and secret-
+replacement fixture requires
 the exact empty seven-column table and installation foreign key, explicit
 package-declared permission bindings, fresh binary grants, exact trusted
 filesystem/registry identity, installed-disabled or enabled state, complete
 typed target values, valid current stored rows, deterministic current/target
-and plan hashes, immediate revocation, zero package execution or secret
-resolution, exact full replacement, ordinary/secret column separation, one
-bounded audit fact, no-op handling, stale-target refusal, rollback after audit
-or injected failure, and exact package/administrator/grant/filesystem cleanup.
+and plan hashes, immediate revocation, zero package execution, exact full
+replacement, ordinary/secret column separation, one bounded audit fact,
+no-op handling, stale-target refusal, server-local secret resolution,
+initial missing-secret binding, unavailable-reference refusal, and exact
+package/administrator/grant/filesystem cleanup.
 Optional component-editor metadata is also validated as a fixed, data-only
 schema: declared components and permissions must resolve exactly, field types
 and constraints are allowlisted, and executable or storage-owned instructions
@@ -427,8 +440,9 @@ foundations.
 The latest complete 2026-08-04 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 48-assertion add-on trust contract, 22-assertion
-add-on setting-value contract, 18-assertion add-on secret-reference
-availability contract, 21-assertion add-on asset-plan contract, 17-assertion
+add-on setting-value contract, 8-assertion add-on secret-resolution
+contract, 18-assertion add-on secret-reference availability contract,
+21-assertion add-on asset-plan contract, 17-assertion
 public-mutation declaration contract, 13-assertion add-on component-editor value
 contract, 20-assertion display-only
 component-editor renderer contract, and
@@ -437,7 +451,8 @@ contract, and 20-assertion public-route contract, imported the 32-table installe
 applied all 45 migrations to the expected 34-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
-23-assertion add-on setting storage, authorization preflight, and atomic writer,
+31-assertion add-on setting storage/editor, authorization preflight, atomic
+writer, and secret replacement,
 13-assertion permission-scoped add-on setting read model,
 18-assertion permission-scoped administrator-tool dispatch,
 18-assertion non-executing administrator-action preflight,
@@ -521,7 +536,7 @@ scripts/dev-acceptance.sh
 A successful run ends with messages similar to:
 
 ```text
-Acceptance database, Owner authorization, add-on setting values, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
+Acceptance database, Owner authorization, add-on setting values/editor, secret-reference availability, asset planning, storage/write preflight/atomic writer, permission-scoped current-setting read model, component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight, static immutable asset endpoint, enabled add-on request bootstrap, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/opaque idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.
 Cleanup complete: stopped the isolated server and removed database/grant redcms_acceptance_....
 ```
 
@@ -595,17 +610,24 @@ containers, network, image, database, package marker, and build context.
   forged, disabled, drifted, invalid, or ambiguous state, no planner registrar
   invocation or registry mutation, real anonymous and signed-in HTTP documents,
   and exact package/administrator/filesystem cleanup.
-- Add-on setting storage/preflight/atomic-writer acceptance runs only in the uniquely
+- Add-on setting storage/editor/preflight/atomic-writer/secret-replacement acceptance runs only in the uniquely
   named disposable database. It requires the exact empty generic schema and
   restrictive installation foreign key, explicit package-declared permission
   bindings, fresh case-sensitive grants, exact trusted package and registry
   identity, supported lifecycle state, complete typed target values, valid
   current rows, deterministic value-free hashes, next-decision revocation, no
-  package execution, no secret resolution, and exact cleanup. Atomic
+  package execution, exact full replacement, and exact cleanup. Atomic
   replacement additionally requires shared locks, exact plan comparison,
-  complete rows, separate ordinary/secret columns, exact postcondition reload,
-  one value-free audit fact, no-op handling, and full rollback on audit or
-  injected late failure.
+  complete rows, separate ordinary/secret columns, server-local resolution,
+  initial missing-secret binding, unavailable-reference refusal, exact
+  postcondition reload, one value-free audit fact, no-op handling, and stale
+  or injected failure refusal without mutation.
+- Add-on secret-resolution acceptance runs before database creation. It requires
+  bounded ignored-local and operating-system value sources, exact lowercase
+  `config:` references, duplicate/conflict refusal, allowlist-required
+  resolution, and a fixed result with no secret bytes. The helper performs no
+  database access, request parsing, package execution, logging, rendering, or
+  lifecycle change.
 - Add-on setting-read-model acceptance runs only in the uniquely named
   disposable database and one temporary trusted package. It requires exact
   installed identity and supported lifecycle evidence, a declared permission
@@ -621,8 +643,20 @@ containers, network, image, database, package marker, and build context.
 - Add-on component-editor update acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires a core-owned operational form with only the numeric parent id, current state hash, CSRF token, and schema fields; server-derived package/component identity; fresh exact view/edit grants; fail-closed rendering after revocation; declared-editor-only writer registration; one exact writer owner; closed package-table metadata; InnoDB refusal before invocation; enabled locked parent/runtime/manifest ownership; normalized values; exact saved-value reload; immutable core-owned baseline/save snapshots; bounded validated history metadata; deterministic read-only restore preflight; exact plan matching; atomic source-linked restore execution; unchanged no-op behavior; stale/revoked/drifted/disabled/forged/tampered refusal; rollback after update or restore revision-ledger failure, emitted output, exceptions, nested buffers, false returns, and incomplete writes; unchanged core placement state; exact restored target state and revision timeline; and zero package, parent, revision, administrator, grant, table, or filesystem fixtures.
 - Add-on component-creation preflight/runner, parent-metadata, public-placement preflight/runner, and atomic-delete acceptance runs only in the uniquely named disposable database. It requires declared-editor-only creator/deleter registration, exact create/view/edit/delete/publish permissions, enabled manifest and runtime component/loader/creator/deleter ownership, closed package-table metadata, InnoDB refusal before callback invocation, an unused numeric record id, one active-theme layout, normalized parent and package values, an inactive hidden unrouted parent plan, deterministic hashing, disabled/revoked/mismatched/invalid/existing-record refusal, and zero creator/deleter invocation during preflight. The atomic creation runner requires exact plan matching under lifecycle/theme/installation serialization, rejects caller-owned transactions, contains creator/loader failures, verifies exact parent and package postconditions, commits one core `create` and one package `baseline` revision, refuses reuse, and rolls back output/exception/nested-buffer/false/partial-write and both forced-ledger failures. Parent state and writes require fresh exact view/edit grants, enabled binding, inactive shell and current revision evidence, stale-state refusal, title/layout/language-only mutation, unchanged package data, one core `save` revision, no-op suppression, and rollback on forced ledger failure. Public-placement planning binds exact parent/package state to one unique active Article route, requires language agreement and active-theme page-position support, derives closed placement values, and proves deterministic zero-write behavior with revoked, stale, cross-language, inactive-target, and unsupported-position refusals. Its atomic runner revalidates under lifecycle/theme/installation/source/target locks, refuses caller transactions, revoked grants, destination drift, and plan reuse, changes only the seven derived parent fields, preserves package and target state, commits one core `move` revision, and rolls back a forced revision failure. Delete planning binds exact parent/package hashes, the latest validated package revision, declared InnoDB tables, and deterministic value-free evidence without invoking the deleter or writing state. The atomic delete runner revalidates under lifecycle/theme/installation/parent locks, contains the deleter, rejects partial deletion, records both final `delete` snapshots, removes package/SEO/parent rows together, retains both ledgers, refuses reuse, and rolls back callback or ledger failures. Exact cleanup leaves zero administrator, grant, package, parent, revision, SEO, or table fixtures.
 - Add-on request-bootstrap acceptance runs only in the uniquely named disposable database and uses temporary first-party packages outside the clean starter. It proves uninstalled and disabled packages never execute, enabled dependencies register first, exact handlers and owners remain lookup-only, lifecycle CLIs do not request-load packages, bootstrap writes no registry or audit state, drift and missing dependencies/code fail before execution, and every package/database/filesystem fixture is removed.
+- Add-on runtime-secret acceptance runs before database creation and in the
+  uniquely named disposable database. The dependency-free fixture proves the
+  private package-bound access object, by-reference lookup, serialization and
+  debug redaction, safe service results, secret-disclosure refusal, and bounded
+  nested-data scanning. The disposable fixture proves the
+  `registration_only_service_with_secrets` profile: complete per-client
+  settings and server-local values are required, missing configuration blocks
+  before registrar execution, Owner preflight evidence is value-free, atomic
+  enablement succeeds only after exact revalidation, the service receives only
+  its own resolved setting, no secret appears in serialized output, and all
+  package, setting, administrator, grant, environment, and database fixtures
+  are removed.
 - Add-on install acceptance runs only in the uniquely named disposable database and uses a temporary validated first-party fixture outside the clean starter. It proves exact Owner authorization and dependency state, stale-plan and audit fail-closed behavior before SQL, resumable partial DDL, immutable migration evidence, bounded audit data, disabled/unloaded completion, local-only confirmations, and zero residual package, SQL, authorization, audit, or code-execution artifacts.
-- Add-on enablement-preflight acceptance runs only in the uniquely named disposable database and uses temporary validated packages outside the clean starter. It requires exact Owner `addons.enable` authority, exact installed-disabled/current registry evidence, deterministic client-bound plans, required enabled dependencies, capability and route conflict reporting, registration-only service, core-rendered default component, and combined default-component plus registration-only-service profiles that clear their declarative gates, exact richer-surface theme/settings/live-data/component-editor blockers, no apply path, identical pre/post registry and authorization fingerprints, no package execution, and exact cleanup.
+- Add-on enablement-preflight acceptance runs only in the uniquely named disposable database and uses temporary validated packages outside the clean starter. It requires exact Owner `addons.enable` authority, exact installed-disabled/current registry evidence, deterministic client-bound plans, required enabled dependencies, capability and route conflict reporting, registration-only service, secret-capable registration-only service with value-free readiness evidence, core-rendered default component, and combined default-component plus registration-only-service profiles that clear their declarative gates, exact richer-surface theme/settings/live-data/component-editor blockers, no apply path, identical pre/post registry and authorization fingerprints, no package execution during preflight, and exact cleanup.
 - Public-mutation live-data-preflight acceptance runs only in the uniquely named disposable database and uses one temporary trusted installed-disabled package outside the clean starter. It requires exact Owner enable authority, a current closed declaration, applied package migration evidence, declared InnoDB tables, complete typed settings, opaque secret-reference availability, and exact core subject/CSRF/rate-limit/idempotency/execution storage; it proves deterministic value-free hashes/counts, missing-table/setting/secret and unsupported-engine blockers, no table or reference disclosure, forged-plan refusal, zero request/transaction/runtime-registration/package-execution path, unchanged preflight state, and exact cleanup. It has no enable or dispatch path.
 - Public-mutation rate-limit acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, an enforced 12-per-60-second fixed window, bounded collision/contention handling, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. It has no HTTP, package-data, or enablement path.
 - Public-mutation idempotency-key acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, a 10-minute core-issued opaque key, correct subject/scope resolution, no raw-key persistence, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. The resolver itself remains non-consuming; the separate internal runner is its only consumer. It has no HTTP, package-data, or enablement path.

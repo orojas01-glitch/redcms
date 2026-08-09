@@ -1,6 +1,6 @@
 # RED-CMS Security Notes
 
-Date: 2026-08-05
+Date: 2026-08-07
 
 ## Configuration Secrets
 
@@ -37,6 +37,9 @@ Supported environment variables:
   request header, client package, log, or diagnostic output)
 - `RED_ADDON_SECRET_REFERENCES` (comma-separated opaque `config:` references;
   contains no secret values)
+- `RED_ADDON_SECRET_VALUES_JSON` (server-local JSON object mapping exact opaque
+  `config:` references to values; read only from the operating-system
+  environment and never returned or logged)
 
 The existing constants `DBHOST`, `DBUSER`, `DBPASS`, and `DBNAME` are preserved so current CMS classes continue to work.
 
@@ -178,6 +181,32 @@ add-on packages without executing them.
   returning any reference identifier or secret value. Malformed or stale
   declarations fail closed. The boundary reads no secret or database, executes
   no package, and grants no activation eligibility.
+- Core-internal secret resolution is a separate boundary. The operator must
+  provide both the explicit opaque-reference allowlist and a server-local
+  value inventory from ignored `ADDON_SECRET_VALUES` or the operating-system
+  `RED_ADDON_SECRET_VALUES_JSON` object. Values are bounded, NUL-free, and
+  rejected on malformed, nested, list-shaped, unknown, or conflicting input.
+  Resolution returns only fixed status while the bytes travel through an
+  internal by-reference value; they are never serialized, logged, audited,
+  rendered, persisted, or sent to package PHP by this boundary.
+- The core-owned secret-reference replacement endpoint accepts only exact
+  `config:` identifiers for declared secret settings. It resolves proposed
+  references server-locally, preserves ordinary values, and delegates a
+  complete configuration to the existing locked atomic settings writer. It
+  records only the value-free `secret_reference_replaced` detail, refuses
+  stale or unavailable plans, and does not change lifecycle, enablement, or
+  package execution. The endpoint remains unlinked while richer runtime
+  consumption and the administrator secret-management UI are separately
+  reviewed.
+- The admitted `registration_only_service_with_secrets` profile is the narrow
+  runtime-consumption exception. For a current enabled package with only
+  secret-reference settings and no richer surfaces, core resolves that
+  package's allowlisted server-local values into a private request object.
+  `RED_Addon_Service_Request::secret()` exposes only a value-free status plus
+  an internal by-reference value; core rejects any typed service result that
+  contains a resolved secret. Missing configuration blocks bootstrap before
+  package PHP runs, and no secret bytes enter context snapshots, plans, audits,
+  responses, logs, or browser state.
 - The display-only administrator renderer accepts only an empty state or the
   validator's exact closed result. It maps fixed field types to core-owned
   namespaced controls, escapes every manifest label, help string, option, and
@@ -507,9 +536,12 @@ closed to static fallback content. This component path never automatically
 invokes service, administrator-tool, administrator-action, adapter, or route
 handlers. Services and adapters remain lookup-only; routes, display tools, and
 action preflight can proceed only through their separate bounded cores. The
-clean starter contains no package directory or enabled state. The implemented enable command accepts only the
-constrained registration-only service, default public component, and combined
-default-component plus registration-only-service profiles.
+clean starter contains no package directory or enabled state. The implemented
+enable command accepts only the constrained registration-only service,
+secret-capable registration-only service, default public component, and
+combined default-component plus registration-only-service profiles. The
+secret-capable profile still has no route, component, asset, migration,
+administrator, adapter, or outbound-host surface.
 
 For add-on components, `RED_Articles` remains the core-owned placement parent
 and stores the complete validated component id. Production public dispatch
@@ -532,9 +564,9 @@ read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
 The implemented disable command is non-executing and data-retaining for any
-current enabled package with no enabled dependent. Settings UI/endpoints,
-migrations, live data, recovery, and every richer enablement gate remain
-separate work.
+current enabled package with no enabled dependent. Migrations, live data,
+recovery, and every richer enablement gate remain separate work; the narrow
+secret-capable service path does not authorize those surfaces.
 
 `docs/STORE-LITE-DIRECTION.md` defines the first optional package's security
 boundary. It does not activate commerce. Combined component-plus-service
@@ -546,8 +578,9 @@ metadata prerequisite, numeric placement-parent
 relationship and read-only public binding foundation are implemented.
 Client-submitted totals and browser payment redirects are never authoritative,
 and Store Lite data must remain package-owned in the current client's database.
-The atomic setting helper and availability evidence do not supply Store Lite
-settings UI/endpoints, actual secret lookup, or enablement readiness. The
+  The atomic setting helper, availability evidence, core-owned secret
+  replacement boundary, and narrow secret-capable service profile do not
+  supply Store Lite settings UI/endpoints or enablement readiness. The
 CSS/JavaScript plan, read-only delivery preflight, static endpoint, and
 core-owned document injection are complete, but do not make Store Lite
 enablement-ready.

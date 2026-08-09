@@ -13,7 +13,9 @@ $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/';
 $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
+require_once $projectRoot . '/includes/addon_setting_editor_helpers.php';
 require_once $projectRoot . '/includes/addon_setting_write_helpers.php';
+require_once $projectRoot . '/includes/addon_secret_replacement_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_setting_storage)_[A-Za-z0-9_]+\z/',
@@ -530,6 +532,172 @@ try {
         'ordinary defaults and opaque secret references persist in separate columns'
     );
 
+    $editorContext = red_addon_setting_editor_context(
+        $connection,
+        $package,
+        $actorId
+    );
+    $editorHtml = red_addon_setting_editor_render(
+        $editorContext,
+        str_repeat('b', 64)
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($editorContext['ready'])
+            && red_addon_valid_sha256($editorContext['planSha256'])
+            && str_contains($editorHtml, 'Settings[store.name]')
+            && str_contains($editorHtml, 'data-red-addon-secret-state="configured"')
+            && !str_contains($editorHtml, 'config:redcms.storage-fixture.api-key'),
+        'authorized settings context renders ordinary controls and masks the stored secret reference'
+    );
+    $editorNoop = red_addon_setting_editor_update(
+        $connection,
+        $package,
+        $actorId,
+        [
+            'store.name' => 'Fixture Store',
+            'store.enabled' => '0',
+        ],
+        $editorContext['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($editorNoop['ok'])
+            && $editorNoop['status'] === 'unchanged',
+        'the core settings editor preserves the secret row on an exact no-op'
+    );
+
+    $replacementReference = 'config:redcms.storage-fixture.rotated-key';
+    putenv(
+        'RED_ADDON_SECRET_REFERENCES='
+            . $values['payment.api-key'] . ',' . $replacementReference
+    );
+    putenv(
+        'RED_ADDON_SECRET_VALUES_JSON=' . json_encode([
+            $values['payment.api-key'] => 'fixture-original-secret',
+            $replacementReference => 'fixture-rotated-secret',
+        ], JSON_UNESCAPED_SLASHES)
+    );
+    $replacementTarget = red_addon_secret_replacement_target(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference]
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($replacementTarget['valid'])
+            && red_addon_valid_sha256(
+                $replacementTarget['plan']['planSha256'] ?? ''
+            ),
+        'a provisioned server-local reference produces a complete replacement plan'
+    );
+    $replacement = red_addon_secret_replacement_update(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference],
+        $replacementTarget['plan']['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($replacement['ok'])
+            && $replacement['status'] === 'updated'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(
+                    ':',
+                    (SELECT SecretReference FROM RED_Addon_Settings
+                     WHERE PackageID='redcms.storage-fixture'
+                       AND SettingKey='payment.api-key'),
+                    (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                     WHERE PackageID='redcms.storage-fixture'
+                       AND EventName='addon.settings.updated'
+                       AND DetailCode='secret_reference_replaced')
+                 )"
+            ) === $replacementReference . ':1',
+        'the replacement delegates to the atomic writer and records no secret value'
+    );
+    $replacementNoopTarget = red_addon_secret_replacement_target(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference]
+    );
+    $replacementNoop = red_addon_secret_replacement_update(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference],
+        $replacementNoopTarget['plan']['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($replacementNoop['ok'])
+            && $replacementNoop['status'] === 'unchanged'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND EventName='addon.settings.updated'
+                   AND DetailCode='secret_reference_replaced'"
+            ) === '1',
+        'an exact secret-reference replacement no-op adds no audit fact'
+    );
+
+    mysqli_query(
+        $connection,
+        "DELETE FROM RED_Addon_Settings
+         WHERE PackageID='redcms.storage-fixture'
+           AND SettingKey='payment.api-key'"
+    );
+    $initialReplacementTarget = red_addon_secret_replacement_target(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference]
+    );
+    $initialReplacement = red_addon_secret_replacement_update(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference],
+        $initialReplacementTarget['plan']['planSha256']
+    );
+    red_addon_setting_storage_test_assert(
+        !empty($initialReplacement['ok'])
+            && $initialReplacement['status'] === 'updated'
+            && red_addon_setting_storage_test_scalar(
+                $connection,
+                "SELECT SecretReference FROM RED_Addon_Settings
+                 WHERE PackageID='redcms.storage-fixture'
+                   AND SettingKey='payment.api-key'"
+            ) === $replacementReference,
+        'the replacement can bind an initially missing secret row without accepting a secret value'
+    );
+    $values['payment.api-key'] = $replacementReference;
+
+    $unavailableTarget = red_addon_secret_replacement_target(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => 'config:redcms.storage-fixture.missing']
+    );
+    red_addon_setting_storage_test_assert(
+        empty($unavailableTarget['valid'])
+            && $unavailableTarget['reason'] === 'secret_unavailable',
+        'a reference without an allowlisted provisioned value fails before writing'
+    );
+    $staleReplacement = red_addon_secret_replacement_update(
+        $connection,
+        $package,
+        $actorId,
+        ['payment.api-key' => $replacementReference],
+        str_repeat('c', 64)
+    );
+    red_addon_setting_storage_test_assert(
+        empty($staleReplacement['ok'])
+            && $staleReplacement['reason'] === 'stale_plan',
+        'a stale secret replacement plan is refused without mutation'
+    );
+    putenv('RED_ADDON_SECRET_REFERENCES');
+    putenv('RED_ADDON_SECRET_VALUES_JSON');
+
     $repeatPlan = red_addon_setting_write_preflight(
         $connection,
         $package,
@@ -550,7 +718,7 @@ try {
                 "SELECT COUNT(*) FROM RED_Addon_Activity_Log
                  WHERE PackageID='redcms.storage-fixture'
                    AND EventName='addon.settings.updated'"
-            ) === '1',
+            ) === '3',
         'an exact no-op commits no replacement and no duplicate audit fact'
     );
 

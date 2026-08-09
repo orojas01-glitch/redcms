@@ -48,6 +48,8 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-migration-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-trust-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-values-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-editor-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-secret-resolution-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-secret-availability-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-asset-plan-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-preflight-self-test.php"
@@ -67,6 +69,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-component-editor-renderer-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-runtime-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-service-invocation-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-runtime-secret-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-route-dispatch-self-test.php"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 if [[ ! -x "$FRANKENPHP_BIN" ]]; then
@@ -4720,7 +4723,7 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running component editor package-permission checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-editor-authorization-self-test.php"
 
-printf '%s\n' 'Running add-on setting storage, authorization preflight, and atomic writer checks.'
+printf '%s\n' 'Running add-on setting storage, editor, authorization preflight, atomic writer, and secret replacement checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-storage-preflight-self-test.php"
 
 printf '%s\n' 'Running permission-scoped add-on setting read-model checks.'
@@ -4754,6 +4757,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 
 printf '%s\n' 'Running enabled add-on request bootstrap checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-request-bootstrap-self-test.php"
+
+printf '%s\n' 'Running package-runtime secret consumption checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-runtime-secret-bootstrap-self-test.php"
 
 printf '%s\n' 'Running safe add-on component persistence and dispatch checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-dispatch-self-test.php"
@@ -4976,4 +4982,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/secret availability/asset plan/storage/write preflight/atomic writer/permission-scoped settings read model, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Owner authorization, add-on setting values/editor/secret resolution/availability/asset plan/storage/write preflight/atomic writer/replacement/permission-scoped settings read model, secret-capable service runtime/by-reference access/result redaction, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery, read-only add-on enablement/public-mutation live-data preflight/anonymous subject and CSRF/fixed-window rate-limit/idempotency-key/atomic-runner/bounded-response/declared-form/HTTP-envelope/route-selector foundations, atomic add-on enablement/disablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
