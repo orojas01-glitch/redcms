@@ -2,8 +2,9 @@
 
 Status: the separately distributed package now implements catalog migrations,
 normalization, persistence, product administration, core-owned Add/Edit/Save
-bridges, and the pure public-product presenter prerequisite. Placement storage
-and enabled Product component binding remain next; cart and orders remain later.
+bridges, Product placement storage, and the enabled runtime Product component.
+The user-facing Add component workflow remains next; cart and orders remain
+later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -148,8 +149,11 @@ the complete product normalization contract and returns only a published
 product's title, summary, fixed price or price range, effective availability,
 and bounded option-label facts. Core now accepts that optional fact list in its
 escaped semantic default renderer. The presenter opens no database and does not
-yet bind a page placement, render media, expose variant controls, or create an
-add-to-cart action.
+render media, expose variant controls, or create an add-to-cart action. Store
+Lite 0.1.11 adds one restrictive package-owned placement relationship plus the
+exact transactional editor callbacks and read-only runtime handler. The handler
+reloads the bound product and delegates only to the pure presenter; no theme or
+core query reads package business fields.
 
 Themes may opt into a declared Product presentation contract later, but a
 theme must not query Store Lite tables directly or become required for safe
@@ -466,9 +470,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    complete; restore UI actions, operational editing, and public
    placement/activation remain. The core default renderer now also accepts an
    optional bounded label/value fact list while preserving the original
-   title/summary output and refusing package HTML. Store Lite 0.1.10 consumes
-   that contract through a pure public-product presenter; package placement
-   persistence and runtime binding remain next. The creation preflight
+   title/summary output and refusing package HTML. Store Lite 0.1.11 now
+   supplies the package-owned placement relationship and runtime Product
+   binding on top of the 0.1.10 presenter. Transactional package callbacks and
+   disposable desktop/mobile public rendering pass; an operational core-owned
+   Add component workflow remains next. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Completed Gate 2A: lock the package-owned Product record contract for

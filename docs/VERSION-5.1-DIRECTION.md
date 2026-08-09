@@ -1032,6 +1032,22 @@ request bootstrap excludes the disabled package.
     cart, order, or mutation access. Placement persistence and the enabled
     Product component binding remain the next Store Lite gate.
 
+77. Completed the separately distributed Store Lite 0.1.11 Product placement
+    and runtime binding gate. One package-owned InnoDB relationship row binds
+    one core `RED_Articles` parent to one existing package Product record using
+    restrictive foreign keys. Exact loader/creator/writer/deleter callbacks
+    participate only in the core-owned transaction, while the public handler
+    reloads the complete normalized published product and returns only the
+    closed presenter model. A fresh clean-core-plus-package rehearsal creates
+    that relationship through the package callback and verifies the homepage
+    fact card before login at 1280x900 and 390x844. All 80 Chrome checks pass,
+    including semantic facts, server-derived price and availability, zero
+    overflow, and zero console, page, request, or HTTP errors. Cleanup removes
+    the staged server, schema, scoped grant, and project while preserving the
+    configured primary fingerprint. This does not make the richer manifest
+    normally enableable and does not add the still-missing user-facing Add
+    component workflow, cart, order, route, or public mutation.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

@@ -566,6 +566,15 @@ behind an exact preflight plan. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
+The separately distributed Store Lite 0.1.11 Product component keeps its
+business relationship in a package-owned InnoDB table with restrictive foreign
+keys to the numeric core parent and package Product parent. Its create, update,
+and delete callbacks require the surrounding core transaction; its runtime
+handler performs only a bound-product read, reconstructs and re-normalizes the
+complete catalog graph, and returns the closed core fact model. It emits no
+markup and cannot mutate cart, order, inventory, payment, lifecycle, or core
+placement state.
+
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Migrations, live data,
 recovery, and every richer enablement gate remain separate work; the narrow

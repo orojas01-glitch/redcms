@@ -300,7 +300,8 @@ RED_DB_NAME="$REHEARSAL_DATABASE" \
 for migration in \
     '2026-08-07-create-catalog.sql' \
     '2026-08-07-align-media-reference-contract.sql' \
-    '2026-08-08-create-product-activity.sql'; do
+    '2026-08-08-create-product-activity.sql' \
+    '2026-08-08-create-product-placements.sql'; do
     red_store_lite_app_mysql < \
         "$STAGED_PROJECT/addons/redcms/store-lite/migrations/$migration"
 done

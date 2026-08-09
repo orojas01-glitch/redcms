@@ -89,18 +89,21 @@ field mixing fail closed before a package write.
 
 ## Persistence ownership
 
-The future package owns namespaced tables such as:
+The package owns namespaced tables including:
 
 - `RED_Addon_StoreLite_Products` for the product parent and publish state;
 - `RED_Addon_StoreLite_Product_Options` and
   `RED_Addon_StoreLite_Product_Option_Values` for bounded choices; and
-- `RED_Addon_StoreLite_Product_Variants` for explicit sellable combinations.
+- `RED_Addon_StoreLite_Product_Variants` for explicit sellable combinations;
+  and
+- `RED_Addon_StoreLite_Product_Placements` for the exact numeric relationship
+  between one core Product component parent and one package product parent.
 
-The exact migration columns remain a next package-implementation decision, but
-every table must be package-owned, InnoDB, migration-backed, and independently
-installed in the adopting client's database. A Product component record may
-refer to one package product parent through the generic numeric placement
-relationship. Core does not select these tables or store their business
+Every table is package-owned, InnoDB, migration-backed, and independently
+installed in the adopting client's database. The placement table has one row
+per core parent and restrictive foreign keys to both `RED_Articles.RecordID`
+and the package Product `RecordID`; neither side can be removed while that
+relationship exists. Core does not select these tables or store their business
 fields.
 
 Cart lines and order lines are later package tables. Order creation must copy
@@ -108,11 +111,13 @@ the selected title, option labels, SKU, integer price, currency, and quantity
 into an immutable order-line snapshot; later product edits cannot rewrite
 history.
 
-Store Lite 0.1.10 also provides a pure public presenter that re-normalizes this
+Store Lite 0.1.10 provides a pure public presenter that re-normalizes this
 exact record before producing title, summary, price, effective availability,
-and bounded option-label facts for the core-owned default renderer. It does not
-open storage or establish the Product component placement relationship; those
-remain the next package gate.
+and bounded option-label facts for the core-owned default renderer. Store Lite
+0.1.11 adds the package-owned relationship plus exact loader/creator/writer/
+deleter callbacks and the runtime handler that reloads the bound product before
+calling that presenter. The handler returns only the closed view model; it does
+not emit HTML or modify cart, order, inventory, or payment state.
 
 ## Server and mutation rules
 

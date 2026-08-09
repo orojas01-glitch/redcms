@@ -47,6 +47,41 @@ async function login(page) {
     check((await response.text()).trim() === 'yes', 'disposable administrator login succeeds');
 }
 
+async function verifyHomepageProduct(page, definition) {
+    await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
+    const product = page.locator(
+        '[data-red-addon-component="redcms.store-lite/product"]'
+    );
+    await product.waitFor({state: 'visible'});
+    const expectedTitle = definition.mutate
+        ? 'Banana bunch'
+        : 'Banana bunch browser-verified';
+    const expectedPrice = definition.mutate ? 'USD 5.99' : 'USD 6.49';
+    check(await product.getByRole('heading', {
+        name: expectedTitle,
+        exact: true,
+    }).count() === 1,
+        `${definition.name} homepage renders the bound Product title`);
+    check((await product.textContent() || '').includes('Six ripe bananas.'),
+        `${definition.name} homepage renders the Product summary`);
+    check(await product.locator('dl.red-addon-component__facts').count() === 1,
+        `${definition.name} homepage uses the semantic fact list`);
+    check((await product.textContent() || '').includes(expectedPrice),
+        `${definition.name} homepage renders the server-derived price`);
+    check((await product.textContent() || '').includes('Available'),
+        `${definition.name} homepage renders server-derived availability`);
+    const overflow = await product.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+    }));
+    check(overflow.scrollWidth <= overflow.clientWidth + 1,
+        `${definition.name} homepage Product has no horizontal overflow`,
+        JSON.stringify(overflow));
+    await product.screenshot({
+        path: path.join(evidenceDir, `${definition.name}-home-product.png`),
+    });
+}
+
 async function openProducts(page, persistedDesktopChange, createdProduct) {
     await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
     await page.locator('#content_third a').click();
@@ -137,6 +172,7 @@ async function runCase(browser, definition) {
         }
     });
 
+    await verifyHomepageProduct(page, definition);
     await login(page);
     let tool = await openProducts(
         page,
