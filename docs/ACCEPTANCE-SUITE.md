@@ -12,9 +12,10 @@ This is a local development and controlled staging tool. It is not a HostGator d
 gate for the externally distributed Store Lite package. It stages a temporary
 clean core plus package, uses one uniquely named disposable schema and scoped
 grant, applies core and package migrations, creates only an acceptance fixture,
-and drives authenticated desktop/mobile Chrome through Products, existing-
-target Edit, Save, and reload. It then verifies exact package and core audit
-facts, unchanged variable-product state, zero browser/runtime errors, the
+and drives desktop/mobile Chrome through a public homepage Product check plus
+authenticated Products Add/Create and existing-target Edit/Save/reload. It then
+verifies exact package and core audit facts, unchanged variable-product state,
+zero browser/runtime errors, the
 configured primary fingerprint, and removal of the temporary server, schema,
 grant, and staged package. Its screenshots and JSON report remain in the
 printed non-secret temporary evidence directory. This gate does not make Store
@@ -783,10 +784,13 @@ containers, network, image, database, package marker, and build context.
   It requires an integrity-valid Store Lite package outside the starter, all 45
   core migrations plus the exact package migration inventory in a fresh
   schema, one acceptance-only enabled registry fixture, only the exact Products
-  capability, a simple banana and bounded variable T-shirt, the visible
-  authenticated Tools -> Products -> Edit -> Save path at 1280x900 and 390x844,
+  capability, a simple banana and bounded variable T-shirt, one package-callback
+  Product binding on the homepage, the unauthenticated public fact card, and the
+  visible authenticated Tools -> Products -> Add/Create and Edit/Save paths at
+  1280x900 and 390x844,
   exact persisted integer-money/stock/title changes, one package update event,
-  one value-free core form-saved audit fact, an unchanged T-shirt graph, zero
+  one value-free core form-saved audit fact, an unchanged T-shirt graph, exact
+  semantic price and availability facts with no overflow, zero
   console/page/request/HTTP/runtime errors, and exact server/schema/grant/staged-
   package cleanup with an unchanged retained-primary fingerprint.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.
