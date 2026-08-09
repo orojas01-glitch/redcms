@@ -142,10 +142,13 @@ implemented. They load only already-recorded `enabled` packages after complete
 catalog, registry, dependency, namespace, and integrity reconciliation, expose
 registered handlers through a core lookup context, and fail before rendering
 when enabled evidence is unsafe. An enabled manifest-declared component can
-now receive only a bounded placement context and return a text-only view model
-that core escapes into its default public renderer; all other handler types
-remain non-dispatched. The clean starter has no package directory or enabled
-package state.
+now receive only a bounded placement context and return a title/summary model
+with an optional bounded list of plain-text label/value facts. Core escapes the
+complete model and owns the semantic default public renderer; package HTML and
+every other handler type remain non-dispatched. This generic fact-card contract
+is the presentation prerequisite for Store Lite 0.1.10's separately distributed
+pure public-product presenter. The clean starter has no package directory or
+enabled package state.
 
 The read-only enablement plan now resolves declarative theme, settings, and
 live-data gates for four deliberately constrained profiles: a registration-only

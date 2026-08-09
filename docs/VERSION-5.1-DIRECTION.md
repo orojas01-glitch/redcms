@@ -1020,6 +1020,18 @@ request bootstrap excludes the disabled package.
     primary fingerprint. The clean starter still contains no Store Lite code or
     business data, and normal richer-package enablement remains blocked.
 
+76. Extended the core-owned default component renderer with an optional closed
+    fact-card model. Existing title/summary output remains unchanged; a handler
+    may additionally return at most twelve bounded plain-text label/value facts,
+    which core escapes and renders as semantic description-list markup. Package
+    HTML, links, controls, templates, output, and malformed facts remain refused
+    through the existing static fallback. The separately distributed Store Lite
+    0.1.10 package adds a pure presenter that re-normalizes one published simple
+    or variable product and returns only title, summary, price, effective
+    availability, and option-label facts. It has no database, request, runtime,
+    cart, order, or mutation access. Placement persistence and the enabled
+    Product component binding remain the next Store Lite gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

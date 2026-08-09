@@ -530,9 +530,12 @@ This remains trusted in-process PHP, not a sandbox. The current self-test
 executes only temporary fixtures outside the starter. Uninstalled and disabled
 packages never execute. Current enabled packages register into a request-local
 lookup context. Core may invoke an enabled manifest-declared component only
-through its fixed text view model and escaped default renderer; malformed
-values, emitted output, handler exceptions, and output-buffer tampering fail
-closed to static fallback content. This component path never automatically
+through its fixed text view model and escaped default renderer. The view may
+add only a bounded closed list of plain-text label/value facts, which core
+escapes and renders as semantic description-list markup; package HTML, links,
+controls, and templates remain forbidden. Malformed values, emitted output,
+handler exceptions, and output-buffer tampering fail closed to static fallback
+content. This component path never automatically
 invokes service, administrator-tool, administrator-action, adapter, or route
 handlers. Services and adapters remain lookup-only; routes, display tools, and
 action preflight can proceed only through their separate bounded cores. The

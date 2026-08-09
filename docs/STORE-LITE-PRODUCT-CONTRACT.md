@@ -1,8 +1,9 @@
 # Store Lite Product and Variant Contract
 
-Status: Gate 2A accepted as a package-contract fixture on 2026-08-07. This
-document fixes the first product/variant bounds before Store Lite package code
-or package migrations are created. It is not a core commerce implementation.
+Status: Gate 2A accepted as a package-contract fixture on 2026-08-07 and now
+implemented by the separately distributed Store Lite package. This document
+continues to fix the first product/variant bounds; it is not a core commerce
+implementation.
 
 Store Lite remains an optional separately deployed package. The contract is
 kept in the RED-CMS repository so the package, its migrations, and its
@@ -106,6 +107,12 @@ Cart lines and order lines are later package tables. Order creation must copy
 the selected title, option labels, SKU, integer price, currency, and quantity
 into an immutable order-line snapshot; later product edits cannot rewrite
 history.
+
+Store Lite 0.1.10 also provides a pure public presenter that re-normalizes this
+exact record before producing title, summary, price, effective availability,
+and bounded option-label facts for the core-owned default renderer. It does not
+open storage or establish the Product component placement relationship; those
+remain the next package gate.
 
 ## Server and mutation rules
 

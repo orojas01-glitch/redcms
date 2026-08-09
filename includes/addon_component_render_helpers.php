@@ -4,7 +4,9 @@
  *
  * Add-on PHP is trusted operator-reviewed code, not a sandbox. This boundary
  * nevertheless keeps the value it receives and the markup it can influence
- * deliberately small: page placement scalars in, a text-only view model out.
+ * deliberately small: page placement scalars in, a bounded text view model
+ * out. Core may render an optional closed list of label/value facts, but
+ * package HTML remains forbidden.
  * Core owns the default renderer and never selects a class, template, or
  * callback from a page row.
  */
@@ -91,7 +93,14 @@ if (!function_exists('red_addon_public_component_view_model')) {
     function red_addon_public_component_view_model($viewModel)
     {
         if (!is_array($viewModel)
-            || array_keys($viewModel) !== ['title', 'summary']
+            || !in_array(
+                array_keys($viewModel),
+                [
+                    ['title', 'summary'],
+                    ['title', 'summary', 'facts'],
+                ],
+                true
+            )
             || !is_string($viewModel['title'])
             || !is_string($viewModel['summary'])
         ) {
@@ -104,10 +113,39 @@ if (!function_exists('red_addon_public_component_view_model')) {
             return null;
         }
 
-        return [
+        $normalized = [
             'title' => $title,
             'summary' => $summary,
         ];
+        if (!array_key_exists('facts', $viewModel)) {
+            return $normalized;
+        }
+        if (!is_array($viewModel['facts'])
+            || !array_is_list($viewModel['facts'])
+            || count($viewModel['facts']) > 12
+        ) {
+            return null;
+        }
+        $facts = [];
+        foreach ($viewModel['facts'] as $fact) {
+            if (!is_array($fact)
+                || array_keys($fact) !== ['label', 'value']
+                || !is_string($fact['label'])
+                || !is_string($fact['value'])
+            ) {
+                return null;
+            }
+            $label = red_addon_public_component_scalar($fact['label'], 80);
+            $value = red_addon_public_component_scalar($fact['value'], 2000);
+            if ($label === null || $label === ''
+                || $value === null || $value === ''
+            ) {
+                return null;
+            }
+            $facts[] = ['label' => $label, 'value' => $value];
+        }
+        $normalized['facts'] = $facts;
+        return $normalized;
     }
 }
 
@@ -180,6 +218,19 @@ if (!function_exists('red_addon_public_component_render')) {
             '</h2>';
         if ($viewModel['summary'] !== '') {
             echo '<p>' . red_addon_public_component_escape($viewModel['summary']) . '</p>';
+        }
+        if (array_key_exists('facts', $viewModel)
+            && $viewModel['facts'] !== []
+        ) {
+            echo '<dl class="red-addon-component__facts">';
+            foreach ($viewModel['facts'] as $fact) {
+                echo '<div><dt>'
+                    . red_addon_public_component_escape($fact['label'])
+                    . '</dt><dd>'
+                    . red_addon_public_component_escape($fact['value'])
+                    . '</dd></div>';
+            }
+            echo '</dl>';
         }
         echo '</section>';
         return true;
