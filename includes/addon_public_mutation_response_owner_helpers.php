@@ -12,7 +12,8 @@
 
 require_once __DIR__ . '/addon_public_mutation_deployment_profile_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_response_emitter_helpers.php';
-require_once __DIR__ . '/addon_public_mutation_subject_cookie_lifecycle_helpers.php';
+require_once __DIR__ .
+    '/addon_public_mutation_subject_cookie_emitter_helpers.php';
 
 if (!function_exists('red_addon_public_mutation_response_owner_result')) {
     function red_addon_public_mutation_response_owner_result(
@@ -50,28 +51,9 @@ if (!function_exists('red_addon_public_mutation_response_owner_cookie_values')) 
         if ($lifecycle === null) {
             return [];
         }
-        if (!red_addon_public_mutation_subject_cookie_lifecycle_serialized_valid(
+        return red_addon_public_mutation_subject_cookie_emitter_values(
             $lifecycle
-        ) || $lifecycle['valid'] !== true) {
-            return null;
-        }
-
-        if ($lifecycle['state'] === 'issued') {
-            return [$lifecycle['setCookieValue']];
-        }
-        if ($lifecycle['state'] === 'resolved') {
-            return [];
-        }
-        if ($lifecycle['state'] === 'cleared') {
-            return [$lifecycle['clearCookieValue']];
-        }
-        if ($lifecycle['state'] === 'rotated') {
-            return [
-                $lifecycle['clearCookieValue'],
-                $lifecycle['setCookieValue'],
-            ];
-        }
-        return null;
+        );
     }
 }
 

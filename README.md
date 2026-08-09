@@ -323,14 +323,17 @@ features.
   state-loader ownership, derives the placement-bound form instance, bootstraps
   evidence, and returns escaped markup plus a lifecycle descriptor. It invokes
   no package callback, reads no request global, emits no output/header/cookie,
-  and remains unlinked from the front controller and mutation endpoint
-- Unlinked core-owned public-mutation browser controller. It validates one
+  and reads no request global or package callback. The generic component
+  renderer now invokes it only inside the core-owned request-local page
+  coordinator when the supported endpoint gate is active
+- Core-owned public-mutation browser controller. It validates one
   same-origin form configuration, removes opaque evidence from DOM attributes,
   captures and freezes one canonical command per idempotency key, and permits
   only exact-body retry after transient network, rate, or availability failure.
   It accepts only the closed JSON response vocabulary and writes generic text
   through `textContent`; it uses no storage, cookies, logs, dynamic code, HTML
-  sinks, or external URL and is not delivered to public pages yet
+  sinks, or external URL. Core delivers it once, and only when at least one
+  mutation form was accepted on an explicitly enabled supported-server page
 - Pure core-owned public-mutation HTTP request envelope for a future dispatcher.
   It validates explicit canonical HTTPS origin, exact static POST path, form
   content metadata, one opaque subject cookie, and fixed CSRF/idempotency
@@ -362,12 +365,15 @@ features.
   change, dispatcher, endpoint, cookie flow, enablement change, or Store
   Lite/client-data path. Its per-installation HMAC key and deployment
   configuration remain external to the clean starter
-- Unlinked core-owned public-mutation dispatcher composition. It accepts only
+- Core-owned public-mutation dispatcher composition. It accepts only
   explicit attested method/target/capture facts, selects one registrar-bound
   route, verifies the opaque subject and CSRF before decoding declared scalar
   fields, invokes the atomic runner, and returns only the fixed response model.
-  It is not linked to `index.php`, emits no response or browser cookie, and
-  adds no package, enablement, Store Lite, or client-data behavior
+  A narrow front-controller bridge now composes it only for the reserved
+  `/addons/` namespace after the explicit server flag, trusted HTTPS origin,
+  and ingress HMAC key all pass. The dispatcher itself still emits no response
+  or browser cookie and adds no package, enablement, Store Lite, or client-data
+  behavior
 - Disposable Docker supported-server dispatcher rehearsal. It builds the
   pinned custom FrankenPHP/Caddy image, applies the current migrations to a
   fresh temporary MySQL database, and proves the real attested request path
@@ -380,11 +386,12 @@ features.
 - Core-owned browser subject-cookie lifecycle bridge. Transactional `ensure`,
   `clear`, and `rotate` operations return only fixed host-only cookie
   descriptors, refuse malformed sources and active caller transactions, and
-  invalidate the old subject and CSRF evidence on rotation. Disposable and
+  invalidate the old subject and CSRF evidence on rotation. The page
+  coordinator can now ensure or resolve one subject for all accepted forms and
+  a separate fixed emitter owns its response cookie. Disposable and
   supported-server proofs cover issuance, resolve-without-reissue, fixed
-  clearance, replacement, and cleanup; the bridge is not linked to `index.php`
-  and does not authorize a client deployment, package enablement, or Store Lite
-  route
+  clearance, replacement, and cleanup; this does not authorize a client
+  deployment, package enablement, or Store Lite route
 - Non-executing per-client public-mutation deployment profile validator. It
   accepts only an operator-owned review packet with one canonical HTTPS origin,
   pinned FrankenPHP/Caddy versions, the fixed process-environment HMAC key
@@ -394,18 +401,27 @@ features.
   request-derived trust, package/theme response ownership, policy drift, and
   all dispatcher/package/Store Lite activation flags; it reads no database,
   secret, filesystem, request, or client state
-- Core-only non-routable public-mutation response emitter. It accepts only the
+- Core-only public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the
   corresponding fixed bytes. It reads no request/cookie/session state,
-  database, runtime, or package code and remains unlinked from `index.php`, so
-  it creates no public endpoint, browser cookie, Store Lite behavior, or
-  enablement change
+  database, runtime, or package code. The supported endpoint bridge is now its
+  only front-controller caller; it creates no browser cookie, Store Lite
+  behavior, package enablement, or client deployment by itself
 - Core-owned non-emitting public-mutation response owner. It composes only an
   already-valid fixed core envelope with the lifecycle bridge's exact subject-
   cookie descriptors, rejects arbitrary headers, policy drift, and body token
   leakage, and returns a deterministic pre-link result. It reads no request,
   database, secret, package, or client state and remains outside `index.php`.
+- Fail-closed public-mutation endpoint and page-delivery bridge. It remains
+  dormant unless server-local configuration explicitly enables the endpoint
+  and provides both the canonical HTTPS origin and process-environment ingress
+  HMAC key. Before theme or session rendering, core may claim only the reserved
+  `/addons/` namespace and emit one closed response. On normal `GET` pages,
+  core parses the raw subject-cookie header, reuses one subject across at most
+  128 accepted forms, appends only core-rendered form HTML, delivers the fixed
+  controller once, and emits only the fixed host-only cookie lifecycle. Theme
+  and package code own none of these headers, cookies, scripts, or responses
 - Non-executing per-client deployment review validator. It binds a reviewed
   profile hash to non-secret Caddy/FrankenPHP/TLS/proxy artifact evidence,
   process-environment trusted-origin/HMAC provisioning and rotation facts, and

@@ -617,6 +617,15 @@ lifecycle with clean logs, preserved the tracked empty-media manifests, and
 removed its fixtures, server, databases, grants, authorization rows, registry
 rows, and add-on audit rows.
 
+On 2026-08-09, the final Gate 2D2D3B tree reran the complete suite against a
+new 45-migration protected disposable baseline and a separate uniquely named
+acceptance database. The new 10-assertion endpoint, 4-assertion cookie emitter,
+and 17-assertion component/page coordinator checks passed alongside every
+existing migration, HTTP, authorization, CRUD, media, transaction, rollback,
+theme-contract, and schema-signature gate. The configured disposable-primary
+snapshot remained unchanged; independent post-run checks found zero temporary
+schemas and zero grants.
+
 A separate generated-fixture Chrome inspection rendered the new component
 editor's valid and field-error states at 1512×900 and 390×844. Both viewports
 had zero console errors, failed requests, missing labels, clipped controls,
@@ -1010,7 +1019,8 @@ containers, network, image, database, package marker, and build context.
   deployment or dispatcher authorization.
 - The separate Docker-only
   `scripts/frankenphp-public-mutation-dispatch-proof.sh` stages only reviewed
-  core helpers and a disposable fixture endpoint, builds the same pinned
+  core helpers plus the operational endpoint bridge and a disposable fixture
+  front controller, builds the same pinned
   FrankenPHP/Caddy binary, adds `mysqli` only to the proof image, and exercises
   the complete attested dispatcher path against a fresh MySQL database. It
   proves accepted/replay/refusal/conflict behavior and exact execution,
@@ -1021,6 +1031,23 @@ containers, network, image, database, package marker, and build context.
   image, network, and context are removed on success or failure; it does not
   alter the default server, a client installation, production browser state,
   enablement, or Store Lite.
+- Public-mutation endpoint acceptance is dependency-free and creates no
+  database, package, browser, client, or server fixture. Its 10 assertions
+  require the conjunctive enablement/origin/HMAC gate, reserved unencoded
+  namespace candidacy, non-POST selection behavior, generic disabled and
+  malformed refusal, exact dispatcher composition, closed-result validation,
+  and no response emission during pure dispatch tests.
+- Public-mutation subject-cookie emitter acceptance is dependency-free. Its 4
+  assertions prove exact issuance, resolve-without-header, clearance, and
+  clear-before-set rotation values from the already validated lifecycle, while
+  refusing invalid input. Package and theme code cannot supply header names,
+  attributes, or arbitrary cookie values.
+- Public-component form-integration acceptance runs only against a freshly
+  migrated disposable database. Its 17 assertions now also require duplicate
+  raw-cookie refusal without evidence, one issued subject and one controller
+  delivery for the first accepted page form, same-subject reuse for later
+  forms, strict request-local coordinator validation, display-only fallback,
+  and exact evidence/schema/grant cleanup.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/
@@ -1045,9 +1072,10 @@ containers, network, image, database, package marker, and build context.
   `Expires`; it refuses forged descriptors, policy drift, token drift, domain
   injection, and max-age drift. It emits no header/cookie and changes no
   request/session/response/buffer state. The separate disposable lifecycle
-  fixture owns database-backed ensure/clear/rotate proof; neither fixture links
-  a front controller or creates a production endpoint, enablement, Store Lite,
-  or client-state path.
+  fixture owns database-backed ensure/clear/rotate proof. The serializer remains
+  pure even though the separate core emitter and gated front-controller bridge
+  now consume its validated lifecycle; no client endpoint, package enablement,
+  Store Lite data, or client state is created by these fixtures.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

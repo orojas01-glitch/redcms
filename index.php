@@ -46,6 +46,87 @@ if (is_string($redAddonAssetRequestUri)
     exit;
 }
 
+$redPublicMutationMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+$redPublicMutationTarget = $_SERVER['REQUEST_URI'] ?? '';
+if (is_string($redPublicMutationMethod)
+    && $redPublicMutationMethod !== ''
+    && is_string($redPublicMutationTarget)
+    && str_starts_with($redPublicMutationTarget, '/addons/')
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__ . '/includes/addon_runtime_helpers.php';
+    require_once __DIR__ .
+        '/includes/addon_public_mutation_endpoint_helpers.php';
+
+    $redPublicMutationEndpoint =
+        red_addon_public_mutation_endpoint_dispatch(
+            null,
+            $redPublicMutationMethod,
+            $redPublicMutationTarget,
+            red_addon_public_mutation_server_request_result(
+                'transport_unavailable'
+            ),
+            false
+        );
+    if (red_addon_public_mutation_endpoint_enabled()) {
+        $redPublicMutationConnection = null;
+        try {
+            $redPublicMutationConnection = @mysqli_connect(
+                red_config_value(
+                    'DBHOST',
+                    ['RED_DB_HOST', 'DBHOST'],
+                    'localhost'
+                ),
+                red_config_value('DBUSER', ['RED_DB_USER', 'DBUSER'], ''),
+                red_config_value('DBPASS', ['RED_DB_PASS', 'DBPASS'], ''),
+                red_config_value('DBNAME', ['RED_DB_NAME', 'DBNAME'], '')
+            );
+            if (!$redPublicMutationConnection
+                || !@mysqli_set_charset(
+                    $redPublicMutationConnection,
+                    'utf8mb4'
+                )
+            ) {
+                throw new RuntimeException(
+                    'The public-mutation database connection is unavailable.'
+                );
+            }
+            red_addon_runtime_request_bootstrap(
+                $redPublicMutationConnection,
+                __DIR__
+            );
+            $redPublicMutationEndpoint =
+                red_addon_public_mutation_endpoint_dispatch_current(
+                    $redPublicMutationConnection
+                );
+        } catch (Throwable $exception) {
+            error_log(
+                'RED-CMS public-mutation endpoint failed: ' .
+                $exception->getMessage()
+            );
+            $redPublicMutationEndpoint =
+                red_addon_public_mutation_endpoint_result(
+                    'endpoint_unavailable'
+                );
+            $redPublicMutationEndpoint['claimed'] = true;
+            $redPublicMutationEndpoint['response'] =
+                red_addon_public_mutation_response_refusal(
+                    'runtime_unavailable'
+                );
+        } finally {
+            if ($redPublicMutationConnection instanceof mysqli) {
+                mysqli_close($redPublicMutationConnection);
+            }
+        }
+    }
+    if (!empty($redPublicMutationEndpoint['claimed'])) {
+        red_addon_public_mutation_endpoint_emit(
+            $redPublicMutationEndpoint
+        );
+        exit;
+    }
+}
+
 /**
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)
@@ -128,6 +209,8 @@ class_content.php: call all components.*/
 require_once __DIR__ . '/includes/addon_runtime_helpers.php';
 require_once __DIR__ . '/includes/addon_public_route_helpers.php';
 require_once __DIR__ . '/includes/addon_asset_injection_helpers.php';
+require_once __DIR__ . '/includes/addon_public_mutation_endpoint_helpers.php';
+require_once __DIR__ . '/includes/addon_public_mutation_page_helpers.php';
 
 $redAddonRuntimeConnection = null;
 $redAddonAssetInjection = red_addon_asset_injection_result(false);
@@ -155,6 +238,14 @@ try {
         isset($_SESSION['alias'])
             && is_string($_SESSION['alias'])
             && trim($_SESSION['alias']) !== ''
+    );
+    $redPublicMutationCookieHeader = $_SERVER['HTTP_COOKIE'] ?? '';
+    red_addon_public_mutation_page_begin(
+        ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET'
+            && red_addon_public_mutation_endpoint_enabled(),
+        is_string($redPublicMutationCookieHeader)
+            ? $redPublicMutationCookieHeader
+            : ''
     );
 } catch (Throwable $exception) {
     while (ob_get_level() > $redThemeRequestBufferLevel) {
@@ -217,6 +308,11 @@ $page->get_page_query();
 <?php $redThemeAdapter->renderFooter(); ?>
 
 <?php
+$redPublicMutationPageDelivery =
+    red_addon_public_mutation_page_delivery();
+echo red_addon_public_mutation_page_controller_tag(
+    $redPublicMutationPageDelivery
+);
 ob_start();
 $redThemeAdapter->renderDocumentEnd();
 $redThemeDocumentEnd = ob_get_clean();
@@ -225,6 +321,11 @@ echo red_addon_asset_injection_insert_document(
     $redAddonAssetInjection,
     'body-end'
 );
+if (!empty($redPublicMutationPageDelivery['active'])) {
+    red_addon_public_mutation_page_emit_cookie(
+        $redPublicMutationPageDelivery
+    );
+}
 ob_end_flush();
 } catch (Throwable $exception) {
     while (ob_get_level() > $redThemeRequestBufferLevel) {
@@ -255,6 +356,11 @@ ob_end_flush();
         $page->get_page_query();
         echo "\n\n<!--==============================footer=================================-->\n";
         $redThemeAdapter->renderFooter();
+        $redPublicMutationPageDelivery =
+            red_addon_public_mutation_page_delivery();
+        echo red_addon_public_mutation_page_controller_tag(
+            $redPublicMutationPageDelivery
+        );
         ob_start();
         $redThemeAdapter->renderDocumentEnd();
         $redThemeDocumentEnd = ob_get_clean();
@@ -263,6 +369,11 @@ ob_end_flush();
             $redAddonAssetInjection,
             'body-end'
         );
+        if (!empty($redPublicMutationPageDelivery['active'])) {
+            red_addon_public_mutation_page_emit_cookie(
+                $redPublicMutationPageDelivery
+            );
+        }
         ob_end_flush();
     } catch (Throwable $fallbackException) {
         while (ob_get_level() > $redThemeRequestBufferLevel) {

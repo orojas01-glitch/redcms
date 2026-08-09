@@ -70,7 +70,11 @@ class content
 			if ($componentContext !== null && $componentContext['active']) {
 				$this->recordid=$componentContext['inputs']['recordId'];
 			}
-			red_legacy_render_public_component($componentContext);
+			red_legacy_render_public_component(
+				$componentContext,
+				null,
+				$db->connection
+			);
 			
 		$result_counter = ($result_counter - 1);
 		}

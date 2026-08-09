@@ -890,7 +890,11 @@ if (!function_exists('red_legacy_public_component_renderer_registry')) {
 }
 
 if (!function_exists('red_legacy_render_public_component')) {
-    function red_legacy_render_public_component($context, $renderer = null)
+    function red_legacy_render_public_component(
+        $context,
+        $renderer = null,
+        $connection = null
+    )
     {
         if ($context === null) {
             return false;
@@ -910,7 +914,7 @@ if (!function_exists('red_legacy_render_public_component')) {
             if ($renderer !== null) {
                 throw new InvalidArgumentException('Add-on public components use the core renderer.');
             }
-            return red_addon_public_component_render($context);
+            return red_addon_public_component_render($context, $connection);
         }
         if (array_keys($context['inputs']) !== $inventory[$component]) {
             throw new InvalidArgumentException('Unsupported legacy public component context.');

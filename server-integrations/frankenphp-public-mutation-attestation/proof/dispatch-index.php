@@ -17,8 +17,9 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/healthz') {
 
 require_once __DIR__ . '/includes/addon_public_mutation_dispatch_helpers.php';
 require_once __DIR__ . '/includes/addon_public_mutation_frankenphp_ingress_helpers.php';
-require_once __DIR__ . '/includes/addon_public_mutation_response_emitter_helpers.php';
+require_once __DIR__ . '/includes/addon_public_mutation_endpoint_helpers.php';
 require_once __DIR__ . '/includes/addon_public_mutation_subject_cookie_lifecycle_helpers.php';
+require_once __DIR__ . '/includes/addon_public_mutation_subject_cookie_emitter_helpers.php';
 
 if (!function_exists('red_dispatch_fixture_manifest')) {
     function red_dispatch_fixture_manifest()
@@ -252,17 +253,6 @@ if (!function_exists('red_dispatch_fixture_subject_token')) {
     }
 }
 
-if (!function_exists('red_dispatch_fixture_set_cookie')) {
-    function red_dispatch_fixture_set_cookie($value)
-    {
-        if (!is_string($value) || $value === '') {
-            return false;
-        }
-        header('Set-Cookie: ' . $value, false);
-        return true;
-    }
-}
-
 $manifest = red_dispatch_fixture_manifest();
 $packageId = $manifest['id'];
 $routeId = 'redcms.dispatch-fixture/cart-intent';
@@ -294,7 +284,7 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/bootstrap') {
     if (empty($subjectLifecycle['valid'])) {
         red_dispatch_fixture_json(503, ['ok' => false]);
     }
-    red_dispatch_fixture_set_cookie($subjectLifecycle['setCookieValue']);
+    red_addon_public_mutation_subject_cookie_emit($subjectLifecycle);
     $subject = [
         'valid' => true,
         'subjectRecordId' => (int) $subjectLifecycle['subjectRecordId'],
@@ -366,8 +356,7 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/subject/rotate') {
     if (empty($subjectLifecycle['valid'])) {
         red_dispatch_fixture_json(409, ['ok' => false]);
     }
-    red_dispatch_fixture_set_cookie($subjectLifecycle['clearCookieValue']);
-    red_dispatch_fixture_set_cookie($subjectLifecycle['setCookieValue']);
+    red_addon_public_mutation_subject_cookie_emit($subjectLifecycle);
     red_dispatch_fixture_json(200, [
         'ok' => true,
         'state' => 'rotated',
@@ -394,7 +383,7 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/__fixture/subject/clear') {
     if (empty($subjectLifecycle['valid'])) {
         red_dispatch_fixture_json(503, ['ok' => false]);
     }
-    red_dispatch_fixture_set_cookie($subjectLifecycle['clearCookieValue']);
+    red_addon_public_mutation_subject_cookie_emit($subjectLifecycle);
     red_dispatch_fixture_json(200, [
         'ok' => true,
         'state' => 'cleared',
@@ -409,11 +398,12 @@ red_dispatch_fixture_runtime_context($manifest);
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
 $requestTarget = $_SERVER['REQUEST_URI'] ?? '';
 $capture = red_addon_public_mutation_frankenphp_ingress_capture_current();
-$result = red_addon_public_mutation_dispatch(
+$result = red_addon_public_mutation_endpoint_dispatch(
     $connection,
     $method,
     $requestTarget,
-    $capture
+    $capture,
+    true
 );
 if (!is_array($result)
     || empty($result['claimed'])
@@ -421,6 +411,6 @@ if (!is_array($result)
 ) {
     red_dispatch_fixture_json(404, ['ok' => false]);
 }
-red_addon_public_mutation_response_emit($result['response']);
+red_addon_public_mutation_endpoint_emit($result);
 
 ?>

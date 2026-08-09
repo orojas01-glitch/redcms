@@ -94,6 +94,11 @@ for include_file in \
     admin_addon_authorization_helpers.php \
     addon_registry_helpers.php \
     addon_runtime_helpers.php \
+    addon_runtime_secret_helpers.php \
+    addon_secret_resolution_helpers.php \
+    addon_secret_availability_helpers.php \
+    addon_setting_helpers.php \
+    addon_setting_storage_helpers.php \
     addon_service_helpers.php \
     addon_install_helpers.php \
     admin_transaction_helpers.php \
@@ -111,7 +116,9 @@ for include_file in \
     addon_public_mutation_execution_helpers.php \
     addon_public_mutation_response_helpers.php \
     addon_public_mutation_response_emitter_helpers.php \
-    addon_public_mutation_dispatch_helpers.php; do
+    addon_public_mutation_dispatch_helpers.php \
+    addon_public_mutation_endpoint_helpers.php \
+    addon_public_mutation_subject_cookie_emitter_helpers.php; do
     cp "$PROJECT_ROOT/includes/$include_file" "$BUILD_CONTEXT/includes/$include_file"
 done
 
