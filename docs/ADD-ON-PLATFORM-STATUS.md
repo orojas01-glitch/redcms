@@ -1,99 +1,71 @@
-# RED-CMS 5.1 Add-On Platform Status
+# RED-CMS 5.1 And Store Lite Progress
 
-This map tracks the approved path from the reusable RED-CMS core to the first
-separately distributed optional package. Green work is complete, blue is the
-current slice, gray is still gated, and gold is the first package target.
+Last updated: 2026-08-08 after Store Lite Gate 2D1.
+
+This is the canonical graphical status page for the current RED-CMS 5.1
+objective. Green work is complete, blue is the active gate, gray remains
+gated, and gold is the release target.
+
+## Objective
+
+```mermaid
+flowchart LR
+    C["Reusable RED-CMS core"] --> P["Optional add-on platform"]
+    P --> S["First proof: Store Lite"]
+    S --> R["TARGET<br/>Re-adapt RED-CMS to different clients<br/>without mixing installations or data"]
+
+    classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
+    classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
+    class C,P,S complete;
+    class R target;
+```
+
+The non-negotiable boundary is unchanged: each client keeps a separate RED-CMS
+installation, database, add-on state, settings, secrets, media, and business
+data. Store Lite is an optional package, never a core component or shared
+client database.
+
+## Store Lite launch path
 
 ```mermaid
 flowchart TD
-    O["Objective<br/>Adaptable lightweight core<br/>with isolated clients and databases"]
-    O --> F1["Trust, manifest, install, lifecycle"]
-    F1 --> F2["Runtime component and service registration"]
-    F2 --> F3["Placement parent, editor schema, permissions, data loading"]
-    F3 --> F4["Atomic update, immutable revisions, restore"]
-    F4 --> F5["Inactive creation and parent metadata"]
-    F5 --> F6["Display-only revision-history UI"]
-    F6 --> F7["Read-only delete preflight"]
-    F7 --> F8["Atomic delete runner"]
-    F8 --> F9["Operational editor endpoint and form"]
-    F9 --> F10["Read-only public-placement preflight"]
-    F10 --> F11["Atomic public placement and activation"]
-    F11 --> F12["Audited administrator placement control"]
-    F12 --> F13["Typed internal service invocation"]
-    F13 --> F14["Public GET route dispatch"]
-    F14 --> F15["Read-only administrator-tool dispatch"]
-    F15 --> F16["Typed setting values and secret references"]
-    F16 --> F17["Settings storage and write preflight"]
-    F17 --> F18["Atomic setting persistence"]
-    F18 --> F19["Secret availability + authorized settings read model"]
-    F19 --> F19A["Secret-capable service runtime + response redaction"]
-    F19A --> F20["Namespaced CSS/JS asset plan"]
-    F20 --> F21["Read-only immutable asset-delivery preflight"]
-    F21 --> F22["Static immutable asset endpoint"]
-    F22 --> C["Core-owned public/admin injection"]
-    C --> A1["Administrator write-action preflight"]
-    A1 --> A2["Atomic internal admin action runner"]
-    A2 --> A3["Protected unlinked admin action endpoint"]
-    A3 --> G4["Public-mutation contract"]
-    G4 --> G5["Public-mutation declaration preflight"]
-    G5 --> G6["Read-only public-mutation live-data preflight"]
-    G6 --> G7["Core anonymous-subject + CSRF foundation"]
-    G7 --> G8["Core fixed-window rate-limit foundation"]
-    G8 --> G9["Core opaque idempotency-key foundation"]
-    G9 --> G10["Core atomic transaction runner + replay ledger"]
-    G10 --> G11["Core public-mutation HTTP envelope"]
-    G11 --> G12["Core static mutation-route selector"]
-    G12 --> G13["Core server request-facts adapter"]
-    G13 --> G14["Core closed response emitter"]
-    G14 --> G15["Core subject-cookie serialization"]
-    G15 --> G16["Caddy/FrankenPHP ingress attestation"]
-    G16 --> G17["Unlinked bounded mutation dispatcher"]
-    G17 --> G18["Core-owned browser subject-cookie lifecycle"]
-    G18 --> G19["Non-executing per-client deployment profile"]
-    G19 --> G20["Core-owned response-owner composition"]
-    G20 --> G21["Core-owned deployment review packet"]
-    G21 --> G22["CURRENT / NEXT<br/>Actual deployment + browser evidence + richer enablement"]
-    G22 --> S["TARGET<br/>Store Lite optional package"]
-    S --> S1["Gate 2A product/variant contract"]
-    S1 --> AF1["Administrator-form declaration + preflight"]
-    AF1 --> AF2["Core-owned disabled schema preview"]
-    AF2 --> AF3["Permission-scoped current-value loader"]
-    AF3 --> AF4["Validation-only JSON adapter"]
-    AF4 --> AF5["Atomic internal administrator-form writer"]
-    AF5 --> AF6["Operational edit + Save bridge"]
-    AF6 --> AF7["Bounded form-target selection + core navigation"]
-    AF7 --> S2["Store Lite catalog + Product administration"]
-    S2 --> S3["Product placement + public runtime"]
-    S3 --> S4["Add Content creation + Homepage placement"]
-    S4 --> S5["Pure server-authoritative cart-line resolver"]
-    S5 --> S6["Cart persistence + atomic ownership"]
-    S6 --> S7["CURRENT / NEXT<br/>Public mutation + Add-to-cart browser path"]
-    S7 -. later optional packages .-> E["Events Calendar"]
-    E -.-> A["Appointments"]
-    A -.-> D["Donations"]
-    D -.-> R["Restaurant Ordering"]
+    A["COMPLETE<br/>A. Add-on platform foundation<br/>trust, lifecycle, runtime, permissions, transactions"]
+    B["COMPLETE<br/>B. Product system<br/>simple products + bounded variants"]
+    C["COMPLETE<br/>C. Catalog administration<br/>create, edit, save, permissions"]
+    D["COMPLETE<br/>D. Public Product component<br/>homepage placement + responsive rendering"]
+    E["COMPLETE<br/>E. Server-authoritative cart engine<br/>resolver + persistence"]
+    F["COMPLETE<br/>Gate 2D1<br/>Store Lite bound to core atomic mutation runner"]
+    G["CURRENT — Gate 2D2<br/>Core-owned browser Add-to-cart path<br/>subject + CSRF + idempotency + form + dispatch + response"]
+    H["NEXT<br/>Usable cart<br/>view, update quantity, remove line"]
+    I["LATER FOR STORE LITE v1<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
+    J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
+    K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
+
+    A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F19A,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20,G21 complete;
-    class G22 complete;
-    class S target;
-    class S1,AF1,AF2,AF3,AF4,AF5,AF6,AF7,S2,S3,S4,S5 complete;
-    class S6 current;
-    class E,A,D,R remaining;
+    class A,B,C,D,E,F complete;
+    class G current;
+    class H,I,J remaining;
+    class K target;
 ```
 
-| Checkpoint | Current answer |
-| --- | --- |
-| Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Store Lite 0.1.13 adds internal, unregistered cart persistence. Five package migrations create ten namespaced InnoDB tables in a disposable client schema; cart writes use only a numeric core-issued subject relation, fresh state, locked current product/variant data, server-derived money, caller-owned transaction, verified postcondition, and value-free activity. The 38 migration and 79 combined persistence assertions pass with exact cleanup and unchanged configured-primary evidence. |
-| Current milestone | Connect the internal cart operation to the generic core public-mutation runner and prove the host-only anonymous cookie, CSRF, rate, idempotency, response-owner, rollback, and desktop/mobile Add-to-cart path in one disposable installation. Store Lite remains disconnected and normally activation-blocked until that separate integration gate passes. The retained local `redcms_v51_starter` database remains intentionally unmigrated. |
-| First vertical target | Store Lite as an optional package, not a core component. |
-| Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
+## Current phase
 
-A documentation-only planning checkpoint moves after its contract review and
-repository integrity checks. An implementation checkpoint moves only after its
-focused checks, the full disposable-database acceptance suite, and relevant
-desktop/mobile administrator verification.
+| Question | Current answer |
+| --- | --- |
+| Where are we? | Gate 2D2: connect the already-proven internal mutation to a core-owned browser Add-to-cart flow. |
+| What just finished? | Gate 2D1. Store Lite 0.1.14 declares and registers the closed cart mutation; simple product, exact variant, replay, conflict, rollback, package activity, and core audit behavior pass in a disposable client. |
+| What can the demo do today? | Administrators can create/edit products and place a Product component on the homepage. Public visitors can see the product. The internal cart write works in rehearsal, but there is no public Add-to-cart control yet. |
+| What does Gate 2D2 add? | Core-issued anonymous subject/cookie, CSRF and idempotency evidence, accessible form controls, supported-server dispatch, generic success/refusal output, and desktop/mobile browser proof. |
+| What remains after Gate 2D2? | A visible editable cart, minimum guest order/pay-on-receipt flow, then lifecycle/recovery/migration/isolation release acceptance. |
+| What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
+
+## Status rule
+
+A gate moves to complete only after its contract, focused checks, disposable
+database proof, relevant desktop/mobile browser inspection, configured-primary
+isolation, exact cleanup, documentation, and reviewed commit are all recorded.

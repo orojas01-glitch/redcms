@@ -35,6 +35,8 @@ $_SERVER['HTTP_HOST'] = '127.0.0.1';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot . '/includes/addon_registry_helpers.php';
+require_once $projectRoot . '/includes/addon_public_mutation_execution_helpers.php';
+require_once $projectRoot . '/includes/addon_public_mutation_subject_helpers.php';
 require_once $projectRoot . '/addons/redcms/store-lite/src/CatalogPersistence.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
@@ -222,6 +224,180 @@ function red_store_lite_browser_seed_products(mysqli $connection): array
     return [$bananaResult, $shirtResult];
 }
 
+function red_store_lite_browser_mutation_evidence(
+    mysqli $connection,
+    array $plan
+): array {
+    $subject = red_addon_public_mutation_subject_issue($connection);
+    $csrf = red_addon_public_mutation_csrf_issue($connection, $subject, $plan);
+    $key = red_addon_public_mutation_idempotency_issue(
+        $connection,
+        $subject,
+        $plan
+    );
+    red_store_lite_browser_assert(
+        !empty($subject['valid'])
+            && !empty($csrf['valid'])
+            && !empty($key['valid']),
+        'core issues isolated subject, CSRF, and idempotency evidence'
+    );
+    return [$subject, $csrf, $key];
+}
+
+function red_store_lite_browser_prove_cart_mutation(
+    mysqli $connection,
+    string $projectRoot
+): void {
+    $packageId = 'redcms.store-lite';
+    $routeId = 'redcms.store-lite/cart-intent';
+    $mutationId = 'redcms.store-lite/add-to-cart';
+    $catalog = red_addon_discover(
+        $projectRoot,
+        ['cmsVersion' => '5.1.0', 'phpVersion' => PHP_VERSION]
+    );
+    $package = $catalog['packages'][$packageId] ?? null;
+    red_store_lite_browser_assert(
+        !empty($catalog['valid']) && is_array($package),
+        'the installed package is rediscovered from the isolated project'
+    );
+    $registry = red_addon_runtime_register_package($package);
+    red_addon_runtime_set_request_context(
+        new RED_Addon_Runtime_Context(
+            [$packageId],
+            [$packageId => $registry]
+        )
+    );
+    $manifest = $package['manifest'] ?? [];
+    $plan = red_addon_public_mutation_declaration_preflight(
+        $manifest,
+        $routeId,
+        $mutationId
+    );
+    red_store_lite_browser_assert(
+        red_addon_public_mutation_declaration_preflight_is_valid($plan),
+        'Store Lite exposes one closed Add-to-cart declaration plan'
+    );
+
+    [$bananaSubject, $bananaCsrf, $bananaKey] =
+        red_store_lite_browser_mutation_evidence($connection, $plan);
+    $banana = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $bananaSubject,
+        $bananaCsrf['token'],
+        $bananaKey['key'],
+        ['product' => 'banana-bunch', 'quantity' => 2]
+    );
+    $bananaReplay = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $bananaSubject,
+        $bananaCsrf['token'],
+        $bananaKey['key'],
+        ['product' => 'banana-bunch', 'quantity' => 2]
+    );
+    $bananaConflict = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $bananaSubject,
+        $bananaCsrf['token'],
+        $bananaKey['key'],
+        ['product' => 'banana-bunch', 'quantity' => 3]
+    );
+    red_store_lite_browser_assert(
+        !empty($banana['completed'])
+            && ($banana['outcome'] ?? '') === 'accepted'
+            && !empty($bananaReplay['replayed'])
+            && ($bananaConflict['reason'] ?? '') === 'idempotency_conflict',
+        'simple-product Add-to-cart accepts once, replays once, and refuses key reuse'
+    );
+
+    red_store_lite_browser_assert(
+        mysqli_query(
+            $connection,
+            "UPDATE RED_Addon_StoreLite_Products
+             SET State='published'
+             WHERE ProductID='classic-shirt' AND State='draft'"
+        ) === true
+            && mysqli_affected_rows($connection) === 1,
+        'the variable fixture is published only for the isolated mutation proof'
+    );
+    [$shirtSubject, $shirtCsrf, $shirtKey] =
+        red_store_lite_browser_mutation_evidence($connection, $plan);
+    $shirt = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $shirtSubject,
+        $shirtCsrf['token'],
+        $shirtKey['key'],
+        [
+            'product' => 'classic-shirt',
+            'quantity' => 1,
+            'variant' => 'small-black',
+        ]
+    );
+    red_store_lite_browser_assert(
+        !empty($shirt['completed']) && ($shirt['outcome'] ?? '') === 'accepted',
+        'variable-product Add-to-cart accepts one exact server-resolved variant'
+    );
+
+    [$invalidSubject, $invalidCsrf, $invalidKey] =
+        red_store_lite_browser_mutation_evidence($connection, $plan);
+    $invalid = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $invalidSubject,
+        $invalidCsrf['token'],
+        $invalidKey['key'],
+        [
+            'product' => 'classic-shirt',
+            'quantity' => 1,
+            'variant' => 'not-a-real-variant',
+        ]
+    );
+    red_store_lite_browser_assert(
+        empty($invalid['completed'])
+            && ($invalid['reason'] ?? '') === 'handler_failed',
+        'unresolved variant fails closed through the core runner'
+    );
+    red_store_lite_browser_assert(
+        mysqli_query(
+            $connection,
+            "UPDATE RED_Addon_StoreLite_Products
+             SET State='draft'
+             WHERE ProductID='classic-shirt' AND State='published'"
+        ) === true
+            && mysqli_affected_rows($connection) === 1,
+        'the variable fixture returns to its browser-facing draft state'
+    );
+    red_store_lite_browser_assert(
+        red_store_lite_browser_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT COUNT(*) FROM RED_Addon_StoreLite_Carts),
+                (SELECT COUNT(*) FROM RED_Addon_StoreLite_Cart_Lines),
+                (SELECT COALESCE(SUM(Quantity), 0)
+                 FROM RED_Addon_StoreLite_Cart_Lines),
+                (SELECT COUNT(*) FROM RED_Addon_StoreLite_Cart_Activity),
+                (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions),
+                (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                 WHERE PackageID='redcms.store-lite'
+                   AND EventName='addon.public-mutation.completed'))"
+        ) === '2:2:3:2:2:2',
+        'package state, replay ledger, and value-free core audit commit atomically'
+    );
+}
+
 try {
     if ($command === 'prepare') {
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -285,6 +461,7 @@ try {
             $actorRecordId
         );
         red_store_lite_browser_seed_products($connection);
+        red_store_lite_browser_prove_cart_mutation($connection, $projectRoot);
         red_store_lite_browser_assert(
             red_store_lite_browser_scalar(
                 $connection,
@@ -296,8 +473,8 @@ try {
                     (SELECT COUNT(*) FROM RED_Addon_StoreLite_Product_Activity),
                     (SELECT COUNT(*) FROM RED_Addon_Activity_Log
                      WHERE PackageID='redcms.store-lite'))"
-            ) === '2:2:2:0:0:0',
-            'fixture contains two products and no component placement or pre-browser activity'
+            ) === '2:2:2:0:0:2',
+            'fixture contains two products, no placement, and only two core mutation audits'
         );
         echo json_encode([
             'ok' => true,
@@ -413,6 +590,19 @@ try {
                        AND ActorAdminRecordID=1))"
             ) === '1:1:1:1:1',
             'browser component creation and homepage placement retain exact revision and audit evidence'
+        );
+        red_store_lite_browser_assert(
+            red_store_lite_browser_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*) FROM RED_Addon_StoreLite_Carts),
+                    (SELECT COUNT(*) FROM RED_Addon_StoreLite_Cart_Lines),
+                    (SELECT COALESCE(SUM(Quantity), 0)
+                     FROM RED_Addon_StoreLite_Cart_Lines),
+                    (SELECT COUNT(*) FROM RED_Addon_StoreLite_Cart_Activity),
+                    (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions))"
+            ) === '2:2:3:2:2',
+            'browser activity did not alter the isolated cart-runner proof'
         );
         echo json_encode([
             'ok' => true,

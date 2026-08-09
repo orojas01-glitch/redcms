@@ -1,9 +1,10 @@
 # Store Lite Cart Persistence Contract
 
 Status: Gate 2C accepted on 2026-08-08 and implemented by the separately
-distributed Store Lite 0.1.13 package. RED-CMS contains only this mirrored
-contract and rehearsal inventory; the clean starter contains no Store Lite
-package code, cart tables, migration rows, settings, or business data.
+distributed Store Lite 0.1.13 package. Store Lite 0.1.14 now consumes this
+boundary through its internal cart-mutation bridge. RED-CMS contains only
+mirrored contracts and rehearsal support; the clean starter contains no Store
+Lite package code, cart tables, migration rows, settings, or business data.
 
 ## Core/package boundary
 
@@ -50,11 +51,12 @@ contract, add an Add-to-cart control, issue/read a cookie, connect the core
 dispatcher, reserve inventory, or create an order, checkout, payment, tax,
 shipping, fulfillment, merge, abandonment, or purge flow.
 
-The next gate is the explicit core-to-package public-mutation integration and
-desktop/mobile browser path. It must preserve the current origin, subject,
-CSRF, rate, idempotency, response-owner, deployment-profile, and rollback
-contracts and remain isolated to one disposable client installation before any
-real deployment.
+Gate 2D1 now proves the explicit internal core-to-package runner integration.
+Gate 2D2 owns the desktop/mobile browser path and must preserve the current
+origin, subject, CSRF, rate, idempotency, response-owner, deployment-profile,
+and rollback contracts in one disposable client installation before any real
+deployment. See
+[`STORE-LITE-CART-MUTATION-CONTRACT.md`](STORE-LITE-CART-MUTATION-CONTRACT.md).
 
 ## Evidence
 
