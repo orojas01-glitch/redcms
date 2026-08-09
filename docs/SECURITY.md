@@ -1061,6 +1061,19 @@ choices. This is only compatibility evidence for later integration: the
 default public renderer ignores the retained presentation and emits no form,
 token, script, header, cookie, endpoint, or package-controlled markup.
 
+The core-owned public component form integration then consumes one already
+returned and revalidated component model; it never invokes the component,
+route, mutation, or state-loader callbacks. Before evidence issuance, current
+runtime ownership of the component, route, mutation handler, and state loader
+must resolve to the same valid package and manifest. Core derives the form
+instance from the numeric placement record, delegates evidence issuance to the
+existing compensating bootstrap, and returns only the validated form model,
+escaped markup, and cookie lifecycle descriptor. A display-only component
+returns no form and changes no evidence state. The helper receives an explicit
+connection and optional cookie scalar, reads no request globals, emits no
+output/header/cookie, and is not linked from `index.php`; response ownership
+and browser dispatch remain mandatory later gates.
+
 The separate pure HTTP request-envelope normalizer accepts only explicit values
 from that later dispatcher. It requires one server-configured canonical HTTPS
 origin rather than `Host` input, an exact static POST path, an exact matching

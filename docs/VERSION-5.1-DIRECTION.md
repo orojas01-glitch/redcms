@@ -1154,6 +1154,19 @@ request bootstrap excludes the disabled package.
     browser evidence, controller, endpoint, cookie/header, or mutation is added
     by this subgate.
 
+85. Completed Gate 2D2D2 after Store Lite 0.1.16 bound its pure mutation
+    presentation to sellable Product component return models and core added the
+    non-routable integration boundary. Core now requires exact component,
+    route, mutation-handler, and state-loader ownership by one runtime package,
+    derives a placement-bound form instance, bootstraps same-subject evidence,
+    and returns escaped form markup plus the lifecycle descriptor for a later
+    response owner. Display-only unavailable Products issue no evidence. The
+    focused 12-assertion fresh current-schema proof invoked zero package
+    callbacks and finished with zero schema/grant or subject/CSRF/idempotency
+    residue. Request-global adaptation, cookie/header emission, script delivery,
+    front-controller wiring, endpoint dispatch, and browser mutation remain
+    Gate 2D2D3.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

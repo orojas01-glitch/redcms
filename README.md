@@ -317,6 +317,13 @@ features.
   The current renderer deliberately emits only the existing product display:
   it creates no form, evidence, endpoint, script, response state, or Store Lite
   behavior
+- Core-owned public-component form integration. Given one already returned
+  component view, exact placement context, explicit database connection, and
+  optional subject-cookie value, core revalidates component/route/mutation/
+  state-loader ownership, derives the placement-bound form instance, bootstraps
+  evidence, and returns escaped markup plus a lifecycle descriptor. It invokes
+  no package callback, reads no request global, emits no output/header/cookie,
+  and remains unlinked from the front controller and mutation endpoint
 - Pure core-owned public-mutation HTTP request envelope for a future dispatcher.
   It validates explicit canonical HTTPS origin, exact static POST path, form
   content metadata, one opaque subject cookie, and fixed CSRF/idempotency
