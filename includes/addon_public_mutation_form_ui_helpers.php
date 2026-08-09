@@ -175,7 +175,7 @@ if (!function_exists('red_addon_public_mutation_form_ui_field')) {
             || !is_array($presented['options'] ?? null)
             || !array_is_list($presented['options'])
             || count($presented['options']) < 1
-            || count($presented['options']) > 100
+            || count($presented['options']) > 128
         ) {
             return null;
         }
@@ -442,7 +442,7 @@ if (!function_exists('red_addon_public_mutation_form_ui_model_valid')) {
                 || !is_array($field['options'] ?? null)
                 || !array_is_list($field['options'])
                 || count($field['options']) < 1
-                || count($field['options']) > 100
+                || count($field['options']) > 128
             ) {
                 return false;
             }

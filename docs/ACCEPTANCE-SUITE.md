@@ -190,11 +190,12 @@ desktop/mobile run retains 87/87 checks with empty console, page-error,
 failed-request, and HTTP-error evidence. The configured primary fingerprint is
 unchanged and the temporary schema, grant, server, and staged package are
 removed.
-The separate 18-assertion public-mutation form UI fixture runs before any
+The separate 20-assertion public-mutation form UI fixture runs before any
 database is created. It requires a manifest-derived static POST action,
 same-subject issued CSRF/idempotency evidence, only declared product/quantity/
 optional-variant controls, escaped labels/options, unique form-control ids,
-bounded number/select semantics, one polite status region, and a no-script
+bounded number/select semantics including exact 128-choice acceptance and
+129-choice refusal, one polite status region, and a no-script
 notice. Missing, unknown, duplicate, malformed, out-of-range, cross-subject,
 or post-composition-invalid models render no partial form or token. The helper
 reads no request globals, database, package, filesystem, or front-controller
