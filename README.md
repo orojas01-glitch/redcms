@@ -201,6 +201,8 @@ features.
 - Owner-authorized atomic enablement for constrained registration-only service,
   core-rendered default public component, and combined default-component plus
   registration-only-service profiles
+- Core-owned public component renderer with unchanged title/summary output and
+  optional bounded escaped label/value facts; package HTML remains forbidden
 - Owner-authorized atomic disablement with enabled-dependent refusal and no
   package execution or data deletion
 - Fail-closed request bootstrap and lookup context for already-enabled first-party packages

@@ -1003,12 +1003,14 @@ to `class_content.php`. The add-on registry is the only new dispatcher.
 The first public-dispatch slice passes an enabled component only a fixed,
 non-executable placement context (`component`, numeric `recordId` and
 `position`, plus bounded `layout` and `article` strings). The registered
-handler returns exactly a text-only `title` and `summary` view model; core
-escapes and renders that model using the accessible default view. Handler
-output, malformed view models, and handler failures render only the static
-unavailable-content fallback and never fall through to legacy component
-rendering. This is a foundation for future component persistence and editor
-contracts, not permission to add Store Lite data or templates to core.
+handler returns exactly a text-only `title` and `summary` view model, optionally
+followed by no more than twelve closed `label`/`value` facts. Core bounds and
+escapes every scalar and renders the facts as semantic description-list
+markup. Package HTML, links, controls, templates, and executable values remain
+forbidden. Handler output, malformed view models, and handler failures render
+only the static unavailable-content fallback and never fall through to legacy
+component rendering. This is a generic presentation prerequisite; Store Lite
+still owns product normalization and its separately distributed package code.
 
 ## Theme And CSS Boundary
 

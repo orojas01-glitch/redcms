@@ -161,6 +161,8 @@ function red_addon_component_test_write_fixture($project, $packageId, $component
         "\n        if (\$placement['article'] === 'throw') { throw new RuntimeException('fixture failure must not reach the browser'); }" .
         "\n        if (\$placement['article'] === 'nested') { ob_start(); }" .
         "\n        if (\$placement['article'] === 'invalid') { return ['title' => 'Incomplete']; }" .
+        "\n        if (\$placement['article'] === 'invalid-facts') { return ['title' => 'Fixture', 'summary' => '', 'facts' => [['label' => 'Price', 'value' => '']]]; }" .
+        "\n        if (\$placement['article'] === 'facts') { return ['title' => '<Product>', 'summary' => 'Bounded facts', 'facts' => [['label' => 'Price <now>', 'value' => 'USD 24.99 & tax'], ['label' => 'Availability', 'value' => 'Available']]]; }" .
         "\n        return ['title' => '<Fixture ' . \$placement['layout'] . '>', 'summary' => 'record=' . \$placement['recordId'] . '&position=' . \$placement['position']];" .
         "\n    });" .
         "\n};\n";
@@ -323,7 +325,41 @@ try {
     ob_start(); $rendered = red_legacy_render_public_component($context); $output = (string) ob_get_clean();
     red_addon_component_test_assert($rendered === true && str_contains($output, 'class="red-addon-component"') && str_contains($output, 'data-red-addon-component="' . $componentId . '"') && str_contains($output, '&lt;Fixture listing&lt;script&gt;&gt;') && str_contains($output, 'record=' . $contentRecordId . '&amp;position=3') && !str_contains($output, '<script>'), 'core renders the exact text-only view model with escaped accessible markup');
 
-    foreach (['emit', 'throw', 'nested', 'invalid'] as $case) {
+    $factsContext = red_legacy_public_component_context(['Component' => $componentId, 'RecordID' => $contentRecordId], 'listing', 'facts', 3, true, $connection);
+    ob_start(); $factsRendered = red_legacy_render_public_component($factsContext); $factsOutput = (string) ob_get_clean();
+    red_addon_component_test_assert(
+        $factsRendered === true
+            && str_contains($factsOutput, '<dl class="red-addon-component__facts">')
+            && str_contains($factsOutput, '<dt>Price &lt;now&gt;</dt>')
+            && str_contains($factsOutput, '<dd>USD 24.99 &amp; tax</dd>')
+            && str_contains($factsOutput, '<dt>Availability</dt>')
+            && !str_contains($factsOutput, '<Product>'),
+        'core renders a bounded fact-card model with escaped semantic markup'
+    );
+
+    $tooManyFacts = array_fill(
+        0,
+        13,
+        ['label' => 'Fact', 'value' => 'Bounded']
+    );
+    red_addon_component_test_assert(
+        red_addon_public_component_view_model([
+            'title' => 'Fixture',
+            'summary' => '',
+            'facts' => $tooManyFacts,
+        ]) === null
+            && red_addon_public_component_view_model([
+                'title' => 'Fixture',
+                'summary' => '',
+                'facts' => [[
+                    'label' => 'Fact',
+                    'value' => str_repeat('x', 2001),
+                ]],
+            ]) === null,
+        'fact-card count and scalar bounds fail closed without partial output'
+    );
+
+    foreach (['emit', 'throw', 'nested', 'invalid', 'invalid-facts'] as $case) {
         $caseContext = red_legacy_public_component_context(['Component' => $componentId, 'RecordID' => $contentRecordId], 'listing', $case, 3, true, $connection);
         ob_start(); $caseRendered = red_legacy_render_public_component($caseContext); $caseOutput = (string) ob_get_clean();
         red_addon_component_test_assert($caseRendered === true && str_contains($caseOutput, 'Content is temporarily unavailable.') && !str_contains($caseOutput, 'fixture-output') && !str_contains($caseOutput, 'fixture failure') && !str_contains($caseOutput, '<script>'), 'component ' . $case . ' failure is contained by the static unavailable fallback');

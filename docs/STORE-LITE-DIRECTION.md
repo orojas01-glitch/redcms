@@ -1,7 +1,9 @@
 # RED-CMS Store Lite Direction
 
-Status: Gate 2A product/variant contract accepted for simple products and
-bounded variable products; package code and migrations have not started.
+Status: the separately distributed package now implements catalog migrations,
+normalization, persistence, product administration, core-owned Add/Edit/Save
+bridges, and the pure public-product presenter prerequisite. Placement storage
+and enabled Product component binding remain next; cart and orders remain later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -140,6 +142,14 @@ The component must not return raw HTML, SQL, executable templates, arbitrary
 class names, absolute server paths, secrets, administrator controls, or
 payment-provider credentials. Core or an explicitly approved package rendering
 contract escapes output and supplies the accessible default view.
+
+Store Lite 0.1.10 implements the first pure presentation adapter. It repeats
+the complete product normalization contract and returns only a published
+product's title, summary, fixed price or price range, effective availability,
+and bounded option-label facts. Core now accepts that optional fact list in its
+escaped semantic default renderer. The presenter opens no database and does not
+yet bind a page placement, render media, expose variant controls, or create an
+add-to-cart action.
 
 Themes may opt into a declared Product presentation contract later, but a
 theme must not query Store Lite tables directly or become required for safe
@@ -454,7 +464,11 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    metadata writes and the display-only value-free revision timeline are also
    complete. Read-only delete planning and atomic inactive deletion are
    complete; restore UI actions, operational editing, and public
-   placement/activation remain. The creation preflight
+   placement/activation remain. The core default renderer now also accepts an
+   optional bounded label/value fact list while preserving the original
+   title/summary output and refusing package HTML. Store Lite 0.1.10 consumes
+   that contract through a pure public-product presenter; package placement
+   persistence and runtime binding remain next. The creation preflight
    invokes no creator and the delete preflight invokes no deleter;
    only the exact activation-blocked runner may write the parent/package rows.
 4. Completed Gate 2A: lock the package-owned Product record contract for
