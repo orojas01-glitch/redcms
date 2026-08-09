@@ -979,8 +979,26 @@ request bootstrap excludes the disabled package.
     acceptance, exact cleanup, and local Chrome desktop/mobile rendered-browser
     inspection pass. The 1280px and 390px checks show zero horizontal overflow,
     successful collection add/remove plus typed Save/reload behavior, and zero
-    console, page, or failed-request errors. No Store Lite navigation, target provider, package, migration,
-    table, or product state is added.
+    console, page, or failed-request errors. No Store Lite package, migration,
+    table, or product state is added to the starter.
+
+74. Completed an isolated Store Lite existing-product browser rehearsal without
+    changing normal package enablement. The runner stages the clean core and
+    separately distributed Store Lite 0.1.8 package in a temporary project,
+    applies all 45 core migrations and the package migration inventory to one
+    fresh schema, records an acceptance-only enabled registry fixture, and
+    grants only `store.products.manage` to a disposable administrator. Chrome
+    at 1280x900 and 390x844 follows the visible Tools -> Products -> Edit path,
+    persists a title, integer minor-unit price, and stock change through the
+    protected Save bridge, and reloads that exact state. Forty-seven browser
+    checks require the simple banana and variable T-shirt targets, permission-
+    filtered Orders absence, no horizontal overflow, and zero console, page,
+    request, or HTTP errors. Database verification requires one package
+    `product.updated` event, one value-free core `addon.form.saved` audit fact,
+    and an unchanged T-shirt graph. Cleanup removes the server, staged package,
+    schema, and scoped grant and rechecks the retained primary fingerprint.
+    This is acceptance evidence, not a production installer or an expansion of
+    the currently allowed enablement profiles.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

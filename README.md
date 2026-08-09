@@ -170,8 +170,10 @@ with the package mutation. The validation endpoint still does not call it.
 A separate core-owned edit endpoint now reloads one exact authorized
 tool/form/positive target into escaped typed controls, while a distinct
 authenticated header-CSRF JSON Save endpoint delegates only to that atomic
-runner and returns a bounded value-free outcome. Target discovery, package
-navigation, and Store Lite behavior remain separate package work.
+runner and returns a bounded value-free outcome. Core-owned target discovery
+and Edit navigation are available only when a separately distributed enabled
+package registers the one reviewed form-target loader; the clean starter
+registers no Store Lite provider and contains no commerce data.
 Operational writable route/tool actions, upgrade,
 uninstall/purge, payment, member access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
@@ -381,8 +383,10 @@ features.
   authorization and exact writer ownership, renders only escaped scalar and
   bounded nested-collection controls, and submits canonical JSON through an
   authenticated header-CSRF endpoint to the atomic form runner. Public Save
-  outcomes are value-free; Store Lite target selection, navigation, provider
-  code, tables, and product data remain outside the starter
+  outcomes are value-free. The separately distributed Store Lite package now
+  supplies one bounded existing-product target loader in isolated acceptance;
+  provider code, migrations, tables, and product data remain outside the
+  starter
 - Generic administrator-form runtime-setting resolution for declared,
   configured, non-secret per-client package scalars under an exact enabled
   request-local binding. Core injects an immutable typed value view into only
