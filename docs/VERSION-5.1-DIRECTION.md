@@ -1142,6 +1142,18 @@ request bootstrap excludes the disabled package.
     `index.php`: no package load, live Product control, JavaScript controller,
     response emission, or public mutation endpoint is added.
 
+84. Completed Gate 2D2D1 as a core compatibility boundary for data-only
+    component mutation presentations. The normalized public component model
+    may now retain one exact route, mutation, submit label, and bounded field
+    list alongside its existing display text and facts. Only hidden
+    identifiers, positive-integer controls, and identifier selects with at
+    most 128 unique choices are accepted; reserved commercial or authority
+    names, extra keys, duplicate fields/options, unsafe labels, and forged
+    selections invalidate the whole component view. The default renderer still
+    emits display content only. No Store Lite package invocation, live form,
+    browser evidence, controller, endpoint, cookie/header, or mutation is added
+    by this subgate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

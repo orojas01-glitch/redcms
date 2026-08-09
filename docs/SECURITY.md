@@ -1050,6 +1050,17 @@ descriptors. The bootstrap accepts an explicit cookie value but reads no PHP
 request, cookie, session, or server global; it loads no package code, renders
 no HTML, emits no header, and remains absent from `index.php`.
 
+The public component boundary separately accepts one optional data-only
+mutation presentation beside its existing title, summary, and facts. The shape
+is exact and closed: one valid route id, mutation id, bounded submit label, and
+one to eight unique presentation fields. Fields are limited to identifiers,
+positive integers, and selects with at most 128 unique identifier choices.
+Core rejects reserved commerce/authority names, extra fields, control
+characters, duplicate keys/options, and selections outside the supplied
+choices. This is only compatibility evidence for later integration: the
+default public renderer ignores the retained presentation and emits no form,
+token, script, header, cookie, endpoint, or package-controlled markup.
+
 The separate pure HTTP request-envelope normalizer accepts only explicit values
 from that later dispatcher. It requires one server-configured canonical HTTPS
 origin rather than `Host` input, an exact static POST path, an exact matching
