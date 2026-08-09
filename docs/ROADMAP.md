@@ -147,6 +147,18 @@ checkout, order, or payment flow. Gate 2D2 owns that browser/server integration.
 See
 [`STORE-LITE-CART-MUTATION-CONTRACT.md`](STORE-LITE-CART-MUTATION-CONTRACT.md).
 
+Gate 2D2A is now complete as the generic browser-form presentation boundary.
+Core can derive one static mutation action and exact hidden identifier,
+positive-integer, and identifier-select controls from a validated declaration,
+then combine them only with same-subject issued CSRF/idempotency result shapes.
+All labels/options and semantic status markup are core-rendered and escaped;
+the opaque evidence is reserved for a later fetch controller and is not part
+of the package form body. This helper performs no issuance, cookie/header
+emission, package loading, component integration, route linking, or mutation.
+Gate 2D2B now belongs to the separately distributed Store Lite package's
+bounded simple/variant presentation model, followed by core browser bootstrap
+and supported-server desktop/mobile integration.
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any
@@ -289,6 +301,13 @@ typed scalar map or no values. It rejects duplicate, nested, unknown,
 malformed, noncanonical, and oversized input, but owns no HTTP request metadata,
 origin, cookie/session, route claim, runtime/package access, database,
 response emission, lifecycle, enablement, or Store Lite state.
+The separate pure form UI boundary derives the exact static action and allowed
+hidden identifier, bounded integer, and identifier-select controls from that
+same declaration. It combines them only with a bounded presentation model and
+same-subject issued CSRF/idempotency result shapes, then returns escaped
+semantic markup with one status region and no package HTML. It does not issue
+evidence, read request/database/package state, emit output or headers, inject a
+controller, link a route, or create Store Lite behavior.
 The separate pure HTTP request-envelope normalizer accepts only explicit
 transport values from a future core dispatcher: one trusted canonical HTTPS
 origin, exact static POST path, complete header list, and raw body. It rejects

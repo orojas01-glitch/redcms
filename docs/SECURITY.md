@@ -1022,6 +1022,20 @@ server globals; access a database, runtime, or package code; issue/verify
 identity, CSRF, or idempotency material; claim a route; or emit a response.
 Those facts remain exclusive to a later core-owned HTTP dispatcher.
 
+The separate pure public-mutation form UI helper is also not an endpoint. It
+accepts only that same closed declaration, a bounded package presentation
+model, one core form-instance id, and exact same-subject issued CSRF and
+idempotency result shapes. Core derives the static action and permits only
+declared hidden identifiers, bounded positive-integer controls, and bounded
+identifier selects; labels and options are escaped into semantic form markup.
+The two opaque values appear only in dedicated fetch-controller data
+attributes and never as submitted package fields, visible copy, logs, or
+package input. A later integration must additionally own `Cache-Control:
+no-store`, subject-cookie response composition, expiry/rotation, and script
+delivery before rendering this form on a public page. This helper reads no
+request/session/cookie/database/package state, emits no output or header, and
+is not included by `index.php`.
+
 The separate pure HTTP request-envelope normalizer accepts only explicit values
 from that later dispatcher. It requires one server-configured canonical HTTPS
 origin rather than `Host` input, an exact static POST path, an exact matching
