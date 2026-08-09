@@ -89,6 +89,12 @@ its component/service split, data ownership, payment boundary, lifecycle, and
 release gates. These packages are not core features or bundled starter
 capabilities.
 
+Gate 0 decision: Store Lite v1 will support both simple products (for example,
+bananas sold by unit or pack) and bounded variable products (for example,
+T-shirts with size and optional color). Variant data remains package-owned;
+unbounded variant matrices, free-form modifiers, and weight-based pricing stay
+out of scope.
+
 ### Add-On Trust And Authorization Foundation
 
 The extension-framework foundation is implemented without activating any
@@ -558,17 +564,26 @@ Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
 dispatcher, supported-server disposable rehearsal, and core-owned browser
 subject-cookie lifecycle bridge, non-executing per-client deployment profile,
 response-owner composer, and deployment-review packet are also complete. The
-installation-shaped HTTPS deployment rehearsal harness is now available but
-remains a separate environment-dependent gate. The supported-server dispatcher
+installation-shaped HTTPS deployment rehearsal passed on 2026-08-07 in an
+isolated Docker environment with pinned FrankenPHP 1.12.4 and Caddy 2.11.4.
+The full disposable acceptance suite also passed against a separately built
+current-schema baseline, including all 45 migration files, idempotency,
+runtime/browser, lifecycle, settings foundations, CRUD/media cleanup, and
+rollback checks; its acceptance database and grant were removed afterward. The
 rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
-MySQL database; it does not link the dispatcher to
-the front controller or deploy a client. Actual client-specific Caddyfile/TLS/
+MySQL databases; it does not link the dispatcher to the front controller or
+deploy a client. The retained local starter database was not migrated because
+it is an older historical snapshot. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
 capture, protected
 settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
-distributed package can be enabled.
+distributed package can be enabled. A separate read-only review of the demo
+client confirmed its public and administrator-login routes return HTTPS 200
+from Apache without Store Lite/add-on/cart/checkout markers; the dispatcher
+remains intentionally unlinked. See
+[`ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md`](ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md).
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
