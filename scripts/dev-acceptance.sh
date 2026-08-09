@@ -5099,6 +5099,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running core-owned public-mutation form evidence-bootstrap checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-form-bootstrap-self-test.php"
 
+printf '%s\n' 'Running core-owned public component form-integration checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-component-form-integration-self-test.php"
+
 printf '%s\n' 'Running atomic core-only public-mutation transaction-runner checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-execution-self-test.php"
 
