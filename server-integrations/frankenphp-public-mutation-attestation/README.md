@@ -59,13 +59,84 @@ The Caddyfile contains the environment *name*, never the secret value. The
 unlinked PHP verifier reads only the same process environment value; it does
 not use `$_SERVER`, `$_ENV`, `Host`, a request header, or
 `config.local.php` for this key. Keep the key out of source control, command
-history, logs, diagnostics, and client packages. Rotate it per installation as
-a later browser-subject lifecycle contract requires; rotation is not active in
-this slice.
+history, logs, diagnostics, and client packages. Rotate it per installation
+through the client deployment runbook. The core browser subject-cookie
+lifecycle bridge is now implemented and proven separately, but HMAC-key
+rotation, production response binding, and browser evidence remain deployment
+gates in this integration slice.
 
 `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` remains a separately configured
 non-secret canonical HTTPS origin. It is never derived from `Host` or a
 request value.
+
+## Per-client deployment review packet
+
+Before any client-specific dispatcher link, prepare an operator-owned profile
+and validate it with the dependency-free core helper:
+
+```sh
+php scripts/addon-public-mutation-deployment-profile-self-test.php
+```
+
+The profile is a review artifact, not a runtime configuration file. It records
+the separate client database, canonical HTTPS origin, pinned FrankenPHP/Caddy
+versions, process-environment HMAC-key name, server-local trusted-origin
+source, attestation-before-`php_server` route order, response/cookie ownership,
+fixed host-only cookie policy, and clean-starter isolation. It must keep the
+dispatcher, package, and Store Lite activation flags false. The validator
+returns only a deterministic non-secret hash; it does not load the profile,
+resolve a key, read a database, or deploy the client.
+
+The core-only response-owner composition step is also dependency-free:
+
+```sh
+php scripts/addon-public-mutation-response-owner-self-test.php
+```
+
+The response-owner composer accepts that validated profile, one fixed core
+response envelope, and optional lifecycle descriptors. It returns only the
+allowed response plus zero, one, or ordered clear-then-set `Set-Cookie` lines;
+it emits no headers/body and remains unlinked. Actual per-client Caddy/TLS/
+proxy, trusted-origin/HMAC provisioning and rotation, and browser deployment
+review remain required before a front-controller link.
+
+The non-executing deployment-review packet can be checked independently:
+
+```sh
+php scripts/addon-public-mutation-deployment-review-self-test.php
+```
+
+It binds the profile hash to non-secret server/artifact hashes,
+process-environment trusted-origin/HMAC and old-key-revocation evidence, and
+fixed desktop/mobile browser results. It reads no deployment file or secret,
+does not open a browser or change client state, and cannot link the dispatcher.
+Actual per-client Caddy/TLS/proxy deployment and browser capture remain the
+next gate.
+
+## Installation-shaped HTTPS deployment rehearsal
+
+The next gate can be rehearsed without a client installation:
+
+```sh
+scripts/frankenphp-public-mutation-deployment-rehearsal.sh
+```
+
+The command stages only this integration and the static deployment fixture into
+a temporary Docker context, builds the pinned custom binary, mounts a generated
+localhost certificate, and runs Caddy over HTTPS before `php_server`. It starts
+once with one process-environment HMAC key, restarts with a distinct key, and
+proves that the previous key is absent from the new container environment. It
+then runs fixed Chrome desktop `1440x1000` and mobile `390x844` checks for HTTPS
+200, no console/network errors, exact no-store/nosniff headers, no cookies, no
+opaque token in the body, and no dispatcher/client-state change.
+
+The default evidence directory is outside the starter under `/tmp`; set
+`RED_DEPLOYMENT_REHEARSAL_OUTPUT` to retain it elsewhere outside the starter.
+Only the profile, Caddyfile, public certificate, browser report/screenshots,
+rotation booleans, and deterministic review packet are retained. The HMAC
+values, private key, temporary image/container, and build context are removed.
+This remains a local rehearsal, not a client or Adriana deployment, and it
+does not link the front controller.
 
 ## Build and configuration boundary
 
@@ -133,3 +204,30 @@ an operator must still build a matching binary for the chosen client, preserve
 the client-specific Caddyfile/TLS/proxy configuration and per-installation key
 outside the starter, and obtain a later dispatcher review before enabling any
 public-mutation behavior.
+
+## Isolated supported-server dispatcher rehearsal
+
+After the custom-binary proof is green, the separate command below stages a
+test-only dispatcher endpoint and the reviewed core helpers into another
+temporary Docker context:
+
+```sh
+scripts/frankenphp-public-mutation-dispatch-proof.sh
+```
+
+It builds the same pinned FrankenPHP/Caddy binary, adds `mysqli` only to the
+disposable proof image because the stock PHP image does not expose that
+extension, starts a fresh MySQL `8.4` container, applies the current migrations,
+and carries one secret-guarded fixture request through Caddy attestation, the
+PHP verifier, the core dispatcher, atomic runner, and fixed response emitter.
+The proof checks accepted/replay, forged-header replacement, `GET` refusal,
+withheld-attestation refusal, idempotency conflict, and exact execution,
+activity, subject, CSRF, idempotency, and rate-limit evidence. Its fixture
+endpoint, bootstrap secret, package marker, database, image, network, and
+build context are removed on success or failure. This rehearsal does not link
+the dispatcher to `index.php`, deploy a client binary/Caddyfile, issue a browser
+cookie, change package enablement, or create Store Lite data.
+
+The repository's FrankenPHP proof workflow runs both the custom-binary ingress
+proof and this supported-server rehearsal when the integration or its reviewed
+core dependencies change.

@@ -21,10 +21,12 @@ separate fail-closed boundaries. Adapters, operational writable route/tool
 actions, settings UI/endpoints, actual secret
 lookup, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
-The generic public-mutation boundary now has optional closed manifest metadata
-and a value-free, non-executing declaration preflight. It has no dispatcher,
-endpoint, package runtime, request/cookie/session state, database state, or
-enablement effect.
+The generic public-mutation boundary now has optional closed manifest metadata,
+a value-free declaration preflight, and an unlinked core-owned dispatcher. A
+separate Docker rehearsal proves that dispatcher through the attested
+supported-server path against a temporary database. It still has no linked
+front-controller endpoint, browser-cookie issuance, package runtime,
+enablement effect, or client state.
 
 ## Implemented Trust Boundary
 
@@ -1016,9 +1018,10 @@ continue to reject routes until richer package lifecycle gates are reviewed.
 core-owned path for a narrowly declared static public POST mutation. The
 internal transaction runner, pure bounded response contract, closed core
 response emitter, pure subject-cookie serializer, and declared-form decoder are
-implemented, but no HTTP dispatcher or enablement profile can reach them. The
-emitter is not linked to the front controller and can output only an
-already-valid fixed core envelope; it does not make a public endpoint
+implemented, but no front-controller endpoint or enablement profile can reach
+them. The unlinked dispatcher composes these contracts but remains outside the
+front controller. The emitter is not linked to the front controller and can
+output only an already-valid fixed core envelope; it does not make a public endpoint
 available. The serializer is likewise unlinked and can only construct the
 fixed future host-only cookie value; it does not emit a browser cookie or make
 a public endpoint available.
@@ -1026,15 +1029,16 @@ An optional Caddy/FrankenPHP ingress-attestation source and paired unlinked PHP
 verifier now prepare one deployment-owned server seam: the handler strips
 spoofed internal headers, then conditionally HMAC-signs only bounded
 `/addons/` POST method/target, body length/hash, and fixed security-header
-facts. It is not a custom binary, active Caddyfile, dispatcher, endpoint,
-cookie flow, package execution, enablement profile, Store Lite package, or
-client-data path. The repository now supplies the required generic
-custom-binary build-and-request proof: it builds the module in an isolated
-temporary image, verifies module registration/configuration, and passes
-requests through Caddy to the unlinked PHP verifier. It is not a client
+facts. It is not an active client Caddyfile, endpoint, cookie flow, package
+execution, enablement profile, Store Lite package, or client-data path. The
+repository now supplies both the generic custom-binary build-and-request proof
+and a supported-server disposable dispatcher rehearsal: the temporary image
+verifies module registration/configuration, passes requests through Caddy to the
+PHP verifier, and carries one fixture request through the unlinked dispatcher,
+atomic runner, and fixed emitter against fresh MySQL. These are not a client
 deployment, so a later operator still owns the matching binary, Caddyfile,
-TLS/proxy boundary, and per-installation key before any future dispatcher may
-use the verifier.
+TLS/proxy boundary, trusted origin, and per-installation key before any future
+dispatcher may use the verifier.
 The optional `publicMutationContracts` field now validates only closed,
 data-only metadata: one already-declared static public POST/CSRF route, a
 unique mutation identity, two bounded scalar field shapes, fixed anonymous,
@@ -1130,12 +1134,12 @@ integers, malformed identifiers, partial values, or
 body overflow. Valid output is only a sorted typed field map. It does not read
 PHP request globals, content headers, cookies, sessions, a database, a runtime
 context, or package code; it does not verify CSRF, issue/resolve identity or
-idempotency material, claim a route, emit a response, or alter lifecycle. A
-later HTTP dispatcher must own those remaining checks and pass only a trusted
+idempotency material, claim a route, emit a response, or alter lifecycle. The
+HTTP dispatcher owns those remaining checks and passes only a trusted
 declaration and raw body to this decoder.
 
 `includes/addon_public_mutation_http_request_helpers.php` is a separate pure
-core-owned transport normalizer for that future dispatcher. It accepts only an
+core-owned transport normalizer for the unlinked dispatcher. It accepts only an
 explicit trusted canonical HTTPS origin, exact declaration path/method, complete
 security-relevant header capture, and raw body. It requires matching `Origin`, canonical form
 content type, matched optional content length, one opaque subject cookie, and
@@ -1148,7 +1152,7 @@ state; it does not resolve/issue evidence, claim a route, emit a response, or
 alter lifecycle, enablement, or Store Lite behavior.
 
 `includes/addon_public_mutation_route_helpers.php` is a separate private
-selector for a later dispatcher. Given one raw request target and an already
+selector for the unlinked dispatcher. Given one raw request target and an already
 initialized core runtime context, it maps only an exact un-decoded static path
 to one package/route/mutation identity after confirming the exact registrar
 route, mutation-handler, and state-loader bindings. Query-bearing known paths

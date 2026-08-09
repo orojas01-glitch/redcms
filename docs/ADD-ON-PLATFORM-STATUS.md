@@ -46,8 +46,13 @@ flowchart TD
     G13 --> G14["Core closed response emitter"]
     G14 --> G15["Core subject-cookie serialization"]
     G15 --> G16["Caddy/FrankenPHP ingress attestation"]
-    G16 --> G17["CURRENT / NEXT<br/>Bounded HTTP dispatch + richer enablement"]
-    G17 --> S["TARGET<br/>Store Lite optional package"]
+    G16 --> G17["Unlinked bounded mutation dispatcher"]
+    G17 --> G18["Core-owned browser subject-cookie lifecycle"]
+    G18 --> G19["Non-executing per-client deployment profile"]
+    G19 --> G20["Core-owned response-owner composition"]
+    G20 --> G21["Core-owned deployment review packet"]
+    G21 --> G22["CURRENT / NEXT<br/>Actual deployment + browser evidence + richer enablement"]
+    G22 --> S["TARGET<br/>Store Lite optional package"]
     S -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
@@ -57,8 +62,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16 complete;
-    class G17 current;
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,C,A1,A2,A3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G18,G19,G20,G21 complete;
+    class G22 current;
     class E,A,D,R remaining;
     class S target;
 ```
@@ -66,8 +71,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Optional Caddy/FrankenPHP ingress attestation now has a reproducible isolated custom-binary proof: it builds the exact module into a temporary FrankenPHP/Caddy image, verifies module registration/config adaptation, and sends bounded requests through Caddy and the unlinked PHP verifier. It changes no default server, client deployment, active Caddyfile, endpoint, browser issuance/rotation, Store Lite state, or enablement state. |
-| Current milestone | Bounded public HTTP dispatch and richer-enablement gates: a client-specific custom-binary deployment remains an operator decision, while actual browser subject-cookie issuance/clearance/rotation, bounded dispatcher routing/containment, richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
+| Latest completed slice | Core-owned non-executing deployment review packet: a profile-bound, non-secret evidence contract now validates pinned Caddy/FrankenPHP/TLS/proxy facts, artifact hashes outside the starter, process-environment trust and key-rotation evidence, and bounded desktop/mobile browser results without deployment or dispatcher linking. |
+| Current milestone | Actual per-client deployment rehearsal: the isolated HTTPS runner now stages the reviewed Caddy/TLS/proxy boundary, rotates process-environment HMAC evidence, and captures browser proof outside the starter. A successful Docker/browser run and later client-specific review are still required before linking the dispatcher. Richer enablement, settings UI/endpoints, actual secret lookup, and Store Lite remain blocked. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 

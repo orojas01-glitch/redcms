@@ -295,6 +295,38 @@ features.
   change, dispatcher, endpoint, cookie flow, enablement change, or Store
   Lite/client-data path. Its per-installation HMAC key and deployment
   configuration remain external to the clean starter
+- Unlinked core-owned public-mutation dispatcher composition. It accepts only
+  explicit attested method/target/capture facts, selects one registrar-bound
+  route, verifies the opaque subject and CSRF before decoding declared scalar
+  fields, invokes the atomic runner, and returns only the fixed response model.
+  It is not linked to `index.php`, emits no response or browser cookie, and
+  adds no package, enablement, Store Lite, or client-data behavior
+- Disposable Docker supported-server dispatcher rehearsal. It builds the
+  pinned custom FrankenPHP/Caddy image, applies the current migrations to a
+  fresh temporary MySQL database, and proves the real attested request path
+  through the core dispatcher, atomic runner, and fixed emitter, including
+  accepted/replay/refusal/conflict and exact ledger/audit/rate evidence. The
+  fixture endpoint, `mysqli` extension, package marker, database, image,
+  network, and build context exist only for the proof and are removed after it;
+  no client installation, default server, browser cookie, enablement, or Store
+  Lite data is changed
+- Core-owned browser subject-cookie lifecycle bridge. Transactional `ensure`,
+  `clear`, and `rotate` operations return only fixed host-only cookie
+  descriptors, refuse malformed sources and active caller transactions, and
+  invalidate the old subject and CSRF evidence on rotation. Disposable and
+  supported-server proofs cover issuance, resolve-without-reissue, fixed
+  clearance, replacement, and cleanup; the bridge is not linked to `index.php`
+  and does not authorize a client deployment, package enablement, or Store Lite
+  route
+- Non-executing per-client public-mutation deployment profile validator. It
+  accepts only an operator-owned review packet with one canonical HTTPS origin,
+  pinned FrankenPHP/Caddy versions, the fixed process-environment HMAC key
+  name, attestation-before-PHP route order, core response/cookie ownership,
+  host-only cookie policy, and explicit client-isolation flags. It returns a
+  deterministic non-secret profile hash and refuses starter-database reuse,
+  request-derived trust, package/theme response ownership, policy drift, and
+  all dispatcher/package/Store Lite activation flags; it reads no database,
+  secret, filesystem, request, or client state
 - Core-only non-routable public-mutation response emitter. It accepts only the
   existing exact fixed core envelopes, refuses to run after output starts,
   clears and sets only their no-store/nosniff JSON headers, and emits only the
@@ -302,6 +334,16 @@ features.
   database, runtime, or package code and remains unlinked from `index.php`, so
   it creates no public endpoint, browser cookie, Store Lite behavior, or
   enablement change
+- Core-owned non-emitting public-mutation response owner. It composes only an
+  already-valid fixed core envelope with the lifecycle bridge's exact subject-
+  cookie descriptors, rejects arbitrary headers, policy drift, and body token
+  leakage, and returns a deterministic pre-link result. It reads no request,
+  database, secret, package, or client state and remains outside `index.php`.
+- Non-executing per-client deployment review validator. It binds a reviewed
+  profile hash to non-secret Caddy/FrankenPHP/TLS/proxy artifact evidence,
+  process-environment trusted-origin/HMAC provisioning and rotation facts, and
+  bounded desktop/mobile browser evidence. It reads no deployment file or
+  secret, changes no client state, and cannot link the dispatcher.
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint
@@ -424,6 +466,33 @@ immutable asset-endpoint fixtures run automatically in `scripts/dev-acceptance.s
 against its uniquely named disposable database and FrankenPHP CLI. The endpoint
 fixture verifies real HTTP headers and bytes plus checksum, traversal,
 lifecycle, and integrity refusal without a session or package-PHP execution.
+
+The supported-server public-mutation rehearsal is separate because it requires
+Docker Desktop and a custom Caddy/FrankenPHP build:
+
+```bash
+scripts/frankenphp-public-mutation-dispatch-proof.sh
+```
+
+It uses only a fresh temporary MySQL database and a fixture-only endpoint. It
+does not deploy the dispatcher, change the default local server, or touch any
+client installation.
+
+The installation-shaped HTTPS deployment rehearsal is a separate, later gate:
+
+```bash
+scripts/frankenphp-public-mutation-deployment-rehearsal.sh
+```
+
+It stages only the reviewed integration into a temporary Docker build context,
+uses a generated localhost certificate outside the starter, restarts the
+container with a second process-environment HMAC key, and captures fixed
+Chrome desktop (`1440x1000`) and mobile (`390x844`) evidence. The retained
+packet contains only non-secret hashes and boolean evidence outside the
+starter; the private key, process secrets, container, image, and build context
+are removed. Set `RED_DEPLOYMENT_REHEARSAL_OUTPUT` to choose an external
+evidence directory. This is not an Adriana/client deployment and does not link
+the dispatcher or front controller.
 
 The install command is a dry run by default. Apply requires the exact database,
 package, version, plan digest, SHA-256 from a separately verified backup, and

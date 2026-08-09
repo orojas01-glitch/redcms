@@ -238,19 +238,21 @@ The optional Caddy/FrankenPHP ingress-attestation source now supplies one
 separately configured server-side seam without changing the default local
 server. It removes spoofed internal headers on every request and conditionally
 HMAC-signs only bounded `/addons/` POST method/target, body length/hash, and
-fixed security-header facts for an unlinked PHP verifier. A separate isolated
-Docker proof builds the matching custom binary, confirms its module/configuration,
-and verifies Caddy-to-PHP capture/body behavior without client data. It ships
-no deployed client binary or active Caddyfile and creates no dispatcher,
-endpoint, cookie flow, package invocation, enablement change, Store Lite
-behavior, or client data.
+fixed security-header facts for an unlinked PHP verifier. Separate isolated
+Docker proofs build the matching custom binary, confirm its
+module/configuration, verify Caddy-to-PHP capture/body behavior, and carry a
+fixture request through the unlinked dispatcher/runner/emitter against fresh
+MySQL without client data. They ship no deployed client binary or active
+Caddyfile and create no linked endpoint, cookie flow, package invocation,
+enablement change, Store Lite behavior, or client data.
 The separate core-only response emitter now accepts only the existing exact
 fixed core envelopes, rejects output that has already started, clears and sets
 only their fixed no-store/nosniff JSON headers, and emits only their matching
 fixed body bytes. It reads no request/cookie/session state, database, runtime,
 or package code and remains outside the front controller. It creates no route,
 endpoint, browser cookie, Store Lite behavior, enablement change, or client
-data; a later dispatcher must return immediately after it uses the emitter.
+data; the unlinked dispatcher returns immediately after it uses the emitter,
+while a front-controller link remains separately gated.
 The separate pure subject-cookie serializer now accepts only the exact
 core-issued descriptor shape and constructs one fixed future host-only
 `Set-Cookie` value: `Max-Age=1800`, `Path=/`, `Secure`, `HttpOnly`, and
@@ -258,6 +260,39 @@ core-issued descriptor shape and constructs one fixed future host-only
 reads no request/cookie/session state, database, runtime, or package code, and
 remains outside the front controller. It creates no endpoint, browser
 issuance/rotation, enablement change, Store Lite behavior, or client data.
+The core-owned lifecycle bridge now provides transactional `ensure`, `clear`,
+and `rotate` operations over the hash-only subject store. It returns only the
+fixed serializer descriptors, refuses malformed rotation sources and active
+caller transactions, and expires the old subject (and therefore its CSRF
+evidence) before committing a distinct replacement. The 18-assertion
+disposable fixture and supported-server HTTP rehearsal prove issuance,
+resolve-without-reissue, fixed clearance, old-token refusal, and cleanup. It
+still has no front-controller link; client response ownership and deployment
+remain separate gates.
+The non-executing per-client deployment profile is now complete. It validates
+one operator-owned packet with a separate database, canonical HTTPS origin,
+pinned FrankenPHP/Caddy versions, fixed process-environment HMAC and
+trusted-origin sources, attestation-before-PHP route order, core response and
+host-only cookie ownership, clean-starter isolation, and disabled activation
+flags. It returns only a deterministic non-secret hash and does not load or
+apply a client deployment; production deployment and browser review remain
+before any front-controller link.
+The core-owned response-owner composer is now complete as a non-emitting,
+profile-bound step. It accepts only the fixed response envelope and lifecycle
+cookie descriptors, preserves clear-before-set rotation ordering, rejects
+arbitrary headers and ownership/policy drift, and remains unlinked from the
+front controller. Actual per-client deployment and browser evidence remain.
+The non-executing deployment-review packet is now complete. It binds the
+profile hash to non-secret server/artifact hashes, process-environment
+trusted-origin/HMAC and old-key-revocation evidence, and fixed desktop/mobile
+browser results without reading files, resolving secrets, or changing client
+state. Actual per-client deployment and browser capture remain.
+An installation-shaped HTTPS rehearsal command now stages only the reviewed
+attestation integration into a temporary Docker context, uses an external
+localhost certificate, proves process-environment HMAC replacement across a
+restart, and captures fixed desktop/mobile browser evidence into a non-secret
+external packet. A successful Docker/browser run and later client-specific
+review are still required; no client or Adriana installation is touched.
 Tool-bearing packages remain
 ineligible for current enablement. The Owner-authorized disable command serializes with
 enablement, refuses enabled dependents, and atomically returns a package to
@@ -519,11 +554,18 @@ idempotency-key, atomic transaction-runner, bounded response, declared-form
 decoder, pure HTTP request-envelope, private static route-selector, and
 non-routable server request-facts adapter plus closed response-emitter
 and non-emitting subject-cookie-serialization and optional
-Caddy/FrankenPHP ingress-attestation foundations are complete. Its
-protected settings UI/endpoint, client-specific custom-binary deployment
-decision for the public HTTP ingress contract,
-bounded dispatcher and actual browser subject-cookie issuance/clearance/rotation,
-actual secret lookup, live-data disable/upgrade
+Caddy/FrankenPHP ingress-attestation foundations are complete. The bounded
+dispatcher, supported-server disposable rehearsal, and core-owned browser
+subject-cookie lifecycle bridge, non-executing per-client deployment profile,
+response-owner composer, and deployment-review packet are also complete. The
+installation-shaped HTTPS deployment rehearsal harness is now available but
+remains a separate environment-dependent gate. The supported-server dispatcher
+rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
+MySQL database; it does not link the dispatcher to
+the front controller or deploy a client. Actual client-specific Caddyfile/TLS/
+proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
+capture, protected
+settings UI/endpoint, actual secret lookup, live-data disable/upgrade
 compatibility, and richer package persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled.

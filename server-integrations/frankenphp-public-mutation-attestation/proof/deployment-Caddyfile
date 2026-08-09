@@ -1,0 +1,19 @@
+# Disposable installation-shaped HTTPS configuration. It is copied only into
+# the temporary Docker build context created by the deployment rehearsal.
+# It is not a RED-CMS root Caddyfile or a client deployment artifact.
+{
+	auto_https off
+	admin off
+}
+
+:8443 {
+	tls /etc/caddy/certs/rehearsal.crt /etc/caddy/certs/rehearsal.key
+	root * /app/public
+
+	# Keep attestation before PHP exactly as the reviewed deployment profile
+	# requires. The fixture page never links the dispatcher or front controller.
+	route {
+		red_public_mutation_attestation RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY
+		php_server
+	}
+}

@@ -34,6 +34,10 @@ RUN CGO_ENABLED=1 \
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php8 AS proof
 
 COPY --from=builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
+# The RED-CMS PHP helpers use mysqli; the stock FrankenPHP PHP image ships
+# mysqlnd but not mysqli, so the disposable proof image adds only this runtime
+# extension. This does not alter the starter or any client deployment.
+RUN install-php-extensions mysqli
 COPY integration/proof/Caddyfile /etc/caddy/Caddyfile
 COPY integration/proof/index.php /app/public/index.php
 COPY includes/ /app/public/includes/

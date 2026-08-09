@@ -30,8 +30,15 @@ documented public-mutation boundary now validates optional closed declaration
 metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
 response constraints; the internal transaction runner and replay ledger are now
-implemented, but there is still no dispatcher, emitted cookie/header or session
-access, package behavior, or enablement change. The separate
+implemented, and an unlinked core-owned dispatcher composes the explicit
+request, route, subject/CSRF, form, runner, and fixed-response contracts. It is
+not linked to the front controller and still emits no cookie/header or session
+access, package behavior, or enablement change. A separate Docker-only
+supported-server rehearsal now carries a secret-guarded fixture request through
+the pinned custom FrankenPHP/Caddy binary, PHP verifier, dispatcher, atomic
+runner, and fixed emitter against a fresh MySQL database, then removes every
+temporary artifact. The rehearsal does not deploy a client or issue a browser
+cookie. The separate
 read-only live-data preflight now binds a trusted declaration from an
 `installed_disabled` package to current per-client migration, table,
 typed-setting, opaque secret-availability, and core
@@ -746,9 +753,74 @@ request bootstrap excludes the disabled package.
     internal capture headers on every request and conditionally HMAC-signs only
     bounded `/addons/` POST method/target, body length/hash, and fixed
     security-header facts. It has no compiled binary, active Caddyfile, default
-    server change, dispatcher, endpoint, cookie issuance, package invocation,
-    enablement, fixture, Store Lite, or client-state path; custom-binary
-    deployment proof remains a later dispatcher gate.
+    server change, linked endpoint, cookie issuance, package invocation,
+    enablement, fixture, Store Lite, or client-state path; per-client
+    deployment and production browser review remain later gates.
+58. Completed the unlinked core-owned public-mutation dispatcher composition:
+    explicit method/target/capture facts select one registrar-bound route,
+    require attested POST transport, verify the opaque subject and CSRF before
+    decoding declared scalar fields, invoke the existing atomic runner, and
+    return only the fixed response model. Its focused fixture proves runtime,
+    method, transport, binding, and callback isolation without linking the
+    front controller, emitting a response/cookie, changing enablement, or
+    adding Store Lite/client state. The supported-server rehearsal and the
+    separate core lifecycle bridge are complete; the non-executing deployment
+    profile and response-owner composition are complete, while production
+    deployment review remains.
+59. Completed the disposable supported-server dispatcher rehearsal: a temporary
+    pinned FrankenPHP/Caddy image (with `mysqli` added only to that proof image)
+    and fresh MySQL database carried a secret-guarded fixture request through
+    the real attester, PHP verifier, core dispatcher, atomic runner, and fixed
+    emitter. Accepted/replay, forged-header replacement, `GET` refusal,
+    withheld-attestation refusal, idempotency conflict, and exact execution,
+    activity, subject, CSRF, idempotency, and rate evidence passed before all
+    containers, network, image, database, package marker, and build context
+    were removed. It remains a test-only rehearsal; the core-owned
+    subject-cookie lifecycle and non-executing deployment profile are now
+    proven, while trusted-origin/HMAC provisioning, production deployment, and
+    browser evidence precede any front-controller link or Store Lite
+    enablement.
+60. Completed the core-owned browser subject-cookie lifecycle bridge. Its
+    transactional `ensure`, `clear`, and `rotate` operations return only fixed
+    host-only cookie descriptors, refuse malformed input and active caller
+    transactions, and expire the old subject and its CSRF evidence before
+    committing a distinct replacement. The 18-assertion disposable fixture and
+    supported-server HTTP proof cover issuance, resolve-without-reissue,
+    fixed clearance, old-token refusal, malformed input, and cleanup. This
+    does not emit a production header, link the front controller, or authorize
+    a client deployment; production deployment remains the next gate.
+61. Completed the non-executing per-client public-mutation deployment profile.
+    One operator-owned packet now validates a separate client database and
+    canonical HTTPS origin, pinned FrankenPHP/Caddy versions, fixed
+    process-environment HMAC and trusted-origin sources, attestation-before-
+    PHP route order, core response/cookie ownership, the fixed host-only
+    subject-cookie policy, clean-starter isolation, and disabled dispatcher,
+    package, and Store Lite flags. It returns only a deterministic non-secret
+    hash, refuses request-derived trust, policy/version/route drift, secret-
+    shaped fields, and starter-database reuse, and does not load or apply a
+    deployment. Production deployment and browser review remain before any
+    front-controller link.
+62. Completed the core-owned non-emitting response-owner composer. It binds a
+    valid deployment profile to the fixed response envelope and zero, one, or
+    ordered clear-then-set subject-cookie descriptors. Arbitrary headers,
+    package/theme ownership, linked-dispatcher profiles, cookie-policy drift,
+    invalid lifecycle state, and opaque cookie tokens in the response body
+    fail closed. The 14-assertion fixture proves no request/global/session/
+    header mutation; the composer remains outside the front controller.
+63. Completed the non-executing per-client deployment-review packet. It binds
+    the deployment-profile hash to non-secret Caddy/FrankenPHP/TLS/proxy
+    artifact hashes, process-environment trusted-origin/HMAC provisioning and
+    old-key-revocation evidence, and fixed desktop/mobile browser results. The
+    17-assertion fixture rejects secret values, starter-resident artifacts,
+    request-derived trust, browser errors/state changes, forged review hashes,
+    deployment, and dispatcher linking. Actual deployment and browser capture
+    remain the next gate.
+64. Added the installation-shaped HTTPS deployment rehearsal command. It
+    stages only the reviewed integration, uses an external generated
+    certificate, proves process-environment HMAC replacement across restart,
+    and captures fixed desktop/mobile browser evidence into a non-secret packet
+    outside the starter. A successful Docker/browser run and client-specific
+    review remain required; it does not touch Adriana or link the dispatcher.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

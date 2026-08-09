@@ -119,9 +119,19 @@ malformed identities, and forged hashes fail closed. It also proves the helper
 has no database, request-global, package-execution, or filesystem-read path.
 It creates no route, handler, session/cookie, table, or enablement eligibility;
 the current public-route fixture must still refuse unsafe methods before a
-package handler. A later isolated fixture must prove anonymous-subject, CSRF,
-rate/idempotency, transaction, response-redaction, disablement, and exact
-cleanup requirements before it can change that behavior.
+package handler. The supported-server rehearsal now proves the disposable
+anonymous-subject, CSRF, rate/idempotency, transaction, response-redaction, and
+exact-cleanup path; disablement and client deployment still precede any
+production behavior change. The separate 18-assertion core-owned
+subject-cookie lifecycle fixture proves ensure/resolve, transactional
+rotation, fixed clearance, old-token and subject-bound CSRF invalidation,
+malformed-input refusal, active-transaction refusal, and exact cleanup.
+The separate 27-assertion non-executing deployment-profile fixture proves one
+closed client review packet with canonical HTTPS, pinned server versions,
+fixed HMAC/trusted-origin sources, attestation-before-PHP route order, core
+response/cookie ownership, host-only cookie policy, clean-starter isolation,
+secret-shaped-field refusal, and disabled activation flags. It reads no
+request, filesystem, database, package, secret, or response state.
 The separate 18-assertion public-mutation response fixture proves that only
 the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
 can be constructed. It requires exact JSON, content type, no-store, nosniff,
@@ -129,6 +139,28 @@ length, and POST-only method headers; maps replay to its original outcome; and
 rejects forged headers, bodies, and inconsistent runner results. It has no
 request parser, globals, cookie/session, database, package execution, response
 emission, route, enablement, Store Lite, or client-data path.
+The separate 14-assertion response-owner fixture proves that a valid deployment
+profile can compose that closed envelope with no cookie, one issuance/clearance
+descriptor, or ordered clear-then-set rotation descriptors. It rejects package
+ownership, linked-dispatcher profiles, arbitrary headers, cookie-policy drift,
+invalid lifecycle states, and any request/global/session/header mutation; it
+does not emit a response or link the front controller.
+The separate 17-assertion deployment-review fixture proves that a profile hash
+binds only non-secret Caddy/FrankenPHP/TLS/proxy artifact hashes, process-
+environment trusted-origin/HMAC provisioning and old-key-revocation evidence,
+and fixed desktop/mobile browser evidence. It rejects secret values, artifact
+placement in the starter, request-derived trust, unreviewed rotation, browser
+errors/state changes, forged review hashes, and any deployment or dispatcher
+path.
+The separate installation-shaped HTTPS rehearsal must be run with Docker when
+the pinned builder layers are available. It stages no client or starter data,
+uses a generated external certificate, proves the attestation-before-PHP route
+over HTTPS, rotates the process-environment HMAC key across a container
+restart, and captures fixed desktop/mobile browser evidence with zero console
+or network errors, no cookie, no opaque token, and no client-state change. Its
+retained output is non-secret and outside the starter; its private key, secret
+values, image, container, and build context are removed. It does not count as
+a client deployment or a front-controller link.
 The separate 17-assertion public-mutation live-data-preflight fixture proves
 that a trusted `installed_disabled` package can be inspected only through
 current migration, declared InnoDB-table, typed-setting, and opaque
@@ -155,9 +187,19 @@ cleanup, and no request-global, browser-response, package-load, or
 runtime-registration path. Its resolver is deliberately non-consuming until a
 internal transaction runner can couple consumption to package state. It creates
 no public route or package fixture. The separate disposable atomic-runner
-fixture proves keyed replay/conflict outcomes, rate claims, postcondition
-checks, and rollback of package/rate/ledger/audit state; it adds no HTTP,
-browser, dispatcher, response, or enablement path.
+  fixture proves keyed replay/conflict outcomes, rate claims, postcondition
+  checks, and rollback of package/rate/ledger/audit state; it adds no HTTP,
+  browser, dispatcher, response, or enablement path.
+The separate 6-assertion public-mutation dispatcher fixture composes only
+explicit method/target/capture facts with an in-memory registrar context. It
+proves runtime-unavailable, non-POST, missing-attestation, incomplete-binding,
+closed-result, and callback-isolation behavior; it has no database, request
+global, response-emission, front-controller, browser, package, enablement,
+Store Lite, or client-data path. The separate Docker-only supported-server
+rehearsal now proves the complete disposable request path; the dispatcher
+remains unlinked until the per-client deployment/trusted-origin/HMAC gate
+passes; the core browser subject-cookie lifecycle and non-executing deployment
+profile are separately proven but do not create a production endpoint.
 After database migration, a separate disposable request fixture proves that
 uninstalled and disabled packages remain unexecuted, enabled dependencies
 register in order, core lookups resolve exact owners, and drift or missing code
@@ -411,14 +453,17 @@ installation/recovery, 23-assertion read-only enablement preflight,
 17-assertion read-only public-mutation live-data preflight, 19-assertion
 core-only anonymous-subject/CSRF foundation, 7-assertion pure subject-cookie
 serializer, 15-assertion core-only fixed-window rate-limit foundation,
-18-assertion core-only opaque idempotency-key foundation,
+18-assertion core-only opaque idempotency-key foundation, 18-assertion
+core-owned browser subject-cookie lifecycle,
+27-assertion non-executing per-client deployment profile,
 21-assertion atomic core-only public-mutation transaction runner, 18-assertion
 bounded public-mutation response contract, 8-assertion closed core response
 emitter, 24-assertion declared
 public-mutation form decoder, 37-assertion pure HTTP request envelope,
 19-assertion private static mutation-route selector, 16-assertion
 non-routable server request-facts adapter, 12-assertion optional
-FrankenPHP-ingress PHP verifier,
+FrankenPHP-ingress PHP verifier, 6-assertion unlinked public-mutation
+dispatcher composition,
 23-assertion atomic enablement, 11-assertion enabled-package request bootstrap,
 18-assertion atomic disablement, 17-assertion safe component
 persistence/dispatch,
@@ -451,6 +496,9 @@ contract only and does not open a restore action or operational endpoint.
 - The configured application database account must already exist.
 - A local MySQL administrative account must be able to create databases, grant/revoke access, and create/drop the suite's disposable trigger.
 - The documented FrankenPHP runtime and `curl` must be available.
+- Docker Desktop is required only for the separate supported-server dispatcher
+  rehearsal; that proof creates its own temporary MySQL container and does not
+  use the local application database.
 
 The local default administrative account is `root` with an empty password. Override it without placing the password on the command line:
 
@@ -478,6 +526,22 @@ Cleanup complete: stopped the isolated server and removed database/grant redcms_
 ```
 
 The command must return a nonzero status if installation, migration, schema, relationship, primary-isolation, runtime behavior, transaction rollback, or cleanup checks fail.
+
+The supported-server public-mutation rehearsal is intentionally separate from
+the normal PHP/MySQL suite because it builds a custom Caddy/FrankenPHP binary
+and requires Docker Desktop:
+
+```bash
+scripts/frankenphp-public-mutation-dispatch-proof.sh
+```
+
+It creates a fresh MySQL `8.4` container, applies the current migrations, and
+uses a secret-guarded fixture-only bootstrap path to exercise one real attested
+`POST` through Caddy, the PHP verifier, the core dispatcher, atomic runner, and
+fixed response emitter. It then checks accepted/replay, forged-header
+replacement, `GET` refusal, withheld-attestation refusal, idempotency conflict,
+and exact fixture ledger/audit/rate state before removing its temporary
+containers, network, image, database, package marker, and build context.
 
 ## Safety Boundaries
 
@@ -563,6 +627,43 @@ The command must return a nonzero status if installation, migration, schema, rel
 - Public-mutation rate-limit acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, an enforced 12-per-60-second fixed window, bounded collision/contention handling, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. It has no HTTP, package-data, or enablement path.
 - Public-mutation idempotency-key acceptance runs only in the uniquely named disposable database and creates no package fixture. It requires exact InnoDB storage, a hash-only client/declaration/subject scope, a 10-minute core-issued opaque key, correct subject/scope resolution, no raw-key persistence, caller-owned transaction refusal, bounded expiry cleanup, subject cascade cleanup, and no request-global, browser-response, package-load, or runtime-registration path. The resolver itself remains non-consuming; the separate internal runner is its only consumer. It has no HTTP, package-data, or enablement path.
 - Atomic public-mutation runner acceptance runs only in the uniquely named disposable database with one temporary InnoDB table and in-memory trusted runtime context. It proves one declared handler/state-loader binding, typed field refusal, CSRF-before-rate ordering, exact replay/conflict outcomes, fixed-rate ordering, server-derived postconditions, keyed replay evidence, a value-free anonymous audit fact, contained output/exception/rollback failures, and exact database/runtime/constraint/table cleanup. It creates no package files, browser state, dispatcher, response, route execution, enablement profile, Store Lite data, or client artifact.
+- Public-mutation dispatcher acceptance runs before database creation and uses
+  only explicit transport fixtures plus an in-memory registrar context. It
+  proves one closed dispatcher/capture result, runtime-unavailable behavior,
+  non-POST refusal, missing-attestation refusal, incomplete-binding refusal,
+  and zero package callback or HTTP-state changes. The dispatcher remains
+  unlinked from `index.php`; the supported-server disposable rehearsal is
+  complete. The core subject-cookie lifecycle is now proven independently;
+  the non-executing deployment profile and response-owner composition are
+  also proven; production deployment review remains required before linking
+  it.
+- Public-mutation deployment-profile acceptance is dependency-free and creates
+  no database, package, request, browser, route, or client fixture. It accepts
+  only one non-secret operator review packet with a separate client database,
+  canonical HTTPS origin, pinned FrankenPHP/Caddy versions, fixed
+  HMAC/trusted-origin sources, attestation-before-PHP route order, core
+  response/cookie ownership, host-only cookie policy, explicit isolation, and
+  disabled activation flags. It rejects starter-database reuse, request-
+  derived trust, version/route/policy drift, secret-shaped fields, and any
+  dispatcher/package/Store Lite activation without loading a profile or
+  changing response, filesystem, database, or client state.
+- Public-mutation deployment-review acceptance is dependency-free and creates
+  no database, package, request, browser, route, or client fixture. It binds
+  the profile hash to pinned server/TLS/proxy facts, non-secret Caddyfile/
+  binary/certificate hashes outside the starter, process-environment
+  trusted-origin/HMAC sources with verified old-key revocation, and bounded
+  desktop/mobile HTTPS browser evidence. It rejects secret values, unreviewed
+  proxy/TLS/rotation/browser facts, forged review hashes, file loading,
+  browser sessions, deployment, response emission, and dispatcher linking.
+- Public-mutation installation-shaped HTTPS rehearsal acceptance is a Docker-
+  and browser-dependent gate. It requires a temporary custom FrankenPHP/Caddy
+  binary, explicit TLS certificate files outside the starter, process-
+  environment trusted-origin/HMAC values, attestation-before-`php_server`
+  ordering, a restart-based old-key absence proof, and fixed `1440x1000` /
+  `390x844` HTTPS evidence. It must retain only non-secret hashes and boolean
+  evidence outside the starter and remove the private key, secret values,
+  image, container, and build context. It cannot touch a client database,
+  install a package, link the dispatcher, or exercise Store Lite.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,
@@ -629,6 +730,19 @@ The command must return a nonzero status if installation, migration, schema, rel
   package, browser, endpoint, or client fixture. The workflow runs it for the
   relevant pull requests; it remains a generic proof rather than a client
   deployment or dispatcher authorization.
+- The separate Docker-only
+  `scripts/frankenphp-public-mutation-dispatch-proof.sh` stages only reviewed
+  core helpers and a disposable fixture endpoint, builds the same pinned
+  FrankenPHP/Caddy binary, adds `mysqli` only to the proof image, and exercises
+  the complete attested dispatcher path against a fresh MySQL database. It
+  proves accepted/replay/refusal/conflict behavior and exact execution,
+  activity, subject, CSRF, idempotency, and rate-limit evidence. Its temporary
+  bootstrap also proves real HTTP subject-cookie issuance, resolve-without-
+  reissue, rotation with fixed deletion plus replacement, old-token refusal,
+  and clearance. Its endpoint, bootstrap secret, package marker, database,
+  image, network, and context are removed on success or failure; it does not
+  alter the default server, a client installation, production browser state,
+  enablement, or Store Lite.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/
@@ -637,6 +751,14 @@ The command must return a nonzero status if installation, migration, schema, rel
   unreviewed statuses before changing response state. It has no request-global,
   browser-cookie, session, database/runtime/package, front-controller, route,
   endpoint, lifecycle, enablement, Store Lite, or client-state path.
+- Public-mutation response-owner acceptance is dependency-free and creates no
+  database, package, request, browser, route, or client fixture. It requires a
+  valid non-executing deployment profile and exact core response envelope,
+  composes only fixed lifecycle cookie descriptors, proves issuance, clear,
+  resolve, and ordered rotation, and rejects arbitrary headers, package/theme
+  ownership, linked-dispatcher profiles, cookie-policy drift, malformed
+  lifecycle state, body token leakage, and any response/global/session state
+  change. It remains non-emitting and unlinked from the front controller.
 - Public-mutation subject-cookie serialization acceptance is dependency-free
   and creates no database, package, request, browser, route, or client
   fixture. It accepts only the exact core-issued descriptor shape and produces
@@ -644,9 +766,10 @@ The command must return a nonzero status if installation, migration, schema, rel
   `Path=/`, `Secure`, `HttpOnly`, and `SameSite=Strict`, no `Domain` or
   `Expires`; it refuses forged descriptors, policy drift, token drift, domain
   injection, and max-age drift. It emits no header/cookie and changes no
-  request/session/response/buffer state; it has no front-controller, endpoint,
-  browser issuance/rotation, lifecycle, enablement, Store Lite, or client-state
-  path.
+  request/session/response/buffer state. The separate disposable lifecycle
+  fixture owns database-backed ensure/clear/rotate proof; neither fixture links
+  a front controller or creates a production endpoint, enablement, Store Lite,
+  or client-state path.
 - Atomic add-on enablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner authority, a stale-plan refusal before execution, registrar-failure refusal, audit and post-state-update injected-failure rollback, atomic enabled-state and bounded-audit commits for all three constrained profiles, lifecycle reach from standalone and combined default components to the safe core renderer, later runtime registration of every combined-package component and service identifier, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

@@ -734,10 +734,10 @@ It supplies no-store, nosniff, content-type, length, and only a fixed
 `Allow: POST` method-refusal header; it exposes neither a replay signal nor any
 package, route, subject, token, key, state, cart, order, plan, secret, or
 internal failure detail. It does not read request/cookie/session state, access
-the database, load package code, emit HTTP state, or change lifecycle. A later
-core-owned dispatcher must still select and emit an exact valid envelope only
-after same-origin, CSRF, scalar-input, server-state, rate/idempotency, and
-transaction checks are complete.
+the database, load package code, emit HTTP state, or change lifecycle. The
+unlinked core-owned dispatcher selects and returns that envelope only after
+same-origin, CSRF, scalar-input, server-state, rate/idempotency, and transaction
+checks are complete; a front-controller link remains separately gated.
 
 The separate pure declared-form decoder accepts only one validated in-memory
 manifest declaration and raw canonical URL-encoded package-field bytes. It
@@ -798,14 +798,18 @@ The handler source, Caddyfile placement example, and test command live under
 FrankenPHP binary cannot load the module dynamically: the operator must build
 and deploy a matching custom binary and keep it, its Caddyfile, the per-client
 environment key, certificates, and proxy configuration outside the clean
-starter. The separate Docker proof builds a temporary matching binary and
-proves module registration, Caddyfile adaptation, signed body preservation,
-spoof stripping, and duplicate/encoded withholding through the unlinked PHP
-verifier. It does not deploy a binary or configuration for a client. Until a
-separately reviewed dispatcher and client deployment decision exist, invalid
-or missing attestation creates no public route, response, cookie,
-runtime/package invocation, lifecycle change, Store Lite behavior, or client
-state.
+starter. The separate Docker proofs build a temporary matching binary and prove
+module registration, Caddyfile adaptation, signed body preservation, spoof
+stripping, and duplicate/encoded withholding through the unlinked PHP verifier.
+The supported-server rehearsal additionally carries one secret-guarded fixture
+request through the verifier, dispatcher, atomic runner, and fixed emitter
+against a fresh MySQL database, then removes its temporary database, image,
+network, package marker, and context. Neither proof deploys a binary or
+configuration for a client. Until the validated profile is followed by actual
+per-client deployment and browser-deployment review, invalid
+or missing attestation creates
+no public route, response, cookie, runtime/package invocation, lifecycle
+change, Store Lite behavior, or client state.
 
 The separate core-only response emitter accepts only an exact closed response
 envelope from the existing fixed core response contract. It rechecks the six
@@ -817,6 +821,16 @@ or claims a route, or changes lifecycle, enablement, Store Lite, or client
 state. It remains unlinked from the front controller, so it is an emission
 primitive rather than a public endpoint or dispatcher.
 
+The core-owned response-owner composer now binds that emitter contract to a
+validated non-executing deployment profile and optional lifecycle result. It
+can return no cookie line, one fixed issuance/clearance line, or clear-then-set
+rotation lines, but it cannot accept arbitrary headers, package/theme response
+ownership, a linked-dispatcher profile, cookie-attribute drift, or a response
+body containing an opaque cookie token. It calls no output API and reads no
+request/global/session, secret, database, filesystem, package, or client state.
+The separate emitter remains the only future HTTP emission primitive; actual
+per-client deployment and browser evidence are still required.
+
 The separate pure subject-cookie serializer accepts only the exact
 issuer-descriptor shape and derives one fixed future host-only `Set-Cookie`
 value. It has a 30-minute `Max-Age`, `Path=/`, `Secure`, `HttpOnly`, and
@@ -825,8 +839,59 @@ an unreviewed cross-subdomain scope or expiry behavior through this helper. It
 does not itself issue a subject, call `header()` or `setcookie()`, read
 request/cookie/session globals, access a database/runtime, invoke package
 code, select a route, or change lifecycle, enablement, Store Lite, or client
-state. It is not linked to the front controller; later browser issuance,
-clearing, retention, and rotation require a separate dispatcher review.
+state. It is not linked to the front controller, so it remains an emission
+primitive rather than a public endpoint or dispatcher.
+
+The core-owned lifecycle bridge now uses that serializer for transactional
+`ensure`, `clear`, and `rotate` operations. It locks and resolves only the
+current installation's hash-only subject, refuses malformed rotation sources
+and active caller transactions, returns fixed set/clear descriptors without
+emitting them, and expires the old subject before committing a distinct
+replacement. Expiring the subject also invalidates its CSRF, rate, idempotency,
+and execution relations under the existing foreign-key/cleanup rules. The
+disposable 18-assertion fixture and supported-server rehearsal prove that a
+valid cookie is not reissued, rotation returns one deletion plus one
+replacement, the old token and CSRF fail closed, malformed input is safe, and
+cleanup leaves no temporary subject state. This remains a core lifecycle
+primitive; the per-client deployment boundary must still be reviewed before
+any front-controller link.
+
+The non-executing per-client deployment profile is the current core review
+boundary. It accepts only a closed operator packet with a separate client
+database name, canonical HTTPS origin, pinned FrankenPHP/Caddy versions, the
+fixed process-environment ingress-key name, a server-local trusted-origin
+source, attestation-before-PHP route order, and explicit operator-owned key
+rotation. It requires core—not a package or theme—to own response headers and
+browser-cookie descriptors, preserves the fixed host-only cookie policy, and
+requires configuration, binary, secret, media, and database isolation outside
+the clean starter. Any secret value, request-derived origin/key, version or
+route-order drift, cross-subdomain cookie, isolation gap, or activation flag
+fails closed. The validator returns only a deterministic non-secret hash; it
+does not load the profile, resolve a secret, access a database, or change
+deployment, lifecycle, enablement, response, or client state.
+
+The non-executing deployment-review validator binds a second operator packet
+to that profile hash. It accepts only pinned Caddy/FrankenPHP/TLS/proxy facts,
+artifact hashes proved outside the starter, process-environment
+`RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` and
+`RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` sources, explicit active-key and
+old-key-revocation evidence, and bounded desktop/mobile browser results. It
+never accepts a secret value, reads a deployment file, opens a browser session,
+or changes a response, cookie, database, package, lifecycle, or client state.
+The packet must keep the dispatcher unlinked and must prove zero client-state
+change; actual per-client deployment and browser capture remain required.
+
+The installation-shaped HTTPS rehearsal is deliberately separate from that
+pure validator. It creates a short-lived localhost certificate and two
+short-lived process-environment HMAC values only in an external temporary
+directory/container. It mounts the certificate read-only, restarts the same
+fixture with the replacement key, verifies the previous key is absent from the
+new process environment, and never records either secret or the private key in
+the review packet. Browser evidence is limited to fixed HTTPS 200 checks with
+zero console/network errors, no cookie, no opaque token in the body, and no
+client-state change. Cleanup removes the private key, container, image, and
+build context; retained evidence stays outside the starter and contains only
+non-secret hashes and booleans.
 
 Any later implementation must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
