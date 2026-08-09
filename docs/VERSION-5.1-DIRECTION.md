@@ -1088,6 +1088,23 @@ request bootstrap excludes the disabled package.
     change. Package-owned cart/cart-line storage and atomic anonymous ownership
     remain the next Store Lite gate.
 
+80. Completed Store Lite Gate 2C as internal package-owned cart persistence.
+    The separately distributed Store Lite 0.1.13 package adds one unique cart
+    per core-issued numeric anonymous-subject relation, exact product/optional-
+    variant lines, and value-free before/after activity evidence. Raw subject
+    tokens, cookies, requests, responses, CSRF values, and idempotency keys are
+    not package state. An already-active core-owned transaction is required;
+    the package locks current cart/line/product/variant rows, refuses stale cart
+    state, repeats the server-authoritative resolver, verifies the full
+    postcondition, records activity, and neither commits nor rolls back.
+    Disposable migration and persistence suites prove exact table/foreign-key
+    shape, simple and variable lines, additive quantity, server-derived money,
+    subject isolation, refusal paths, forced late-audit rollback, deletion
+    protection, cleanup, and unchanged retained-primary evidence. Core contains
+    no Store Lite package or tables. Public dispatcher binding, Add-to-cart
+    cookie/browser behavior, inventory mutation, orders, and checkout remain
+    later gates.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

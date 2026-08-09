@@ -6,8 +6,10 @@ bridges, Product placement storage, and the enabled runtime Product component.
 The core-owned user-facing Add component and explicit Homepage placement
 workflow now pass isolated desktop/mobile rehearsal. The first
 pure server-authoritative cart-line resolver now passes its package and
-clean-core contract fixtures. Package-owned cart persistence and transaction
-integration are next; orders remain later.
+clean-core contract fixtures. Package-owned cart persistence now passes its
+disposable migration and transactional package suites while remaining
+unregistered and disconnected from public dispatch. Core-to-package public
+mutation and browser integration are next; orders remain later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -195,6 +197,16 @@ result to a product-state SHA-256. It is not registered as `commerce.cart` and
 creates no database, route, cookie, response, inventory reservation, cart, or
 order. See
 [`STORE-LITE-CART-LINE-CONTRACT.md`](STORE-LITE-CART-LINE-CONTRACT.md).
+
+Store Lite 0.1.13 implements the first internal cart persistence boundary.
+One core-issued numeric anonymous-subject relation owns one package cart; the
+package never reads or stores the raw token or cookie. Its caller-owned
+transaction locks current cart, line, product, and selected-variant state,
+requires a fresh cart-state SHA-256, reuses the server-authoritative resolver,
+verifies the full postcondition, and writes one value-free activity fact.
+Product/variant deletion is restrictive and a cart cascades only its own lines.
+The class remains unregistered and non-routable. See
+[`STORE-LITE-CART-PERSISTENCE-CONTRACT.md`](STORE-LITE-CART-PERSISTENCE-CONTRACT.md).
 
 ## Data Ownership
 
@@ -625,9 +637,13 @@ Store Lite is releasable only after disposable isolated acceptance proves:
 26. In progress: package-owned Product migrations, simple/variable Product
    administration, Product component persistence, administrator creation,
    Homepage placement, public rendering, and the pure server-authoritative
-   cart-line resolver are complete. Implement package-owned cart/cart-line
-   persistence plus atomic anonymous ownership and postcondition rules next;
-   the resolver remains unregistered and orders/pay-on-receipt remain later.
+   cart-line resolver are complete. Package-owned cart/cart-line persistence,
+   numeric anonymous ownership, stale-state concurrency, caller-owned
+   transaction, postcondition, and value-free activity rules are also complete.
+   Connect that internal package operation to the generic public-mutation path
+   and prove the Add-to-cart cookie/browser flow next; the resolver and
+   persistence class remain unregistered, and orders/pay-on-receipt remain
+   later.
 27. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
 28. Add a separately reviewed hosted-payment adapter only after the

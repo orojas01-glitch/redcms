@@ -605,6 +605,21 @@ It opens no database or request/session/cookie state, registers no commerce
 service, reserves no inventory, and creates no route, response, cart, order,
 checkout, or enablement path.
 
+Store Lite 0.1.13 adds an internal, unregistered cart persistence boundary.
+The package accepts only a positive core-issued numeric anonymous-subject
+relation, never the raw subject token or cookie. One unique cart belongs to one
+relation, but it deliberately has no foreign key to the expiring core subject
+table so core rotation/cleanup cannot silently cascade-delete package business
+data. An already-active caller-owned InnoDB transaction is mandatory. The
+package locks cart and line state plus the current product/selected variant,
+requires a fresh expected cart-state hash, re-resolves commercial facts from
+server storage, verifies the complete postcondition, and records one value-free
+before/after activity fact. It never begins, commits, or rolls back; core must
+roll back every non-success result, including late activity failure. Product
+and variant references restrict deletion. The class reads no request/session/
+cookie state, registers no service, and creates no route, response, inventory
+reservation, order, checkout, or enablement path.
+
 The implemented disable command is non-executing and data-retaining for any
 current enabled package with no enabled dependent. Migrations, live data,
 recovery, and every richer enablement gate remain separate work; the narrow

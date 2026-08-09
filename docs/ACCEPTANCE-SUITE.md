@@ -168,6 +168,18 @@ server product state, and returns no partial line for draft, unavailable,
 currency-drifted, malformed, stale-variant, out-of-stock, unknown-field, or
 invalid-quantity input. It loads no package or core runtime and opens no
 database, request, session, cookie, route, or commerce service.
+The separately distributed Store Lite 0.1.13 package has two additional
+cross-repository disposable database gates. Its 38-assertion migration suite
+applies the exact five manifest migrations and proves ten package-owned InnoDB
+tables, numeric subject ownership with no core foreign key, exact cart-line
+product/variant relationships, and value-free activity columns. Its 79-
+assertion combined catalog/cart persistence suite proves caller transaction
+ownership, simple and explicit-variant lines, additive quantity, server-derived
+money, fresh/stale cart state, subject isolation, refusal without drift, forced
+late-activity rollback, restrictive deletion, exact schema/grant cleanup, and
+an unchanged configured-primary fingerprint. These suites run from the
+separate package repository; the clean-core `dev-acceptance.sh` does not load
+or execute Store Lite package code.
 The separate 16-assertion administrator-tool form-preflight fixture proves one
 closed JSON/CSRF form declaration, exact request-local tool ownership, fresh
 binary package permission, deterministic actor-bound hashes, contract-drift
@@ -791,7 +803,7 @@ containers, network, image, database, package marker, and build context.
 - Add-on administrator-tool form Save-bridge acceptance runs only in the uniquely named disposable database with one temporary package-owned InnoDB table, enabled installation, explicit package grant, and in-memory trusted runtime context. It requires exact tool/form/canonical-positive-target edit identity, fresh permission and enabled-version checks, exact loader/writer/table ownership, complete current values, escaped core-only editable scalar and two-level collection markup, bounded add/remove templates, typed canonical JSON with header CSRF, an atomic value-free `saved` result, no-op `unchanged`, stale replay and next-decision revocation refusal, and exact administrator/role/grant/package/audit/table cleanup. Source and real HTTP checks require POST, database-backed session, and header CSRF before edit parsing or Save body I/O; public responses disclose no values, state/plan evidence, package identity, or tables. Local Chrome captures at 1280px and 390px verify no horizontal overflow, the collection interaction path, typed Save/reload states, and zero console, page, or failed-request errors.
 - The Store Lite browser rehearsal is a separate opt-in cross-repository gate.
   It requires an integrity-valid Store Lite package outside the starter, all 45
-  core migrations plus the exact package migration inventory in a fresh
+  core migrations plus the exact five-package-migration inventory in a fresh
   schema, one acceptance-only enabled registry fixture, only the exact Products
   capability, a simple banana and bounded variable T-shirt, zero initial
   Product placements, the visible authenticated Add Content -> Product ->

@@ -1694,6 +1694,16 @@ response, inventory reservation, cart, order, checkout, or enablement path.
 The clean-core mirror contract is
 [`STORE-LITE-CART-LINE-CONTRACT.md`](STORE-LITE-CART-LINE-CONTRACT.md).
 
+Store Lite 0.1.13 then persists that closed result only inside an already-
+active core-owned transaction. One core-issued numeric anonymous-subject
+relation owns one package cart; raw subject tokens and cookies never cross the
+package boundary. Store Lite locks current cart/line/product/variant state,
+requires fresh cart-state evidence, re-runs the resolver, verifies the complete
+postcondition, and records value-free activity without beginning, committing,
+or rolling back. It remains unregistered and disconnected from the public
+dispatcher. The clean-core mirror is
+[`STORE-LITE-CART-PERSISTENCE-CONTRACT.md`](STORE-LITE-CART-PERSISTENCE-CONTRACT.md).
+
 Initial exclusions:
 
 - Stored card data

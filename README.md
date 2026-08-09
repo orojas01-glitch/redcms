@@ -431,6 +431,11 @@ features.
   unit price/total, currency, stock sufficiency, and product-state evidence
   from current normalized server data, with no cart table, route, cookie,
   runtime registration, or partial refusal line in the clean starter
+- Store Lite Gate 2C internal package cart-persistence contract: the separate
+  Store Lite 0.1.13 package owns numeric-subject carts, exact server-derived
+  product/variant lines, fresh-state locking, caller-owned transactions, and
+  value-free activity while core retains no Store Lite package, table, route,
+  cookie, business data, or public cart behavior
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
@@ -620,6 +625,7 @@ database.
 - [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
 - [Store Lite Product Contract](docs/STORE-LITE-PRODUCT-CONTRACT.md)
 - [Store Lite Cart-Line Contract](docs/STORE-LITE-CART-LINE-CONTRACT.md)
+- [Store Lite Cart Persistence Contract](docs/STORE-LITE-CART-PERSISTENCE-CONTRACT.md)
 - [Version 5.1 Direction](docs/VERSION-5.1-DIRECTION.md)
 - [Security Notes](docs/SECURITY.md)
 

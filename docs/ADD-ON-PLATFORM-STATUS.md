@@ -66,8 +66,9 @@ flowchart TD
     S2 --> S3["Product placement + public runtime"]
     S3 --> S4["Add Content creation + Homepage placement"]
     S4 --> S5["Pure server-authoritative cart-line resolver"]
-    S5 --> S6["CURRENT / NEXT<br/>Cart persistence + atomic ownership"]
-    S6 -. later optional packages .-> E["Events Calendar"]
+    S5 --> S6["Cart persistence + atomic ownership"]
+    S6 --> S7["CURRENT / NEXT<br/>Public mutation + Add-to-cart browser path"]
+    S7 -. later optional packages .-> E["Events Calendar"]
     E -.-> A["Appointments"]
     A -.-> D["Donations"]
     D -.-> R["Restaurant Ordering"]
@@ -87,8 +88,8 @@ flowchart TD
 | Checkpoint | Current answer |
 | --- | --- |
 | Product objective | Reusable core plus optional packages; never mix client installations, databases, add-on state, media, settings, or business data. |
-| Latest completed slice | Store Lite 0.1.12 now has a pure, unregistered server-authoritative cart-line resolver. Product, integer quantity, and optional variant are the only intent fields; SKU, option labels, price, currency, stock sufficiency, total, and product-state evidence come from the current normalized server product. The 26 package and 21 clean-core assertions pass with no database, route, cart, or partial refusal result. |
-| Current milestone | Add package-owned cart/cart-line persistence with opaque anonymous ownership, exact InnoDB transaction and concurrency rules, current resolver postconditions, and value-free audit evidence. It must remain disconnected from the public dispatcher until the separate route/cookie/CSRF/idempotency browser gate. The retained local `redcms_v51_starter` database remains intentionally unmigrated; all persistence verification uses uniquely named disposable databases. |
+| Latest completed slice | Store Lite 0.1.13 adds internal, unregistered cart persistence. Five package migrations create ten namespaced InnoDB tables in a disposable client schema; cart writes use only a numeric core-issued subject relation, fresh state, locked current product/variant data, server-derived money, caller-owned transaction, verified postcondition, and value-free activity. The 38 migration and 79 combined persistence assertions pass with exact cleanup and unchanged configured-primary evidence. |
+| Current milestone | Connect the internal cart operation to the generic core public-mutation runner and prove the host-only anonymous cookie, CSRF, rate, idempotency, response-owner, rollback, and desktop/mobile Add-to-cart path in one disposable installation. Store Lite remains disconnected and normally activation-blocked until that separate integration gate passes. The retained local `redcms_v51_starter` database remains intentionally unmigrated. |
 | First vertical target | Store Lite as an optional package, not a core component. |
 | Later examples | Events Calendar, Appointments, Donations, and Restaurant Ordering; these are possibilities, not simultaneous core scope. |
 
