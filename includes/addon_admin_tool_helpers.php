@@ -375,6 +375,49 @@ if (!function_exists('red_addon_admin_tool_form_target_binding')) {
     }
 }
 
+if (!function_exists('red_addon_admin_tool_form_create_action')) {
+    function red_addon_admin_tool_form_create_action(array $binding)
+    {
+        $package = $binding['package'] ?? null;
+        $form = $binding['form'] ?? null;
+        $create = $binding['contract']['create'] ?? null;
+        if (!is_string($package)
+            || !red_addon_valid_package_id($package)
+            || !is_string($form)
+            || !red_addon_valid_capability($form)
+            || !is_array($create)
+        ) {
+            return null;
+        }
+        foreach (
+            [
+                'adminToolFormValueLoaders',
+                'adminToolFormInitialValueLoaders',
+                'adminToolFormCreators',
+            ] as $type
+        ) {
+            $owner = red_addon_runtime_owner($type, $form);
+            if (!is_string($owner)
+                || !hash_equals($package, $owner)
+                || !is_callable(red_addon_runtime_handler($type, $form))
+            ) {
+                return null;
+            }
+        }
+        $metadata = red_addon_runtime_metadata(
+            'adminToolFormCreators',
+            $form
+        );
+        if (!is_array($metadata)
+            || !is_array($metadata['tables'] ?? null)
+            || $metadata['tables'] === []
+        ) {
+            return null;
+        }
+        return $create;
+    }
+}
+
 if (!function_exists('red_addon_admin_tool_form_target_page')) {
     function red_addon_admin_tool_form_target_page(
         $connection,
@@ -391,6 +434,7 @@ if (!function_exists('red_addon_admin_tool_form_target_page')) {
             'permission' => '',
             'label' => '',
             'description' => '',
+            'create' => null,
             'items' => [],
             'nextCursor' => null,
             'reason' => 'invalid_request',
@@ -408,6 +452,7 @@ if (!function_exists('red_addon_admin_tool_form_target_page')) {
         $result['permission'] = $binding['permission'];
         $result['label'] = $binding['contract']['label'];
         $result['description'] = $binding['contract']['description'];
+        $result['create'] = red_addon_admin_tool_form_create_action($binding);
         if (!red_addon_component_editor_actor_has_permission(
             $connection,
             $actorRecordId,
@@ -698,11 +743,26 @@ if (!function_exists('red_addon_admin_tool_render')) {
             }
             $html .= '<section class="red-admin-addon-tool__targets"'
                 . ' data-red-addon-admin-form-targets>';
-            $html .= '<header><h3>'
+            $html .= '<header><div><h3>'
                 . red_addon_admin_tool_html($page['label'] ?? '')
                 . '</h3><p>'
                 . red_addon_admin_tool_html($page['description'] ?? '')
-                . '</p></header>';
+                . '</p></div>';
+            if (is_array($page['create'] ?? null)) {
+                $html .= '<button type="button"'
+                    . ' class="red-admin-addon-tool__create"'
+                    . ' data-red-addon-admin-form-create-target'
+                    . ' data-create-action="/admin/bin/new_addon_tool_form.php"'
+                    . ' data-tool="'
+                    . red_addon_admin_tool_html($toolId) . '"'
+                    . ' data-form="'
+                    . red_addon_admin_tool_html($page['form']) . '">'
+                    . red_addon_admin_tool_html(
+                        $page['create']['label'] ?? 'Create'
+                    )
+                    . '</button>';
+            }
+            $html .= '</header>';
             if ($page['items'] === []) {
                 $html .= '<p class="red-admin-addon-tool__empty">'
                     . 'No editable records are available.</p>';

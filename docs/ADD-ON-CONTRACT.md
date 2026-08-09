@@ -289,7 +289,20 @@ An illustrative manifest shape is:
       "method": "POST",
       "csrf": "required",
       "encoding": "application/json",
-      "maxBodyBytes": 32768
+      "maxBodyBytes": 32768,
+      "fields": [
+        {
+          "key": "reference",
+          "label": "Reference",
+          "type": "text",
+          "required": true,
+          "maxLength": 64
+        }
+      ],
+      "create": {
+        "label": "Add order",
+        "description": "Prepare one new bounded order form."
+      }
     }
   ],
   "componentEditors": [
@@ -1263,6 +1276,85 @@ form id, bounded label and description, one declared package permission, only
 duplicate-form identity collisions, ungranted permissions, executable fields,
 other methods, weaker CSRF, alternate encodings, and invalid body bounds before
 package PHP is loaded.
+
+The same declaration may include one optional closed `create` object containing
+only a bounded label and description, and it requires a non-empty closed
+`fields` schema. This is non-executing discovery metadata:
+it declares that a later core-owned workflow may offer creation for the exact
+form, reusing the form permission and transport limits. It does not register a
+creator, render a button, accept a request, allocate a record id, or authorize a
+write. Unknown keys, callbacks, templates, scripts, URLs, and unsafe text fail
+manifest validation before package PHP is loaded.
+
+When an enabled package declares this metadata, its fixed registrar must bind
+exactly one `registerAdminToolFormInitialValueLoader()` and one
+`registerAdminToolFormCreator()` for that form. The creator must declare one to
+eight package-owned InnoDB transaction tables using the same reserved-table
+rules as the existing form writer. Missing, duplicate, or undeclared bindings
+fail request bootstrap. These registrations remain lookup-only in this slice:
+core has not yet defined the creator request/result, transaction runner,
+browser control, or HTTP endpoint.
+
+The initial-value provider must eventually return the dedicated
+`RED_Addon_Admin_Tool_Form_Initial_Values::draft()` result. Draft validation
+requires every declared field key and rejects extra keys, type coercion,
+invalid choices, unsafe text, collection-bound violations, schema drift, and
+body-limit overflow. Required scalar fields alone may begin empty so a new
+product can be authored; the ordinary current-value and submission validators
+remain strict. The corresponding request carries only the exact tool/form ids
+and immutable declared runtime settings—never an administrator identity,
+record id, session, request global, package selector, or secret. Core can bind
+the normalized draft to contract and runtime-setting state without inventing a
+synthetic target record id.
+
+`red_addon_admin_tool_form_load_initial_values()` is the separate read-only
+runner. It repeats the existing form preflight, exact enabled package/form
+ownership, fresh binary permission, current manifest contract, and declared
+runtime-setting resolution before invoking only the registered initial-value
+loader. Core contains output, exceptions, nested-buffer drift, and HTTP-state
+changes, then validates the dedicated draft result and binds it to contract and
+configuration state. Permission revocation, missing configuration, owner or
+manifest drift, undeclared creation, malformed results, and provider side
+effects fail closed. The runner has no target id, transaction, creator lookup,
+request global, CSRF operation, endpoint, form, or button.
+
+Creation submission preparation is a separate validation-only adapter and
+cannot reuse the edit body. Its canonical JSON object contains exactly `tool`,
+`form`, `initialStateSha256`, and the complete `values`; it contains no package,
+permission, actor, target record, creator, or table identity. Core repeats form
+preflight and the manifest body limit before reloading the current target-free
+draft, refuses stale contract/configuration/draft state, then restores the
+ordinary strict field validator so every required value must be complete. The
+opaque plan binds package, form, actor, permission, contract, runtime settings,
+initial state, and submitted-value hashes. This adapter invokes no creator,
+opens no transaction, allocates no id, writes no audit, reads no request global,
+and exposes no endpoint; its evidence is preparation, not authorization to
+mutate.
+
+The atomic create runner is internal and requires that exact prepared plan. It
+repeats preparation before and after lifecycle/package locking, locks the
+enabled installation row, verifies the package version and declared InnoDB
+tables, and resolves the same runtime-setting state inside one transaction.
+The creator receives one final typed request and must return only
+`RED_Addon_Admin_Tool_Form_Created_Record::created()` with a positive numeric
+record id. Core then reloads that exact id through the existing form value
+loader and requires its complete normalized values to equal the prepared
+submission before committing one value-free `addon.form.created` audit fact.
+Wrong plans, permission/configuration/version/contract drift, active caller
+transactions, output or buffer/HTTP drift, exceptions, invalid results,
+partial writes, wrong reloaded values, non-InnoDB tables, audit failure, and
+commit failure roll back. The caller cannot choose or receive a record id until
+postconditions succeed.
+
+The core-owned browser execution path is deliberately split. A protected HTML
+endpoint accepts only target-free tool/form identity after administrator and
+header-CSRF verification, reloads the typed initial draft, and renders the same
+closed core controls used for editing. A separate protected JSON endpoint
+authenticates and verifies header CSRF before reading the canonical Create body,
+then invokes only the atomic create runner. Packages supply no markup, script,
+URL, session decision, or record id. The response exposes only `created` plus
+the positive target id after the full postcondition and audit commit, allowing
+core to reopen that exact record through the existing edit loader.
 
 The declaration may now include an optional closed `fields` schema. Scalar
 fields use the same bounded text, textarea, integer, boolean, select, URL,

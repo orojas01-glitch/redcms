@@ -679,6 +679,63 @@ Executable fields, identity collisions, undeclared tools, ungranted
 permissions, alternate methods/encodings, weakened CSRF, and invalid body
 bounds fail manifest validation without loading package PHP.
 
+An optional closed form `create` declaration contains only a bounded label and
+description and requires a non-empty closed `fields` schema. It reuses the
+exact form permission and remains data-only discovery evidence: the declaration
+itself creates no callback, record allocation, or write authority. Executable
+or unknown metadata fails before package PHP is loaded.
+
+An enabled package that declares form creation must register one exact initial
+value loader and one exact creator; the creator is constrained to one through
+eight declared package tables. Missing, duplicate, undeclared, empty-table, or
+reserved-table registration fails bootstrap. Registration exposes no execution
+path by itself: no provider is invoked, no transaction begins, and no request or
+browser surface is added.
+
+Draft initial values use a separate typed result and validation mode. The full
+closed field graph, scalar types, options, collection limits, node ceiling, and
+body-size limit still apply; only required scalar emptiness is relaxed before
+the author has entered data. Normal edit/save validation stays strict. Draft
+state is bound to package, tool, form, contract, runtime settings, and values
+without accepting or fabricating a record id. This type definition invokes no
+registered loader and performs no authorization or database access.
+
+The dedicated initial-value runner performs the same exact enabled owner,
+fresh binary form-permission, manifest-contract, and runtime-setting checks as
+current-value loading before invoking the initial loader. Output, exceptions,
+buffer drift, HTTP-state drift, malformed results, and configuration changes
+are contained or refused. It loads no current target and exposes no actor to
+package code. It does not resolve or invoke the creator, open a transaction,
+consume CSRF, read request globals, or create an endpoint.
+
+Create preparation accepts a separate canonical target-free JSON body. Edit
+state and numeric target ids are rejected rather than translated. Core checks
+the body limit before loading the current initial draft, compares exact draft
+state, and then applies strict completed-value validation. The resulting opaque
+plan is actor, permission, contract, configuration, initial-state, and values
+bound. No package or table selector enters the body, and the validation helper
+contains no creator lookup, record allocation, transaction, audit, or endpoint.
+
+Atomic creation requires the exact opaque preflight plan and serializes with
+the add-on lifecycle, package, and enabled installation. Only declared
+package-owned InnoDB tables enter the transaction. The creator returns one
+typed positive record id; core never accepts a caller-selected id. Core reloads
+that id through the exact current-value owner and compares the full normalized
+graph before a value-free `addon.form.created` audit fact may commit. Provider
+output, exception, buffer/HTTP drift, malformed results, partial or wrong
+writes, drift, audit failure, and commit failure roll back both package and
+audit state. The runner reads no request global.
+
+The operational browser bridge keeps draft opening and creation separate from
+edit/save. Core renders the Add control only when the exact enabled package owns
+the target, current-value, initial-value, and creator registrations. The draft
+endpoint accepts only target-free tool/form identity after administrator
+authentication and header CSRF. The JSON Create endpoint authenticates and
+consumes header CSRF before body I/O, accepts only the canonical target-free
+submission, and delegates to the atomic runner. A positive target id is returned
+only after package postconditions and both package/core activity facts commit;
+responses contain no submitted values, plan hashes, or draft-state evidence.
+
 The read-only form preflight requires the exact enabled request-local tool
 owner and a fresh case-sensitive grant, then returns only bounded metadata and
 deterministic contract/plan hashes. Owner and lifecycle access do not imply the

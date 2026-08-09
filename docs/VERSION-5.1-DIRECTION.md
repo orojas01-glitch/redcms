@@ -1000,6 +1000,26 @@ request bootstrap excludes the disabled package.
     This is acceptance evidence, not a production installer or an expansion of
     the currently allowed enablement profiles.
 
+75. Implemented the separate target-free administrator-form Create bridge and
+    proved it with Store Lite 0.1.9. A core-owned Add control appears only when
+    one enabled package owns the tool, target/current loaders, initial loader,
+    creator, permission, and declared InnoDB tables. The protected draft
+    endpoint accepts exact tool/form identity only after administrator and
+    header-CSRF verification. The protected JSON endpoint authenticates and
+    verifies header CSRF before body I/O, then delegates the canonical
+    initial-state-bound submission to the atomic creator. Store Lite derives
+    one unavailable simple draft from installation currency, normalizes the
+    completed simple or variable graph, inserts it inside the core transaction,
+    and records `product.created`; core reloads the returned numeric target and
+    records `addon.form.created` before commit. Desktop creates and reloads a
+    third product, then completes the existing Save path; mobile verifies the
+    three-record catalog and persisted state. Sixty-eight Chrome checks pass
+    with no overflow or console, page, request, or HTTP errors. Focused core and
+    package transaction tests also pass, and cleanup removes the temporary
+    server, staged package, schema, and grant while preserving the configured
+    primary fingerprint. The clean starter still contains no Store Lite code or
+    business data, and normal richer-package enablement remains blocked.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

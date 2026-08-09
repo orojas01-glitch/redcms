@@ -316,6 +316,11 @@ try {
             'classic-shirt',
             'USD'
         );
+        $created = RED_CMS_Store_Lite_Catalog_Persistence::read(
+            $connection,
+            'browser-created-shirt',
+            'USD'
+        );
         red_store_lite_browser_assert(
             ($banana['status'] ?? '') === 'found'
                 && ($banana['product']['title'] ?? '')
@@ -332,9 +337,26 @@ try {
             'variable T-shirt remains unchanged with its bounded graph'
         );
         red_store_lite_browser_assert(
+            ($created['status'] ?? '') === 'found'
+                && ($created['product']['title'] ?? '')
+                    === 'Browser-created shirt'
+                && ($created['product']['state'] ?? '') === 'draft'
+                && ($created['product']['availability'] ?? '')
+                    === 'unavailable'
+                && ($created['product']['sku'] ?? '') === 'BROWSER-SHIRT'
+                && ($created['product']['priceMinor'] ?? null) === 3200
+                && ($created['product']['stock'] ?? null) === 12,
+            'browser Create persisted one unavailable simple draft product'
+        );
+        red_store_lite_browser_assert(
             red_store_lite_browser_scalar(
                 $connection,
                 "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_StoreLite_Product_Activity
+                     WHERE EventName='product.created'
+                       AND ProductID='browser-created-shirt'
+                       AND ActorAdminRecordID=1),
                     (SELECT COUNT(*)
                      FROM RED_Addon_StoreLite_Product_Activity
                      WHERE EventName='product.updated'
@@ -346,9 +368,16 @@ try {
                        AND PackageID='redcms.store-lite'
                        AND ActorAdminRecordID=1
                        AND Result='succeeded'
-                       AND DetailCode='form_saved'))"
-            ) === '1:1',
-            'package and core each recorded one successful browser update'
+                       AND DetailCode='form_saved'),
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_Activity_Log
+                     WHERE EventName='addon.form.created'
+                       AND PackageID='redcms.store-lite'
+                       AND ActorAdminRecordID=1
+                       AND Result='succeeded'
+                       AND DetailCode='form_created'))"
+            ) === '1:1:1:1',
+            'package and core recorded one browser create and one update'
         );
         echo json_encode([
             'ok' => true,
@@ -356,6 +385,7 @@ try {
             'bananaPriceMinor' => $banana['product']['priceMinor'],
             'bananaStock' => $banana['product']['stock'],
             'shirtVariantCount' => count($shirt['product']['variants']),
+            'createdProductId' => $created['product']['id'],
             'assertions' => $assertions,
         ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
     }

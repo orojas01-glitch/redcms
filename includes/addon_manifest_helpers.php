@@ -1164,6 +1164,7 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                     'maxBodyBytes',
                     'fields',
                     'runtimeSettings',
+                    'create',
                 ],
                 $context,
                 $result
@@ -1356,6 +1357,64 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
                 $normalizedRuntimeSettings = $runtimeSettings;
             }
 
+            $normalizedCreate = null;
+            if (array_key_exists('create', $contract)) {
+                $createContext = $context . ' create';
+                if (!is_array($normalizedFields)
+                    || $normalizedFields === []
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $createContext . ' requires a non-empty fields schema.'
+                    );
+                }
+                if (red_addon_validate_object_keys(
+                    $contract['create'],
+                    ['label', 'description'],
+                    ['label', 'description'],
+                    $createContext,
+                    $result
+                )) {
+                    $createLabel = red_addon_required_string(
+                        $contract['create'],
+                        'label',
+                        $createContext,
+                        120,
+                        $result
+                    );
+                    $createDescription = red_addon_required_string(
+                        $contract['create'],
+                        'description',
+                        $createContext,
+                        500,
+                        $result
+                    );
+                    foreach (
+                        [
+                            'label' => $createLabel,
+                            'description' => $createDescription,
+                        ] as $key => $value
+                    ) {
+                        if (preg_match('//u', $value) !== 1
+                            || preg_match(
+                                '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/',
+                                $value
+                            ) === 1
+                        ) {
+                            red_addon_add_error(
+                                $result,
+                                $createContext . ' field "' . $key .
+                                    '" contains unsafe text.'
+                            );
+                        }
+                    }
+                    $normalizedCreate = [
+                        'label' => $createLabel,
+                        'description' => $createDescription,
+                    ];
+                }
+            }
+
             $normalizedContract = [
                 'tool' => $tool,
                 'form' => $form,
@@ -1373,6 +1432,9 @@ if (!function_exists('red_addon_validate_admin_tool_form_contracts')) {
             if (is_array($normalizedRuntimeSettings)) {
                 $normalizedContract['runtimeSettings'] =
                     $normalizedRuntimeSettings;
+            }
+            if (is_array($normalizedCreate)) {
+                $normalizedContract['create'] = $normalizedCreate;
             }
             $normalized[] = $normalizedContract;
         }

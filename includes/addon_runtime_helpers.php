@@ -75,6 +75,26 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 $adminToolFormValueLoaders;
             $this->handlers['adminToolFormWriters'] = [];
             $this->metadata['adminToolFormWriters'] = [];
+            $adminToolFormCreators = [];
+            foreach ($manifest['adminToolFormContracts'] ?? [] as $contract) {
+                $formId = is_array($contract)
+                    && is_string($contract['form'] ?? null)
+                    && is_array($contract['fields'] ?? null)
+                    && $contract['fields'] !== []
+                    && is_array($contract['create'] ?? null)
+                        ? $contract['form']
+                        : '';
+                if (red_addon_valid_capability($formId)) {
+                    $adminToolFormCreators[$formId] = true;
+                }
+            }
+            $this->allowed['adminToolFormInitialValueLoaders'] =
+                $adminToolFormCreators;
+            $this->handlers['adminToolFormInitialValueLoaders'] = [];
+            $this->metadata['adminToolFormInitialValueLoaders'] = [];
+            $this->allowed['adminToolFormCreators'] = $adminToolFormCreators;
+            $this->handlers['adminToolFormCreators'] = [];
+            $this->metadata['adminToolFormCreators'] = [];
             $publicMutations = [];
             foreach ($manifest['publicMutationContracts'] ?? [] as $contract) {
                 $mutationId = is_array($contract)
@@ -385,6 +405,30 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
             );
         }
 
+        public function registerAdminToolFormInitialValueLoader(
+            string $id,
+            callable $handler
+        ): void {
+            $this->register(
+                'adminToolFormInitialValueLoaders',
+                $id,
+                $handler
+            );
+        }
+
+        public function registerAdminToolFormCreator(
+            string $id,
+            callable $handler,
+            array $tables
+        ): void {
+            $this->register(
+                'adminToolFormCreators',
+                $id,
+                $handler,
+                ['tables' => $this->adminToolFormTransactionTables($tables)]
+            );
+        }
+
         public function registerPublicMutation(
             string $id,
             callable $handler,
@@ -515,6 +559,8 @@ if (!class_exists('RED_Addon_Runtime_Context', false)) {
                     'adminToolFormTargetLoaders',
                     'adminToolFormValueLoaders',
                     'adminToolFormWriters',
+                    'adminToolFormInitialValueLoaders',
+                    'adminToolFormCreators',
                     'adminToolActions',
                     'adminToolActionStateLoaders',
                     'publicMutationHandlers',

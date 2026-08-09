@@ -2,14 +2,32 @@
 /**
  * Core-owned operational browser bridge for administrator add-on forms.
  *
- * The edit context reloads one exact permission-scoped form target and renders
- * only core-owned controls. The save dispatcher accepts a canonical JSON body
- * only after the HTTP endpoint has authenticated the administrator and checked
- * header CSRF, then delegates to the atomic writer boundary.
+ * Edit reloads one exact permission-scoped form target. Create reloads one
+ * target-free package draft. Both render only core-owned controls, and their
+ * JSON dispatchers delegate to the corresponding atomic persistence boundary
+ * only after the HTTP endpoint authenticates and verifies header CSRF.
  */
 
 require_once __DIR__ . '/addon_admin_tool_form_ui_helpers.php';
 require_once __DIR__ . '/addon_admin_tool_form_write_helpers.php';
+require_once __DIR__ . '/addon_admin_tool_form_create_helpers.php';
+
+if (!function_exists('red_addon_admin_tool_form_create_endpoint_request')) {
+    function red_addon_admin_tool_form_create_endpoint_request(array $post)
+    {
+        $keys = array_keys($post);
+        sort($keys, SORT_STRING);
+        if ($keys !== ['form', 'tool']
+            || !is_string($post['tool'] ?? null)
+            || !red_addon_valid_capability($post['tool'])
+            || !is_string($post['form'] ?? null)
+            || !red_addon_valid_capability($post['form'])
+        ) {
+            return null;
+        }
+        return ['tool' => $post['tool'], 'form' => $post['form']];
+    }
+}
 
 if (!function_exists('red_addon_admin_tool_form_endpoint_target_record_id')) {
     function red_addon_admin_tool_form_endpoint_target_record_id($value)
@@ -184,6 +202,126 @@ if (!function_exists('red_addon_admin_tool_form_endpoint_context')) {
         $result['contract'] = $contract;
         $result['values'] = $loaded['values'];
         $result['stateSha256'] = $loaded['stateSha256'];
+        $result['ready'] = true;
+        $result['reason'] = 'ready';
+        return $result;
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_form_create_endpoint_context_result')) {
+    function red_addon_admin_tool_form_create_endpoint_context_result(
+        $toolId,
+        $formId,
+        $actorRecordId,
+        $reason = 'invalid_request'
+    ) {
+        return [
+            'ready' => false,
+            'tool' => is_string($toolId) && red_addon_valid_capability($toolId)
+                ? $toolId
+                : '',
+            'form' => is_string($formId) && red_addon_valid_capability($formId)
+                ? $formId
+                : '',
+            'package' => '',
+            'actorRecordId' => red_addon_admin_tool_form_actor_record_id(
+                $actorRecordId
+            ),
+            'permission' => '',
+            'manifest' => [],
+            'contract' => [],
+            'values' => [],
+            'initialStateSha256' => '',
+            'reason' => (string) $reason,
+        ];
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_form_create_endpoint_context')) {
+    function red_addon_admin_tool_form_create_endpoint_context(
+        $connection,
+        $toolId,
+        $formId,
+        $actorRecordId
+    ) {
+        $result = red_addon_admin_tool_form_create_endpoint_context_result(
+            $toolId,
+            $formId,
+            $actorRecordId
+        );
+        if (!$connection
+            || $result['tool'] === ''
+            || $result['form'] === ''
+            || $result['actorRecordId'] < 1
+        ) {
+            return $result;
+        }
+        $binding = red_addon_admin_tool_form_create_binding(
+            $result['tool'],
+            $result['form']
+        );
+        if (!is_array($binding)
+            || !red_admin_transaction_tables_supported(
+                $connection,
+                array_merge(
+                    ['RED_Addon_Installations', 'RED_Addon_Activity_Log'],
+                    $binding['tables']
+                )
+            )
+            || red_addon_admin_tool_form_write_package_version(
+                $connection,
+                $binding['package'] ?? ''
+            ) === ''
+        ) {
+            $result['reason'] = 'form_unavailable';
+            return $result;
+        }
+        $loaded = red_addon_admin_tool_form_load_initial_values(
+            $connection,
+            $result['tool'],
+            $result['form'],
+            $result['actorRecordId']
+        );
+        $result['package'] = is_string($loaded['package'] ?? null)
+            ? $loaded['package']
+            : '';
+        $result['permission'] = is_string($loaded['permission'] ?? null)
+            ? $loaded['permission']
+            : '';
+        if (($loaded['loaded'] ?? false) !== true) {
+            $result['reason'] = (string) (
+                $loaded['reason'] ?? 'form_unavailable'
+            );
+            return $result;
+        }
+        if (!hash_equals(
+            (string) ($binding['package'] ?? ''),
+            $result['package']
+        )) {
+            $result['reason'] = 'form_unavailable';
+            return $result;
+        }
+        $manifest = red_addon_runtime_manifest($result['package']);
+        $contract = is_array($manifest)
+            ? red_addon_admin_tool_form_contract(
+                $manifest,
+                $result['tool'],
+                $result['form']
+            )
+            : null;
+        if (!is_array($manifest)
+            || !is_array($contract)
+            || !is_array($contract['create'] ?? null)
+            || !is_array($loaded['values'] ?? null)
+            || !red_addon_valid_sha256($loaded['stateSha256'] ?? null)
+        ) {
+            $result['reason'] = 'form_unavailable';
+            return $result;
+        }
+        $result['manifest'] = $manifest;
+        $result['contract'] = $contract;
+        $result['values'] = $loaded['values'];
+        $result['initialStateSha256'] = $loaded['stateSha256'];
         $result['ready'] = true;
         $result['reason'] = 'ready';
         return $result;
@@ -491,6 +629,77 @@ if (!function_exists('red_addon_admin_tool_form_endpoint_render')) {
     }
 }
 
+if (!function_exists('red_addon_admin_tool_form_create_endpoint_render')) {
+    function red_addon_admin_tool_form_create_endpoint_render(array $context)
+    {
+        $expectedKeys = [
+            'ready',
+            'tool',
+            'form',
+            'package',
+            'actorRecordId',
+            'permission',
+            'manifest',
+            'contract',
+            'values',
+            'initialStateSha256',
+            'reason',
+        ];
+        if (array_keys($context) !== $expectedKeys
+            || ($context['ready'] ?? false) !== true
+            || !red_addon_valid_capability($context['tool'] ?? null)
+            || !red_addon_valid_capability($context['form'] ?? null)
+            || !red_addon_valid_package_id($context['package'] ?? null)
+            || !is_array($context['contract']['create'] ?? null)
+            || !is_array($context['values'] ?? null)
+            || !red_addon_valid_sha256(
+                $context['initialStateSha256'] ?? null
+            )
+        ) {
+            return red_addon_admin_tool_form_ui_unavailable();
+        }
+        $validated = red_addon_admin_tool_form_validate_initial_values(
+            $context['contract'],
+            $context['values']
+        );
+        if (($validated['valid'] ?? false) !== true) {
+            return red_addon_admin_tool_form_ui_unavailable();
+        }
+        $fields = red_addon_admin_tool_form_edit_fields(
+            $context['contract']['fields'],
+            $validated['values']
+        );
+        if ($fields === '') {
+            return red_addon_admin_tool_form_ui_unavailable();
+        }
+        $escape = 'red_addon_admin_tool_form_ui_html';
+        $create = $context['contract']['create'];
+        return '<section class="red-admin-addon-tool-form-workspace"'
+            . ' data-red-addon-admin-form-workspace>'
+            . '<form class="red-admin-addon-tool-form red-admin-addon-tool-form--editable"'
+            . ' data-red-addon-admin-form-create action="/admin/bin/create_addon_tool_form.php"'
+            . ' data-edit-action="/admin/bin/edit_addon_tool_form.php"'
+            . ' data-tool="' . $escape($context['tool']) . '"'
+            . ' data-form="' . $escape($context['form']) . '"'
+            . ' data-initial-state-sha256="'
+            . $escape($context['initialStateSha256']) . '">'
+            . '<header class="red-admin-addon-tool-form__header"><div>'
+            . '<span>New add-on record</span><h2>'
+            . $escape($create['label'] ?? '')
+            . '</h2><p>'
+            . $escape($create['description'] ?? '')
+            . '</p></div></header>'
+            . '<div class="red-admin-addon-tool-form__fields"'
+            . ' data-red-addon-admin-form-object>' . $fields . '</div>'
+            . '<div class="red-admin-addon-form__actions">'
+            . '<span data-red-addon-admin-form-status role="status"'
+            . ' aria-live="polite" hidden></span>'
+            . '<button type="submit">'
+            . $escape($create['label'] ?? 'Create')
+            . '</button></div></form></section>';
+    }
+}
+
 if (!function_exists('red_addon_admin_tool_form_save_failure')) {
     function red_addon_admin_tool_form_save_failure($reason)
     {
@@ -559,6 +768,82 @@ if (!function_exists('red_addon_admin_tool_form_save_dispatch')) {
         }
         return red_addon_admin_tool_form_save_failure(
             $written['reason'] ?? 'save_failed'
+        );
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_form_create_failure')) {
+    function red_addon_admin_tool_form_create_failure($reason)
+    {
+        $mapping = [
+            'invalid_request' => [400, 'invalid_request'],
+            'permission_denied' => [403, 'permission_denied'],
+            'body_too_large' => [413, 'body_too_large'],
+            'state_conflict' => [409, 'state_conflict'],
+            'plan_mismatch' => [409, 'state_conflict'],
+            'invalid_values' => [422, 'invalid_values'],
+            'creator_unavailable' => [422, 'form_unavailable'],
+            'form_unavailable' => [422, 'form_unavailable'],
+            'package_not_enabled' => [422, 'form_unavailable'],
+            'transaction_unsupported' => [422, 'form_unavailable'],
+            'runtime_settings_unavailable' => [422, 'form_unavailable'],
+            'creator_failed' => [422, 'create_failed'],
+            'postcondition_failed' => [422, 'create_failed'],
+            'audit_failed' => [422, 'create_failed'],
+        ];
+        [$status, $publicReason] = $mapping[(string) $reason]
+            ?? [503, 'temporary_unavailable'];
+        return [
+            'httpStatus' => $status,
+            'body' => ['ok' => false, 'reason' => $publicReason],
+        ];
+    }
+}
+
+if (!function_exists('red_addon_admin_tool_form_create_dispatch')) {
+    function red_addon_admin_tool_form_create_dispatch(
+        $connection,
+        $rawBody,
+        $actorRecordId
+    ) {
+        if (!$connection || !is_string($rawBody)) {
+            return red_addon_admin_tool_form_create_failure(
+                'invalid_request'
+            );
+        }
+        $preflight = red_addon_admin_tool_form_create_preflight(
+            $connection,
+            $rawBody,
+            $actorRecordId
+        );
+        if (($preflight['prepared'] ?? false) !== true
+            || !red_addon_valid_sha256($preflight['planSha256'] ?? null)
+        ) {
+            return red_addon_admin_tool_form_create_failure(
+                $preflight['reason'] ?? 'form_unavailable'
+            );
+        }
+        $created = red_addon_admin_tool_form_create(
+            $connection,
+            $rawBody,
+            $actorRecordId,
+            $preflight['planSha256']
+        );
+        if (($created['executed'] ?? false) === true
+            && is_int($created['targetRecordId'] ?? null)
+            && $created['targetRecordId'] > 0
+        ) {
+            return [
+                'httpStatus' => 200,
+                'body' => [
+                    'ok' => true,
+                    'status' => 'created',
+                    'targetRecordId' => $created['targetRecordId'],
+                ],
+            ];
+        }
+        return red_addon_admin_tool_form_create_failure(
+            $created['reason'] ?? 'create_failed'
         );
     }
 }
