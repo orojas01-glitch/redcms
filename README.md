@@ -6,6 +6,9 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
+Current Version 5.1 and Store Lite milestone map:
+[`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
+
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
 on July 25, 2026.

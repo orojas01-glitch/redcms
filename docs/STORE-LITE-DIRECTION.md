@@ -3,13 +3,12 @@
 Status: the separately distributed package now implements catalog migrations,
 normalization, persistence, product administration, core-owned Add/Edit/Save
 bridges, Product placement storage, and the enabled runtime Product component.
-The core-owned user-facing Add component and explicit Homepage placement
-workflow now pass isolated desktop/mobile rehearsal. The first
-pure server-authoritative cart-line resolver now passes its package and
-clean-core contract fixtures. Package-owned cart persistence now passes its
-disposable migration and transactional package suites while remaining
-unregistered and disconnected from public dispatch. Core-to-package public
-mutation and browser integration are next; orders remain later.
+The core-owned Add component and explicit Homepage placement workflow pass
+isolated desktop/mobile rehearsal. The server-authoritative cart-line resolver,
+package-owned cart persistence, and Gate 2D1 core atomic-runner binding now pass
+their package, disposable-database, replay/rollback, and audit proofs. Gate 2D2
+browser Add-to-cart integration is current; visible cart management and orders
+remain later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -648,14 +647,15 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    accepted contracts.
 26. In progress: package-owned Product migrations, simple/variable Product
    administration, Product component persistence, administrator creation,
-   Homepage placement, public rendering, and the pure server-authoritative
-   cart-line resolver are complete. Package-owned cart/cart-line persistence,
-   numeric anonymous ownership, stale-state concurrency, caller-owned
-   transaction, postcondition, and value-free activity rules are also complete.
-   Connect that internal package operation to the generic public-mutation path
-   and prove the Add-to-cart cookie/browser flow next; the resolver and
-   persistence class remain unregistered, and orders/pay-on-receipt remain
-   later.
+   Homepage placement, public rendering, the server-authoritative cart-line
+   resolver, and cart persistence are complete. Store Lite 0.1.14 now declares
+   and registers the closed Add-to-cart route, mutation handler, state loader,
+   and exact package tables; the real core atomic runner passes simple product,
+   explicit variant, replay, conflict, rollback, postcondition, and audit proof.
+   Gate 2D2 must now connect core-owned browser subject/CSRF/idempotency evidence,
+   accessible form composition, supported-server dispatch, fixed responses, and
+   desktop/mobile Add-to-cart QA. The general `commerce.cart` service, visible
+   cart management, and orders/pay-on-receipt remain later.
 27. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
 28. Add a separately reviewed hosted-payment adapter only after the

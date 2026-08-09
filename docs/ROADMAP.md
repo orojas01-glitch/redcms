@@ -66,6 +66,10 @@ property classification and implementation boundary.
 
 ### Adaptable Add-On Platform
 
+The current objective, completed gates, active phase, and remaining Store Lite
+launch path are shown in
+[`ADD-ON-PLATFORM-STATUS.md`](ADD-ON-PLATFORM-STATUS.md).
+
 RED-CMS should support separately installed client capabilities rather than
 bundle every business vertical into the core. The following packages are
 optional future examples, in priority order if separately approved:
