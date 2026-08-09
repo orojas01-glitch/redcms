@@ -1,6 +1,6 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-09 after Store Lite Gate 2D2A.
+Last updated: 2026-08-09 after Store Lite Gate 2D2C.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -36,22 +36,23 @@ flowchart TD
     E["COMPLETE<br/>E. Server-authoritative cart engine<br/>resolver + persistence"]
     F["COMPLETE<br/>Gate 2D1<br/>Store Lite bound to core atomic mutation runner"]
     G1["COMPLETE<br/>Gate 2D2A<br/>Core-owned accessible form model + escaped renderer"]
-    G2["CURRENT — Gate 2D2B<br/>Store Lite product/variant field model<br/>no package HTML or browser authority"]
-    G3["NEXT — Gate 2D2C/D<br/>subject + CSRF + idempotency bootstrap<br/>supported-server controller + response + browser QA"]
+    G2["COMPLETE<br/>Gate 2D2B<br/>Store Lite product/variant field model"]
+    G3["COMPLETE<br/>Gate 2D2C<br/>subject + CSRF + idempotency bootstrap"]
+    G4["CURRENT — Gate 2D2D<br/>Product integration + browser controller<br/>response ownership + desktop/mobile QA"]
     H["NEXT<br/>Usable cart<br/>view, update quantity, remove line"]
     I["LATER FOR STORE LITE v1<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
-    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> H --> I --> J --> K
+    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4 --> H --> I --> J --> K
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1 complete;
-    class G2 current;
-    class G3,H,I,J remaining;
+    class A,B,C,D,E,F,G1,G2,G3 complete;
+    class G4 current;
+    class H,I,J remaining;
     class K target;
 ```
 
@@ -59,10 +60,10 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Gate 2D2B: let Store Lite describe only the declared product, quantity, and variant controls that core may place into the new form model. |
-| What just finished? | Gate 2D2A. Core now composes and escapes an accessible Add-to-cart-shaped form only from a matching manifest contract, bounded package field model, and same-subject core-issued CSRF/idempotency evidence. It does not issue evidence, load package code, link a route, or execute a mutation. |
+| Where are we? | Gate 2D2D: connect the completed Store Lite field model and core evidence bootstrap to the public Product component through a core-owned browser controller and response boundary. |
+| What just finished? | Gates 2D2B/C. Store Lite 0.1.15 now describes simple and bounded variable-product controls without HTML or authority; core validates that presentation before ensuring one opaque subject and issuing same-subject CSRF/idempotency evidence. Partial issuance is compensated. No endpoint is linked. |
 | What can the demo do today? | Administrators can create/edit products and place a Product component on the homepage. Public visitors can see the product. The internal cart write works in rehearsal, but there is no public Add-to-cart control yet. |
-| What remains inside Gate 2D2? | Store Lite's bounded simple/variant field model, core-issued anonymous subject/cookie plus CSRF/idempotency bootstrap, component integration, a supported-server browser controller, generic success/refusal output, no-store response ownership, and desktop/mobile proof. |
+| What remains inside Gate 2D2? | Product-component integration, the core-owned browser fetch controller, supported-server request dispatch, generic success/refusal output, no-store response/cookie ownership, and desktop/mobile mutation proof. |
 | What remains after Gate 2D2? | A visible editable cart, minimum guest order/pay-on-receipt flow, then lifecycle/recovery/migration/isolation release acceptance. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 

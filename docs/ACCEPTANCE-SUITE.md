@@ -200,6 +200,15 @@ notice. Missing, unknown, duplicate, malformed, out-of-range, cross-subject,
 or post-composition-invalid models render no partial form or token. The helper
 reads no request globals, database, package, filesystem, or front-controller
 state and emits no output or headers.
+The separate 12-assertion disposable form-bootstrap fixture validates the
+complete presentation before issuance, proves absent-cookie subject issuance
+and valid-cookie subject reuse, same-subject scoped CSRF/idempotency evidence,
+simple and variable form composition, subject-token exclusion from markup,
+forged-lifecycle cleanup refusal, caller-transaction refusal, and exact
+compensation when idempotency storage becomes unavailable after CSRF issuance.
+It finishes with zero subject, CSRF, and idempotency rows and creates no
+endpoint, request-global read, package load, HTML/header emission, or client
+state.
 The separate 16-assertion administrator-tool form-preflight fixture proves one
 closed JSON/CSRF form declaration, exact request-local tool ownership, fresh
 binary package permission, deterministic actor-bound hashes, contract-drift

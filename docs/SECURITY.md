@@ -1037,6 +1037,19 @@ delivery before rendering this form on a public page. This helper reads no
 request/session/cookie/database/package state, emits no output or header, and
 is not included by `index.php`.
 
+The core-owned form evidence bootstrap now joins the existing lifecycle,
+CSRF, idempotency, and pure form helpers without creating an endpoint. It
+validates the complete declaration, instance, label, and package field model
+before changing storage; then it ensures or resolves one opaque subject,
+issues one declaration/database-scoped CSRF token and idempotency key for that
+same subject, and composes the existing form model. An issuance failure
+returns no form or cookie descriptor and transactionally removes only the
+subject or exact token/key records created by that failed attempt. Cleanup
+revalidates the issued cookie-to-subject relation and refuses forged lifecycle
+descriptors. The bootstrap accepts an explicit cookie value but reads no PHP
+request, cookie, session, or server global; it loads no package code, renders
+no HTML, emits no header, and remains absent from `index.php`.
+
 The separate pure HTTP request-envelope normalizer accepts only explicit values
 from that later dispatcher. It requires one server-configured canonical HTTPS
 origin rather than `Host` input, an exact static POST path, an exact matching

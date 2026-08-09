@@ -51,6 +51,7 @@ changed by it.
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
+| Public form evidence bootstrap | Core validates the complete presentation, ensures one opaque subject, issues same-subject scoped CSRF/idempotency evidence, and composes the pure form model with exact partial-issuance compensation | No request-global read, package load, HTML/header emission, front-controller link, or public endpoint |
 | Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No endpoint, package fixture, browser behavior, or public response-emission path |
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
@@ -841,8 +842,15 @@ This planning slice does not authorize:
     no-script notice. Security evidence is carried only as fetch-controller
     attributes, never package form fields. It reads no request/database/package
     state, emits nothing, and remains absent from the front controller.
-24. A separate richer enablement review may admit only packages that satisfy
+24. Completed the core-owned public-mutation form evidence bootstrap and its
+    12-assertion disposable fixture. It validates the complete presentation
+    before issuance, ensures or reuses one opaque subject, issues a fresh
+    declaration-scoped CSRF/key pair for that subject, composes the existing
+    form model, and compensates exact partial evidence on failure. It reads no
+    request globals, loads no package code, emits no HTML/header, and remains
+    absent from the front controller.
+25. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-25. Store Lite can then implement its separately distributed catalog and cart
+26. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.
