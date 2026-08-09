@@ -1,6 +1,6 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-09 after Store Lite Gate 2D2D3A.
+Last updated: 2026-08-09 after Store Lite Gate 2D2D3B.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -41,8 +41,8 @@ flowchart TD
     G4A["COMPLETE<br/>Gate 2D2D1<br/>component mutation-presentation boundary"]
     G4B["COMPLETE<br/>Gate 2D2D2<br/>Store Lite Product binding + core form integration"]
     G4C1["COMPLETE<br/>Gate 2D2D3A<br/>unlinked browser controller"]
-    G4C2["CURRENT — Gate 2D2D3B<br/>response/cookie ownership + endpoint wiring"]
-    G4C3["NEXT — Gate 2D2D3C<br/>real Store Lite desktop/mobile mutation QA"]
+    G4C2["COMPLETE<br/>Gate 2D2D3B<br/>response/cookie ownership + endpoint wiring"]
+    G4C3["CURRENT — Gate 2D2D3C<br/>real Store Lite desktop/mobile mutation QA"]
     H["NEXT<br/>Usable cart<br/>view, update quantity, remove line"]
     I["LATER FOR STORE LITE v1<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
@@ -54,9 +54,9 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1 complete;
-    class G4C2 current;
-    class G4C3,H,I,J remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2 complete;
+    class G4C3 current;
+    class H,I,J remaining;
     class K target;
 ```
 
@@ -64,10 +64,10 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Gate 2D2D3B: connect the completed form integration and browser controller to core-owned response/cookie emission and the supported-server mutation endpoint. |
-| What just finished? | Gate 2D2D3A. The unlinked controller freezes one canonical command per idempotency key, removes evidence from DOM attributes, supports exact-body transient retry, and passed 19 real-Chrome desktop/mobile assertions plus 9 dependency-free source assertions. |
-| What can the demo do today? | Administrators can create/edit products and place a Product component on the homepage. Public visitors can see the product. The internal cart write works in rehearsal, but there is no public Add-to-cart control yet. |
-| What remains inside Gate 2D2? | Supported-server request dispatch, generic success/refusal and no-store cookie ownership, endpoint/controller delivery, and real Store Lite desktop/mobile mutation proof. |
+| Where are we? | Gate 2D2D3C: exercise the now-connected core form, endpoint, cookie, controller, and Store Lite handler together in real desktop/mobile mutation QA. |
+| What just finished? | Gate 2D2D3B. The fail-closed front-controller bridge now requires the explicit local flag, trusted HTTPS origin, and ingress HMAC key; core alone owns form placement, one page subject, controller delivery, cookie emission, dispatch, and the fixed response. |
+| What can the demo do today? | Administrators can create/edit products and place a Product component on the homepage. Public visitors can see the product. The generic core mutation path is now implementable on a reviewed supported-server deployment, but the demo remains unchanged until Gate 2D2D3C deploys and verifies Store Lite there. |
+| What remains inside Gate 2D2? | Activate the reviewed endpoint only in the isolated demo installation, then prove real Store Lite add-to-cart behavior, refusal/retry states, accessibility, and zero console/network errors on desktop and mobile. |
 | What remains after Gate 2D2? | A visible editable cart, minimum guest order/pay-on-receipt flow, then lifecycle/recovery/migration/isolation release acceptance. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 

@@ -33,10 +33,13 @@ documented public-mutation boundary now validates optional closed declaration
 metadata and produces value-free deterministic preflight evidence for a future
 static-POST anonymous path with CSRF, idempotency, rate-limit, transaction, and
 response constraints; the internal transaction runner and replay ledger are now
-implemented, and an unlinked core-owned dispatcher composes the explicit
-request, route, subject/CSRF, form, runner, and fixed-response contracts. It is
-not linked to the front controller and still emits no cookie/header or session
-access, package behavior, or enablement change. A separate Docker-only
+implemented, and the core-owned dispatcher composes the explicit request,
+route, subject/CSRF, form, runner, and fixed-response contracts. A fail-closed
+front-controller bridge now calls it only after the explicit local endpoint
+flag, trusted HTTPS origin, and ingress HMAC key pass; core also owns raw-cookie
+validation, one request-local page subject, fixed controller delivery, and the
+closed response/cookie emitters. This adds no administrator-session access,
+package enablement, Store Lite activation, or client deployment. A separate Docker-only
 supported-server rehearsal now carries a secret-guarded fixture request through
 the pinned custom FrankenPHP/Caddy binary, PHP verifier, dispatcher, atomic
 runner, and fixed emitter against a fresh MySQL database, then removes every
@@ -1180,6 +1183,30 @@ request bootstrap excludes the disabled package.
     dependency-free source contract keeps the script unlinked. Response/cookie
     ownership and endpoint/front-controller activation remain Gate 2D2D3B;
     real Store Lite mutation QA remains Gate 2D2D3C.
+
+87. Completed Gate 2D2D3B as the fail-closed supported-server endpoint and
+    page-delivery bridge. `index.php` can now claim a reserved `/addons/`
+    candidate before theme or session rendering only when an explicit local
+    enablement flag, one canonical trusted HTTPS origin, and the process-
+    environment ingress HMAC key all exist. The bridge composes the existing
+    attested dispatcher and closed response emitter; unknown or unavailable
+    mutation requests receive only generic bounded responses. Normal `GET`
+    pages parse the raw subject-cookie header, coordinate one subject across at
+    most 128 accepted component forms, append only core-rendered markup, deliver
+    the fixed browser controller once, and emit only the fixed host-only cookie
+    lifecycle after successful document assembly. Malformed duplicate cookies
+    or request-local coordinator drift disable the form path. Focused evidence
+    includes 10 endpoint assertions, 4 cookie-emitter assertions, 17 fresh-
+    schema component/page assertions, the prior 19 real-Chrome controller
+    assertions, and the complete disposable FrankenPHP/Caddy dispatch proof.
+    The final tree also passed the complete 45-migration disposable acceptance
+    suite with normalized schema signature
+    `cb6e941861fc5ed74142f11b0f36536549a335f478b8214e613836f360501a3f`;
+    the protected primary snapshot was unchanged and both temporary schemas and
+    grants were independently confirmed at zero. The default starter flag
+    remains false and no package, demo deployment,
+    Store Lite data, or client database is activated. Real Store Lite desktop/
+    mobile add-to-cart mutation QA remains Gate 2D2D3C.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

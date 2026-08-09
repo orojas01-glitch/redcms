@@ -1009,9 +1009,10 @@ It supplies no-store, nosniff, content-type, length, and only a fixed
 package, route, subject, token, key, state, cart, order, plan, secret, or
 internal failure detail. It does not read request/cookie/session state, access
 the database, load package code, emit HTTP state, or change lifecycle. The
-unlinked core-owned dispatcher selects and returns that envelope only after
+core-owned dispatcher selects and returns that envelope only after
 same-origin, CSRF, scalar-input, server-state, rate/idempotency, and transaction
-checks are complete; a front-controller link remains separately gated.
+checks are complete; its only front-controller caller is the separately gated
+operational bridge.
 
 The separate pure declared-form decoder accepts only one validated in-memory
 manifest declaration and raw canonical URL-encoded package-field bytes. It
@@ -1074,8 +1075,8 @@ connection and optional cookie scalar, reads no request globals, emits no
 output/header/cookie, and is not linked from `index.php`; response ownership
 and browser dispatch remain mandatory later gates.
 
-The separate public-mutation browser controller remains an unlinked static
-core asset. It accepts only one same-origin, query-free, fragment-free path;
+The public-mutation browser controller is a fixed static core asset. It accepts
+only one same-origin, query-free, fragment-free path;
 the exact POST/form encoding; the fixed CSRF and idempotency header names; and
 lowercase 64-hex evidence. Initialization copies evidence into one closure and
 removes it from DOM attributes. On first submit, it serializes only bounded
@@ -1084,9 +1085,9 @@ mutable control, and never recomputes that command for the same idempotency
 key. Only exact-body retry is allowed after a network, `429`, or `503` result.
 The controller accepts only the closed core JSON status/body pairs, places
 generic messages with `textContent`, and uses no cookie API, browser storage,
-logging, dynamic code, HTML sink, redirect, or external URL. It is not included
-by `index.php` or either core theme adapter until response and endpoint
-ownership are activated together.
+logging, dynamic code, HTML sink, redirect, or external URL. `index.php`
+delivers it once only after the request-local coordinator has accepted at least
+one core-rendered form while the supported endpoint gate is active.
 
 The separate pure HTTP request-envelope normalizer accepts only explicit values
 from that later dispatcher. It requires one server-configured canonical HTTPS
@@ -1107,8 +1108,8 @@ state-loader ownership all agree. A duplicate candidate or missing binding is
 claimed and refused without revealing an owner. It does not read PHP request,
 cookie, or session globals; bootstrap a runtime; read package files; invoke a
 callback; open a database; issue browser evidence; emit a response; or change
-lifecycle, enablement, Store Lite, or client state. It is not wired to the
-front controller, so no public mutation endpoint exists yet.
+  lifecycle, enablement, Store Lite, or client state. The operational bridge
+  may now compose this selector only after all supported-server gates pass.
 
 The separate non-routable server request-facts adapter resolves the future
 canonical HTTPS origin only through the stricter server-local configuration
@@ -1131,7 +1132,8 @@ replacement values. The signed payload contains only method, raw target, body
 length/hash, and a fixed security-header subset; it never exposes arbitrary
 request headers to PHP or package code. The paired PHP helper verifies the
 HMAC before reading `php://input`, rechecks current method/target/body facts,
-and remains unlinked from `index.php`.
+and is consumed by `index.php` only for a reserved candidate after the explicit
+endpoint gate passes.
 
 The handler source, Caddyfile placement example, and test command live under
 `server-integrations/frankenphp-public-mutation-attestation/`. A stock
@@ -1158,8 +1160,8 @@ has begun, clears prior response headers, and emits only the fixed matching
 body bytes. It never accepts a request, reads request/cookie/session globals,
 accesses a database or runtime, invokes package code, issues a cookie, selects
 or claims a route, or changes lifecycle, enablement, Store Lite, or client
-state. It remains unlinked from the front controller, so it is an emission
-primitive rather than a public endpoint or dispatcher.
+state. It remains an emission primitive; the supported endpoint bridge is its
+only front-controller caller.
 
 The core-owned response-owner composer now binds that emitter contract to a
 validated non-executing deployment profile and optional lifecycle result. It
@@ -1168,8 +1170,9 @@ rotation lines, but it cannot accept arbitrary headers, package/theme response
 ownership, a linked-dispatcher profile, cookie-attribute drift, or a response
 body containing an opaque cookie token. It calls no output API and reads no
 request/global/session, secret, database, filesystem, package, or client state.
-The separate emitter remains the only future HTTP emission primitive; actual
-per-client deployment and browser evidence are still required.
+The separate emitter remains the only HTTP response-emission primitive;
+per-client deployment and browser evidence are still required before enabling
+the operational bridge for a client.
 
 The separate pure subject-cookie serializer accepts only the exact
 issuer-descriptor shape and derives one fixed future host-only `Set-Cookie`
@@ -1179,8 +1182,8 @@ an unreviewed cross-subdomain scope or expiry behavior through this helper. It
 does not itself issue a subject, call `header()` or `setcookie()`, read
 request/cookie/session globals, access a database/runtime, invoke package
 code, select a route, or change lifecycle, enablement, Store Lite, or client
-state. It is not linked to the front controller, so it remains an emission
-primitive rather than a public endpoint or dispatcher.
+state. The serializer remains pure; only the separate core-owned cookie emitter
+may turn one validated lifecycle into fixed `Set-Cookie` header lines.
 
 The core-owned lifecycle bridge now uses that serializer for transactional
 `ensure`, `clear`, and `rotate` operations. It locks and resolves only the
@@ -1192,9 +1195,33 @@ and execution relations under the existing foreign-key/cleanup rules. The
 disposable 18-assertion fixture and supported-server rehearsal prove that a
 valid cookie is not reissued, rotation returns one deletion plus one
 replacement, the old token and CSRF fail closed, malformed input is safe, and
-cleanup leaves no temporary subject state. This remains a core lifecycle
-primitive; the per-client deployment boundary must still be reviewed before
-any front-controller link.
+cleanup leaves no temporary subject state. The request-local page coordinator
+may now call `ensure` while rendering accepted core-owned forms, but only after
+the endpoint gate is active for the current installation.
+
+The operational endpoint gate is deliberately conjunctive. The server-local
+`PUBLIC_MUTATION_ENDPOINT_ENABLED` value must be exactly true or `1`, the
+canonical trusted origin must resolve through the existing server-local path,
+and `RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` must be a valid process-environment
+secret. Missing or malformed configuration keeps page forms inactive and makes
+a reserved mutation candidate fail closed. The front controller checks a
+bounded unencoded `/addons/` candidate before theme or administrator-session
+rendering, verifies the upstream-signed capture for `POST`, composes the static
+selector and dispatcher, and delegates only a closed response envelope to the
+core emitter. An unknown non-`POST` path remains unclaimed; a selected mutation
+with the wrong method receives the fixed method refusal.
+
+For normal `GET` rendering, core parses the raw `Cookie` header rather than
+PHP's lossy cookie map. Duplicate, malformed, oversized, or control-bearing
+subject cookies disable all mutation forms on that page. The coordinator
+revalidates its exact request-local state, permits at most 128 forms, ensures or
+resolves one subject for the first accepted form, requires every later form to
+resolve the same database record, appends only core-rendered markup, delivers
+the fixed controller once, and emits only the first validated lifecycle after
+document assembly. Package and theme code supply no header name, cookie
+attribute, script URL, response status, or response body. The clean starter
+keeps the endpoint flag false, and this bridge does not install or enable a
+package or deploy server integration for any client.
 
 The non-executing per-client deployment profile is the current core review
 boundary. It accepts only a closed operator packet with a separate client
@@ -1233,16 +1260,16 @@ client-state change. Cleanup removes the private key, container, image, and
 build context; retained evidence stays outside the starter and contains only
 non-secret hashes and booleans.
 
-Any later implementation must use one static trusted declaration, a
+The operational bridge and any later extension must use one static trusted declaration, a
 client-scoped opaque anonymous subject, core-owned same-origin CSRF, exact
 scalar input validation, server-derived state, privacy-preserving rate and
 idempotency enforcement, declared-package-table transaction support, exact
 postcondition reload, and only bounded no-store/nosniff responses. It may not
 leak cookies, tokens, request bodies, package/actor/cart/order state, secrets,
-or payment data. No current enablement profile admits this capability; the
-foundation creates no public dispatcher or endpoint, emitted cookie or session
-access, public package execution, Store Lite behavior,
-or client data. A live dispatcher must additionally prove that its supported
+or payment data. Package eligibility remains separately governed by the
+runtime/enablement contracts; the bridge itself does not admit a package,
+deploy a supported server, or create Store Lite behavior or client data. A live
+dispatcher must additionally prove that its supported
 web-server boundary preserves or rejects duplicate critical headers before PHP
 and cannot turn any request value into trusted-origin configuration.
 

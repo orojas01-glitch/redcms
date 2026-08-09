@@ -717,8 +717,8 @@ current-schema baseline, including all 45 migration files, idempotency,
 runtime/browser, lifecycle, settings foundations, CRUD/media cleanup, and
 rollback checks; its acceptance database and grant were removed afterward. The
 rehearsal uses only a temporary custom binary, fixture endpoint, and fresh
-MySQL databases; it does not link the dispatcher to the front controller or
-deploy a client. The retained local starter database was not migrated because
+MySQL databases; it does not deploy a client. The retained local starter
+database was not migrated because
 it is an older historical snapshot. Actual client-specific Caddyfile/TLS/
 proxy deployment, trusted-origin/HMAC provisioning and rotation, browser
 capture, live-data disable/upgrade compatibility, and richer package
@@ -726,17 +726,19 @@ persistence contracts must still be
 implemented and accepted with disposable fixtures before the separately
 distributed package can be enabled. A separate read-only review of the demo
 client confirmed its public and administrator-login routes return HTTPS 200
-from Apache without Store Lite/add-on/cart/checkout markers; the dispatcher
-remains intentionally unlinked. See
+from Apache without Store Lite/add-on/cart/checkout markers; that reviewed demo
+deployment remains intentionally unchanged. See
 [`ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md`](ADD-ON-DEPLOYMENT-REVIEW-20260807-DEMO.md).
 
 Gate 2D2 now also has the pure core form renderer, the separately distributed
-Store Lite 0.1.15 simple/variant field presenter, and the core-owned evidence
-bootstrap that validates before issuing an opaque subject plus same-subject
-CSRF/idempotency values. The bootstrap compensates exact partial issuance and
-remains unlinked from the front controller. Live Product-component integration,
-the browser fetch controller, response ownership/emission, and desktop/mobile
-mutation QA remain the next gate.
+Store Lite simple/variant field presenter, evidence bootstrap, browser
+controller, and the fail-closed supported-server front-controller bridge. The
+bridge stays dormant unless a server-local flag, canonical trusted HTTPS origin,
+and process-environment ingress HMAC key are all present; core owns the response,
+host-only cookie, request-local subject coordination, form placement, and fixed
+controller delivery. The clean starter flag remains false and no client or
+package is activated by this code. Real Store Lite desktop/mobile add-to-cart
+mutation QA in the isolated demo deployment remains the next gate.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

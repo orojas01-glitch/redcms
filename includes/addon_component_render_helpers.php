@@ -310,7 +310,10 @@ if (!function_exists('red_addon_public_component_render_unavailable')) {
 }
 
 if (!function_exists('red_addon_public_component_render')) {
-    function red_addon_public_component_render(array $context)
+    function red_addon_public_component_render(
+        array $context,
+        $connection = null
+    )
     {
         if (array_keys($context) !== ['component', 'active', 'inputs']
             || !is_string($context['component'])
@@ -356,6 +359,31 @@ if (!function_exists('red_addon_public_component_render')) {
             return true;
         }
 
+        $formHtml = '';
+        if (array_key_exists('mutationForm', $viewModel)
+            && $connection instanceof mysqli
+            && function_exists('red_addon_public_mutation_page_integrate')
+        ) {
+            $integration = red_addon_public_mutation_page_integrate(
+                $connection,
+                $context,
+                $viewModel
+            );
+            if (red_addon_public_component_form_integration_valid($integration)
+                && !empty($integration['valid'])
+                && !empty($integration['available'])
+            ) {
+                $formHtml = $integration['formHtml'];
+            } elseif (($integration['reason'] ?? '')
+                !== 'integration_invalid'
+            ) {
+                error_log(
+                    'RED-CMS add-on component form is unavailable: ' .
+                    $context['component']
+                );
+            }
+        }
+
         echo '<section class="red-addon-component" data-red-addon-component="' .
             red_addon_public_component_escape($context['component']) .
             '"><h2>' . red_addon_public_component_escape($viewModel['title']) .
@@ -376,6 +404,7 @@ if (!function_exists('red_addon_public_component_render')) {
             }
             echo '</dl>';
         }
+        echo $formHtml;
         echo '</section>';
         return true;
     }

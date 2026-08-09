@@ -5,22 +5,23 @@ separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
 pure declared-form decoder, HTTP request-envelope normalizer, private static
-route selector, non-routable server request-facts adapter, closed response
-emitter, pure subject-cookie serializer, core-owned subject-cookie lifecycle
-bridge, and an optional Caddy/FrankenPHP
-ingress-attestation source with an unlinked PHP verifier are implemented. An
-unlinked explicit-input core dispatcher and a disposable supported-server
-end-to-end proof are also implemented. A non-executing per-client deployment
+route selector, server request-facts adapter, closed response emitter, pure
+subject-cookie serializer, core-owned subject-cookie lifecycle bridge, and an
+optional Caddy/FrankenPHP ingress-attestation source with its PHP verifier are
+implemented. An explicit-input core dispatcher, gated front-controller bridge,
+request-local page/form coordinator, fixed cookie emitter, and disposable
+supported-server end-to-end proof are also implemented. A non-executing per-client deployment
 profile validator now covers the operator-owned deployment boundary without
 loading or applying a profile. The core-owned response-owner composer now
 binds that profile to one exact response envelope and fixed lifecycle cookie
-descriptors without emitting them. The dispatcher composes those contracts
-but remains unlinked from the front controller. A non-executing deployment
+descriptors without emitting them. The operational bridge composes the
+dispatcher only after the explicit local enablement flag, trusted HTTPS origin,
+and process-environment ingress HMAC key all pass. A non-executing deployment
 review validator now binds a profile hash to non-secret server, trust, and
-browser evidence without loading or applying it. This document does **not** add
-a production public HTTP endpoint, production-emitted cookie, browser session access,
-package, permission, enablement profile, or Store Lite behavior. The five
-generic core tables remain empty in the clean starter.
+browser evidence without loading or applying it. This document adds no package,
+permission, enabled client deployment, Store Lite behavior, or shared client
+state. The endpoint remains false in the clean starter, whose five generic core
+tables remain empty.
 
 ## Purpose
 
@@ -47,18 +48,19 @@ changed by it.
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
 | Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency/execution storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
-| Anonymous cart identity | Core-owned lifecycle now validates/ensures, clears, and rotates one opaque subject with fixed host-only cookie descriptors; the pure serializer remains non-emitting and the lifecycle bridge remains unlinked | No production front-controller, client deployment, package access, route claim, session, or client business data |
+| Anonymous cart identity | Core-owned lifecycle validates/ensures, clears, and rotates one opaque subject with fixed host-only cookie descriptors; the request-local page coordinator may ensure or resolve one subject and only the core emitter may send its validated lifecycle | No package access, administrator session, cross-client identity, or package-controlled cookie policy |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
 | Public rate decision | Internal core fixed-window claim is limited to 12 requests per 60 seconds for one client, declaration, and opaque subject; the runner uses its transaction-only primitive | No dispatcher, request parsing, package execution, or enablement |
 | Public idempotency evidence | Internal core issue/resolve helper binds a 10-minute opaque key to one client, declaration, and subject | No endpoint issues or accepts a key; the helper itself remains non-consuming |
-| Public form evidence bootstrap | Core validates the complete presentation, ensures one opaque subject, issues same-subject scoped CSRF/idempotency evidence, and composes the pure form model with exact partial-issuance compensation | No request-global read, package load, HTML/header emission, front-controller link, or public endpoint |
+| Public form evidence bootstrap | Core validates the complete presentation, ensures one opaque subject, issues same-subject scoped CSRF/idempotency evidence, and composes the pure form model with exact partial-issuance compensation; the gated page coordinator links this to the generic renderer | No package callback during integration and no package/theme header, cookie, script, or response ownership |
 | Public mutation ledger/audit | Internal core runner records one completed key relation, keyed HMAC command/state evidence, one bounded outcome, and one value-free anonymous audit fact | No endpoint, package fixture, browser behavior, or public response-emission path |
 | Declared package fields | Pure core decoder accepts one trusted declaration and canonical raw URL-encoded package fields only | No HTTP request ownership, header/cookie/session access, route claim, package execution, or response emission |
 | HTTP request envelope | Pure core normalizer accepts explicit static transport facts and releases opaque subject/CSRF/idempotency evidence only after complete validation | No PHP globals, route claim, endpoint, response emission, session, database/runtime/package access, or client state |
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
-| Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the unlinked PHP HMAC bridge | No default-server change, deployed client binary, active client Caddyfile, dispatcher, endpoint, cookie emission, package execution, or client state |
-| Public-mutation dispatcher | Unlinked core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model | No front-controller link, response emission, browser issuance, package enablement, or Store Lite behavior |
+| Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the PHP HMAC bridge used only after the endpoint gate | No default-server change, deployed client binary, active client Caddyfile, package activation, Store Lite data, or client state |
+| Public-mutation dispatcher | Core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model; the gated bridge is its only front-controller caller | No package/theme response ownership, package enablement, Store Lite activation, or client deployment |
+| Operational endpoint and page bridge | Before theme/session rendering, core may claim one reserved `/addons/` candidate only after the local flag, trusted origin, and ingress key pass; normal GET rendering parses raw cookies, coordinates at most 128 forms, delivers one fixed controller, and emits only fixed lifecycle/response headers | False in the clean starter; no server integration deployment, package installation/enablement, Store Lite data, or shared client state |
 | Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
 | Per-client deployment profile | Pure validator accepts one non-secret operator review packet with canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags | No profile loading, secret resolution, filesystem/database access, deployment, dispatcher link, package enablement, or Store Lite data |
 | Response ownership/composition | Core accepts only a valid deployment profile and fixed response envelope, then appends zero, one, or an ordered clear/set subject-cookie descriptor from the lifecycle bridge; the result is non-emitting and deterministic | No arbitrary headers, package/theme ownership, cookie policy drift, request parsing, secret/database access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |
@@ -553,10 +555,10 @@ The command may be pointed at an external evidence directory with
 `RED_DEPLOYMENT_REHEARSAL_OUTPUT`. A successful Docker/browser run remains
 required before any client-specific deployment or front-controller link.
 
-## Future Core-Owned Request And Response Path
+## Core-Owned Request And Response Path
 
-When the dispatcher is linked, core—not a theme, browser script, or package
-route file—must own this sequence:
+When an installation explicitly enables the supported endpoint, core—not a
+theme, browser script, or package route file—owns this sequence:
 
 1. Use the implemented server request-facts adapter only with a supported
    server-specific attestation, configured canonical HTTPS origin, raw body,
@@ -572,12 +574,11 @@ route file—must own this sequence:
    only through the dispatcher. It is an opaque, unguessable cookie-bound
    reference; it is neither an administrator session, a Member Access identity,
    a raw cookie value exposed to package code, nor a client database/global
-   identity. The unlinked dispatcher still requires an existing subject. A
-   future response owner may call the implemented lifecycle bridge to ensure,
-   clear, or rotate that subject, compose the exact fixed envelope and cookie
-   descriptors through the response-owner boundary, then emit only the
-   validated result after the per-client deployment profile and reviewed
-   production deployment boundaries are accepted.
+   identity. The dispatcher still requires an existing subject. The page
+   coordinator may call the lifecycle bridge to ensure or resolve that subject,
+   retain its first exact lifecycle, and let only the core emitter send the
+   validated cookie after successful document assembly. Clear and rotate remain
+   available through the separately reviewed lifecycle/response-owner boundary.
 3. Use the implemented core-owned CSRF issue/verify foundation before semantic
    request parsing or handler invocation. The token, subject, raw cookie,
    request body, and secrets must not enter general logs, package output, audit
@@ -792,26 +793,26 @@ This planning slice does not authorize:
     database, header/cookie emission, browser, route, dispatcher, enablement,
     or client-state path.
 15. Completed the optional non-routable Caddy/FrankenPHP ingress-attestation
-    source, unlinked PHP HMAC verifier, and isolated custom-binary proof. The
+    source, PHP HMAC verifier, and isolated custom-binary proof. The
     proof builds the module into a temporary versioned image, checks registration
     and configuration, and exercises Caddy-to-PHP capture behavior without a
     client deployment. It adds no default server configuration, client binary,
     dispatcher, endpoint, browser cookie, package execution, enablement, Store
     Lite, or client state.
-16. Completed the unlinked core-owned public-mutation dispatcher composition:
+16. Completed the core-owned public-mutation dispatcher composition:
     explicit captured method/target facts select one registrar-bound route,
     require attested POST transport, verify subject/CSRF before field decoding,
     invoke the existing atomic runner, and return only the fixed response model.
-    Its focused fixture has no front-controller, response-emission, browser,
-    package, enablement, Store Lite, or client-state path.
+    Its focused fixture has no response-emission, browser, package, enablement,
+    Store Lite, or client-state path; only the later gated bridge may call it
+    from the front controller.
 17. Completed the disposable supported-server dispatcher rehearsal: a temporary
     pinned FrankenPHP/Caddy image and fresh MySQL database exercised the real
     attester, PHP verifier, core dispatcher, atomic runner, and fixed emitter,
     proving accepted/replay/refusal/conflict behavior and exact ledger/audit/
     rate evidence before cleaning every temporary artifact. It does not deploy
-    a client or link the dispatcher. A separate batch may link it only after the
-    later per-client Caddyfile/TLS/proxy, trusted-origin, HMAC-key, and browser
-    subject-cookie deployment review.
+    a client. A later batch linked the same path behind the explicit local flag,
+    trusted-origin, and HMAC-key gates without enabling any deployment.
 18. Completed the core-owned browser subject-cookie lifecycle bridge and its
     18-assertion disposable plus supported-server HTTP proofs. Ensure, clear,
     and rotate are transactional, fixed-descriptor, non-package operations;
@@ -849,8 +850,16 @@ This planning slice does not authorize:
     form model, and compensates exact partial evidence on failure. It reads no
     request globals, loads no package code, emits no HTML/header, and remains
     absent from the front controller.
-25. A separate richer enablement review may admit only packages that satisfy
+25. Completed the gated operational endpoint and request-local page bridge.
+    The front controller composes the attested dispatcher only when the explicit
+    local flag, trusted HTTPS origin, and process-environment HMAC key all pass.
+    Normal pages strictly validate the raw subject cookie and coordinator state,
+    reuse one subject across at most 128 accepted core-rendered forms, deliver
+    one fixed controller, and emit only fixed lifecycle/response headers.
+    Focused endpoint, cookie, fresh-schema, Chrome-controller, and supported-
+    server Docker evidence pass without enabling a package or client deployment.
+26. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-26. Store Lite can then implement its separately distributed catalog and cart
+27. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

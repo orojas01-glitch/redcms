@@ -15,6 +15,8 @@ require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot .
     '/includes/addon_public_component_form_integration_helpers.php';
+require_once $projectRoot .
+    '/includes/addon_public_mutation_page_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|addon_public_component_form)_[A-Za-z0-9_]+\z/',
@@ -334,6 +336,74 @@ try {
         'component integration resolves ownership without invoking package callbacks'
     );
 
+    $beforePageCounts = red_addon_component_form_test_counts($connection);
+    $duplicateCookie = red_addon_public_mutation_subject_cookie_name() . '='
+        . str_repeat('a', 64) . '; '
+        . red_addon_public_mutation_subject_cookie_name() . '='
+        . str_repeat('b', 64);
+    $invalidPage = red_addon_public_mutation_page_begin(
+        true,
+        $duplicateCookie
+    );
+    red_addon_component_form_test_assert(
+        $invalidPage['enabled'] === false
+            && $invalidPage['reason'] === 'cookie_invalid'
+            && red_addon_public_mutation_page_delivery()['active'] === false
+            && red_addon_component_form_test_counts($connection)
+                === $beforePageCounts,
+        'duplicate raw subject cookies disable page forms without issuing evidence'
+    );
+
+    red_addon_public_mutation_page_begin(true, '');
+    $pageSimple = red_addon_public_mutation_page_integrate(
+        $connection,
+        red_addon_component_form_test_context(),
+        red_addon_component_form_test_view()
+    );
+    $subjectIds[] = $pageSimple['lifecycle']['subjectRecordId'] ?? 0;
+    $firstDelivery = red_addon_public_mutation_page_delivery();
+    red_addon_component_form_test_assert(
+        red_addon_public_component_form_integration_valid($pageSimple)
+            && $pageSimple['available'] === true
+            && red_addon_public_mutation_page_delivery_valid($firstDelivery)
+            && $firstDelivery['active'] === true
+            && $firstDelivery['formCount'] === 1
+            && $firstDelivery['lifecycle']['state'] === 'issued'
+            && red_addon_public_mutation_page_controller_tag($firstDelivery)
+                === '<script src="/js/public-addon-mutation.js" defer></script>'
+            && red_addon_public_mutation_subject_cookie_emitter_values(
+                $firstDelivery['lifecycle']
+            ) === [$firstDelivery['lifecycle']['setCookieValue']],
+        'the first accepted page form owns one issued subject, cookie, and controller delivery'
+    );
+
+    $pageVariable = red_addon_public_mutation_page_integrate(
+        $connection,
+        red_addon_component_form_test_context(),
+        red_addon_component_form_test_view(true)
+    );
+    $secondDelivery = red_addon_public_mutation_page_delivery();
+    red_addon_component_form_test_assert(
+        red_addon_public_component_form_integration_valid($pageVariable)
+            && $pageVariable['lifecycle']['state'] === 'resolved'
+            && $pageVariable['lifecycle']['subjectRecordId']
+                === $pageSimple['lifecycle']['subjectRecordId']
+            && red_addon_public_mutation_page_delivery_valid($secondDelivery)
+            && $secondDelivery['formCount'] === 2
+            && $secondDelivery['lifecycle'] === $firstDelivery['lifecycle']
+            && red_addon_component_form_test_counts($connection) === '2:4:4',
+        'later page forms reuse one subject while retaining the first response lifecycle'
+    );
+
+    $GLOBALS['RED_ADDON_PUBLIC_MUTATION_PAGE_CONTEXT']['formCount'] = 129;
+    $invalidContext = red_addon_public_mutation_page_context_current();
+    red_addon_component_form_test_assert(
+        $invalidContext['enabled'] === false
+            && $invalidContext['reason'] === 'page_context_invalid'
+            && red_addon_public_mutation_page_delivery()['active'] === false,
+        'request-local page coordination fails closed after global state drift'
+    );
+
     $source = file_get_contents(
         $projectRoot .
             '/includes/addon_public_component_form_integration_helpers.php'
@@ -348,6 +418,26 @@ try {
             && strpos($source, 'setcookie(') === false
             && strpos($source, 'addon.php') === false,
         'integration reads no request globals and has no emission or package path'
+    );
+    $pageSource = file_get_contents(
+        $projectRoot . '/includes/addon_public_mutation_page_helpers.php'
+    );
+    $rendererSource = file_get_contents(
+        $projectRoot . '/includes/addon_component_render_helpers.php'
+    );
+    red_addon_component_form_test_assert(
+        is_string($pageSource)
+            && is_string($rendererSource)
+            && str_contains(
+                $rendererSource,
+                'red_addon_public_mutation_page_integrate('
+            )
+            && str_contains($rendererSource, 'echo $formHtml;')
+            && !preg_match(
+                '/\$_(?:SERVER|GET|POST|COOKIE|SESSION|REQUEST)\b/',
+                $rendererSource
+            ),
+        'the generic component renderer appends only the core-coordinated form result'
     );
 } finally {
     $ids = array_values(array_filter(

@@ -18,6 +18,9 @@ return [
     // Canonical HTTPS origin for a future core-owned public-mutation path.
     // Never derive this from Host or a request header.
     'PUBLIC_MUTATION_TRUSTED_ORIGIN' => '',
+    // Supported Caddy/FrankenPHP deployments only. The endpoint additionally
+    // requires RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY in process environment.
+    'PUBLIC_MUTATION_ENDPOINT_ENABLED' => false,
     // Opaque references only. Secret values remain in their provider.
     'ADDON_SECRET_REFERENCES' => [],
     // Optional local-only values keyed by the exact opaque references above.
