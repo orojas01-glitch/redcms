@@ -573,7 +573,7 @@ non-destructive atomic disablement foundations, fail-closed enabled-package
 request bootstrap, plus
 Milestone 5 content-version, direct page-structure, and custom Layout Builder
 foundations.
-The latest complete 2026-08-08 run passed the
+The complete 2026-08-08 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 48-assertion add-on trust contract, 22-assertion
 add-on setting-value contract, 8-assertion add-on secret-resolution
@@ -643,6 +643,18 @@ existing migration, HTTP, authorization, CRUD, media, transaction, rollback,
 theme-contract, and schema-signature gate. The configured disposable-primary
 snapshot remained unchanged; independent post-run checks found zero temporary
 schemas and zero grants.
+
+On 2026-08-10, the collection-row mutation-presentation tree reran the complete
+suite against a fresh temporary primary built from the tracked installer plus
+all 45 current migrations, because the retained local starter is an older
+protected snapshot. The new 11-assertion data-only component/row presentation
+contract passed alongside every existing migration, authorization,
+transaction, endpoint, CRUD, media, theme, and rollback gate. The normalized
+schema signature remained
+`cb6e941861fc5ed74142f11b0f36536549a335f478b8214e613836f360501a3f`,
+the temporary primary isolation snapshot was unchanged, the isolated server
+log was clean, and independent post-run checks found zero matching temporary
+schemas and grants. No retained database or hosted installation was migrated.
 
 A separate generated-fixture Chrome inspection rendered the new component
 editor's valid and field-error states at 1512×900 and 390×844. Both viewports

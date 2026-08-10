@@ -1257,6 +1257,19 @@ request bootstrap excludes the disabled package.
     hosted demo and every retained client installation remained unchanged.
     Quantity update and line removal are the next Store Lite gate.
 
+92. Completed the generic data-only collection-row mutation-presentation
+    prerequisite. One public collection row may retain one or two distinct
+    closed presentations using the existing bounded identifier, integer, and
+    select field vocabulary. Empty, overflowing, associative, duplicate,
+    malformed, authority-bearing, or expanded row forms fail the complete
+    component view closed. The default renderer still emits only escaped row
+    titles and facts: it derives no form instance, issues no evidence, renders
+    no control, invokes no package callback, opens no database, and changes no
+    response or deployment. Separately distributed Store Lite 0.1.23 supplies
+    the matching pure quantity/remove models; package read-model binding,
+    core-owned evidence composition/rendering, and browser mutation QA remain
+    separate follow-up gates.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

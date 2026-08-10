@@ -6,9 +6,9 @@
  * nevertheless keeps the value it receives and the markup it can influence
  * deliberately small: page placement scalars in, a bounded data-only view
  * model out. Core may render an optional closed list of label/value facts and
- * retain one validated public-mutation form presentation for a later
- * core-owned controller, but package HTML and browser authority remain
- * forbidden.
+ * retain validated component or bounded collection-row public-mutation form
+ * presentations for a later core-owned controller, but package HTML and
+ * browser authority remain forbidden.
  * Core owns the default renderer and never selects a class, template, or
  * callback from a page row.
  */
@@ -222,6 +222,37 @@ if (!function_exists('red_addon_public_component_mutation_form_presentation')) {
     }
 }
 
+if (!function_exists('red_addon_public_component_collection_mutation_forms')) {
+    function red_addon_public_component_collection_mutation_forms(
+        $presentations
+    ) {
+        if (!is_array($presentations)
+            || !array_is_list($presentations)
+            || count($presentations) < 1
+            || count($presentations) > 2
+        ) {
+            return null;
+        }
+        $normalized = [];
+        $seen = [];
+        foreach ($presentations as $presentation) {
+            $form = red_addon_public_component_mutation_form_presentation(
+                $presentation
+            );
+            if (!is_array($form)) {
+                return null;
+            }
+            $identity = $form['route'] . "\0" . $form['mutation'];
+            if (isset($seen[$identity])) {
+                return null;
+            }
+            $seen[$identity] = true;
+            $normalized[] = $form;
+        }
+        return $normalized;
+    }
+}
+
 if (!function_exists('red_addon_public_component_collection_presentation')) {
     function red_addon_public_component_collection_presentation($collection)
     {
@@ -242,7 +273,14 @@ if (!function_exists('red_addon_public_component_collection_presentation')) {
         $items = [];
         foreach ($collection['items'] as $item) {
             if (!is_array($item)
-                || array_keys($item) !== ['title', 'facts']
+                || !in_array(
+                    array_keys($item),
+                    [
+                        ['title', 'facts'],
+                        ['title', 'facts', 'mutationForms'],
+                    ],
+                    true
+                )
                 || !is_string($item['title'] ?? null)
                 || !is_array($item['facts'] ?? null)
                 || !array_is_list($item['facts'])
@@ -273,7 +311,18 @@ if (!function_exists('red_addon_public_component_collection_presentation')) {
                 }
                 $facts[] = ['label' => $factLabel, 'value' => $value];
             }
-            $items[] = ['title' => $title, 'facts' => $facts];
+            $normalized = ['title' => $title, 'facts' => $facts];
+            if (array_key_exists('mutationForms', $item)) {
+                $mutationForms =
+                    red_addon_public_component_collection_mutation_forms(
+                        $item['mutationForms']
+                    );
+                if (!is_array($mutationForms)) {
+                    return null;
+                }
+                $normalized['mutationForms'] = $mutationForms;
+            }
+            $items[] = $normalized;
         }
         return ['label' => $label, 'items' => $items];
     }
