@@ -470,11 +470,12 @@ try {
                     (SELECT COUNT(*) FROM RED_Addon_StoreLite_Product_Options),
                     (SELECT COUNT(*) FROM RED_Addon_StoreLite_Product_Variants),
                     (SELECT COUNT(*) FROM RED_Addon_StoreLite_Product_Placements),
+                    (SELECT COUNT(*) FROM RED_Addon_StoreLite_Cart_Placements),
                     (SELECT COUNT(*) FROM RED_Addon_StoreLite_Product_Activity),
                     (SELECT COUNT(*) FROM RED_Addon_Activity_Log
                      WHERE PackageID='redcms.store-lite'))"
-            ) === '2:2:2:0:0:2',
-            'fixture contains two products, no placement, and only two core mutation audits'
+            ) === '2:2:2:0:0:0:2',
+            'fixture contains two products, no component placement, and only two core mutation audits'
         );
         echo json_encode([
             'ok' => true,
@@ -574,22 +575,43 @@ try {
                        AND a.HomePositionOrder=90
                        AND a.PagePosition=0
                        AND a.Active='Y'),
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_StoreLite_Cart_Placements p
+                     INNER JOIN RED_Articles a
+                       ON a.RecordID=p.ContentRecordID
+                     WHERE p.Title='Shopping cart'
+                       AND a.Component='redcms.store-lite/cart'
+                       AND LOWER(a.Sections)='home'
+                       AND a.HomePosition=1
+                       AND a.HomePositionOrder=92
+                       AND a.PagePosition=0
+                       AND a.Active='Y'),
                     (SELECT COUNT(*) FROM RED_Content_Revisions
                      WHERE Operation='create'
                        AND ContentType='redcms.store-lite/product'),
                     (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE Operation='create'
+                       AND ContentType='redcms.store-lite/cart'),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
                      WHERE Operation='move'
                        AND ContentType='redcms.store-lite/product'),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE Operation='move'
+                       AND ContentType='redcms.store-lite/cart'),
                     (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
                      WHERE PackageID='redcms.store-lite'
                        AND ComponentID='redcms.store-lite/product'
+                       AND Operation='baseline'),
+                    (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                     WHERE PackageID='redcms.store-lite'
+                       AND ComponentID='redcms.store-lite/cart'
                        AND Operation='baseline'),
                     (SELECT COUNT(*) FROM RED_Admin_Activity_Log
                      WHERE EventName='component.public_placed'
                        AND TargetType='component'
                        AND ActorAdminRecordID=1))"
-            ) === '1:1:1:1:1',
-            'browser component creation and homepage placement retain exact revision and audit evidence'
+            ) === '1:1:1:1:1:1:1:1:2',
+            'browser Product and Cart creation/placement retain exact revision and audit evidence'
         );
         red_store_lite_browser_assert(
             red_store_lite_browser_scalar(
