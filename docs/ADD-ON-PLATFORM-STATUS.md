@@ -64,7 +64,7 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Gate 2D2 is complete. The current Store Lite milestone is a usable visitor cart: view current lines, update quantity, and remove a line. |
+| Where are we? | Gate 2D2 is complete. The current Store Lite milestone is a usable visitor cart: view current lines, update quantity, and remove a line. Its first read-only foundation is in progress: core resolves an already-present anonymous subject for a package read model without exposing the cookie or creating browser evidence. |
 | What just finished? | Gate 2D2D3C connected the real core form, endpoint flag, HTTPS origin, ingress attestation, anonymous cookie, browser controller, dispatcher, atomic runner, and Store Lite handler in one isolated supported-server rehearsal. Desktop simple-product and mobile exact Size/Color variant mutation, retry, conflict, invalid-input, accessibility, responsive, console/network, database, and cleanup checks passed. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place a Product component; public visitors can see it and successfully add it to a server-authoritative anonymous cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |

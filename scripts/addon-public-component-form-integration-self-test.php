@@ -362,6 +362,7 @@ try {
     );
     $subjectIds[] = $pageSimple['lifecycle']['subjectRecordId'] ?? 0;
     $firstDelivery = red_addon_public_mutation_page_delivery();
+    $pageSubject = red_addon_public_mutation_page_subject_context($connection);
     red_addon_component_form_test_assert(
         red_addon_public_component_form_integration_valid($pageSimple)
             && $pageSimple['available'] === true
@@ -375,6 +376,15 @@ try {
                 $firstDelivery['lifecycle']
             ) === [$firstDelivery['lifecycle']['setCookieValue']],
         'the first accepted page form owns one issued subject, cookie, and controller delivery'
+    );
+    red_addon_component_form_test_assert(
+        $pageSubject === [
+            'valid' => true,
+            'subjectRecordId' => $pageSimple['lifecycle']['subjectRecordId'],
+            'reason' => 'subject_resolved',
+        ]
+            && red_addon_component_form_test_counts($connection) === '2:3:3',
+        'a package read model receives only the core-resolved current subject'
     );
 
     $pageVariable = red_addon_public_mutation_page_integrate(
@@ -397,9 +407,15 @@ try {
 
     $GLOBALS['RED_ADDON_PUBLIC_MUTATION_PAGE_CONTEXT']['formCount'] = 129;
     $invalidContext = red_addon_public_mutation_page_context_current();
+    $invalidSubject = red_addon_public_mutation_page_subject_context($connection);
     red_addon_component_form_test_assert(
         $invalidContext['enabled'] === false
             && $invalidContext['reason'] === 'page_context_invalid'
+            && $invalidSubject === [
+                'valid' => false,
+                'subjectRecordId' => 0,
+                'reason' => 'subject_unavailable',
+            ]
             && red_addon_public_mutation_page_delivery()['active'] === false,
         'request-local page coordination fails closed after global state drift'
     );
