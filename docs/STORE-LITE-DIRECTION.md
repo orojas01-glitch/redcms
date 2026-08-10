@@ -633,6 +633,17 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    component forms, fixed controller delivery, and host-only cookie emission.
    This installs or enables no Store Lite package and changes no demo/client
    deployment; real Store Lite desktop/mobile mutation QA is Gate 2D2D3C.
+26. Completed Gate 2D2D3C through a separate opt-in supported-server browser
+   rehearsal. It stages clean core plus pinned Store Lite 0.1.16 only in a
+   temporary Docker context, applies core migrations and package migrations in
+   manifest order to fresh MySQL, enables the endpoint only through temporary
+   process configuration, and drives the real Product form and Add-to-cart
+   route over self-signed localhost HTTPS. Desktop simple-product and mobile
+   exact Size/Color variant acceptance, retry, conflict, invalid quantity,
+   accessible controls/status, host-only
+   Secure/HttpOnly/Strict subject cookie, zero console/page/network errors,
+   exact atomic cart/audit state, and complete Docker cleanup passed. No hosted
+   demo or client installation was changed.
    Typed internal service
    invocation, exact static public `GET` routes, display-only administrator
    tools, typed setting validation, per-client storage, read-only preflight,
@@ -650,22 +661,23 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    Chrome desktop/mobile rendered inspection with zero overflow and no
    console, page, or failed-request errors. Store Lite remains outside the
    clean starter and blocked from normal richer-package enablement.
-26. Completed: create Store Lite in its separate distribution using only the
+27. Completed: create Store Lite in its separate distribution using only the
    accepted contracts.
-27. In progress: package-owned Product migrations, simple/variable Product
+28. Completed through Add-to-cart: package-owned Product migrations,
+   simple/variable Product
    administration, Product component persistence, administrator creation,
    Homepage placement, public rendering, the server-authoritative cart-line
    resolver, and cart persistence are complete. Store Lite 0.1.14 now declares
    and registers the closed Add-to-cart route, mutation handler, state loader,
    and exact package tables; the real core atomic runner passes simple product,
    explicit variant, replay, conflict, rollback, postcondition, and audit proof.
-   Gate 2D2 must now prove the connected core form, evidence, supported-server
+   Gate 2D2 now also proves the connected core form, evidence, supported-server
    dispatch, fixed response/cookie, and Store Lite handler together through
    desktop/mobile Add-to-cart QA. The general `commerce.cart` service, visible
-   cart management, and orders/pay-on-receipt remain later.
-28. Validate disable/re-enable, failure recovery, migration, responsive
+   cart management, and orders/pay-on-receipt remain next/later milestones.
+29. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-29. Add a separately reviewed hosted-payment adapter only after the
+30. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

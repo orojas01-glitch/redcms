@@ -13,7 +13,9 @@ const password = process.env.RED_STORE_LITE_PASSWORD || '';
 const chromePath = process.env.RED_CHROME_BIN
     || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-if (!/^http:\/\/127\.0\.0\.1:\d+$/.test(baseUrl)
+const ignoreHTTPSErrors = process.env.RED_STORE_LITE_IGNORE_HTTPS_ERRORS === '1';
+
+if (!/^(?:http:\/\/127\.0\.0\.1|https:\/\/localhost):\d+$/.test(baseUrl)
     || !path.isAbsolute(evidenceDir)
     || !username
     || !password
@@ -221,6 +223,7 @@ async function runCase(browser, definition) {
     const context = await browser.newContext({
         viewport: definition.viewport,
         reducedMotion: 'reduce',
+        ignoreHTTPSErrors,
     });
     const page = await context.newPage();
     const consoleErrors = [];

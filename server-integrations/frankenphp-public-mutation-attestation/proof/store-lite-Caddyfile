@@ -1,0 +1,21 @@
+# Disposable Store Lite supported-server browser rehearsal configuration.
+# The paired script copies this file into a temporary Docker image only. It is
+# not a RED-CMS root Caddyfile or a client deployment artifact.
+{
+	auto_https off
+	admin off
+}
+
+:8443 {
+	tls /etc/caddy/certs/rehearsal.crt /etc/caddy/certs/rehearsal.key
+	root * /app/public
+
+	# Attestation must remain before PHP. The real RED-CMS front controller
+	# owns endpoint dispatch, package bootstrap, and the fixed response.
+	route {
+		@health path /healthz
+		respond @health 204
+		red_public_mutation_attestation RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY
+		php_server
+	}
+}

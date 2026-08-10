@@ -21,6 +21,22 @@ grant, and staged package. Its screenshots and JSON report remain in the
 printed non-secret temporary evidence directory. This gate does not make Store
 Lite part of the starter or authorize normal richer-package enablement.
 
+`scripts/store-lite-public-mutation-rehearsal.sh` is the separate Docker-only
+Gate 2D2D3C supported-server integration. It requires the clean external Store
+Lite 0.1.16 repository at its pinned revision, stages no retained add-on or
+local configuration, builds the reviewed custom FrankenPHP/Caddy attestation
+module, and creates fresh MySQL, HTTPS certificate, HMAC key, and trusted-origin
+state. It first reruns the established administrator/component browser path,
+then drives the real public Product Add-to-cart form in desktop/mobile Chrome.
+Acceptance requires one host-only Secure/HttpOnly/Strict subject cookie,
+core-issued CSRF/idempotency evidence, accepted mutation, exact retry replay,
+changed-command conflict, invalid-quantity refusal, accessible controls/status,
+no overflow or browser errors, exact Store Lite/core database facts, and removal
+of every temporary container, network, image, database, certificate, secret,
+and staged project. Only non-secret screenshots and JSON reports remain in the
+printed external temporary evidence directory. It does not change the hosted
+demo or authorize a client deployment.
+
 Before it creates a database or grant, the runner executes
 `scripts/clean-starter-boundary-self-test.php` and
 the SEO, add-on trust, component-editor value, and display-only
@@ -692,6 +708,18 @@ replacement, `GET` refusal, withheld-attestation refusal, idempotency conflict,
 and exact fixture ledger/audit/rate state before removing its temporary
 containers, network, image, database, package marker, and build context.
 
+The connected Store Lite supported-server browser rehearsal is also opt-in and
+requires Docker Desktop plus the external pinned package:
+
+```bash
+scripts/store-lite-public-mutation-rehearsal.sh
+```
+
+It composes the same reviewed attestation binary with the real clean-starter
+front controller and Store Lite package over temporary localhost HTTPS and
+fresh MySQL. The default endpoint remains disabled everywhere outside that
+process environment.
+
 ## Safety Boundaries
 
 - Database names must match `redcms_acceptance_[A-Za-z0-9_]+`.
@@ -856,6 +884,17 @@ containers, network, image, database, package marker, and build context.
   database evidence requires the exact package Product relationship, active
   homepage-only core fields, one core `create`, package `baseline`, core
   `move`, and value-free `component.public_placed` audit fact.
+- The Store Lite supported-server public-mutation browser rehearsal is a
+  separate Docker-only cross-repository gate. It requires Store Lite 0.1.16 at
+  revision `27b23dbfa6f84e966f9a5a69d290885dfa8bb604`, manifest-ordered package
+  migrations, the reviewed custom FrankenPHP/Caddy module, fresh MySQL and
+  localhost TLS, temporary process-only endpoint/origin/HMAC configuration,
+  the existing 87-check administrator/component browser proof, and 59 real
+  desktop/mobile public-mutation checks including a simple product and exact
+  Size/Color variant. Final cart, line, quantity, package
+  activity, execution, and core audit counts must be exactly `4:4:6:4:4:4`;
+  no container, network, image, database, certificate, secret, staged package,
+  or client state may remain.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.
 - Add-on component-editor update acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires a core-owned operational form with only the numeric parent id, current state hash, CSRF token, and schema fields; server-derived package/component identity; fresh exact view/edit grants; fail-closed rendering after revocation; declared-editor-only writer registration; one exact writer owner; closed package-table metadata; InnoDB refusal before invocation; enabled locked parent/runtime/manifest ownership; normalized values; exact saved-value reload; immutable core-owned baseline/save snapshots; bounded validated history metadata; deterministic read-only restore preflight; exact plan matching; atomic source-linked restore execution; unchanged no-op behavior; stale/revoked/drifted/disabled/forged/tampered refusal; rollback after update or restore revision-ledger failure, emitted output, exceptions, nested buffers, false returns, and incomplete writes; unchanged core placement state; exact restored target state and revision timeline; and zero package, parent, revision, administrator, grant, table, or filesystem fixtures.
 - Add-on component-creation preflight/runner, parent-metadata, public-placement preflight/runner, and atomic-delete acceptance runs only in the uniquely named disposable database. It requires declared-editor-only creator/deleter registration, exact create/view/edit/delete/publish permissions, enabled manifest and runtime component/loader/creator/deleter ownership, closed package-table metadata, InnoDB refusal before callback invocation, an unused numeric record id, one active-theme layout, normalized parent and package values, an inactive hidden unrouted parent plan, deterministic hashing, disabled/revoked/mismatched/invalid/existing-record refusal, and zero creator/deleter invocation during preflight. The atomic creation runner requires exact plan matching under lifecycle/theme/installation serialization, rejects caller-owned transactions, contains creator/loader failures, verifies exact parent and package postconditions, commits one core `create` and one package `baseline` revision, refuses reuse, and rolls back output/exception/nested-buffer/false/partial-write and both forced-ledger failures. Parent state and writes require fresh exact view/edit grants, enabled binding, inactive shell and current revision evidence, stale-state refusal, title/layout/language-only mutation, unchanged package data, one core `save` revision, no-op suppression, and rollback on forced ledger failure. Public-placement planning binds exact parent/package state to either the unique active language homepage or one unique active Article route, requires language agreement and active-theme position support, derives closed destination-specific placement values, and proves deterministic zero-write behavior with revoked, stale, cross-language, inactive-target, and unsupported-position refusals. Its atomic runner revalidates under lifecycle/theme/installation/source/destination locks, refuses caller transactions, revoked grants, destination drift, and plan reuse, changes only the four homepage or seven Article parent fields, preserves package and destination state, commits one core `move` revision and value-free placement audit, and rolls back revision or audit failure. Delete planning binds exact parent/package hashes, the latest validated package revision, declared InnoDB tables, and deterministic value-free evidence without invoking the deleter or writing state. The atomic delete runner revalidates under lifecycle/theme/installation/parent locks, contains the deleter, rejects partial deletion, records both final `delete` snapshots, removes package/SEO/parent rows together, retains both ledgers, refuses reuse, and rolls back callback or ledger failures. Exact cleanup leaves zero administrator, grant, package, parent, revision, SEO, or table fixtures.
