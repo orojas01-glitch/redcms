@@ -1226,6 +1226,14 @@ request bootstrap excludes the disabled package.
     Gate 2D2 is complete; the next Store Lite milestone is a visible editable
     cart with view, quantity-update, and remove-line behavior.
 
+89. In progress: establish the generic read-only public-component subject
+    context required by a future Cart component. Core may resolve only an
+    already-present anonymous subject and return its numeric internal ID to a
+    package read model. It does not issue browser evidence, expose a cookie,
+    create a cart, render Store Lite, add a mutation, or change a deployment.
+    Package-owned cart presentation, quantity updates, and removal remain
+    separate follow-up slices.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

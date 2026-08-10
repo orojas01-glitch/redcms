@@ -251,6 +251,44 @@ if (!function_exists('red_addon_public_mutation_page_integrate')) {
     }
 }
 
+if (!function_exists('red_addon_public_mutation_page_subject_context')) {
+    /**
+     * Resolves the current anonymous browser subject for a package-owned
+     * read model. It never issues evidence, changes lifecycle state, or
+     * exposes the opaque cookie value to package code.
+     */
+    function red_addon_public_mutation_page_subject_context($connection)
+    {
+        $absent = [
+            'valid' => false,
+            'subjectRecordId' => 0,
+            'reason' => 'subject_unavailable',
+        ];
+        $page = red_addon_public_mutation_page_context_current();
+        if (!$connection instanceof mysqli
+            || ($page['enabled'] ?? null) !== true
+            || !red_addon_public_mutation_valid_opaque_token(
+                $page['subjectToken'] ?? null
+            )
+        ) {
+            return $absent;
+        }
+        $resolved = red_addon_public_mutation_subject_resolve(
+            $connection,
+            $page['subjectToken']
+        );
+        $recordId = red_addon_public_mutation_subject_record_id($resolved);
+        if ($recordId < 1) {
+            return $absent;
+        }
+        return [
+            'valid' => true,
+            'subjectRecordId' => $recordId,
+            'reason' => 'subject_resolved',
+        ];
+    }
+}
+
 if (!function_exists('red_addon_public_mutation_page_delivery')) {
     function red_addon_public_mutation_page_delivery()
     {

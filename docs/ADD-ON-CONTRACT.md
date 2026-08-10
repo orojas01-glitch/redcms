@@ -1025,6 +1025,14 @@ only the static unavailable-content fallback and never fall through to legacy
 component rendering. This is a generic presentation prerequisite; Store Lite
 still owns product normalization and its separately distributed package code.
 
+For a package-owned read model that needs the current anonymous visitor, core
+may resolve the already-present host-only subject cookie through its hashed
+subject store and return only a numeric internal subject record ID. This
+read-context helper never issues a cookie, CSRF token, or idempotency key;
+does not expose the opaque cookie value; and fails closed for a missing,
+malformed, expired, or drifted page context. Cart display may use this narrow
+bridge, while cart writes remain a separately declared public-mutation path.
+
 ## Theme And CSS Boundary
 
 - Business rules, permissions, database access, forms, endpoints, and secrets
