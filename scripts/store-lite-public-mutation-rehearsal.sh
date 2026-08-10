@@ -8,8 +8,8 @@ INTEGRATION_DIR="$PROJECT_ROOT/server-integrations/frankenphp-public-mutation-at
 PROOF_DIR="$INTEGRATION_DIR/proof"
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$PROJECT_ROOT")/redcms-store-lite}"
 STORE_PACKAGE="$STORE_REPOSITORY/package"
-EXPECTED_STORE_VERSION='0.1.16'
-EXPECTED_STORE_REVISION='27b23dbfa6f84e966f9a5a69d290885dfa8bb604'
+EXPECTED_STORE_VERSION='0.1.19'
+EXPECTED_STORE_REVISION='e274c48b57b7c2f8ca33d1b13e554128275661be'
 MYSQL_IMAGE="${RED_STORE_LITE_MYSQL_IMAGE:-mysql:8.4}"
 NODE_BIN="${RED_NODE_BIN:-/Users/oscarrojas/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node}"
 PLAYWRIGHT_MODULE="${RED_PLAYWRIGHT_MODULE:-/Users/oscarrojas/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright}"
@@ -242,8 +242,8 @@ for (const migration of manifest.migrations || []) {
 ' "$STORE_PACKAGE/addon.json")
 [[ "${#CORE_MIGRATIONS[@]}" -eq 45 ]] \
     || fail "expected 45 core migrations; found ${#CORE_MIGRATIONS[@]}."
-[[ "${#STORE_MIGRATIONS[@]}" -eq 5 ]] \
-    || fail "expected 5 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
+[[ "${#STORE_MIGRATIONS[@]}" -eq 6 ]] \
+    || fail "expected 6 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
 for migration in "${STORE_MIGRATIONS[@]}"; do
     [[ -s "$migration" ]] || fail "Store Lite migration is missing: $migration"
 done

@@ -1,6 +1,6 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-09 after Store Lite Gate 2D2D3C.
+Last updated: 2026-08-10 after the Store Lite 0.1.19 read-only Cart rehearsal.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -43,19 +43,20 @@ flowchart TD
     G4C1["COMPLETE<br/>Gate 2D2D3A<br/>unlinked browser controller"]
     G4C2["COMPLETE<br/>Gate 2D2D3B<br/>response/cookie ownership + endpoint wiring"]
     G4C3["COMPLETE — Gate 2D2D3C<br/>real Store Lite desktop/mobile mutation QA"]
-    H["CURRENT<br/>Usable cart<br/>view, update quantity, remove line"]
+    H1["COMPLETE<br/>Read-only Cart component<br/>empty + current subject lines"]
+    H2["CURRENT<br/>Editable Cart<br/>update quantity + remove line"]
     I["LATER FOR STORE LITE v1<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
-    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H --> I --> J --> K
+    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2 --> I --> J --> K
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3 complete;
-    class H current;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1 complete;
+    class H2 current;
     class I,J remaining;
     class K target;
 ```
@@ -64,11 +65,11 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Gate 2D2 is complete. The current Store Lite milestone is a usable visitor cart: view current lines, update quantity, and remove a line. The read-only foundation is in progress: core resolves an already-present anonymous subject for a package read model and safely renders bounded repeated rows, without exposing the cookie or creating browser evidence. |
-| What just finished? | Gate 2D2D3C connected the real core form, endpoint flag, HTTPS origin, ingress attestation, anonymous cookie, browser controller, dispatcher, atomic runner, and Store Lite handler in one isolated supported-server rehearsal. Desktop simple-product and mobile exact Size/Color variant mutation, retry, conflict, invalid-input, accessibility, responsive, console/network, database, and cleanup checks passed. |
-| What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place a Product component; public visitors can see it and successfully add it to a server-authoritative anonymous cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
+| Where are we? | The placeable read-only Cart is complete. The current Store Lite milestone is an editable visitor cart: update quantity and remove a line through server-authoritative mutations. |
+| What just finished? | The supported-server rehearsal pinned external Store Lite 0.1.19, created and placed Product and Cart components through the real administrator flow, proved empty Cart rendering, then proved desktop simple-product and mobile Size/Color Add-to-cart results appear in the same subject-owned Cart after reload. The 100 administrator and 76 public checks included accessibility, responsive overflow, console/network, database, revision/audit, and cleanup evidence. |
+| What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add one simple or variable product and see the current server-authoritative Cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after Gate 2D2? | A visible editable cart, minimum guest order/pay-on-receipt flow, then lifecycle/recovery/migration/isolation release acceptance. |
+| What remains after Gate 2D2? | Quantity update and line removal, minimum guest order/pay-on-receipt flow, then lifecycle/recovery/migration/isolation release acceptance. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

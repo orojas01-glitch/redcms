@@ -27,7 +27,7 @@ if (!/^https:\/\/localhost:\d+$/.test(baseUrl)
 const report = {
     baseUrl,
     browser: 'Google Chrome',
-    package: 'redcms.store-lite@0.1.16',
+    package: 'redcms.store-lite@0.1.19',
     checks: [],
 };
 
@@ -36,6 +36,61 @@ function check(condition, name, detail = '') {
         throw new Error(`${name}${detail ? `: ${detail}` : ''}`);
     }
     report.checks.push({name, passed: true, detail});
+}
+
+async function verifyCart(page, definition, populated) {
+    const cart = page.locator(
+        '[data-red-addon-component="redcms.store-lite/cart"]'
+    );
+    await cart.waitFor({state: 'visible'});
+    check(await cart.getByRole('heading', {
+        name: 'Shopping cart',
+        exact: true,
+    }).count() === 1,
+    `${definition.name} renders the placed Cart component`);
+    const content = await cart.textContent() || '';
+    if (!populated) {
+        check(content.includes('Your cart is empty.')
+            && content.includes('Items')
+            && content.includes('0')
+            && content.includes('Total')
+            && content.includes('USD 0.00'),
+        `${definition.name} starts with an empty subject-owned Cart`);
+        check(await cart.locator(
+            '.red-addon-component__collection'
+        ).count() === 0,
+        `${definition.name} empty Cart has no line collection`);
+    } else {
+        check(content.includes(definition.cartSummary)
+            && content.includes(definition.productTitle)
+            && content.includes(`Quantity${definition.quantity}`)
+            && content.includes(`Unit price${definition.unitPrice}`)
+            && content.includes(`Line total${definition.lineTotal}`),
+        `${definition.name} Cart renders server-derived line and total facts`);
+        if (definition.variantLabel) {
+            check(content.includes(`Options${definition.variantLabel}`),
+                `${definition.name} Cart renders the selected variant labels`);
+        }
+        const collection = cart.locator(
+            '.red-addon-component__collection[aria-label="Cart items"]'
+        );
+        check(await collection.count() === 1
+            && await collection.locator('li').count() === 1,
+        `${definition.name} Cart renders exactly one semantic line item`);
+    }
+    const overflow = await cart.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+    }));
+    check(overflow.scrollWidth <= overflow.clientWidth + 1,
+        `${definition.name} Cart has no horizontal overflow`,
+        JSON.stringify(overflow));
+    await cart.screenshot({
+        path: path.join(
+            evidenceDir,
+            `${definition.name}-cart-${populated ? 'populated' : 'empty'}.png`
+        ),
+    });
 }
 
 async function runCase(browser, definition) {
@@ -98,6 +153,7 @@ async function runCase(browser, definition) {
         exact: true,
     }).count() === 1,
     `${definition.name} renders the package-owned published product`);
+    await verifyCart(page, definition, false);
 
     const form = product.locator('[data-red-addon-public-mutation-form]');
     await form.waitFor({state: 'visible'});
@@ -235,6 +291,8 @@ async function runCase(browser, definition) {
     check(subjectsAfter.length === 1
         && subjectsAfter[0].value === subject.value,
     `${definition.name} mutation and retries do not rotate or duplicate the subject`);
+    await page.reload({waitUntil: 'networkidle'});
+    await verifyCart(page, definition, true);
     check(consoleErrors.length === 0,
         `${definition.name} console has no errors`,
         JSON.stringify(consoleErrors));
@@ -315,6 +373,9 @@ async function prepareVariableProduct(browser) {
             keyboard: false,
             productTitle: 'Banana bunch browser-verified',
             variantLabel: '',
+            cartSummary: '2 items · USD 12.98',
+            unitPrice: 'USD 6.49',
+            lineTotal: 'USD 12.98',
         });
         await runCase(browser, {
             name: 'mobile',
@@ -323,6 +384,9 @@ async function prepareVariableProduct(browser) {
             keyboard: true,
             productTitle: 'Classic T-shirt',
             variantLabel: 'Size: Small · Color: Black',
+            cartSummary: '1 item · USD 24.99',
+            unitPrice: 'USD 24.99',
+            lineTotal: 'USD 24.99',
         });
     } finally {
         await browser.close();

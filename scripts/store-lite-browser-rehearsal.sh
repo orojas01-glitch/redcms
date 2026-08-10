@@ -309,7 +309,8 @@ for migration in \
     '2026-08-07-align-media-reference-contract.sql' \
     '2026-08-08-create-product-activity.sql' \
     '2026-08-08-create-product-placements.sql' \
-    '2026-08-08-z-create-carts.sql'; do
+    '2026-08-08-z-create-carts.sql' \
+    '2026-08-10-create-cart-placements.sql'; do
     red_store_lite_app_mysql < \
         "$STAGED_PROJECT/addons/redcms/store-lite/migrations/$migration"
 done

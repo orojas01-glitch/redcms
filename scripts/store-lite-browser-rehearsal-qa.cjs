@@ -157,6 +157,102 @@ async function createHomepageProduct(page) {
     });
 }
 
+async function createHomepageCart(page) {
+    await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
+    await page.locator('#content_second a').click();
+    await page.locator('#addcontent').waitFor({state: 'visible'});
+    const card = page.locator(
+        '[data-red-addon-component-add]'
+            + '[data-component-id="redcms.store-lite/cart"]:visible'
+    );
+    await card.waitFor({state: 'visible'});
+    check(await card.count() === 1,
+        'Add Content exposes one authorized Store Lite Cart card');
+    check((await card.textContent() || '').includes('Cart'),
+        'Cart card uses the manifest-declared label');
+    await card.click();
+
+    const createWorkspace = page.locator(
+        '[data-red-addon-component-create-workspace]:visible'
+    );
+    await createWorkspace.waitFor({state: 'visible'});
+    check(await createWorkspace.locator(
+        '[data-red-addon-component-editor="redcms.store-lite/cart"]'
+    ).count() === 1,
+    'core renders the manifest-declared Cart component fields');
+    await createWorkspace.locator('[name="Title"]').fill(
+        'Store Lite homepage cart'
+    );
+    await createWorkspace.locator(
+        '[name="componentValues[cart-title]"]'
+    ).fill('Shopping cart');
+    await createWorkspace.screenshot({
+        path: path.join(evidenceDir, 'desktop-create-cart-component.png'),
+    });
+    await createWorkspace.getByRole('button', {
+        name: 'Create component',
+    }).click();
+
+    const componentWorkspace = page.locator(
+        '[data-red-addon-component-workspace]:visible'
+    );
+    await componentWorkspace.waitFor({state: 'visible'});
+    check(await componentWorkspace.locator(
+        '[name="componentValues[cart-title]"]'
+    ).inputValue() === 'Shopping cart',
+    'created Cart component reloads its package-owned public title');
+    const placement = page.locator(
+        '[data-red-addon-placement-form]:visible'
+    );
+    await placement.waitFor({state: 'visible'});
+    await placement.locator('[name="TargetPageRecordID"]').selectOption('0');
+    await placement.locator('[name="PagePosition"]').selectOption('1');
+    await placement.locator('[name="PagePositionOrder"]').fill('92');
+    await placement.getByRole('button', {name: 'Place component'}).click();
+    await placement.getByText('Component placed and published.').waitFor({
+        state: 'visible',
+    });
+    check(await placement.getAttribute(
+        'data-red-addon-placement-complete'
+    ) === 'true',
+    'Cart homepage placement completes through the core transaction runner');
+    await placement.screenshot({
+        path: path.join(evidenceDir, 'desktop-cart-homepage-placement.png'),
+    });
+}
+
+async function verifyHomepageCartEmpty(page, definition) {
+    await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
+    const cart = page.locator(
+        '[data-red-addon-component="redcms.store-lite/cart"]'
+    );
+    await cart.waitFor({state: 'visible'});
+    check(await cart.getByRole('heading', {
+        name: 'Shopping cart',
+        exact: true,
+    }).count() === 1,
+    `${definition.name} homepage renders the placed Cart title`);
+    const content = await cart.textContent() || '';
+    check(content.includes('Your cart is empty.')
+        && content.includes('Items')
+        && content.includes('0')
+        && content.includes('Total')
+        && content.includes('USD 0.00'),
+    `${definition.name} homepage renders the empty Cart facts`);
+    check(await cart.locator('.red-addon-component__collection').count() === 0,
+        `${definition.name} empty Cart has no line collection`);
+    const overflow = await cart.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+    }));
+    check(overflow.scrollWidth <= overflow.clientWidth + 1,
+        `${definition.name} homepage Cart has no horizontal overflow`,
+        JSON.stringify(overflow));
+    await cart.screenshot({
+        path: path.join(evidenceDir, `${definition.name}-home-cart-empty.png`),
+    });
+}
+
 async function openProducts(page, persistedDesktopChange, createdProduct) {
     await page.goto(`${baseUrl}/`, {waitUntil: 'networkidle'});
     await page.locator('#content_third a').click();
@@ -253,7 +349,9 @@ async function runCase(browser, definition) {
     if (definition.mutate) {
         await createHomepageProduct(page);
         await verifyHomepageProduct(page, definition);
+        await createHomepageCart(page);
     }
+    await verifyHomepageCartEmpty(page, definition);
     let tool = await openProducts(
         page,
         !definition.mutate,

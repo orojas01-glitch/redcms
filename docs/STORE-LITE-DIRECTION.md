@@ -7,7 +7,8 @@ The core-owned Add component and explicit Homepage placement workflow pass
 isolated desktop/mobile rehearsal. The server-authoritative cart-line resolver,
 package-owned cart persistence, and Gate 2D1 core atomic-runner binding now pass
 their package, disposable-database, replay/rollback, and audit proofs. Gate 2D2
-browser Add-to-cart integration is current; visible cart management and orders
+browser Add-to-cart integration and the read-only Cart component now pass their
+supported-server desktop/mobile proof. Quantity update, line removal, and orders
 remain later.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
@@ -673,11 +674,17 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    explicit variant, replay, conflict, rollback, postcondition, and audit proof.
    Gate 2D2 now also proves the connected core form, evidence, supported-server
    dispatch, fixed response/cookie, and Store Lite handler together through
-   desktop/mobile Add-to-cart QA. The general `commerce.cart` service, visible
-   cart management, and orders/pay-on-receipt remain next/later milestones.
-29. Validate disable/re-enable, failure recovery, migration, responsive
+   desktop/mobile Add-to-cart QA.
+29. Completed the separately distributed Store Lite 0.1.19 placeable read-only
+   Cart component. The supported-server rehearsal creates and places Product
+   and Cart components through the real administrator flow, proves empty Cart
+   rendering, then reloads the same subject-owned Cart after desktop simple and
+   mobile Size/Color Add-to-cart requests. The generic `commerce.cart` service,
+   quantity update, line removal, and orders/pay-on-receipt remain next/later
+   milestones.
+30. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-30. Add a separately reviewed hosted-payment adapter only after the
+31. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

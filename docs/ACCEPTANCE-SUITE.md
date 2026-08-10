@@ -1,6 +1,6 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-08-08
+Date: 2026-08-10
 
 ## Purpose
 
@@ -12,9 +12,10 @@ This is a local development and controlled staging tool. It is not a HostGator d
 gate for the externally distributed Store Lite package. It stages a temporary
 clean core plus package, uses one uniquely named disposable schema and scoped
 grant, applies core and package migrations, creates only an acceptance fixture,
-and drives desktop/mobile Chrome through a public homepage Product check plus
-authenticated Products Add/Create and existing-target Edit/Save/reload. It then
-verifies exact package and core audit facts, unchanged variable-product state,
+and drives desktop/mobile Chrome through public homepage Product and empty Cart
+checks plus authenticated Product/Cart component creation/placement and Products
+Add/Create and existing-target Edit/Save/reload. It then verifies exact package
+and core revision/audit facts, unchanged variable-product state,
 zero browser/runtime errors, the
 configured primary fingerprint, and removal of the temporary server, schema,
 grant, and staged package. Its screenshots and JSON report remain in the
@@ -23,11 +24,12 @@ Lite part of the starter or authorize normal richer-package enablement.
 
 `scripts/store-lite-public-mutation-rehearsal.sh` is the separate Docker-only
 Gate 2D2D3C supported-server integration. It requires the clean external Store
-Lite 0.1.16 repository at its pinned revision, stages no retained add-on or
+Lite 0.1.19 repository at its pinned merged revision, stages no retained add-on or
 local configuration, builds the reviewed custom FrankenPHP/Caddy attestation
 module, and creates fresh MySQL, HTTPS certificate, HMAC key, and trusted-origin
 state. It first reruns the established administrator/component browser path,
-then drives the real public Product Add-to-cart form in desktop/mobile Chrome.
+then drives the real public Product Add-to-cart form in desktop/mobile Chrome
+and reloads the placed Cart to prove the same subject-owned line and totals.
 Acceptance requires one host-only Secure/HttpOnly/Strict subject cookie,
 core-issued CSRF/idempotency evidence, accepted mutation, exact retry replay,
 changed-command conflict, invalid-quantity refusal, accessible controls/status,
@@ -869,29 +871,29 @@ process environment.
 - Add-on administrator-tool form Save-bridge acceptance runs only in the uniquely named disposable database with one temporary package-owned InnoDB table, enabled installation, explicit package grant, and in-memory trusted runtime context. It requires exact tool/form/canonical-positive-target edit identity, fresh permission and enabled-version checks, exact loader/writer/table ownership, complete current values, escaped core-only editable scalar and two-level collection markup, bounded add/remove templates, typed canonical JSON with header CSRF, an atomic value-free `saved` result, no-op `unchanged`, stale replay and next-decision revocation refusal, and exact administrator/role/grant/package/audit/table cleanup. Source and real HTTP checks require POST, database-backed session, and header CSRF before edit parsing or Save body I/O; public responses disclose no values, state/plan evidence, package identity, or tables. Local Chrome captures at 1280px and 390px verify no horizontal overflow, the collection interaction path, typed Save/reload states, and zero console, page, or failed-request errors.
 - The Store Lite browser rehearsal is a separate opt-in cross-repository gate.
   It requires an integrity-valid Store Lite package outside the starter, all 45
-  core migrations plus the exact five-package-migration inventory in a fresh
+  core migrations plus the exact six-package-migration inventory in a fresh
   schema, one acceptance-only enabled registry fixture, only the exact Products
   capability, a simple banana and bounded variable T-shirt, zero initial
-  Product placements, the visible authenticated Add Content -> Product ->
-  Create component -> Homepage -> Place component path, the resulting
-  unauthenticated public fact card, and the visible authenticated Tools ->
+  Product or Cart placements, the visible authenticated Add Content -> Product/
+  Cart -> Create component -> Homepage -> Place component paths, the resulting
+  unauthenticated public product facts and empty Cart, and the visible authenticated Tools ->
   Products -> Add/Create and Edit/Save paths at 1280x900 and 390x844,
   exact persisted integer-money/stock/title changes, one package update event,
   one value-free core form-saved audit fact, an unchanged T-shirt graph, exact
   semantic price and availability facts with no overflow, zero
   console/page/request/HTTP/runtime errors, and exact server/schema/grant/staged-
   package cleanup with an unchanged retained-primary fingerprint. Final
-  database evidence requires the exact package Product relationship, active
-  homepage-only core fields, one core `create`, package `baseline`, core
-  `move`, and value-free `component.public_placed` audit fact.
+  database evidence requires the exact package Product and Cart relationships,
+  active homepage-only core fields, two core `create`, package `baseline`, core
+  `move`, and value-free `component.public_placed` audit facts.
 - The Store Lite supported-server public-mutation browser rehearsal is a
-  separate Docker-only cross-repository gate. It requires Store Lite 0.1.16 at
-  revision `27b23dbfa6f84e966f9a5a69d290885dfa8bb604`, manifest-ordered package
+  separate Docker-only cross-repository gate. It requires Store Lite 0.1.19 at
+  revision `e274c48b57b7c2f8ca33d1b13e554128275661be`, manifest-ordered package
   migrations, the reviewed custom FrankenPHP/Caddy module, fresh MySQL and
   localhost TLS, temporary process-only endpoint/origin/HMAC configuration,
-  the existing 87-check administrator/component browser proof, and 59 real
-  desktop/mobile public-mutation checks including a simple product and exact
-  Size/Color variant. Final cart, line, quantity, package
+  the 100-check administrator Product/Cart browser proof, and 76 real desktop/
+  mobile public-mutation/Cart checks including empty state, a simple product,
+  and an exact Size/Color variant. Final cart, line, quantity, package
   activity, execution, and core audit counts must be exactly `4:4:6:4:4:4`;
   no container, network, image, database, certificate, secret, staged package,
   or client state may remain.

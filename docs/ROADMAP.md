@@ -744,8 +744,14 @@ exact-retry, conflict, invalid-input, simple-product, exact Size/Color variant,
 accessibility, responsive, console, network, atomic-state, and cleanup checks.
 The clean starter flag remains false,
 the hosted demo remains unchanged, and no client package or database was used.
-The next Store Lite milestone is a visible editable cart with line viewing,
-quantity updates, and removal.
+The read-only Cart milestone is now complete through a second isolated
+supported-server rehearsal pinned to external Store Lite 0.1.19 at merged
+revision `e274c48b57b7c2f8ca33d1b13e554128275661be`. The real administrator flow
+created and placed Product and Cart components; desktop and mobile Chrome
+proved empty Cart rendering and current subject-owned simple/Size-Color lines
+after real Add-to-cart requests. The 100 administrator checks, 76 public checks,
+exact `4:4:6:4:4:4` cart state, revision/audit evidence, and full Docker cleanup
+passed. The next Store Lite milestone is quantity update and line removal.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

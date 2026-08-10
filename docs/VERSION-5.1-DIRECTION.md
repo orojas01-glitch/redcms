@@ -1226,20 +1226,36 @@ request bootstrap excludes the disabled package.
     Gate 2D2 is complete; the next Store Lite milestone is a visible editable
     cart with view, quantity-update, and remove-line behavior.
 
-89. In progress: establish the generic read-only public-component subject
-    context required by a future Cart component. Core may resolve only an
+89. Completed the generic read-only public-component subject
+    context required by the Cart component. Core may resolve only an
     already-present anonymous subject and return its numeric internal ID to a
     package read model. It does not issue browser evidence, expose a cookie,
     create a cart, render Store Lite, add a mutation, or change a deployment.
-    Package-owned cart presentation, quantity updates, and removal remain
+    Package-owned cart presentation, quantity updates, and removal remained
     separate follow-up slices.
 
-90. In progress: establish a generic bounded public-component collection
+90. Completed a generic bounded public-component collection
     presentation. It accepts only one text label, one to twenty-four rows, and
     one to four text facts per row; core escapes and renders the semantic
     markup. It contains no Store Lite identifier, commercial calculation,
     package table, control, mutation, endpoint, or browser authority. The
-    later Cart component may use it for package-owned current cart lines.
+    Cart component may use it for package-owned current cart lines.
+
+91. Completed the placeable read-only Cart milestone with separately
+    distributed Store Lite 0.1.19 at merged revision
+    `e274c48b57b7c2f8ca33d1b13e554128275661be`. One package-owned placement
+    stores only the core parent and bounded public title. The package asks the
+    core read context for an already-present anonymous subject, loads only that
+    subject's cart, applies its pure presenter, and returns the generic bounded
+    collection model; a missing subject renders an empty Cart without issuing
+    identity or writing state. The supported-server rehearsal created and
+    placed Product and Cart components through the real administrator path,
+    passed 100 administrator checks, then passed 76 desktop/mobile public checks
+    proving empty and populated simple/Size-Color carts after real Add-to-cart
+    requests. Exact final state remained `4:4:6:4:4:4`; all containers, network,
+    image, build context, database, certificate, and secrets were removed. The
+    hosted demo and every retained client installation remained unchanged.
+    Quantity update and line removal are the next Store Lite gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
