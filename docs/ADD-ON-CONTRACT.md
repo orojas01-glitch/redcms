@@ -1033,6 +1033,14 @@ does not expose the opaque cookie value; and fails closed for a missing,
 malformed, expired, or drifted page context. Cart display may use this narrow
 bridge, while cart writes remain a separately declared public-mutation path.
 
+When one component must show a bounded repeated read model, its data-only view
+may additionally carry a named collection of one to twenty-four items. Each
+item has one text title and one to four text-only facts; core validates and
+escapes every value, then renders semantic nested list and description-list
+markup. Packages still cannot provide HTML, links, controls, templates, or
+browser authority. This supports a Cart line list without making Cart a core
+feature.
+
 ## Theme And CSS Boundary
 
 - Business rules, permissions, database access, forms, endpoints, and secrets
