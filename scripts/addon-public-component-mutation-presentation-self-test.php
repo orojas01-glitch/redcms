@@ -96,6 +96,28 @@ try {
         'a simple product presentation does not require a variant field'
     );
 
+    $collection = [
+        'label' => 'Cart items',
+        'items' => [[
+            'title' => 'Studio shirt',
+            'facts' => [[
+                'label' => 'Quantity',
+                'value' => '2',
+            ], [
+                'label' => 'Total',
+                'value' => 'USD 48.00',
+            ]],
+        ]],
+    ];
+    red_addon_component_mutation_presentation_test_assert(
+        red_addon_public_component_collection_presentation($collection)
+            === $collection
+            && red_addon_public_component_collection_presentation([
+                'label' => 'Cart items', 'items' => [],
+            ]) === null,
+        'the bounded generic collection presentation retains rows and refuses empty lists'
+    );
+
     $maximum = red_addon_component_mutation_presentation_test_form(128);
     $overflow = red_addon_component_mutation_presentation_test_form(129);
     red_addon_component_mutation_presentation_test_assert(
@@ -178,6 +200,13 @@ try {
             'position' => 1,
         ],
     ];
+    $fixtureViewModel = [
+        'title' => $viewModel['title'],
+        'summary' => $viewModel['summary'],
+        'facts' => $viewModel['facts'],
+        'collection' => $collection,
+        'mutationForm' => $viewModel['mutationForm'],
+    ];
     ob_start();
     $rendered = red_addon_public_component_render($context);
     $output = (string) ob_get_clean();
@@ -185,6 +214,9 @@ try {
         $rendered === true
             && str_contains($output, '<h2>Studio shirt</h2>')
             && str_contains($output, '<dt>Availability</dt>')
+            && str_contains($output, 'aria-label="Cart items"')
+            && str_contains($output, '<h4>Studio shirt</h4>')
+            && str_contains($output, '<dt>Quantity</dt><dd>2</dd>')
             && !str_contains($output, '<form')
             && !str_contains($output, 'Add to cart')
             && !str_contains($output, 'cart-intent')

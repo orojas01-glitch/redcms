@@ -222,6 +222,63 @@ if (!function_exists('red_addon_public_component_mutation_form_presentation')) {
     }
 }
 
+if (!function_exists('red_addon_public_component_collection_presentation')) {
+    function red_addon_public_component_collection_presentation($collection)
+    {
+        if (!is_array($collection)
+            || array_keys($collection) !== ['label', 'items']
+            || !is_string($collection['label'] ?? null)
+            || !is_array($collection['items'] ?? null)
+            || !array_is_list($collection['items'])
+            || count($collection['items']) < 1
+            || count($collection['items']) > 24
+        ) {
+            return null;
+        }
+        $label = red_addon_public_component_scalar($collection['label'], 80);
+        if ($label === null || $label === '') {
+            return null;
+        }
+        $items = [];
+        foreach ($collection['items'] as $item) {
+            if (!is_array($item)
+                || array_keys($item) !== ['title', 'facts']
+                || !is_string($item['title'] ?? null)
+                || !is_array($item['facts'] ?? null)
+                || !array_is_list($item['facts'])
+                || count($item['facts']) < 1
+                || count($item['facts']) > 4
+            ) {
+                return null;
+            }
+            $title = red_addon_public_component_scalar($item['title'], 200);
+            if ($title === null || $title === '') {
+                return null;
+            }
+            $facts = [];
+            foreach ($item['facts'] as $fact) {
+                if (!is_array($fact)
+                    || array_keys($fact) !== ['label', 'value']
+                    || !is_string($fact['label'] ?? null)
+                    || !is_string($fact['value'] ?? null)
+                ) {
+                    return null;
+                }
+                $factLabel = red_addon_public_component_scalar($fact['label'], 80);
+                $value = red_addon_public_component_scalar($fact['value'], 2000);
+                if ($factLabel === null || $factLabel === ''
+                    || $value === null || $value === ''
+                ) {
+                    return null;
+                }
+                $facts[] = ['label' => $factLabel, 'value' => $value];
+            }
+            $items[] = ['title' => $title, 'facts' => $facts];
+        }
+        return ['label' => $label, 'items' => $items];
+    }
+}
+
 if (!function_exists('red_addon_public_component_view_model')) {
     function red_addon_public_component_view_model($viewModel)
     {
@@ -233,6 +290,10 @@ if (!function_exists('red_addon_public_component_view_model')) {
                     ['title', 'summary', 'facts'],
                     ['title', 'summary', 'mutationForm'],
                     ['title', 'summary', 'facts', 'mutationForm'],
+                    ['title', 'summary', 'collection'],
+                    ['title', 'summary', 'facts', 'collection'],
+                    ['title', 'summary', 'collection', 'mutationForm'],
+                    ['title', 'summary', 'facts', 'collection', 'mutationForm'],
                 ],
                 true
             )
@@ -288,6 +349,15 @@ if (!function_exists('red_addon_public_component_view_model')) {
                 return null;
             }
             $normalized['mutationForm'] = $mutationForm;
+        }
+        if (array_key_exists('collection', $viewModel)) {
+            $collection = red_addon_public_component_collection_presentation(
+                $viewModel['collection']
+            );
+            if (!is_array($collection)) {
+                return null;
+            }
+            $normalized['collection'] = $collection;
         }
         return $normalized;
     }
@@ -403,6 +473,27 @@ if (!function_exists('red_addon_public_component_render')) {
                     . '</dd></div>';
             }
             echo '</dl>';
+        }
+        if (array_key_exists('collection', $viewModel)) {
+            echo '<section class="red-addon-component__collection" aria-label="'
+                . red_addon_public_component_escape($viewModel['collection']['label'])
+                . '"><h3>'
+                . red_addon_public_component_escape($viewModel['collection']['label'])
+                . '</h3><ol>';
+            foreach ($viewModel['collection']['items'] as $item) {
+                echo '<li><h4>'
+                    . red_addon_public_component_escape($item['title'])
+                    . '</h4><dl>';
+                foreach ($item['facts'] as $fact) {
+                    echo '<div><dt>'
+                        . red_addon_public_component_escape($fact['label'])
+                        . '</dt><dd>'
+                        . red_addon_public_component_escape($fact['value'])
+                        . '</dd></div>';
+                }
+                echo '</dl></li>';
+            }
+            echo '</ol></section>';
         }
         echo $formHtml;
         echo '</section>';

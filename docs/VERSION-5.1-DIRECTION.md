@@ -1234,6 +1234,13 @@ request bootstrap excludes the disabled package.
     Package-owned cart presentation, quantity updates, and removal remain
     separate follow-up slices.
 
+90. In progress: establish a generic bounded public-component collection
+    presentation. It accepts only one text label, one to twenty-four rows, and
+    one to four text facts per row; core escapes and renders the semantic
+    markup. It contains no Store Lite identifier, commercial calculation,
+    package table, control, mutation, endpoint, or browser authority. The
+    later Cart component may use it for package-owned current cart lines.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
