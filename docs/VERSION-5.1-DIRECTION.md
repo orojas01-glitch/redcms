@@ -1208,6 +1208,24 @@ request bootstrap excludes the disabled package.
     Store Lite data, or client database is activated. Real Store Lite desktop/
     mobile add-to-cart mutation QA remains Gate 2D2D3C.
 
+88. Completed Gate 2D2D3C as the isolated supported-server Store Lite browser
+    rehearsal. The opt-in runner pins external Store Lite 0.1.16 at revision
+    `27b23dbfa6f84e966f9a5a69d290885dfa8bb604`, stages it with the clean core,
+    derives the package migration order from the validated manifest, builds
+    the reviewed FrankenPHP 1.12.4/Caddy 2.11.4 attestation module, and uses a
+    fresh MySQL 8.4 container plus one-day localhost certificate. The existing
+    administrator/product/component rehearsal passed 87 checks before real
+    desktop and mobile Chrome passed 59 connected form, endpoint, cookie,
+    controller, accessibility, responsive, accepted, exact-retry, conflict,
+    invalid-input, simple-product, exact Size/Color variant, console, page, and
+    network checks. The final isolated
+    cart/line/quantity/package-activity/execution/core-audit state was exactly
+    `4:4:6:4:4:4`; all app/database containers, network, image, build context,
+    keys, certificate, and database were removed. Evidence remained outside
+    the starter. The hosted demo and all client installations were unchanged.
+    Gate 2D2 is complete; the next Store Lite milestone is a visible editable
+    cart with view, quantity-update, and remove-line behavior.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

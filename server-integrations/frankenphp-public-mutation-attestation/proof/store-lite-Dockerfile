@@ -1,0 +1,35 @@
+ARG FRANKENPHP_VERSION=1.12.4
+
+FROM caddy:2.11.4-builder AS xcaddy
+
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-builder-php8 AS builder
+
+ARG FRANKENPHP_VERSION
+
+COPY --from=xcaddy /usr/bin/xcaddy /usr/bin/xcaddy
+COPY integration /opt/redcms/frankenphp-public-mutation-attestation
+
+WORKDIR /go/src/app
+
+RUN CGO_ENABLED=1 \
+    XCADDY_SETCAP=1 \
+    XCADDY_GO_BUILD_FLAGS="-ldflags='-w -s' -tags=nobadger,nomysql,nopgx" \
+    CGO_CFLAGS="$(php-config --includes)" \
+    CGO_LDFLAGS="$(php-config --ldflags) $(php-config --libs)" \
+    xcaddy build v2.11.4 \
+        --output /usr/local/bin/frankenphp \
+        --with github.com/dunglas/frankenphp@v${FRANKENPHP_VERSION}=/go/src/app \
+        --with github.com/dunglas/frankenphp/caddy@v${FRANKENPHP_VERSION}=/go/src/app/caddy \
+        --with github.com/orojas01-glitch/redcms/server-integrations/frankenphp-public-mutation-attestation=/opt/redcms/frankenphp-public-mutation-attestation
+
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php8 AS rehearsal
+
+COPY --from=builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
+RUN install-php-extensions mysqli
+COPY site/ /app/public/
+COPY integration/proof/store-lite-Caddyfile /etc/caddy/Caddyfile
+
+EXPOSE 8443
+
+ENTRYPOINT ["/usr/local/bin/frankenphp"]
+CMD ["run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

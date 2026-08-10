@@ -736,9 +736,16 @@ controller, and the fail-closed supported-server front-controller bridge. The
 bridge stays dormant unless a server-local flag, canonical trusted HTTPS origin,
 and process-environment ingress HMAC key are all present; core owns the response,
 host-only cookie, request-local subject coordination, form placement, and fixed
-controller delivery. The clean starter flag remains false and no client or
-package is activated by this code. Real Store Lite desktop/mobile add-to-cart
-mutation QA in the isolated demo deployment remains the next gate.
+controller delivery. Gate 2D2D3C is complete through the isolated opt-in
+supported-server rehearsal: pinned Store Lite 0.1.16, clean staged core, fresh
+MySQL, temporary HTTPS and process secrets, the real administrator Product
+placement, and the real desktop/mobile Add-to-cart route passed accepted,
+exact-retry, conflict, invalid-input, simple-product, exact Size/Color variant,
+accessibility, responsive, console, network, atomic-state, and cleanup checks.
+The clean starter flag remains false,
+the hosted demo remains unchanged, and no client package or database was used.
+The next Store Lite milestone is a visible editable cart with line viewing,
+quantity updates, and removal.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
