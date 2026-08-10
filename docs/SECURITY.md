@@ -1062,6 +1062,16 @@ choices. This is only compatibility evidence for later integration: the
 default public renderer ignores the retained presentation and emits no form,
 token, script, header, cookie, endpoint, or package-controlled markup.
 
+A bounded collection row may now retain one or two distinct presentations of
+that same closed shape. Core refuses empty or associative lists, more than two
+forms, repeated route/mutation pairs, malformed fields, raw authority, HTML,
+or unknown row keys. The default renderer continues to emit only the row title
+and facts and never renders these retained presentations. This data-only gate
+does not derive form instances, invoke the evidence bootstrap, open a database,
+call a package handler, issue a subject/CSRF/idempotency value, deliver the
+controller, or change a response. Per-row integration remains a later
+core-owned gate.
+
 The core-owned public component form integration then consumes one already
 returned and revalidated component model; it never invokes the component,
 route, mutation, or state-loader callbacks. Before evidence issuance, current

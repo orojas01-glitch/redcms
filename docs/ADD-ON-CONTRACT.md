@@ -1035,11 +1035,17 @@ bridge, while cart writes remain a separately declared public-mutation path.
 
 When one component must show a bounded repeated read model, its data-only view
 may additionally carry a named collection of one to twenty-four items. Each
-item has one text title and one to four text-only facts; core validates and
-escapes every value, then renders semantic nested list and description-list
-markup. Packages still cannot provide HTML, links, controls, templates, or
-browser authority. This supports a Cart line list without making Cart a core
-feature.
+item has one text title and one to four text-only facts. A row may additionally
+retain a list of one or two distinct closed public-mutation presentations using
+the same route, mutation, label, and bounded-field vocabulary as the existing
+component-level presentation. Core rejects empty, overflowing, associative,
+duplicate route/mutation, malformed, authority-bearing, or expanded row-form
+lists. It validates and escapes the visible text, then renders only the
+semantic nested list and description-list markup; the retained row
+presentations emit no control or browser authority until a separate core-owned
+integration gate. Packages still cannot provide HTML, links, controls,
+templates, tokens, or response behavior. This supports a Cart line list and a
+later generic editable-row path without making Cart a core feature.
 
 ## Theme And CSS Boundary
 

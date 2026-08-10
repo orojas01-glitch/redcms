@@ -66,6 +66,35 @@ function red_addon_component_mutation_presentation_test_form(
     ];
 }
 
+function red_addon_component_mutation_presentation_test_row_forms(): array
+{
+    $handle = 'line-' . str_repeat('a', 64);
+    return [[
+        'route' => 'redcms.store-lite/cart-line-quantity',
+        'mutation' => 'redcms.store-lite/set-cart-line-quantity',
+        'submitLabel' => 'Update quantity',
+        'fields' => [[
+            'key' => 'line',
+            'control' => 'hidden',
+            'value' => $handle,
+        ], [
+            'key' => 'quantity',
+            'control' => 'number',
+            'label' => 'Quantity',
+            'value' => 2,
+        ]],
+    ], [
+        'route' => 'redcms.store-lite/cart-line-remove',
+        'mutation' => 'redcms.store-lite/remove-cart-line',
+        'submitLabel' => 'Remove item',
+        'fields' => [[
+            'key' => 'line',
+            'control' => 'hidden',
+            'value' => $handle,
+        ]],
+    ]];
+}
+
 try {
     $form = red_addon_component_mutation_presentation_test_form();
     $viewModel = [
@@ -116,6 +145,49 @@ try {
                 'label' => 'Cart items', 'items' => [],
             ]) === null,
         'the bounded generic collection presentation retains rows and refuses empty lists'
+    );
+
+    $rowForms =
+        red_addon_component_mutation_presentation_test_row_forms();
+    $collectionWithForms = $collection;
+    $collectionWithForms['items'][0]['mutationForms'] = $rowForms;
+    red_addon_component_mutation_presentation_test_assert(
+        red_addon_public_component_collection_presentation(
+            $collectionWithForms
+        ) === $collectionWithForms
+            && red_addon_public_component_collection_mutation_forms(
+                [$rowForms[0]]
+            ) === [$rowForms[0]],
+        'one collection row retains one or two closed mutation presentations'
+    );
+
+    $duplicateForms = $rowForms;
+    $duplicateForms[1] = $duplicateForms[0];
+    $malformedForms = $rowForms;
+    $malformedForms[1]['csrfToken'] = str_repeat('b', 64);
+    red_addon_component_mutation_presentation_test_assert(
+        red_addon_public_component_collection_mutation_forms([]) === null
+            && red_addon_public_component_collection_mutation_forms([
+                $rowForms[0], $rowForms[1], $rowForms[0],
+            ]) === null
+            && red_addon_public_component_collection_mutation_forms([
+                'quantity' => $rowForms[0],
+            ]) === null
+            && red_addon_public_component_collection_mutation_forms(
+                $duplicateForms
+            ) === null
+            && red_addon_public_component_collection_mutation_forms(
+                $malformedForms
+            ) === null,
+        'empty, overflowing, associative, duplicate, or authority-bearing row forms fail closed'
+    );
+
+    $expandedRow = $collectionWithForms;
+    $expandedRow['items'][0]['controlHtml'] = '<button>Remove</button>';
+    red_addon_component_mutation_presentation_test_assert(
+        red_addon_public_component_collection_presentation($expandedRow)
+            === null,
+        'collection rows cannot add package HTML or unknown control fields'
     );
 
     $maximum = red_addon_component_mutation_presentation_test_form(128);
@@ -204,7 +276,7 @@ try {
         'title' => $viewModel['title'],
         'summary' => $viewModel['summary'],
         'facts' => $viewModel['facts'],
-        'collection' => $collection,
+        'collection' => $collectionWithForms,
         'mutationForm' => $viewModel['mutationForm'],
     ];
     ob_start();
@@ -219,9 +291,12 @@ try {
             && str_contains($output, '<dt>Quantity</dt><dd>2</dd>')
             && !str_contains($output, '<form')
             && !str_contains($output, 'Add to cart')
+            && !str_contains($output, 'Update quantity')
+            && !str_contains($output, 'Remove item')
+            && !str_contains($output, 'line-' . str_repeat('a', 64))
             && !str_contains($output, 'cart-intent')
             && !str_contains($output, 'studio-shirt'),
-        'the existing renderer emits product facts but no mutation form or authority'
+        'the existing renderer emits collection facts but no retained form or authority'
     );
 
     $fixtureViewModel['mutationForm']['csrfToken'] = str_repeat('b', 64);

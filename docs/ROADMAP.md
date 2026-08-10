@@ -753,6 +753,15 @@ after real Add-to-cart requests. The 100 administrator checks, 76 public checks,
 exact `4:4:6:4:4:4` cart state, revision/audit evidence, and full Docker cleanup
 passed. The next Store Lite milestone is quantity update and line removal.
 
+The first two editable-Cart presentation prerequisites are now complete.
+Separately distributed Store Lite 0.1.23 returns pure set-quantity and
+remove-line form descriptions for one server-derived line, while core can
+retain one or two distinct closed mutation presentations on each bounded
+collection row. Core still renders only row text. Package read-model binding,
+core-owned per-row evidence/form composition, real mutation rendering, and
+desktop/mobile dispatch remain separate current gates; the hosted demo and all
+client installations remain unchanged.
+
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
 and later optional vertical packages without changing their scope.
