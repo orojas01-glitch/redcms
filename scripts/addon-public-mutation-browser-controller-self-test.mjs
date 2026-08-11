@@ -160,8 +160,11 @@ try {
                 === null,
         'opaque evidence is removed from DOM attributes after initialization'
     );
+    const acceptedReload = accepted.page.waitForNavigation({
+        waitUntil: 'domcontentloaded',
+    });
     await accepted.page.getByRole('button', {name: 'Add to cart'}).click();
-    await accepted.page.getByText('Added to cart.', {exact: true}).waitFor();
+    await accepted.page.getByText('Update completed.', {exact: true}).waitFor();
     assert(acceptedRequests.length === 1, 'accepted form sends one request');
     assert(
         acceptedRequests[0].body
@@ -182,6 +185,11 @@ try {
             && await accepted.page.locator('[name="quantity"]').isDisabled()
             && await accepted.page.locator('[name="variant"]').isDisabled(),
         'accepted command remains frozen and cannot reuse its key with new values'
+    );
+    await acceptedReload;
+    assert(
+        accepted.page.url() === `${origin}/`,
+        'accepted command refreshes the same page after announcing completion'
     );
     assert(accepted.pageErrors.length === 0, 'desktop success has no page errors');
     await accepted.context.close();
@@ -205,7 +213,7 @@ try {
     );
     await retry.page.getByRole('button', {name: 'Add to cart'}).click();
     await retry.page.getByText(
-        'Could not reach the store. Try again.',
+        'Could not complete this update. Try again.',
         {exact: true}
     ).waitFor();
     assert(
@@ -213,9 +221,12 @@ try {
             && await retry.page.locator('[name="quantity"]').isDisabled(),
         'mobile transient failure permits retry but keeps command fields frozen'
     );
+    const unchangedReload = retry.page.waitForNavigation({
+        waitUntil: 'domcontentloaded',
+    });
     await retry.page.getByRole('button', {name: 'Add to cart'}).click();
     await retry.page.getByText(
-        'Cart already up to date.',
+        'No changes were needed.',
         {exact: true}
     ).waitFor();
     assert(
@@ -225,6 +236,11 @@ try {
     assert(
         await retry.page.getByRole('button', {name: 'Add to cart'}).isDisabled(),
         'successful retry closes the form command'
+    );
+    await unchangedReload;
+    assert(
+        retry.page.url() === `${origin}/`,
+        'unchanged command refreshes the same page after announcing completion'
     );
     assert(retry.pageErrors.length === 0, 'mobile retry has no page errors');
     await retry.context.close();
@@ -244,7 +260,7 @@ try {
     );
     await conflict.page.getByRole('button', {name: 'Add to cart'}).click();
     await conflict.page.getByText(
-        'Could not add this item. Refresh the page.',
+        'Could not complete this update. Refresh the page.',
         {exact: true}
     ).waitFor();
     assert(conflictRequests === 1, 'closed refusal sends one request');

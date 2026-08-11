@@ -130,9 +130,10 @@
         ) {
             return {
                 complete: true,
+                refresh: true,
                 message: payload.outcome === 'accepted'
-                    ? 'Added to cart.'
-                    : 'Cart already up to date.'
+                    ? 'Update completed.'
+                    : 'No changes were needed.'
             };
         }
         var refusalStatuses = {
@@ -151,24 +152,28 @@
         if (payload.reason === 'rate_limited') {
             return {
                 complete: false,
+                refresh: false,
                 message: 'Too many attempts. Try again shortly.'
             };
         }
         if (payload.reason === 'temporarily_unavailable') {
             return {
                 complete: false,
-                message: 'The store is temporarily unavailable. Try again.'
+                refresh: false,
+                message: 'This update is temporarily unavailable. Try again.'
             };
         }
         return {
             complete: true,
-            message: 'Could not add this item. Refresh the page.'
+            refresh: false,
+            message: 'Could not complete this update. Refresh the page.'
         };
     }
 
     async function send(state) {
+        var refresh = false;
         setBusy(state, true);
-        setStatus(state, 'Adding item…');
+        setStatus(state, 'Updating…');
         try {
             var response = await window.fetch(state.url.href, {
                 method: 'POST',
@@ -192,16 +197,25 @@
             );
             if (result === null) {
                 state.finished = true;
-                setStatus(state, 'Could not add this item. Refresh the page.');
+                setStatus(
+                    state,
+                    'Could not complete this update. Refresh the page.'
+                );
             } else {
                 state.finished = result.complete;
+                refresh = result.refresh;
                 setStatus(state, result.message);
             }
         } catch (error) {
             state.finished = false;
-            setStatus(state, 'Could not reach the store. Try again.');
+            setStatus(state, 'Could not complete this update. Try again.');
         }
         setBusy(state, false);
+        if (refresh) {
+            window.setTimeout(function () {
+                window.location.reload();
+            }, 750);
+        }
     }
 
     function configure(form) {

@@ -1100,7 +1100,10 @@ identifier/integer controls, captures the canonical form bytes, disables every
 mutable control, and never recomputes that command for the same idempotency
 key. Only exact-body retry is allowed after a network, `429`, or `503` result.
 The controller accepts only the closed core JSON status/body pairs, places
-generic messages with `textContent`, and uses no cookie API, browser storage,
+mutation-neutral messages with `textContent`, and schedules only
+`window.location.reload()` 750 milliseconds after an accepted or unchanged
+response. It never assigns or derives a location, so package/request values
+cannot choose a navigation target. It uses no cookie API, browser storage,
 logging, dynamic code, HTML sink, redirect, or external URL. `index.php`
 delivers it once only after the request-local coordinator has accepted at least
 one core-rendered form while the supported endpoint gate is active.

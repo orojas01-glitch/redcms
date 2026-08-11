@@ -765,6 +765,21 @@ mobile quantity/remove dispatch, Cart refresh behavior, and visitor-facing
 status wording remain the current follow-up gate; the hosted demo and all
 client installations remain unchanged.
 
+That editable-Cart follow-up gate is now complete in the isolated
+supported-server rehearsal pinned to external Store Lite 0.1.24 at merged
+revision `c3dc7405d9e62c1112555503523c0c339e4b8fa8`. The fixed core controller
+uses mutation-neutral status copy and refreshes only the current page after an
+accepted or unchanged command. Desktop and mobile Chrome each added a real
+simple or exact Size/Color line, proved accessible quantity/remove controls and
+one server-derived line handle, updated quantity through the real dispatcher,
+verified recalculated totals after refresh, removed the line, and returned to
+the empty Cart without rotating the subject. The established 100 administrator
+checks and 147 public checks passed with zero console, page, request, HTTP, or
+overflow errors. Exact final state was `4:2:3:8:8:8`, and every container,
+network, image, database, certificate, secret, and staged project was removed.
+No hosted or client installation changed. The next Store Lite gate is the
+minimum guest order and immutable pay-on-receipt snapshot.
+
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
 and later optional vertical packages without changing their scope.

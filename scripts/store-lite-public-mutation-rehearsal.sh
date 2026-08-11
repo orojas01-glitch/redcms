@@ -8,8 +8,8 @@ INTEGRATION_DIR="$PROJECT_ROOT/server-integrations/frankenphp-public-mutation-at
 PROOF_DIR="$INTEGRATION_DIR/proof"
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$PROJECT_ROOT")/redcms-store-lite}"
 STORE_PACKAGE="$STORE_REPOSITORY/package"
-EXPECTED_STORE_VERSION='0.1.19'
-EXPECTED_STORE_REVISION='e274c48b57b7c2f8ca33d1b13e554128275661be'
+EXPECTED_STORE_VERSION='0.1.24'
+EXPECTED_STORE_REVISION='c3dc7405d9e62c1112555503523c0c339e4b8fa8'
 MYSQL_IMAGE="${RED_STORE_LITE_MYSQL_IMAGE:-mysql:8.4}"
 NODE_BIN="${RED_NODE_BIN:-/Users/oscarrojas/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node}"
 PLAYWRIGHT_MODULE="${RED_PLAYWRIGHT_MODULE:-/Users/oscarrojas/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright}"
@@ -38,7 +38,7 @@ fail() {
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs the real Store Lite Add-to-cart form and endpoint in disposable Docker/MySQL over HTTPS.'
+    printf '%s\n' 'Runs real Store Lite add, quantity, and removal forms in disposable Docker/MySQL over HTTPS.'
 }
 
 if [[ $# -gt 0 ]]; then
@@ -242,8 +242,8 @@ for (const migration of manifest.migrations || []) {
 ' "$STORE_PACKAGE/addon.json")
 [[ "${#CORE_MIGRATIONS[@]}" -eq 45 ]] \
     || fail "expected 45 core migrations; found ${#CORE_MIGRATIONS[@]}."
-[[ "${#STORE_MIGRATIONS[@]}" -eq 6 ]] \
-    || fail "expected 6 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
+[[ "${#STORE_MIGRATIONS[@]}" -eq 7 ]] \
+    || fail "expected 7 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
 for migration in "${STORE_MIGRATIONS[@]}"; do
     [[ -s "$migration" ]] || fail "Store Lite migration is missing: $migration"
 done
@@ -345,7 +345,7 @@ cart_state="$(docker exec "$DB_CONTAINER" mysql \
              WHERE PackageID='redcms.store-lite'
                AND EventName='addon.public-mutation.completed'));
     " 2>/dev/null)"
-[[ "$cart_state" == '4:4:6:4:4:4' ]] \
+[[ "$cart_state" == '4:2:3:8:8:8' ]] \
     || fail "unexpected atomic Store Lite state after browser mutations: $cart_state"
 
 if docker logs "$APP_CONTAINER" 2>&1 | grep -Eq \
