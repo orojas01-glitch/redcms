@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-10 after the Store Lite 0.1.23 control presenter and core
-collection-row mutation-presentation contract.
+Last updated: 2026-08-10 after Store Lite 0.1.24 line-identity binding and the
+core-owned collection-row evidence/form composition gate.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -47,8 +47,8 @@ flowchart TD
     H1["COMPLETE<br/>Read-only Cart component<br/>empty + current subject lines"]
     H2A["COMPLETE<br/>Editable Cart A<br/>Store Lite quantity/remove data models"]
     H2B["COMPLETE<br/>Editable Cart B<br/>core bounded row-form retention"]
-    H2C["CURRENT<br/>Editable Cart C<br/>read-model binding + core composition"]
-    H2D["LATER<br/>Editable Cart D<br/>desktop/mobile mutation QA"]
+    H2C["COMPLETE<br/>Editable Cart C<br/>read-model binding + core composition"]
+    H2D["CURRENT<br/>Editable Cart D<br/>desktop/mobile mutation QA"]
     I["LATER FOR STORE LITE v1<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
@@ -59,9 +59,9 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B complete;
-    class H2C current;
-    class H2D,I,J remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C complete;
+    class H2D current;
+    class I,J remaining;
     class K target;
 ```
 
@@ -69,11 +69,11 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | The placeable read-only Cart is complete. Store Lite 0.1.23 now supplies pure quantity/remove form data, and core can retain one or two closed forms per collection row. The current gate binds current line identity to those models and composes them through core authority. |
-| What just finished? | Store Lite PR #13 merged the 0.1.23 data-only control presenter. This core gate adds bounded collection-row presentation retention while continuing to render only text facts. No hosted installation changed. |
+| Where are we? | The placeable Cart now has package-owned current-line identity and two core-rendered controls per non-empty row. The current gate is real desktop/mobile quantity-update and line-removal behavior through the existing public-mutation dispatcher. |
+| What just finished? | Store Lite 0.1.24 bound current line identity to pure quantity/remove presentations. Core now revalidates each row form, verifies same-package component/route/mutation/state-loader ownership, issues separate CSRF/idempotency evidence under one page subject, and renders only escaped core form HTML. No hosted installation changed. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add one simple or variable product and see the current server-authoritative Cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after Gate 2D2? | Bind and render quantity/remove controls through core, prove desktop/mobile mutation behavior, add the minimum guest order/pay-on-receipt flow, then pass lifecycle/recovery/migration/isolation release acceptance. |
+| What remains after Gate 2D2? | Prove desktop/mobile quantity/remove mutation behavior and refreshed Cart state, add the minimum guest order/pay-on-receipt flow, then pass lifecycle/recovery/migration/isolation release acceptance. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

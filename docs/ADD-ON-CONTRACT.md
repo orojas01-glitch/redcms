@@ -1041,11 +1041,17 @@ the same route, mutation, label, and bounded-field vocabulary as the existing
 component-level presentation. Core rejects empty, overflowing, associative,
 duplicate route/mutation, malformed, authority-bearing, or expanded row-form
 lists. It validates and escapes the visible text, then renders only the
-semantic nested list and description-list markup; the retained row
-presentations emit no control or browser authority until a separate core-owned
-integration gate. Packages still cannot provide HTML, links, controls,
-templates, tokens, or response behavior. This supports a Cart line list and a
-later generic editable-row path without making Cart a core feature.
+semantic nested list and description-list markup. When the supported
+public-mutation page gate is explicitly active and the caller supplies the
+database connection, core may also revalidate and compose each retained row
+presentation through the same ownership, evidence-bootstrap, and escaped-form
+renderer used by a component-level form. Core derives a stable
+placement/row/form instance, gives each control separate CSRF/idempotency
+evidence, and reuses the page's one request-local anonymous subject. Failed
+controls remain unavailable. Packages still cannot provide HTML, links,
+controls, templates, tokens, instance IDs, callbacks during composition, or
+response behavior. This supports an editable Cart line list without making
+Cart a core feature.
 
 ## Theme And CSS Boundary
 

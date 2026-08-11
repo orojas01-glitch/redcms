@@ -33,6 +33,7 @@ if (!preg_match(
 $assertions = 0;
 $subjectIds = [];
 $callbackInvocations = 0;
+$rendererViewModel = null;
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -84,6 +85,21 @@ function red_addon_component_form_test_manifest()
             'methods' => ['POST'],
             'authentication' => 'public',
             'csrf' => 'required',
+        ], [
+            'id' => 'redcms.component-form-fixture/cart-line-quantity',
+            'scope' => 'public',
+            'path' =>
+                '/addons/redcms/component-form-fixture/cart-line-quantity',
+            'methods' => ['POST'],
+            'authentication' => 'public',
+            'csrf' => 'required',
+        ], [
+            'id' => 'redcms.component-form-fixture/cart-line-remove',
+            'scope' => 'public',
+            'path' => '/addons/redcms/component-form-fixture/cart-line-remove',
+            'methods' => ['POST'],
+            'authentication' => 'public',
+            'csrf' => 'required',
         ]],
         'publicMutationContracts' => [[
             'route' => 'redcms.component-form-fixture/cart-intent',
@@ -120,6 +136,62 @@ function red_addon_component_form_test_manifest()
             'tables' => ['RED_Addon_Component_Form_Fixture_Carts'],
             'postcondition' => 'server-derived-state',
             'audit' => 'commerce.cart.item-added',
+            'outcomes' => ['accepted', 'unchanged'],
+        ], [
+            'route' =>
+                'redcms.component-form-fixture/cart-line-quantity',
+            'mutation' =>
+                'redcms.component-form-fixture/set-cart-line-quantity',
+            'scope' => 'public',
+            'authentication' => 'public',
+            'method' => 'POST',
+            'csrf' => 'required',
+            'encoding' => 'application/x-www-form-urlencoded',
+            'maxBodyBytes' => 256,
+            'requestFields' => [[
+                'key' => 'line',
+                'type' => 'identifier',
+                'required' => true,
+                'minLength' => 69,
+                'maxLength' => 69,
+            ], [
+                'key' => 'quantity',
+                'type' => 'positive-integer',
+                'required' => true,
+                'minimum' => 1,
+                'maximum' => 100,
+            ]],
+            'subject' => 'anonymous',
+            'idempotency' => 'core-issued-key',
+            'privacy' => 'no-store',
+            'rateLimit' => 'required',
+            'tables' => ['RED_Addon_Component_Form_Fixture_Carts'],
+            'postcondition' => 'server-derived-state',
+            'audit' => 'commerce.cart.quantity-set',
+            'outcomes' => ['accepted', 'unchanged'],
+        ], [
+            'route' => 'redcms.component-form-fixture/cart-line-remove',
+            'mutation' => 'redcms.component-form-fixture/remove-cart-line',
+            'scope' => 'public',
+            'authentication' => 'public',
+            'method' => 'POST',
+            'csrf' => 'required',
+            'encoding' => 'application/x-www-form-urlencoded',
+            'maxBodyBytes' => 256,
+            'requestFields' => [[
+                'key' => 'line',
+                'type' => 'identifier',
+                'required' => true,
+                'minLength' => 69,
+                'maxLength' => 69,
+            ]],
+            'subject' => 'anonymous',
+            'idempotency' => 'core-issued-key',
+            'privacy' => 'no-store',
+            'rateLimit' => 'required',
+            'tables' => ['RED_Addon_Component_Form_Fixture_Carts'],
+            'postcondition' => 'server-derived-state',
+            'audit' => 'commerce.cart.item-removed',
             'outcomes' => ['accepted', 'unchanged'],
         ]],
     ];
@@ -182,25 +254,93 @@ function red_addon_component_form_test_view($variable = false)
     ];
 }
 
+function red_addon_component_form_test_collection_view()
+{
+    $lineHandle = 'line-' . str_repeat('a', 64);
+    return [
+        'title' => 'Your cart',
+        'summary' => '2 items · USD 11.98',
+        'facts' => [[
+            'label' => 'Items',
+            'value' => '2',
+        ], [
+            'label' => 'Total',
+            'value' => 'USD 11.98',
+        ]],
+        'collection' => [
+            'label' => 'Cart items',
+            'items' => [[
+                'title' => 'Banana bunch',
+                'facts' => [[
+                    'label' => 'Quantity',
+                    'value' => '2',
+                ], [
+                    'label' => 'Line total',
+                    'value' => 'USD 11.98',
+                ]],
+                'mutationForms' => [[
+                    'route' =>
+                        'redcms.component-form-fixture/cart-line-quantity',
+                    'mutation' =>
+                        'redcms.component-form-fixture/set-cart-line-quantity',
+                    'submitLabel' => 'Update quantity',
+                    'fields' => [[
+                        'key' => 'line',
+                        'control' => 'hidden',
+                        'value' => $lineHandle,
+                    ], [
+                        'key' => 'quantity',
+                        'control' => 'number',
+                        'label' => 'Quantity',
+                        'value' => 2,
+                    ]],
+                ], [
+                    'route' =>
+                        'redcms.component-form-fixture/cart-line-remove',
+                    'mutation' =>
+                        'redcms.component-form-fixture/remove-cart-line',
+                    'submitLabel' => 'Remove item',
+                    'fields' => [[
+                        'key' => 'line',
+                        'control' => 'hidden',
+                        'value' => $lineHandle,
+                    ]],
+                ]],
+            ]],
+        ],
+    ];
+}
+
 try {
     $manifest = red_addon_component_form_test_manifest();
     $packageId = $manifest['id'];
     $componentId = $manifest['provides']['components'][0];
-    $routeId = $manifest['routes'][0]['id'];
-    $mutationId = $manifest['publicMutationContracts'][0]['mutation'];
-    $callback = static function () use (&$callbackInvocations) {
+    $callback = static function () use (
+        &$callbackInvocations,
+        &$rendererViewModel
+    ) {
         $callbackInvocations++;
+        if (is_array($rendererViewModel)) {
+            return $rendererViewModel;
+        }
         throw new RuntimeException('Integration invoked a package callback.');
     };
     $registry = new RED_Addon_Runtime_Registry($packageId, $manifest);
     $registry->registerComponent($componentId, $callback);
-    $registry->registerRoute($routeId, $callback);
-    $registry->registerPublicMutation(
-        $mutationId,
-        $callback,
-        ['RED_Addon_Component_Form_Fixture_Carts']
-    );
-    $registry->registerPublicMutationStateLoader($mutationId, $callback);
+    foreach ($manifest['routes'] as $route) {
+        $registry->registerRoute($route['id'], $callback);
+    }
+    foreach ($manifest['publicMutationContracts'] as $contract) {
+        $registry->registerPublicMutation(
+            $contract['mutation'],
+            $callback,
+            ['RED_Addon_Component_Form_Fixture_Carts']
+        );
+        $registry->registerPublicMutationStateLoader(
+            $contract['mutation'],
+            $callback
+        );
+    }
     $registry->assertComplete();
     red_addon_runtime_set_request_context(
         new RED_Addon_Runtime_Context(
@@ -257,6 +397,37 @@ try {
             && $ownershipRefusal['reason'] === 'ownership_invalid'
             && red_addon_component_form_test_counts($connection) === '0:0:0',
         'cross-package route ownership fails before evidence issuance'
+    );
+
+    $collectionView = red_addon_component_form_test_collection_view();
+    $foreignRow = $collectionView;
+    $foreignRow['collection']['items'][0]['mutationForms'][1]['route'] =
+        'redcms.foreign/cart-line-remove';
+    $foreignRowRefusal =
+        red_addon_public_component_collection_form_integrate(
+            $connection,
+            red_addon_component_form_test_context(),
+            $foreignRow,
+            0,
+            1
+        );
+    $invalidRowIndex =
+        red_addon_public_component_collection_form_integrate(
+            $connection,
+            red_addon_component_form_test_context(),
+            $collectionView,
+            24,
+            0
+        );
+    red_addon_component_form_test_assert(
+        red_addon_public_component_form_integration_valid($foreignRowRefusal)
+            && $foreignRowRefusal['reason'] === 'ownership_invalid'
+            && red_addon_public_component_form_integration_valid(
+                $invalidRowIndex
+            )
+            && $invalidRowIndex['reason'] === 'integration_invalid'
+            && red_addon_component_form_test_counts($connection) === '0:0:0',
+        'foreign ownership or an out-of-range row fails before evidence issuance'
     );
 
     ob_start();
@@ -336,6 +507,26 @@ try {
         'component integration resolves ownership without invoking package callbacks'
     );
 
+    $rendererViewModel = $collectionView;
+    ob_start();
+    $displayOnlyRendered = red_addon_public_component_render(
+        red_addon_component_form_test_context(),
+        $connection
+    );
+    $displayOnlyHtml = (string) ob_get_clean();
+    $rendererViewModel = null;
+    red_addon_component_form_test_assert(
+        $displayOnlyRendered === true
+            && $callbackInvocations === 1
+            && str_contains($displayOnlyHtml, '<h2>Your cart</h2>')
+            && str_contains($displayOnlyHtml, '<h4>Banana bunch</h4>')
+            && !str_contains($displayOnlyHtml, '<form')
+            && !str_contains($displayOnlyHtml, 'Update quantity')
+            && !str_contains($displayOnlyHtml, 'Remove item')
+            && red_addon_component_form_test_counts($connection) === '1:2:2',
+        'collection rows stay display-only while the page mutation gate is disabled'
+    );
+
     $beforePageCounts = red_addon_component_form_test_counts($connection);
     $duplicateCookie = red_addon_public_mutation_subject_cookie_name() . '='
         . str_repeat('a', 64) . '; '
@@ -405,6 +596,52 @@ try {
         'later page forms reuse one subject while retaining the first response lifecycle'
     );
 
+    $rendererViewModel = $collectionView;
+    ob_start();
+    $collectionRendered = red_addon_public_component_render(
+        red_addon_component_form_test_context(),
+        $connection
+    );
+    $collectionHtml = (string) ob_get_clean();
+    $rendererViewModel = null;
+    $collectionDelivery = red_addon_public_mutation_page_delivery();
+    red_addon_component_form_test_assert(
+        $collectionRendered === true
+            && $callbackInvocations === 2
+            && substr_count(
+                $collectionHtml,
+                'data-red-addon-public-mutation-form'
+            ) === 2
+            && str_contains(
+                $collectionHtml,
+                'id="red-public-mutation-component-42-row-1-form-1"'
+            )
+            && str_contains(
+                $collectionHtml,
+                'id="red-public-mutation-component-42-row-1-form-2"'
+            )
+            && str_contains(
+                $collectionHtml,
+                'action="/addons/redcms/component-form-fixture/cart-line-quantity"'
+            )
+            && str_contains(
+                $collectionHtml,
+                'action="/addons/redcms/component-form-fixture/cart-line-remove"'
+            )
+            && str_contains($collectionHtml, 'name="line" value="line-')
+            && str_contains($collectionHtml, 'name="quantity" value="2"')
+            && str_contains($collectionHtml, '>Update quantity</button>')
+            && str_contains($collectionHtml, '>Remove item</button>'),
+        'core renders two uniquely identified quantity and removal forms inside the row'
+    );
+    red_addon_component_form_test_assert(
+        red_addon_public_mutation_page_delivery_valid($collectionDelivery)
+            && $collectionDelivery['formCount'] === 4
+            && $collectionDelivery['lifecycle'] === $firstDelivery['lifecycle']
+            && red_addon_component_form_test_counts($connection) === '2:6:6',
+        'row forms reuse the page subject and receive separate CSRF and idempotency evidence'
+    );
+
     $GLOBALS['RED_ADDON_PUBLIC_MUTATION_PAGE_CONTEXT']['formCount'] = 129;
     $invalidContext = red_addon_public_mutation_page_context_current();
     $invalidSubject = red_addon_public_mutation_page_subject_context($connection);
@@ -448,7 +685,12 @@ try {
                 $rendererSource,
                 'red_addon_public_mutation_page_integrate('
             )
+            && str_contains(
+                $rendererSource,
+                'red_addon_public_mutation_page_integrate_collection_form('
+            )
             && str_contains($rendererSource, 'echo $formHtml;')
+            && str_contains($rendererSource, 'echo $rowFormHtml;')
             && !preg_match(
                 '/\$_(?:SERVER|GET|POST|COOKIE|SESSION|REQUEST)\b/',
                 $rendererSource
