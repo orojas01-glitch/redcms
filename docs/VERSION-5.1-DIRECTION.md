@@ -1286,6 +1286,22 @@ request bootstrap excludes the disabled package.
     Real desktop/mobile quantity and remove dispatch, Cart refresh behavior,
     and visitor wording remain the next gate.
 
+94. Completed editable-Cart desktop/mobile mutation acceptance with external
+    Store Lite 0.1.24 at merged revision
+    `c3dc7405d9e62c1112555503523c0c339e4b8fa8`. The fixed core browser controller
+    now uses mutation-neutral completion/refusal language and refreshes only the
+    current page 750 milliseconds after an accepted or unchanged response, so
+    server-authoritative facts replace consumed forms without client-side
+    commercial reconstruction. Desktop and mobile Chrome each added one real
+    simple or exact Size/Color line, verified two accessible core-owned row
+    controls and one bounded server-derived line handle, updated quantity,
+    observed recalculated totals after refresh, removed the line, and returned
+    to the empty Cart under the same anonymous subject. The proof passed the
+    established 100 administrator checks and 147 public checks, exact
+    `4:2:3:8:8:8` final state, clean browser/runtime gates, and complete Docker
+    cleanup. No hosted or client installation changed. Minimum guest order and
+    an immutable pay-on-receipt snapshot are the next Store Lite gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

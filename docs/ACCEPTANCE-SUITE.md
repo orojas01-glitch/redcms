@@ -23,17 +23,20 @@ printed non-secret temporary evidence directory. This gate does not make Store
 Lite part of the starter or authorize normal richer-package enablement.
 
 `scripts/store-lite-public-mutation-rehearsal.sh` is the separate Docker-only
-Gate 2D2D3C supported-server integration. It requires the clean external Store
-Lite 0.1.19 repository at its pinned merged revision, stages no retained add-on or
+supported-server Add-to-cart and editable-Cart integration. It requires the
+clean external Store Lite 0.1.24 repository at its pinned merged revision,
+stages no retained add-on or
 local configuration, builds the reviewed custom FrankenPHP/Caddy attestation
 module, and creates fresh MySQL, HTTPS certificate, HMAC key, and trusted-origin
 state. It first reruns the established administrator/component browser path,
-then drives the real public Product Add-to-cart form in desktop/mobile Chrome
-and reloads the placed Cart to prove the same subject-owned line and totals.
+then drives the real public Product Add-to-cart, Cart quantity, and Cart removal
+forms in desktop/mobile Chrome. Accepted and unchanged commands announce a
+generic result before the fixed controller refreshes only the current page.
 Acceptance requires one host-only Secure/HttpOnly/Strict subject cookie,
 core-issued CSRF/idempotency evidence, accepted mutation, exact retry replay,
 changed-command conflict, invalid-quantity refusal, accessible controls/status,
-no overflow or browser errors, exact Store Lite/core database facts, and removal
+one verified line handle, recalculated totals, return to empty Cart, no overflow
+or browser errors, exact Store Lite/core database facts, and removal
 of every temporary container, network, image, database, certificate, secret,
 and staged project. Only non-secret screenshots and JSON reports remain in the
 printed external temporary evidence directory. It does not change the hosted
@@ -671,6 +674,27 @@ the isolated PHP server log was clean, and cleanup removed the acceptance
 database, its grant, the temporary primary, and its grant. No retained database,
 hosted installation, or client data was changed.
 
+On 2026-08-10, the separate H2D supported-server rehearsal pinned the clean
+external Store Lite 0.1.24 repository at merged revision
+`c3dc7405d9e62c1112555503523c0c339e4b8fa8`. The established administrator path
+passed 100 checks. The expanded public path passed 147 desktop/mobile checks
+through real add, exact replay/conflict/refusal, current-line quantity update,
+same-page refresh with recalculated facts, line removal, and return to empty
+Cart under one unchanged subject. Screenshots showed usable controls without
+desktop or mobile overflow; console, page, failed-request, and unexpected-HTTP
+error lists were empty. Exact final cart/line/quantity/package-activity/
+execution/core-audit state was `4:2:3:8:8:8`. Cleanup removed the disposable
+app, database, network, image, certificate, secrets, and staged project. No
+hosted or client installation changed. The complete core suite then reran
+against a fresh temporary current-schema primary. The 10-assertion controller
+source contract and 22-assertion component/form integration fixture passed
+beside every existing migration, authorization, transaction, endpoint, CRUD,
+media, theme, and rollback gate. The normalized 32-table signature remained
+`cb6e941861fc5ed74142f11b0f36536549a335f478b8214e613836f360501a3f`,
+the isolated PHP log was clean, and exact acceptance and temporary-primary
+database/grant cleanup passed. The retained historical starter was not
+migrated.
+
 A separate generated-fixture Chrome inspection rendered the new component
 editor's valid and field-error states at 1512×900 and 390×844. Both viewports
 had zero console errors, failed requests, missing labels, clipped controls,
@@ -898,7 +922,7 @@ process environment.
 - Add-on administrator-tool form Save-bridge acceptance runs only in the uniquely named disposable database with one temporary package-owned InnoDB table, enabled installation, explicit package grant, and in-memory trusted runtime context. It requires exact tool/form/canonical-positive-target edit identity, fresh permission and enabled-version checks, exact loader/writer/table ownership, complete current values, escaped core-only editable scalar and two-level collection markup, bounded add/remove templates, typed canonical JSON with header CSRF, an atomic value-free `saved` result, no-op `unchanged`, stale replay and next-decision revocation refusal, and exact administrator/role/grant/package/audit/table cleanup. Source and real HTTP checks require POST, database-backed session, and header CSRF before edit parsing or Save body I/O; public responses disclose no values, state/plan evidence, package identity, or tables. Local Chrome captures at 1280px and 390px verify no horizontal overflow, the collection interaction path, typed Save/reload states, and zero console, page, or failed-request errors.
 - The Store Lite browser rehearsal is a separate opt-in cross-repository gate.
   It requires an integrity-valid Store Lite package outside the starter, all 45
-  core migrations plus the exact six-package-migration inventory in a fresh
+  core migrations plus the exact seven-package-migration inventory in a fresh
   schema, one acceptance-only enabled registry fixture, only the exact Products
   capability, a simple banana and bounded variable T-shirt, zero initial
   Product or Cart placements, the visible authenticated Add Content -> Product/
@@ -914,14 +938,16 @@ process environment.
   active homepage-only core fields, two core `create`, package `baseline`, core
   `move`, and value-free `component.public_placed` audit facts.
 - The Store Lite supported-server public-mutation browser rehearsal is a
-  separate Docker-only cross-repository gate. It requires Store Lite 0.1.19 at
-  revision `e274c48b57b7c2f8ca33d1b13e554128275661be`, manifest-ordered package
+  separate Docker-only cross-repository gate. It requires Store Lite 0.1.24 at
+  revision `c3dc7405d9e62c1112555503523c0c339e4b8fa8`, manifest-ordered package
   migrations, the reviewed custom FrankenPHP/Caddy module, fresh MySQL and
   localhost TLS, temporary process-only endpoint/origin/HMAC configuration,
-  the 100-check administrator Product/Cart browser proof, and 76 real desktop/
+  the 100-check administrator Product/Cart browser proof, and 147 real desktop/
   mobile public-mutation/Cart checks including empty state, a simple product,
-  and an exact Size/Color variant. Final cart, line, quantity, package
-  activity, execution, and core audit counts must be exactly `4:4:6:4:4:4`;
+  an exact Size/Color variant, two accessible row controls, quantity update,
+  recalculated totals, removal, and same-page refresh. Final cart, line,
+  quantity, package activity, execution, and core audit counts must be exactly
+  `4:2:3:8:8:8`;
   no container, network, image, database, certificate, secret, staged package,
   or client state may remain.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.
@@ -1024,16 +1050,20 @@ process environment.
   invocation. Cleanup leaves zero subject, CSRF, idempotency, schema, or grant
   residue and the helper has no request-global, emission, package-load, or
   endpoint path.
-- Public-mutation browser-controller source acceptance is dependency-free. It
-  requires the exact form/status selectors, fixed evidence/content headers,
+- Public-mutation browser-controller source acceptance is dependency-free. Its
+  10 assertions require the exact form/status selectors, fixed evidence/content
+  headers,
   same-origin/no-store/redirect-error fetch policy, one WeakMap-held frozen
   command body, immediate DOM evidence removal, no cookie/storage/log/dynamic-
   code/HTML-sink/external-URL path, and continued absence from the front
-  controller and theme adapters. The separate Playwright self-test uses an
+  controller and theme adapters. It also requires mutation-neutral status copy
+  and a fixed delayed `window.location.reload()` with no assignable or external
+  navigation target. The separate 21-assertion Playwright self-test uses an
   intercepted local origin and real Chrome at `1440x1000` and `390x844`; it
   proves canonical body/header delivery, accepted completion, exact-body retry,
   conflict closure, invalid foreign configuration refusal, DOM evidence
-  removal, frozen controls, generic status copy, and zero page errors.
+  removal, frozen controls, generic status copy, accepted/unchanged same-page
+  refresh, and zero page errors.
 - Public-mutation HTTP request-envelope acceptance is dependency-free and
   creates no database, package, request-global, browser, route, or client
   fixture. It accepts only one validated declaration, configured canonical HTTPS

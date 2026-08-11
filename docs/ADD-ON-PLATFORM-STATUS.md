@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-10 after Store Lite 0.1.24 line-identity binding and the
-core-owned collection-row evidence/form composition gate.
+Last updated: 2026-08-10 after the isolated Store Lite 0.1.24 desktop/mobile
+quantity-update and line-removal rehearsal.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -48,8 +48,8 @@ flowchart TD
     H2A["COMPLETE<br/>Editable Cart A<br/>Store Lite quantity/remove data models"]
     H2B["COMPLETE<br/>Editable Cart B<br/>core bounded row-form retention"]
     H2C["COMPLETE<br/>Editable Cart C<br/>read-model binding + core composition"]
-    H2D["CURRENT<br/>Editable Cart D<br/>desktop/mobile mutation QA"]
-    I["LATER FOR STORE LITE v1<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
+    H2D["COMPLETE<br/>Editable Cart D<br/>desktop/mobile mutation QA"]
+    I["CURRENT<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
@@ -59,9 +59,9 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C complete;
-    class H2D current;
-    class I,J remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D complete;
+    class I current;
+    class J remaining;
     class K target;
 ```
 
@@ -69,11 +69,11 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | The placeable Cart now has package-owned current-line identity and two core-rendered controls per non-empty row. The current gate is real desktop/mobile quantity-update and line-removal behavior through the existing public-mutation dispatcher. |
-| What just finished? | Store Lite 0.1.24 bound current line identity to pure quantity/remove presentations. Core now revalidates each row form, verifies same-package component/route/mutation/state-loader ownership, issues separate CSRF/idempotency evidence under one page subject, and renders only escaped core form HTML. No hosted installation changed. |
-| What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add one simple or variable product and see the current server-authoritative Cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
+| Where are we? | Editable Cart is complete in the isolated supported-server proof. The current Store Lite gate is the minimum guest order with an immutable order snapshot and pay-on-receipt first. |
+| What just finished? | Desktop and mobile Chrome added a simple or exact Size/Color product, rendered two core-owned row controls, updated the verified line, refreshed to recalculated totals, removed the line, and refreshed to an empty Cart. The proof passed 147 public checks plus the established 100 administrator checks with exact state and cleanup. |
+| What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove a simple or variable product through the server-authoritative Cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after Gate 2D2? | Prove desktop/mobile quantity/remove mutation behavior and refreshed Cart state, add the minimum guest order/pay-on-receipt flow, then pass lifecycle/recovery/migration/isolation release acceptance. |
+| What remains after Gate 2D2? | Add the minimum guest order/pay-on-receipt flow, then pass lifecycle/recovery/migration/isolation release acceptance. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

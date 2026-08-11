@@ -105,6 +105,16 @@ red_addon_browser_controller_contract_assert(
     'controller has no dynamic-code, HTML sink, logging, or external URL path'
 );
 red_addon_browser_controller_contract_assert(
+    str_contains($controller, "'Update completed.'")
+        && str_contains($controller, "'No changes were needed.'")
+        && str_contains($controller, 'window.setTimeout(function () {')
+        && str_contains($controller, 'window.location.reload();')
+        && !str_contains($controller, 'window.location =')
+        && !str_contains($controller, 'window.location.href =')
+        && !str_contains($controller, 'window.open('),
+    'successful generic updates announce completion then refresh only the same page'
+);
+red_addon_browser_controller_contract_assert(
     is_string($browserTest)
         && str_contains($browserTest, '{width: 1440, height: 1000}')
         && str_contains($browserTest, '{width: 390, height: 844}')

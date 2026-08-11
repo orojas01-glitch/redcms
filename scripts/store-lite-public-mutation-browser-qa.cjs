@@ -12,8 +12,14 @@ const username = process.env.RED_STORE_LITE_USERNAME || '';
 const password = process.env.RED_STORE_LITE_PASSWORD || '';
 const chromePath = process.env.RED_CHROME_BIN
     || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const mutationPath = '/addons/redcms/store-lite/cart-intent';
-const mutationUrl = `${baseUrl}${mutationPath}`;
+const mutationPaths = {
+    add: '/addons/redcms/store-lite/cart-intent',
+    quantity: '/addons/redcms/store-lite/cart-line-quantity',
+    remove: '/addons/redcms/store-lite/cart-line-remove',
+};
+const mutationUrls = Object.fromEntries(
+    Object.entries(mutationPaths).map(([key, value]) => [key, `${baseUrl}${value}`])
+);
 
 if (!/^https:\/\/localhost:\d+$/.test(baseUrl)
     || !path.isAbsolute(evidenceDir)
@@ -27,7 +33,7 @@ if (!/^https:\/\/localhost:\d+$/.test(baseUrl)
 const report = {
     baseUrl,
     browser: 'Google Chrome',
-    package: 'redcms.store-lite@0.1.19',
+    package: 'redcms.store-lite@0.1.24',
     checks: [],
 };
 
@@ -38,7 +44,7 @@ function check(condition, name, detail = '') {
     report.checks.push({name, passed: true, detail});
 }
 
-async function verifyCart(page, definition, populated) {
+async function verifyCart(page, definition, state) {
     const cart = page.locator(
         '[data-red-addon-component="redcms.store-lite/cart"]'
     );
@@ -49,7 +55,7 @@ async function verifyCart(page, definition, populated) {
     }).count() === 1,
     `${definition.name} renders the placed Cart component`);
     const content = await cart.textContent() || '';
-    if (!populated) {
+    if (state === 'empty') {
         check(content.includes('Your cart is empty.')
             && content.includes('Items')
             && content.includes('0')
@@ -61,11 +67,21 @@ async function verifyCart(page, definition, populated) {
         ).count() === 0,
         `${definition.name} empty Cart has no line collection`);
     } else {
-        check(content.includes(definition.cartSummary)
+        const updated = state === 'updated';
+        const expectedQuantity = updated
+            ? definition.updatedQuantity
+            : definition.quantity;
+        const expectedSummary = updated
+            ? definition.updatedCartSummary
+            : definition.cartSummary;
+        const expectedLineTotal = updated
+            ? definition.updatedLineTotal
+            : definition.lineTotal;
+        check(content.includes(expectedSummary)
             && content.includes(definition.productTitle)
-            && content.includes(`Quantity${definition.quantity}`)
+            && content.includes(`Quantity${expectedQuantity}`)
             && content.includes(`Unit price${definition.unitPrice}`)
-            && content.includes(`Line total${definition.lineTotal}`),
+            && content.includes(`Line total${expectedLineTotal}`),
         `${definition.name} Cart renders server-derived line and total facts`);
         if (definition.variantLabel) {
             check(content.includes(`Options${definition.variantLabel}`),
@@ -88,9 +104,114 @@ async function verifyCart(page, definition, populated) {
     await cart.screenshot({
         path: path.join(
             evidenceDir,
-            `${definition.name}-cart-${populated ? 'populated' : 'empty'}.png`
+            `${definition.name}-cart-${state}.png`
         ),
     });
+}
+
+async function cartControls(page, definition, expectedQuantity) {
+    const cart = page.locator(
+        '[data-red-addon-component="redcms.store-lite/cart"]'
+    );
+    const line = cart.locator(
+        '.red-addon-component__collection[aria-label="Cart items"] li'
+    );
+    const actions = line.locator(
+        '.red-addon-component__collection-actions'
+    );
+    const quantityForm = actions.locator(
+        `form[action="${mutationPaths.quantity}"]`
+    );
+    const removeForm = actions.locator(
+        `form[action="${mutationPaths.remove}"]`
+    );
+    await quantityForm.waitFor({state: 'visible'});
+    await removeForm.waitFor({state: 'visible'});
+    check(await actions.locator('form').count() === 2,
+        `${definition.name} Cart line exposes exactly two core-owned controls`);
+    check(await quantityForm.getByLabel('Quantity').count() === 1
+        && await quantityForm.getByRole('button', {
+            name: 'Update quantity',
+        }).count() === 1,
+    `${definition.name} quantity form has accessible core controls`);
+    check(await removeForm.getByRole('button', {
+        name: 'Remove item',
+    }).count() === 1,
+    `${definition.name} removal form has an accessible core control`);
+    check(await quantityForm.getByLabel('Quantity').inputValue()
+        === String(expectedQuantity),
+    `${definition.name} quantity control reflects current server state`);
+    const quantityLine = await quantityForm.locator('[name="line"]').inputValue();
+    const removeLine = await removeForm.locator('[name="line"]').inputValue();
+    check(/^line-[a-f0-9]{64}$/.test(quantityLine)
+        && removeLine === quantityLine,
+    `${definition.name} row controls share one bounded server-derived line handle`);
+    for (const form of [quantityForm, removeForm]) {
+        check(await form.getAttribute('method') === 'post'
+            && await form.getAttribute('enctype')
+                === 'application/x-www-form-urlencoded',
+        `${definition.name} row control uses the declared POST encoding`);
+        const status = form.locator('[data-red-addon-public-mutation-status]');
+        check(await status.getAttribute('role') === 'status'
+            && await status.getAttribute('aria-live') === 'polite',
+        `${definition.name} row result uses a polite status region`);
+    }
+    const overflow = await actions.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+    }));
+    check(overflow.scrollWidth <= overflow.clientWidth + 1,
+        `${definition.name} Cart row controls have no horizontal overflow`,
+        JSON.stringify(overflow));
+    return {quantityForm, removeForm, lineHandle: quantityLine};
+}
+
+async function submitAndRefresh(page, definition, options) {
+    let requestRecord = null;
+    const requestPromise = page.waitForRequest((request) => {
+        if (request.url() !== options.url || request.method() !== 'POST') {
+            return false;
+        }
+        requestRecord = {
+            body: request.postData(),
+            headers: request.headers(),
+        };
+        return true;
+    });
+    const responsePromise = page.waitForResponse(
+        (response) => response.url() === options.url
+            && response.request().method() === 'POST'
+    );
+    const refreshPromise = page.waitForNavigation({waitUntil: 'networkidle'});
+    await options.submit();
+    await requestPromise;
+    const response = await responsePromise;
+    check(response.status() === 200
+        && await response.text() === '{"ok":true,"outcome":"accepted"}',
+    `${definition.name} ${options.name} reaches the real accepted endpoint`);
+    await options.form.getByText('Update completed.', {exact: true}).waitFor({
+        state: 'visible',
+    });
+    check(await options.form.getAttribute(
+        'data-red-addon-public-mutation-frozen'
+    ) === 'true'
+        && await options.form.getByRole('button', {
+            name: options.button,
+        }).isDisabled(),
+    `${definition.name} ${options.name} freezes its consumed command`);
+    check(requestRecord
+        && /^[a-z][a-z0-9-]*=/.test(requestRecord.body || '')
+        && /^[a-f0-9]{64}$/.test(
+            requestRecord.headers['x-red-cms-csrf'] || ''
+        )
+        && /^[a-f0-9]{64}$/.test(
+            requestRecord.headers['idempotency-key'] || ''
+        ),
+    `${definition.name} ${options.name} sends canonical fields and core evidence`);
+    await refreshPromise;
+    check(page.url() === `${baseUrl}/`,
+        `${definition.name} ${options.name} refreshes only the current page`);
+    return requestRecord;
 }
 
 async function runCase(browser, definition) {
@@ -104,7 +225,6 @@ async function runCase(browser, definition) {
     const pageErrors = [];
     const failedRequests = [];
     const unexpectedBadResponses = [];
-    let mutationRequest = null;
 
     page.on('console', (message) => {
         if (message.type() === 'error') {
@@ -117,14 +237,6 @@ async function runCase(browser, definition) {
             url: request.url(),
             error: request.failure() ? request.failure().errorText : 'unknown',
         });
-    });
-    page.on('request', (request) => {
-        if (request.url() === mutationUrl && request.method() === 'POST') {
-            mutationRequest = {
-                body: request.postData(),
-                headers: request.headers(),
-            };
-        }
     });
     page.on('response', (response) => {
         if (response.status() >= 400) {
@@ -153,11 +265,11 @@ async function runCase(browser, definition) {
         exact: true,
     }).count() === 1,
     `${definition.name} renders the package-owned published product`);
-    await verifyCart(page, definition, false);
+    await verifyCart(page, definition, 'empty');
 
     const form = product.locator('[data-red-addon-public-mutation-form]');
     await form.waitFor({state: 'visible'});
-    check(await form.getAttribute('action') === mutationPath,
+    check(await form.getAttribute('action') === mutationPaths.add,
         `${definition.name} form targets the declared Store Lite route`);
     check(await form.getAttribute('method') === 'post',
         `${definition.name} form uses POST`);
@@ -215,39 +327,23 @@ async function runCase(browser, definition) {
         `${definition.name} subject cookie is one bounded opaque token`);
 
     await form.getByLabel('Quantity').fill(String(definition.quantity));
-    const acceptedResponsePromise = page.waitForResponse(
-        (response) => response.url() === mutationUrl
-            && response.request().method() === 'POST'
-    );
-    if (definition.keyboard) {
-        await form.getByLabel('Quantity').press('Enter');
-    } else {
-        await form.getByRole('button', {name: 'Add to cart'}).click();
-    }
-    const acceptedResponse = await acceptedResponsePromise;
-    check(acceptedResponse.status() === 200,
-        `${definition.name} real endpoint accepts the cart mutation`);
-    check((await acceptedResponse.text())
-        === '{"ok":true,"outcome":"accepted"}',
-    `${definition.name} receives the core-owned fixed accepted response`);
-    await status.getByText('Added to cart.', {exact: true}).waitFor({
-        state: 'visible',
+    const addRequest = await submitAndRefresh(page, definition, {
+        name: 'Add to cart',
+        form,
+        button: 'Add to cart',
+        url: mutationUrls.add,
+        submit: async () => {
+            if (definition.keyboard) {
+                await form.getByLabel('Quantity').press('Enter');
+            } else {
+                await form.getByRole('button', {name: 'Add to cart'}).click();
+            }
+        },
     });
-    check(await form.getAttribute('data-red-addon-public-mutation-frozen')
-        === 'true',
-    `${definition.name} controller freezes the completed command`);
-    check(await form.getByRole('button', {name: 'Add to cart'}).isDisabled(),
-        `${definition.name} controller disables duplicate submission`);
-    check(mutationRequest
-        && typeof mutationRequest.body === 'string'
-        && /^[a-z][a-z0-9-]*=/.test(mutationRequest.body),
-    `${definition.name} captures the canonical browser command for retry`);
+    await verifyCart(page, definition, 'added');
 
-    const csrf = mutationRequest.headers['x-red-cms-csrf'];
-    const idempotency = mutationRequest.headers['idempotency-key'];
-    check(/^[a-f0-9]{64}$/.test(csrf || '')
-        && /^[a-f0-9]{64}$/.test(idempotency || ''),
-    `${definition.name} browser sends core-issued CSRF and idempotency evidence`);
+    const csrf = addRequest.headers['x-red-cms-csrf'];
+    const idempotency = addRequest.headers['idempotency-key'];
     const headers = {
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -255,17 +351,17 @@ async function runCase(browser, definition) {
         'X-RED-CMS-CSRF': csrf,
         'Idempotency-Key': idempotency,
     };
-    const retry = await context.request.post(mutationUrl, {
+    const retry = await context.request.post(mutationUrls.add, {
         headers,
-        data: mutationRequest.body,
+        data: addRequest.body,
     });
     check(retry.status() === 200
         && await retry.text() === '{"ok":true,"outcome":"accepted"}',
     `${definition.name} exact network retry replays the accepted result`);
 
-    const conflictBody = new URLSearchParams(mutationRequest.body);
+    const conflictBody = new URLSearchParams(addRequest.body);
     conflictBody.set('quantity', String(definition.quantity + 1));
-    const conflict = await context.request.post(mutationUrl, {
+    const conflict = await context.request.post(mutationUrls.add, {
         headers,
         data: conflictBody.toString(),
     });
@@ -274,9 +370,9 @@ async function runCase(browser, definition) {
             === '{"ok":false,"reason":"request_conflict"}',
     `${definition.name} changed command with the same key fails closed`);
 
-    const invalidBody = new URLSearchParams(mutationRequest.body);
+    const invalidBody = new URLSearchParams(addRequest.body);
     invalidBody.set('quantity', '0');
-    const invalid = await context.request.post(mutationUrl, {
+    const invalid = await context.request.post(mutationUrls.add, {
         headers,
         data: invalidBody.toString(),
     });
@@ -284,15 +380,54 @@ async function runCase(browser, definition) {
         && await invalid.text() === '{"ok":false,"reason":"invalid_request"}',
     `${definition.name} out-of-contract quantity is refused without disclosure`);
 
+    let controls = await cartControls(page, definition, definition.quantity);
+    const originalLineHandle = controls.lineHandle;
+    await controls.quantityForm.getByLabel('Quantity').fill(
+        String(definition.updatedQuantity)
+    );
+    await submitAndRefresh(page, definition, {
+        name: 'quantity update',
+        form: controls.quantityForm,
+        button: 'Update quantity',
+        url: mutationUrls.quantity,
+        submit: async () => {
+            if (definition.keyboard) {
+                await controls.quantityForm.getByLabel('Quantity').press('Enter');
+            } else {
+                await controls.quantityForm.getByRole('button', {
+                    name: 'Update quantity',
+                }).click();
+            }
+        },
+    });
+    await verifyCart(page, definition, 'updated');
+    controls = await cartControls(
+        page,
+        definition,
+        definition.updatedQuantity
+    );
+    check(controls.lineHandle === originalLineHandle,
+        `${definition.name} quantity update preserves the current line identity`);
+    await submitAndRefresh(page, definition, {
+        name: 'line removal',
+        form: controls.removeForm,
+        button: 'Remove item',
+        url: mutationUrls.remove,
+        submit: async () => {
+            await controls.removeForm.getByRole('button', {
+                name: 'Remove item',
+            }).click();
+        },
+    });
+    await verifyCart(page, definition, 'empty');
+
     const cookiesAfter = await context.cookies(baseUrl);
     const subjectsAfter = cookiesAfter.filter(
         (cookie) => cookie.name === 'redcms_public_mutation_subject'
     );
     check(subjectsAfter.length === 1
         && subjectsAfter[0].value === subject.value,
-    `${definition.name} mutation and retries do not rotate or duplicate the subject`);
-    await page.reload({waitUntil: 'networkidle'});
-    await verifyCart(page, definition, true);
+    `${definition.name} add, retry, update, and removal reuse one subject`);
     check(consoleErrors.length === 0,
         `${definition.name} console has no errors`,
         JSON.stringify(consoleErrors));
@@ -370,23 +505,29 @@ async function prepareVariableProduct(browser) {
             name: 'desktop',
             viewport: {width: 1280, height: 900},
             quantity: 2,
+            updatedQuantity: 3,
             keyboard: false,
             productTitle: 'Banana bunch browser-verified',
             variantLabel: '',
             cartSummary: '2 items · USD 12.98',
+            updatedCartSummary: '3 items · USD 19.47',
             unitPrice: 'USD 6.49',
             lineTotal: 'USD 12.98',
+            updatedLineTotal: 'USD 19.47',
         });
         await runCase(browser, {
             name: 'mobile',
             viewport: {width: 390, height: 844},
             quantity: 1,
+            updatedQuantity: 2,
             keyboard: true,
             productTitle: 'Classic T-shirt',
             variantLabel: 'Size: Small · Color: Black',
             cartSummary: '1 item · USD 24.99',
+            updatedCartSummary: '2 items · USD 49.98',
             unitPrice: 'USD 24.99',
             lineTotal: 'USD 24.99',
+            updatedLineTotal: 'USD 49.98',
         });
     } finally {
         await browser.close();

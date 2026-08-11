@@ -492,12 +492,15 @@ features.
   product/variant lines, fresh-state locking, caller-owned transactions, and
   value-free activity while core retains no Store Lite package, table, route,
   cookie, business data, or public cart behavior
-- Store Lite read-only Cart component: the separate Store Lite 0.1.19 package
+- Store Lite editable Cart component: the separate Store Lite 0.1.24 package
   stores one restrictive core-parent/title placement, resolves only an existing
-  core-owned anonymous subject, and returns its bounded empty or current-line
-  model through the generic core renderer. The isolated supported-server
-  rehearsal passed 100 administrator and 76 public desktop/mobile checks while
-  the starter retained no Store Lite package, table, setting, or business data
+  core-owned anonymous subject, and binds each verified current line to pure
+  quantity/remove presentations. Core owns their evidence, escaped forms,
+  dispatcher, generic completion status, and same-page refresh. The isolated
+  supported-server rehearsal passed 100 administrator and 147 public
+  desktop/mobile checks through add, quantity update, recalculated totals, and
+  removal while the starter retained no Store Lite package, table, setting, or
+  business data
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional
