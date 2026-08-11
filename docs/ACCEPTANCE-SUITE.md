@@ -656,6 +656,21 @@ the temporary primary isolation snapshot was unchanged, the isolated server
 log was clean, and independent post-run checks found zero matching temporary
 schemas and grants. No retained database or hosted installation was migrated.
 
+On 2026-08-10, the core collection-row form-integration tree reran the complete
+suite against another fresh temporary primary built from the tracked installer
+plus all 45 current migrations. The expanded 22-assertion disposable fixture
+proved malformed and foreign row refusal before evidence, stable row/form
+instances, separate quantity/remove CSRF and idempotency issuance, one shared
+page subject, exact core-rendered actions and controls, display-only fallback
+when the page gate is disabled, global form counting, and no package callback
+during integration. Every existing migration, authorization, transaction,
+endpoint, CRUD, media, theme, and rollback gate also passed. The normalized
+32-table schema signature remained
+`cb6e941861fc5ed74142f11b0f36536549a335f478b8214e613836f360501a3f`,
+the isolated PHP server log was clean, and cleanup removed the acceptance
+database, its grant, the temporary primary, and its grant. No retained database,
+hosted installation, or client data was changed.
+
 A separate generated-fixture Chrome inspection rendered the new component
 editor's valid and field-error states at 1512×900 and 390×844. Both viewports
 had zero console errors, failed requests, missing labels, clipped controls,
@@ -1096,11 +1111,13 @@ process environment.
   refusing invalid input. Package and theme code cannot supply header names,
   attributes, or arbitrary cookie values.
 - Public-component form-integration acceptance runs only against a freshly
-  migrated disposable database. Its 17 assertions now also require duplicate
-  raw-cookie refusal without evidence, one issued subject and one controller
-  delivery for the first accepted page form, same-subject reuse for later
-  forms, strict request-local coordinator validation, display-only fallback,
-  and exact evidence/schema/grant cleanup.
+  migrated disposable database. Its 22 assertions require duplicate raw-cookie
+  refusal without evidence, one issued subject and one controller delivery for
+  the first accepted page form, same-subject reuse for later top-level and row
+  forms, strict request-local coordinator validation, malformed/foreign row
+  refusal before evidence, stable row/form instances, exact quantity/remove
+  actions and fields, display-only fallback, global form counting, and exact
+  evidence/schema/grant cleanup.
 - Public-mutation response-emitter acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It accepts
   only exact fixed response-contract envelopes, proves the closed no-store/

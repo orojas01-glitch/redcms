@@ -181,29 +181,11 @@ if (!function_exists('red_addon_public_mutation_page_context_valid')) {
     }
 }
 
-if (!function_exists('red_addon_public_mutation_page_integrate')) {
-    function red_addon_public_mutation_page_integrate(
-        $connection,
-        $componentContext,
-        $viewModel
+if (!function_exists('red_addon_public_mutation_page_accept_integration')) {
+    function red_addon_public_mutation_page_accept_integration(
+        array $page,
+        $integration
     ) {
-        $page = red_addon_public_mutation_page_context_current();
-        if (($page['enabled'] ?? null) !== true) {
-            return red_addon_public_component_form_integration_result(
-                'integration_invalid'
-            );
-        }
-        if (($page['formCount'] ?? 0) >= 128) {
-            return red_addon_public_component_form_integration_result(
-                'bootstrap_unavailable'
-            );
-        }
-        $integration = red_addon_public_component_form_integrate(
-            $connection,
-            $componentContext,
-            $viewModel,
-            $page['subjectToken']
-        );
         if (!red_addon_public_component_form_integration_valid($integration)
             || empty($integration['valid'])
             || empty($integration['available'])
@@ -248,6 +230,68 @@ if (!function_exists('red_addon_public_mutation_page_integrate')) {
         $page['reason'] = 'forms_ready';
         red_addon_public_mutation_page_context_set($page);
         return $integration;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_page_integrate')) {
+    function red_addon_public_mutation_page_integrate(
+        $connection,
+        $componentContext,
+        $viewModel
+    ) {
+        $page = red_addon_public_mutation_page_context_current();
+        if (($page['enabled'] ?? null) !== true) {
+            return red_addon_public_component_form_integration_result(
+                'integration_invalid'
+            );
+        }
+        if (($page['formCount'] ?? 0) >= 128) {
+            return red_addon_public_component_form_integration_result(
+                'bootstrap_unavailable'
+            );
+        }
+        return red_addon_public_mutation_page_accept_integration(
+            $page,
+            red_addon_public_component_form_integrate(
+                $connection,
+                $componentContext,
+                $viewModel,
+                $page['subjectToken']
+            )
+        );
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_page_integrate_collection_form')) {
+    function red_addon_public_mutation_page_integrate_collection_form(
+        $connection,
+        $componentContext,
+        $viewModel,
+        $rowIndex,
+        $formIndex
+    ) {
+        $page = red_addon_public_mutation_page_context_current();
+        if (($page['enabled'] ?? null) !== true) {
+            return red_addon_public_component_form_integration_result(
+                'integration_invalid'
+            );
+        }
+        if (($page['formCount'] ?? 0) >= 128) {
+            return red_addon_public_component_form_integration_result(
+                'bootstrap_unavailable'
+            );
+        }
+        return red_addon_public_mutation_page_accept_integration(
+            $page,
+            red_addon_public_component_collection_form_integrate(
+                $connection,
+                $componentContext,
+                $viewModel,
+                $rowIndex,
+                $formIndex,
+                $page['subjectToken']
+            )
+        );
     }
 }
 

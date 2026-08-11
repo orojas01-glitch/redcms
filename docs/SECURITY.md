@@ -1062,15 +1062,21 @@ choices. This is only compatibility evidence for later integration: the
 default public renderer ignores the retained presentation and emits no form,
 token, script, header, cookie, endpoint, or package-controlled markup.
 
-A bounded collection row may now retain one or two distinct presentations of
-that same closed shape. Core refuses empty or associative lists, more than two
+A bounded collection row may retain one or two distinct presentations of that
+same closed shape. Core refuses empty or associative lists, more than two
 forms, repeated route/mutation pairs, malformed fields, raw authority, HTML,
-or unknown row keys. The default renderer continues to emit only the row title
-and facts and never renders these retained presentations. This data-only gate
-does not derive form instances, invoke the evidence bootstrap, open a database,
-call a package handler, issue a subject/CSRF/idempotency value, deliver the
-controller, or change a response. Per-row integration remains a later
-core-owned gate.
+or unknown row keys. The default renderer emits the row title and facts in all
+contexts. It may additionally compose row controls only when the supported
+public-mutation page gate is active and the caller supplied the explicit
+database connection. Core revalidates the complete view, derives stable
+placement/row/form instance IDs, verifies that the component, route, mutation
+handler, and state loader still resolve to the same enabled package, and gives
+each accepted form separate CSRF/idempotency evidence under the page's one
+request-local subject. Only validated escaped core form HTML is emitted.
+Packages provide no HTML, evidence, script, cookie, response behavior, instance
+ID, or callback during composition. A disabled gate, malformed complete view,
+ownership drift, bootstrap failure, or global form-cap exhaustion fails the
+affected control closed without granting package authority.
 
 The core-owned public component form integration then consumes one already
 returned and revalidated component model; it never invokes the component,

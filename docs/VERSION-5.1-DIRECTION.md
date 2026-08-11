@@ -1270,6 +1270,22 @@ request bootstrap excludes the disabled package.
     core-owned evidence composition/rendering, and browser mutation QA remain
     separate follow-up gates.
 
+93. Completed core-owned collection-row public-mutation form integration.
+    Separately distributed Store Lite 0.1.24 supplies current server-derived
+    line identity and exactly two pure presentations for each non-empty Cart
+    row. Core revalidates the complete view, then independently verifies that
+    the component, route, mutation handler, and state loader still belong to
+    one enabled package before issuing evidence. Each row control receives a
+    stable placement/row/form instance and separate CSRF/idempotency values,
+    while every accepted form on the page reuses one request-local anonymous
+    subject. The default renderer emits only validated escaped core form HTML;
+    package callbacks are not reinvoked and package HTML, tokens, cookies,
+    scripts, response ownership, and endpoint choice remain forbidden. A
+    disabled page gate, invalid complete view, ownership drift, unavailable
+    bootstrap, or form-cap overflow leaves the affected control unavailable.
+    Real desktop/mobile quantity and remove dispatch, Cart refresh behavior,
+    and visitor wording remain the next gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

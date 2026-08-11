@@ -7,7 +7,8 @@
  * deliberately small: page placement scalars in, a bounded data-only view
  * model out. Core may render an optional closed list of label/value facts and
  * retain validated component or bounded collection-row public-mutation form
- * presentations for a later core-owned controller, but package HTML and
+ * presentations. When the explicit page mutation gate is active, core alone
+ * may compose browser evidence and render those forms; package HTML and
  * browser authority remain forbidden.
  * Core owns the default renderer and never selects a class, template, or
  * callback from a page row.
@@ -503,6 +504,46 @@ if (!function_exists('red_addon_public_component_render')) {
             }
         }
 
+        $collectionFormHtml = [];
+        if (array_key_exists('collection', $viewModel)
+            && $connection instanceof mysqli
+            && function_exists(
+                'red_addon_public_mutation_page_integrate_collection_form'
+            )
+        ) {
+            foreach ($viewModel['collection']['items'] as $rowIndex => $item) {
+                if (!array_key_exists('mutationForms', $item)) {
+                    continue;
+                }
+                foreach ($item['mutationForms'] as $formIndex => $_form) {
+                    $integration =
+                        red_addon_public_mutation_page_integrate_collection_form(
+                            $connection,
+                            $context,
+                            $viewModel,
+                            $rowIndex,
+                            $formIndex
+                        );
+                    if (red_addon_public_component_form_integration_valid(
+                        $integration
+                    )
+                        && !empty($integration['valid'])
+                        && !empty($integration['available'])
+                    ) {
+                        $collectionFormHtml[$rowIndex][] =
+                            $integration['formHtml'];
+                    } elseif (($integration['reason'] ?? '')
+                        !== 'integration_invalid'
+                    ) {
+                        error_log(
+                            'RED-CMS add-on collection-row form is unavailable: ' .
+                            $context['component']
+                        );
+                    }
+                }
+            }
+        }
+
         echo '<section class="red-addon-component" data-red-addon-component="' .
             red_addon_public_component_escape($context['component']) .
             '"><h2>' . red_addon_public_component_escape($viewModel['title']) .
@@ -529,7 +570,7 @@ if (!function_exists('red_addon_public_component_render')) {
                 . '"><h3>'
                 . red_addon_public_component_escape($viewModel['collection']['label'])
                 . '</h3><ol>';
-            foreach ($viewModel['collection']['items'] as $item) {
+            foreach ($viewModel['collection']['items'] as $rowIndex => $item) {
                 echo '<li><h4>'
                     . red_addon_public_component_escape($item['title'])
                     . '</h4><dl>';
@@ -540,7 +581,15 @@ if (!function_exists('red_addon_public_component_render')) {
                         . red_addon_public_component_escape($fact['value'])
                         . '</dd></div>';
                 }
-                echo '</dl></li>';
+                echo '</dl>';
+                if (!empty($collectionFormHtml[$rowIndex])) {
+                    echo '<div class="red-addon-component__collection-actions">';
+                    foreach ($collectionFormHtml[$rowIndex] as $rowFormHtml) {
+                        echo $rowFormHtml;
+                    }
+                    echo '</div>';
+                }
+                echo '</li>';
             }
             echo '</ol></section>';
         }
