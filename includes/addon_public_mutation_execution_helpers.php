@@ -611,7 +611,7 @@ if (!function_exists('red_addon_public_mutation_execution_tables')) {
             }
             $normalized[$table] = true;
         }
-        if ($normalized === [] || count($normalized) > 8) {
+        if ($normalized === [] || count($normalized) > 16) {
             return null;
         }
         $tables = array_keys($normalized);

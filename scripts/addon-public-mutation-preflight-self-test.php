@@ -10,6 +10,8 @@ if (PHP_SAPI !== 'cli') {
 
 require_once dirname(__DIR__) .
     '/includes/addon_public_mutation_preflight_helpers.php';
+require_once dirname(__DIR__) .
+    '/includes/addon_public_mutation_execution_helpers.php';
 
 $assertions = 0;
 
@@ -81,6 +83,34 @@ function red_addon_public_mutation_test_manifest()
     ];
 }
 
+function red_addon_public_mutation_test_max_scope_manifest()
+{
+    $manifest = red_addon_public_mutation_test_manifest();
+    $fields = [];
+    $tables = [];
+    for ($index = 1; $index <= 16; $index++) {
+        $suffix = str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+        $fields[] = [
+            'key' => 'checkout-field-' . $suffix,
+            'type' => 'string',
+            'format' => 'plain-text',
+            'required' => $index === 1,
+            'minLength' => 1,
+            'maxLength' => 120,
+        ];
+        $tables[] = 'RED_Addon_StoreLite_Checkout_Scope_' . $suffix;
+    }
+    $manifest['provides'] = [
+        'components' => [],
+        'services' => [],
+        'adminTools' => [],
+        'adapters' => [],
+    ];
+    $manifest['publicMutationContracts'][0]['requestFields'] = $fields;
+    $manifest['publicMutationContracts'][0]['tables'] = $tables;
+    return $manifest;
+}
+
 try {
     $manifest = red_addon_public_mutation_test_manifest();
     $contract = red_addon_public_mutation_contract(
@@ -129,6 +159,95 @@ try {
             && !array_key_exists('requestFields', $plan)
             && !array_key_exists('tables', $plan),
         'preflight exposes only counts and fingerprints rather than mutable field or table declarations'
+    );
+
+    $maxScope = red_addon_public_mutation_test_max_scope_manifest();
+    $maxScopeContract = red_addon_public_mutation_contract(
+        $maxScope,
+        'redcms.store-lite/cart-intent',
+        'redcms.store-lite/add-to-cart'
+    );
+    $maxScopePlan = red_addon_public_mutation_declaration_preflight(
+        $maxScope,
+        'redcms.store-lite/cart-intent',
+        'redcms.store-lite/add-to-cart'
+    );
+    $registry = new RED_Addon_Runtime_Registry(
+        'redcms.store-lite',
+        $maxScope
+    );
+    $registry->registerRoute(
+        'redcms.store-lite/cart-intent',
+        static function (): void {}
+    );
+    $registry->registerPublicMutation(
+        'redcms.store-lite/add-to-cart',
+        static function (): void {},
+        $maxScope['publicMutationContracts'][0]['tables']
+    );
+    $registry->registerPublicMutationStateLoader(
+        'redcms.store-lite/add-to-cart',
+        static function (): void {}
+    );
+    $registry->assertComplete();
+    red_addon_public_mutation_test_assert(
+        is_array($maxScopeContract)
+            && count($maxScopeContract['requestFields']) === 16
+            && count($maxScopeContract['tables']) === 16
+            && !empty($maxScopePlan['valid'])
+            && $maxScopePlan['requestFieldCount'] === 16
+            && $maxScopePlan['tableCount'] === 16
+            && red_addon_public_mutation_declaration_preflight_is_valid(
+                $maxScopePlan
+            )
+            && red_addon_public_mutation_execution_tables(
+                $maxScopeContract['tables']
+            ) === $maxScopeContract['tables'],
+        'the closed sixteen-field and sixteen-table boundary agrees across declaration, preflight, runtime registration, and execution validation'
+    );
+
+    $tooManyFields = $maxScope;
+    $tooManyFields['publicMutationContracts'][0]['requestFields'][] = [
+        'key' => 'checkout-field-17',
+        'type' => 'string',
+        'format' => 'plain-text',
+        'required' => false,
+        'minLength' => 1,
+        'maxLength' => 120,
+    ];
+    $tooManyTables = $maxScope;
+    $tooManyTables['publicMutationContracts'][0]['tables'][] =
+        'RED_Addon_StoreLite_Checkout_Scope_17';
+    $runtimeOverflowRefused = false;
+    try {
+        $overflowRegistry = new RED_Addon_Runtime_Registry(
+            'redcms.store-lite',
+            $tooManyTables
+        );
+        $overflowRegistry->registerPublicMutation(
+            'redcms.store-lite/add-to-cart',
+            static function (): void {},
+            $tooManyTables['publicMutationContracts'][0]['tables']
+        );
+    } catch (LogicException $throwable) {
+        $runtimeOverflowRefused = true;
+    }
+    red_addon_public_mutation_test_assert(
+        red_addon_public_mutation_contract(
+            $tooManyFields,
+            'redcms.store-lite/cart-intent',
+            'redcms.store-lite/add-to-cart'
+        ) === null
+            && red_addon_public_mutation_contract(
+                $tooManyTables,
+                'redcms.store-lite/cart-intent',
+                'redcms.store-lite/add-to-cart'
+            ) === null
+            && $runtimeOverflowRefused
+            && red_addon_public_mutation_execution_tables(
+                $tooManyTables['publicMutationContracts'][0]['tables']
+            ) === null,
+        'seventeen declared request fields or transaction tables remain uniformly refused'
     );
 
     $reordered = $manifest;

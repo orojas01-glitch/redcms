@@ -94,7 +94,7 @@ and must declare every one of these fixed values:
 - `subject: anonymous`, `idempotency: core-issued-key`,
   `privacy: no-store`, `rateLimit: required`, and
   `postcondition: server-derived-state`;
-- one to eight package-shaped tables, a bounded value-free audit category; and
+- one to sixteen package-shaped tables, a bounded value-free audit category; and
 - exactly the public success vocabulary `accepted`, `unchanged`.
 
 Core canonicalizes field and table order, rejects duplicated route, mutation,
