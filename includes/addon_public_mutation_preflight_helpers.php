@@ -270,14 +270,14 @@ if (!function_exists('red_addon_public_mutation_declaration_preflight_is_valid')
             || $plan['maxBodyBytes'] > 8192
             || !is_int($plan['requestFieldCount'] ?? null)
             || $plan['requestFieldCount'] < 1
-            || $plan['requestFieldCount'] > 8
+            || $plan['requestFieldCount'] > 16
             || ($plan['subject'] ?? null) !== 'anonymous'
             || ($plan['idempotency'] ?? null) !== 'core-issued-key'
             || ($plan['privacy'] ?? null) !== 'no-store'
             || ($plan['rateLimit'] ?? null) !== 'required'
             || !is_int($plan['tableCount'] ?? null)
             || $plan['tableCount'] < 1
-            || $plan['tableCount'] > 8
+            || $plan['tableCount'] > 16
             || ($plan['postcondition'] ?? null) !== 'server-derived-state'
             || ($plan['outcomes'] ?? null) !== ['accepted', 'unchanged']
             || !red_addon_valid_sha256($plan['contractSha256'] ?? null)

@@ -304,9 +304,9 @@ if (!class_exists('RED_Addon_Runtime_Registry', false)) {
                 }
                 $normalized[$table] = true;
             }
-            if ($normalized === [] || count($normalized) > 8) {
+            if ($normalized === [] || count($normalized) > 16) {
                 throw new LogicException(
-                    'Public mutation persistence requires one to eight package tables.'
+                    'Public mutation persistence requires one to sixteen package tables.'
                 );
             }
             $tables = array_keys($normalized);

@@ -2123,10 +2123,10 @@ if (!function_exists('red_addon_validate_public_mutation_tables')) {
             red_addon_add_error($result, $context . ' tables must be an array.');
             return [];
         }
-        if ($tables === [] || count($tables) > 8) {
+        if ($tables === [] || count($tables) > 16) {
             red_addon_add_error(
                 $result,
-                $context . ' tables must contain one to eight package tables.'
+                $context . ' tables must contain one to sixteen package tables.'
             );
         }
         $normalized = [];

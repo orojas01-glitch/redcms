@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-12 during the generic RED-CMS rich public-mutation form
-gate following the merged Store Lite 0.1.27 guest-checkout contract.
+Last updated: 2026-08-12 during the generic RED-CMS checkout-scope gate
+following the merged Store Lite 0.1.27 guest-checkout contract.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -51,7 +51,7 @@ flowchart TD
     H2D["COMPLETE<br/>Editable Cart D<br/>desktop/mobile mutation QA"]
     I1["COMPLETE<br/>Guest order foundation<br/>immutable server-derived snapshot"]
     I2["COMPLETE<br/>Store Lite 0.1.27<br/>guest-checkout scalar + presentation contract"]
-    I3["CURRENT<br/>Generic RED-CMS rich form gate<br/>text, email, tel, textarea, conditions"]
+    I3["CURRENT<br/>Generic RED-CMS checkout-scope gate<br/>16 fields + 16 declared tables"]
     I4["REMAINING<br/>Store Lite checkout linkage<br/>persist order + pay on receipt + browser QA"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
@@ -72,8 +72,9 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | The immutable guest-order and Store Lite 0.1.27 guest-checkout data contracts are complete. The current gate extends RED-CMS's generic closed mutation form so an optional package can later link checkout without package HTML or browser authority. |
-| What just finished? | Store Lite fixed twelve bounded guest fields, pickup/delivery semantics, payment-readiness intersection, and a data-only presentation model. This core batch adds generic formatted strings, explicit optional empty values, four rich controls, and select-backed conditional browser behavior. |
+| Where are we? | The immutable guest-order and Store Lite 0.1.27 guest-checkout data contracts are complete. The current gate aligns RED-CMS's generic closed mutation limits so an optional package can later link checkout without package HTML or browser authority. |
+| What just finished? | Store Lite fixed twelve bounded guest fields, pickup/delivery semantics, payment-readiness intersection, and a data-only presentation model. The prior core batch added generic formatted strings, explicit optional empty values, four rich controls, and select-backed conditional browser behavior. |
+| What is active now? | The generic public-mutation contract is being aligned to a closed maximum of sixteen request fields and sixteen declared package-owned tables. That permits one atomic checkout scope without exposing client-selected tables or weakening core validation. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove a simple or variable product through the server-authoritative Cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
 | What remains after this core gate? | Adapt and register the separate Store Lite presentation against the accepted core declaration, link the guest-order mutation, prove pay-on-receipt desktop/mobile behavior, then pass lifecycle/recovery/migration/isolation release acceptance. |

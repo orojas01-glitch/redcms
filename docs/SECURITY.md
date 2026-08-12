@@ -992,9 +992,10 @@ request, token, package, cart, order, secret, or business value.
 The internal core-only transaction runner is not a public endpoint. It accepts
 only a typed command and opaque evidence from a later core dispatcher, plus a
 current trusted first-party runtime binding. Under lifecycle and package locks
-it validates the subject, CSRF, idempotency key, rate budget, declared InnoDB
-tables, server-derived state, replay ledger, and a value-free anonymous audit
-fact in one transaction. Replays return a bounded stored outcome; changed
+it validates the subject, CSRF, idempotency key, rate budget, and up to sixteen
+declared package-owned InnoDB tables, server-derived state, replay ledger, and
+a value-free anonymous audit fact in one transaction. Replays return a bounded
+stored outcome; changed
 commands are refused. Output, exceptions, malformed results, state drift,
 transaction loss, ledger failure, and audit failure roll back or refuse.
 The callback receives a core-supplied transaction connection, so this is a

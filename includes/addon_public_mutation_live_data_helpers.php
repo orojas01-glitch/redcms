@@ -158,7 +158,7 @@ if (!function_exists('red_addon_public_mutation_live_data_table_evidence')) {
             || !red_addon_valid_capability($routeId)
             || !red_addon_valid_capability($mutationId)
             || $tables === []
-            || count($tables) > 8
+            || count($tables) > 16
         ) {
             $result['errors'][] = 'table_evidence_invalid';
             return $result;
@@ -969,7 +969,7 @@ if (!function_exists('red_addon_public_mutation_live_data_preflight_is_valid')) 
             || $plan['migrationCount'] > 200
             || !is_int($plan['tableCount'] ?? null)
             || $plan['tableCount'] < 1
-            || $plan['tableCount'] > 8
+            || $plan['tableCount'] > 16
             || !is_int($plan['innoDbTableCount'] ?? null)
             || $plan['innoDbTableCount'] < 0
             || $plan['innoDbTableCount'] > $plan['tableCount']
