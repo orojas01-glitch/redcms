@@ -102,10 +102,11 @@ for include_file in \
     addon_service_helpers.php \
     addon_install_helpers.php \
     admin_transaction_helpers.php \
-        addon_public_mutation_preflight_helpers.php \
-        addon_public_mutation_subject_helpers.php \
-        addon_public_mutation_subject_cookie_helpers.php \
-        addon_public_mutation_subject_cookie_lifecycle_helpers.php \
+    addon_public_mutation_preflight_helpers.php \
+    addon_public_mutation_runtime_setting_helpers.php \
+    addon_public_mutation_subject_helpers.php \
+    addon_public_mutation_subject_cookie_helpers.php \
+    addon_public_mutation_subject_cookie_lifecycle_helpers.php \
     addon_public_mutation_http_request_helpers.php \
     addon_public_mutation_route_helpers.php \
     addon_public_mutation_server_request_helpers.php \
