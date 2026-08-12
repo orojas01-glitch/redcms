@@ -521,6 +521,15 @@ if (!function_exists('red_addon_public_component_view_model')) {
             }
             $normalized['facts'] = $facts;
         }
+        if (array_key_exists('collection', $viewModel)) {
+            $collection = red_addon_public_component_collection_presentation(
+                $viewModel['collection']
+            );
+            if (!is_array($collection)) {
+                return null;
+            }
+            $normalized['collection'] = $collection;
+        }
         if (array_key_exists('mutationForm', $viewModel)) {
             $mutationForm =
                 red_addon_public_component_mutation_form_presentation(
@@ -530,15 +539,6 @@ if (!function_exists('red_addon_public_component_view_model')) {
                 return null;
             }
             $normalized['mutationForm'] = $mutationForm;
-        }
-        if (array_key_exists('collection', $viewModel)) {
-            $collection = red_addon_public_component_collection_presentation(
-                $viewModel['collection']
-            );
-            if (!is_array($collection)) {
-                return null;
-            }
-            $normalized['collection'] = $collection;
         }
         return $normalized;
     }

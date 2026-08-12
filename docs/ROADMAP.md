@@ -751,7 +751,8 @@ created and placed Product and Cart components; desktop and mobile Chrome
 proved empty Cart rendering and current subject-owned simple/Size-Color lines
 after real Add-to-cart requests. The 100 administrator checks, 76 public checks,
 exact `4:4:6:4:4:4` cart state, revision/audit evidence, and full Docker cleanup
-passed. The next Store Lite milestone is quantity update and line removal.
+passed. At that checkpoint, the next Store Lite milestone was quantity update
+and line removal.
 
 The editable-Cart composition prerequisites are now complete. Separately
 distributed Store Lite 0.1.24 binds each server-derived current line identity
@@ -760,10 +761,10 @@ complete collection model, verifies same-package runtime ownership, derives
 stable per-placement row/form instances, issues separate CSRF and idempotency
 evidence under one request-local subject, and renders only escaped core-owned
 form markup beside the row facts. Packages still supply no HTML, browser
-evidence, response behavior, or callback during composition. Real desktop and
-mobile quantity/remove dispatch, Cart refresh behavior, and visitor-facing
-status wording remain the current follow-up gate; the hosted demo and all
-client installations remain unchanged.
+evidence, response behavior, or callback during composition. At that
+checkpoint, real desktop and mobile quantity/remove dispatch, Cart refresh
+behavior, and visitor-facing status wording remained the follow-up gate; the
+hosted demo and all client installations remained unchanged.
 
 That editable-Cart follow-up gate is now complete in the isolated
 supported-server rehearsal pinned to external Store Lite 0.1.24 at merged
@@ -777,16 +778,17 @@ the empty Cart without rotating the subject. The established 100 administrator
 checks and 147 public checks passed with zero console, page, request, HTTP, or
 overflow errors. Exact final state was `4:2:3:8:8:8`, and every container,
 network, image, database, certificate, secret, and staged project was removed.
-No hosted or client installation changed. The immutable guest-order foundation
-and the separate Store Lite 0.1.27 guest-checkout scalar/presentation contract
-are now complete. The current generic core gate expands the same closed
-public-mutation declaration, decoder, component presentation, renderer, and
-fixed browser controller to at most sixteen fields with bounded plain-text,
-email, telephone, country-code, textarea, and select-backed condition support.
-It installs no package and adds no Store Lite route, setting, migration,
-business record, payment provider, or client state. Store Lite checkout route
-linkage, order persistence, pay-on-receipt browser QA, and later hosted-provider
-adapters remain separate follow-up gates.
+No hosted or client installation changed. The immutable guest-order foundation,
+generic non-secret runtime-setting boundary, and separate Store Lite 0.1.28
+checkout linkage are now complete. Desktop pickup and mobile delivery used the
+closed core-rendered form and real dispatcher to persist exact server-derived
+order snapshots with pay on receipt. The 100 administrator and 268 public
+checks covered conditional fields, retry/conflict behavior, responsive output,
+database facts, and complete Docker cleanup. The core additionally locks
+canonical idempotent component normalization when one view contains both a
+collection and top-level form. Store Lite remains external to the starter; the
+active release gate is disable/re-enable, recovery, migration, responsive, and
+client-isolation acceptance. Hosted-provider adapters remain later work.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

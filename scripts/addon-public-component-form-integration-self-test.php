@@ -507,7 +507,23 @@ try {
         'component integration resolves ownership without invoking package callbacks'
     );
 
-    $rendererViewModel = $collectionView;
+    $combinedView = $collectionView;
+    $combinedView['mutationForm'] =
+        red_addon_component_form_test_view()['mutationForm'];
+    $normalizedCombinedView = red_addon_public_component_view_model(
+        $combinedView
+    );
+    red_addon_component_form_test_assert(
+        is_array($normalizedCombinedView)
+            && array_keys($normalizedCombinedView) === [
+                'title', 'summary', 'facts', 'collection', 'mutationForm',
+            ]
+            && red_addon_public_component_view_model(
+                $normalizedCombinedView
+            ) === $normalizedCombinedView,
+        'collection plus top-level mutation form normalization is canonical and idempotent'
+    );
+    $rendererViewModel = $combinedView;
     ob_start();
     $displayOnlyRendered = red_addon_public_component_render(
         red_addon_component_form_test_context(),
@@ -596,7 +612,7 @@ try {
         'later page forms reuse one subject while retaining the first response lifecycle'
     );
 
-    $rendererViewModel = $collectionView;
+    $rendererViewModel = $combinedView;
     ob_start();
     $collectionRendered = red_addon_public_component_render(
         red_addon_component_form_test_context(),
@@ -611,7 +627,11 @@ try {
             && substr_count(
                 $collectionHtml,
                 'data-red-addon-public-mutation-form'
-            ) === 2
+            ) === 3
+            && str_contains(
+                $collectionHtml,
+                'id="red-public-mutation-component-42"'
+            )
             && str_contains(
                 $collectionHtml,
                 'id="red-public-mutation-component-42-row-1-form-1"'
@@ -632,14 +652,14 @@ try {
             && str_contains($collectionHtml, 'name="quantity" value="2"')
             && str_contains($collectionHtml, '>Update quantity</button>')
             && str_contains($collectionHtml, '>Remove item</button>'),
-        'core renders two uniquely identified quantity and removal forms inside the row'
+        'core renders one top-level form plus two uniquely identified row forms'
     );
     red_addon_component_form_test_assert(
         red_addon_public_mutation_page_delivery_valid($collectionDelivery)
-            && $collectionDelivery['formCount'] === 4
+            && $collectionDelivery['formCount'] === 5
             && $collectionDelivery['lifecycle'] === $firstDelivery['lifecycle']
-            && red_addon_component_form_test_counts($connection) === '2:6:6',
-        'row forms reuse the page subject and receive separate CSRF and idempotency evidence'
+            && red_addon_component_form_test_counts($connection) === '2:7:7',
+        'top-level and row forms reuse the page subject with separate evidence'
     );
 
     $GLOBALS['RED_ADDON_PUBLIC_MUTATION_PAGE_CONTEXT']['formCount'] = 129;

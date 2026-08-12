@@ -8,8 +8,8 @@ INTEGRATION_DIR="$PROJECT_ROOT/server-integrations/frankenphp-public-mutation-at
 PROOF_DIR="$INTEGRATION_DIR/proof"
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$PROJECT_ROOT")/redcms-store-lite}"
 STORE_PACKAGE="$STORE_REPOSITORY/package"
-EXPECTED_STORE_VERSION='0.1.24'
-EXPECTED_STORE_REVISION='c3dc7405d9e62c1112555503523c0c339e4b8fa8'
+EXPECTED_STORE_VERSION='0.1.28'
+EXPECTED_STORE_REVISION='0f4253b3ec22d5e6b25bfc723a6c1596eea67d90'
 MYSQL_IMAGE="${RED_STORE_LITE_MYSQL_IMAGE:-mysql:8.4}"
 NODE_BIN="${RED_NODE_BIN:-/Users/oscarrojas/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node}"
 PLAYWRIGHT_MODULE="${RED_PLAYWRIGHT_MODULE:-/Users/oscarrojas/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright}"
@@ -38,7 +38,7 @@ fail() {
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs real Store Lite add, quantity, and removal forms in disposable Docker/MySQL over HTTPS.'
+    printf '%s\n' 'Runs real Store Lite cart and guest-checkout forms in disposable Docker/MySQL over HTTPS.'
 }
 
 if [[ $# -gt 0 ]]; then
@@ -242,8 +242,8 @@ for (const migration of manifest.migrations || []) {
 ' "$STORE_PACKAGE/addon.json")
 [[ "${#CORE_MIGRATIONS[@]}" -eq 45 ]] \
     || fail "expected 45 core migrations; found ${#CORE_MIGRATIONS[@]}."
-[[ "${#STORE_MIGRATIONS[@]}" -eq 7 ]] \
-    || fail "expected 7 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
+[[ "${#STORE_MIGRATIONS[@]}" -eq 8 ]] \
+    || fail "expected 8 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
 for migration in "${STORE_MIGRATIONS[@]}"; do
     [[ -s "$migration" ]] || fail "Store Lite migration is missing: $migration"
 done
@@ -345,8 +345,88 @@ cart_state="$(docker exec "$DB_CONTAINER" mysql \
              WHERE PackageID='redcms.store-lite'
                AND EventName='addon.public-mutation.completed'));
     " 2>/dev/null)"
-[[ "$cart_state" == '4:2:3:8:8:8' ]] \
+[[ "$cart_state" == '2:2:3:10:12:12' ]] \
     || fail "unexpected atomic Store Lite state after browser mutations: $cart_state"
+
+if ! order_state="$(docker exec "$DB_CONTAINER" mysql \
+    -u"$DB_USER" "-p$DB_PASSWORD" "$DB_NAME" \
+    --batch --skip-column-names --execute="
+        SELECT CONCAT_WS(':',
+            (SELECT COUNT(*) FROM RED_Addon_StoreLite_Orders),
+            (SELECT COUNT(*) FROM RED_Addon_StoreLite_Order_Lines),
+            (SELECT COUNT(*) FROM RED_Addon_StoreLite_Order_Line_Options),
+            (SELECT COUNT(*) FROM RED_Addon_StoreLite_Order_Status_History),
+            (SELECT COUNT(*) FROM RED_Addon_StoreLite_Orders
+             WHERE FulfillmentMethod='pickup'),
+            (SELECT COUNT(*) FROM RED_Addon_StoreLite_Orders
+             WHERE FulfillmentMethod='delivery'),
+            (SELECT COALESCE(SUM(FulfillmentFeeMinor), 0)
+             FROM RED_Addon_StoreLite_Orders),
+            (SELECT COALESCE(SUM(TotalMinor), 0)
+             FROM RED_Addon_StoreLite_Orders));
+    " 2>"$OUTPUT_DIR/order-state-query.log")"; then
+    cat "$OUTPUT_DIR/order-state-query.log" >&2 || true
+    fail 'Store Lite order-state verification query failed.'
+fi
+rm -f "$OUTPUT_DIR/order-state-query.log"
+[[ "$order_state" == '2:2:2:2:1:1:700:4497' ]] \
+    || fail "unexpected Store Lite order graph after checkout: $order_state"
+
+if ! order_facts="$(docker exec "$DB_CONTAINER" mysql \
+    -u"$DB_USER" "-p$DB_PASSWORD" "$DB_NAME" \
+    --batch --skip-column-names --execute="
+        SELECT GROUP_CONCAT(
+            CONCAT_WS(':', FulfillmentMethod, QuantityTotal, SubtotalMinor,
+                FulfillmentFeeMinor, TotalMinor, PaymentMethod, PaymentKind,
+                PaymentStatus,
+                IF(DeliveryLine1 IS NULL, 'no-address', 'address'))
+            ORDER BY FulfillmentMethod SEPARATOR '|')
+        FROM RED_Addon_StoreLite_Orders;
+    " 2>"$OUTPUT_DIR/order-facts-query.log")"; then
+    cat "$OUTPUT_DIR/order-facts-query.log" >&2 || true
+    fail 'Store Lite order-facts verification query failed.'
+fi
+rm -f "$OUTPUT_DIR/order-facts-query.log"
+[[ "$order_facts" == 'delivery:1:2499:700:3199:pay_on_receipt:deferred:due_on_receipt:address|pickup:2:1298:0:1298:pay_on_receipt:deferred:due_on_receipt:no-address' ]] \
+    || fail "unexpected immutable Store Lite order facts: $order_facts"
+
+if ! order_line_facts="$(docker exec "$DB_CONTAINER" mysql \
+    -u"$DB_USER" "-p$DB_PASSWORD" "$DB_NAME" \
+    --batch --skip-column-names --execute="
+        SELECT GROUP_CONCAT(
+            CONCAT_WS(':', orders.FulfillmentMethod, order_lines.ProductID,
+                COALESCE(order_lines.VariantID, 'simple'), order_lines.SKU,
+                order_lines.Quantity, order_lines.UnitPriceMinor,
+                order_lines.LineTotalMinor)
+            ORDER BY orders.FulfillmentMethod SEPARATOR '|')
+        FROM RED_Addon_StoreLite_Order_Lines order_lines
+        INNER JOIN RED_Addon_StoreLite_Orders orders
+          ON orders.RecordID=order_lines.OrderRecordID;
+    " 2>"$OUTPUT_DIR/order-line-query.log")"; then
+    cat "$OUTPUT_DIR/order-line-query.log" >&2 || true
+    fail 'Store Lite order-line verification query failed.'
+fi
+rm -f "$OUTPUT_DIR/order-line-query.log"
+[[ "$order_line_facts" == 'delivery:classic-shirt:small-black:SHIRT-S-BLACK:1:2499:2499|pickup:banana-bunch:simple:BANANA-BUNCH:2:649:1298' ]] \
+    || fail "unexpected immutable Store Lite order lines: $order_line_facts"
+
+if ! order_customer_facts="$(docker exec "$DB_CONTAINER" mysql \
+    -u"$DB_USER" "-p$DB_PASSWORD" "$DB_NAME" \
+    --batch --skip-column-names --execute="
+        SELECT GROUP_CONCAT(
+            CONCAT_WS(':', FulfillmentMethod, CustomerName, CustomerEmail,
+                COALESCE(CustomerPhone, 'no-phone'),
+                COALESCE(DeliveryLine1, 'no-address'),
+                COALESCE(DeliveryCountryCode, 'no-country'))
+            ORDER BY FulfillmentMethod SEPARATOR '|')
+        FROM RED_Addon_StoreLite_Orders;
+    " 2>"$OUTPUT_DIR/order-customer-query.log")"; then
+    cat "$OUTPUT_DIR/order-customer-query.log" >&2 || true
+    fail 'Store Lite order-customer verification query failed.'
+fi
+rm -f "$OUTPUT_DIR/order-customer-query.log"
+[[ "$order_customer_facts" == 'delivery:Mobile Delivery Customer:mobile.delivery@example.com:+15715550128:128 Rehearsal Way:US|pickup:Desktop Pickup Customer:desktop.pickup@example.com:no-phone:no-address:no-country' ]] \
+    || fail 'browser checkout fields did not persist as the exact bounded fixture'
 
 if docker logs "$APP_CONTAINER" 2>&1 | grep -Eq \
     'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Database query failed|Uncaught [A-Za-z]'; then
@@ -366,6 +446,7 @@ cat > "$OUTPUT_DIR/rehearsal-summary.json" <<JSON
   "adminBrowserReport": "admin/report.json",
   "publicMutationBrowserReport": "public/public-mutation-report.json",
   "cartState": "$cart_state",
+  "orderState": "$order_state",
   "hostedDemoChanged": false,
   "clientDataUsed": false,
   "passed": true

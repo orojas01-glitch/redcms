@@ -679,12 +679,19 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    Cart component. The supported-server rehearsal creates and places Product
    and Cart components through the real administrator flow, proves empty Cart
    rendering, then reloads the same subject-owned Cart after desktop simple and
-   mobile Size/Color Add-to-cart requests. The generic `commerce.cart` service,
-   quantity update, line removal, and orders/pay-on-receipt remain next/later
-   milestones.
-30. Validate disable/re-enable, failure recovery, migration, responsive
+   mobile Size/Color Add-to-cart requests.
+30. Completed the Store Lite 0.1.24 editable Cart: package-owned quantity and
+   removal presentations compose through core-owned row forms and pass real
+   desktop/mobile supported-server mutation, recalculation, refresh, retry,
+   conflict, and cleanup proof.
+31. Completed the Store Lite 0.1.28 guest checkout: one Cart view combines its
+   collection with a top-level closed twelve-field form; configured pickup and
+   delivery plus pay on receipt persist immutable server-derived order and line
+   snapshots. The isolated supported-server gate passed 100 administrator and
+   268 public checks with exact database facts and complete cleanup.
+32. Validate disable/re-enable, failure recovery, migration, responsive
    administrator, public rendering, and client-isolation behavior.
-31. Add a separately reviewed hosted-payment adapter only after the
+33. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite

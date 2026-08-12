@@ -1,6 +1,6 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-08-10
+Date: 2026-08-12
 
 ## Purpose
 
@@ -23,20 +23,23 @@ printed non-secret temporary evidence directory. This gate does not make Store
 Lite part of the starter or authorize normal richer-package enablement.
 
 `scripts/store-lite-public-mutation-rehearsal.sh` is the separate Docker-only
-supported-server Add-to-cart and editable-Cart integration. It requires the
-clean external Store Lite 0.1.24 repository at its pinned merged revision,
+supported-server Cart and guest-checkout integration. It requires the clean
+external Store Lite 0.1.28 repository at its pinned merged revision,
 stages no retained add-on or
 local configuration, builds the reviewed custom FrankenPHP/Caddy attestation
 module, and creates fresh MySQL, HTTPS certificate, HMAC key, and trusted-origin
 state. It first reruns the established administrator/component browser path,
-then drives the real public Product Add-to-cart, Cart quantity, and Cart removal
-forms in desktop/mobile Chrome. Accepted and unchanged commands announce a
-generic result before the fixed controller refreshes only the current page.
+then drives the real public Product Add-to-cart, Cart quantity/removal, and
+pickup/delivery guest-checkout forms in desktop/mobile Chrome. Accepted and
+unchanged commands announce a generic result before the fixed controller
+refreshes only the current page.
 Acceptance requires one host-only Secure/HttpOnly/Strict subject cookie,
 core-issued CSRF/idempotency evidence, accepted mutation, exact retry replay,
 changed-command conflict, invalid-quantity refusal, accessible controls/status,
-one verified line handle, recalculated totals, return to empty Cart, no overflow
-or browser errors, exact Store Lite/core database facts, and removal
+one verified line handle, recalculated totals, a closed twelve-field checkout,
+runtime-ready fulfillment/payment choices, immutable server-derived order and
+line snapshots, return to empty Cart, no overflow or browser errors, exact
+Store Lite/core database facts, and removal
 of every temporary container, network, image, database, certificate, secret,
 and staged project. Only non-secret screenshots and JSON reports remain in the
 printed external temporary evidence directory. It does not change the hosted
@@ -704,6 +707,22 @@ the isolated PHP log was clean, and exact acceptance and temporary-primary
 database/grant cleanup passed. The retained historical starter was not
 migrated.
 
+On 2026-08-12, the separate guest-checkout supported-server rehearsal pinned
+the clean external Store Lite 0.1.28 repository at merged revision
+`0f4253b3ec22d5e6b25bfc723a6c1596eea67d90`. The established 100-check
+administrator path and expanded 268-check public path passed. Desktop pickup
+and mobile delivery each used one closed twelve-field core-rendered form,
+pay-on-receipt, the existing anonymous subject, exact retry replay, and
+changed-request conflict refusal. The package persisted two immutable
+server-derived orders, two lines, two line options, and two initial status
+events with one pickup, one delivery, one 700-minor-unit delivery fee, and
+combined total 4497. Exact final cart/mutation state was `2:2:3:10:12:12` and
+order state was `2:2:2:2:1:1:700:4497`. Screenshots had no horizontal overflow;
+console, page, request, and unexpected-HTTP error lists were empty. Cleanup
+removed the disposable app, database, network, image, certificate, secrets,
+and staged project. No hosted demo, retained primary, client installation, or
+client data changed.
+
 A separate generated-fixture Chrome inspection rendered the new component
 editor's valid and field-error states at 1512×900 and 390×844. Both viewports
 had zero console errors, failed requests, missing labels, clipped controls,
@@ -947,16 +966,18 @@ process environment.
   active homepage-only core fields, two core `create`, package `baseline`, core
   `move`, and value-free `component.public_placed` audit facts.
 - The Store Lite supported-server public-mutation browser rehearsal is a
-  separate Docker-only cross-repository gate. It requires Store Lite 0.1.24 at
-  revision `c3dc7405d9e62c1112555503523c0c339e4b8fa8`, manifest-ordered package
+  separate Docker-only cross-repository gate. It requires Store Lite 0.1.28 at
+  revision `0f4253b3ec22d5e6b25bfc723a6c1596eea67d90`, manifest-ordered package
   migrations, the reviewed custom FrankenPHP/Caddy module, fresh MySQL and
   localhost TLS, temporary process-only endpoint/origin/HMAC configuration,
-  the 100-check administrator Product/Cart browser proof, and 147 real desktop/
-  mobile public-mutation/Cart checks including empty state, a simple product,
-  an exact Size/Color variant, two accessible row controls, quantity update,
-  recalculated totals, removal, and same-page refresh. Final cart, line,
-  quantity, package activity, execution, and core audit counts must be exactly
-  `4:2:3:8:8:8`;
+  the 100-check administrator Product/Cart browser proof, and 268 real desktop/
+  mobile public-mutation/Cart/checkout checks including empty state, a simple
+  product, an exact Size/Color variant, quantity/removal, one closed checkout
+  form, pickup, delivery, pay on receipt, retry/conflict behavior, immutable
+  order snapshots, and same-page refresh. Final cart, line, quantity, package
+  activity, execution, and core audit counts must be exactly `2:2:3:10:12:12`;
+  order, line, option, history, pickup, delivery, fee, and total facts must be
+  exactly `2:2:2:2:1:1:700:4497`;
   no container, network, image, database, certificate, secret, staged package,
   or client state may remain.
 - Add-on component-editor data-loader acceptance runs only in the uniquely named disposable database and temporary first-party package. It requires exact declared registration, current view permission, enabled placement/runtime/manifest ownership, exact runtime-manifest identity, complete normalized returned values, a record-bound state hash, pre-invocation revocation/case/drift/disabled refusal, foreign and same-id forged-manifest refusal, invalid-value and output/exception/buffer containment, unchanged database fingerprints, and zero package, parent, administrator, grant, table, or filesystem fixtures.
