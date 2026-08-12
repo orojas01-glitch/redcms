@@ -24,7 +24,8 @@ operational writable route/tool actions, richer settings-bearing surfaces, and
 richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
 The generic public-mutation boundary now has optional closed manifest metadata,
-a value-free declaration preflight, and an unlinked core-owned dispatcher. A
+a value-free declaration preflight, a transaction-only declared runtime-settings
+resolver, and an unlinked core-owned dispatcher. A
 separate Docker rehearsal proves that dispatcher through the attested
 supported-server path against a temporary database. It still has no linked
 front-controller endpoint, browser-cookie issuance, package runtime,
@@ -1138,6 +1139,12 @@ CSRF, idempotency, privacy, rate-limit, and postcondition policies, package
 table declarations, a value-free audit category, and the fixed `accepted` /
 `unchanged` outcome vocabulary.
 
+An entry may optionally declare one to sixteen `runtimeSettings` keys. Each
+must name a current package setting with a supported non-secret scalar type and
+no non-null default. This is not a browser configuration channel: declaration
+and preflight retain only value-free identity/count evidence. See
+[`PUBLIC-MUTATION-RUNTIME-SETTINGS-CONTRACT.md`](PUBLIC-MUTATION-RUNTIME-SETTINGS-CONTRACT.md).
+
 `includes/addon_public_mutation_preflight_helpers.php` converts one validated
 declaration into deterministic hashes and value-free counts only. It never
 loads a package, reads request/cookie/session state, reads a database, verifies
@@ -1197,13 +1204,26 @@ core-owned runner. It accepts no HTTP request and constructs no public response.
 It requires a current trusted enabled runtime binding for both a declared
 mutation handler and its state loader, locks lifecycle/package state, verifies
 the opaque subject, CSRF, idempotency key, rate decision, and declared InnoDB
-tables, then commits only the package change, keyed HMAC command/state replay
-evidence, and one value-free audit fact. Exact replays return a bounded stored
-outcome without calling package code; changed commands are refused. It passes a
-core-supplied active connection to reviewed first-party PHP, not a database
-sandbox. Package code must not commit, roll back, use globals, emit output, or
-write outside its declared tables. The empty clean-starter ledger stores no raw
-token, request, route, package, cart, order, secret, or client business value.
+tables, and optional declared runtime settings, then commits only the package
+change, keyed HMAC command/state replay evidence, and one value-free audit fact.
+Exact replays return a bounded stored outcome without calling package code;
+changed commands are refused. It passes a core-supplied active connection to
+reviewed first-party PHP, not a database sandbox. Package code must not commit,
+roll back, use globals, emit output, or write outside its declared tables. The
+empty clean-starter ledger stores no raw token, request, route, package, cart,
+order, secret, or client business value.
+
+For a contract that declares runtime settings, the runner resolves them only
+inside that locked transaction from the exact current runtime binding. It gives
+the registered state loader and handler one immutable typed settings object;
+the object contains only selected configured non-secret values and an opaque
+state hash. A coexisting secret reference stays unavailable. Missing, drifted,
+unconfigured, defaulted, or secret selected settings refuse before the runner
+uses rate, replay, or package callback state. The settings hash binds declared
+commands to their configuration, so a changed value cannot replay an earlier
+idempotency key. A contract with no declaration receives an empty object and
+requires no setting row. Packages never query core-owned setting storage
+directly.
 
 `includes/addon_public_mutation_response_helpers.php` is a dependency-free,
 non-emitting core response model. It turns only the runner's fixed

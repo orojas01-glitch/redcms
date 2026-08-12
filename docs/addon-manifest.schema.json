@@ -718,6 +718,16 @@
         },
         "outcomes": {
           "const": ["accepted", "unchanged"]
+        },
+        "runtimeSettings": {
+          "description": "Optional closed list of declared, non-secret package settings that the core-owned public-mutation runner may resolve only for this exact enabled package, route, and mutation. Values are not resolved by manifest validation.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/permission"
+          }
         }
       }
     },

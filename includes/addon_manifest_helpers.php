@@ -2208,7 +2208,8 @@ if (!function_exists('red_addon_validate_public_mutation_contracts')) {
         $contracts,
         $routes,
         $packageId,
-        array &$result
+        array &$result,
+        array $declaredSettings = []
     ) {
         if (!is_array($contracts) || !array_is_list($contracts)) {
             red_addon_add_error(
@@ -2295,6 +2296,7 @@ if (!function_exists('red_addon_validate_public_mutation_contracts')) {
                     'postcondition',
                     'audit',
                     'outcomes',
+                    'runtimeSettings',
                 ],
                 $context,
                 $result
@@ -2432,6 +2434,64 @@ if (!function_exists('red_addon_validate_public_mutation_contracts')) {
                 $contractValid = false;
             }
 
+            $runtimeSettings = null;
+            if (array_key_exists('runtimeSettings', $contract)) {
+                $runtimeSettings = red_addon_validate_string_list(
+                    $contract['runtimeSettings'],
+                    $context . ' runtimeSettings',
+                    16,
+                    'red_addon_valid_permission',
+                    $result
+                );
+                if ($runtimeSettings === []) {
+                    red_addon_add_error(
+                        $result,
+                        $context . ' runtimeSettings must not be empty.'
+                    );
+                    $contractValid = false;
+                }
+                $settingsByKey = [];
+                foreach ($declaredSettings as $setting) {
+                    if (is_array($setting)
+                        && is_string($setting['key'] ?? null)
+                    ) {
+                        $settingsByKey[$setting['key']] = $setting;
+                    }
+                }
+                foreach ($runtimeSettings as $settingKey) {
+                    $setting = $settingsByKey[$settingKey] ?? null;
+                    if (!is_array($setting)) {
+                        red_addon_add_error(
+                            $result,
+                            $context . ' runtime setting "' . $settingKey .
+                                '" must be declared by the package.'
+                        );
+                        $contractValid = false;
+                        continue;
+                    }
+                    if (($setting['secret'] ?? false) === true
+                        || ($setting['type'] ?? '') === 'secret-reference'
+                    ) {
+                        red_addon_add_error(
+                            $result,
+                            $context . ' runtime setting "' . $settingKey .
+                                '" must be non-secret.'
+                        );
+                        $contractValid = false;
+                    }
+                    if (array_key_exists('default', $setting)
+                        && $setting['default'] !== null
+                    ) {
+                        red_addon_add_error(
+                            $result,
+                            $context . ' runtime setting "' . $settingKey .
+                                '" must not have a non-null default.'
+                        );
+                        $contractValid = false;
+                    }
+                }
+            }
+
             if ($contractValid) {
                 $normalized[] = [
                     'route' => $routeId,
@@ -2453,6 +2513,10 @@ if (!function_exists('red_addon_validate_public_mutation_contracts')) {
                     'audit' => $audit,
                     'outcomes' => ['accepted', 'unchanged'],
                 ];
+                if (is_array($runtimeSettings)) {
+                    $normalized[array_key_last($normalized)]['runtimeSettings'] =
+                        $runtimeSettings;
+                }
             }
         }
         usort(
@@ -2483,11 +2547,36 @@ if (!function_exists('red_addon_public_mutation_contract')) {
             return null;
         }
         $result = ['errors' => [], 'warnings' => []];
+        $declaredSettings = [];
+        $hasRuntimeSettings = false;
+        foreach ($manifest['publicMutationContracts'] as $contract) {
+            if (is_array($contract)
+                && array_key_exists('runtimeSettings', $contract)
+            ) {
+                $hasRuntimeSettings = true;
+                break;
+            }
+        }
+        if ($hasRuntimeSettings) {
+            $declaredPermissions = red_addon_validate_string_list(
+                $manifest['permissions'] ?? null,
+                'Permissions',
+                200,
+                'red_addon_valid_permission',
+                $result
+            );
+            $declaredSettings = red_addon_validate_settings(
+                $manifest['settings'] ?? null,
+                $result,
+                $declaredPermissions
+            );
+        }
         $contracts = red_addon_validate_public_mutation_contracts(
             $manifest['publicMutationContracts'] ?? null,
             $manifest['routes'] ?? null,
             $manifest['id'] ?? null,
-            $result
+            $result,
+            $declaredSettings
         );
         if ($result['errors'] !== []) {
             return null;
@@ -3466,7 +3555,8 @@ if (!function_exists('red_addon_validate_manifest')) {
                 $manifest['publicMutationContracts'],
                 $routes,
                 $packageId,
-                $result
+                $result,
+                $declaredSettings
             );
         }
 

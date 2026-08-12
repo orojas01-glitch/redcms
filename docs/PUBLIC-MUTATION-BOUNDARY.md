@@ -4,6 +4,7 @@ Status: data-only declaration validation, its non-executing preflight, a
 separate read-only live-data preflight, an internal core-only
 anonymous-subject/CSRF foundation, a fixed-window rate-limit foundation, and an
 opaque idempotency-key foundation, an internal atomic transaction runner, a
+transaction-only public-mutation runtime-settings resolver,
 pure declared-form decoder, HTTP request-envelope normalizer, private static
 route selector, server request-facts adapter, closed response emitter, pure
 subject-cookie serializer, core-owned subject-cookie lifecycle bridge, and an
@@ -47,6 +48,7 @@ changed by it.
 | Add-on public routes | Exact static public GET JSON only | None |
 | Unsafe add-on methods | Refused before package execution | None |
 | `publicMutationContracts` | Optional closed manifest metadata plus value-free preflight evidence | No route claim, runtime loading, handler, or enablement |
+| Public-mutation runtime settings | An optional closed list resolves exact configured non-secret values only inside the lifecycle/package-locked runner transaction and supplies an immutable object to that mutation's state loader and handler | No package-selected lookup, secret/default fallback, browser exposure, settings UI, component presentation, response/audit disclosure, or cross-client value access |
 | Public-mutation live-data preflight | Read-only installed-disabled package, migration, InnoDB-table, typed-setting, opaque-secret-availability, and core subject/CSRF/rate-limit/idempotency/execution storage evidence | No dispatcher, secret resolution, package execution, lifecycle change, or package-data write |
 | Anonymous cart identity | Core-owned lifecycle validates/ensures, clears, and rotates one opaque subject with fixed host-only cookie descriptors; the request-local page coordinator may ensure or resolve one subject and only the core emitter may send its validated lifecycle | No package access, administrator session, cross-client identity, or package-controlled cookie policy |
 | Public CSRF issuance/validation | Internal core issue/verify helper binds a short-lived value to one subject, client database, and validated declaration | No HTTP request parsing, token consumption, handler, ledger, or mutation |
@@ -96,6 +98,12 @@ and must declare every one of these fixed values:
   `postcondition: server-derived-state`;
 - one to sixteen package-shaped tables, a bounded value-free audit category; and
 - exactly the public success vocabulary `accepted`, `unchanged`.
+
+An entry may additionally declare one to sixteen unique `runtimeSettings`
+keys. Each key must be a package-declared non-secret scalar setting with no
+non-null manifest default. The declaration remains value-free: it neither reads
+an installed setting nor makes that value available to a browser, route,
+preflight, or package file.
 
 Core canonicalizes field and table order, rejects duplicated route, mutation,
 field, and table identities, reserves all core-controlled request names, and
@@ -213,14 +221,14 @@ already-typed command, a resolved opaque subject, raw CSRF/idempotency evidence
 from a future core dispatcher, and a current in-memory first-party runtime
 binding. Under the existing lifecycle and package locks it rechecks the enabled
 installation, subject, CSRF, key, declared InnoDB tables, fixed rate budget,
-state loader, postcondition, replay evidence, and one value-free audit fact in
-one transaction. Its in-transaction rate claim first performs the same bounded
-expired-rate cleanup, so the future runner path does not retain expired opaque
-rate evidence. Exact replay returns only its bounded stored outcome before a
-rate claim, state load, handler call, or second audit. A different command for
-the same key is refused. Output, exceptions, malformed results, transaction
-loss, postcondition drift, ledger/audit failure, and rate failure roll back or
-refuse as applicable.
+state loader, optional declared runtime settings, postcondition, replay
+evidence, and one value-free audit fact in one transaction. Its in-transaction
+rate claim first performs the same bounded expired-rate cleanup, so the future
+runner path does not retain expired opaque rate evidence. Exact replay returns
+only its bounded stored outcome before a rate claim, state load, handler call,
+or second audit. A different command for the same key is refused. Output,
+exceptions, malformed results, transaction loss, postcondition drift,
+ledger/audit failure, and rate failure roll back or refuse as applicable.
 
 The registrar callback receives the core-supplied active transaction connection
 and final immutable request object. This is a reviewed first-party package
@@ -230,6 +238,34 @@ declared tables. The runner detects transaction loss and contains ordinary
 callback failure, but cannot make untrusted arbitrary PHP safe. There is no
 current public dispatcher, response emission, cookie/header emission, request
 parser, enabled package profile, or Store Lite package that can reach it.
+
+## Implemented Core-Owned Runtime Settings
+
+`includes/addon_public_mutation_runtime_setting_helpers.php` is called only by
+the internal runner after it has revalidated the exact current enabled runtime
+binding and opened the lifecycle/package-locked transaction. Core derives the
+package, route, mutation, manifest, and selected setting keys from that binding;
+neither browser input nor a package callback can choose them. The resolver
+locks the current package setting rows, admits only complete configured,
+canonical, type-valid non-secret values for the declaration's closed list, and
+constructs one immutable `RED_Addon_Public_Mutation_Runtime_Settings` object
+for the exact state loader and handler.
+
+Its state SHA-256 binds package, route, mutation, normalized contract, and the
+declared typed values. The runner incorporates that opaque state hash into a
+declared mutation's command evidence before it examines replay state. A changed
+configuration therefore refuses an earlier idempotency key without invoking
+package code. Missing, mismatched, secret-bearing, defaulted, malformed, or
+unconfigured selected settings refuse before a rate claim, replay reservation,
+or package write. A mutation without `runtimeSettings` receives an empty typed
+object and requires no configured setting row.
+
+The object never crosses a browser, response, cookie, session, audit, replay,
+or package-selection boundary. A coexisting secret-reference setting is not
+normalized, exposed, or included in this hash. This is not a settings editor,
+component-renderer configuration source, payment-provider bridge, deployment,
+or Store Lite package path. The detailed contract is in
+[`PUBLIC-MUTATION-RUNTIME-SETTINGS-CONTRACT.md`](PUBLIC-MUTATION-RUNTIME-SETTINGS-CONTRACT.md).
 
 ## Implemented Bounded Response Contract
 

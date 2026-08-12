@@ -15,6 +15,7 @@ require_once __DIR__ . '/addon_public_mutation_form_helpers.php';
 require_once __DIR__ . '/addon_install_helpers.php';
 require_once __DIR__ . '/admin_transaction_helpers.php';
 require_once __DIR__ . '/addon_runtime_helpers.php';
+require_once __DIR__ . '/addon_public_mutation_runtime_setting_helpers.php';
 require_once __DIR__ . '/addon_service_helpers.php';
 
 if (!function_exists('red_addon_public_mutation_execution_transaction_active')) {
@@ -267,13 +268,15 @@ if (!class_exists('RED_Addon_Public_Mutation_Command', false)) {
         private string $mutationId;
         private int $subjectRecordId;
         private array $fields;
+        private ?RED_Addon_Public_Mutation_Runtime_Settings $runtimeSettings;
 
         public function __construct(
             string $packageId,
             string $routeId,
             string $mutationId,
             int $subjectRecordId,
-            array $fields
+            array $fields,
+            ?RED_Addon_Public_Mutation_Runtime_Settings $runtimeSettings = null
         ) {
             $normalized = red_addon_service_payload($fields);
             if (!red_addon_valid_package_id($packageId)
@@ -293,6 +296,7 @@ if (!class_exists('RED_Addon_Public_Mutation_Command', false)) {
             $this->mutationId = $mutationId;
             $this->subjectRecordId = $subjectRecordId;
             $this->fields = $normalized;
+            $this->runtimeSettings = $runtimeSettings;
         }
 
         public function packageId(): string
@@ -323,6 +327,29 @@ if (!class_exists('RED_Addon_Public_Mutation_Command', false)) {
         public function field(string $key)
         {
             return $this->fields[$key] ?? null;
+        }
+
+        public function runtimeSettings(): RED_Addon_Public_Mutation_Runtime_Settings
+        {
+            if (!($this->runtimeSettings
+                instanceof RED_Addon_Public_Mutation_Runtime_Settings)
+            ) {
+                throw new RuntimeException(
+                    'Public mutation runtime settings are unavailable.'
+                );
+            }
+            return $this->runtimeSettings;
+        }
+
+        public function runtimeSettingsSha256(): string
+        {
+            if (!($this->runtimeSettings
+                instanceof RED_Addon_Public_Mutation_Runtime_Settings)
+                || !$this->runtimeSettings->declared()
+            ) {
+                return '';
+            }
+            return $this->runtimeSettings->stateSha256();
         }
     }
 }
@@ -445,6 +472,11 @@ if (!class_exists('RED_Addon_Public_Mutation_Execution_Request', false)) {
             return $this->command->field($key);
         }
 
+        public function runtimeSettings(): RED_Addon_Public_Mutation_Runtime_Settings
+        {
+            return $this->command->runtimeSettings();
+        }
+
         public function previousStateSha256(): string
         {
             return $this->previousStateSha256;
@@ -500,7 +532,8 @@ if (!function_exists('red_addon_public_mutation_execution_command_from_contract'
         array $declarationPlan,
         array $contract,
         $subjectRecordId,
-        $fields
+        $fields,
+        ?RED_Addon_Public_Mutation_Runtime_Settings $runtimeSettings = null
     ) {
         if (!red_addon_public_mutation_declaration_preflight_is_valid(
             $declarationPlan
@@ -526,7 +559,8 @@ if (!function_exists('red_addon_public_mutation_execution_command_from_contract'
                 $declarationPlan['route'],
                 $declarationPlan['mutation'],
                 $subjectRecordId,
-                $normalized
+                $normalized,
+                $runtimeSettings
             );
         } catch (Throwable $throwable) {
             return null;
@@ -554,6 +588,7 @@ if (!function_exists('red_addon_public_mutation_execution_command_sha256')) {
                 'mutation' => $command->mutationId(),
                 'subjectRecordId' => (string) $command->subjectRecordId(),
                 'contractSha256' => $declarationPlan['contractSha256'],
+                'runtimeSettingsSha256' => $command->runtimeSettingsSha256(),
                 'fields' => $command->fields(),
             ],
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
@@ -678,6 +713,10 @@ if (!function_exists('red_addon_public_mutation_execution_binding')) {
             return null;
         }
         return [
+            'packageId' => $declarationPlan['packageId'],
+            'route' => $declarationPlan['route'],
+            'mutation' => $declarationPlan['mutation'],
+            'manifest' => $manifest,
             'contract' => $contract,
             'handler' => $handler,
             'stateLoader' => $stateLoader,
@@ -1143,15 +1182,6 @@ if (!function_exists('red_addon_public_mutation_execute')) {
             $result['reason'] = 'idempotency_invalid';
             return $result;
         }
-        $commandSha256 = red_addon_public_mutation_execution_command_sha256(
-            $command,
-            $declarationPlan,
-            $idempotencyKey
-        );
-        if (!red_addon_valid_sha256($commandSha256)) {
-            $result['reason'] = 'idempotency_invalid';
-            return $result;
-        }
         $binding = red_addon_public_mutation_execution_binding(
             $manifest,
             $declarationPlan
@@ -1168,6 +1198,7 @@ if (!function_exists('red_addon_public_mutation_execute')) {
             [
                 'RED_Addon_Installations',
                 'RED_Addon_Activity_Log',
+                'RED_Addon_Settings',
                 'RED_Addon_Public_Mutation_Subjects',
                 'RED_Addon_Public_Mutation_CSRF_Tokens',
                 'RED_Addon_Public_Mutation_Rate_Limits',
@@ -1255,6 +1286,41 @@ if (!function_exists('red_addon_public_mutation_execute')) {
                 $csrfToken
             )) {
                 $transactionReason = 'csrf_invalid';
+                throw new RuntimeException($transactionReason);
+            }
+            $runtimeSettings =
+                red_addon_public_mutation_runtime_settings_resolve(
+                    $connection,
+                    $lockedBinding
+                );
+            if (empty($runtimeSettings['resolved'])
+                || !($runtimeSettings['settings']
+                    instanceof RED_Addon_Public_Mutation_Runtime_Settings)
+                || !red_addon_valid_sha256(
+                    $runtimeSettings['stateSha256'] ?? null
+                )
+            ) {
+                $transactionReason = 'runtime_settings_unavailable';
+                throw new RuntimeException($transactionReason);
+            }
+            $command = red_addon_public_mutation_execution_command_from_contract(
+                $lockedPlan,
+                $lockedBinding['contract'],
+                $subjectRecordId,
+                $fields,
+                $runtimeSettings['settings']
+            );
+            if (!$command instanceof RED_Addon_Public_Mutation_Command) {
+                $transactionReason = 'command_invalid';
+                throw new RuntimeException($transactionReason);
+            }
+            $commandSha256 = red_addon_public_mutation_execution_command_sha256(
+                $command,
+                $lockedPlan,
+                $idempotencyKey
+            );
+            if (!red_addon_valid_sha256($commandSha256)) {
+                $transactionReason = 'idempotency_invalid';
                 throw new RuntimeException($transactionReason);
             }
             $idempotency = red_addon_public_mutation_execution_idempotency_locked(

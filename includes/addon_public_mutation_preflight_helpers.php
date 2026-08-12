@@ -45,6 +45,7 @@ if (!function_exists('red_addon_public_mutation_declaration_preflight_result')) 
             'privacy' => '',
             'rateLimit' => '',
             'tableCount' => 0,
+            'runtimeSettingCount' => 0,
             'postcondition' => '',
             'outcomes' => [],
             'contractSha256' => '',
@@ -90,6 +91,7 @@ if (!function_exists('red_addon_public_mutation_contract_fingerprint')) {
                 'privacy' => $contract['privacy'] ?? null,
                 'rateLimit' => $contract['rateLimit'] ?? null,
                 'tables' => $contract['tables'] ?? null,
+                'runtimeSettings' => $contract['runtimeSettings'] ?? [],
                 'postcondition' => $contract['postcondition'] ?? null,
                 'audit' => $contract['audit'] ?? null,
                 'outcomes' => $contract['outcomes'] ?? null,
@@ -121,6 +123,7 @@ if (!function_exists('red_addon_public_mutation_declaration_preflight_fingerprin
                 'privacy' => $plan['privacy'] ?? null,
                 'rateLimit' => $plan['rateLimit'] ?? null,
                 'tableCount' => $plan['tableCount'] ?? null,
+                'runtimeSettingCount' => $plan['runtimeSettingCount'] ?? null,
                 'postcondition' => $plan['postcondition'] ?? null,
                 'outcomes' => $plan['outcomes'] ?? null,
                 'contractSha256' => $plan['contractSha256'] ?? null,
@@ -191,6 +194,9 @@ if (!function_exists('red_addon_public_mutation_declaration_preflight')) {
         $result['privacy'] = $contract['privacy'];
         $result['rateLimit'] = $contract['rateLimit'];
         $result['tableCount'] = count($contract['tables']);
+        $result['runtimeSettingCount'] = count(
+            $contract['runtimeSettings'] ?? []
+        );
         $result['postcondition'] = $contract['postcondition'];
         $result['outcomes'] = $contract['outcomes'];
         $result['contractSha256'] = $contractSha256;
@@ -236,6 +242,7 @@ if (!function_exists('red_addon_public_mutation_declaration_preflight_is_valid')
             'reason',
             'requestFieldCount',
             'route',
+            'runtimeSettingCount',
             'subject',
             'tableCount',
             'valid',
@@ -278,6 +285,9 @@ if (!function_exists('red_addon_public_mutation_declaration_preflight_is_valid')
             || !is_int($plan['tableCount'] ?? null)
             || $plan['tableCount'] < 1
             || $plan['tableCount'] > 16
+            || !is_int($plan['runtimeSettingCount'] ?? null)
+            || $plan['runtimeSettingCount'] < 0
+            || $plan['runtimeSettingCount'] > 16
             || ($plan['postcondition'] ?? null) !== 'server-derived-state'
             || ($plan['outcomes'] ?? null) !== ['accepted', 'unchanged']
             || !red_addon_valid_sha256($plan['contractSha256'] ?? null)

@@ -114,6 +114,21 @@ function red_addon_public_mutation_execution_test_manifest(
             'adminTools' => [],
             'adapters' => [],
         ],
+        'permissions' => ['fixture.settings.manage'],
+        'settings' => [[
+            'key' => 'fixture.currency',
+            'label' => 'Fixture currency',
+            'type' => 'text',
+            'secret' => false,
+            'permission' => 'fixture.settings.manage',
+            'default' => null,
+        ], [
+            'key' => 'fixture.provider-token',
+            'label' => 'Fixture provider token',
+            'type' => 'secret-reference',
+            'secret' => true,
+            'permission' => 'fixture.settings.manage',
+        ]],
         'routes' => [[
             'id' => $routeId,
             'scope' => 'public',
@@ -155,6 +170,7 @@ function red_addon_public_mutation_execution_test_manifest(
             'postcondition' => 'server-derived-state',
             'audit' => 'commerce.cart.item-added',
             'outcomes' => ['accepted', 'unchanged'],
+            'runtimeSettings' => ['fixture.currency'],
         ]],
     ];
 }
@@ -285,6 +301,12 @@ function red_addon_public_mutation_execution_test_cleanup(
             's',
             [$packageId]
         );
+        red_addon_public_mutation_execution_test_execute(
+            $connection,
+            'DELETE FROM RED_Addon_Settings WHERE PackageID=?',
+            's',
+            [$packageId]
+        );
         if ($ids !== []) {
             mysqli_query(
                 $connection,
@@ -342,6 +364,36 @@ try {
         'sss',
         [$packageId, str_repeat('a', 64), str_repeat('b', 64)]
     );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'INSERT INTO RED_Addon_Settings (
+            PackageID, SettingKey, ValueType, ValueJSON,
+            SecretReference, UpdatedByAdminRecordID
+         ) VALUES (?, ?, ?, ?, NULL, ?)',
+        'ssssi',
+        [
+            $packageId,
+            'fixture.currency',
+            'text',
+            '"USD"',
+            1,
+        ]
+    );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'INSERT INTO RED_Addon_Settings (
+            PackageID, SettingKey, ValueType, ValueJSON,
+            SecretReference, UpdatedByAdminRecordID
+         ) VALUES (?, ?, ?, NULL, ?, ?)',
+        'ssssi',
+        [
+            $packageId,
+            'fixture.provider-token',
+            'secret-reference',
+            'config:fixture-provider-token',
+            1,
+        ]
+    );
 
     $manifest = red_addon_public_mutation_execution_test_manifest(
         $packageId,
@@ -360,14 +412,27 @@ try {
     );
 
     $calls = ['route' => 0, 'handler' => 0, 'loader' => 0];
+    $runtimeSettingsObserved = [];
     $handlerMode = 'accepted';
     $loaderMode = 'normal';
     $routeHandler = static function () use (&$calls) {
         $calls['route']++;
         throw new RuntimeException('public route callback must remain uninvoked');
     };
-    $stateLoader = static function ($connection, $command) use (&$calls, &$loaderMode) {
+    $stateLoader = static function ($connection, $command) use (
+        &$calls,
+        &$loaderMode,
+        &$runtimeSettingsObserved
+    ) {
         $calls['loader']++;
+        $settings = $command->runtimeSettings();
+        $runtimeSettingsObserved[] = [
+            'role' => 'loader',
+            'declared' => $settings->declared(),
+            'values' => $settings->values(),
+            'stateSha256' => $settings->stateSha256(),
+            'commandSettingsSha256' => $command->runtimeSettingsSha256(),
+        ];
         if ($loaderMode === 'output') {
             echo 'state-loader-output';
         }
@@ -379,8 +444,19 @@ try {
             )
         );
     };
-    $handler = static function ($connection, $request) use (&$calls, &$handlerMode) {
+    $handler = static function ($connection, $request) use (
+        &$calls,
+        &$handlerMode,
+        &$runtimeSettingsObserved
+    ) {
         $calls['handler']++;
+        $settings = $request->runtimeSettings();
+        $runtimeSettingsObserved[] = [
+            'role' => 'handler',
+            'declared' => $settings->declared(),
+            'values' => $settings->values(),
+            'stateSha256' => $settings->stateSha256(),
+        ];
         $subjectRecordId = $request->subjectRecordId();
         $product = (string) $request->field('product');
         $quantity = (int) $request->field('quantity');
@@ -533,6 +609,19 @@ try {
             'reason' => 'completed',
         ]
             && $calls === ['route' => 0, 'handler' => 1, 'loader' => 2]
+            && count($runtimeSettingsObserved) === 3
+            && count(array_filter(
+                $runtimeSettingsObserved,
+                static function (array $observed): bool {
+                    return $observed['declared'] === true
+                        && $observed['values'] === ['fixture.currency' => 'USD']
+                        && red_addon_valid_sha256($observed['stateSha256']);
+                }
+            )) === 3
+            && count(array_unique(array_column(
+                $runtimeSettingsObserved,
+                'stateSha256'
+            ))) === 1
             && red_addon_public_mutation_execution_test_state(
                 $connection,
                 $subject['subjectRecordId']
@@ -544,7 +633,92 @@ try {
             && $_COOKIE === $cookieSnapshot
             && session_status() === $sessionStatus
             && headers_list() === $headerSnapshot,
-        'one valid internal command commits only the exact package postcondition and returns bounded non-browser evidence'
+        'one valid internal command exposes only its declared non-secret setting despite a coexisting secret row, then commits the exact package postcondition with bounded non-browser evidence'
+    );
+    [$invalidSettingsSubject, $invalidSettingsCsrf, $invalidSettingsKey] =
+        red_addon_public_mutation_execution_test_evidence(
+            $connection,
+            $plan,
+            $subjectIds
+        );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'UPDATE RED_Addon_Settings SET ValueJSON=?
+         WHERE PackageID=? AND SettingKey=?',
+        'sss',
+        ['[]', $packageId, 'fixture.currency']
+    );
+    $callsBeforeRuntimeSettingsFailure = $calls;
+    $runtimeSettingsBeforeFailure = count($runtimeSettingsObserved);
+    $invalidSettings = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $invalidSettingsSubject,
+        $invalidSettingsCsrf['token'],
+        $invalidSettingsKey['key'],
+        ['product' => 'runtime-settings-fixture', 'quantity' => 1]
+    );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'UPDATE RED_Addon_Settings SET ValueJSON=?
+         WHERE PackageID=? AND SettingKey=?',
+        'sss',
+        ['"USD"', $packageId, 'fixture.currency']
+    );
+    red_addon_public_mutation_execution_test_assert(
+        ($invalidSettings['reason'] ?? '') === 'runtime_settings_unavailable'
+            && $calls === $callsBeforeRuntimeSettingsFailure
+            && count($runtimeSettingsObserved) === $runtimeSettingsBeforeFailure
+            && red_addon_public_mutation_execution_test_state(
+                $connection,
+                $invalidSettingsSubject['subjectRecordId']
+            ) === ['present' => false]
+            && red_addon_public_mutation_execution_test_scalar(
+                $connection,
+                'SELECT CONCAT_WS(\':\',
+                    (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions
+                     WHERE IdempotencyRecordID=' .
+                        (int) $invalidSettingsKey['idempotencyRecordId'] . '),
+                    (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Rate_Limits
+                     WHERE SubjectRecordID=' .
+                        (int) $invalidSettingsSubject['subjectRecordId'] . ')
+                )'
+            ) === '0:0',
+        'a missing or malformed declared runtime setting fails before package callbacks, rate use, replay evidence, or package writes'
+    );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'UPDATE RED_Addon_Settings SET ValueJSON=?
+         WHERE PackageID=? AND SettingKey=?',
+        'sss',
+        ['"EUR"', $packageId, 'fixture.currency']
+    );
+    $callsBeforeRuntimeSettingsConflict = $calls;
+    $runtimeSettingsBeforeConflict = count($runtimeSettingsObserved);
+    $runtimeSettingsConflict = red_addon_public_mutation_execute(
+        $connection,
+        $manifest,
+        $routeId,
+        $mutationId,
+        $subject,
+        $csrf['token'],
+        $key['key'],
+        ['product' => 'percussion-kit', 'quantity' => 2]
+    );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'UPDATE RED_Addon_Settings SET ValueJSON=?
+         WHERE PackageID=? AND SettingKey=?',
+        'sss',
+        ['"USD"', $packageId, 'fixture.currency']
+    );
+    red_addon_public_mutation_execution_test_assert(
+        ($runtimeSettingsConflict['reason'] ?? '') === 'idempotency_conflict'
+            && $calls === $callsBeforeRuntimeSettingsConflict
+            && count($runtimeSettingsObserved) === $runtimeSettingsBeforeConflict,
+        'a changed runtime configuration invalidates prior idempotency command evidence without invoking package code'
     );
     red_addon_public_mutation_execution_test_assert(
         red_addon_public_mutation_execution_test_scalar(
@@ -938,6 +1112,92 @@ try {
                 )'
             ) === '12:12:12',
         'the atomic runner applies the fixed twelve-request budget before a thirteenth key can reserve or invoke a package mutation'
+    );
+
+    $noRuntimeManifest = $manifest;
+    unset($noRuntimeManifest['publicMutationContracts'][0]['runtimeSettings']);
+    $noRuntimeManifest['permissions'] = [];
+    $noRuntimeManifest['settings'] = [];
+    $noRuntimePlan = red_addon_public_mutation_declaration_preflight(
+        $noRuntimeManifest,
+        $routeId,
+        $mutationId
+    );
+    red_addon_public_mutation_execution_test_assert(
+        red_addon_public_mutation_declaration_preflight_is_valid(
+            $noRuntimePlan
+        ),
+        'a public mutation remains valid when it declares no runtime settings'
+    );
+    $GLOBALS['RED_ADDON_RUNTIME_CONTEXT'] =
+        red_addon_public_mutation_execution_test_runtime(
+            $noRuntimeManifest,
+            $routeId,
+            $mutationId,
+            $fixtureTable,
+            $routeHandler,
+            $handler,
+            $stateLoader
+        );
+    [$noRuntimeSubject, $noRuntimeCsrf, $noRuntimeKey] =
+        red_addon_public_mutation_execution_test_evidence(
+            $connection,
+            $noRuntimePlan,
+            $subjectIds
+        );
+    red_addon_public_mutation_execution_test_execute(
+        $connection,
+        'DELETE FROM RED_Addon_Settings WHERE PackageID=?',
+        's',
+        [$packageId]
+    );
+    $callsBeforeNoRuntime = $calls;
+    $runtimeSettingsBeforeNoRuntime = count($runtimeSettingsObserved);
+    $noRuntime = red_addon_public_mutation_execute(
+        $connection,
+        $noRuntimeManifest,
+        $routeId,
+        $mutationId,
+        $noRuntimeSubject,
+        $noRuntimeCsrf['token'],
+        $noRuntimeKey['key'],
+        ['product' => 'no-runtime-settings', 'quantity' => 1]
+    );
+    $noRuntimeObserved = array_slice(
+        $runtimeSettingsObserved,
+        $runtimeSettingsBeforeNoRuntime
+    );
+    red_addon_public_mutation_execution_test_assert(
+        $noRuntime === [
+            'completed' => true,
+            'replayed' => false,
+            'outcome' => 'accepted',
+            'route' => $routeId,
+            'mutation' => $mutationId,
+            'reason' => 'completed',
+        ]
+            && $calls === [
+                'route' => $callsBeforeNoRuntime['route'],
+                'handler' => $callsBeforeNoRuntime['handler'] + 1,
+                'loader' => $callsBeforeNoRuntime['loader'] + 2,
+            ]
+            && count($noRuntimeObserved) === 3
+            && count(array_filter(
+                $noRuntimeObserved,
+                static function (array $observed): bool {
+                    return $observed['declared'] === false
+                        && $observed['values'] === []
+                        && red_addon_valid_sha256($observed['stateSha256']);
+                }
+            )) === 3
+            && count(array_filter(
+                $noRuntimeObserved,
+                static function (array $observed): bool {
+                    return ($observed['role'] ?? '') === 'loader'
+                        && ($observed['commandSettingsSha256'] ?? null) === '';
+                }
+            )) === 2,
+        'an undeclared mutation gets an empty typed settings object and remains executable after all package settings are absent'
     );
 
     red_addon_public_mutation_execution_test_cleanup(
