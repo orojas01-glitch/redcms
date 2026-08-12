@@ -414,6 +414,19 @@ try {
         ) === $input,
         'the execution boundary independently revalidates the rich command'
     );
+    $typedCommand = new RED_Addon_Public_Mutation_Command(
+        'redcms.rich-form-fixture',
+        'redcms.rich-form-fixture/submit',
+        'redcms.rich-form-fixture/record-response',
+        101,
+        $decoded['fields']
+    );
+    red_addon_rich_field_test_assert(
+        $typedCommand->fields() === $input
+            && $typedCommand->field('contact-name') === 'Ana María'
+            && $typedCommand->field('location-line2') === '',
+        'typed command retains kebab-case rich fields and explicit empty strings'
+    );
 
     $optional = $input;
     foreach ([
@@ -432,6 +445,36 @@ try {
             red_addon_rich_field_test_body($optional)
         )['valid'] === true,
         'optional empty strings remain explicit for later package semantics'
+    );
+    $optionalCommand = new RED_Addon_Public_Mutation_Command(
+        'redcms.rich-form-fixture',
+        'redcms.rich-form-fixture/submit',
+        'redcms.rich-form-fixture/record-response',
+        101,
+        $optional
+    );
+    red_addon_rich_field_test_assert(
+        $optionalCommand->fields() === $optional,
+        'typed command preserves every optional empty control for package rules'
+    );
+    red_addon_rich_field_test_assert(
+        red_addon_public_mutation_command_fields([]) === null
+            && red_addon_public_mutation_command_fields(
+                ['bad_key' => 'value']
+            ) === null
+            && red_addon_public_mutation_command_fields(
+                ['field' => ['nested']]
+            ) === null
+            && red_addon_public_mutation_command_fields(
+                ['field' => true]
+            ) === null
+            && red_addon_public_mutation_command_fields(
+                ['field' => 0]
+            ) === null
+            && red_addon_public_mutation_command_fields(
+                ['field' => ' padded ']
+            ) === null,
+        'typed command still refuses empty maps, underscore keys, nested or boolean values, non-positive integers, and non-canonical strings'
     );
 
     $invalidBodies = [

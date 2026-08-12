@@ -222,13 +222,14 @@ notice. Missing, unknown, duplicate, malformed, out-of-range, cross-subject,
 or post-composition-invalid models render no partial form or token. The helper
 reads no request globals, database, package, filesystem, or front-controller
 state and emits no output or headers.
-The separate 14-assertion rich-field fixture proves twelve mixed declared
+The separate 17-assertion rich-field fixture proves twelve mixed declared
 fields, the sixteen-field ceiling, closed string formats, component-model
 normalization, declaration-order composition, escaped text/email/telephone/
 textarea markup, select-backed conditions, canonical Unicode/space/empty-value
-decoding, independent execution revalidation, and uniform no-partial-data
-refusal. It creates no database, package installation, route activation, or
-client state.
+decoding, independent execution revalidation, typed-command preservation of
+kebab-case and optional empty values, rejection of the nested service grammar,
+and uniform no-partial-data refusal. It creates no database, package
+installation, route activation, or client state.
 The separate 12-assertion disposable form-bootstrap fixture validates the
 complete presentation before issuance, proves absent-cookie subject issuance
 and valid-cookie subject reuse, same-subject scoped CSRF/idempotency evidence,
