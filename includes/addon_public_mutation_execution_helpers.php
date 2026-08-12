@@ -260,6 +260,50 @@ if (!function_exists('red_addon_public_mutation_execution_fields')) {
     }
 }
 
+if (!function_exists('red_addon_public_mutation_command_fields')) {
+    /**
+     * Retains only the flat typed field map already admitted by one manifest
+     * contract. Public form keys deliberately use kebab-case and optional
+     * string controls deliberately remain present as empty strings.
+     */
+    function red_addon_public_mutation_command_fields($fields)
+    {
+        if (!is_array($fields)
+            || array_is_list($fields)
+            || count($fields) < 1
+            || count($fields) > 16
+        ) {
+            return null;
+        }
+        $normalized = [];
+        foreach ($fields as $key => $value) {
+            if (!is_string($key)
+                || preg_match('/\A[a-z][a-z0-9-]{0,63}\z/D', $key) !== 1
+                || array_key_exists($key, $normalized)
+            ) {
+                return null;
+            }
+            if (is_string($value)) {
+                if (strlen($value) > 2000
+                    || preg_match('//u', $value) !== 1
+                    || preg_match('/[\x00-\x1F\x7F]/', $value) === 1
+                    || trim($value) !== $value
+                ) {
+                    return null;
+                }
+            } elseif (!is_int($value)
+                || $value < 1
+                || $value > 2147483647
+            ) {
+                return null;
+            }
+            $normalized[$key] = $value;
+        }
+        ksort($normalized, SORT_STRING);
+        return $normalized;
+    }
+}
+
 if (!class_exists('RED_Addon_Public_Mutation_Command', false)) {
     final class RED_Addon_Public_Mutation_Command
     {
@@ -278,7 +322,7 @@ if (!class_exists('RED_Addon_Public_Mutation_Command', false)) {
             array $fields,
             ?RED_Addon_Public_Mutation_Runtime_Settings $runtimeSettings = null
         ) {
-            $normalized = red_addon_service_payload($fields);
+            $normalized = red_addon_public_mutation_command_fields($fields);
             if (!red_addon_valid_package_id($packageId)
                 || !red_addon_valid_capability($routeId)
                 || !red_addon_valid_capability($mutationId)

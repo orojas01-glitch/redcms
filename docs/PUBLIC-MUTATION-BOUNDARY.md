@@ -297,8 +297,9 @@ enablement-eligible.
 `includes/addon_public_mutation_form_helpers.php` decodes only raw canonical
 `application/x-www-form-urlencoded` package-field bytes after its caller
 supplies one validated in-memory manifest, declared route, and declared mutation
-identity. It accepts only the contract's one-to-eight identifier or
-positive-integer fields and returns a sorted typed field map. It fails closed
+identity. It accepts only the contract's one-to-sixteen identifier,
+positive-integer, or closed formatted-string fields and returns a sorted typed
+field map. It fails closed
 with no partial values for missing required fields, duplicates, PHP-style
 nested names, undeclared names, malformed segments, raw control bytes,
 noncanonical `%`/`+` encodings (apart from canonical `%7E` identifier bytes),
@@ -311,6 +312,12 @@ content length, path, or method; it does not access a database, runtime,
 package code, or browser state; and it emits no response. A later core-owned
 HTTP dispatcher must establish those facts before it selects this decoder and
 then pass its result to the existing transaction runner.
+
+The internal typed command retains that already-validated flat map with the
+same kebab-case field keys and explicit optional empty strings. It does not
+reuse the separate service-payload key grammar. Empty maps, underscore keys,
+nested or boolean values, non-positive integers, non-canonical strings, and
+out-of-bound scalars still fail before a package callback.
 
 ## Implemented HTTP Request-Envelope Normalizer
 

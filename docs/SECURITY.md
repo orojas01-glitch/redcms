@@ -1055,6 +1055,9 @@ form markup. Optional select-backed required/visibility conditions are
 validated as data, rendered as core-owned attributes, and enforced in the
 fixed controller for browser usability. Package validation remains the final
 authority for domain-specific conditional semantics.
+The internal execution command preserves only that flat validated field map,
+including kebab-case keys and explicit optional empty strings; it does not
+admit the broader nested service-payload grammar.
 The two opaque values appear only in dedicated fetch-controller data
 attributes and never as submitted package fields, visible copy, logs, or
 package input. A later integration must additionally own `Cache-Control:
