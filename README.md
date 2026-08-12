@@ -501,6 +501,14 @@ features.
   desktop/mobile checks through add, quantity update, recalculated totals, and
   removal while the starter retained no Store Lite package, table, setting, or
   business data
+- Store Lite guest checkout: the separate Store Lite 0.1.28 package combines
+  the Cart collection with one top-level, core-rendered twelve-field checkout
+  form. Only configured pickup/delivery and pay-on-receipt choices render. The
+  isolated supported-server rehearsal passed 100 administrator and 268 public
+  desktop/mobile checks, persisted exact immutable server-derived order/line
+  snapshots, proved retry/conflict behavior, and removed every disposable
+  runtime artifact while the starter retained no Store Lite package, table,
+  setting, order, or customer data
 
 See the [RED-CMS 5.1 add-on platform status map](docs/ADD-ON-PLATFORM-STATUS.md)
 for the current milestone, remaining Store Lite gates, and later optional

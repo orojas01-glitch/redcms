@@ -125,9 +125,6 @@ function red_store_lite_browser_insert_registry(
     }
     mysqli_stmt_close($migrationStatement);
 
-    $settingKey = 'catalog.currency';
-    $valueType = 'text';
-    $valueJson = json_encode('USD', JSON_THROW_ON_ERROR);
     $settingStatement = mysqli_prepare(
         $connection,
         'INSERT INTO RED_Addon_Settings
@@ -135,17 +132,35 @@ function red_store_lite_browser_insert_registry(
              SecretReference, UpdatedByAdminRecordID)
          VALUES (?, ?, ?, ?, NULL, ?)'
     );
-    mysqli_stmt_bind_param(
-        $settingStatement,
-        'ssssi',
-        $snapshot['id'],
-        $settingKey,
-        $valueType,
-        $valueJson,
-        $actorRecordId
-    );
-    mysqli_stmt_execute($settingStatement);
+    $settings = [
+        ['catalog.currency', 'text', 'USD'],
+        ['checkout.delivery-enabled', 'boolean', true],
+        ['checkout.delivery-fee-minor', 'integer', 700],
+        ['checkout.pay-on-receipt-enabled', 'boolean', true],
+        ['checkout.pickup-enabled', 'boolean', true],
+    ];
+    foreach ($settings as [$settingKey, $valueType, $value]) {
+        $valueJson = json_encode($value, JSON_THROW_ON_ERROR);
+        mysqli_stmt_bind_param(
+            $settingStatement,
+            'ssssi',
+            $snapshot['id'],
+            $settingKey,
+            $valueType,
+            $valueJson,
+            $actorRecordId
+        );
+        mysqli_stmt_execute($settingStatement);
+    }
     mysqli_stmt_close($settingStatement);
+    red_store_lite_browser_assert(
+        red_store_lite_browser_scalar(
+            $connection,
+            "SELECT COUNT(*) FROM RED_Addon_Settings
+             WHERE PackageID='redcms.store-lite'"
+        ) === '5',
+        'checkout fixture stores only the five declared non-secret settings'
+    );
     return $snapshot;
 }
 

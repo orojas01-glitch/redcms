@@ -16,10 +16,26 @@ const mutationPaths = {
     add: '/addons/redcms/store-lite/cart-intent',
     quantity: '/addons/redcms/store-lite/cart-line-quantity',
     remove: '/addons/redcms/store-lite/cart-line-remove',
+    checkout: '/addons/redcms/store-lite/guest-checkout',
 };
 const mutationUrls = Object.fromEntries(
     Object.entries(mutationPaths).map(([key, value]) => [key, `${baseUrl}${value}`])
 );
+const checkoutFieldKeys = [
+    'customer-name',
+    'customer-email',
+    'customer-phone',
+    'fulfillment-method',
+    'delivery-line1',
+    'delivery-line2',
+    'delivery-city',
+    'delivery-region',
+    'delivery-postal-code',
+    'delivery-country-code',
+    'delivery-instructions',
+    'payment-method',
+];
+const canonicalCheckoutFieldKeys = [...checkoutFieldKeys].sort();
 
 if (!/^https:\/\/localhost:\d+$/.test(baseUrl)
     || !path.isAbsolute(evidenceDir)
@@ -33,7 +49,7 @@ if (!/^https:\/\/localhost:\d+$/.test(baseUrl)
 const report = {
     baseUrl,
     browser: 'Google Chrome',
-    package: 'redcms.store-lite@0.1.24',
+    package: 'redcms.store-lite@0.1.28',
     checks: [],
 };
 
@@ -66,6 +82,10 @@ async function verifyCart(page, definition, state) {
             '.red-addon-component__collection'
         ).count() === 0,
         `${definition.name} empty Cart has no line collection`);
+        check(await cart.locator(
+            `form[action="${mutationPaths.checkout}"]`
+        ).count() === 0,
+        `${definition.name} empty Cart has no checkout form`);
     } else {
         const updated = state === 'updated';
         const expectedQuantity = updated
@@ -93,6 +113,12 @@ async function verifyCart(page, definition, state) {
         check(await collection.count() === 1
             && await collection.locator('li').count() === 1,
         `${definition.name} Cart renders exactly one semantic line item`);
+        const checkoutCount = await cart.locator(
+            `form[action="${mutationPaths.checkout}"]`
+        ).count();
+        check(checkoutCount === 1,
+            `${definition.name} non-empty Cart renders one checkout form`,
+            checkoutCount === 1 ? '' : await cart.innerHTML());
     }
     const overflow = await cart.evaluate((element) => ({
         clientWidth: element.clientWidth,
@@ -105,6 +131,134 @@ async function verifyCart(page, definition, state) {
         path: path.join(
             evidenceDir,
             `${definition.name}-cart-${state}.png`
+        ),
+    });
+}
+
+async function checkoutForm(page, definition) {
+    const cart = page.locator(
+        '[data-red-addon-component="redcms.store-lite/cart"]'
+    );
+    const form = cart.locator(
+        `form[action="${mutationPaths.checkout}"]`
+    );
+    await form.waitFor({state: 'visible'});
+    check(await form.getAttribute('method') === 'post'
+        && await form.getAttribute('enctype')
+            === 'application/x-www-form-urlencoded',
+    `${definition.name} checkout uses the declared POST encoding`);
+    check(await form.getByRole('button', {name: 'Place order'}).count() === 1,
+        `${definition.name} checkout has an accessible Place order control`);
+
+    const renderedKeys = await form.locator('input, select, textarea')
+        .evaluateAll((controls) => controls.map((control) => control.name));
+    check(renderedKeys.length === checkoutFieldKeys.length
+        && JSON.stringify([...renderedKeys].sort())
+            === JSON.stringify(canonicalCheckoutFieldKeys),
+        `${definition.name} checkout exposes exactly twelve declared fields`,
+        JSON.stringify(renderedKeys));
+
+    const fulfillment = form.getByLabel('Fulfillment');
+    const payment = form.getByLabel('Payment');
+    check(await fulfillment.locator('option').allTextContents()
+        .then((labels) => JSON.stringify(labels))
+            === JSON.stringify(['Pickup', 'Delivery'])
+        && await fulfillment.inputValue() === 'pickup',
+    `${definition.name} checkout offers pickup and delivery with pickup default`);
+    check(await payment.locator('option').allTextContents()
+        .then((labels) => JSON.stringify(labels))
+            === JSON.stringify(['Pay on receipt'])
+        && await payment.inputValue() === 'pay_on_receipt',
+    `${definition.name} checkout exposes only runtime-ready pay on receipt`);
+
+    const deliveryOnly = [
+        'delivery-line1',
+        'delivery-line2',
+        'delivery-city',
+        'delivery-region',
+        'delivery-postal-code',
+        'delivery-country-code',
+        'delivery-instructions',
+    ];
+    for (const key of deliveryOnly) {
+        const wrapper = form.locator(
+            `[data-red-addon-public-mutation-field="${key}"]`
+        );
+        check(await wrapper.isHidden(),
+            `${definition.name} pickup hides ${key}`);
+    }
+    check(!await form.getByLabel('Phone').evaluate(
+        (control) => control.required
+    ),
+        `${definition.name} pickup keeps phone optional`);
+
+    await fulfillment.selectOption('delivery');
+    for (const key of deliveryOnly) {
+        const wrapper = form.locator(
+            `[data-red-addon-public-mutation-field="${key}"]`
+        );
+        check(await wrapper.isVisible(),
+            `${definition.name} delivery reveals ${key}`);
+    }
+    for (const label of [
+        'Phone', 'Address', 'City', 'State or region', 'Country code',
+    ]) {
+        check(await form.getByLabel(label, {exact: true}).evaluate(
+            (control) => control.required
+        ),
+            `${definition.name} delivery requires ${label}`);
+    }
+    check(!await form.evaluate((element) => element.checkValidity()),
+        `${definition.name} browser blocks incomplete delivery checkout`);
+
+    await fulfillment.selectOption('pickup');
+    for (const key of deliveryOnly) {
+        const control = form.locator(`[name="${key}"]`);
+        check(await control.inputValue() === '',
+            `${definition.name} returning to pickup clears ${key}`);
+    }
+    if (definition.checkout.fulfillment === 'delivery') {
+        await fulfillment.selectOption('delivery');
+    }
+
+    const overflow = await form.evaluate((element) => ({
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+    }));
+    check(overflow.scrollWidth <= overflow.clientWidth + 1,
+        `${definition.name} checkout has no horizontal overflow`,
+        JSON.stringify(overflow));
+    return form;
+}
+
+async function fillCheckout(form, definition) {
+    const checkout = definition.checkout;
+    await form.getByLabel('Name', {exact: true}).fill(checkout.name);
+    await form.getByLabel('Email', {exact: true}).fill(checkout.email);
+    if (checkout.phone) {
+        await form.getByLabel('Phone', {exact: true}).fill(checkout.phone);
+    }
+    if (checkout.fulfillment === 'delivery') {
+        await form.getByLabel('Address', {exact: true})
+            .fill(checkout.address);
+        await form.getByLabel('Address line 2', {exact: true})
+            .fill(checkout.addressLine2);
+        await form.getByLabel('City', {exact: true}).fill(checkout.city);
+        await form.getByLabel('State or region', {exact: true})
+            .fill(checkout.region);
+        await form.getByLabel('Postal code', {exact: true})
+            .fill(checkout.postalCode);
+        await form.getByLabel('Country code', {exact: true})
+            .fill(checkout.countryCode);
+        await form.getByLabel('Delivery instructions', {exact: true})
+            .fill(checkout.instructions);
+    }
+    check(await form.evaluate((element) => element.checkValidity()),
+        `${definition.name} completed ${checkout.fulfillment} checkout is valid`);
+    await form.screenshot({
+        path: path.join(
+            evidenceDir,
+            `${definition.name}-checkout-${checkout.fulfillment}.png`
         ),
     });
 }
@@ -421,13 +575,76 @@ async function runCase(browser, definition) {
     });
     await verifyCart(page, definition, 'empty');
 
+    await form.getByLabel('Quantity').fill(String(definition.quantity));
+    await submitAndRefresh(page, definition, {
+        name: 'checkout cart preparation',
+        form,
+        button: 'Add to cart',
+        url: mutationUrls.add,
+        submit: async () => {
+            await form.getByRole('button', {name: 'Add to cart'}).click();
+        },
+    });
+    await verifyCart(page, definition, 'added');
+
+    const checkout = await checkoutForm(page, definition);
+    await fillCheckout(checkout, definition);
+    const checkoutRequest = await submitAndRefresh(page, definition, {
+        name: `${definition.checkout.fulfillment} checkout`,
+        form: checkout,
+        button: 'Place order',
+        url: mutationUrls.checkout,
+        submit: async () => {
+            await checkout.getByRole('button', {name: 'Place order'}).click();
+        },
+    });
+    await verifyCart(page, definition, 'empty');
+
+    const checkoutBody = new URLSearchParams(checkoutRequest.body);
+    const submittedKeys = Array.from(checkoutBody.keys());
+    check(submittedKeys.length === checkoutFieldKeys.length
+        && JSON.stringify([...submittedKeys].sort())
+            === JSON.stringify(canonicalCheckoutFieldKeys)
+        && checkoutBody.get('fulfillment-method')
+            === definition.checkout.fulfillment
+        && checkoutBody.get('payment-method') === 'pay_on_receipt',
+    `${definition.name} checkout sends only the selected fulfillment and deferred payment intent`);
+    const checkoutHeaders = {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Origin: baseUrl,
+        'X-RED-CMS-CSRF': checkoutRequest.headers['x-red-cms-csrf'],
+        'Idempotency-Key': checkoutRequest.headers['idempotency-key'],
+    };
+    const checkoutRetry = await context.request.post(mutationUrls.checkout, {
+        headers: checkoutHeaders,
+        data: checkoutRequest.body,
+    });
+    check(checkoutRetry.status() === 200
+        && await checkoutRetry.text()
+            === '{"ok":true,"outcome":"accepted"}',
+    `${definition.name} exact checkout network retry replays one order`);
+    const checkoutConflictBody = new URLSearchParams(checkoutRequest.body);
+    checkoutConflictBody.set('customer-name', 'Changed checkout customer');
+    const checkoutConflict = await context.request.post(
+        mutationUrls.checkout,
+        {
+            headers: checkoutHeaders,
+            data: checkoutConflictBody.toString(),
+        }
+    );
+    check(checkoutConflict.status() === 409
+        && await checkoutConflict.text()
+            === '{"ok":false,"reason":"request_conflict"}',
+    `${definition.name} changed checkout with the same key fails closed`);
+
     const cookiesAfter = await context.cookies(baseUrl);
     const subjectsAfter = cookiesAfter.filter(
         (cookie) => cookie.name === 'redcms_public_mutation_subject'
     );
     check(subjectsAfter.length === 1
         && subjectsAfter[0].value === subject.value,
-    `${definition.name} add, retry, update, and removal reuse one subject`);
+    `${definition.name} cart and checkout mutations reuse one subject`);
     check(consoleErrors.length === 0,
         `${definition.name} console has no errors`,
         JSON.stringify(consoleErrors));
@@ -514,6 +731,12 @@ async function prepareVariableProduct(browser) {
             unitPrice: 'USD 6.49',
             lineTotal: 'USD 12.98',
             updatedLineTotal: 'USD 19.47',
+            checkout: {
+                fulfillment: 'pickup',
+                name: 'Desktop Pickup Customer',
+                email: 'desktop.pickup@example.com',
+                phone: '',
+            },
         });
         await runCase(browser, {
             name: 'mobile',
@@ -528,6 +751,19 @@ async function prepareVariableProduct(browser) {
             unitPrice: 'USD 24.99',
             lineTotal: 'USD 24.99',
             updatedLineTotal: 'USD 49.98',
+            checkout: {
+                fulfillment: 'delivery',
+                name: 'Mobile Delivery Customer',
+                email: 'mobile.delivery@example.com',
+                phone: '+15715550128',
+                address: '128 Rehearsal Way',
+                addressLine2: 'Suite 28',
+                city: 'Arlington',
+                region: 'Virginia',
+                postalCode: '22201',
+                countryCode: 'US',
+                instructions: 'Leave with the test concierge.',
+            },
         });
     } finally {
         await browser.close();
