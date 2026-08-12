@@ -1027,9 +1027,13 @@ The separate pure public-mutation form UI helper is also not an endpoint. It
 accepts only that same closed declaration, a bounded package presentation
 model, one core form-instance id, and exact same-subject issued CSRF and
 idempotency result shapes. Core derives the static action and permits only
-declared hidden identifiers, bounded positive-integer controls, and identifier
-selects capped at 128 choices; labels and options are escaped into semantic form
-markup.
+declared hidden identifiers, bounded positive-integer controls, identifier
+selects capped at 128 choices, and declared formatted-string text, email,
+telephone, or textarea controls; labels and options are escaped into semantic
+form markup. Optional select-backed required/visibility conditions are
+validated as data, rendered as core-owned attributes, and enforced in the
+fixed controller for browser usability. Package validation remains the final
+authority for domain-specific conditional semantics.
 The two opaque values appear only in dedicated fetch-controller data
 attributes and never as submitted package fields, visible copy, logs, or
 package input. A later integration must additionally own `Cache-Control:
@@ -1054,8 +1058,9 @@ no HTML, emits no header, and remains absent from `index.php`.
 The public component boundary separately accepts one optional data-only
 mutation presentation beside its existing title, summary, and facts. The shape
 is exact and closed: one valid route id, mutation id, bounded submit label, and
-one to eight unique presentation fields. Fields are limited to identifiers,
-positive integers, and selects with at most 128 unique identifier choices.
+one to sixteen unique presentation fields. Fields are limited to identifiers,
+positive integers, selects with at most 128 unique identifier choices, and
+bounded text, email, telephone, or textarea descriptions with closed formats.
 Core rejects reserved commerce/authority names, extra fields, control
 characters, duplicate keys/options, and selections outside the supplied
 choices. This is only compatibility evidence for later integration: the

@@ -86,9 +86,11 @@ and must declare every one of these fixed values:
 - `scope: public`, `authentication: public`, `method: POST`, and
   `csrf: required`, matching the referenced route exactly;
 - `encoding: application/x-www-form-urlencoded`, a body bound from 128 to
-  8,192 bytes, and one to eight closed request fields;
-- only `identifier` fields with explicit 1–160 byte bounds or
-  `positive-integer` fields with explicit 1–2,147,483,647 bounds;
+  8,192 bytes, and one to sixteen closed request fields;
+- `identifier` fields with explicit 1–160 byte bounds,
+  `positive-integer` fields with explicit 1–2,147,483,647 bounds, or bounded
+  strings in the closed formats `plain-text`, `email`, `telephone`, and
+  `iso-3166-1-alpha-2-uppercase`;
 - `subject: anonymous`, `idempotency: core-issued-key`,
   `privacy: no-store`, `rateLimit: required`, and
   `postcondition: server-derived-state`;
@@ -839,8 +841,12 @@ This planning slice does not authorize:
     one static action and exact allowed controls from the validated declaration,
     accepts only a bounded package presentation model plus same-subject issued
     CSRF/idempotency evidence, and renders escaped labels, hidden identifiers,
-    bounded integer controls, variant selects, a live status region, and a
-    no-script notice. Security evidence is carried only as fetch-controller
+    bounded integer controls, variant selects, text, email, telephone, and
+    textarea controls, conditional-required/visibility facts, a live status
+    region, and a no-script notice. Canonical decoding now accepts the exact
+    URLSearchParams representation of bounded UTF-8 strings, including explicit
+    optional empty values, while rejecting noncanonical encodings and partial
+    results. Security evidence is carried only as fetch-controller
     attributes, never package form fields. It reads no request/database/package
     state, emits nothing, and remains absent from the front controller.
 24. Completed the core-owned public-mutation form evidence bootstrap and its

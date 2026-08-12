@@ -79,6 +79,16 @@ red_addon_browser_controller_contract_assert(
     'one captured command body is frozen for exact retry only'
 );
 red_addon_browser_controller_contract_assert(
+    str_contains($controller, "pairs.length > 16")
+        && str_contains($controller, "updateConditions(form)")
+        && str_contains($controller, "data-red-' + prefix + '-field")
+        && str_contains($controller, 'controller instanceof HTMLSelectElement')
+        && str_contains($browserTest, 'Ana María')
+        && str_contains($browserTest, 'location-instructions=')
+        && str_contains($browserTest, 'control.required'),
+    'controller supports bounded rich values and declared select conditions'
+);
+red_addon_browser_controller_contract_assert(
     str_contains(
         $controller,
         "form.removeAttribute('data-red-csrf-token')"

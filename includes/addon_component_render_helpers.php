@@ -94,6 +94,128 @@ if (!function_exists('red_addon_public_component_context')) {
 }
 
 if (!function_exists('red_addon_public_component_mutation_form_field')) {
+    function red_addon_public_component_mutation_form_condition($condition)
+    {
+        if ($condition === null) {
+            return null;
+        }
+        if (!is_array($condition)
+            || array_keys($condition) !== ['field', 'equals']
+            || !red_addon_valid_component_field_key(
+                $condition['field'] ?? null
+            )
+            || !red_addon_public_mutation_form_identifier_valid(
+                $condition['equals'] ?? null,
+                1,
+                160
+            )
+        ) {
+            return false;
+        }
+        return $condition;
+    }
+
+    function red_addon_public_component_mutation_form_string_field(array $field)
+    {
+        $requiredKeys = [
+            'key', 'control', 'label', 'required', 'maxLength',
+        ];
+        $allowedKeys = array_merge($requiredKeys, [
+            'minLength', 'format', 'requiredWhen', 'visibleWhen',
+        ]);
+        foreach ($requiredKeys as $key) {
+            if (!array_key_exists($key, $field)) {
+                return null;
+            }
+        }
+        foreach (array_keys($field) as $key) {
+            if (!in_array($key, $allowedKeys, true)) {
+                return null;
+            }
+        }
+        $control = $field['control'];
+        $defaultFormats = [
+            'text' => 'plain-text',
+            'email' => 'email',
+            'tel' => 'telephone',
+            'textarea' => 'plain-text',
+        ];
+        if (!array_key_exists($control, $defaultFormats)
+            || red_addon_public_mutation_form_ui_text(
+                $field['label'] ?? null,
+                80
+            ) === ''
+            || !is_bool($field['required'] ?? null)
+            || !is_int($field['maxLength'] ?? null)
+            || $field['maxLength'] < 1
+            || $field['maxLength'] > 2000
+        ) {
+            return null;
+        }
+        $minimum = $field['minLength'] ?? 1;
+        $format = $field['format'] ?? $defaultFormats[$control];
+        if (!is_int($minimum)
+            || $minimum < 1
+            || $minimum > $field['maxLength']
+            || !in_array(
+                $format,
+                [
+                    'plain-text',
+                    'email',
+                    'telephone',
+                    'iso-3166-1-alpha-2-uppercase',
+                ],
+                true
+            )
+            || ($control === 'email' && $format !== 'email')
+            || ($control === 'tel' && $format !== 'telephone')
+            || ($control === 'textarea' && $format !== 'plain-text')
+            || ($control === 'text'
+                && !in_array(
+                    $format,
+                    ['plain-text', 'iso-3166-1-alpha-2-uppercase'],
+                    true
+                ))
+            || ($format === 'email' && $field['maxLength'] > 254)
+            || ($format === 'telephone' && $field['maxLength'] > 64)
+            || ($format === 'iso-3166-1-alpha-2-uppercase'
+                && ($minimum !== 2 || $field['maxLength'] !== 2))
+        ) {
+            return null;
+        }
+        $requiredWhen = red_addon_public_component_mutation_form_condition(
+            $field['requiredWhen'] ?? null
+        );
+        $visibleWhen = red_addon_public_component_mutation_form_condition(
+            $field['visibleWhen'] ?? null
+        );
+        if ($requiredWhen === false
+            || $visibleWhen === false
+            || ($field['required']
+                && ($requiredWhen !== null || $visibleWhen !== null))
+            || ($requiredWhen !== null
+                && $requiredWhen['field'] === $field['key'])
+            || ($visibleWhen !== null
+                && $visibleWhen['field'] === $field['key'])
+            || ($requiredWhen !== null
+                && $visibleWhen !== null
+                && $requiredWhen !== $visibleWhen)
+        ) {
+            return null;
+        }
+        return [
+            'key' => $field['key'],
+            'control' => $control,
+            'label' => $field['label'],
+            'required' => $field['required'],
+            'minLength' => $minimum,
+            'maxLength' => $field['maxLength'],
+            'format' => $format,
+            'requiredWhen' => $requiredWhen,
+            'visibleWhen' => $visibleWhen,
+        ];
+    }
+
     function red_addon_public_component_mutation_form_field($field)
     {
         if (!is_array($field)
@@ -110,6 +232,15 @@ if (!function_exists('red_addon_public_component_mutation_form_field')) {
         }
 
         $control = $field['control'];
+        if (in_array(
+            $control,
+            ['text', 'email', 'tel', 'textarea'],
+            true
+        )) {
+            return red_addon_public_component_mutation_form_string_field(
+                $field
+            );
+        }
         if ($control === 'hidden') {
             if (array_keys($field) !== ['key', 'control', 'value']
                 || !red_addon_public_mutation_form_identifier_valid(
@@ -198,7 +329,7 @@ if (!function_exists('red_addon_public_component_mutation_form_presentation')) {
             || !is_array($presentation['fields'] ?? null)
             || !array_is_list($presentation['fields'])
             || count($presentation['fields']) < 1
-            || count($presentation['fields']) > 8
+            || count($presentation['fields']) > 16
         ) {
             return null;
         }

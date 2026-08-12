@@ -116,13 +116,44 @@ if (!function_exists('red_addon_public_mutation_form_declared_fields')) {
                 ) {
                     return null;
                 }
+            } elseif ($type === 'string') {
+                if ($keys !== [
+                    'format', 'key', 'maxLength', 'minLength', 'required',
+                    'type',
+                ]
+                    || !in_array(
+                        $field['format'] ?? null,
+                        [
+                            'plain-text',
+                            'email',
+                            'telephone',
+                            'iso-3166-1-alpha-2-uppercase',
+                        ],
+                        true
+                    )
+                    || !is_int($field['minLength'] ?? null)
+                    || !is_int($field['maxLength'] ?? null)
+                    || $field['minLength'] < 1
+                    || $field['maxLength'] > 2000
+                    || $field['minLength'] > $field['maxLength']
+                    || ($field['format'] === 'email'
+                        && $field['maxLength'] > 254)
+                    || ($field['format'] === 'telephone'
+                        && $field['maxLength'] > 64)
+                    || ($field['format']
+                        === 'iso-3166-1-alpha-2-uppercase'
+                        && ($field['minLength'] !== 2
+                            || $field['maxLength'] !== 2))
+                ) {
+                    return null;
+                }
             } else {
                 return null;
             }
             $declared[$key] = $field;
             $previousKey = $key;
         }
-        return count($declared) >= 1 && count($declared) <= 8
+        return count($declared) >= 1 && count($declared) <= 16
             ? $declared
             : null;
     }
@@ -167,19 +198,98 @@ if (!function_exists('red_addon_public_mutation_form_positive_integer')) {
     }
 }
 
+if (!function_exists('red_addon_public_mutation_form_string_valid')) {
+    function red_addon_public_mutation_form_string_valid(
+        $value,
+        $format,
+        $minimum,
+        $maximum,
+        $required
+    ) {
+        if (!is_string($value)
+            || !is_string($format)
+            || !is_int($minimum)
+            || !is_int($maximum)
+            || !is_bool($required)
+            || preg_match('//u', $value) !== 1
+            || preg_match('/[\x00-\x1F\x7F]/', $value) === 1
+            || trim($value) !== $value
+        ) {
+            return false;
+        }
+        if ($value === '') {
+            return $required === false;
+        }
+        $length = preg_match_all('/./us', $value, $matches);
+        if (!is_int($length)
+            || $length < $minimum
+            || $length > $maximum
+        ) {
+            return false;
+        }
+        if ($format === 'plain-text') {
+            return true;
+        }
+        if ($format === 'email') {
+            return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+        }
+        if ($format === 'telephone') {
+            return preg_match('/\A[0-9+(). -]+\z/D', $value) === 1
+                && preg_match_all('/[0-9]/', $value, $digits) >= 7;
+        }
+        return $format === 'iso-3166-1-alpha-2-uppercase'
+            && preg_match('/\A[A-Z]{2}\z/D', $value) === 1;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_form_value_encode')) {
+    /**
+     * Mirrors URLSearchParams application/x-www-form-urlencoded encoding.
+     */
+    function red_addon_public_mutation_form_value_encode($value)
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+        $encoded = '';
+        for ($index = 0, $length = strlen($value); $index < $length; $index++) {
+            $byte = ord($value[$index]);
+            if (($byte >= 0x30 && $byte <= 0x39)
+                || ($byte >= 0x41 && $byte <= 0x5A)
+                || ($byte >= 0x61 && $byte <= 0x7A)
+                || in_array($byte, [0x2A, 0x2D, 0x2E, 0x5F], true)
+            ) {
+                $encoded .= $value[$index];
+            } elseif ($byte === 0x20) {
+                $encoded .= '+';
+            } else {
+                $encoded .= '%' . strtoupper(str_pad(
+                    dechex($byte),
+                    2,
+                    '0',
+                    STR_PAD_LEFT
+                ));
+            }
+        }
+        return $encoded;
+    }
+}
+
 if (!function_exists('red_addon_public_mutation_form_value_decode')) {
     /**
-     * The allowed identifier alphabet needs only canonical %7E form decoding.
+     * Accepts only the canonical bytes emitted by URLSearchParams.
      */
     function red_addon_public_mutation_form_value_decode($value)
     {
         if (!is_string($value)
-            || str_contains($value, '~')
-            || preg_match('/%(?!7E)/', $value) === 1
+            || preg_match('/%(?![0-9A-F]{2})/', $value) === 1
         ) {
             return null;
         }
-        return str_replace('%7E', '~', $value);
+        $decoded = rawurldecode(str_replace('+', ' ', $value));
+        return red_addon_public_mutation_form_value_encode($decoded) === $value
+            ? $decoded
+            : null;
     }
 }
 
@@ -225,7 +335,7 @@ if (!function_exists('red_addon_public_mutation_form_decode')) {
             foreach ($pairs as $pair) {
                 if ($pair === ''
                     || substr_count($pair, '=') !== 1
-                    || strpbrk($pair, '+[];') !== false
+                    || strpbrk($pair, '[];') !== false
                 ) {
                     return red_addon_public_mutation_form_result();
                 }
@@ -233,6 +343,7 @@ if (!function_exists('red_addon_public_mutation_form_decode')) {
                 $value = red_addon_public_mutation_form_value_decode($value);
                 if ($key === ''
                     || str_contains($key, '%')
+                    || str_contains($key, '+')
                     || !is_string($value)
                     || !array_key_exists($key, $declared)
                     || array_key_exists($key, $rawFields)
@@ -256,6 +367,19 @@ if (!function_exists('red_addon_public_mutation_form_decode')) {
                     $rawFields[$key],
                     $field['minLength'],
                     $field['maxLength']
+                )) {
+                    return red_addon_public_mutation_form_result();
+                }
+                $fields[$key] = $rawFields[$key];
+                continue;
+            }
+            if ($field['type'] === 'string') {
+                if (!red_addon_public_mutation_form_string_valid(
+                    $rawFields[$key],
+                    $field['format'],
+                    $field['minLength'],
+                    $field['maxLength'],
+                    $field['required']
                 )) {
                     return red_addon_public_mutation_form_result();
                 }

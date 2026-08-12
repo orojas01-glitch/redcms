@@ -11,6 +11,7 @@
  */
 
 require_once __DIR__ . '/addon_public_mutation_idempotency_helpers.php';
+require_once __DIR__ . '/addon_public_mutation_form_helpers.php';
 require_once __DIR__ . '/addon_install_helpers.php';
 require_once __DIR__ . '/admin_transaction_helpers.php';
 require_once __DIR__ . '/addon_runtime_helpers.php';
@@ -202,7 +203,7 @@ if (!function_exists('red_addon_public_mutation_execution_fields')) {
             }
             $declared[$key] = $field;
         }
-        if ($declared === [] || count($declared) > 8) {
+        if ($declared === [] || count($declared) > 16) {
             return null;
         }
         foreach ($fields as $key => $_value) {
@@ -236,6 +237,16 @@ if (!function_exists('red_addon_public_mutation_execution_fields')) {
                     || $value < $field['minimum']
                     || $value > $field['maximum']
                 ) {
+                    return null;
+                }
+            } elseif (($field['type'] ?? null) === 'string') {
+                if (!red_addon_public_mutation_form_string_valid(
+                    $value,
+                    $field['format'] ?? null,
+                    $field['minLength'] ?? null,
+                    $field['maxLength'] ?? null,
+                    $required
+                )) {
                     return null;
                 }
             } else {

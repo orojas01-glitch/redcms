@@ -88,6 +88,46 @@ function formMarkup(action = actionPath, csrf = csrfToken) {
     </body></html>`;
 }
 
+function richFormMarkup() {
+    return `<!doctype html><html><body>
+        <form data-red-addon-public-mutation-form
+            data-red-csrf-header="X-RED-CMS-CSRF"
+            data-red-csrf-token="${csrfToken}"
+            data-red-idempotency-header="Idempotency-Key"
+            data-red-idempotency-key="${idempotencyKey}"
+            action="${actionPath}" method="post"
+            enctype="application/x-www-form-urlencoded">
+            <label for="contact-name">Name</label>
+            <input id="contact-name" type="text" name="contact-name"
+                value="Ana María" maxlength="120" required>
+            <label for="contact-email">Email</label>
+            <input id="contact-email" type="email" name="contact-email"
+                value="ana@example.com" maxlength="254" required>
+            <div data-red-addon-public-mutation-field="contact-phone"
+                data-red-required-when-field="response-method"
+                data-red-required-when-equals="onsite">
+                <label for="contact-phone">Phone</label>
+                <input id="contact-phone" type="tel" name="contact-phone"
+                    value="" maxlength="32">
+            </div>
+            <div data-red-addon-public-mutation-field="location-instructions"
+                data-red-visible-when-field="response-method"
+                data-red-visible-when-equals="onsite">
+                <label for="location-instructions">Instructions</label>
+                <textarea id="location-instructions"
+                    name="location-instructions" maxlength="500"></textarea>
+            </div>
+            <label for="response-method">Response method</label>
+            <select id="response-method" name="response-method">
+                <option value="remote" selected>Remote</option>
+                <option value="onsite">On site</option>
+            </select>
+            <button type="submit">Submit response</button>
+            <p data-red-addon-public-mutation-status role="status"></p>
+        </form>
+    </body></html>`;
+}
+
 function jsonResponse(status, body) {
     return {
         status,
@@ -275,6 +315,59 @@ try {
     );
     assert(conflict.pageErrors.length === 0, 'conflict case has no page errors');
     await conflict.context.close();
+
+    const richRequests = [];
+    const rich = await fixturePage(
+        browser,
+        {width: 390, height: 844},
+        async (route, request) => {
+            richRequests.push(request.postData());
+            await route.fulfill(jsonResponse(
+                409,
+                '{"ok":false,"reason":"request_conflict"}'
+            ));
+        },
+        richFormMarkup()
+    );
+    const phone = rich.page.locator('[name="contact-phone"]');
+    const instructions = rich.page.locator('[name="location-instructions"]');
+    assert(
+        !await phone.evaluate((control) => control.required)
+            && !await instructions.isVisible(),
+        'remote rich form initializes optional phone and hidden location facts'
+    );
+    await rich.page.selectOption('[name="response-method"]', 'onsite');
+    assert(
+        await phone.evaluate((control) => control.required)
+            && await instructions.isVisible(),
+        'declared select condition updates required and visible controls'
+    );
+    await instructions.fill('Temporary note');
+    await rich.page.selectOption('[name="response-method"]', 'remote');
+    assert(
+        !await instructions.isVisible()
+            && await instructions.inputValue() === '',
+        'a newly hidden conditional value is cleared before command capture'
+    );
+    await rich.page.selectOption('[name="response-method"]', 'onsite');
+    await phone.fill('+1 202-555-0199');
+    await rich.page.getByRole('button', {name: 'Submit response'}).click();
+    await rich.page.getByText(
+        'Could not complete this update. Refresh the page.',
+        {exact: true}
+    ).waitFor();
+    assert(
+        richRequests.length === 1
+            && richRequests[0]
+                === 'contact-name=Ana+Mar%C3%ADa'
+                    + '&contact-email=ana%40example.com'
+                    + '&contact-phone=%2B1+202-555-0199'
+                    + '&location-instructions='
+                    + '&response-method=onsite',
+        'rich values use canonical URLSearchParams bytes including explicit empty strings'
+    );
+    assert(rich.pageErrors.length === 0, 'rich field case has no page errors');
+    await rich.context.close();
 
     let invalidRequests = 0;
     const invalid = await fixturePage(

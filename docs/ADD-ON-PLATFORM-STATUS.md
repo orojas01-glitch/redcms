@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-10 after the isolated Store Lite 0.1.24 desktop/mobile
-quantity-update and line-removal rehearsal.
+Last updated: 2026-08-12 during the generic RED-CMS rich public-mutation form
+gate following the merged Store Lite 0.1.27 guest-checkout contract.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -49,19 +49,22 @@ flowchart TD
     H2B["COMPLETE<br/>Editable Cart B<br/>core bounded row-form retention"]
     H2C["COMPLETE<br/>Editable Cart C<br/>read-model binding + core composition"]
     H2D["COMPLETE<br/>Editable Cart D<br/>desktop/mobile mutation QA"]
-    I["CURRENT<br/>Guest order + immutable order snapshot<br/>pay-on-receipt first"]
+    I1["COMPLETE<br/>Guest order foundation<br/>immutable server-derived snapshot"]
+    I2["COMPLETE<br/>Store Lite 0.1.27<br/>guest-checkout scalar + presentation contract"]
+    I3["CURRENT<br/>Generic RED-CMS rich form gate<br/>text, email, tel, textarea, conditions"]
+    I4["REMAINING<br/>Store Lite checkout linkage<br/>persist order + pay on receipt + browser QA"]
     J["RELEASE GATE<br/>disable/re-enable, recovery, migration,<br/>responsive QA, client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
-    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I --> J --> K
+    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J --> K
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D complete;
-    class I current;
-    class J remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2 complete;
+    class I3 current;
+    class I4,J remaining;
     class K target;
 ```
 
@@ -69,11 +72,11 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Editable Cart is complete in the isolated supported-server proof. The current Store Lite gate is the minimum guest order with an immutable order snapshot and pay-on-receipt first. |
-| What just finished? | Desktop and mobile Chrome added a simple or exact Size/Color product, rendered two core-owned row controls, updated the verified line, refreshed to recalculated totals, removed the line, and refreshed to an empty Cart. The proof passed 147 public checks plus the established 100 administrator checks with exact state and cleanup. |
+| Where are we? | The immutable guest-order and Store Lite 0.1.27 guest-checkout data contracts are complete. The current gate extends RED-CMS's generic closed mutation form so an optional package can later link checkout without package HTML or browser authority. |
+| What just finished? | Store Lite fixed twelve bounded guest fields, pickup/delivery semantics, payment-readiness intersection, and a data-only presentation model. This core batch adds generic formatted strings, explicit optional empty values, four rich controls, and select-backed conditional browser behavior. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove a simple or variable product through the server-authoritative Cart. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after Gate 2D2? | Add the minimum guest order/pay-on-receipt flow, then pass lifecycle/recovery/migration/isolation release acceptance. |
+| What remains after this core gate? | Adapt and register the separate Store Lite presentation against the accepted core declaration, link the guest-order mutation, prove pay-on-receipt desktop/mobile behavior, then pass lifecycle/recovery/migration/isolation release acceptance. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule
