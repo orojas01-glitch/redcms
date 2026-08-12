@@ -1,6 +1,7 @@
 <?php
 /**
- * Dependency-free checks for administrator-form runtime setting declarations.
+ * Dependency-free checks for administrator-form and public-mutation runtime
+ * setting declarations.
  *
  * This exercises manifest validation only. It never loads package PHP, opens a
  * database connection, resolves a setting value, or creates an endpoint.
@@ -14,6 +15,7 @@ if (PHP_SAPI !== 'cli') {
 $projectRoot = dirname(__DIR__);
 require_once $projectRoot . '/includes/addon_manifest_helpers.php';
 require_once $projectRoot . '/includes/addon_admin_tool_form_preflight_helpers.php';
+require_once $projectRoot . '/includes/addon_public_mutation_preflight_helpers.php';
 
 $assertions = 0;
 $temporaryRoot = sys_get_temp_dir() . '/redcms-runtime-setting-contract-' .
@@ -108,6 +110,53 @@ function red_addon_runtime_setting_contract_manifest(array $settings, array $run
             'allowExplicitPurge' => true,
         ],
     ];
+}
+
+function red_addon_public_runtime_setting_contract_manifest(
+    array $settings,
+    array $runtimeSettings
+) {
+    $manifest = red_addon_runtime_setting_contract_manifest(
+        $settings,
+        ['fixture.currency']
+    );
+    unset($manifest['adminToolFormContracts']);
+    $manifest['provides']['adminTools'] = [];
+    $manifest['routes'] = [[
+        'id' => 'redcms.runtime-fixture/checkout',
+        'scope' => 'public',
+        'path' => '/addons/redcms/runtime-fixture/checkout',
+        'methods' => ['POST'],
+        'authentication' => 'public',
+        'csrf' => 'required',
+    ]];
+    $manifest['publicMutationContracts'] = [[
+        'route' => 'redcms.runtime-fixture/checkout',
+        'mutation' => 'redcms.runtime-fixture/create-order',
+        'scope' => 'public',
+        'authentication' => 'public',
+        'method' => 'POST',
+        'csrf' => 'required',
+        'encoding' => 'application/x-www-form-urlencoded',
+        'maxBodyBytes' => 512,
+        'requestFields' => [[
+            'key' => 'item',
+            'type' => 'identifier',
+            'required' => true,
+            'minLength' => 1,
+            'maxLength' => 64,
+        ]],
+        'subject' => 'anonymous',
+        'idempotency' => 'core-issued-key',
+        'privacy' => 'no-store',
+        'rateLimit' => 'required',
+        'tables' => ['RED_Addon_Runtime_Fixture_Orders'],
+        'postcondition' => 'server-derived-state',
+        'audit' => 'commerce.order.created',
+        'outcomes' => ['accepted', 'unchanged'],
+        'runtimeSettings' => $runtimeSettings,
+    ]];
+    return $manifest;
 }
 
 function red_addon_runtime_setting_contract_validate(
@@ -272,6 +321,118 @@ try {
             'runtimeSettings repeats "fixture.currency"'
         ),
         'runtime setting declarations are deduplicated'
+    );
+
+    $publicManifest = red_addon_public_runtime_setting_contract_manifest(
+        $configuredLater,
+        ['fixture.currency']
+    );
+    $publicValid = red_addon_runtime_setting_contract_validate(
+        $temporaryRoot,
+        $publicManifest
+    );
+    $publicContract = red_addon_public_mutation_contract(
+        $publicManifest,
+        'redcms.runtime-fixture/checkout',
+        'redcms.runtime-fixture/create-order'
+    );
+    $publicPlan = red_addon_public_mutation_declaration_preflight(
+        $publicManifest,
+        'redcms.runtime-fixture/checkout',
+        'redcms.runtime-fixture/create-order'
+    );
+    red_addon_runtime_setting_contract_assert(
+        ($publicValid['errors'] ?? []) === []
+            && is_array($publicContract)
+            && ($publicContract['runtimeSettings'] ?? [])
+                === ['fixture.currency']
+            && !empty($publicPlan['valid'])
+            && ($publicPlan['runtimeSettingCount'] ?? null) === 1,
+        'one declared non-secret client setting is preserved by a public mutation contract and value-free plan'
+    );
+    $publicWithoutRuntime = $publicManifest;
+    unset($publicWithoutRuntime['publicMutationContracts'][0]['runtimeSettings']);
+    $publicWithoutRuntime['settings'] = [];
+    $publicWithoutRuntimeValid = red_addon_runtime_setting_contract_validate(
+        $temporaryRoot,
+        $publicWithoutRuntime
+    );
+    $publicWithoutRuntimeContract = red_addon_public_mutation_contract(
+        $publicWithoutRuntime,
+        'redcms.runtime-fixture/checkout',
+        'redcms.runtime-fixture/create-order'
+    );
+    red_addon_runtime_setting_contract_assert(
+        ($publicWithoutRuntimeValid['errors'] ?? []) === []
+            && is_array($publicWithoutRuntimeContract)
+            && !array_key_exists('runtimeSettings', $publicWithoutRuntimeContract)
+            && !hash_equals(
+                red_addon_public_mutation_contract_fingerprint($publicContract),
+                red_addon_public_mutation_contract_fingerprint(
+                    $publicWithoutRuntimeContract
+                )
+            ),
+        'a public mutation without a runtime declaration remains valid but cannot reuse runtime-bound contract evidence'
+    );
+    $publicUnknown = red_addon_runtime_setting_contract_validate(
+        $temporaryRoot,
+        red_addon_public_runtime_setting_contract_manifest(
+            $configuredLater,
+            ['fixture.unknown']
+        )
+    );
+    $publicSecret = red_addon_runtime_setting_contract_validate(
+        $temporaryRoot,
+        red_addon_public_runtime_setting_contract_manifest(
+            [[
+                'key' => 'fixture.api-token',
+                'label' => 'API token',
+                'type' => 'secret-reference',
+                'secret' => true,
+                'permission' => 'fixture.settings.manage',
+            ]],
+            ['fixture.api-token']
+        )
+    );
+    $publicDefaulted = red_addon_runtime_setting_contract_validate(
+        $temporaryRoot,
+        red_addon_public_runtime_setting_contract_manifest(
+            [[
+                'key' => 'fixture.currency',
+                'label' => 'Catalog currency',
+                'type' => 'text',
+                'secret' => false,
+                'permission' => 'fixture.settings.manage',
+                'default' => 'USD',
+            ]],
+            ['fixture.currency']
+        )
+    );
+    $publicDuplicate = red_addon_runtime_setting_contract_validate(
+        $temporaryRoot,
+        red_addon_public_runtime_setting_contract_manifest(
+            $configuredLater,
+            ['fixture.currency', 'fixture.currency']
+        )
+    );
+    red_addon_runtime_setting_contract_assert(
+        red_addon_runtime_setting_contract_has_error(
+            $publicUnknown,
+            'runtime setting "fixture.unknown" must be declared'
+        )
+            && red_addon_runtime_setting_contract_has_error(
+                $publicSecret,
+                'runtime setting "fixture.api-token" must be non-secret'
+            )
+            && red_addon_runtime_setting_contract_has_error(
+                $publicDefaulted,
+                'runtime setting "fixture.currency" must not have a non-null default'
+            )
+            && red_addon_runtime_setting_contract_has_error(
+                $publicDuplicate,
+                'runtimeSettings repeats "fixture.currency"'
+            ),
+        'a public mutation cannot expose undeclared, secret, defaulted, or duplicate runtime settings'
     );
 
     red_addon_runtime_setting_contract_remove_tree($temporaryRoot);

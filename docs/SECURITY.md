@@ -952,6 +952,12 @@ core add-on tables. The preflight returns only deterministic hashes and counts;
 it does not load package PHP, read a request/cookie/session/database, issue
 tokens, check live table state, start a transaction, or invoke a handler.
 
+An entry may also declare a closed list of one to sixteen `runtimeSettings`
+keys. Each must be a package-declared non-secret scalar setting with no
+non-null manifest default. The declaration and its preflight remain value-free;
+they do not make a setting available to a route, browser, package, or another
+client installation.
+
 A separate read-only live-data preflight now uses that trusted declaration only
 after the package is current and `installed_disabled`. It reads the one
 client's existing migration ledger, declared package-table engines, typed
@@ -993,15 +999,29 @@ The internal core-only transaction runner is not a public endpoint. It accepts
 only a typed command and opaque evidence from a later core dispatcher, plus a
 current trusted first-party runtime binding. Under lifecycle and package locks
 it validates the subject, CSRF, idempotency key, rate budget, and up to sixteen
-declared package-owned InnoDB tables, server-derived state, replay ledger, and
-a value-free anonymous audit fact in one transaction. Replays return a bounded
-stored outcome; changed
+declared package-owned InnoDB tables, optional declared runtime settings,
+server-derived state, replay ledger, and a value-free anonymous audit fact in
+one transaction. Replays return a bounded stored outcome; changed
 commands are refused. Output, exceptions, malformed results, state drift,
 transaction loss, ledger failure, and audit failure roll back or refuse.
 The callback receives a core-supplied transaction connection, so this is a
 reviewed first-party-PHP boundary rather than a database sandbox; package code
 must not commit, roll back, alter buffers, read request globals, or write
 outside its declared tables.
+
+For a declared runtime-settings list, core derives exact package/route/mutation
+identity from the current enabled binding, locks only that package's current
+setting state inside the runner transaction, and passes one immutable typed
+object to the matching state loader and handler. It exposes no secret or
+secret-reference value, browser input cannot select a setting, and a
+coexisting secret setting never enters values or configuration evidence. A
+missing, malformed, unconfigured, defaulted, or secret selected value fails
+before rate use, replay reservation, or package callback invocation. The opaque
+configuration hash participates in declared command evidence, so a
+configuration change cannot replay an old idempotency key. No declaration
+receives an empty object and requires no configured setting row. Packages must
+not query `RED_Addon_Settings` directly. See
+[`PUBLIC-MUTATION-RUNTIME-SETTINGS-CONTRACT.md`](PUBLIC-MUTATION-RUNTIME-SETTINGS-CONTRACT.md).
 
 The separate pure core response model maps only the runner's two bounded
 outcomes and a fixed future-dispatch refusal vocabulary to exact JSON envelopes.

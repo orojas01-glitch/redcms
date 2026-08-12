@@ -218,6 +218,10 @@ try {
                 === '#/$defs/adminToolFormField'
             && ($schema['properties']['publicMutationContracts']['items']['$ref'] ?? '')
                 === '#/$defs/publicMutationContract'
+            && ($schema['$defs']['publicMutationContract']['properties']['runtimeSettings']['maxItems'] ?? null)
+                === 16
+            && ($schema['$defs']['publicMutationContract']['properties']['runtimeSettings']['items']['$ref'] ?? '')
+                === '#/$defs/permission'
             && ($schema['$defs']['publicMutationContract']['properties']['method']['const'] ?? '')
                 === 'POST'
             && ($schema['$defs']['publicMutationContract']['properties']['idempotency']['const'] ?? '')
