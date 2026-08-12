@@ -3,8 +3,9 @@
  * Dependency-free checks for administrator-form and public-mutation runtime
  * setting declarations.
  *
- * This exercises manifest validation only. It never loads package PHP, opens a
- * database connection, resolves a setting value, or creates an endpoint.
+ * This exercises manifest validation plus the supported-server proof staging
+ * contract. It never loads package PHP, opens a database connection, resolves
+ * a setting value, or creates an endpoint.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -196,6 +197,30 @@ function red_addon_runtime_setting_contract_has_error(array $result, $needle)
 }
 
 try {
+    $dispatcherProof = file_get_contents(
+        $projectRoot . '/scripts/frankenphp-public-mutation-dispatch-proof.sh'
+    );
+    $stagingStart = is_string($dispatcherProof)
+        ? strpos($dispatcherProof, 'for include_file in')
+        : false;
+    $stagingEnd = $stagingStart !== false
+        ? strpos($dispatcherProof, '; do', $stagingStart)
+        : false;
+    $stagingContract = $stagingStart !== false && $stagingEnd !== false
+        ? substr(
+            $dispatcherProof,
+            $stagingStart,
+            $stagingEnd - $stagingStart
+        )
+        : '';
+    red_addon_runtime_setting_contract_assert(
+        str_contains(
+            $stagingContract,
+            'addon_public_mutation_runtime_setting_helpers.php'
+        ),
+        'the supported-server proof stages the runtime setting dependency'
+    );
+
     $configuredLater = [[
         'key' => 'fixture.currency',
         'label' => 'Catalog currency',
