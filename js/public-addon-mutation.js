@@ -40,28 +40,87 @@
 
     function formBody(form) {
         var pairs = [];
+        var seen = Object.create(null);
         var valid = true;
         new FormData(form).forEach(function (value, key) {
             if (typeof value !== 'string'
                 || !/^[a-z][a-z0-9-]{0,63}$/.test(key)
-                || !/^[A-Za-z0-9][A-Za-z0-9._~-]*$/.test(value)
+                || value.length > 2000
+                || Object.prototype.hasOwnProperty.call(seen, key)
             ) {
                 valid = false;
                 return;
             }
+            seen[key] = true;
             pairs.push([key, value]);
         });
-        if (!valid || pairs.length < 1 || pairs.length > 8) {
+        if (!valid || pairs.length < 1 || pairs.length > 16) {
             return '';
         }
         var body = new URLSearchParams(pairs).toString();
-        if (body.length < 1
-            || body.length > 8192
-            || !/^[a-z][a-z0-9-]*=(?:[A-Za-z0-9._-]|%7E)+(?:&[a-z][a-z0-9-]*=(?:[A-Za-z0-9._-]|%7E)+)*$/.test(body)
-        ) {
+        if (body.length < 1 || body.length > 8192) {
             return '';
         }
         return body;
+    }
+
+    function condition(form, wrapper, prefix) {
+        var field = wrapper.getAttribute('data-red-' + prefix + '-field');
+        var equals = wrapper.getAttribute('data-red-' + prefix + '-equals');
+        if (field === null && equals === null) {
+            return {valid: true, active: false, matches: false};
+        }
+        if (typeof field !== 'string'
+            || typeof equals !== 'string'
+            || !/^[a-z][a-z0-9-]{0,63}$/.test(field)
+            || !/^[A-Za-z0-9][A-Za-z0-9._~-]*$/.test(equals)
+        ) {
+            return {valid: false, active: false, matches: false};
+        }
+        var controller = form.elements.namedItem(field);
+        if (!(controller instanceof HTMLSelectElement)) {
+            return {valid: false, active: false, matches: false};
+        }
+        var allowed = Array.prototype.some.call(
+            controller.options,
+            function (option) {
+                return option.value === equals;
+            }
+        );
+        return {
+            valid: allowed,
+            active: true,
+            matches: allowed && controller.value === equals
+        };
+    }
+
+    function updateConditions(form) {
+        var valid = true;
+        form.querySelectorAll('[data-red-addon-public-mutation-field]').forEach(
+            function (wrapper) {
+                var controls = wrapper.querySelectorAll('input, textarea');
+                if (controls.length !== 1) {
+                    valid = false;
+                    return;
+                }
+                var requiredWhen = condition(form, wrapper, 'required-when');
+                var visibleWhen = condition(form, wrapper, 'visible-when');
+                if (!requiredWhen.valid || !visibleWhen.valid) {
+                    valid = false;
+                    return;
+                }
+                if (requiredWhen.active) {
+                    controls[0].required = requiredWhen.matches;
+                }
+                if (visibleWhen.active) {
+                    if (!visibleWhen.matches) {
+                        controls[0].value = '';
+                    }
+                    wrapper.hidden = !visibleWhen.matches;
+                }
+            }
+        );
+        return valid;
     }
 
     function statusElement(form) {
@@ -251,7 +310,8 @@
             && form.getAttribute('data-red-idempotency-header')
                 === 'Idempotency-Key'
             && tokenPattern.test(state.csrfToken)
-            && tokenPattern.test(state.idempotencyKey);
+            && tokenPattern.test(state.idempotencyKey)
+            && updateConditions(form);
         form.setAttribute(
             'data-red-addon-public-mutation-controller',
             state.configured ? 'ready' : 'unavailable'
@@ -265,6 +325,10 @@
                 unavailable(state);
                 return;
             }
+            if (!updateConditions(form)) {
+                unavailable(state);
+                return;
+            }
             if (state.body === '') {
                 state.body = formBody(form);
                 if (state.body === '') {
@@ -274,6 +338,11 @@
                 freezeCommand(state);
             }
             send(state);
+        });
+        form.addEventListener('change', function () {
+            if (!state.busy && !state.finished && !updateConditions(form)) {
+                unavailable(state);
+            }
         });
     }
 

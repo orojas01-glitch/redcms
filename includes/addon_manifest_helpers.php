@@ -1807,10 +1807,10 @@ if (!function_exists('red_addon_validate_public_mutation_request_fields')) {
             );
             return [];
         }
-        if ($fields === [] || count($fields) > 8) {
+        if ($fields === [] || count($fields) > 16) {
             red_addon_add_error(
                 $result,
-                $context . ' requestFields must contain one to eight fields.'
+                $context . ' requestFields must contain one to sixteen fields.'
             );
         }
 
@@ -1825,6 +1825,7 @@ if (!function_exists('red_addon_validate_public_mutation_request_fields')) {
                     'key',
                     'type',
                     'required',
+                    'format',
                     'minLength',
                     'maxLength',
                     'minimum',
@@ -1862,10 +1863,15 @@ if (!function_exists('red_addon_validate_public_mutation_request_fields')) {
             }
 
             $type = is_string($field['type'] ?? null) ? $field['type'] : '';
-            if (!in_array($type, ['identifier', 'positive-integer'], true)) {
+            if (!in_array(
+                $type,
+                ['identifier', 'positive-integer', 'string'],
+                true
+            )) {
                 red_addon_add_error(
                     $result,
-                    $fieldContext . ' type must be identifier or positive-integer.'
+                    $fieldContext .
+                        ' type must be identifier, positive-integer, or string.'
                 );
                 continue;
             }
@@ -1925,6 +1931,113 @@ if (!function_exists('red_addon_validate_public_mutation_request_fields')) {
                     $normalized[] = [
                         'key' => $key,
                         'type' => $type,
+                        'required' => $field['required'],
+                        'minLength' => $minLength,
+                        'maxLength' => $maxLength,
+                    ];
+                }
+                continue;
+            }
+
+            if ($type === 'string') {
+                $expectedKeys = [
+                    'format',
+                    'key',
+                    'maxLength',
+                    'minLength',
+                    'required',
+                    'type',
+                ];
+                if ($keys !== $expectedKeys) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext .
+                            ' string fields require only format, minLength, and maxLength bounds.'
+                    );
+                    continue;
+                }
+                $format = is_string($field['format'] ?? null)
+                    ? $field['format']
+                    : '';
+                if (!in_array(
+                    $format,
+                    [
+                        'plain-text',
+                        'email',
+                        'telephone',
+                        'iso-3166-1-alpha-2-uppercase',
+                    ],
+                    true
+                )) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' format is invalid.'
+                    );
+                    $fieldValid = false;
+                }
+                $minLength = $field['minLength'] ?? null;
+                $maxLength = $field['maxLength'] ?? null;
+                if (!is_int($minLength)
+                    || $minLength < 1
+                    || $minLength > 2000
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext .
+                            ' minLength must be an integer from 1 to 2000.'
+                    );
+                    $fieldValid = false;
+                }
+                if (!is_int($maxLength)
+                    || $maxLength < 1
+                    || $maxLength > 2000
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext .
+                            ' maxLength must be an integer from 1 to 2000.'
+                    );
+                    $fieldValid = false;
+                }
+                if (is_int($minLength)
+                    && is_int($maxLength)
+                    && $minLength > $maxLength
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' minLength must not exceed maxLength.'
+                    );
+                    $fieldValid = false;
+                }
+                if ($format === 'email' && $maxLength > 254) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' email maxLength must not exceed 254.'
+                    );
+                    $fieldValid = false;
+                }
+                if ($format === 'telephone' && $maxLength > 64) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext . ' telephone maxLength must not exceed 64.'
+                    );
+                    $fieldValid = false;
+                }
+                if ($format === 'iso-3166-1-alpha-2-uppercase'
+                    && ($minLength !== 2 || $maxLength !== 2)
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $fieldContext .
+                            ' ISO country-code strings require length 2.'
+                    );
+                    $fieldValid = false;
+                }
+                if ($fieldValid) {
+                    $normalized[] = [
+                        'key' => $key,
+                        'type' => $type,
+                        'format' => $format,
                         'required' => $field['required'],
                         'minLength' => $minLength,
                         'maxLength' => $maxLength,

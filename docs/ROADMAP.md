@@ -777,8 +777,16 @@ the empty Cart without rotating the subject. The established 100 administrator
 checks and 147 public checks passed with zero console, page, request, HTTP, or
 overflow errors. Exact final state was `4:2:3:8:8:8`, and every container,
 network, image, database, certificate, secret, and staged project was removed.
-No hosted or client installation changed. The next Store Lite gate is the
-minimum guest order and immutable pay-on-receipt snapshot.
+No hosted or client installation changed. The immutable guest-order foundation
+and the separate Store Lite 0.1.27 guest-checkout scalar/presentation contract
+are now complete. The current generic core gate expands the same closed
+public-mutation declaration, decoder, component presentation, renderer, and
+fixed browser controller to at most sixteen fields with bounded plain-text,
+email, telephone, country-code, textarea, and select-backed condition support.
+It installs no package and adds no Store Lite route, setting, migration,
+business record, payment provider, or client state. Store Lite checkout route
+linkage, order persistence, pay-on-receipt browser QA, and later hosted-provider
+adapters remain separate follow-up gates.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

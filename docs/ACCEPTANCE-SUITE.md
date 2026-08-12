@@ -221,6 +221,13 @@ notice. Missing, unknown, duplicate, malformed, out-of-range, cross-subject,
 or post-composition-invalid models render no partial form or token. The helper
 reads no request globals, database, package, filesystem, or front-controller
 state and emits no output or headers.
+The separate 14-assertion rich-field fixture proves twelve mixed declared
+fields, the sixteen-field ceiling, closed string formats, component-model
+normalization, declaration-order composition, escaped text/email/telephone/
+textarea markup, select-backed conditions, canonical Unicode/space/empty-value
+decoding, independent execution revalidation, and uniform no-partial-data
+refusal. It creates no database, package installation, route activation, or
+client state.
 The separate 12-assertion disposable form-bootstrap fixture validates the
 complete presentation before issuance, proves absent-cookie subject issuance
 and valid-cookie subject reuse, same-subject scoped CSRF/idempotency evidence,
@@ -1051,17 +1058,19 @@ process environment.
   residue and the helper has no request-global, emission, package-load, or
   endpoint path.
 - Public-mutation browser-controller source acceptance is dependency-free. Its
-  10 assertions require the exact form/status selectors, fixed evidence/content
+  11 assertions require the exact form/status selectors, fixed evidence/content
   headers,
   same-origin/no-store/redirect-error fetch policy, one WeakMap-held frozen
   command body, immediate DOM evidence removal, no cookie/storage/log/dynamic-
   code/HTML-sink/external-URL path, and continued absence from the front
-  controller and theme adapters. It also requires mutation-neutral status copy
+  controller and theme adapters. It also requires bounded rich-value encoding,
+  validated select-backed conditional controls, mutation-neutral status copy
   and a fixed delayed `window.location.reload()` with no assignable or external
-  navigation target. The separate 21-assertion Playwright self-test uses an
+  navigation target. The separate 26-assertion Playwright self-test uses an
   intercepted local origin and real Chrome at `1440x1000` and `390x844`; it
   proves canonical body/header delivery, accepted completion, exact-body retry,
-  conflict closure, invalid foreign configuration refusal, DOM evidence
+  conflict closure, rich UTF-8/empty-value encoding, conditional required and
+  visible control updates, invalid foreign configuration refusal, DOM evidence
   removal, frozen controls, generic status copy, accepted/unchanged same-page
   refresh, and zero page errors.
 - Public-mutation HTTP request-envelope acceptance is dependency-free and
