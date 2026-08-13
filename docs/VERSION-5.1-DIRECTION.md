@@ -70,8 +70,7 @@ value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
 Adapters, operational writable route/tool actions, richer package-runtime
-secret surfaces,
-upgrades, uninstall/purge,
+secret surfaces, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. Gate 2A now fixes the
 package-owned simple/variable Product record contract: three option groups,
@@ -349,7 +348,20 @@ migration evidence and bounded audit events, and finishes
 `installed_disabled`. It never includes `addon.php`. Because MySQL DDL can
 commit implicitly, partial failures remain visible as `installation_failed`
 with an explicit resumable ledger rather than a false rollback claim. No
-lifecycle UI, upgrade, uninstall, or purge command exists.
+lifecycle UI, uninstall, or purge command exists.
+
+The separate server-local upgrade command is also dry-run first and requires
+the exact persisted Owner `addons.upgrade` capability. It accepts only an
+`installed_disabled` package and a strictly higher trusted same-type target;
+historical migration ids/paths/checksums must be unchanged and current stored
+setting definitions must remain compatible. Apply holds the lifecycle and
+package locks, never includes `addon.php`, applies only pending package SQL,
+and ends disabled. Since MySQL DDL can commit independently, a failure remains
+visible and non-loadable as `upgrade_failed` with the old registry identity and
+exact completed-migration ledger. Explicit resume revalidates the same target
+and applies only remaining migrations before the target identity and bounded
+completion audit commit atomically. This does not provide downgrade, uninstall,
+purge, or arbitrary migration rollback.
 
 The next lifecycle boundary is a separate server-local, read-only enablement
 preflight gated by the exact persisted Owner `addons.enable` capability. It

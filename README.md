@@ -19,7 +19,11 @@ add-on trust validation; persisted Owner authorization; and per-client package
 registry/migration-ledger storage with read-only drift reporting. A
 server-local Owner-authorized installer can apply reviewed, checksum-verified
 package migrations and always records the package as `installed_disabled`; it
-never executes package PHP. A separate read-only Owner-authorized preflight can
+never executes package PHP. A separate dry-run-first Owner-authorized upgrade
+command accepts only a disabled package at a strictly higher trusted version,
+preserves its append-only migration ledger and compatible stored settings,
+and recovers explicitly from partial MySQL DDL without loading package PHP.
+A separate read-only Owner-authorized preflight can
 inspect that disabled package's dependency, capability, and route readiness
 without changing state or loading code. Front-controller page requests now bootstrap
 only already-recorded `enabled` packages whose complete registry, dependency,
@@ -182,8 +186,8 @@ runner and returns a bounded value-free outcome. Core-owned target discovery
 and Edit navigation are available only when a separately distributed enabled
 package registers the one reviewed form-target loader; the clean starter
 registers no Store Lite provider and contains no commerce data.
-Operational writable route/tool actions, upgrade,
-uninstall/purge, payment, member access, editorial workflow, notifications,
+Operational writable route/tool actions, uninstall/purge, payment, member
+access, editorial workflow, notifications,
 the broader role model, and social publishing integrations are not active
 features.
 
@@ -686,7 +690,23 @@ database-wide lifecycle lock. Disablement refuses an enabled dependent, never
 includes package PHP or runs migrations, and atomically returns the package to
 `installed_disabled` with one bounded audit fact. Package code, migration
 evidence, settings, and data remain in place, while later request bootstrap no
-longer loads the disabled package. The
+longer loads the disabled package.
+
+The upgrade command is likewise CLI-only and dry-run first. It requires the
+exact Owner `addons.upgrade` capability, current and target versions, database,
+package, plan, nonzero backup checksum, and lifecycle-state confirmation. A
+package must be disabled before upgrade. Historical migrations must remain in
+the target manifest with identical paths and checksums; stored setting keys,
+types, and secret classification cannot be removed or changed. Core holds the
+database-wide lifecycle and package locks, never includes `addon.php`, applies
+only pending checksum-verified package migrations, and finishes
+`installed_disabled`. Because MySQL DDL may commit implicitly, failure is
+reported as non-loadable `upgrade_failed` rather than a false rollback claim.
+Explicit `--resume-failed` revalidates the exact target and applies only the
+remaining ledger migrations before atomically replacing registry identity and
+recording completion.
+
+The
 runtime-contract self-test executes only a temporary
 first-party fixture outside the starter. It rechecks the fixed `addon.php`
 checksum, requires exact manifest registration, orders required dependencies
