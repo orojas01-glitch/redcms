@@ -20,6 +20,20 @@ Cleanup requires database, grant, and staged-project counts of zero plus an
 unchanged configured-primary boundary. It never enables the package, deploys
 the hosted demo, or touches a client installation.
 
+`scripts/store-lite-two-client-isolation-rehearsal.sh` is the separate opt-in
+Release C3 isolation gate. It requires the clean external Store Lite 0.1.29
+repository at merged revision
+`96ae2b2986b6805b33b44f21cf454bd18a67a470`, stages clean core plus the package,
+and creates two fresh databases with separate scoped grants. Its 14 assertions
+install all 45 core and 10 package migrations in both clients, enable both with
+exact registrar evidence, retain distinct USD/pickup and COP/delivery settings
+and products, prove product mutation isolation in both directions, and prove
+one client's disable/re-enable lifecycle never unloads the other. Cleanup
+requires `databases:0 grants:0 staged-project:0 primary:unchanged`; primary
+protection uses a schema-neutral full database dump hash and does not migrate
+the configured primary. The gate does not deploy the hosted demo or use client
+data.
+
 `scripts/store-lite-browser-rehearsal.sh` is the separate opt-in integration
 gate for the externally distributed Store Lite package. It stages a temporary
 clean core plus package, uses one uniquely named disposable schema and scoped
@@ -36,7 +50,8 @@ Lite part of the starter or authorize normal richer-package enablement.
 
 `scripts/store-lite-public-mutation-rehearsal.sh` is the separate Docker-only
 supported-server Cart and guest-checkout integration. It requires the clean
-external Store Lite 0.1.28 repository at its pinned merged revision,
+external Store Lite 0.1.29 repository at merged revision
+`96ae2b2986b6805b33b44f21cf454bd18a67a470`,
 stages no retained add-on or
 local configuration, builds the reviewed custom FrankenPHP/Caddy attestation
 module, and creates fresh MySQL, HTTPS certificate, HMAC key, and trusted-origin
@@ -731,9 +746,9 @@ the isolated PHP log was clean, and exact acceptance and temporary-primary
 database/grant cleanup passed. The retained historical starter was not
 migrated.
 
-On 2026-08-12, the separate guest-checkout supported-server rehearsal pinned
-the clean external Store Lite 0.1.28 repository at merged revision
-`0f4253b3ec22d5e6b25bfc723a6c1596eea67d90`. The established 100-check
+On 2026-08-12, the Release C3 guest-checkout supported-server rehearsal pinned
+the clean external Store Lite 0.1.29 repository at merged revision
+`96ae2b2986b6805b33b44f21cf454bd18a67a470`. The established 100-check
 administrator path and expanded 268-check public path passed. Desktop pickup
 and mobile delivery each used one closed twelve-field core-rendered form,
 pay-on-receipt, the existing anonymous subject, exact retry replay, and
@@ -745,7 +760,10 @@ order state was `2:2:2:2:1:1:700:4497`. Screenshots had no horizontal overflow;
 console, page, request, and unexpected-HTTP error lists were empty. Cleanup
 removed the disposable app, database, network, image, certificate, secrets,
 and staged project. No hosted demo, retained primary, client installation, or
-client data changed.
+client data changed. Direct screenshot review confirmed the administrator list
+and editor plus the public simple/variable Cart and pickup/delivery checkout
+surfaces remained usable at 1280x900 and 390x844; their basic-theme visual
+polish is intentionally deferred from this functional release gate.
 
 A separate generated-fixture Chrome inspection rendered the new component
 editor's valid and field-error states at 1512×900 and 390×844. Both viewports
@@ -990,8 +1008,8 @@ process environment.
   active homepage-only core fields, two core `create`, package `baseline`, core
   `move`, and value-free `component.public_placed` audit facts.
 - The Store Lite supported-server public-mutation browser rehearsal is a
-  separate Docker-only cross-repository gate. It requires Store Lite 0.1.28 at
-  revision `0f4253b3ec22d5e6b25bfc723a6c1596eea67d90`, manifest-ordered package
+  separate Docker-only cross-repository gate. It requires Store Lite 0.1.29 at
+  revision `96ae2b2986b6805b33b44f21cf454bd18a67a470`, all 10 manifest-ordered package
   migrations, the reviewed custom FrankenPHP/Caddy module, fresh MySQL and
   localhost TLS, temporary process-only endpoint/origin/HMAC configuration,
   the 100-check administrator Product/Cart browser proof, and 268 real desktop/
@@ -1236,6 +1254,7 @@ process environment.
 - Atomic add-on disablement acceptance runs only in the uniquely named disposable database and uses temporary validated first-party packages outside the clean starter. It requires exact Owner `addons.disable` authority, deterministic current-registry evidence, an exact enabled-dependent blocker, database-wide lifecycle-lock exclusion across connections, stale-plan refusal, audit and post-state-update injected-failure rollback, an atomic `installed_disabled` state and bounded audit commit, zero registrar or migration execution, exclusion of both combined-package component and service registrations from later request bootstrap, dependent-first unblocking, repeat refusal, CLI-only confirmations, and exact cleanup.
 - Add-on upgrade/recovery acceptance runs only in the uniquely named disposable database and a temporary first-party package outside the starter. Its 24 assertions require exact Owner `addons.upgrade` authority, a strictly higher same-type target, disabled starting state, deterministic non-executing planning, explicit historical-migration checksum-drift refusal, compatible stored setting definitions, stale-plan and start-audit refusal, a forced mid-upgrade migration failure, explicit non-loadable `upgrade_failed` reporting, preserved old identity/data/settings, remaining-only resume planning, completion-audit rollback, zero-pending final recovery, exact target identity/ledger/audit postconditions, CLI backup/current-target/state confirmations, repeat refusal, and exact fixture cleanup.
 - The separate real Store Lite upgrade rehearsal stages historical 0.1.28 and current 0.1.29 package payloads outside the starter. Its 14 assertions require all eight historical migration paths and checksums unchanged, five compatible stored settings, one preserved real order, an exact two-migration target plan, a forced failure after the fulfillment-status index, non-loadable old-identity `upgrade_failed`, remaining-only payment-status index recovery, exact 0.1.29 disabled registry/ledger/audit evidence, repeat refusal, all 45 core migrations, and cleanup `database:0 grant:0 staged-project:0 primary:unchanged`.
+- The separate Store Lite Release C3 isolation rehearsal stages current clean core plus external Store Lite 0.1.29 and creates two fresh databases. Its 14 assertions require database-bound install and enable plans, all 45 core and 10 package migrations per client, distinct USD/pickup and COP/delivery settings and products, no cross-client product reads, unchanged opposite-client fingerprints after mutation in both directions, client-local disable/re-enable runtime behavior, identical package registrar evidence, and cleanup `databases:0 grants:0 staged-project:0 primary:unchanged` using a schema-neutral full configured-primary hash.
 - Operational add-on lifecycle acceptance runs only in a uniquely named disposable database and a temporary generic content package outside the clean starter. Its 21 assertions prove non-executing discovery; exact migration, setting, table, and data evidence; deterministic planning; stale-plan and forced-registrar refusal; incomplete-registry refusal; registrar-time MyISAM drift refusal before lifecycle mutation; audit rollback; successful exact registrar validation; later request bootstrap; non-executing disable; settings, migration, code, and business-row preservation; disabled bootstrap exclusion; identical-evidence re-enable; exactly two enable and one disable audits; CLI-only confirmations; and exact database/grant/package cleanup.
 - The separate real Store Lite operational lifecycle rehearsal stages current clean core plus externally distributed Store Lite 0.1.28 in a temporary supported-server project. Its 10 assertions run all 45 core and 8 package migrations, fingerprint all 15 package tables and seeded product/cart rows, require exact real registrar evidence, prove Product/Cart/create-guest-order registration after enable, prove disabled bootstrap exclusion and data preservation, reproduce the registrar hash on re-enable, record exactly two enable and one disable audits, and remove the staged project and disposable database/grant. It does not alter the Store Lite source repository, clean starter, hosted demo, or any client installation.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 34 tables unchanged.

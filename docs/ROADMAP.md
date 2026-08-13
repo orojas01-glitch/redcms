@@ -805,9 +805,15 @@ migration. Two package-owned order-list indexes preserve all eight historical
 migration paths/checksums. A forced second-migration failure kept the old
 identity, one real order, five settings, and the first DDL ledger exact and
 non-loadable; explicit resume applied only the remaining index and finished
-0.1.29 disabled. The active Release C3 sub-gate is responsive
-administrator/public QA, configured-primary protection, cleanup, and
-two-client isolation acceptance. Hosted-provider adapters remain later work.
+0.1.29 disabled. Release C3 is also complete: Store Lite 0.1.29 passed the
+supported-server 100-check administrator and 268-check public desktop/mobile
+rehearsal with exact cleanup, while a separate 14-assertion proof installed and
+enabled two isolated clients with different currency, fulfillment, and product
+data; mutations and disable/re-enable state remained database-local. Both
+client databases and grants were removed and a schema-neutral full hash proved
+the configured primary unchanged. The next milestone is a separately reviewed
+basic `demo.red-sphere.com` deployment. Hosted-provider adapters remain later
+work.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

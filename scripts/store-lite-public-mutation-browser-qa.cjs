@@ -49,7 +49,7 @@ if (!/^https:\/\/localhost:\d+$/.test(baseUrl)
 const report = {
     baseUrl,
     browser: 'Google Chrome',
-    package: 'redcms.store-lite@0.1.28',
+    package: 'redcms.store-lite@0.1.29',
     checks: [],
 };
 
