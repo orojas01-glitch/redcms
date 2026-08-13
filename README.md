@@ -354,6 +354,15 @@ features.
   does not read a body stream, claim a route, invoke a handler, access a
   database, emit a response/cookie, or add a public endpoint, Store Lite
   behavior, or enablement change
+- Read-only operational content-package enablement preflight. It accepts only
+  exact component/editor and administrator tool/contract coverage, bounded
+  forms referencing declared tools, current package migrations, fully
+  configured non-secret settings, one-to-one public POST route/mutation
+  declarations, InnoDB package tables, and the existing core
+  subject/CSRF/rate/idempotency/transaction evidence. It returns only bounded
+  counts and hashes, keeps `enableReady` and `activationSupported` false, never
+  includes `addon.php`, and leaves registrar validation plus atomic lifecycle
+  transition to a separately reviewed gate
 - Optional operator-built Caddy/FrankenPHP public-mutation ingress attestation
   source and paired unlinked PHP HMAC verifier. The handler strips spoofed
   internal headers on every request and can sign only a bounded `/addons/`

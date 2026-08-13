@@ -786,9 +786,14 @@ order snapshots with pay on receipt. The 100 administrator and 268 public
 checks covered conditional fields, retry/conflict behavior, responsive output,
 database facts, and complete Docker cleanup. The core additionally locks
 canonical idempotent component normalization when one view contains both a
-collection and top-level form. Store Lite remains external to the starter; the
-active release gate is disable/re-enable, recovery, migration, responsive, and
-client-isolation acceptance. Hosted-provider adapters remain later work.
+collection and top-level form. Store Lite remains external to the starter. The
+first release sub-gate now also produces deterministic read-only evidence for
+a closed operational content-package profile. Store Lite 0.1.28 matches that
+pure manifest shape, but core still keeps it installed-disabled and unexecuted.
+The active release sub-gate is Owner-authorized atomic operational enablement
+and non-destructive disable/re-enable; recovery, upgrade migration, responsive,
+and two-client isolation acceptance follow. Hosted-provider adapters remain
+later work.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

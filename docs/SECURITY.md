@@ -511,14 +511,27 @@ migration, removes code, or deletes settings, media, or package data. The
 `addon.disable.completed` audit fact commit in one transaction. Later request
 bootstrap excludes the disabled package.
 
+The operational content-package preflight is a separate read-only bridge for
+the first richer package profile. It requires exact one-to-one component/editor
+and public POST route/mutation coverage, complete administrator tool contracts,
+at least one core-owned administrator form, current recorded migrations, fully
+configured non-secret settings with no manifest default, declared InnoDB
+package tables, and the existing public subject, CSRF, rate-limit, idempotency,
+transaction, and response boundaries. Adapters, jobs, assets, outbound hosts,
+administrator actions, secret settings, partial coverage, unsupported engines,
+and forged counts fail closed. The result exposes only bounded counts and
+hashes, leaves `enableReady` and `activationSupported` false, includes no
+package entrypoint, executes no registrar, and writes no lifecycle or audit
+state. Atomic operational enablement remains a separate required gate.
+
 No web endpoint consumes the installer, enable, or disable command. Component
 dispatch is limited to the bounded core-rendered contract described below.
 Typed internal service, exact static public-route, display-only
 administrator-tool, and non-executing administrator-action-preflight
 boundaries are separate reviewed implementations described below. Adapters,
-operational write actions and routes, upgrades, uninstall, purge, and client
-business packages still require distinct backup, dependency, live-data, and
-rollback or recovery gates.
+administrator write actions, upgrades, uninstall, purge, and client
+business-package activation still require distinct backup, dependency,
+registrar, atomic lifecycle, and rollback or recovery gates.
 
 ### Add-On Runtime Registration Contract
 
