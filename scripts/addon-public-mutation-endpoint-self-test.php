@@ -102,9 +102,11 @@ function red_addon_public_mutation_endpoint_test_capture()
 $contextKey = 'RED_ADDON_RUNTIME_CONTEXT';
 $contextWasSet = array_key_exists($contextKey, $GLOBALS);
 $contextBefore = $GLOBALS[$contextKey] ?? null;
+$serverBefore = $_SERVER;
 $environmentKeys = [
     'RED_PUBLIC_MUTATION_ENDPOINT_ENABLED',
     'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN',
+    'RED_PUBLIC_MUTATION_INGRESS_PROFILE',
     'RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY',
 ];
 $environmentBefore = [];
@@ -137,7 +139,7 @@ try {
     }
     red_addon_public_mutation_endpoint_test_assert(
         !red_addon_public_mutation_endpoint_enabled(),
-        'the endpoint is dormant without all three operator-owned facts'
+        'the endpoint is dormant without its operator-owned deployment facts'
     );
     putenv('RED_PUBLIC_MUTATION_ENDPOINT_ENABLED=1');
     putenv('RED_PUBLIC_MUTATION_TRUSTED_ORIGIN=https://demo.example.test');
@@ -146,7 +148,34 @@ try {
     );
     red_addon_public_mutation_endpoint_test_assert(
         red_addon_public_mutation_endpoint_enabled(),
-        'the exact enable flag, canonical origin, and binary HMAC key activate the bridge'
+        'the default attested profile requires the exact flag, origin, and HMAC key'
+    );
+    putenv('RED_PUBLIC_MUTATION_INGRESS_PROFILE=direct_php');
+    putenv('RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY');
+    red_addon_public_mutation_endpoint_test_assert(
+        red_addon_public_mutation_endpoint_ingress_profile() === 'direct_php'
+            && red_addon_public_mutation_endpoint_enabled(),
+        'the explicitly selected direct-PHP profile requires no attestation key'
+    );
+    $_SERVER['HTTPS'] = 'off';
+    red_addon_public_mutation_endpoint_test_assert(
+        !red_addon_public_mutation_endpoint_page_enabled_current(),
+        'the direct-PHP profile exposes no page forms over HTTP'
+    );
+    $_SERVER['HTTPS'] = 'on';
+    red_addon_public_mutation_endpoint_test_assert(
+        red_addon_public_mutation_endpoint_page_enabled_current(),
+        'the direct-PHP page gate accepts a server-owned HTTPS request'
+    );
+    putenv('RED_PUBLIC_MUTATION_INGRESS_PROFILE=invalid');
+    red_addon_public_mutation_endpoint_test_assert(
+        red_addon_public_mutation_endpoint_ingress_profile() === ''
+            && !red_addon_public_mutation_endpoint_enabled(),
+        'an unknown ingress profile disables the endpoint'
+    );
+    putenv('RED_PUBLIC_MUTATION_INGRESS_PROFILE=frankenphp_attested');
+    putenv(
+        'RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY=' . str_repeat('a', 64)
     );
     putenv('RED_PUBLIC_MUTATION_TRUSTED_ORIGIN=http://demo.example.test');
     red_addon_public_mutation_endpoint_test_assert(
@@ -283,6 +312,7 @@ try {
             putenv($key);
         }
     }
+    $_SERVER = $serverBefore;
 }
 
 ?>

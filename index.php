@@ -242,7 +242,7 @@ try {
     $redPublicMutationCookieHeader = $_SERVER['HTTP_COOKIE'] ?? '';
     red_addon_public_mutation_page_begin(
         ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET'
-            && red_addon_public_mutation_endpoint_enabled(),
+            && red_addon_public_mutation_endpoint_page_enabled_current(),
         is_string($redPublicMutationCookieHeader)
             ? $redPublicMutationCookieHeader
             : ''

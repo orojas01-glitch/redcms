@@ -1323,6 +1323,17 @@ request bootstrap excludes the disabled package.
     cleanup. No hosted or client installation changed. Minimum guest order and
     an immutable pay-on-receipt snapshot are the next Store Lite gate.
 
+95. Added the first shared-host public-mutation compatibility gate. Core now
+    supports an explicit `direct_php` ingress alongside the unchanged default
+    `frankenphp_attested` profile. The direct adapter requires canonical
+    configured/request origin agreement, direct HTTPS, exact POST/path,
+    bounded content metadata and body, and closed subject/CSRF/idempotency
+    values while ignoring Host and forwarding input. Its focused 22-assertion
+    adapter and expanded endpoint fixtures pass without a database or package.
+    This does not deploy or enable Store Lite: a real Apache/shared-host HTTP
+    proof, direct-profile deployment review, and hosted browser verification
+    remain before `demo.red-sphere.com` activation.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

@@ -3,14 +3,18 @@
  * Core-owned operational bridge for the supported public-mutation endpoint.
  *
  * The bridge remains dormant unless an operator explicitly enables it in
- * server-local configuration and supplies both the canonical HTTPS origin and
- * the Caddy/FrankenPHP ingress HMAC key. It accepts only POST requests in the
- * reserved /addons/ namespace, composes the already reviewed dispatcher, and
- * emits only the closed core response envelope.
+ * server-local configuration, supplies the canonical HTTPS origin, and
+ * selects one supported ingress profile. The default attested profile also
+ * requires the Caddy/FrankenPHP HMAC key; the explicit direct-PHP profile
+ * requires a direct server-owned HTTPS fact and a closed PHP projection. The
+ * bridge accepts only POST requests in the reserved /addons/ namespace,
+ * composes the same reviewed dispatcher, and emits only the closed core
+ * response envelope.
  */
 
 require_once __DIR__ . '/addon_public_mutation_dispatch_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_frankenphp_ingress_helpers.php';
+require_once __DIR__ . '/addon_public_mutation_direct_ingress_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_response_emitter_helpers.php';
 
 if (!function_exists('red_addon_public_mutation_endpoint_result')) {
@@ -64,9 +68,33 @@ if (!function_exists('red_addon_public_mutation_endpoint_candidate')) {
     }
 }
 
+if (!function_exists('red_addon_public_mutation_endpoint_ingress_profile')) {
+    /**
+     * Defaults to the existing attested profile for backward compatibility.
+     * Direct PHP is never selected implicitly.
+     */
+    function red_addon_public_mutation_endpoint_ingress_profile()
+    {
+        $profile = red_server_config_value(
+            'PUBLIC_MUTATION_INGRESS_PROFILE',
+            ['RED_PUBLIC_MUTATION_INGRESS_PROFILE'],
+            'frankenphp_attested'
+        );
+        return is_string($profile)
+            && in_array(
+                $profile,
+                ['frankenphp_attested', 'direct_php'],
+                true
+            )
+                ? $profile
+                : '';
+    }
+}
+
 if (!function_exists('red_addon_public_mutation_endpoint_enabled')) {
     /**
-     * Requires three independent operator-owned deployment facts.
+     * Requires the enable flag, canonical origin, and one explicit supported
+     * ingress profile. Attested deployments additionally require their HMAC.
      */
     function red_addon_public_mutation_endpoint_enabled()
     {
@@ -75,9 +103,50 @@ if (!function_exists('red_addon_public_mutation_endpoint_enabled')) {
             ['RED_PUBLIC_MUTATION_ENDPOINT_ENABLED'],
             false
         );
-        return ($enabled === true || $enabled === '1')
-            && red_addon_public_mutation_server_trusted_origin() !== ''
-            && red_addon_public_mutation_frankenphp_ingress_key() !== '';
+        $profile = red_addon_public_mutation_endpoint_ingress_profile();
+        if (($enabled !== true && $enabled !== '1')
+            || red_addon_public_mutation_server_trusted_origin() === ''
+            || $profile === ''
+        ) {
+            return false;
+        }
+        return $profile === 'direct_php'
+            || red_addon_public_mutation_frankenphp_ingress_key() !== '';
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_endpoint_capture_current')) {
+    /**
+     * Resolves only the explicitly configured core-owned ingress adapter.
+     */
+    function red_addon_public_mutation_endpoint_capture_current($profile)
+    {
+        if ($profile === 'direct_php') {
+            return red_addon_public_mutation_direct_ingress_capture_current();
+        }
+        if ($profile === 'frankenphp_attested') {
+            return
+                red_addon_public_mutation_frankenphp_ingress_capture_current();
+        }
+        return red_addon_public_mutation_server_request_result(
+            'transport_unavailable'
+        );
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_endpoint_page_enabled_current')) {
+    /**
+     * Prevents direct-PHP controls from rendering on an HTTP request. The
+     * attested profile retains its separately reviewed TLS/proxy boundary.
+     */
+    function red_addon_public_mutation_endpoint_page_enabled_current()
+    {
+        if (!red_addon_public_mutation_endpoint_enabled()) {
+            return false;
+        }
+        return red_addon_public_mutation_endpoint_ingress_profile()
+                !== 'direct_php'
+            || red_addon_public_mutation_direct_ingress_https($_SERVER);
     }
 }
 
@@ -163,7 +232,7 @@ if (!function_exists('red_addon_public_mutation_endpoint_dispatch')) {
 
 if (!function_exists('red_addon_public_mutation_endpoint_dispatch_current')) {
     /**
-     * Reads the signed current request only after the explicit endpoint gate.
+     * Captures the current request only after the explicit endpoint gate.
      */
     function red_addon_public_mutation_endpoint_dispatch_current($connection)
     {
@@ -176,8 +245,9 @@ if (!function_exists('red_addon_public_mutation_endpoint_dispatch_current')) {
             return red_addon_public_mutation_endpoint_result();
         }
         $enabled = red_addon_public_mutation_endpoint_enabled();
+        $profile = red_addon_public_mutation_endpoint_ingress_profile();
         $capture = $enabled && $method === 'POST'
-            ? red_addon_public_mutation_frankenphp_ingress_capture_current()
+            ? red_addon_public_mutation_endpoint_capture_current($profile)
             : red_addon_public_mutation_server_request_result(
                 'transport_unavailable'
             );
