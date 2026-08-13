@@ -9,7 +9,9 @@ pure declared-form decoder, HTTP request-envelope normalizer, private static
 route selector, server request-facts adapter, closed response emitter, pure
 subject-cookie serializer, core-owned subject-cookie lifecycle bridge, and an
 optional Caddy/FrankenPHP ingress-attestation source with its PHP verifier are
-implemented. An explicit-input core dispatcher, gated front-controller bridge,
+implemented. An explicit opt-in direct-PHP ingress adapter for compatible
+shared hosting is also implemented without replacing the attested default. An
+explicit-input core dispatcher, gated front-controller bridge,
 request-local page/form coordinator, fixed cookie emitter, and disposable
 supported-server end-to-end proof are also implemented. A non-executing per-client deployment
 profile validator now covers the operator-owned deployment boundary without
@@ -17,7 +19,9 @@ loading or applying a profile. The core-owned response-owner composer now
 binds that profile to one exact response envelope and fixed lifecycle cookie
 descriptors without emitting them. The operational bridge composes the
 dispatcher only after the explicit local enablement flag, trusted HTTPS origin,
-and process-environment ingress HMAC key all pass. A non-executing deployment
+and selected ingress-profile requirements pass. The default attested profile
+requires its process-environment HMAC key; `direct_php` requires direct HTTPS
+and the closed PHP transport projection. A non-executing deployment
 review validator now binds a profile hash to non-secret server, trust, and
 browser evidence without loading or applying it. This document adds no package,
 permission, enabled client deployment, Store Lite behavior, or shared client
@@ -61,8 +65,9 @@ changed by it.
 | Static mutation-route selection | Core maps one exact un-decoded path to one registrar-bound public route, mutation handler, state loader, and manifest identity | No request-global adapter, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the PHP HMAC bridge used only after the endpoint gate | No default-server change, deployed client binary, active client Caddyfile, package activation, Store Lite data, or client state |
+| Optional direct-PHP ingress | Explicit `direct_php` profile accepts only direct server-owned HTTPS, an exact static POST candidate, canonical configured/request origin agreement, fixed content metadata, bounded measured body, and closed opaque cookie/CSRF/idempotency values; Host and forwarding values are ignored | No implicit selection, proxy trust, arbitrary header map, parsed fields, package response ownership, deployment approval, Store Lite data, or client state |
 | Public-mutation dispatcher | Core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model; the gated bridge is its only front-controller caller | No package/theme response ownership, package enablement, Store Lite activation, or client deployment |
-| Operational endpoint and page bridge | Before theme/session rendering, core may claim one reserved `/addons/` candidate only after the local flag, trusted origin, and ingress key pass; normal GET rendering parses raw cookies, coordinates at most 128 forms, delivers one fixed controller, and emits only fixed lifecycle/response headers | False in the clean starter; no server integration deployment, package installation/enablement, Store Lite data, or shared client state |
+| Operational endpoint and page bridge | Before theme/session rendering, core may claim one reserved `/addons/` candidate only after the local flag, trusted origin, and explicit supported ingress profile pass; direct-PHP forms additionally require the current request's direct HTTPS fact. Normal GET rendering parses raw cookies, coordinates at most 128 forms, delivers one fixed controller, and emits only fixed lifecycle/response headers | False in the clean starter; no server integration deployment, package installation/enablement, Store Lite data, or shared client state |
 | Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
 | Per-client deployment profile | Pure validator accepts one non-secret operator review packet with canonical HTTPS, pinned server versions, fixed HMAC/trusted-origin sources, route order, core response/cookie ownership, host-only cookie policy, client isolation, and disabled activation flags | No profile loading, secret resolution, filesystem/database access, deployment, dispatcher link, package enablement, or Store Lite data |
 | Response ownership/composition | Core accepts only a valid deployment profile and fixed response envelope, then appends zero, one, or an ordered clear/set subject-cookie descriptor from the lifecycle bridge; the result is non-emitting and deterministic | No arbitrary headers, package/theme ownership, cookie policy drift, request parsing, secret/database access, route claim, dispatcher, front-controller path, browser identity, enablement, or client state |

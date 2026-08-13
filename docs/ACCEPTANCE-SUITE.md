@@ -319,6 +319,17 @@ fixed HMAC/trusted-origin sources, attestation-before-PHP route order, core
 response/cookie ownership, host-only cookie policy, clean-starter isolation,
 secret-shaped-field refusal, and disabled activation flags. It reads no
 request, filesystem, database, package, secret, or response state.
+The separate 22-assertion direct-ingress fixture proves the explicit
+shared-host profile accepts only direct server-owned HTTPS and a fixed bounded
+PHP projection, ignores Host/forwarded values, rejects malformed combined
+origin/cookie/CSRF/idempotency evidence, alternate content metadata,
+transfer/content encodings, foreign methods/paths, and declared/actual body
+length drift, and changes no request, session, buffer, or response state. The
+endpoint fixture separately proves `direct_php` is explicit, needs no
+attestation key, disables page forms over HTTP, and leaves
+`frankenphp_attested` as the default. These dependency-free checks do not prove
+a particular shared host; real Apache/HostGator HTTP and browser evidence is a
+separate gate before deployment.
 The separate 18-assertion public-mutation response fixture proves that only
 the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
 can be constructed. It requires exact JSON, content type, no-store, nosniff,

@@ -31,6 +31,9 @@ Supported environment variables:
   future core-owned public-mutation dispatcher; it is not a secret and must
   not be supplied by `Host`, a request header, or a request-projected server
   value)
+- `RED_PUBLIC_MUTATION_INGRESS_PROFILE` (optional exact
+  `frankenphp_attested` or `direct_php`; the attested profile remains the
+  default and an unknown value disables the endpoint)
 - `RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` (one 64-lowercase-hex, 256-bit secret
   shared only by an optional operator-built Caddy ingress handler and its
   unlinked PHP verifier; never place it in a Caddyfile, `config.local.php`,
@@ -1280,6 +1283,27 @@ or missing attestation creates
 no public route, response, cookie, runtime/package invocation, lifecycle
 change, Store Lite behavior, or client state.
 
+The explicit `direct_php` ingress is the shared-host compatibility profile.
+It is never inferred from the server brand or selected as a fallback. It
+requires the same server-local enable flag and canonical HTTPS origin as the
+attested endpoint plus a direct server-owned `HTTPS=on` or `HTTPS=1` fact. It
+ignores `Host` and every forwarding value. Before reading `php://input`, it
+accepts only one exact POST candidate, the canonical matching `Origin`, fixed
+form content type, a decimal body length no greater than 8,192 bytes, one
+valid core subject cookie, and opaque CSRF/idempotency values. Transfer or
+content encoding and alternate content metadata projections fail closed. The
+actual body length must equal the declared length before the existing request
+adapter releases facts to the unchanged subject, CSRF, rate-limit,
+idempotency, transaction, and response-owner pipeline.
+
+PHP cannot prove the original order or count of raw duplicate wire headers on
+every shared server. This profile therefore accepts only closed projected
+values for which common comma/semicolon combination is invalid and relies on
+the front web server to reject HTTP request smuggling. It is authorized only
+for a direct HTTPS web-server-to-PHP path; a TLS-terminating proxy requires a
+separately reviewed adapter and must not spoof `HTTPS`. Real Apache/shared-host
+projection and browser evidence remain a separate deployment gate.
+
 The separate core-only response emitter accepts only an exact closed response
 envelope from the existing fixed core response contract. It rechecks the six
 allowed statuses and exact no-store/nosniff JSON headers, refuses once output
@@ -1329,14 +1353,16 @@ the endpoint gate is active for the current installation.
 The operational endpoint gate is deliberately conjunctive. The server-local
 `PUBLIC_MUTATION_ENDPOINT_ENABLED` value must be exactly true or `1`, the
 canonical trusted origin must resolve through the existing server-local path,
-and `RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` must be a valid process-environment
-secret. Missing or malformed configuration keeps page forms inactive and makes
+and one exact ingress profile must be selected. `frankenphp_attested` remains
+the default and additionally requires a valid process-environment
+`RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY`; `direct_php` requires direct HTTPS and
+the fixed projection above. Missing or malformed configuration keeps page forms inactive and makes
 a reserved mutation candidate fail closed. The front controller checks a
 bounded unencoded `/addons/` candidate before theme or administrator-session
-rendering, verifies the upstream-signed capture for `POST`, composes the static
-selector and dispatcher, and delegates only a closed response envelope to the
-core emitter. An unknown non-`POST` path remains unclaimed; a selected mutation
-with the wrong method receives the fixed method refusal.
+rendering, captures `POST` through only the selected ingress adapter, composes
+the static selector and dispatcher, and delegates only a closed response
+envelope to the core emitter. An unknown non-`POST` path remains unclaimed; a
+selected mutation with the wrong method receives the fixed method refusal.
 
 For normal `GET` rendering, core parses the raw `Cookie` header rather than
 PHP's lossy cookie map. Duplicate, malformed, oversized, or control-bearing

@@ -72,6 +72,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-http-request-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-route-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-server-request-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-direct-ingress-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-frankenphp-ingress-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-deployment-profile-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-public-mutation-response-owner-self-test.php"

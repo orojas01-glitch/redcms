@@ -386,14 +386,27 @@ features.
   change, dispatcher, endpoint, cookie flow, enablement change, or Store
   Lite/client-data path. Its per-installation HMAC key and deployment
   configuration remain external to the clean starter
+- Explicit shared-host `direct_php` public-mutation ingress adapter. It
+  requires the server-local enable flag, canonical HTTPS origin, direct
+  server-owned HTTPS fact, exact static `/addons/` POST target, bounded body,
+  fixed content metadata, one opaque subject cookie, CSRF token, and
+  idempotency key. It ignores Host/forwarding values, rejects encoded or
+  ambiguous projected transport, and feeds the unchanged core dispatcher.
+  The existing `frankenphp_attested` profile remains the default. This adapter
+  is not itself a HostGator deployment or proof that every shared server
+  projection is compatible
 - Core-owned public-mutation dispatcher composition. It accepts only
-  explicit attested method/target/capture facts, selects one registrar-bound
-  route, verifies the opaque subject and CSRF before decoding declared scalar
-  fields, invokes the atomic runner, and returns only the fixed response model.
+  explicit supported-ingress method/target/capture facts, selects one
+  registrar-bound route, verifies the opaque subject and CSRF before decoding
+  declared scalar fields, invokes the atomic runner, and returns only the fixed
+  response model.
   A narrow front-controller bridge now composes it only for the reserved
   `/addons/` namespace after the explicit server flag, trusted HTTPS origin,
-  and ingress HMAC key all pass. The dispatcher itself still emits no response
-  or browser cookie and adds no package, enablement, Store Lite, or client-data
+  and selected ingress-profile requirements all pass. The default attested
+  profile additionally requires its process-environment HMAC key; the explicit
+  direct-PHP profile requires a direct server-owned HTTPS fact and closed PHP
+  transport projection. The dispatcher itself still emits no response or
+  browser cookie and adds no package, enablement, Store Lite, or client-data
   behavior
 - Disposable Docker supported-server dispatcher rehearsal. It builds the
   pinned custom FrankenPHP/Caddy image, applies the current migrations to a
@@ -436,13 +449,16 @@ features.
   database, secret, package, or client state and remains outside `index.php`.
 - Fail-closed public-mutation endpoint and page-delivery bridge. It remains
   dormant unless server-local configuration explicitly enables the endpoint
-  and provides both the canonical HTTPS origin and process-environment ingress
-  HMAC key. Before theme or session rendering, core may claim only the reserved
-  `/addons/` namespace and emit one closed response. On normal `GET` pages,
-  core parses the raw subject-cookie header, reuses one subject across at most
-  128 accepted forms, appends only core-rendered form HTML, delivers the fixed
-  controller once, and emits only the fixed host-only cookie lifecycle. Theme
-  and package code own none of these headers, cookies, scripts, or responses
+  and provides the canonical HTTPS origin plus one explicit supported ingress
+  profile. The default attested profile additionally requires its process-
+  environment HMAC key; direct PHP additionally requires the current request's
+  direct HTTPS fact. Before theme or session rendering, core may claim only the
+  reserved `/addons/` namespace and emit one closed response. On normal `GET`
+  pages, core parses the raw subject-cookie header, reuses one subject across
+  at most 128 accepted forms, appends only core-rendered form HTML, delivers the
+  fixed controller once, and emits only the fixed host-only cookie lifecycle.
+  Theme and package code own none of these headers, cookies, scripts, or
+  responses
 - Non-executing per-client deployment review validator. It binds a reviewed
   profile hash to non-secret Caddy/FrankenPHP/TLS/proxy artifact evidence,
   process-environment trusted-origin/HMAC provisioning and rotation facts, and
