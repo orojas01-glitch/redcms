@@ -334,6 +334,17 @@ global, transaction, runtime registration, lifecycle write, package execution,
 or residual package/table/authorization/filesystem fixture survives. It still
 cannot itself issue a subject, CSRF token, or idempotency key; resolve a secret;
 dispatch a request; or enable the package.
+The separate 13-assertion operational enablement-preflight fixture composes
+that evidence for every mutation in one bounded operational content package.
+It requires exact component/editor and administrator tool/contract coverage,
+bounded forms referencing declared tools, current migrations, complete
+non-secret settings, one-to-one public POST routes/mutations, InnoDB package
+tables, deterministic hashes, and an installed-disabled registry state. Secret
+or network surfaces, missing settings, unsupported engines, incomplete
+coverage, and forged counts fail closed. The fixture proves no package
+entrypoint, registrar, request, runtime, transaction, lifecycle, or audit path
+and leaves atomic enablement explicitly unimplemented before exact
+package/table/administrator/filesystem cleanup.
 The separate 15-assertion core-only rate-limit fixture proves exact InnoDB
 storage, a client/declaration/subject-scoped 12-per-60-second cap, opaque scope
 persistence, caller-owned transaction refusal, bounded expiry cleanup, subject
@@ -623,7 +634,8 @@ and atomic-restore lifecycle,
 static immutable asset endpoint, 11-assertion core-owned public/admin asset
 injection, 19-assertion disabled
 installation/recovery, 23-assertion read-only enablement preflight,
-17-assertion read-only public-mutation live-data preflight, 19-assertion
+17-assertion read-only public-mutation live-data preflight, 13-assertion
+read-only operational-package enablement preflight, 19-assertion
 core-only anonymous-subject/CSRF foundation, 7-assertion pure subject-cookie
 serializer, 15-assertion core-only fixed-window rate-limit foundation,
 18-assertion core-only opaque idempotency-key foundation, 18-assertion

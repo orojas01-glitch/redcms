@@ -689,9 +689,19 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    delivery plus pay on receipt persist immutable server-derived order and line
    snapshots. The isolated supported-server gate passed 100 administrator and
    268 public checks with exact database facts and complete cleanup.
-32. Validate disable/re-enable, failure recovery, migration, responsive
-   administrator, public rendering, and client-isolation behavior.
-33. Add a separately reviewed hosted-payment adapter only after the
+32. Completed the generic read-only operational content-package preflight. It
+   aggregates exact manifest coverage, recorded migrations, complete non-secret
+   per-client settings, InnoDB tables, and every declared public mutation into
+   one deterministic plan while keeping Store Lite installed-disabled and
+   unexecuted. Store Lite 0.1.28 matches the pure profile, but this evidence
+   cannot validate its registrar or enable it.
+33. Add Owner-authorized atomic operational enablement, then prove
+   disable/re-enable without deleting package code, settings, migrations,
+   components, carts, orders, or customer data.
+34. Validate failure recovery, upgrade migration, responsive administrator and
+   public rendering, configured-primary protection, cleanup, and two-client
+   isolation behavior.
+35. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite
