@@ -706,6 +706,18 @@ Explicit `--resume-failed` revalidates the exact target and applies only the
 remaining ledger migrations before atomically replacing registry identity and
 recording completion.
 
+The separate opt-in Store Lite upgrade rehearsal applies that boundary to the
+historical external 0.1.28 package and the real 0.1.29 target. Two package-owned
+order-list indexes are append-only; the rehearsal forces the second migration
+to fail, proves the old identity plus one order and five settings remain exact
+and non-loadable, then resumes only that migration and finishes 0.1.29 disabled.
+It creates and removes one bounded disposable database, scoped grant, and two
+staged package projects without changing the configured primary database:
+
+```bash
+scripts/store-lite-upgrade-rehearsal.sh
+```
+
 The
 runtime-contract self-test executes only a temporary
 first-party fixture outside the starter. It rechecks the fixed `addon.php`

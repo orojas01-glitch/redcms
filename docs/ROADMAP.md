@@ -800,10 +800,14 @@ historical migration evidence, compatible stored settings, explicit Owner and
 backup confirmations, and no runtime execution. Forced partial migration and
 completion-audit failures remain non-loadable as `upgrade_failed`; exact resume
 applies only remaining migrations and finishes disabled with preserved data.
-The active Release C2 sub-gate is the real Store Lite 0.1.28 to 0.1.29
-append-only migration rehearsal. Responsive administrator/public QA,
-configured-primary protection, cleanup, and two-client isolation acceptance
-follow in Release C3. Hosted-provider adapters remain later work.
+Release C2 now proves the real Store Lite 0.1.28 to 0.1.29 append-only
+migration. Two package-owned order-list indexes preserve all eight historical
+migration paths/checksums. A forced second-migration failure kept the old
+identity, one real order, five settings, and the first DDL ledger exact and
+non-loadable; explicit resume applied only the remaining index and finished
+0.1.29 disabled. The active Release C3 sub-gate is responsive
+administrator/public QA, configured-primary protection, cleanup, and
+two-client isolation acceptance. Hosted-provider adapters remain later work.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
