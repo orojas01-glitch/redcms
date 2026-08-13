@@ -695,12 +695,17 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    one deterministic plan while keeping Store Lite installed-disabled and
    unexecuted. Store Lite 0.1.28 matches the pure profile, but this evidence
    cannot validate its registrar or enable it.
-33. Add Owner-authorized atomic operational enablement, then prove
-   disable/re-enable without deleting package code, settings, migrations,
-   components, carts, orders, or customer data.
-34. Validate failure recovery, upgrade migration, responsive administrator and
-   public rendering, configured-primary protection, cleanup, and two-client
-   isolation behavior.
+33. Completed Owner-authorized atomic operational enablement. Core revalidates
+   the read-only plan under both locks, requires exact registrar coverage and
+   live InnoDB transaction bindings, and atomically records enabled state plus
+   audit. Generic and real Store Lite disposable rehearsals prove failed
+   registration never changes lifecycle state, disable executes no package
+   code, and re-enable reproduces the registrar evidence without deleting or
+   changing package code, settings, migrations, components, products, carts,
+   order tables, or seeded business data.
+34. Current: validate failure recovery, upgrade migration, responsive
+   administrator and public rendering, configured-primary protection, cleanup,
+   and two-client isolation behavior.
 35. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 

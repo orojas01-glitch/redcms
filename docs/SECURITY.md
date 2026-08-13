@@ -522,7 +522,32 @@ administrator actions, secret settings, partial coverage, unsupported engines,
 and forged counts fail closed. The result exposes only bounded counts and
 hashes, leaves `enableReady` and `activationSupported` false, includes no
 package entrypoint, executes no registrar, and writes no lifecycle or audit
-state. Atomic operational enablement remains a separate required gate.
+state. The separate operational enable command can consume this evidence only
+after revalidating it under both lifecycle locks.
+
+Operational enablement remains CLI-only, dry-run first, and Owner-authorized.
+Apply requires exact database, package, version, plan, backup SHA-256, and
+installed-disabled confirmations. After current evidence and package integrity
+are rechecked, core includes the trusted entry point and invokes its registrar
+without invoking any registered handler. Registration must exactly cover the
+manifest-declared components, services, tools, forms, routes, mutations,
+loaders, writers, creators, deleters, and state loaders with no missing,
+undeclared, or duplicate identifier. Each public-mutation handler's table list
+must exactly equal its manifest declaration. Every additional table bound to a
+component or form transaction must exist in the current client database as
+InnoDB. Only after this validation succeeds does core commit the
+`installed_disabled` to `enabled` compare-and-swap and one bounded audit fact
+in a single database transaction.
+
+The registrar is trusted in-process PHP, not a sandbox, and it runs before the
+state/audit transaction. Database rollback therefore cannot reverse arbitrary
+external effects from package PHP. The operational contract requires the entry
+point and registrar to remain registration-only: no output, network activity,
+handler invocation, migration, business-data mutation, or response/session
+change. A package that cannot satisfy that boundary is not eligible for this
+profile. Disable remains non-executing and non-destructive; re-enable must
+reproduce the same exact registrar evidence while preserving package code,
+migration evidence, settings, and business data.
 
 No web endpoint consumes the installer, enable, or disable command. Component
 dispatch is limited to the bounded core-rendered contract described below.
@@ -535,11 +560,13 @@ registrar, atomic lifecycle, and rollback or recovery gates.
 
 ### Add-On Runtime Registration Contract
 
-The runtime-registration helper is connected only to the front-controller page
-request bootstrap, public or authenticated, not to a lifecycle apply command.
-It may execute only the fixed
+The runtime-registration helper is connected to front-controller request
+bootstrap for enabled packages and to the separately guarded operational
+enable registrar-validation step. It may execute only the fixed
 `addon.php` entry point of an already validated first-party package recorded
-as enabled in the current client database.
+as enabled in the current client database, except during the locked operational
+transition where the exact current installed-disabled evidence is revalidated
+before inclusion.
 
 - Core rechecks the real path, symlink boundary, and declared `addon.php`
   checksum immediately before inclusion.
