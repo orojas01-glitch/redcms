@@ -3,16 +3,16 @@
  * Guarded Owner-authorized transition from installed_disabled to enabled.
  *
  * The transition is intentionally narrower than the manifest contract. It
- * accepts only the preflight's registration-only service, secret-capable
- * registration-only service, core-rendered default public component, or
- * default component with registration-only services profile. It validates the
- * fixed first-party registrar under the package advisory lock, then persists
- * state plus its bounded audit fact in one transaction.
+ * accepts the preflight's narrow legacy profiles plus the separately proven
+ * operational content-package profile. It validates the fixed first-party
+ * registrar under the package advisory lock, then persists state plus its
+ * bounded audit fact in one transaction.
  */
 
 require_once __DIR__ . '/addon_enable_preflight_helpers.php';
 require_once __DIR__ . '/addon_install_helpers.php';
 require_once __DIR__ . '/addon_runtime_helpers.php';
+require_once __DIR__ . '/addon_operational_registrar_helpers.php';
 
 if (!function_exists('red_addon_enable_transition_plan')) {
     function red_addon_enable_transition_plan(
@@ -37,6 +37,7 @@ if (!function_exists('red_addon_enable_transition_plan')) {
             'targetState' => 'enabled',
             'preflightPlanSha256' => (string) ($preflight['planSha256'] ?? ''),
             'activationProfile' => $preflight['activationProfile'] ?? [],
+            'operationalEvidenceSha256' => '',
             'planSha256' => '',
             'errors' => [],
         ];
@@ -48,20 +49,41 @@ if (!function_exists('red_addon_enable_transition_plan')) {
         }
         $activationProfileId =
             (string) ($preflight['activationProfile']['id'] ?? '');
+        $legacyProfiles = [
+            'registration_only_service',
+            'registration_only_service_with_secrets',
+            'default_public_component',
+            'default_public_component_with_services',
+        ];
         if (empty($preflight['declarativeGatesReady'])
-            || !in_array(
-                $activationProfileId,
-                [
-                    'registration_only_service',
-                    'registration_only_service_with_secrets',
-                    'default_public_component',
-                    'default_public_component_with_services',
-                ],
-                true
-            )
+            || !in_array($activationProfileId, $legacyProfiles, true)
         ) {
-            $plan['errors'][] = 'supported_activation_profile_required';
-            return $plan;
+            $operational = red_addon_operational_enablement_preflight(
+                $connection,
+                $package,
+                $actorAdminRecordId,
+                $catalog
+            );
+            if (empty($operational['valid'])
+                || !red_addon_operational_enablement_preflight_is_valid(
+                    $operational
+                )
+                || empty($operational['operationalEvidenceReady'])
+            ) {
+                $plan['errors'][] = 'supported_activation_profile_required';
+                return $plan;
+            }
+            $plan['preflightPlanSha256'] = $operational['planSha256'];
+            $plan['operationalEvidenceSha256'] = $operational['planSha256'];
+            $plan['activationProfile'] = [
+                'id' => 'operational_content_package',
+                'eligible' => true,
+                'contractSha256' => $operational['contractSha256'],
+                'migrationCount' => $operational['migrationCount'],
+                'settingCount' => $operational['settingCount'],
+                'publicMutationCount' =>
+                    $operational['publicMutationCount'],
+            ];
         }
 
         $material = [
@@ -73,6 +95,8 @@ if (!function_exists('red_addon_enable_transition_plan')) {
             'targetState' => $plan['targetState'],
             'preflightPlanSha256' => $plan['preflightPlanSha256'],
             'activationProfile' => $plan['activationProfile'],
+            'operationalEvidenceSha256' =>
+                $plan['operationalEvidenceSha256'],
             'registrarValidation' => 'required',
             'stateMutation' => 'atomic_compare_and_swap',
         ];
@@ -173,6 +197,7 @@ if (!function_exists('red_addon_enable_package')) {
             'packageId' => (string) $packageId,
             'version' => '',
             'runtimeRegistrations' => [],
+            'registrarEvidenceSha256' => '',
         ];
         $actorAdminRecordId = (int) $actorAdminRecordId;
         if (!red_addon_valid_package_id($packageId)
@@ -246,6 +271,24 @@ if (!function_exists('red_addon_enable_package')) {
                         return $result;
                     }
                     $result['runtimeRegistrations'] = $registry->snapshot();
+                    if (($plan['activationProfile']['id'] ?? '') ===
+                        'operational_content_package'
+                    ) {
+                        $registrarEvidence =
+                            red_addon_operational_registrar_evidence(
+                                $connection,
+                                $registry,
+                                $package['manifest']
+                            );
+                        if (empty($registrarEvidence['valid'])) {
+                            $result['runtimeRegistrations'] = [];
+                            $result['status'] =
+                                'registrar_validation_failed';
+                            return $result;
+                        }
+                        $result['registrarEvidenceSha256'] =
+                            $registrarEvidence['registrationSha256'];
+                    }
                 } catch (Throwable $throwable) {
                     error_log(
                         'RED-CMS add-on enable registrar validation failed for ' .

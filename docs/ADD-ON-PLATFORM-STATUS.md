@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-12 after the isolated Store Lite guest-checkout
-supported-server browser gate.
+Last updated: 2026-08-12 after the isolated operational enable,
+disable, and re-enable lifecycle gate.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -54,8 +54,8 @@ flowchart TD
     I3["COMPLETE<br/>Generic runtime-settings boundary<br/>declared non-secret handler configuration"]
     I4["COMPLETE<br/>Store Lite 0.1.28 guest checkout<br/>orders + pay on receipt + browser QA"]
     J1["COMPLETE — Release A<br/>read-only operational-package evidence"]
-    J2["CURRENT — Release B<br/>atomic enable + disable/re-enable"]
-    J3["REMAINING — Release C<br/>recovery, migration, responsive QA,<br/>client isolation"]
+    J2["COMPLETE — Release B<br/>atomic enable + disable/re-enable"]
+    J3["CURRENT — Release C<br/>recovery, migration, responsive QA,<br/>client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
     A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J1 --> J2 --> J3 --> K
@@ -64,9 +64,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1 complete;
-    class J2 current;
-    class J3 remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2 complete;
+    class J3 current;
     class K target;
 ```
 
@@ -74,12 +73,12 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Guest checkout and the first release sub-gate are complete. Core can now produce one deterministic, read-only evidence plan for a tightly bounded operational content package while keeping that package installed-disabled and unexecuted. |
-| What just finished? | Release A accepts only exact component/editor and administrator tool/contract coverage, bounded forms tied to declared tools, migration, non-secret setting, public POST route, and public-mutation declarations with current per-client InnoDB/settings evidence. Missing settings, secret/network surfaces, unsupported engines, forged plans, or incomplete coverage fail closed. Store Lite 0.1.28 matches the pure profile at two components, three services, two tools, one form, eight migrations, five settings, and four mutations. |
-| What is active now? | Release B: bind that evidence to exact registrar validation and an Owner-authorized atomic operational enable transition, then prove disable/re-enable without deleting settings, migrations, components, carts, orders, or customer data. |
+| Where are we? | Release B is complete. Core can now safely transition one tightly bounded operational content package from installed-disabled to enabled, disable it without execution or deletion, and re-enable it with identical registrar evidence. |
+| What just finished? | Owner-authorized operational enablement now revalidates Release A evidence, executes the trusted registration-only entry point, requires an exact manifest-to-registry match and live InnoDB transaction tables, then atomically commits enabled state plus audit. Generic 21-assertion and real Store Lite 10-assertion disposable rehearsals proved failure refusal, rollback, disabled bootstrap exclusion, preserved code/settings/migrations/data, identical re-enable evidence, and exact cleanup. |
+| What is active now? | Release C: prove failure recovery and an upgrade migration, then complete responsive administrator/public QA, configured-primary protection, cleanup, and two-client isolation. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove simple or variable products and place a pickup or delivery order with pay on receipt. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Complete atomic operational enable/disable/re-enable, then pass recovery, upgrade migration, responsive administrator/public, configured-primary, cleanup, and two-client isolation proof. A separately approved basic demo deployment may follow; hosted PayPal/card adapters remain later work. |
+| What remains after this gate? | Pass recovery, upgrade migration, responsive administrator/public, configured-primary, cleanup, and two-client isolation proof. A separately approved basic demo deployment may follow; hosted PayPal/card adapters remain later work. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

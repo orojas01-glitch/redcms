@@ -363,6 +363,14 @@ features.
   counts and hashes, keeps `enableReady` and `activationSupported` false, never
   includes `addon.php`, and leaves registrar validation plus atomic lifecycle
   transition to a separately reviewed gate
+- Owner-authorized operational content-package lifecycle. The dry-run-first
+  enable command consumes the exact preflight evidence under the lifecycle and
+  package locks, executes the trusted registrar without invoking any registered
+  handler, requires an exact manifest-to-registry match, and verifies every
+  registrar-bound transaction table is present and InnoDB. It then commits the
+  `enabled` compare-and-swap and bounded audit fact in one transaction. The
+  existing non-executing disable command preserves code, migrations, settings,
+  and business data; re-enable must reproduce the same registrar evidence
 - Optional operator-built Caddy/FrankenPHP public-mutation ingress attestation
   source and paired unlinked PHP HMAC verifier. The handler strips spoofed
   internal headers on every request and can sign only a bounded `/addons/`
@@ -658,12 +666,18 @@ The first route slice accepts only an exact static manifest path, public
 authentication, `GET`, `csrf: not-applicable`, bounded query values, and a
 typed JSON result. Member routes, unsafe methods, placeholders, package HTML,
 and administrator routes remain non-dispatched. The separate enable command is
-also dry-run first. It accepts only
-those three constrained profiles and requires exact database, package,
-version, plan, backup SHA-256, and installed-disabled confirmations before it
-validates the fixed registrar and atomically records `enabled` plus its bounded
-audit fact. Packages with any richer surface remain blocked behind their
-explicit theme, settings, or live-data contract. The disable command is
+also dry-run first. In addition to those three constrained profiles, it accepts
+the closed operational content-package profile only when the read-only evidence
+is exact and current. It requires exact database, package, version, plan,
+backup SHA-256, and installed-disabled confirmations before it validates the
+fixed registrar. Operational registration must match every declared component,
+service, tool, form, route, mutation, loader, writer, creator, deleter, and
+state loader exactly; public-mutation table metadata must match its manifest
+declaration, and every other registrar-bound transaction table must exist as
+InnoDB in the current client database. No registered handler is invoked. The
+command then atomically records `enabled` plus its bounded audit fact. Packages
+outside the four accepted profiles remain blocked behind a separately reviewed
+contract. The disable command is
 likewise CLI-only and dry-run first. It requires the exact Owner
 `addons.disable` capability, current
 enabled package evidence, plan and nonzero backup checksums, and

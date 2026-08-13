@@ -22,7 +22,7 @@ if (!in_array($command, ['prepare', 'verify'], true)
     || !is_string($projectRoot)
     || !is_dir($projectRoot)
     || preg_match(
-        '/\Aredcms_store_lite_browser_[A-Za-z0-9_]+\z/D',
+        '/\Aredcms_store_lite_(?:browser|lifecycle)_[A-Za-z0-9_]+\z/D',
         $databaseName
     ) !== 1
 ) {
