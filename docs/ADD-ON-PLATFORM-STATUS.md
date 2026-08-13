@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-12 after the real Store Lite 0.1.28 to 0.1.29
-failure-and-resume rehearsal.
+Last updated: 2026-08-12 after Store Lite Release C3 responsive and two-client
+isolation acceptance.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -57,30 +57,31 @@ flowchart TD
     J2["COMPLETE — Release B<br/>atomic enable + disable/re-enable"]
     J3A["COMPLETE — Release C1<br/>generic upgrade + failure recovery"]
     J3B["COMPLETE — Release C2<br/>real Store Lite 0.1.28 → 0.1.29 migration"]
-    J3C["CURRENT — Release C3<br/>responsive QA + configured-primary<br/>and two-client isolation"]
-    K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
+    J3C["COMPLETE — Release C3<br/>responsive QA + configured-primary<br/>and two-client isolation"]
+    K["CURRENT<br/>separately reviewed basic demo deployment"]
+    L["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
-    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J1 --> J2 --> J3A --> J3B --> J3C --> K
+    A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J1 --> J2 --> J3A --> J3B --> J3C --> K --> L
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B complete;
-    class J3C current;
-    class K target;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B,J3C complete;
+    class K current;
+    class L target;
 ```
 
 ## Current phase
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Release C2 is complete. The generic recovery boundary has passed against the real external Store Lite 0.1.28 → 0.1.29 package upgrade. |
-| What just finished? | The real 14-assertion rehearsal preserved all eight historical migrations, five settings, and one order; forced failure after the first of two new order-list indexes; proved old-identity `upgrade_failed` stayed non-loadable; resumed only the second index; and finished 0.1.29 disabled with exact cleanup. |
-| What is active now? | Release C3: responsive administrator/public QA, configured-primary protection, exact cleanup, and two-client isolation proof. |
+| Where are we? | Release C3 is complete. Store Lite 0.1.29 has passed the final local responsive and two-client release-readiness evidence. |
+| What just finished? | The supported-server gate passed 100 administrator and 268 public desktop/mobile checks; the separate 14-assertion gate proved two distinct client databases, settings, catalogs, mutations, and lifecycle states remain isolated, then removed both grants/databases with the configured primary unchanged. |
+| What is active now? | A separately reviewed basic deployment to `demo.red-sphere.com`. No deployment has been authorized or made by Release C3. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove simple or variable products and place a pickup or delivery order with pay on receipt. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Pass Release C3 responsive and isolation evidence. A separately approved basic demo deployment may then follow; hosted PayPal/card adapters remain later work. |
+| What remains after this gate? | Review and execute the basic demo deployment, then verify the hosted administrator and public product/cart/order path. Hosted PayPal/card adapters remain later work. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

@@ -710,10 +710,17 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    resume only the exact remaining work. The real Store Lite 0.1.28 to 0.1.29
    proof adds two append-only order-list indexes, forces failure after the first,
    preserves one order and five settings with the old identity, and resumes only
-   the second before finishing disabled. Current Release C3 covers responsive
-   administrator/public rendering, configured-primary protection, cleanup, and
-   two-client isolation behavior.
-35. Add a separately reviewed hosted-payment adapter only after the
+   the second before finishing disabled.
+35. Completed Release C3. The supported-server rehearsal reruns 100
+   administrator and 268 public desktop/mobile checks against Store Lite
+   0.1.29 with exact cart/order facts and complete Docker cleanup. A separate
+   14-assertion rehearsal installs and enables 0.1.29 in two fresh client
+   databases with distinct USD/pickup and COP/delivery settings and products,
+   proves mutations and lifecycle changes cannot cross between them, preserves
+   the configured primary by full database hash, and removes both databases,
+   grants, and the staged project. The next step is a separately reviewed basic
+   `demo.red-sphere.com` deployment; this evidence does not deploy it.
+36. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite
