@@ -703,9 +703,14 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    code, and re-enable reproduces the registrar evidence without deleting or
    changing package code, settings, migrations, components, products, carts,
    order tables, or seeded business data.
-34. Current: validate failure recovery, upgrade migration, responsive
-   administrator and public rendering, configured-primary protection, cleanup,
-   and two-client isolation behavior.
+34. In progress. The generic core upgrade/recovery gate is complete: a disabled
+   package can move only to a higher trusted same-type target with unchanged
+   historical migration evidence and compatible stored settings. Forced
+   partial migration and completion-audit failures remain non-loadable and
+   resume only the exact remaining work. Current: add and rehearse the real
+   Store Lite 0.1.28 to 0.1.29 append-only migration. Responsive administrator
+   and public rendering, configured-primary protection, cleanup, and two-client
+   isolation behavior follow.
 35. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 

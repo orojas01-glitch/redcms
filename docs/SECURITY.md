@@ -406,8 +406,8 @@ and a capability row without the Owner role authorizes nothing. Only
 `addons.install` has a server-local lifecycle consumer. `addons.enable` gates
 both the read-only enablement preflight and the separate dry-run-first atomic
 enable command. `addons.disable` gates the dry-run-first atomic disable
-command. The other grants remain dormant because no upgrade, uninstall, or
-purge transition exists.
+command. `addons.upgrade` gates the dry-run-first disabled-package upgrade and
+explicit recovery command. The uninstall and purge grants remain dormant.
 
 ### Add-On Registry Reconciliation
 
@@ -469,6 +469,34 @@ bounded audit event and leaves the package non-loadable. Recovery requires
 `--resume-failed`, a new dry run and plan digest, and all exact apply
 confirmations. Successful installation ends `installed_disabled` and never
 includes `addon.php`.
+
+### Guarded Add-On Upgrade And Recovery
+
+`scripts/admin-addon-upgrade.php` is CLI-only and dry-run first. It requires a
+database-backed Owner with `addons.upgrade`, a separately verified nonzero
+backup checksum, exact database/package/current-version/target-version/state
+and plan confirmations, and a package that is already `installed_disabled`.
+The target must be a strictly higher trusted version of the same package type.
+Every recorded migration must remain present with the identical id, path, and
+checksum. Existing stored settings must retain their declared key, type, and
+secret classification. Required dependencies must remain current and enabled.
+
+Apply holds the database-wide lifecycle lock and package lock. It never
+includes `addon.php`, invokes a registrar, or enables runtime code. It records
+`upgrading`, applies only pending checksum-revalidated package migrations, and
+records each completed migration immediately. Completion atomically replaces
+the recorded version/manifest/inventory identity, restores
+`installed_disabled`, and records one bounded target-version audit fact.
+
+MySQL DDL is not transactionally reversible. A failed migration or completion
+therefore preserves the old recorded package identity, marks the package
+`upgrade_failed`, retains exact completed-migration evidence, and remains
+non-loadable. Recovery requires `--resume-failed`, a new deterministic plan,
+the same exact target package, and all apply confirmations. It runs only the
+remaining migrations; if all migration SQL already completed, it performs only
+the final registry/audit transaction. Package migrations must consequently be
+reviewed as safe to resume after an execution/ledger boundary failure. This is
+recovery from a known append-only target, not arbitrary downgrade or rollback.
 
 The separate Owner-authorized enablement preflight remains CLI-only and
 read-only. It never includes package PHP and has no apply mode. Its activation
