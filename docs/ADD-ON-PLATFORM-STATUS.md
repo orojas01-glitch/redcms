@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-12 after the generic disabled-package upgrade and
-failure-recovery gate.
+Last updated: 2026-08-12 after the real Store Lite 0.1.28 to 0.1.29
+failure-and-resume rehearsal.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -56,8 +56,8 @@ flowchart TD
     J1["COMPLETE — Release A<br/>read-only operational-package evidence"]
     J2["COMPLETE — Release B<br/>atomic enable + disable/re-enable"]
     J3A["COMPLETE — Release C1<br/>generic upgrade + failure recovery"]
-    J3B["CURRENT — Release C2<br/>real Store Lite 0.1.28 → 0.1.29 migration"]
-    J3C["REMAINING — Release C3<br/>responsive QA + configured-primary<br/>and two-client isolation"]
+    J3B["COMPLETE — Release C2<br/>real Store Lite 0.1.28 → 0.1.29 migration"]
+    J3C["CURRENT — Release C3<br/>responsive QA + configured-primary<br/>and two-client isolation"]
     K["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
     A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J1 --> J2 --> J3A --> J3B --> J3C --> K
@@ -66,9 +66,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A complete;
-    class J3B current;
-    class J3C remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B complete;
+    class J3C current;
     class K target;
 ```
 
@@ -76,12 +75,12 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Release C1 is complete. Core now has a dry-run-first, Owner-authorized disabled-package upgrade path with explicit recovery from partial MySQL DDL. |
-| What just finished? | The generic 24-assertion gate requires a higher trusted same-type package, unchanged historical migrations, compatible stored settings, lifecycle/package locks, exact plan and backup confirmations, and zero runtime execution. Forced migration and completion-audit failures remained non-loadable as `upgrade_failed`; explicit resume applied only remaining migrations and preserved prior data/settings before committing the new identity disabled. |
-| What is active now? | Release C2: create and rehearse a real Store Lite 0.1.28 → 0.1.29 append-only migration using this core boundary. |
+| Where are we? | Release C2 is complete. The generic recovery boundary has passed against the real external Store Lite 0.1.28 → 0.1.29 package upgrade. |
+| What just finished? | The real 14-assertion rehearsal preserved all eight historical migrations, five settings, and one order; forced failure after the first of two new order-list indexes; proved old-identity `upgrade_failed` stayed non-loadable; resumed only the second index; and finished 0.1.29 disabled with exact cleanup. |
+| What is active now? | Release C3: responsive administrator/public QA, configured-primary protection, exact cleanup, and two-client isolation proof. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove simple or variable products and place a pickup or delivery order with pay on receipt. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Pass the real Store Lite upgrade, then responsive administrator/public, configured-primary, cleanup, and two-client isolation proof. A separately approved basic demo deployment may follow; hosted PayPal/card adapters remain later work. |
+| What remains after this gate? | Pass Release C3 responsive and isolation evidence. A separately approved basic demo deployment may then follow; hosted PayPal/card adapters remain later work. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

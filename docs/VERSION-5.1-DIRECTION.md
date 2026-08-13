@@ -363,6 +363,15 @@ and applies only remaining migrations before the target identity and bounded
 completion audit commit atomically. This does not provide downgrade, uninstall,
 purge, or arbitrary migration rollback.
 
+The real external Store Lite 0.1.28 to 0.1.29 Release C2 rehearsal now proves
+this contract with two append-only package-owned order-list indexes. It stages
+the historical package from its exact Git commit, runs all current core
+migrations in a bounded disposable database, preserves one real order plus all
+five configured settings through a forced second-migration failure, and resumes
+only the remaining migration. The result is 0.1.29 `installed_disabled`, with
+the configured primary database, clean starter, hosted demo, and unrelated
+client installations unchanged.
+
 The next lifecycle boundary is a separate server-local, read-only enablement
 preflight gated by the exact persisted Owner `addons.enable` capability. It
 accepts only an exact current `installed_disabled` package, reconciles the full

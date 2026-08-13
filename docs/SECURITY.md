@@ -498,6 +498,17 @@ the final registry/audit transaction. Package migrations must consequently be
 reviewed as safe to resume after an execution/ledger boundary failure. This is
 recovery from a known append-only target, not arbitrary downgrade or rollback.
 
+`scripts/store-lite-upgrade-rehearsal.sh` is the opt-in real-package proof. It
+requires the historical external Store Lite 0.1.28 commit and the exact merged
+0.1.29 commit, stages both outside the starter, and permits only a bounded
+`redcms_sl_upg_*` disposable database. It installs 0.1.28 disabled, stores five
+non-secret settings and one order, then forces failure before the second of two
+new order-list indexes. The first DDL remains recorded under the old identity
+and `upgrade_failed`; runtime registration stays unavailable. Explicit resume
+applies only the second index and finishes 0.1.29 disabled. Cleanup revokes the
+exact grant, drops the exact database and staged projects, and rechecks the
+configured primary boundary.
+
 The separate Owner-authorized enablement preflight remains CLI-only and
 read-only. It never includes package PHP and has no apply mode. Its activation
 gate evaluator supports only three constrained profiles: a registration-only
