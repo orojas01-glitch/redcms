@@ -391,10 +391,18 @@ features.
   server-owned HTTPS fact, exact static `/addons/` POST target, bounded body,
   fixed content metadata, one opaque subject cookie, CSRF token, and
   idempotency key. It ignores Host/forwarding values, rejects encoded or
-  ambiguous projected transport, and feeds the unchanged core dispatcher.
+  ambiguous projected transport, requires the measured PHP body to match its
+  projected length, and feeds the unchanged core dispatcher.
   The existing `frankenphp_attested` profile remains the default. This adapter
   is not itself a HostGator deployment or proof that every shared server
   projection is compatible
+- Disposable real Apache/FastCGI `direct_php` proof. It starts the host Apache
+  2.4 runtime with PHP FastCGI over temporary localhost TLS, confirms the exact
+  HTTPS/PHP projection, canonical capture, Host/forwarding isolation, duplicate
+  and encoding refusals, Apache chunk normalization, and desktop/mobile browser
+  evidence, then builds a validated non-secret deployment-review packet. It
+  opens no database, links no dispatcher, loads no package, changes no client
+  state, and removes its temporary server, FastCGI process, and private key
 - Core-owned public-mutation dispatcher composition. It accepts only
   explicit supported-ingress method/target/capture facts, selects one
   registrar-bound route, verifies the opaque subject and CSRF before decoding
@@ -428,9 +436,10 @@ features.
   deployment, package enablement, or Store Lite route
 - Non-executing per-client public-mutation deployment profile validator. It
   accepts only an operator-owned review packet with one canonical HTTPS origin,
-  pinned FrankenPHP/Caddy versions, the fixed process-environment HMAC key
-  name, attestation-before-PHP route order, core response/cookie ownership,
-  host-only cookie policy, and explicit client-isolation flags. It returns a
+  either pinned FrankenPHP/Caddy attestation facts or pinned Apache/PHP direct
+  projection facts, the profile-specific trust and route order, core response/
+  cookie ownership, host-only cookie policy, and explicit client-isolation
+  flags. It returns a
   deterministic non-secret profile hash and refuses starter-database reuse,
   request-derived trust, package/theme response ownership, policy drift, and
   all dispatcher/package/Store Lite activation flags; it reads no database,
@@ -460,10 +469,10 @@ features.
   Theme and package code own none of these headers, cookies, scripts, or
   responses
 - Non-executing per-client deployment review validator. It binds a reviewed
-  profile hash to non-secret Caddy/FrankenPHP/TLS/proxy artifact evidence,
-  process-environment trusted-origin/HMAC provisioning and rotation facts, and
-  bounded desktop/mobile browser evidence. It reads no deployment file or
-  secret, changes no client state, and cannot link the dispatcher.
+  profile hash to either non-secret Caddy/FrankenPHP attestation evidence or
+  Apache/PHP direct-projection evidence, the matching trust facts, and bounded
+  desktop/mobile browser evidence. It reads no deployment file or secret,
+  changes no client state, and cannot link the dispatcher.
 - Permission-scoped display-only administrator tools with data-only manifest
   contracts, fresh exact per-client grants, typed text view models, core-owned
   escaped rendering, and a protected POST/CSRF endpoint

@@ -816,13 +816,15 @@ reviewed basic `demo.red-sphere.com` deployment. Hosted-provider adapters
 remain later work.
 
 The deployment review exposed that the original public-mutation endpoint was
-coupled to a custom Caddy/FrankenPHP attester. The first compatibility slice
-now adds an explicitly selected `direct_php` core ingress for direct HTTPS
-Apache/PHP shared hosting while retaining `frankenphp_attested` as the default
-hardened profile. Focused fixtures prove the closed projection and endpoint
-gates only. That real shared-host HTTP/browser proof and matching deployment
-review are now the active prerequisite before Store Lite is enabled on the
-hosted demo.
+coupled to a custom Caddy/FrankenPHP attester. The shared-host compatibility
+gate is now complete locally: `direct_php` remains explicit while
+`frankenphp_attested` remains the default hardened profile, and a disposable
+real Apache 2.4/PHP FastCGI HTTPS run proves the closed projection, Apache
+chunk normalization, refusal cases, desktop/mobile browser behavior, and
+matching non-secret deployment review. It opened no database, linked no
+dispatcher, loaded no package, or changed client state. A separately approved
+basic `demo.red-sphere.com` deployment and hosted verification are now the
+active milestone before Store Lite is enabled there.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,

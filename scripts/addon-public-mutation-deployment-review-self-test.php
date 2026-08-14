@@ -82,6 +82,35 @@ function red_addon_public_mutation_deployment_review_test_profile()
     ];
 }
 
+function red_addon_public_mutation_deployment_review_test_direct_profile()
+{
+    $profile = red_addon_public_mutation_deployment_review_test_profile();
+    $profile['databaseName'] = 'orojas_demo_redsphere';
+    $profile['server'] = [
+        'runtime' => 'apache_php',
+        'apacheVersion' => '2.4.65',
+        'phpVersion' => '8.4.13',
+        'sapi' => 'apache2handler',
+        'tlsMode' => 'https',
+        'proxyMode' => 'none',
+    ];
+    $profile['ingress'] = [
+        'profile' => 'direct_php',
+        'projectionVersion' => 'v1',
+        'trustedOriginSource' => 'process_environment',
+        'routeOrder' => [
+            'apache_https',
+            'php_server_projection',
+            'red_direct_php_ingress',
+        ],
+        'directHttpsRequired' => true,
+        'hostIgnored' => true,
+        'forwardedHeadersIgnored' => true,
+        'hmacRequired' => false,
+    ];
+    return $profile;
+}
+
 function red_addon_public_mutation_deployment_review_test_case(
     $width,
     $height,
@@ -162,6 +191,48 @@ function red_addon_public_mutation_deployment_review_test_packet()
     ];
 }
 
+function red_addon_public_mutation_deployment_review_test_direct_packet()
+{
+    $review = red_addon_public_mutation_deployment_review_test_packet();
+    $review['server'] = [
+        'runtime' => 'apache_php',
+        'apacheVersion' => '2.4.65',
+        'phpVersion' => '8.4.13',
+        'sapi' => 'apache2handler',
+        'tlsMode' => 'https',
+        'proxyMode' => 'none',
+        'siteOrigin' => 'https://demo.example.test',
+        'routeOrder' => [
+            'apache_https',
+            'php_server_projection',
+            'red_direct_php_ingress',
+        ],
+        'dispatcherLinked' => false,
+        'deploymentRootOutsideStarter' => true,
+        'configurationOutsideStarter' => true,
+        'certificatesOutsideStarter' => true,
+        'apacheConfigSHA256' => str_repeat('1', 64),
+        'runtimeEvidenceSHA256' => str_repeat('2', 64),
+        'certificateChainSHA256' => str_repeat('3', 64),
+        'projectionEvidenceSHA256' => str_repeat('4', 64),
+        'projectionVerified' => true,
+    ];
+    $review['trust'] = [
+        'profile' => 'direct_php',
+        'trustedOriginEnvironment' =>
+            'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN',
+        'trustedOriginSource' => 'process_environment',
+        'trustedOriginMatchesProfile' => true,
+        'httpsSource' => 'apache_server',
+        'httpsVerified' => true,
+        'hostIgnored' => true,
+        'forwardedHeadersIgnored' => true,
+        'hmacRequired' => false,
+        'secretValuesRecorded' => false,
+    ];
+    return $review;
+}
+
 function red_addon_public_mutation_deployment_review_test_invalid(
     $profile,
     $review,
@@ -225,6 +296,70 @@ try {
         $valid['reviewHash'] === $repeat['reviewHash'],
         'the non-secret review hash is deterministic'
     );
+
+    $directProfile = red_addon_public_mutation_deployment_profile(
+        red_addon_public_mutation_deployment_review_test_direct_profile()
+    );
+    $directReview =
+        red_addon_public_mutation_deployment_review_test_direct_packet();
+    $directReview['profileHash'] = $directProfile['profileHash'];
+    $direct = red_addon_public_mutation_deployment_review(
+        $directProfile,
+        $directReview
+    );
+    red_addon_public_mutation_deployment_review_test_assert(
+        $directProfile['valid']
+            && $direct['valid']
+            && red_addon_public_mutation_deployment_review_valid($direct),
+        'the direct Apache PHP review validates against its exact profile'
+    );
+    red_addon_public_mutation_deployment_review_test_assert(
+        $direct['review']['server'] === $directReview['server']
+            && $direct['review']['trust'] === $directReview['trust']
+            && $direct['reviewHash'] ===
+                red_addon_public_mutation_deployment_review(
+                    $directProfile,
+                    $directReview
+                )['reviewHash'],
+        'direct server, trust, and review hashes remain deterministic'
+    );
+    red_addon_public_mutation_deployment_review_test_assert(
+        !str_contains(json_encode($direct), 'HMAC')
+            && $direct['review']['trust']['hmacRequired'] === false
+            && $direct['review']['server']['projectionVerified'] === true,
+        'direct review binds projection evidence without inventing HMAC facts'
+    );
+
+    foreach ([
+        ['projectionVerified', false],
+        ['apacheConfigSHA256', 'invalid'],
+        ['phpVersion', '8.3.99'],
+    ] as [$field, $value]) {
+        $candidate = $directReview;
+        $candidate['server'][$field] = $value;
+        red_addon_public_mutation_deployment_review_test_invalid(
+            $directProfile,
+            $candidate,
+            'server_evidence_invalid',
+            'direct server evidence drift fails closed: ' . $field
+        );
+    }
+
+    foreach ([
+        ['httpsSource', 'forwarded_header'],
+        ['hostIgnored', false],
+        ['forwardedHeadersIgnored', false],
+        ['hmacRequired', true],
+    ] as [$field, $value]) {
+        $candidate = $directReview;
+        $candidate['trust'][$field] = $value;
+        red_addon_public_mutation_deployment_review_test_invalid(
+            $directProfile,
+            $candidate,
+            'trust_evidence_invalid',
+            'direct transport trust drift fails closed: ' . $field
+        );
+    }
 
     $profileMismatch = $review;
     $profileMismatch['profileHash'] = str_repeat('a', 64);

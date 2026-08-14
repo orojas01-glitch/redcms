@@ -106,6 +106,268 @@ if (!function_exists('red_addon_public_mutation_deployment_review_browser_case')
     }
 }
 
+if (!function_exists('red_addon_public_mutation_deployment_review_server')) {
+    function red_addon_public_mutation_deployment_review_server(
+        $profile,
+        $server
+    ) {
+        if (!is_array($profile) || !is_array($server)
+            || !isset($profile['server']['runtime'])
+        ) {
+            return null;
+        }
+
+        if ($profile['server']['runtime'] === 'frankenphp') {
+            if (!red_addon_public_mutation_deployment_review_keys_valid(
+                $server,
+                [
+                    'runtime',
+                    'frankenphpVersion',
+                    'caddyVersion',
+                    'tlsMode',
+                    'proxyMode',
+                    'siteOrigin',
+                    'routeOrder',
+                    'dispatcherLinked',
+                    'deploymentRootOutsideStarter',
+                    'binaryOutsideStarter',
+                    'caddyfileOutsideStarter',
+                    'certificatesOutsideStarter',
+                    'caddyfileSHA256',
+                    'binarySHA256',
+                    'certificateChainSHA256',
+                ]
+            )
+                || $server['runtime'] !== $profile['server']['runtime']
+                || $server['frankenphpVersion']
+                    !== $profile['server']['frankenphpVersion']
+                || $server['caddyVersion']
+                    !== $profile['server']['caddyVersion']
+                || $server['tlsMode'] !== 'https'
+                || $server['proxyMode'] !== $profile['server']['proxyMode']
+                || $server['siteOrigin'] !== $profile['trustedOrigin']
+                || $server['routeOrder'] !== $profile['ingress']['routeOrder']
+                || $server['dispatcherLinked'] !== false
+                || $server['deploymentRootOutsideStarter'] !== true
+                || $server['binaryOutsideStarter'] !== true
+                || $server['caddyfileOutsideStarter'] !== true
+                || $server['certificatesOutsideStarter'] !== true
+                || !red_addon_public_mutation_deployment_review_sha256_valid(
+                    $server['caddyfileSHA256']
+                )
+                || !red_addon_public_mutation_deployment_review_sha256_valid(
+                    $server['binarySHA256']
+                )
+                || !red_addon_public_mutation_deployment_review_sha256_valid(
+                    $server['certificateChainSHA256']
+                )
+            ) {
+                return null;
+            }
+            return $server;
+        }
+
+        if ($profile['server']['runtime'] !== 'apache_php'
+            || !red_addon_public_mutation_deployment_review_keys_valid(
+                $server,
+                [
+                    'runtime',
+                    'apacheVersion',
+                    'phpVersion',
+                    'sapi',
+                    'tlsMode',
+                    'proxyMode',
+                    'siteOrigin',
+                    'routeOrder',
+                    'dispatcherLinked',
+                    'deploymentRootOutsideStarter',
+                    'configurationOutsideStarter',
+                    'certificatesOutsideStarter',
+                    'apacheConfigSHA256',
+                    'runtimeEvidenceSHA256',
+                    'certificateChainSHA256',
+                    'projectionEvidenceSHA256',
+                    'projectionVerified',
+                ]
+            )
+            || $server['runtime'] !== 'apache_php'
+            || $server['apacheVersion']
+                !== $profile['server']['apacheVersion']
+            || $server['phpVersion'] !== $profile['server']['phpVersion']
+            || $server['sapi'] !== $profile['server']['sapi']
+            || $server['tlsMode'] !== 'https'
+            || $server['proxyMode'] !== 'none'
+            || $server['siteOrigin'] !== $profile['trustedOrigin']
+            || $server['routeOrder'] !== $profile['ingress']['routeOrder']
+            || $server['dispatcherLinked'] !== false
+            || $server['deploymentRootOutsideStarter'] !== true
+            || $server['configurationOutsideStarter'] !== true
+            || $server['certificatesOutsideStarter'] !== true
+            || $server['projectionVerified'] !== true
+            || !red_addon_public_mutation_deployment_review_sha256_valid(
+                $server['apacheConfigSHA256']
+            )
+            || !red_addon_public_mutation_deployment_review_sha256_valid(
+                $server['runtimeEvidenceSHA256']
+            )
+            || !red_addon_public_mutation_deployment_review_sha256_valid(
+                $server['certificateChainSHA256']
+            )
+            || !red_addon_public_mutation_deployment_review_sha256_valid(
+                $server['projectionEvidenceSHA256']
+            )
+        ) {
+            return null;
+        }
+        return $server;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_deployment_review_trust')) {
+    function red_addon_public_mutation_deployment_review_trust(
+        $profile,
+        $trust
+    ) {
+        if (!is_array($profile) || !is_array($trust)
+            || !isset($profile['server']['runtime'])
+        ) {
+            return null;
+        }
+
+        if ($profile['server']['runtime'] === 'frankenphp') {
+            $expected = [
+                'hmacKeyEnvironment' =>
+                    'RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY',
+                'hmacKeySource' => 'process_environment',
+                'hmacKeyShapeVerified' => true,
+                'trustedOriginEnvironment' =>
+                    'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN',
+                'trustedOriginSource' => 'process_environment',
+                'trustedOriginMatchesProfile' => true,
+                'rotationOwner' => 'operator_owned',
+                'rotationProcedureVersion' => 'v1',
+                'activeKeyPresent' => true,
+                'previousKeyRevoked' => true,
+                'rotationVerified' => true,
+                'secretValuesRecorded' => false,
+            ];
+            return $trust === $expected ? $expected : null;
+        }
+
+        $expected = [
+            'profile' => 'direct_php',
+            'trustedOriginEnvironment' =>
+                'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN',
+            'trustedOriginSource' =>
+                $profile['ingress']['trustedOriginSource'],
+            'trustedOriginMatchesProfile' => true,
+            'httpsSource' => 'apache_server',
+            'httpsVerified' => true,
+            'hostIgnored' => true,
+            'forwardedHeadersIgnored' => true,
+            'hmacRequired' => false,
+            'secretValuesRecorded' => false,
+        ];
+        return $profile['server']['runtime'] === 'apache_php'
+            && in_array(
+                $profile['ingress']['trustedOriginSource'],
+                ['process_environment', 'ignored_local_config'],
+                true
+            )
+            && $trust === $expected
+                ? $expected
+                : null;
+    }
+}
+
+if (!function_exists('red_addon_public_mutation_deployment_review_profile_from_server')) {
+    function red_addon_public_mutation_deployment_review_profile_from_server(
+        $server,
+        $trust
+    ) {
+        if (!is_array($server) || !is_array($trust)) {
+            return null;
+        }
+        if (($server['runtime'] ?? null) === 'frankenphp') {
+            if (!red_addon_public_mutation_deployment_review_keys_valid(
+                $server,
+                [
+                    'runtime',
+                    'frankenphpVersion',
+                    'caddyVersion',
+                    'tlsMode',
+                    'proxyMode',
+                    'siteOrigin',
+                    'routeOrder',
+                    'dispatcherLinked',
+                    'deploymentRootOutsideStarter',
+                    'binaryOutsideStarter',
+                    'caddyfileOutsideStarter',
+                    'certificatesOutsideStarter',
+                    'caddyfileSHA256',
+                    'binarySHA256',
+                    'certificateChainSHA256',
+                ]
+            )) {
+                return null;
+            }
+            return [
+                'trustedOrigin' => $server['siteOrigin'],
+                'server' => [
+                    'runtime' => 'frankenphp',
+                    'frankenphpVersion' => $server['frankenphpVersion'],
+                    'caddyVersion' => $server['caddyVersion'],
+                    'tlsMode' => $server['tlsMode'],
+                    'proxyMode' => $server['proxyMode'],
+                ],
+                'ingress' => ['routeOrder' => $server['routeOrder']],
+            ];
+        }
+        if (($server['runtime'] ?? null) !== 'apache_php'
+            || !red_addon_public_mutation_deployment_review_keys_valid(
+                $server,
+                [
+                    'runtime',
+                    'apacheVersion',
+                    'phpVersion',
+                    'sapi',
+                    'tlsMode',
+                    'proxyMode',
+                    'siteOrigin',
+                    'routeOrder',
+                    'dispatcherLinked',
+                    'deploymentRootOutsideStarter',
+                    'configurationOutsideStarter',
+                    'certificatesOutsideStarter',
+                    'apacheConfigSHA256',
+                    'runtimeEvidenceSHA256',
+                    'certificateChainSHA256',
+                    'projectionEvidenceSHA256',
+                    'projectionVerified',
+                ]
+            )
+            || !is_string($trust['trustedOriginSource'] ?? null)
+        ) {
+            return null;
+        }
+        return [
+            'trustedOrigin' => $server['siteOrigin'],
+            'server' => [
+                'runtime' => 'apache_php',
+                'apacheVersion' => $server['apacheVersion'],
+                'phpVersion' => $server['phpVersion'],
+                'sapi' => $server['sapi'],
+                'tlsMode' => $server['tlsMode'],
+                'proxyMode' => $server['proxyMode'],
+            ],
+            'ingress' => [
+                'trustedOriginSource' => $trust['trustedOriginSource'],
+                'routeOrder' => $server['routeOrder'],
+            ],
+        ];
+    }
+}
+
 if (!function_exists('red_addon_public_mutation_deployment_review_normalize')) {
     /**
      * Validates one explicit deployment/evidence packet without applying it.
@@ -144,85 +406,22 @@ if (!function_exists('red_addon_public_mutation_deployment_review_normalize')) {
 
         $profile = $deploymentProfileResult['profile'];
         $server = $review['server'];
-        if (!red_addon_public_mutation_deployment_review_keys_valid(
-            $server,
-            [
-                'runtime',
-                'frankenphpVersion',
-                'caddyVersion',
-                'tlsMode',
-                'proxyMode',
-                'siteOrigin',
-                'routeOrder',
-                'dispatcherLinked',
-                'deploymentRootOutsideStarter',
-                'binaryOutsideStarter',
-                'caddyfileOutsideStarter',
-                'certificatesOutsideStarter',
-                'caddyfileSHA256',
-                'binarySHA256',
-                'certificateChainSHA256',
-            ]
-        )
-            || $server['runtime'] !== $profile['server']['runtime']
-            || $server['frankenphpVersion']
-                !== $profile['server']['frankenphpVersion']
-            || $server['caddyVersion'] !== $profile['server']['caddyVersion']
-            || $server['tlsMode'] !== 'https'
-            || $server['proxyMode'] !== $profile['server']['proxyMode']
-            || $server['siteOrigin'] !== $profile['trustedOrigin']
-            || $server['routeOrder'] !== $profile['ingress']['routeOrder']
-            || $server['dispatcherLinked'] !== false
-            || $server['deploymentRootOutsideStarter'] !== true
-            || $server['binaryOutsideStarter'] !== true
-            || $server['caddyfileOutsideStarter'] !== true
-            || $server['certificatesOutsideStarter'] !== true
-            || !red_addon_public_mutation_deployment_review_sha256_valid(
-                $server['caddyfileSHA256']
-            )
-            || !red_addon_public_mutation_deployment_review_sha256_valid(
-                $server['binarySHA256']
-            )
-            || !red_addon_public_mutation_deployment_review_sha256_valid(
-                $server['certificateChainSHA256']
-            )
-        ) {
+        $normalizedServer =
+            red_addon_public_mutation_deployment_review_server(
+                $profile,
+                $server
+            );
+        if ($normalizedServer === null) {
             return $invalid('server_evidence_invalid');
         }
 
         $trust = $review['trust'];
-        if (!red_addon_public_mutation_deployment_review_keys_valid(
-            $trust,
-            [
-                'hmacKeyEnvironment',
-                'hmacKeySource',
-                'hmacKeyShapeVerified',
-                'trustedOriginEnvironment',
-                'trustedOriginSource',
-                'trustedOriginMatchesProfile',
-                'rotationOwner',
-                'rotationProcedureVersion',
-                'activeKeyPresent',
-                'previousKeyRevoked',
-                'rotationVerified',
-                'secretValuesRecorded',
-            ]
-        )
-            || $trust['hmacKeyEnvironment']
-                !== 'RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY'
-            || $trust['hmacKeySource'] !== 'process_environment'
-            || $trust['hmacKeyShapeVerified'] !== true
-            || $trust['trustedOriginEnvironment']
-                !== 'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN'
-            || $trust['trustedOriginSource'] !== 'process_environment'
-            || $trust['trustedOriginMatchesProfile'] !== true
-            || $trust['rotationOwner'] !== 'operator_owned'
-            || $trust['rotationProcedureVersion'] !== 'v1'
-            || $trust['activeKeyPresent'] !== true
-            || $trust['previousKeyRevoked'] !== true
-            || $trust['rotationVerified'] !== true
-            || $trust['secretValuesRecorded'] !== false
-        ) {
+        $normalizedTrust =
+            red_addon_public_mutation_deployment_review_trust(
+                $profile,
+                $trust
+            );
+        if ($normalizedTrust === null) {
             return $invalid('trust_evidence_invalid');
         }
 
@@ -268,40 +467,8 @@ if (!function_exists('red_addon_public_mutation_deployment_review_normalize')) {
 
         $normalized = [
             'profileHash' => $profileHash,
-            'server' => [
-                'runtime' => $profile['server']['runtime'],
-                'frankenphpVersion' => $profile['server']['frankenphpVersion'],
-                'caddyVersion' => $profile['server']['caddyVersion'],
-                'tlsMode' => 'https',
-                'proxyMode' => $profile['server']['proxyMode'],
-                'siteOrigin' => $profile['trustedOrigin'],
-                'routeOrder' => $profile['ingress']['routeOrder'],
-                'dispatcherLinked' => false,
-                'deploymentRootOutsideStarter' => true,
-                'binaryOutsideStarter' => true,
-                'caddyfileOutsideStarter' => true,
-                'certificatesOutsideStarter' => true,
-                'caddyfileSHA256' => $server['caddyfileSHA256'],
-                'binarySHA256' => $server['binarySHA256'],
-                'certificateChainSHA256' =>
-                    $server['certificateChainSHA256'],
-            ],
-            'trust' => [
-                'hmacKeyEnvironment' =>
-                    'RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY',
-                'hmacKeySource' => 'process_environment',
-                'hmacKeyShapeVerified' => true,
-                'trustedOriginEnvironment' =>
-                    'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN',
-                'trustedOriginSource' => 'process_environment',
-                'trustedOriginMatchesProfile' => true,
-                'rotationOwner' => 'operator_owned',
-                'rotationProcedureVersion' => 'v1',
-                'activeKeyPresent' => true,
-                'previousKeyRevoked' => true,
-                'rotationVerified' => true,
-                'secretValuesRecorded' => false,
-            ],
+            'server' => $normalizedServer,
+            'trust' => $normalizedTrust,
             'browser' => [
                 'reviewVersion' => 'v1',
                 'origin' => $profile['trustedOrigin'],
@@ -357,90 +524,24 @@ if (!function_exists('red_addon_public_mutation_deployment_review_normalized_val
         }
 
         $server = $review['server'];
-        if (!red_addon_public_mutation_deployment_review_keys_valid(
-            $server,
-            [
-                'runtime',
-                'frankenphpVersion',
-                'caddyVersion',
-                'tlsMode',
-                'proxyMode',
-                'siteOrigin',
-                'routeOrder',
-                'dispatcherLinked',
-                'deploymentRootOutsideStarter',
-                'binaryOutsideStarter',
-                'caddyfileOutsideStarter',
-                'certificatesOutsideStarter',
-                'caddyfileSHA256',
-                'binarySHA256',
-                'certificateChainSHA256',
-            ]
-        )
-            || $server['runtime'] !== 'frankenphp'
-            || $server['frankenphpVersion'] !== '1.12.4'
-            || $server['caddyVersion'] !== '2.11.4'
-            || $server['tlsMode'] !== 'https'
-            || !in_array($server['proxyMode'], ['none', 'operator_trusted'], true)
-            || red_addon_public_mutation_http_request_trusted_origin(
-                $server['siteOrigin']
-            ) !== $server['siteOrigin']
-            || $server['routeOrder'] !== [
-                'red_public_mutation_attestation',
-                'php_server',
-            ]
-            || $server['dispatcherLinked'] !== false
-            || $server['deploymentRootOutsideStarter'] !== true
-            || $server['binaryOutsideStarter'] !== true
-            || $server['caddyfileOutsideStarter'] !== true
-            || $server['certificatesOutsideStarter'] !== true
-            || !red_addon_public_mutation_deployment_review_sha256_valid(
-                $server['caddyfileSHA256']
-            )
-            || !red_addon_public_mutation_deployment_review_sha256_valid(
-                $server['binarySHA256']
-            )
-            || !red_addon_public_mutation_deployment_review_sha256_valid(
-                $server['certificateChainSHA256']
-            )
-        ) {
-            return false;
-        }
-
         $trust = $review['trust'];
-        if (!red_addon_public_mutation_deployment_review_keys_valid(
-            $trust,
-            [
-                'hmacKeyEnvironment',
-                'hmacKeySource',
-                'hmacKeyShapeVerified',
-                'trustedOriginEnvironment',
-                'trustedOriginSource',
-                'trustedOriginMatchesProfile',
-                'rotationOwner',
-                'rotationProcedureVersion',
-                'activeKeyPresent',
-                'previousKeyRevoked',
-                'rotationVerified',
-                'secretValuesRecorded',
-            ]
-        )
-            || $trust !== [
-                'hmacKeyEnvironment' =>
-                    'RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY',
-                'hmacKeySource' => 'process_environment',
-                'hmacKeyShapeVerified' => true,
-                'trustedOriginEnvironment' =>
-                    'RED_PUBLIC_MUTATION_TRUSTED_ORIGIN',
-                'trustedOriginSource' => 'process_environment',
-                'trustedOriginMatchesProfile' => true,
-                'rotationOwner' => 'operator_owned',
-                'rotationProcedureVersion' => 'v1',
-                'activeKeyPresent' => true,
-                'previousKeyRevoked' => true,
-                'rotationVerified' => true,
-                'secretValuesRecorded' => false,
-            ]
+        $profile =
+            red_addon_public_mutation_deployment_review_profile_from_server(
+                $server,
+                $trust
+            );
+        if ($profile === null
+            || red_addon_public_mutation_http_request_trusted_origin(
+                $server['siteOrigin'] ?? null
+            ) !== ($server['siteOrigin'] ?? null)
+            || red_addon_public_mutation_deployment_review_server(
+                $profile,
+                $server
+            ) !== $server
+            || red_addon_public_mutation_deployment_review_trust(
+                $profile,
+                $trust
+            ) !== $trust
         ) {
             return false;
         }

@@ -83,6 +83,34 @@ function red_addon_public_mutation_deployment_profile_test_fixture(
     ];
 }
 
+function red_addon_public_mutation_deployment_profile_test_direct_fixture()
+{
+    $profile = red_addon_public_mutation_deployment_profile_test_fixture();
+    $profile['server'] = [
+        'runtime' => 'apache_php',
+        'apacheVersion' => '2.4.65',
+        'phpVersion' => '8.4.13',
+        'sapi' => 'apache2handler',
+        'tlsMode' => 'https',
+        'proxyMode' => 'none',
+    ];
+    $profile['ingress'] = [
+        'profile' => 'direct_php',
+        'projectionVersion' => 'v1',
+        'trustedOriginSource' => 'process_environment',
+        'routeOrder' => [
+            'apache_https',
+            'php_server_projection',
+            'red_direct_php_ingress',
+        ],
+        'directHttpsRequired' => true,
+        'hostIgnored' => true,
+        'forwardedHeadersIgnored' => true,
+        'hmacRequired' => false,
+    ];
+    return $profile;
+}
+
 function red_addon_public_mutation_deployment_profile_test_invalid(
     array $profile,
     $reason,
@@ -305,6 +333,93 @@ try {
                 === 'operator_trusted',
         'an explicitly reviewed operator-trusted proxy mode remains representable'
     );
+
+    $directProfile =
+        red_addon_public_mutation_deployment_profile_test_direct_fixture();
+    $directProfile['databaseName'] = 'orojas_demo_redsphere';
+    $direct = red_addon_public_mutation_deployment_profile($directProfile);
+    red_addon_public_mutation_deployment_profile_test_assert(
+        $direct['valid']
+            && red_addon_public_mutation_deployment_profile_valid($direct),
+        'the explicit direct-PHP deployment profile validates independently'
+    );
+    red_addon_public_mutation_deployment_profile_test_assert(
+        $direct['profile']['databaseName'] === 'orojas_demo_redsphere',
+        'a safe host-prefixed per-client database name remains representable'
+    );
+    red_addon_public_mutation_deployment_profile_test_assert(
+        $direct['profile']['server'] === $directProfile['server']
+            && $direct['profile']['ingress'] === $directProfile['ingress']
+            && $direct['profileHash'] !== $valid['profileHash'],
+        'the pinned Apache PHP projection and profile hash are deterministic'
+    );
+    red_addon_public_mutation_deployment_profile_test_assert(
+        !str_contains(json_encode($direct), 'HMAC')
+            && $direct['profile']['ingress']['hmacRequired'] === false
+            && $direct['profile']['activation'] === $profile['activation'],
+        'direct PHP invents no HMAC secret and keeps every activation disabled'
+    );
+
+    foreach ([
+        ['apacheVersion', '2.2.34'],
+        ['phpVersion', '8.1.31'],
+        ['sapi', 'cli'],
+        ['proxyMode', 'operator_trusted'],
+    ] as [$field, $value]) {
+        $candidate = $directProfile;
+        $candidate['server'][$field] = $value;
+        red_addon_public_mutation_deployment_profile_test_invalid(
+            $candidate,
+            'server_invalid',
+            'unsupported direct-PHP server drift fails closed: ' . $field
+        );
+    }
+
+    $directRouteDrift = $directProfile;
+    $directRouteDrift['ingress']['routeOrder'] = [
+        'php_server_projection',
+        'apache_https',
+        'red_direct_php_ingress',
+    ];
+    red_addon_public_mutation_deployment_profile_test_invalid(
+        $directRouteDrift,
+        'ingress_invalid',
+        'direct-PHP projection cannot precede the Apache HTTPS boundary'
+    );
+
+    $cgiProfile = $directProfile;
+    $cgiProfile['server']['sapi'] = 'cgi-fcgi';
+    $cgi = red_addon_public_mutation_deployment_profile($cgiProfile);
+    red_addon_public_mutation_deployment_profile_test_assert(
+        $cgi['valid'] && $cgi['profile']['server']['sapi'] === 'cgi-fcgi',
+        'an explicitly pinned Apache CGI/FastCGI projection is representable'
+    );
+
+    $directForwardingDrift = $directProfile;
+    $directForwardingDrift['ingress']['forwardedHeadersIgnored'] = false;
+    red_addon_public_mutation_deployment_profile_test_invalid(
+        $directForwardingDrift,
+        'ingress_invalid',
+        'forwarded headers cannot become direct-PHP transport trust'
+    );
+
+    $directHmacDrift = $directProfile;
+    $directHmacDrift['ingress']['hmacRequired'] = true;
+    red_addon_public_mutation_deployment_profile_test_invalid(
+        $directHmacDrift,
+        'ingress_invalid',
+        'the direct profile cannot claim an unused HMAC trust boundary'
+    );
+
+    foreach (['mysql', 'redcms_acceptance_123_456'] as $reservedDatabase) {
+        $candidate = $directProfile;
+        $candidate['databaseName'] = $reservedDatabase;
+        red_addon_public_mutation_deployment_profile_test_invalid(
+            $candidate,
+            'database_invalid',
+            'system and disposable database names remain unavailable'
+        );
+    }
 
     echo 'Public-mutation deployment profile self-test passed (' .
         $assertions . " assertions).\n";

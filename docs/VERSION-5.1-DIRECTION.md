@@ -1334,6 +1334,20 @@ request bootstrap excludes the disabled package.
     proof, direct-profile deployment review, and hosted browser verification
     remain before `demo.red-sphere.com` activation.
 
+96. Completed the local real-Apache `direct_php` deployment gate. A disposable
+    Apache 2.4.67 server projected direct HTTPS into PHP 8.5.8 FastCGI and
+    passed canonical capture, forged Host/forwarding isolation, duplicate
+    Origin/CSRF/cookie refusal, content-encoding refusal, Apache chunk
+    normalization into the same measured body, and forwarded-HTTPS-over-HTTP
+    refusal. Desktop `1440x1000` and mobile `390x844` browser evidence passed
+    with HTTPS 200, zero console/network errors, no cookie or token leakage,
+    and no client-state change. The expanded 41-assertion profile and
+    27-assertion review validators accepted the generated non-secret packet for
+    `orojas_demo_redsphere`. The proof opened no database, linked no dispatcher,
+    loaded no Store Lite package, and removed its temporary Apache/FastCGI/TLS
+    runtime. The separately approved hosted deployment and verification remain
+    next; `demo.red-sphere.com` was not changed by this gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

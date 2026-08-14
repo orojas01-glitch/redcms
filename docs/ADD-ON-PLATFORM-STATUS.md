@@ -1,7 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-13 during the shared-host direct-PHP public-mutation
-compatibility gate after Store Lite Release C3.
+Last updated: 2026-08-14 after the shared-host direct-PHP public-mutation
+compatibility gate and before the separately approved hosted demo deployment.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -59,8 +59,8 @@ flowchart TD
     J3B["COMPLETE — Release C2<br/>real Store Lite 0.1.28 → 0.1.29 migration"]
     J3C["COMPLETE — Release C3<br/>responsive QA + configured-primary<br/>and two-client isolation"]
     K1["COMPLETE<br/>shared-host direct-PHP ingress adapter"]
-    K2["CURRENT<br/>real Apache/shared-host proof + deployment review"]
-    K3["REMAINING<br/>basic demo deployment"]
+    K2["COMPLETE<br/>real Apache/FastCGI proof + deployment review"]
+    K3["CURRENT<br/>basic demo deployment"]
     L["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
     A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J1 --> J2 --> J3A --> J3B --> J3C --> K1 --> K2 --> K3 --> L
@@ -69,9 +69,8 @@ flowchart TD
     classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
     classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B,J3C,K1 complete;
-    class K2 current;
-    class K3 remaining;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B,J3C,K1,K2 complete;
+    class K3 current;
     class L target;
 ```
 
@@ -79,12 +78,12 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Release C3 and the direct-PHP ingress adapter are complete locally. The current deployment prerequisite is proving that adapter against the exact Apache/PHP shared-host projection. |
-| What just finished? | The explicit `direct_php` adapter, endpoint selection, fail-closed HTTPS page gate, focused fixtures, and full disposable acceptance passed while retaining the attested default. |
-| What is active now? | Real shared-host compatibility evidence and direct-profile deployment review. These still precede the basic `demo.red-sphere.com` deployment. |
+| Where are we? | Release C3, the direct-PHP adapter, and its real Apache/FastCGI local deployment proof are complete. The basic hosted demo deployment is the current gate. |
+| What just finished? | Apache 2.4/PHP FastCGI HTTPS projection, refusal and normalization cases, desktop/mobile browser evidence, and the non-secret direct-profile deployment review passed without opening a database or loading Store Lite. |
+| What is active now? | A separately approved deployment and hosted administrator/public verification limited to `demo.red-sphere.com`. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove simple or variable products and place a pickup or delivery order with pay on receipt. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Prove the exact Apache/shared-host projection, complete the direct-profile deployment review, then deploy and verify the hosted administrator and public product/cart/order path. Hosted PayPal/card adapters remain later work. |
+| What remains after this gate? | Deploy and verify the hosted administrator and public product/cart/order path, then close the Store Lite demo target. Hosted PayPal/card adapters remain later work. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 ## Status rule

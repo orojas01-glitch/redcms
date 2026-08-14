@@ -313,11 +313,11 @@ body handling. Local Chrome desktop/mobile inspection also passes with zero
 horizontal overflow, collection add/remove behavior, typed JSON/CSRF output,
 `unchanged` and `saved` reload behavior, and zero console, page, or
 failed-request errors.
-The separate 27-assertion non-executing deployment-profile fixture proves one
-closed client review packet with canonical HTTPS, pinned server versions,
-fixed HMAC/trusted-origin sources, attestation-before-PHP route order, core
-response/cookie ownership, host-only cookie policy, clean-starter isolation,
-secret-shaped-field refusal, and disabled activation flags. It reads no
+The separate 41-assertion non-executing deployment-profile fixture proves the
+closed attested and direct client packet shapes with canonical HTTPS, pinned
+server versions, profile-specific trust and route order, core response/cookie
+ownership, host-only cookie policy, clean-starter isolation, safe shared-host
+database naming, secret-shaped-field refusal, and disabled activation flags. It reads no
 request, filesystem, database, package, secret, or response state.
 The separate 22-assertion direct-ingress fixture proves the explicit
 shared-host profile accepts only direct server-owned HTTPS and a fixed bounded
@@ -328,8 +328,8 @@ length drift, and changes no request, session, buffer, or response state. The
 endpoint fixture separately proves `direct_php` is explicit, needs no
 attestation key, disables page forms over HTTP, and leaves
 `frankenphp_attested` as the default. These dependency-free checks do not prove
-a particular shared host; real Apache/HostGator HTTP and browser evidence is a
-separate gate before deployment.
+a particular shared host. The separate real Apache/FastCGI proof establishes
+the reviewed local projection; the hosted environment remains a separate gate.
 The separate 18-assertion public-mutation response fixture proves that only
 the fixed `accepted` / `unchanged` outcomes and five generic refusal envelopes
 can be constructed. It requires exact JSON, content type, no-store, nosniff,
@@ -343,13 +343,12 @@ descriptor, or ordered clear-then-set rotation descriptors. It rejects package
 ownership, linked-dispatcher profiles, arbitrary headers, cookie-policy drift,
 invalid lifecycle states, and any request/global/session/header mutation; it
 does not emit a response or link the front controller.
-The separate 17-assertion deployment-review fixture proves that a profile hash
-binds only non-secret Caddy/FrankenPHP/TLS/proxy artifact hashes, process-
-environment trusted-origin/HMAC provisioning and old-key-revocation evidence,
-and fixed desktop/mobile browser evidence. It rejects secret values, artifact
-placement in the starter, request-derived trust, unreviewed rotation, browser
-errors/state changes, forged review hashes, and any deployment or dispatcher
-path.
+The separate 27-assertion deployment-review fixture proves that a profile hash
+binds only the matching non-secret attested or direct server/artifact/trust
+facts and fixed desktop/mobile browser evidence. It rejects secret values,
+artifact placement in the starter, request-derived trust, unreviewed rotation
+or direct projection, browser errors/state changes, forged review hashes, and
+any deployment or dispatcher path.
 The separate installation-shaped HTTPS rehearsal must be run with Docker when
 the pinned builder layers are available. It stages no client or starter data,
 uses a generated external certificate, proves the attestation-before-PHP route
@@ -678,7 +677,7 @@ core-only anonymous-subject/CSRF foundation, 7-assertion pure subject-cookie
 serializer, 15-assertion core-only fixed-window rate-limit foundation,
 18-assertion core-only opaque idempotency-key foundation, 18-assertion
 core-owned browser subject-cookie lifecycle,
-27-assertion non-executing per-client deployment profile,
+41-assertion non-executing per-client deployment profile,
 21-assertion atomic core-only public-mutation transaction runner, 18-assertion
 bounded public-mutation response contract, 8-assertion closed core response
 emitter, 24-assertion declared
@@ -841,6 +840,25 @@ fixed response emitter. It then checks accepted/replay, forged-header
 replacement, `GET` refusal, withheld-attestation refusal, idempotency conflict,
 and exact fixture ledger/audit/rate state before removing its temporary
 containers, network, image, database, package marker, and build context.
+
+The real Apache direct-PHP projection proof is also separate from the normal
+PHP/MySQL suite because it binds temporary localhost HTTP, HTTPS, and FastCGI
+ports and launches the host Apache runtime:
+
+```bash
+scripts/apache-public-mutation-direct-ingress-proof.sh
+```
+
+It stages only the exact direct-ingress PHP dependencies in a temporary server
+root, generates one short-lived localhost certificate, and exercises Apache
+2.4/PHP FastCGI without opening a database or loading a package. It proves the
+canonical direct-HTTPS capture, ignored Host/forwarding values, duplicate
+Origin/CSRF/cookie and content-encoding refusals, Apache chunk normalization
+into the same bounded measured body, and forwarded-HTTPS-over-HTTP refusal.
+Desktop `1440x1000` and mobile `390x844` browser evidence must pass with zero
+console/network errors, no cookie or opaque token, and no client-state change.
+The run builds a validated non-secret direct deployment-review packet outside
+the starter, then removes its Apache/FastCGI/TLS runtime and private key.
 
 The connected Store Lite supported-server browser rehearsal is also opt-in and
 requires Docker Desktop plus the external pinned package:
@@ -1063,25 +1081,26 @@ process environment.
   unlinked from `index.php`; the supported-server disposable rehearsal is
   complete. The core subject-cookie lifecycle is now proven independently;
   the non-executing deployment profile and response-owner composition are
-  also proven; production deployment review remains required before linking
-  it.
+  also proven; the local direct Apache review now passes, while an exact hosted
+  deployment review remains required before linking it there.
 - Public-mutation deployment-profile acceptance is dependency-free and creates
   no database, package, request, browser, route, or client fixture. It accepts
   only one non-secret operator review packet with a separate client database,
-  canonical HTTPS origin, pinned FrankenPHP/Caddy versions, fixed
-  HMAC/trusted-origin sources, attestation-before-PHP route order, core
-  response/cookie ownership, host-only cookie policy, explicit isolation, and
-  disabled activation flags. It rejects starter-database reuse, request-
+  canonical HTTPS origin, either pinned FrankenPHP/Caddy attestation facts or
+  pinned Apache/PHP direct facts, matching trust and route order, core response/
+  cookie ownership, host-only cookie policy, explicit isolation, and disabled
+  activation flags. It rejects starter-database reuse, request-
   derived trust, version/route/policy drift, secret-shaped fields, and any
   dispatcher/package/Store Lite activation without loading a profile or
   changing response, filesystem, database, or client state.
 - Public-mutation deployment-review acceptance is dependency-free and creates
   no database, package, request, browser, route, or client fixture. It binds
-  the profile hash to pinned server/TLS/proxy facts, non-secret Caddyfile/
-  binary/certificate hashes outside the starter, process-environment
-  trusted-origin/HMAC sources with verified old-key revocation, and bounded
-  desktop/mobile HTTPS browser evidence. It rejects secret values, unreviewed
-  proxy/TLS/rotation/browser facts, forged review hashes, file loading,
+  the profile hash to the exact attested or direct server/TLS/artifact/trust
+  facts outside the starter and bounded desktop/mobile HTTPS browser evidence.
+  The direct form requires Apache/PHP/SAPI plus configuration/runtime/
+  certificate/projection hashes and verified direct-HTTPS/ignored-forwarding
+  facts. It rejects secret values, unreviewed server/TLS/trust/browser facts,
+  forged review hashes, file loading,
   browser sessions, deployment, response emission, and dispatcher linking.
 - Public-mutation installation-shaped HTTPS rehearsal acceptance is a Docker-
   and browser-dependent gate. It requires a temporary custom FrankenPHP/Caddy
@@ -1092,6 +1111,15 @@ process environment.
   evidence outside the starter and remove the private key, secret values,
   image, container, and build context. It cannot touch a client database,
   install a package, link the dispatcher, or exercise Store Lite.
+- Real Apache direct-PHP deployment acceptance is localhost-server- and
+  browser-dependent but database-free. It requires Apache 2.4 with PHP 8.2-8.5
+  under an accepted SAPI, direct TLS ownership, an exact canonical origin,
+  closed PHP request projection, duplicate/encoded refusal, Apache chunk
+  normalization into the measured body, ignored Host/forwarding values, and
+  fixed desktop/mobile evidence. It must emit only a validated non-secret
+  review outside the starter and remove its server root, FastCGI process,
+  private key, and TLS directory. It cannot link the dispatcher, load a
+  package, enable Store Lite, access a database, or change client state.
 - Public-mutation response acceptance is dependency-free and creates no
   database, package, request, browser, route, or client fixture. It requires
   only the fixed `accepted` / `unchanged` envelopes and generic invalid-request,
