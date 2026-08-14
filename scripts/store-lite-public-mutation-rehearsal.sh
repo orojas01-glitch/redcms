@@ -240,8 +240,8 @@ for (const migration of manifest.migrations || []) {
     process.stdout.write(`${migration.path}\n`);
 }
 ' "$STORE_PACKAGE/addon.json")
-[[ "${#CORE_MIGRATIONS[@]}" -eq 45 ]] \
-    || fail "expected 45 core migrations; found ${#CORE_MIGRATIONS[@]}."
+[[ "${#CORE_MIGRATIONS[@]}" -eq 46 ]] \
+    || fail "expected 46 core migrations; found ${#CORE_MIGRATIONS[@]}."
 [[ "${#STORE_MIGRATIONS[@]}" -eq 10 ]] \
     || fail "expected 10 Store Lite migrations; found ${#STORE_MIGRATIONS[@]}."
 for migration in "${STORE_MIGRATIONS[@]}"; do

@@ -543,6 +543,15 @@ requires that administrator's exact grant. Owner and lifecycle grants do not
 imply package access. The decision is read-only and does not activate a
 package, execute code, open an endpoint, or write content.
 
+The first operational package-permission workflow is now implemented without
+adding a web grant-management surface. A server-local Owner command discovers
+only permissions from an integrity-valid manifest, produces a deterministic
+dry-run plan, and requires exact database, actor, target, and plan
+confirmations before atomically granting or revoking one permission. The same
+transaction writes one exact permission audit fact. Discovery and mutation
+never load package PHP or change package lifecycle, settings, or content, and
+every client database remains independent.
+
 The bounded package data-loader prerequisite is now implemented without
 opening an editor endpoint. An enabled package registrar must bind exactly one
 loader for each declared component editor. Core requires the exact view grant,
@@ -719,7 +728,7 @@ response-owner composer, and deployment-review packet are also complete. The
 installation-shaped HTTPS deployment rehearsal passed on 2026-08-07 in an
 isolated Docker environment with pinned FrankenPHP 1.12.4 and Caddy 2.11.4.
 The full disposable acceptance suite also passed against a separately built
-current-schema baseline, including all 45 migration files, idempotency,
+current-schema baseline, including all 46 migration files, idempotency,
 runtime/browser, lifecycle, settings foundations, CRUD/media cleanup, and
 rollback checks; its acceptance database and grant were removed afterward. The
 rehearsal uses only a temporary custom binary, fixture endpoint, and fresh

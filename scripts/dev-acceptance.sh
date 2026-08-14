@@ -259,6 +259,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, MigrationID, MigrationPath, Checksum, AppliedByAdminRecordID, AppliedAt, ExecutionMs))), 0) FROM RED_Addon_Migrations),
             (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, EventName, PackageID, PackageVersion, ActorAdminRecordID, Result, DetailCode, OccurredAt))), 0) FROM RED_Addon_Activity_Log),
+            (SELECT COUNT(*) FROM RED_Addon_Permission_Activity_Log),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, EventName, PackageID, PackageVersion, Permission, TargetAdminRecordID, ActorAdminRecordID, Result, OccurredAt))), 0) FROM RED_Addon_Permission_Activity_Log),
             (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RevisionID, ContentRecordID, PackageID, ComponentID, RevisionNumber, Operation, ActorAdminRecordID, ActorAlias, Snapshot, StateHash, RestoredFromRevisionID, CreatedAt))), 0) FROM RED_Addon_Component_Revisions),
             (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
@@ -1494,6 +1496,7 @@ red_acceptance_all_table_checksums() {
             RED_Addon_Settings,
             RED_Addon_Migrations,
             RED_Addon_Activity_Log,
+            RED_Addon_Permission_Activity_Log,
             RED_Addon_Component_Revisions,
             RED_Addon_Admin_Action_Executions,
             RED_Addon_Public_Mutation_Subjects,
@@ -5021,6 +5024,9 @@ red_acceptance_assert_equals \
 printf '%s\n' 'Running persisted Owner lifecycle authorization checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-owner-authorization-self-test.php"
 
+printf '%s\n' 'Running Owner-authorized package permission grant and revoke checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-package-permission-self-test.php"
+
 printf '%s\n' 'Running component editor package-permission checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-component-editor-authorization-self-test.php"
 
@@ -5158,6 +5164,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Addon_Settings),
         (SELECT COUNT(*) FROM RED_Addon_Migrations),
         (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
+        (SELECT COUNT(*) FROM RED_Addon_Permission_Activity_Log),
         (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
         (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Subjects),
@@ -5231,10 +5238,10 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
       );
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '34:34:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '35:35:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:0:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:0:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
@@ -5313,4 +5320,4 @@ if grep -Eq 'PHP (Warning|Deprecated|Notice|Fatal)|Fatal error|Parse error|Datab
 fi
 printf '%s\n' 'PASS: isolated PHP server log has no PHP/runtime error markers.'
 
-printf '%s\n' 'Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, add-on setting values/editor/secret resolution/availability/asset plan/storage/write preflight/atomic writer/replacement/permission-scoped settings read model, secret-capable service runtime/by-reference access/result redaction, add-on administrator tool form schema/preview/planning/current-value loading/JSON validation/atomic writer/edit-and-Save and target-free Create bridges, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery-preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery and disabled-package upgrade/recovery, read-only add-on enablement/public-mutation live-data/operational-package preflight/anonymous subject and CSRF/fixed-window rate-limit/idempotency-key/atomic-runner/bounded-response/declared-form/form-UI/HTTP-envelope/route-selector foundations, atomic add-on legacy and operational enablement/disablement/re-enablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'
+printf '%s\n' 'Acceptance database, Store Lite product/variant and server-authoritative cart-line contracts, Owner authorization, atomic package-permission grant/revoke and audit, add-on setting values/editor/secret resolution/availability/asset plan/storage/write preflight/atomic writer/replacement/permission-scoped settings read model, secret-capable service runtime/by-reference access/result redaction, add-on administrator tool form schema/preview/planning/current-value loading/JSON validation/atomic writer/edit-and-Save and target-free Create bridges, add-on component data loading, transactional updates, immutable revision snapshots, atomic revision restore, component creation, parent metadata, atomic public placement, atomic deletion, add-on registry reconciliation/asset-delivery-preflight/static immutable endpoint/core-owned public-admin injection, enabled add-on request bootstrap, add-on component persistence/dispatch, disabled add-on installation/recovery and disabled-package upgrade/recovery, read-only add-on enablement/public-mutation live-data/operational-package preflight/anonymous subject and CSRF/fixed-window rate-limit/idempotency-key/atomic-runner/bounded-response/declared-form/form-UI/HTTP-envelope/route-selector foundations, atomic add-on legacy and operational enablement/disablement/re-enablement, theme-contract serialization, Layout Builder, public runtime, authentication, permission, Move Content, Section archive/delete, Article upload/CRUD, Form CRUD, Gallery CRUD, Gallery upload, and forced transaction rollback checks passed.'

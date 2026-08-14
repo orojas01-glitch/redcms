@@ -1659,8 +1659,13 @@ Each package declares its permissions, but core owns authorization enforcement.
 An add-on cannot grant permissions to itself. The per-client capability column
 matches the manifest's 160-character permission limit. A package editor
 operation requires its exact fresh grant; Owner and lifecycle grants confer no
-daily package access. The first decision helper is read-only, and no
-administrator grant-management UI or package-driven grant path exists yet.
+daily package access. The first decision helper remains read-only. The first
+operational grant path is the server-local
+`scripts/admin-addon-permission.php` command: it accepts only permissions from
+an integrity-valid discovered manifest, requires a fresh Owner and exact
+database, actor, target, and plan confirmations, and atomically records one
+grant or revoke with one permission-specific audit fact. No administrator web
+grant-management UI or package-driven grant path exists yet.
 
 Important lifecycle, settings, order, payment, appointment, entitlement, and
 donation changes require an actor, timestamp, target identifier, result, and

@@ -399,9 +399,10 @@ Lite's first release RED-CMS needs separate reviewed core batches for:
   and its atomic runner are complete with exact creator/loader postconditions
   and dual initial revisions. Read-only parent state and atomic
   title/layout/language updates are complete with exact grants, shell/package
-  postconditions, and core revision rollback, but no grant-management
-  workflow, restore UI action, delete endpoint/control, uninstall, or purge
-  exists. The audited public-placement control is complete but does not by
+  postconditions, and core revision rollback. A dry-run-first server-local
+  Owner grant/revoke workflow now exists, but no web grant-management UI,
+  restore UI action, delete endpoint/control, uninstall, or purge exists. The
+  audited public-placement control is complete but does not by
   itself admit the Store Lite package;
 - typed service invocation is complete as an internal core-to-package boundary;
 - exact static public `GET` routes are complete as a core-owned JSON boundary,
