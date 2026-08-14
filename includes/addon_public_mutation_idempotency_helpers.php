@@ -56,11 +56,13 @@ if (!function_exists('red_addon_public_mutation_idempotency_storage_available'))
                        AND ENGINE='InnoDB'),
                     (SELECT COUNT(*)=6
                        AND SUM(COLUMN_NAME='RecordID'
-                         AND COLUMN_TYPE='int unsigned'
+                         AND DATA_TYPE='int'
+                         AND COLUMN_TYPE LIKE 'int% unsigned'
                          AND IS_NULLABLE='NO'
                          AND EXTRA='auto_increment')=1
                        AND SUM(COLUMN_NAME='SubjectRecordID'
-                         AND COLUMN_TYPE='int unsigned'
+                         AND DATA_TYPE='int'
+                         AND COLUMN_TYPE LIKE 'int% unsigned'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='ScopeSHA256'
                          AND COLUMN_TYPE='char(64)'

@@ -102,7 +102,8 @@ if (!function_exists('red_addon_setting_storage_available')) {
                          AND COLUMN_TYPE='varchar(160)'
                          AND IS_NULLABLE='YES')=1
                        AND SUM(COLUMN_NAME='UpdatedByAdminRecordID'
-                         AND COLUMN_TYPE='int unsigned'
+                         AND DATA_TYPE='int'
+                         AND COLUMN_TYPE LIKE 'int% unsigned'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='UpdatedAt'
                          AND DATA_TYPE='timestamp'

@@ -506,6 +506,8 @@ features.
   exact missing/unknown reporting, and separate opaque secret references
 - Empty per-client package-setting storage and deterministic read-only write
   preflight with explicit manifest permissions and fresh database grants
+- Portable unsigned-integer schema guards compare semantic integer type and
+  unsignedness without depending on the legacy MySQL 5.7 display-width string
 - Atomic complete-setting persistence with shared locks, exact postcondition,
   value-free audit, no-op handling, and rollback
 - Core-only current-setting read models with per-setting fresh grants,

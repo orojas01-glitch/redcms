@@ -95,11 +95,13 @@ if (!function_exists('red_addon_public_mutation_execution_storage_available')) {
                        AND ENGINE='InnoDB'),
                     (SELECT COUNT(*)=7
                        AND SUM(COLUMN_NAME='RecordID'
-                         AND COLUMN_TYPE='bigint unsigned'
+                         AND DATA_TYPE='bigint'
+                         AND COLUMN_TYPE LIKE 'bigint% unsigned'
                          AND IS_NULLABLE='NO'
                          AND EXTRA='auto_increment')=1
                        AND SUM(COLUMN_NAME='IdempotencyRecordID'
-                         AND COLUMN_TYPE='int unsigned'
+                         AND DATA_TYPE='int'
+                         AND COLUMN_TYPE LIKE 'int% unsigned'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='CommandSHA256'
                          AND COLUMN_TYPE='char(64)'
