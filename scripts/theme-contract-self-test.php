@@ -3152,7 +3152,7 @@ try {
             && is_string($controlPanelNavigationSource)
             && str_contains($controlPanelNavigationSource, 'class="red-admin-signature"')
             && !str_contains($controlPanelNavigationSource, 'redcms-bonsai.png'),
-        'the Webmaster website-credit control uses a polished opt-out workspace and the admin shell uses a text-only RED-CMS 5.0 signature'
+        'the Webmaster website-credit control uses a polished opt-out workspace and the admin shell uses the current text-only RED-CMS signature'
     );
     $publicThemeHelperSource = file_get_contents(dirname(__DIR__) . '/includes/public_theme_helpers.php');
     $starterFooterSource = file_get_contents(dirname(__DIR__) . '/themes/starter-reference/partials/production-footer.php');

@@ -3282,7 +3282,7 @@ if (!function_exists('red_addon_validate_manifest')) {
                 red_addon_add_error($result, 'Compatibility php range uses an unsupported format.');
             }
             $cmsVersion = isset($context['cmsVersion']) ? (string) $context['cmsVersion'] : (
-                defined('RED_CMS_VERSION') ? (string) RED_CMS_VERSION : '5.0.0'
+                defined('RED_CMS_VERSION') ? (string) RED_CMS_VERSION : '5.1.0'
             );
             $phpVersion = isset($context['phpVersion']) ? (string) $context['phpVersion'] : PHP_VERSION;
             if (red_addon_version_range_valid($cmsRange) && !red_addon_version_satisfies($cmsVersion, $cmsRange)) {

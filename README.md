@@ -1,6 +1,6 @@
-# RED-CMS 5.0
+# RED-CMS 5.1
 
-RED-CMS is a lightweight PHP and MySQL content management system for structured, template-driven websites. Version 5.0 modernizes the legacy application while preserving its public URLs, existing database table names, and compatibility-first deployment model.
+RED-CMS is a lightweight PHP and MySQL content management system for structured, template-driven websites. Version 5.1 extends the completed Version 5.0 Bonsai modernization with per-page SEO compatibility and an optional, per-client add-on platform while preserving public URLs, existing database table names, and the compatibility-first deployment model.
 
 The current release adds a consistent administrator workspace, standard theme packages, visual page structures, reusable layouts, content version history, safer database migrations, and repeatable acceptance testing.
 

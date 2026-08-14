@@ -9,6 +9,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 $repositoryRoot = dirname(__DIR__);
+require_once $repositoryRoot . '/includes/bootstrap.php';
 require_once $repositoryRoot . '/includes/addon_manifest_helpers.php';
 require_once $repositoryRoot . '/includes/addon_asset_helpers.php';
 require_once $repositoryRoot . '/includes/admin_addon_authorization_helpers.php';
@@ -173,6 +174,33 @@ try {
     if (!mkdir($temporaryRoot, 0700, true) && !is_dir($temporaryRoot)) {
         throw new RuntimeException('Could not create add-on trust test root.');
     }
+
+    red_addon_test_assert(
+        defined('RED_CMS_VERSION') && RED_CMS_VERSION === '5.1.0',
+        'the runtime advertises the exact RED-CMS 5.1 release identity'
+    );
+
+    $releaseIdentityProject = red_addon_test_project(
+        $temporaryRoot,
+        'release-identity-default-discovery'
+    );
+    red_addon_test_write_package(
+        $releaseIdentityProject,
+        'redcms.release-probe',
+        $executionMarker,
+        [],
+        static function (&$manifest) {
+            $manifest['compatibility']['cms'] = '>=5.1 <6.0';
+        }
+    );
+    $releaseIdentityPackage = red_addon_validate_manifest(
+        'redcms.release-probe',
+        $releaseIdentityProject
+    );
+    red_addon_test_assert(
+        !empty($releaseIdentityPackage['valid']) && !file_exists($executionMarker),
+        'default non-executing discovery accepts a trusted package requiring RED-CMS 5.1'
+    );
 
     $schema = json_decode(
         (string) file_get_contents($repositoryRoot . '/docs/addon-manifest.schema.json'),
