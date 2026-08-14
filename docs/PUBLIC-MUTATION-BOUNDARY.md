@@ -66,6 +66,7 @@ changed by it.
 | Server request facts | Core resolves one canonical HTTPS origin from operating-system/local configuration, reads only the current method/raw target, and accepts only an upstream-attested complete fixed security-header capture | No associative header fallback, body-stream read, route claim, handler invocation, database, response emission, browser behavior, enablement, or client state |
 | Optional Caddy/FrankenPHP ingress attestation | Separately built source plus isolated temporary-image proofs strip spoofed internal headers, conditionally sign bounded candidate facts, and verify the PHP HMAC bridge used only after the endpoint gate | No default-server change, deployed client binary, active client Caddyfile, package activation, Store Lite data, or client state |
 | Optional direct-PHP ingress | Explicit `direct_php` profile accepts only direct server-owned HTTPS, an exact static POST candidate, canonical configured/request origin agreement, fixed content metadata, bounded measured body, and closed opaque cookie/CSRF/idempotency values; Host and forwarding values are ignored | No implicit selection, proxy trust, arbitrary header map, parsed fields, package response ownership, deployment approval, Store Lite data, or client state |
+| Real Apache direct-PHP proof | Disposable Apache 2.4/PHP FastCGI HTTPS runtime proves canonical projection, Host/forwarding isolation, duplicate and content-encoding refusal, chunk normalization into a measured body, fixed desktop/mobile evidence, and one validated non-secret review packet | No database access, dispatcher link, package load, Store Lite behavior, hosted deployment, client state, retained private key, or starter-resident evidence |
 | Public-mutation dispatcher | Core composition accepts explicit method/target/capture facts, selects one registrar-bound route, verifies subject/CSRF, decodes declared fields, invokes the atomic runner, and returns only the fixed response model; the gated bridge is its only front-controller caller | No package/theme response ownership, package enablement, Store Lite activation, or client deployment |
 | Operational endpoint and page bridge | Before theme/session rendering, core may claim one reserved `/addons/` candidate only after the local flag, trusted origin, and explicit supported ingress profile pass; direct-PHP forms additionally require the current request's direct HTTPS fact. Normal GET rendering parses raw cookies, coordinates at most 128 forms, delivers one fixed controller, and emits only fixed lifecycle/response headers | False in the clean starter; no server integration deployment, package installation/enablement, Store Lite data, or shared client state |
 | Supported-server dispatcher rehearsal | Disposable Docker proof builds the pinned custom FrankenPHP/Caddy binary, runs the real attester, PHP ingress bridge, dispatcher, runner, emitter, and test-only subject-cookie lifecycle over a fresh MySQL database | No client database, default server, deployed binary, production browser flow, package installation, richer enablement, or Store Lite data |
@@ -526,10 +527,11 @@ core lifecycle gate, not a production endpoint or client browser deployment.
 
 `includes/addon_public_mutation_deployment_profile_helpers.php` validates one
 operator-owned review packet without loading or applying it. The packet binds a
-client slug to a separate database name and canonical HTTPS origin, pins the
-supported FrankenPHP/Caddy versions, requires the fixed process-environment
-HMAC key name and attestation-before-PHP route order, records the trusted-origin
-source and operator-owned key-rotation responsibility, and requires the core
+client slug to a separate database name and canonical HTTPS origin, then pins
+either the supported FrankenPHP/Caddy attestation shape or the supported
+Apache/PHP direct projection. Each shape has an exact trust source and route
+order; only the attested shape requires the process-environment HMAC key and
+operator-owned rotation. Both require the core
 response emitter and lifecycle bridge to own all public headers/cookies. It
 also requires the fixed host-only subject-cookie policy, configuration/binary/
 secret/media isolation outside the clean starter, and all dispatcher/package/
@@ -540,8 +542,8 @@ SHA-256 profile hash. It rejects starter-database reuse, request-derived trust,
 server/version drift, reversed ingress order, package/theme response ownership,
 cookie policy drift, isolation gaps, secret-shaped fields, and any activation
 flag. It reads no PHP request/global state, filesystem, database, package,
-secret, lifecycle, or response state. The dependency-free 27-assertion fixture
-proves both direct and explicitly operator-trusted proxy profiles while keeping
+secret, lifecycle, or response state. The dependency-free 41-assertion fixture
+proves both attested and direct profiles while keeping
 the deployment packet non-executing.
 
 ## Core-Owned Response-Owner Composition
@@ -567,11 +569,12 @@ before any front-controller link.
 
 `includes/addon_public_mutation_deployment_review_helpers.php` binds one
 operator-owned review packet to the existing deployment-profile hash. It
-requires pinned FrankenPHP/Caddy/TLS/proxy facts, attestation-before-PHP route
-order, four deployment artifacts outside the clean starter, non-secret hashes
-for the Caddyfile/binary/certificate chain, process-environment trusted-origin
-and HMAC sources, explicit active-key/old-key rotation evidence, and no secret
-values in the packet.
+requires the exact profile-specific server, TLS, route-order, artifact-hash,
+and trust evidence outside the clean starter. Attested reviews prove the
+Caddyfile/binary/certificate chain and process-environment HMAC rotation;
+direct reviews prove Apache/PHP/SAPI, configuration/runtime/certificate/
+projection hashes, direct HTTPS, and ignored Host/forwarding values. Neither
+form accepts secret values in the packet.
 
 The packet also records bounded desktop `1440x1000` and mobile `390x844`
 browser evidence: HTTPS 200, zero console/network errors, exact response and
@@ -579,8 +582,27 @@ cookie policy matches, no opaque token in the body, evidence hashes outside the
 starter, no dispatcher link, no mutation endpoint exercise, and no client
 state change. The validator reads no file or secret, performs no deployment or
 browser action, and returns only normalized non-secret evidence plus a
-deterministic review hash. Actual per-client deployment and browser capture
-remain the next gate.
+deterministic review hash. The dependency-free fixture contains 27 assertions.
+Actual hosted per-client deployment and browser capture remain the next gate.
+
+## Real Apache Direct-PHP Deployment Proof
+
+`scripts/apache-public-mutation-direct-ingress-proof.sh` stages the exact
+direct-ingress dependency set in a temporary server root, starts the host's
+Apache 2.4 with PHP FastCGI and a generated localhost certificate, and leaves
+the clean starter and every database untouched. It proves canonical capture,
+Host/forwarding isolation, duplicate Origin/CSRF/cookie and content-encoding
+refusal, Apache chunk normalization into the same bounded measured body, and
+HTTP refusal even when a forwarding header claims HTTPS.
+
+The same run captures desktop `1440x1000` and mobile `390x844` HTTPS evidence
+with zero console/network errors, no cookie, no opaque token, no mutation
+endpoint exercise, and no client-state change. It builds and validates one
+non-secret direct deployment review, then removes the Apache server root,
+FastCGI process, certificate private key, and TLS directory. Retained evidence
+must remain outside the starter. This proves the local Apache/FastCGI shape; it
+does not deploy HostGator, open `orojas_demo_redsphere`, link the dispatcher, or
+load/enable Store Lite.
 
 ## Installation-Shaped HTTPS Deployment Rehearsal
 
@@ -868,7 +890,7 @@ This planning slice does not authorize:
     and rotate are transactional, fixed-descriptor, non-package operations;
     client deployment remains unaccepted.
 19. Completed the non-executing per-client deployment profile and its
-    27-assertion dependency-free fixture. It validates the operator-owned
+    41-assertion dependency-free fixture. It validates the operator-owned
     client database/origin, pinned server and ingress facts, core response and
     cookie ownership, fixed host-only policy, clean-starter isolation, and
     disabled activation flags without loading or applying a deployment.
@@ -878,7 +900,7 @@ This planning slice does not authorize:
     cookie descriptors while rejecting arbitrary headers, ownership/policy
     drift, invalid lifecycle state, and front-controller linking.
 21. Completed the non-executing per-client deployment review packet and its
-    17-assertion dependency-free fixture. It binds the profile hash to
+    27-assertion dependency-free fixture. It binds the profile hash to
     non-secret server/artifact, process-environment trust/rotation, and fixed
     desktop/mobile browser evidence while refusing secret values, deployment
     file loading, browser state, and dispatcher linking.
@@ -912,8 +934,14 @@ This planning slice does not authorize:
     one fixed controller, and emit only fixed lifecycle/response headers.
     Focused endpoint, cookie, fresh-schema, Chrome-controller, and supported-
     server Docker evidence pass without enabling a package or client deployment.
-26. A separate richer enablement review may admit only packages that satisfy
+26. Completed the disposable real Apache/FastCGI direct-ingress proof and its
+    non-secret deployment-review builder. It verifies direct HTTPS projection,
+    canonical capture, Host/forwarding isolation, duplicate and encoding
+    refusals, Apache chunk normalization, and fixed desktop/mobile browser
+    evidence without opening a database, linking the dispatcher, loading a
+    package, retaining a private key, or changing client state.
+27. A separate richer enablement review may admit only packages that satisfy
     every declared prerequisite.
-27. Store Lite can then implement its separately distributed catalog and cart
+28. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.

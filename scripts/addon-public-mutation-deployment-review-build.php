@@ -138,9 +138,11 @@ $rotation = red_addon_public_mutation_deployment_review_build_json(
 );
 
 $profileResult = red_addon_public_mutation_deployment_profile($profile);
-if (!red_addon_public_mutation_deployment_profile_valid($profileResult)) {
+if (!red_addon_public_mutation_deployment_profile_valid($profileResult)
+    || ($profileResult['profile']['server']['runtime'] ?? '') !== 'frankenphp'
+) {
     red_addon_public_mutation_deployment_review_build_fail(
-        'Deployment profile did not validate: ' . ($profileResult['reason'] ?? '')
+        'An exact validated FrankenPHP deployment profile is required.'
     );
 }
 

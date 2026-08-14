@@ -1,0 +1,55 @@
+ServerRoot "@SERVER_ROOT@"
+PidFile "@PID_FILE@"
+Mutex "file:@SERVER_ROOT@/logs" default
+ServerName localhost
+ServerTokens Prod
+ServerSignature Off
+Timeout 5
+ProxyTimeout 5
+
+Listen 127.0.0.1:@HTTP_PORT@
+Listen 127.0.0.1:@HTTPS_PORT@
+
+LoadModule mpm_prefork_module /usr/libexec/apache2/mod_mpm_prefork.so
+LoadModule unixd_module /usr/libexec/apache2/mod_unixd.so
+LoadModule authz_core_module /usr/libexec/apache2/mod_authz_core.so
+LoadModule authz_host_module /usr/libexec/apache2/mod_authz_host.so
+LoadModule log_config_module /usr/libexec/apache2/mod_log_config.so
+LoadModule mime_module /usr/libexec/apache2/mod_mime.so
+LoadModule dir_module /usr/libexec/apache2/mod_dir.so
+LoadModule env_module /usr/libexec/apache2/mod_env.so
+LoadModule proxy_module /usr/libexec/apache2/mod_proxy.so
+LoadModule proxy_fcgi_module /usr/libexec/apache2/mod_proxy_fcgi.so
+LoadModule socache_shmcb_module /usr/libexec/apache2/mod_socache_shmcb.so
+LoadModule ssl_module /usr/libexec/apache2/mod_ssl.so
+
+SSLSessionCache "shmcb:@SSL_CACHE@(512000)"
+
+TypesConfig /etc/apache2/mime.types
+ErrorLog "@ERROR_LOG@"
+LogLevel warn
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+CustomLog "@ACCESS_LOG@" common
+
+PassEnv RED_PUBLIC_MUTATION_TRUSTED_ORIGIN
+
+<Directory "@DOCUMENT_ROOT@">
+    Options -Indexes
+    AllowOverride None
+    Require all granted
+    DirectoryIndex index.php
+</Directory>
+
+ProxyFCGIBackendType GENERIC
+ProxyPassMatch "^/.*$" "fcgi://127.0.0.1:@FCGI_PORT@@DOCUMENT_ROOT@/index.php"
+
+<VirtualHost 127.0.0.1:@HTTP_PORT@>
+    DocumentRoot "@DOCUMENT_ROOT@"
+</VirtualHost>
+
+<VirtualHost 127.0.0.1:@HTTPS_PORT@>
+    DocumentRoot "@DOCUMENT_ROOT@"
+    SSLEngine on
+    SSLCertificateFile "@CERTIFICATE@"
+    SSLCertificateKeyFile "@PRIVATE_KEY@"
+</VirtualHost>

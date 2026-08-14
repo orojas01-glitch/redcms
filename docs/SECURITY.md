@@ -1290,8 +1290,9 @@ attested endpoint plus a direct server-owned `HTTPS=on` or `HTTPS=1` fact. It
 ignores `Host` and every forwarding value. Before reading `php://input`, it
 accepts only one exact POST candidate, the canonical matching `Origin`, fixed
 form content type, a decimal body length no greater than 8,192 bytes, one
-valid core subject cookie, and opaque CSRF/idempotency values. Transfer or
-content encoding and alternate content metadata projections fail closed. The
+    valid core subject cookie, and opaque CSRF/idempotency values. Transfer or
+  content encoding that remains visible in the PHP projection and alternate
+  content metadata projections fail closed. The
 actual body length must equal the declared length before the existing request
 adapter releases facts to the unchanged subject, CSRF, rate-limit,
 idempotency, transaction, and response-owner pipeline.
@@ -1299,10 +1300,13 @@ idempotency, transaction, and response-owner pipeline.
 PHP cannot prove the original order or count of raw duplicate wire headers on
 every shared server. This profile therefore accepts only closed projected
 values for which common comma/semicolon combination is invalid and relies on
-the front web server to reject HTTP request smuggling. It is authorized only
+  the front web server to reject HTTP request smuggling or normalize chunk
+  framing into one measured PHP body. It is authorized only
 for a direct HTTPS web-server-to-PHP path; a TLS-terminating proxy requires a
-separately reviewed adapter and must not spoof `HTTPS`. Real Apache/shared-host
-projection and browser evidence remain a separate deployment gate.
+  separately reviewed adapter and must not spoof `HTTPS`. The disposable real
+  Apache 2.4/PHP FastCGI proof confirms the direct profile's canonical request,
+  refusal, normalization, and browser projection without authorizing a hosted
+  installation.
 
 The separate core-only response emitter accepts only an exact closed response
 envelope from the existing fixed core response contract. It rechecks the six
@@ -1378,10 +1382,11 @@ package or deploy server integration for any client.
 
 The non-executing per-client deployment profile is the current core review
 boundary. It accepts only a closed operator packet with a separate client
-database name, canonical HTTPS origin, pinned FrankenPHP/Caddy versions, the
-fixed process-environment ingress-key name, a server-local trusted-origin
-source, attestation-before-PHP route order, and explicit operator-owned key
-rotation. It requires core—not a package or theme—to own response headers and
+database name and canonical HTTPS origin plus either pinned FrankenPHP/Caddy
+attestation facts or pinned Apache/PHP direct-projection facts. Each shape has
+an exact server-local trust source and route order; only the attested profile
+contains the fixed ingress-key name and operator-owned key rotation. It
+requires core—not a package or theme—to own response headers and
 browser-cookie descriptors, preserves the fixed host-only cookie policy, and
 requires configuration, binary, secret, media, and database isolation outside
 the clean starter. Any secret value, request-derived origin/key, version or
@@ -1391,15 +1396,19 @@ does not load the profile, resolve a secret, access a database, or change
 deployment, lifecycle, enablement, response, or client state.
 
 The non-executing deployment-review validator binds a second operator packet
-to that profile hash. It accepts only pinned Caddy/FrankenPHP/TLS/proxy facts,
-artifact hashes proved outside the starter, process-environment
-`RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` and
-`RED_PUBLIC_MUTATION_INGRESS_HMAC_KEY` sources, explicit active-key and
-old-key-revocation evidence, and bounded desktop/mobile browser results. It
+to that profile hash. The attested form accepts pinned Caddy/FrankenPHP/TLS/
+proxy facts, artifact hashes, process-environment trusted-origin/HMAC sources,
+and rotation evidence. The direct form accepts pinned Apache/PHP/SAPI/TLS
+facts, hashes of the Apache configuration, runtime, certificate chain, and
+request-projection report, plus explicit direct-HTTPS and ignored Host/
+forwarding evidence. Both require artifacts outside the starter and bounded
+desktop/mobile browser results. It
 never accepts a secret value, reads a deployment file, opens a browser session,
 or changes a response, cookie, database, package, lifecycle, or client state.
 The packet must keep the dispatcher unlinked and must prove zero client-state
-change; actual per-client deployment and browser capture remain required.
+change. The local Apache proof can build and validate this direct packet, but
+actual hosted per-client deployment and browser capture remain separately
+required.
 
 The installation-shaped HTTPS rehearsal is deliberately separate from that
 pure validator. It creates a short-lived localhost certificate and two
