@@ -323,7 +323,8 @@ if (!function_exists('red_addon_admin_tool_action_execution_storage_available'))
                          AND COLUMN_TYPE='varchar(160)'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='TargetRecordID'
-                         AND COLUMN_TYPE='int unsigned'
+                         AND DATA_TYPE='int'
+                         AND COLUMN_TYPE LIKE 'int% unsigned'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='PlanSHA256'
                          AND COLUMN_TYPE='char(64)'
@@ -338,7 +339,8 @@ if (!function_exists('red_addon_admin_tool_action_execution_storage_available'))
                          AND COLUMN_TYPE='char(64)'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='ActorAdminRecordID'
-                         AND COLUMN_TYPE='int unsigned'
+                         AND DATA_TYPE='int'
+                         AND COLUMN_TYPE LIKE 'int% unsigned'
                          AND IS_NULLABLE='NO')=1
                        AND SUM(COLUMN_NAME='CompletedAt'
                          AND DATA_TYPE='timestamp'

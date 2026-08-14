@@ -25,7 +25,8 @@ if (!function_exists('red_addon_component_persistence_storage_available')) {
                    AND TABLE_NAME='RED_Articles'
                    AND (
                      (COLUMN_NAME='RecordID'
-                       AND COLUMN_TYPE='int unsigned'
+                       AND DATA_TYPE='int'
+                       AND COLUMN_TYPE LIKE 'int% unsigned'
                        AND IS_NULLABLE='NO')
                      OR
                      (COLUMN_NAME='Component'

@@ -181,6 +181,43 @@ function red_addon_setting_storage_test_manifest($permission)
     ];
 }
 
+$unsignedMetadataSources = '';
+foreach ([
+    'includes/addon_setting_storage_helpers.php',
+    'includes/addon_component_persistence_helpers.php',
+    'includes/addon_admin_tool_action_execution_helpers.php',
+    'includes/addon_public_mutation_rate_limit_helpers.php',
+    'includes/addon_public_mutation_subject_helpers.php',
+    'includes/addon_public_mutation_execution_helpers.php',
+    'includes/addon_public_mutation_idempotency_helpers.php',
+] as $relativePath) {
+    $source = file_get_contents($projectRoot . '/' . $relativePath);
+    red_addon_setting_storage_test_assert(
+        is_string($source),
+        'unsigned metadata contract source is readable: ' . $relativePath
+    );
+    $unsignedMetadataSources .= (string) $source;
+}
+red_addon_setting_storage_test_assert(
+    preg_match_all(
+        "/DATA_TYPE='int'\\s+AND COLUMN_TYPE LIKE 'int% unsigned'/",
+        $unsignedMetadataSources
+    ) === 12
+        && preg_match_all(
+            "/DATA_TYPE='smallint'\\s+AND COLUMN_TYPE LIKE 'smallint% unsigned'/",
+            $unsignedMetadataSources
+        ) === 1
+        && preg_match_all(
+            "/DATA_TYPE='bigint'\\s+AND COLUMN_TYPE LIKE 'bigint% unsigned'/",
+            $unsignedMetadataSources
+        ) === 1
+        && preg_match(
+            "/COLUMN_TYPE='(?:smallint|int|bigint) unsigned'/",
+            $unsignedMetadataSources
+        ) === 0,
+    'unsigned schema guards accept legacy display widths without weakening type checks'
+);
+
 red_addon_setting_storage_test_cleanup(
     $connection,
     $packageId,

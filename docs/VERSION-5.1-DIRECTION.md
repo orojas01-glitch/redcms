@@ -1357,6 +1357,15 @@ request bootstrap excludes the disabled package.
     documentation use the 5.1 identity. No hosted installation, database,
     package lifecycle, dispatcher, or client state changed in this gate.
 
+98. The approved basic `demo.red-sphere.com` deployment installed Store Lite
+    `0.1.31` disabled with its ten migrations and no package content. The first
+    hosted setting-storage check then failed closed because MySQL 5.7 reports
+    unsigned integer display widths in `COLUMN_TYPE`, unlike the exact MySQL 8
+    spelling used by seven core storage guards. The active compatibility patch
+    preserves exact integer type and unsignedness while accepting either
+    server representation. Hosted settings and enablement remain paused until
+    the portable guards pass core acceptance and are merged and deployed.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

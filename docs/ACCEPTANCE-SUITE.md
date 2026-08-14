@@ -651,7 +651,7 @@ contract, and 20-assertion public-route contract, imported the 32-table installe
 applied all 45 migrations to the expected 34-table schema with zero pending or
 drifted files, and completed the 16-assertion Owner authorization,
 11-assertion component-editor package-permission authorization,
-31-assertion add-on setting storage/editor, authorization preflight, atomic
+39-assertion add-on setting storage/editor, authorization preflight, atomic
 writer, and secret replacement,
 13-assertion permission-scoped add-on setting read model,
 18-assertion permission-scoped administrator-tool dispatch,

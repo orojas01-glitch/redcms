@@ -836,6 +836,14 @@ The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
 the completed foundation, current reviewed slice, remaining Store Lite gates,
 and later optional vertical packages without changing their scope.
 
+The approved basic `demo.red-sphere.com` deployment installed Store Lite
+`0.1.31` in the disabled state with all ten package migrations applied and no
+package content. Hosted MySQL 5.7 then exposed core schema guards that depended
+on display-width text such as `int unsigned` instead of the equivalent
+`int(10) unsigned`. The active compatibility gate makes all affected unsigned
+integer checks semantic and portable before any hosted setting is written or
+the package is enabled. No unrelated client or database is in scope.
+
 ### Version 5.1 Compatibility Work
 
 - Site-wide Analytics, Tag Manager, Jotform, consent, and similar client
