@@ -111,6 +111,7 @@ for include_file in \
     addon_public_mutation_route_helpers.php \
     addon_public_mutation_server_request_helpers.php \
     addon_public_mutation_frankenphp_ingress_helpers.php \
+    addon_public_mutation_direct_ingress_helpers.php \
     addon_public_mutation_form_helpers.php \
     addon_public_mutation_rate_limit_helpers.php \
     addon_public_mutation_idempotency_helpers.php \
