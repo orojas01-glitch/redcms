@@ -4,7 +4,7 @@
  */
 
 if (!defined('RED_CMS_VERSION')) {
-    define('RED_CMS_VERSION', '5.0');
+    define('RED_CMS_VERSION', '5.1.0');
 }
 
 require_once __DIR__ . '/admin_addon_authorization_helpers.php';

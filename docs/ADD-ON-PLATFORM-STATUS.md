@@ -1,7 +1,8 @@
 # RED-CMS 5.1 And Store Lite Progress
 
 Last updated: 2026-08-14 after the shared-host direct-PHP public-mutation
-compatibility gate and before the separately approved hosted demo deployment.
+compatibility gate and the RED-CMS 5.1 runtime identity gate, before the
+separately approved hosted demo deployment.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -78,8 +79,8 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Release C3, the direct-PHP adapter, and its real Apache/FastCGI local deployment proof are complete. The basic hosted demo deployment is the current gate. |
-| What just finished? | Apache 2.4/PHP FastCGI HTTPS projection, refusal and normalization cases, desktop/mobile browser evidence, and the non-secret direct-profile deployment review passed without opening a database or loading Store Lite. |
+| Where are we? | Release C3, the direct-PHP adapter, its real Apache/FastCGI local deployment proof, and the RED-CMS 5.1 runtime identity gate are complete. The basic hosted demo deployment is the current gate. |
+| What just finished? | Hosted preflight found and closed the final release-identity mismatch: normal non-executing discovery now identifies core as 5.1.0 and accepts trusted packages requiring `>=5.1 <6.0` without a test-only version override. No hosted installation changed. |
 | What is active now? | A separately approved deployment and hosted administrator/public verification limited to `demo.red-sphere.com`. |
 | What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove simple or variable products and place a pickup or delivery order with pay on receipt. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |

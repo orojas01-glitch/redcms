@@ -70,6 +70,12 @@ The current objective, completed gates, active phase, and remaining Store Lite
 launch path are shown in
 [`ADD-ON-PLATFORM-STATUS.md`](ADD-ON-PLATFORM-STATUS.md).
 
+The hosted Store Lite preflight exposed and closed the final core release-
+identity mismatch: runtime bootstrap and install branding now advertise
+RED-CMS 5.1, and the default non-executing manifest path accepts a trusted
+package whose compatibility range begins at 5.1. This gate changes no hosted
+installation or database; deployment and browser verification remain separate.
+
 RED-CMS should support separately installed client capabilities rather than
 bundle every business vertical into the core. The following packages are
 optional future examples, in priority order if separately approved:

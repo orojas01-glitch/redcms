@@ -1348,6 +1348,15 @@ request bootstrap excludes the disabled package.
     runtime. The separately approved hosted deployment and verification remain
     next; `demo.red-sphere.com` was not changed by this gate.
 
+97. Promoted the runtime release identity from 5.0 to 5.1.0 after the hosted
+    Store Lite preflight proved that normal non-executing discovery correctly
+    refused the package's `>=5.1 <6.0` compatibility range. The trust fixture
+    now proves default discovery accepts a trusted 5.1 package without the
+    test-only version override while still never executing package PHP. The
+    administrator signature, web manifest, clean-install heading, and release
+    documentation use the 5.1 identity. No hosted installation, database,
+    package lifecycle, dispatcher, or client state changed in this gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

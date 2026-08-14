@@ -130,7 +130,7 @@ if (is_string($redPublicMutationMethod)
 /**
  * Red Sphere - Unique php CMS
  * @version: 1.0 - (2012/02/25)
- * @version: 5.0 - (2026/07/24)
+ * @version: 5.1 - (2026/08/14)
  * @requires linux v1.2.2 or later 
  * @author Oscar Rojas
  * Examples and documentation at: http://red-sphere.tv/documentation/ 

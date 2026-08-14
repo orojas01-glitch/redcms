@@ -1,4 +1,4 @@
-# RED-CMS 5.0 Clean Installation
+# RED-CMS 5.1 Clean Installation
 
 This package installs RED-CMS with the portable `starter-reference` theme and
 generic starter content. It does not contain a client theme, client media, or a
