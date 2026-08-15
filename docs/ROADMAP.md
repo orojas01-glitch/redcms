@@ -53,10 +53,12 @@ hosted checkout, server-verified events, credentials, webhooks, replay,
 refund/reversal handling, and client isolation in a separately versioned
 adapter rather than the core or Store Lite base package. Gate P1 selects Stripe
 Checkout's hosted full-page flow as the first provisional USD hosted-card
-candidate without performing payment integration. The non-network fixture and
-sandbox are later approved gates; see
+candidate without performing payment integration. The completed non-network
+fixture and later gated sandbox are separate gates; see
 [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md) and
-[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md).
+[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md), including
+the fixture boundary in
+[`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 

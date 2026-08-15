@@ -78,9 +78,11 @@ access, a Stripe SDK, keys, a provider account, or a payment:
   replay, refund, reversal, configuration, and client-boundary mismatches with
   no partial transition.
 
-P2 must not hard-code a secret, send a request to Stripe, add a public route,
-persist a payment attempt, or alter the demo. It is a fixture-level contract
-gate, not an integration.
+P2 completed this fixture-level contract without hard-coding a secret, sending
+a request to Stripe, adding a public route, persisting a payment attempt, or
+altering the demo. Its exact boundary and refusal coverage are recorded in
+[`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md). It remains a
+fixture, not an integration.
 
 ## Later Sandbox And Deployment Gates
 

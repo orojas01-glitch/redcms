@@ -156,10 +156,13 @@ or fail closed and recover through a reviewed package migration path.
    flow is the first candidate for a provisional USD online-card pilot. The
    decision remains reversible and does not choose a provider for another
    client; see [`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md).
-3. **P2 — non-network adapter fixture:** prove the closed checkout request,
-   opaque response, event normalization, replay refusal, amount/currency
-   mismatch refusal, refund, reversal, and browser-return non-authority using
-   no real provider account or payment.
+3. **P2 — complete non-network adapter fixture:** the CLI-only Stripe Checkout
+   contract fixture proves the closed checkout request, opaque response,
+   raw-body verification boundary, event normalization, replay refusal,
+   amount/currency mismatch refusal, refund, reversal, and browser-return
+   non-authority with no provider account, credential, SDK, request, payment,
+   database, or package. See
+   [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 4. **P3 — sandbox integration:** configure one disposable client-only adapter
    environment; prove signature verification, server-side provider lookup when
    required, idempotency, secret isolation, disable/re-enable behavior,
