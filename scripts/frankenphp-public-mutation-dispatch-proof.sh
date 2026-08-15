@@ -176,8 +176,8 @@ docker exec -i "$DB_CONTAINER" mysql \
 shopt -s nullglob
 MIGRATIONS=("$PROJECT_ROOT"/database/migrations/*.sql)
 shopt -u nullglob
-if [[ "${#MIGRATIONS[@]}" -ne 45 ]]; then
-    echo "Expected 45 migrations, found ${#MIGRATIONS[@]}." >&2
+if [[ "${#MIGRATIONS[@]}" -ne 46 ]]; then
+    echo "Expected 46 migrations, found ${#MIGRATIONS[@]}." >&2
     exit 1
 fi
 for migration in "${MIGRATIONS[@]}"; do

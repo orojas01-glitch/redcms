@@ -499,6 +499,14 @@ request bootstrap excludes the disabled package.
     administrator grant. Do not infer package access from Owner or lifecycle
     grants, add a grant-management UI, execute package code, write package
     state, or change activation eligibility.
+16a. Completed the first operational package-permission workflow as a
+    server-local command rather than a web UI. It discovers only validated
+    manifest permissions without loading package PHP, requires a fresh Owner
+    plus exact database, actor, target, and dry-run plan confirmations, and
+    atomically grants or revokes one permission with one bounded audit fact.
+    It does not let a package grant itself, infer access from lifecycle
+    authority, change package lifecycle or settings, or cross a client
+    database boundary.
 17. Completed component data-loader prerequisite: require an enabled package
     to register exactly one loader for each declared editor, then enforce the
     exact view grant and current placement/runtime owner before invocation.
@@ -1012,7 +1020,7 @@ request bootstrap excludes the disabled package.
 74. Completed an isolated Store Lite existing-product browser rehearsal without
     changing normal package enablement. The runner stages the clean core and
     separately distributed Store Lite 0.1.8 package in a temporary project,
-    applies all 45 core migrations and the package migration inventory to one
+    applies all 46 core migrations and the package migration inventory to one
     fresh schema, records an acceptance-only enabled registry fixture, and
     grants only `store.products.manage` to a disposable administrator. Chrome
     at 1280x900 and 390x844 follows the visible Tools -> Products -> Edit path,

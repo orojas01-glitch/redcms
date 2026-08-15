@@ -412,6 +412,40 @@ enable command. `addons.disable` gates the dry-run-first atomic disable
 command. `addons.upgrade` gates the dry-run-first disabled-package upgrade and
 explicit recovery command. The uninstall and purge grants remain dormant.
 
+### Add-On Package Permission Administration
+
+Migration `2026-08-14-addon-package-permission-audit.sql` adds an empty
+`RED_Addon_Permission_Activity_Log` to each client database. It records only a
+successful grant or revoke event, validated package identity, the exact
+manifest permission, actor and target administrator ids, result, and
+timestamp. It stores no credential, request body, package setting, or package
+code.
+
+Package access is managed by a server-local, dry-run-first command:
+
+```bash
+php scripts/admin-addon-permission.php \
+  --package=PACKAGE_ID \
+  --target-admin=TARGET_ADMIN_ID \
+  --actor-owner=OWNER_ADMIN_ID \
+  --permission=PACKAGE_PERMISSION \
+  --grant \
+  --confirm-database=CLIENT_DATABASE \
+  --confirm-target-username=EXACT_TARGET_USERNAME \
+  --confirm-actor-username=EXACT_OWNER_USERNAME
+```
+
+The command discovers an integrity-valid manifest without loading package PHP.
+It accepts only an exactly declared permission, rechecks the Owner from the
+current client database, and prints a deterministic plan SHA-256 without
+writing. Apply requires repeating the exact command with `--apply` and
+`--expected-plan=SHA256`. The runner locks the current actor, target, role, and
+capability state, refuses stale or repeated plans, and commits the capability
+change and its permission-specific audit fact in one transaction. `--revoke`
+uses the same boundary, and the next package authorization decision sees the
+revocation immediately. This command does not change package lifecycle,
+settings, content, or any other client database.
+
 ### Add-On Registry Reconciliation
 
 Migration `2026-07-26-addon-registry-foundation.sql` adds empty
