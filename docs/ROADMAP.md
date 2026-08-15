@@ -837,21 +837,34 @@ gate is now complete locally: `direct_php` remains explicit while
 real Apache 2.4/PHP FastCGI HTTPS run proves the closed projection, Apache
 chunk normalization, refusal cases, desktop/mobile browser behavior, and
 matching non-secret deployment review. It opened no database, linked no
-dispatcher, loaded no package, or changed client state. A separately approved
-basic `demo.red-sphere.com` deployment and hosted verification are now the
-active milestone before Store Lite is enabled there.
+dispatcher, loaded no package, or changed client state. That prerequisite is
+now followed by the separately approved hosted deployment and closeout.
 
 The maintained [add-on platform status map](ADD-ON-PLATFORM-STATUS.md) shows
-the completed foundation, current reviewed slice, remaining Store Lite gates,
-and later optional vertical packages without changing their scope.
+the completed foundation, achieved Store Lite basic-demo target, and later
+optional payment or vertical-package gates without changing their scope.
 
 The approved basic `demo.red-sphere.com` deployment installed Store Lite
 `0.1.31` in the disabled state with all ten package migrations applied and no
 package content. Hosted MySQL 5.7 then exposed core schema guards that depended
 on display-width text such as `int unsigned` instead of the equivalent
-`int(10) unsigned`. The active compatibility gate makes all affected unsigned
-integer checks semantic and portable before any hosted setting is written or
-the package is enabled. No unrelated client or database is in scope.
+`int(10) unsigned`. Pull requests #116 and #118 made the affected storage and
+permission-audit checks semantic and portable. Pull requests #117 and #119
+completed the Owner package-grant path and polished the installed add-on
+administrator surfaces. Store Lite was then enabled only for the demo and
+populated with nine fictional dog products, including one exact nine-choice
+Size/Color scarf. Product and Cart authoring, Products and Orders tools, the
+public catalog, cart, responsive Checkout route, pickup/delivery, and pay on
+receipt are verified without touching another client installation or database.
+
+Pull request #120 replaced the starter Instructions article with the clean-core
+RED-CMS 5.1 guide and explicitly keeps Store Lite and all business packages
+separately installed per client. The Store Lite v1 basic-demo target is now
+closed. No new hosted order was submitted during the read-only closeout; real
+order creation and immutable snapshots remain covered by the isolated
+supported-server browser gate. Hosted payment adapters remain a separate later
+milestone. See
+[`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
 
 ### Version 5.1 Compatibility Work
 

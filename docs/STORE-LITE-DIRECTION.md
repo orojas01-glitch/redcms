@@ -1,15 +1,12 @@
 # RED-CMS Store Lite Direction
 
-Status: the separately distributed package now implements catalog migrations,
-normalization, persistence, product administration, core-owned Add/Edit/Save
-bridges, Product placement storage, and the enabled runtime Product component.
-The core-owned Add component and explicit Homepage placement workflow pass
-isolated desktop/mobile rehearsal. The server-authoritative cart-line resolver,
-package-owned cart persistence, and Gate 2D1 core atomic-runner binding now pass
-their package, disposable-database, replay/rollback, and audit proofs. Gate 2D2
-browser Add-to-cart integration and the read-only Cart component now pass their
-supported-server desktop/mobile proof. Quantity update, line removal, and orders
-remain later.
+Status: the separately distributed Store Lite 0.1.31 package is deployed only
+to the isolated `demo.red-sphere.com` RED-CMS 5.1.0 installation. The hosted
+catalog, simple and bounded-variable products, Product and Cart placement,
+Add-to-cart, quantity update, line removal, guest checkout, pickup and delivery,
+pay on receipt, and Products/Orders administrator surfaces are verified. The
+Store Lite v1 basic-demo target is achieved; hosted payment adapters remain a
+separate later gate.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -719,9 +716,17 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    databases with distinct USD/pickup and COP/delivery settings and products,
    proves mutations and lifecycle changes cannot cross between them, preserves
    the configured primary by full database hash, and removes both databases,
-   grants, and the staged project. The next step is a separately reviewed basic
-   `demo.red-sphere.com` deployment; this evidence does not deploy it.
-36. Add a separately reviewed hosted-payment adapter only after the
+   grants, and the staged project. This evidence did not deploy the hosted demo.
+36. Completed the separately reviewed basic `demo.red-sphere.com` deployment
+   and closeout. Store Lite 0.1.31 remains a client-local optional package;
+   RED-CMS 5.1.0 exposes nine hosted products, bounded variant selection,
+   Product and Cart placement, Products and Orders tools, an empty/current cart,
+   pickup and delivery checkout, and pay on receipt. Desktop and 390-pixel
+   inspection produced no browser warnings or errors. No new hosted order was
+   submitted during closeout; real order creation remains covered by the
+   isolated supported-server acceptance gate. See
+   [`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
+37. Add a separately reviewed hosted-payment adapter only after the
    provider-neutral event contract passes.
 
 Events Calendar remains the second independent vertical proof. Store Lite
