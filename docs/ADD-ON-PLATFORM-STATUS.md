@@ -79,7 +79,7 @@ flowchart TD
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
 | What just finished? | The hosted demo exposes nine products, the exact nine-choice Size/Color scarf, Product and Cart authoring, Products and Orders tools, an empty/current cart, pickup and delivery checkout, and pay on receipt. RED-CMS 5.1.0 and the clean-core Instructions boundary are visible in the authenticated workspace. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released and Payment Adapter Gate P0 is complete. Provider selection and sandbox integration remain separately approved gates. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released; Payment Adapter Gates P0 and P1 are complete. The first candidate is Stripe Checkout for a provisional USD hosted-card pilot. The no-network fixture and sandbox integration remain separately approved gates. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
 | What remains after this gate? | Nothing required for the basic-demo target. Hosted PayPal/card adapters remain later provider-neutral work and are not implied by this closeout. |
@@ -94,22 +94,25 @@ recorded in
 ```mermaid
 flowchart LR
     P0["COMPLETE<br/>P0. Provider-neutral contract<br/>events, secrets, replay, refunds"]
-    P1["GATED<br/>P1. Provider selection<br/>client country, currency, sandbox"]
-    P2["GATED<br/>P2. Adapter fixture and sandbox<br/>no live charge"]
-    P3["GATED<br/>P3. Client deployment review<br/>explicit production approval"]
+    P1["COMPLETE<br/>P1. Stripe Checkout candidate<br/>USD hosted-card pilot"]
+    P2["GATED<br/>P2. Non-network adapter fixture<br/>no provider account or charge"]
+    P3["GATED<br/>P3. Sandbox integration<br/>client-local test credentials"]
+    P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> P3
+    P0 --> P1 --> P2 --> P3 --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0 complete;
-    class P1,P2,P3 gated;
+    class P0,P1 complete;
+    class P2,P3,P4 gated;
 ```
 
-Gate P0 defines no provider, credentials, webhook, checkout, charge, or order
-change. Read the contract in
-[`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md) before proposing
-P1.
+Gates P0 and P1 define no credentials, webhook, checkout, charge, or order
+change. Read the provider-neutral contract in
+[`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md) and the
+reversible USD pilot decision in
+[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md) before
+proposing P2.
 
 ## Status rule
 

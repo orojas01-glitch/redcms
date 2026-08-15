@@ -1,9 +1,12 @@
 # Store Lite Payment Adapter Direction
 
-Status: Gate P0 is complete as a provider-neutral contract. No payment adapter,
-provider account, provider credential, webhook, outbound payment request,
-customer charge, payment migration, or payment state change is implemented by
-this document.
+Status: Gate P0 is complete as a provider-neutral contract. Gate P1 selects
+Stripe Checkout's hosted full-page flow as the first USD hosted-card adapter
+candidate, recorded in
+[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md). No payment
+adapter, provider account, provider credential, webhook, outbound payment
+request, customer charge, payment migration, or payment state change is
+implemented by these documents.
 
 ## Purpose
 
@@ -149,9 +152,10 @@ or fail closed and recover through a reviewed package migration path.
 
 1. **P0 — complete:** this provider-neutral contract, threat boundary, state
    rules, and clean-starter exclusion are reviewed.
-2. **P1 — provider decision:** compare the client's actual country, currency,
-   hosted-checkout, refund, payout, sandbox, current-fee, and policy needs;
-   approve one adapter package and exact provider capabilities.
+2. **P1 — complete provider decision:** Stripe Checkout's hosted full-page
+   flow is the first candidate for a provisional USD online-card pilot. The
+   decision remains reversible and does not choose a provider for another
+   client; see [`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md).
 3. **P2 — non-network adapter fixture:** prove the closed checkout request,
    opaque response, event normalization, replay refusal, amount/currency
    mismatch refusal, refund, reversal, and browser-return non-authority using
