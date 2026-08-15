@@ -1,10 +1,11 @@
 # RED-CMS 5.1 Direction
 
-Status: the RED-CMS 5.1.0 release candidate passed its full disposable
-current-schema acceptance gate on 2026-08-15. The formal Git tag and GitHub
-release remain pending. Store Lite 0.1.31 completed the optional add-on model's
-basic-demo proof in its isolated demo installation and remains outside the
-clean starter. Per-page SEO compatibility, including the
+Status: RED-CMS 5.1.0 was released on 2026-08-15 as
+[`v5.1.0`](https://github.com/orojas01-glitch/redcms/releases/tag/v5.1.0)
+after its full disposable current-schema acceptance gate passed. Store Lite
+0.1.31 completed the optional add-on model's basic-demo proof in its isolated
+demo installation and remains outside the clean starter. Per-page SEO
+compatibility, including the
 approved constrained JSON-LD core, non-executing add-on trust validation,
 persisted Owner authorization, per-client registry/migration-ledger storage,
 read-only reconciliation, guarded server-local installation into a disabled

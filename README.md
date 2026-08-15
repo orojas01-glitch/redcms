@@ -6,12 +6,12 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
-Release-candidate verification for RED-CMS 5.1.0 passed on 2026-08-15. The
-clean installer, all 46 migrations, normalized schema, canonical routes,
+RED-CMS 5.1.0 was formally released on 2026-08-15 as
+[`v5.1.0`](https://github.com/orojas01-glitch/redcms/releases/tag/v5.1.0).
+The clean installer, all 46 migrations, normalized schema, canonical routes,
 add-on and CMS lifecycles, forced rollback, runtime log, and exact disposable
 database/grant cleanup passed against a fresh temporary current-schema
-baseline. The formal `v5.1.0` Git tag and GitHub release have not been created
-yet. See [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md).
+baseline. See [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md).
 
 The separately distributed Store Lite 0.1.31 basic-demo proof is complete on
 its isolated demo installation. Store Lite remains optional and is not bundled
