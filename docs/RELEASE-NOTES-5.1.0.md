@@ -1,7 +1,7 @@
 # RED-CMS 5.1.0 Release Notes
 
-Status: release candidate verified on 2026-08-15. The formal Git tag and
-GitHub release have not been created yet.
+Status: released on 2026-08-15 as
+[`v5.1.0`](https://github.com/orojas01-glitch/redcms/releases/tag/v5.1.0).
 
 ## Release Summary
 
@@ -92,13 +92,15 @@ The retained historical local starter remained unchanged at 20 tables and
 four Articles. No hosted installation or client database was used by this
 release-candidate run.
 
-## Formal Release Gate
+## Formal Release Record
 
-Before calling 5.1.0 formally released:
+The completed publication gate:
 
-1. merge the reviewed release-candidate documentation and acceptance-marker
-   correction;
-2. confirm `main` is clean and GitHub checks pass;
-3. create the signed or annotated `v5.1.0` tag at the reviewed merge commit;
-4. create the GitHub 5.1.0 release from these notes; and
-5. independently verify the published tag and release assets.
+1. merged the reviewed release-candidate documentation and acceptance-marker
+   correction through pull request #122;
+2. confirmed a clean `main` and the candidate's exact merge tree;
+3. created annotated tag `v5.1.0` at merge commit
+   `15be9449a60fa9232a71f2f4a8787ddc93e1204b`;
+4. published the GitHub 5.1.0 release from these notes; and
+5. independently verified the published tag, release record, and authenticated
+   generated source archives.
