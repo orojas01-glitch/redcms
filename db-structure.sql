@@ -1037,4 +1037,66 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+--
+-- RED-CMS 5.1 clean-core Instructions Article
+--
+-- Keep the installed guide focused on the portable CMS. Store Lite and every
+-- other client package remain separately installed add-ons.
+UPDATE `RED_Articles`
+SET `ShortDesc` = '<p>Install and operate the clean RED-CMS 5.1 core: prepare the database, sign in, create pages, place content, manage navigation and settings, and update safely. Store Lite and other optional add-ons are not part of this guide.</p>',
+    `LongDesc` = '<h1 id="guide-overview">RED-CMS 5.1 Core Guide</h1>
+<p>RED-CMS 5.1 is a lightweight PHP and MySQL content management system for structured, template-driven websites. This guide covers the portable clean installation and the standard administrator workspace.</p>
+<p><strong>Scope:</strong> a new RED-CMS 5.1 installation contains no store. Store Lite, products, carts, checkout, payment, and every business-specific feature are separately installed per-client add-ons. Complete the core installation and verify it first.</p>
+<h2 id="contents">In this guide</h2>
+<ul>
+<li><a href="#guide-install">Install the clean core</a></li>
+<li><a href="#guide-first-login">Sign in and orient yourself</a></li>
+<li><a href="#guide-pages">Create pages and add content</a></li>
+<li><a href="#guide-placement">Arrange content on a layout</a></li>
+<li><a href="#guide-structure">Manage structure and navigation</a></li>
+<li><a href="#guide-move-content">Move existing content safely</a></li>
+<li><a href="#guide-advanced">Maintain the site safely</a></li>
+</ul>
+<hr />
+<h2 id="guide-install">1. Install the clean core</h2>
+<p>Start with an empty database and a database user limited to that database. Import <strong>db-structure.sql</strong>, then copy <strong>includes/config.local.example.php</strong> to <strong>includes/config.local.php</strong>. Enter the database host, port, name, user, and password in that local file.</p>
+<ol>
+<li>Use PHP 8.2 or newer with mysqli, MySQL 8 or a compatible MariaDB release, and a web server whose document root is the project directory.</li>
+<li>Run the pending database migrations described in the Database Migrations documentation.</li>
+<li>Replace the disabled starter administrator password hashes before the first login. Do not enable a shared default password.</li>
+<li>Serve the project, open <strong>/admin/</strong>, and confirm the correct site URL, administrator identity, email settings, upload-directory permissions, and HTTPS configuration.</li>
+</ol>
+<p>Keep <strong>includes/config.local.php</strong> outside Git and out of release archives. Keep uploaded media outside the clean starter release. Leave legacy mail and PayPal settings empty unless that compatibility path has been deliberately configured for this installation.</p>
+<h2 id="guide-first-login">2. Sign in and orient yourself</h2>
+<p>After you sign in, the administrator workspace appears over the public site. The page bar identifies the current route, the active layout, and its editable positions. Open the layout map before placing content, especially when you are working on a new page.</p>
+<p><img src="../admin/images/red-cms-instructions-manual_files/v51-workspace.jpg" alt="RED-CMS 5.1 content workspace with layout and editable positions" width="1440" height="850" border="0" /></p>
+<p><strong>Figure 1.</strong> The clean 5.1 workspace: current page, layout controls, Edit Content, Add Content, Tools, and editable page positions.</p>
+<h2 id="guide-pages">3. Create pages and add content</h2>
+<p>RED-CMS organizes the website as <strong>Sections</strong>, optional <strong>Categories</strong> and <strong>Subcategories</strong>, and <strong>Articles</strong>. An Article can be a page and can also hold or receive placed content. Create the parent path first, then create the Article with a clear title, an alias, the correct layout, and an active state when it is ready to appear publicly.</p>
+<p>Use <strong>Add Content</strong> from the page you are editing. The available cards reflect the current page and your permissions. The clean core includes standard CMS content such as Articles, Form Builder, FTP, Other, Video, and supported Gallery tools. Product, Cart, Checkout, and store controls are not part of the core workspace.</p>
+<p><img src="../admin/images/red-cms-instructions-manual_files/v51-add-content.jpg" alt="RED-CMS 5.1 Add Content panel showing core content types" width="1440" height="850" border="0" /></p>
+<p><strong>Figure 2.</strong> Add only the core content type needed for the current page. The shown clean installation has no store component.</p>
+<h2 id="guide-placement">4. Arrange content on a layout</h2>
+<p>Open <strong>Edit Content</strong> to see every available layout position and the content already assigned to it. Drag a card between positions on desktop, or use its Arrange menu on touch and keyboard devices. Use <strong>Hidden content</strong> for work that must remain out of the public page until you are ready to place it.</p>
+<p>Every layout has its own positions. Change the layout only when the new structure supports the content you intend to show, then check the public page on desktop and mobile before you finish.</p>
+<h2 id="guide-structure">5. Manage structure and navigation</h2>
+<p>Use the <strong>Sections</strong>, <strong>Categories</strong>, and <strong>Subcategories</strong> panels to manage the site hierarchy. Each record has a title, layout, active state, and related page settings. Keep the hierarchy shallow and intentional because it determines the public path and the layout available to that part of the site.</p>
+<p><img src="../admin/images/red-cms-instructions-manual_files/v51-site-structure.jpg" alt="RED-CMS 5.1 Sections panel with active layouts and edit controls" width="1440" height="850" border="0" /></p>
+<p><strong>Figure 3.</strong> Sections are the top level of the public site structure. Categories and Subcategories refine that path only when needed.</p>
+<p>Use <strong>Top Navigation</strong> to edit the labels, order, and links visitors see. A public page can remain outside navigation when it should be reached only by a direct link.</p>
+<h2 id="guide-move-content">6. Move existing content safely</h2>
+<p>Use <strong>Tools &gt; Move</strong> when a component belongs somewhere else. Select the content, choose the destination path, then choose a real position in that destination layout. The tool moves placement; it does not duplicate the content. Existing order values and unrelated placements remain intact.</p>
+<p><img src="../admin/images/red-cms-instructions-manual_files/v51-move-content.jpg" alt="RED-CMS 5.1 Move content tool with content selection and destination builder" width="1440" height="950" border="0" /></p>
+<p><strong>Figure 4.</strong> Move Content keeps the selected component and its content together while changing only the placement you choose.</p>
+<h2 id="guide-advanced">7. Maintain the site safely</h2>
+<p>Use <strong>Advanced</strong> only for shared settings: administrator users, themes, Layout Builder, website identity, header and footer content, and Website CSS. Permissions determine which controls you can use. Preview public-facing changes before they are published.</p>
+<p>Before any release, migration, or major content cleanup, back up the database and uploaded media. Test the backup and migrations against a disposable restored copy first. Never import <strong>db-structure.sql</strong> over an existing site.</p>
+<p>For an ordinary content update, check the public route, layout, navigation, images, and mobile presentation after saving. Use content version history where it is available instead of manually rebuilding an earlier revision.</p>
+<h2 id="guide-addons">Optional add-ons</h2>
+<p>This page intentionally stops at the raw RED-CMS 5.1 core. When a client needs Store Lite or another business feature, install that separately for that client only, using its reviewed package and its own backup, migration, permission, and verification procedure.</p>'
+WHERE `RecordID` = 89196971
+  AND `Title` = 'Instructions'
+  AND `Component` = 'Article'
+  AND `Alias` = 'instructions';
+
 -- Dump completed

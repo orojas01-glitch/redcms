@@ -45,12 +45,7 @@ function red_theme_administration_preview_test_rows()
         '#|question=|name=username|type=textfield|required=true|displayname=Username:|initialvalue=;' . "\r\n" .
         '#|question=|name=password|type=password|required=true|displayname=Password:|initialvalue=;' . "\r\n" .
         '#|question=|name=Submit|type=button|displayname=submit';
-    $instructionsSummary =
-        "<p>RED-CMS&trade; is an easy to use Content Management System.</p>\r\n" .
-        "<ul>\r\n" .
-        "<li><a href=\"instructions#interface_guidelines\">Interface Guidelines</a></li>\r\n" .
-        "<li><a href=\"instructions#advanced\">Advanced Settings</a></li>\r\n" .
-        '</ul>';
+    $instructionsSummary = '<p>Install and operate the clean RED-CMS 5.1 core: prepare the database, sign in, create pages, place content, manage navigation and settings, and update safely. Store Lite and other optional add-ons are not part of this guide.</p>';
 
     return [
         'section' => [
@@ -268,8 +263,8 @@ try {
         'two Administration fixture-row renders are byte-for-byte deterministic'
     );
     red_theme_administration_preview_test_assert(
-        $first['bytes'] === 13539
-            && $first['sha256'] === '538feed727c73e64ce91275bfba7f7ab34c7cd0e59c178debcc17f5711f30ed0',
+        $first['bytes'] === 13685
+            && $first['sha256'] === '089e4aac3d7978dc732da6e369c74f2d536626aacc3653ceba37e2368dd0222f',
         'Administration fixture-row output matches the reviewed deterministic artifact'
     );
     red_theme_administration_preview_test_assert(
@@ -315,8 +310,8 @@ try {
     );
     red_theme_administration_preview_test_assert(
         $first['contract']['page']['slots'][2][0]['data']['summary'] ===
-            'RED-CMS™ is an easy to use Content Management System. Interface Guidelines Advanced Settings'
-            && strpos($first['html'], 'instructions#advanced') === false,
+            'Install and operate the clean RED-CMS 5.1 core: prepare the database, sign in, create pages, place content, manage navigation and settings, and update safely. Store Lite and other optional add-ons are not part of this guide.'
+            && strpos($first['html'], 'Store Lite and other optional add-ons are not part of this guide.') !== false,
         'Instructions rich listing input is reduced to bounded plain text'
     );
     red_theme_administration_preview_test_assert(
@@ -370,8 +365,9 @@ try {
     );
     $fixturePreview = red_theme_preview_render('starter-reference', $repositoryRoot);
     red_theme_administration_preview_test_assert(
-        $fixturePreview['sha256'] === '106c984a77643cb0a8b4f0154a59e0558b1d082ff90267d5cbd7e785bbd02a7d',
-        'the original deterministic fixture output remains byte-for-byte unchanged'
+        $fixturePreview['bytes'] === 19523
+            && $fixturePreview['sha256'] === '984e8464dbbd6d0db1edabcae81023f65e3de31b941f3e569e0c3ede13f93e7e',
+        'the current deterministic fixture output remains byte-for-byte unchanged'
     );
     $runtime = red_theme_runtime_bootstrap('starter-reference', $repositoryRoot);
     red_theme_administration_preview_test_assert(
