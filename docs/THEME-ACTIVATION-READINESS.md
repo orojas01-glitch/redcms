@@ -121,7 +121,7 @@ Production activation capabilities are available and independently gated:
 
 | Dependency | Current evidence | Result |
 | --- | --- | --- |
-| Home Banner | `/images/gallery/layout-02.png`; 410,147 bytes; `770x500`; SHA-256 `24c407995a1f14053866595c4e4ecc88842bf804baa3cf6e87b9a3b9be056458` | Present and confined |
+| Home Banner | `/images/gallery/layout-02.png`; client-local Gallery media | Confined path recorded; intentionally absent from the clean starter, so live preview fails closed until the installation supplies its own reviewed media |
 | Administration Video | Fixed provider reconstructs only `youtube` plus id `pP8VJwjSnqA` into the inert offline contract | Preview representation and provider complete; playback intentionally absent |
 | Instructions body | 7,506 source bytes; SHA-256 `ac05d87a2a7821e13083d66067b1af9e1f4ff131d3133658ba07b2416afd3c36`; sanitized to 497,598 bytes at SHA-256 `913fab88e6440a1c4e84fa612d8be80f52397f6f77de95c176c42a618f716455` | Exact fixed trusted-HTML canary passes |
 | Instructions local media | 4 references; all 4 present; 367,642 bytes; manifest SHA-256 `330c2c4ca83b78522e9d3484430d85fc79e3c11363089fdd23d27efcf0157994`; embedded as bounded JPEG data | Complete fixed preview dependency set |

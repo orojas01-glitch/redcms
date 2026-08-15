@@ -96,7 +96,7 @@ function red_theme_home_preview_test_rows()
             'GalleryTitle' => 'banner test',
             'GalleryType' => 'Banner',
             'ShortDesc' => '',
-            'LongDesc' => 'layout-02.png',
+            'LongDesc' => 'v51-workspace.jpg',
             'Link' => '/administracion/',
             'NewWindow' => '',
         ]],
@@ -271,7 +271,7 @@ try {
         $prepared['fixture']['page']['layout'] === 'index-1'
             && array_keys($prepared['fixture']['page']['slots']) === [1, 2, 3, 4]
             && $prepared['fixture']['page']['slots']['1'][0]['component'] === 'Gallery'
-            && $prepared['fixture']['page']['slots']['1'][0]['data']['items'][0]['image'] === 'layout-02.png'
+            && $prepared['fixture']['page']['slots']['1'][0]['data']['items'][0]['image'] === 'v51-workspace.jpg'
             && $prepared['fixture']['page']['slots']['2'] === []
             && $prepared['fixture']['page']['slots']['3'] === []
             && $prepared['fixture']['page']['slots']['4'] === [],
@@ -291,8 +291,9 @@ try {
         'source report exposes only fixed provenance ids and row counts'
     );
 
-    $first = red_theme_home_preview_render_rows($rows, $repositoryRoot, 0);
-    $second = red_theme_home_preview_render_rows($rows, $repositoryRoot, 0);
+    $fixtureMediaRoot = $repositoryRoot . '/admin/images/red-cms-instructions-manual_files';
+    $first = red_theme_home_preview_render_rows($rows, $repositoryRoot, 0, $fixtureMediaRoot);
+    $second = red_theme_home_preview_render_rows($rows, $repositoryRoot, 0, $fixtureMediaRoot);
     red_theme_home_preview_test_assert(
         $first['html'] === $second['html']
             && $first['sha256'] === $second['sha256']
@@ -310,26 +311,49 @@ try {
         'Home output exposes exactly its own five-read notice and never falls through to other preview copy'
     );
     red_theme_home_preview_test_assert(
-        $first['bytes'] === 558241
-            && $first['sha256'] === 'f790b6eedf0e93c2a726ddbcea6a11d3109e1fead7ba479badd4c2c3bd56d223',
-        'Home output matches the reviewed exact notice-copy checkpoint'
+        $first['bytes'] === 129018
+            && $first['sha256'] === 'df5ed28bd8e122785dda335792353bdda19b55c1e4d8a0cd56317bec9c2da15f',
+        'Home output matches the reviewed portable-fixture checkpoint'
     );
     red_theme_home_preview_test_assert(
-        strpos($first['html'], 'data:image/png;base64,') !== false
+        strpos($first['html'], 'data:image/jpeg;base64,') !== false
             && strpos($first['html'], '/images/gallery/') === false
             && strpos($first['html'], '<form') === false
             && strpos($first['html'], '<script') === false,
         'Home media is embedded from the confined root with no live path, form, or script'
     );
     red_theme_home_preview_test_assert(
-        $first['source']['gallery']['mediaBytes'] === 410147
-            && $first['source']['gallery']['mediaSha256'] === '24c407995a1f14053866595c4e4ecc88842bf804baa3cf6e87b9a3b9be056458'
+        $first['source']['gallery']['mediaBytes'] === 88216
+            && $first['source']['gallery']['mediaSha256'] === 'c1a4f5008ad50a3cdf179889d06eb6d3e18b899992c8bc3a692b6807779bff8c'
             && strpos(json_encode($first['source']), $repositoryRoot) === false,
-        'current Home media is fingerprinted without exposing an absolute filesystem path'
+        'portable Home fixture media is fingerprinted without exposing an absolute filesystem path'
     );
     red_theme_home_preview_test_expect(
         function () use ($rows, $repositoryRoot) {
-            red_theme_home_preview_render_rows($rows, $repositoryRoot, 4);
+            red_theme_home_preview_render_rows($rows, $repositoryRoot, 0);
+        },
+        'missing, unsafe, empty, or too large',
+        'live Home preview fails closed when client Gallery media is absent from the clean starter'
+    );
+    red_theme_home_preview_test_expect(
+        function () use ($repositoryRoot) {
+            red_theme_home_preview_media(
+                $repositoryRoot,
+                'v51-workspace.jpg',
+                dirname($repositoryRoot)
+            );
+        },
+        'media root is unavailable',
+        'portable fixture media cannot escape the repository root'
+    );
+    red_theme_home_preview_test_expect(
+        function () use ($rows, $repositoryRoot) {
+            red_theme_home_preview_render_rows(
+                $rows,
+                $repositoryRoot,
+                4,
+                $repositoryRoot . '/admin/images/red-cms-instructions-manual_files'
+            );
         },
         'zero or five',
         'Home rendering rejects a fabricated database-read count'
@@ -375,7 +399,7 @@ try {
         ['gallery RefID', function ($value) { $value['gallery'][0]['RefID'] = '1'; return $value; }, 'relationship canary'],
         ['gallery component', function ($value) { $value['gallery'][0]['Component'] = 'Article'; return $value; }, 'relationship canary'],
         ['gallery position', function ($value) { $value['gallery'][0]['HomePosition'] = '2'; return $value; }, 'relationship canary'],
-        ['gallery traversal', function ($value) { $value['gallery'][0]['LongDesc'] = '../layout-02.png'; return $value; }, 'safe local raster'],
+        ['gallery traversal', function ($value) { $value['gallery'][0]['LongDesc'] = '../v51-workspace.jpg'; return $value; }, 'safe local raster'],
         ['gallery external link', function ($value) { $value['gallery'][0]['Link'] = 'https://example.com'; return $value; }, 'local absolute-path'],
         ['gallery new window', function ($value) { $value['gallery'][0]['NewWindow'] = 'Y'; return $value; }, 'new browsing context'],
         ['setting removal', function ($value) { array_pop($value['settings']); return $value; }, 'exactly two'],

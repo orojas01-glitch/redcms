@@ -555,14 +555,21 @@ if (!function_exists('red_theme_home_preview_settings')) {
 }
 
 if (!function_exists('red_theme_home_preview_media')) {
-    function red_theme_home_preview_media($projectRoot, $image)
+    function red_theme_home_preview_media($projectRoot, $image, $mediaRoot = null)
     {
         $projectRoot = $projectRoot === null ? dirname(__DIR__) : $projectRoot;
-        if (!is_string($projectRoot) || $projectRoot === '' || realpath($projectRoot) === false) {
+        $resolvedProjectRoot = is_string($projectRoot) ? realpath($projectRoot) : false;
+        if ($projectRoot === '' || $resolvedProjectRoot === false || !is_dir($resolvedProjectRoot)) {
             throw new InvalidArgumentException('Home preview project root is unavailable.');
         }
-        $mediaRoot = realpath(rtrim($projectRoot, DIRECTORY_SEPARATOR) . '/images/gallery');
-        if ($mediaRoot === false || !is_dir($mediaRoot)) {
+        $requestedMediaRoot = $mediaRoot === null
+            ? rtrim($resolvedProjectRoot, DIRECTORY_SEPARATOR) . '/images/gallery'
+            : $mediaRoot;
+        $mediaRoot = is_string($requestedMediaRoot) ? realpath($requestedMediaRoot) : false;
+        if ($mediaRoot === false
+            || !is_dir($mediaRoot)
+            || strpos($mediaRoot, $resolvedProjectRoot . DIRECTORY_SEPARATOR) !== 0
+        ) {
             throw new RuntimeException('Home preview Gallery media root is unavailable.');
         }
         $file = red_theme_existing_path($mediaRoot, $image);
@@ -734,14 +741,23 @@ if (!function_exists('red_theme_home_preview_prepare_rows')) {
 }
 
 if (!function_exists('red_theme_home_preview_render_rows')) {
-    function red_theme_home_preview_render_rows(array $rows, $projectRoot = null, $databaseReads = 0)
+    function red_theme_home_preview_render_rows(
+        array $rows,
+        $projectRoot = null,
+        $databaseReads = 0,
+        $mediaRoot = null
+    )
     {
         if (!in_array($databaseReads, [0, 5], true)) {
             throw new InvalidArgumentException('Home preview database-read count must be zero or five.');
         }
         $validation = red_theme_preview_validate_reference_theme('starter-reference', $projectRoot);
         $prepared = red_theme_home_preview_prepare_rows($rows);
-        $media = red_theme_home_preview_media($projectRoot, $prepared['source']['gallery']['image']);
+        $media = red_theme_home_preview_media(
+            $projectRoot,
+            $prepared['source']['gallery']['image'],
+            $mediaRoot
+        );
         $contract = red_theme_preview_contract($prepared['fixture'], $validation);
         $result = red_theme_preview_render_prepared_contract(
             $validation,

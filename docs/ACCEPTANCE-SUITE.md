@@ -663,6 +663,26 @@ The isolated server log was clean, the configured-primary snapshot was
 unchanged, and an independent post-run query found zero temporary acceptance
 or baseline databases and zero scoped grants.
 
+The complete 2026-08-15 release-candidate run repeated that boundary after the
+RED-CMS 5.1 Basic instructions update. It corrected the canonical Instructions
+route assertion from the retired repeated `id="instructions"` marker to the
+new guide root `id="guide-overview"`, then passed all dependency-free,
+database, migration, authorization, add-on lifecycle/runtime, SEO, theme,
+authentication, CRUD/upload, Move Content, Section archive, and forced-
+rollback checks. The 32-table installer, all 46 migrations, 35-table final
+schema, normalized signature
+`0e75f9590094e9875c8df2aa83a8fe5646f2aad6931ed168a7ee935984f9f313`,
+five canonical routes, and clean isolated runtime log passed. Exact cleanup
+left zero temporary databases and zero temporary grants; the retained older
+starter remained unchanged at 20 tables and four Articles. No hosted
+installation or client database was used.
+
+Separate final theme checks removed the self-test dependency on the omitted
+legacy branded `layout-02.png`. The portable Home fixture now uses the tracked
+repository-confined `v51-workspace.jpg`, while the live client-media path still
+fails closed when absent. Home preview passed 43 assertions, activation
+readiness 50, Instructions preview 82, and the theme contract 276.
+
 The complete 2026-08-08 run passed the
 22-assertion clean starter boundary, 92-assertion SEO contract, 17-assertion SEO
 metadata migration contract, 48-assertion add-on trust contract, 22-assertion

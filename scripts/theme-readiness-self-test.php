@@ -411,9 +411,11 @@ try {
         'Video Gallery records its recognized external provider and id'
     );
     red_theme_readiness_test_assert(
-        $banner['media']['fact']['exists']
-            && $banner['media']['fact']['sha256'] === '24c407995a1f14053866595c4e4ecc88842bf804baa3cf6e87b9a3b9be056458',
-        'Banner Gallery records the confined live image digest'
+        $banner['media']['fact']['safe']
+            && !$banner['media']['fact']['exists']
+            && $banner['media']['fact']['publicPath'] === '/images/gallery/layout-02.png'
+            && $banner['media']['fact']['sha256'] === '',
+        'Banner Gallery records the confined missing-media fact without requiring client media'
     );
 
     $formTypes = [];

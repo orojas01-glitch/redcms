@@ -1,8 +1,9 @@
 # RED-CMS 5.1 And Store Lite Progress
 
 Last updated: 2026-08-15 after the isolated hosted demo deployment, public and
-administrator verification, responsive checkout inspection, and RED-CMS 5.1
-Basic instruction closeout.
+administrator verification, responsive checkout inspection, RED-CMS 5.1 Basic
+instruction closeout, and the full RED-CMS 5.1.0 release-candidate acceptance
+gate.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -78,7 +79,7 @@ flowchart TD
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
 | What just finished? | The hosted demo exposes nine products, the exact nine-choice Size/Color scarf, Product and Cart authoring, Products and Orders tools, an empty/current cart, pickup and delivery checkout, and pay on receipt. RED-CMS 5.1.0 and the clean-core Instructions boundary are visible in the authenticated workspace. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. Stabilization fixes can be handled independently; hosted payment adapters require a new approved gate. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is in release-candidate publication housekeeping: merge the verified marker/docs batch, then separately approve the formal tag and GitHub release. Hosted payment adapters require a new approved gate. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
 | What remains after this gate? | Nothing required for the basic-demo target. Hosted PayPal/card adapters remain later provider-neutral work and are not implied by this closeout. |
