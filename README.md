@@ -790,6 +790,7 @@ database.
 - [Version 5.1 Add-On Contract](docs/ADD-ON-CONTRACT.md)
 - [Public Mutation Boundary](docs/PUBLIC-MUTATION-BOUNDARY.md)
 - [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
+- [Store Lite Payment Adapter Direction](docs/PAYMENT-ADAPTER-DIRECTION.md)
 - [Store Lite Product Contract](docs/STORE-LITE-PRODUCT-CONTRACT.md)
 - [Store Lite Cart-Line Contract](docs/STORE-LITE-CART-LINE-CONTRACT.md)
 - [Store Lite Cart Persistence Contract](docs/STORE-LITE-CART-PERSISTENCE-CONTRACT.md)
