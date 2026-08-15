@@ -46,6 +46,16 @@ package. It is not bundled with the starter and does not broaden the 5.1.0
 release into hosted payments or the other example verticals. See
 [`RELEASE-NOTES-5.1.0.md`](RELEASE-NOTES-5.1.0.md).
 
+### Next Optional Store Lite Gate: Hosted Payments
+
+Payment Adapter Gate P0 is complete as a provider-neutral contract. It keeps
+hosted checkout, server-verified events, credentials, webhooks, replay,
+refund/reversal handling, and client isolation in a separately versioned
+adapter rather than the core or Store Lite base package. It selects no provider
+and performs no payment integration. Provider selection and sandbox integration
+are later approved gates; see
+[`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

@@ -5,8 +5,9 @@ to the isolated `demo.red-sphere.com` RED-CMS 5.1.0 installation. The hosted
 catalog, simple and bounded-variable products, Product and Cart placement,
 Add-to-cart, quantity update, line removal, guest checkout, pickup and delivery,
 pay on receipt, and Products/Orders administrator surfaces are verified. The
-Store Lite v1 basic-demo target is achieved; hosted payment adapters remain a
-separate later gate.
+Store Lite v1 basic-demo target is achieved. Payment Adapter Gate P0 now fixes
+the provider-neutral contract; provider selection and hosted integration remain
+separate later gates.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -336,7 +337,8 @@ When hosted checkout is added:
 
 Store Lite must not depend on PayPal-specific field names or callback behavior.
 The first adapter may use PayPal, but the commerce contract remains
-provider-neutral.
+provider-neutral. The complete Gate P0 direction is in
+[`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
 
 ## Administrator Boundary
 
@@ -726,8 +728,12 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    submitted during closeout; real order creation remains covered by the
    isolated supported-server acceptance gate. See
    [`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
-37. Add a separately reviewed hosted-payment adapter only after the
-   provider-neutral event contract passes.
+37. Completed Payment Adapter Gate P0: the provider-neutral checkout, verified
+   event, secret, webhook, replay, refund/reversal, lifecycle, and acceptance
+   contract is documented without selecting a provider or adding payment code.
+   The next separately approved gate is provider selection and sandbox
+   integration under
+   [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
 
 Events Calendar remains the second independent vertical proof. Store Lite
 implementation must not add calendar, appointment, donation, restaurant, or
