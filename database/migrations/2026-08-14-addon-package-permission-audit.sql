@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS `RED_Addon_Permission_Activity_Log` (
 
 SET @redcms_addon_permission_activity_columns_valid = (
   SELECT COUNT(*) = 9
-    AND SUM(COLUMN_NAME='RecordID' AND COLUMN_TYPE='bigint unsigned' AND IS_NULLABLE='NO' AND EXTRA='auto_increment') = 1
+    AND SUM(COLUMN_NAME='RecordID' AND DATA_TYPE='bigint' AND COLUMN_TYPE LIKE 'bigint% unsigned' AND IS_NULLABLE='NO' AND EXTRA='auto_increment') = 1
     AND SUM(COLUMN_NAME='EventName' AND COLUMN_TYPE='varchar(64)' AND IS_NULLABLE='NO') = 1
     AND SUM(COLUMN_NAME='PackageID' AND COLUMN_TYPE='varchar(127)' AND IS_NULLABLE='NO') = 1
     AND SUM(COLUMN_NAME='PackageVersion' AND COLUMN_TYPE='varchar(120)' AND IS_NULLABLE='NO') = 1
     AND SUM(COLUMN_NAME='Permission' AND COLUMN_TYPE='varchar(160)' AND IS_NULLABLE='NO' AND BINARY COLLATION_NAME=BINARY 'utf8mb4_unicode_ci') = 1
-    AND SUM(COLUMN_NAME='TargetAdminRecordID' AND COLUMN_TYPE='int unsigned' AND IS_NULLABLE='NO') = 1
-    AND SUM(COLUMN_NAME='ActorAdminRecordID' AND COLUMN_TYPE='int unsigned' AND IS_NULLABLE='NO') = 1
+    AND SUM(COLUMN_NAME='TargetAdminRecordID' AND DATA_TYPE='int' AND COLUMN_TYPE LIKE 'int% unsigned' AND IS_NULLABLE='NO') = 1
+    AND SUM(COLUMN_NAME='ActorAdminRecordID' AND DATA_TYPE='int' AND COLUMN_TYPE LIKE 'int% unsigned' AND IS_NULLABLE='NO') = 1
     AND SUM(COLUMN_NAME='Result' AND COLUMN_TYPE='varchar(16)' AND IS_NULLABLE='NO') = 1
     AND SUM(COLUMN_NAME='OccurredAt' AND DATA_TYPE='timestamp' AND IS_NULLABLE='NO') = 1
   FROM INFORMATION_SCHEMA.COLUMNS
