@@ -5,8 +5,9 @@ to the isolated `demo.red-sphere.com` RED-CMS 5.1.0 installation. The hosted
 catalog, simple and bounded-variable products, Product and Cart placement,
 Add-to-cart, quantity update, line removal, guest checkout, pickup and delivery,
 pay on receipt, and Products/Orders administrator surfaces are verified. The
-Store Lite v1 basic-demo target is achieved. Payment Adapter Gate P0 now fixes
-the provider-neutral contract; provider selection and hosted integration remain
+Store Lite v1 basic-demo target is achieved. Payment Adapter Gate P0 fixes the
+provider-neutral contract and Gate P1 selects Stripe Checkout as the first USD
+hosted-card adapter candidate. Fixture, sandbox, and hosted integration remain
 separate later gates.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
@@ -730,9 +731,10 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    [`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
 37. Completed Payment Adapter Gate P0: the provider-neutral checkout, verified
    event, secret, webhook, replay, refund/reversal, lifecycle, and acceptance
-   contract is documented without selecting a provider or adding payment code.
-   The next separately approved gate is provider selection and sandbox
-   integration under
+   contract is documented without adding payment code. Gate P1 separately
+   selects Stripe Checkout's hosted full-page flow as the first provisional USD
+   hosted-card candidate. The next separately approved gate is the non-network
+   adapter fixture under
    [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
 
 Events Calendar remains the second independent vertical proof. Store Lite

@@ -51,10 +51,12 @@ release into hosted payments or the other example verticals. See
 Payment Adapter Gate P0 is complete as a provider-neutral contract. It keeps
 hosted checkout, server-verified events, credentials, webhooks, replay,
 refund/reversal handling, and client isolation in a separately versioned
-adapter rather than the core or Store Lite base package. It selects no provider
-and performs no payment integration. Provider selection and sandbox integration
-are later approved gates; see
-[`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
+adapter rather than the core or Store Lite base package. Gate P1 selects Stripe
+Checkout's hosted full-page flow as the first provisional USD hosted-card
+candidate without performing payment integration. The non-network fixture and
+sandbox are later approved gates; see
+[`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md) and
+[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 
