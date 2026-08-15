@@ -1369,10 +1369,34 @@ request bootstrap excludes the disabled package.
     `0.1.31` disabled with its ten migrations and no package content. The first
     hosted setting-storage check then failed closed because MySQL 5.7 reports
     unsigned integer display widths in `COLUMN_TYPE`, unlike the exact MySQL 8
-    spelling used by seven core storage guards. The active compatibility patch
-    preserves exact integer type and unsignedness while accepting either
-    server representation. Hosted settings and enablement remain paused until
-    the portable guards pass core acceptance and are merged and deployed.
+    spelling used by seven core storage guards. The compatibility and
+    permission-audit patches now preserve exact integer type and unsignedness
+    while accepting either server representation; they passed core acceptance,
+    merged in pull requests #116 and #118, and unblocked the hosted lifecycle.
+
+99. Completed the demo-only Owner grant and administrator-surface path. Pull
+    request #117 added the explicit server-local package-permission CLI; pull
+    request #119 aligned installed add-on Product, Cart, Products, and Orders
+    surfaces with the core administrator workspace. No grant or package state
+    is shared with another client database.
+
+100. Achieved the Store Lite v1 basic-demo target on `demo.red-sphere.com`.
+    Store Lite 0.1.31 is enabled only for that installation with nine fictional
+    dog products, including one exact nine-choice Size/Color scarf. Read-only
+    closeout verified RED-CMS 5.1.0, nine public Add-to-cart controls, Product
+    and Cart authoring, Products and Orders tools, the empty/current cart,
+    pickup and delivery checkout, pay on receipt, 390-pixel responsive output,
+    and clean browser logs. No new hosted order was submitted during closeout;
+    real order creation, immutable snapshots, retry/conflict behavior, and
+    pickup/delivery persistence remain covered by the isolated supported-server
+    browser gate.
+
+101. Pull request #120 completed the RED-CMS 5.1 Basic documentation boundary.
+    The clean installer now seeds a concise core-only Instructions article with
+    four reviewed administrator screenshots. It states that Store Lite and
+    every business-specific capability are separate per-client packages; it
+    does not migrate or overwrite an existing client's customized guide. See
+    [`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

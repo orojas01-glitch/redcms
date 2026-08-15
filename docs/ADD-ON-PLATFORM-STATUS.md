@@ -1,12 +1,12 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-14 after the shared-host direct-PHP public-mutation
-compatibility gate and the RED-CMS 5.1 runtime identity gate, before the
-separately approved hosted demo deployment.
+Last updated: 2026-08-15 after the isolated hosted demo deployment, public and
+administrator verification, responsive checkout inspection, and RED-CMS 5.1
+Basic instruction closeout.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
-gated, and gold is the release target.
+gated, and gold marks an achieved release target.
 
 ## Objective
 
@@ -14,7 +14,7 @@ gated, and gold is the release target.
 flowchart LR
     C["Reusable RED-CMS core"] --> P["Optional add-on platform"]
     P --> S["First proof: Store Lite"]
-    S --> R["TARGET<br/>Re-adapt RED-CMS to different clients<br/>without mixing installations or data"]
+    S --> R["ACHIEVED<br/>Re-adapt RED-CMS to different clients<br/>without mixing installations or data"]
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
@@ -61,17 +61,14 @@ flowchart TD
     J3C["COMPLETE — Release C3<br/>responsive QA + configured-primary<br/>and two-client isolation"]
     K1["COMPLETE<br/>shared-host direct-PHP ingress adapter"]
     K2["COMPLETE<br/>real Apache/FastCGI proof + deployment review"]
-    K3["CURRENT<br/>basic demo deployment"]
-    L["TARGET<br/>Store Lite v1 usable on demo.red-sphere.com"]
+    K3["COMPLETE<br/>basic demo deployment"]
+    L["ACHIEVED<br/>Store Lite v1 usable on demo.red-sphere.com"]
 
     A --> B --> C --> D --> E --> F --> G1 --> G2 --> G3 --> G4A --> G4B --> G4C1 --> G4C2 --> G4C3 --> H1 --> H2A --> H2B --> H2C --> H2D --> I1 --> I2 --> I3 --> I4 --> J1 --> J2 --> J3A --> J3B --> J3C --> K1 --> K2 --> K3 --> L
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
-    classDef current fill:#e8f1ff,stroke:#2f6fc3,color:#173a68,stroke-width:3px;
-    classDef remaining fill:#f3f5f7,stroke:#82909c,color:#34424d;
     classDef target fill:#fff3d6,stroke:#a36b00,color:#5e4100,stroke-width:3px;
-    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B,J3C,K1,K2 complete;
-    class K3 current;
+    class A,B,C,D,E,F,G1,G2,G3,G4A,G4B,G4C1,G4C2,G4C3,H1,H2A,H2B,H2C,H2D,I1,I2,I3,I4,J1,J2,J3A,J3B,J3C,K1,K2,K3 complete;
     class L target;
 ```
 
@@ -79,13 +76,17 @@ flowchart TD
 
 | Question | Current answer |
 | --- | --- |
-| Where are we? | Release C3, the direct-PHP adapter, its real Apache/FastCGI local deployment proof, and the RED-CMS 5.1 runtime identity gate are complete. The basic hosted demo deployment is the current gate. |
-| What just finished? | Hosted preflight found and closed the final release-identity mismatch: normal non-executing discovery now identifies core as 5.1.0 and accepts trusted packages requiring `>=5.1 <6.0` without a test-only version override. No hosted installation changed. |
-| What is active now? | A separately approved deployment and hosted administrator/public verification limited to `demo.red-sphere.com`. |
-| What can the demo do today? | In an isolated rehearsal, administrators can create/edit products and place Product and Cart components; public visitors can add, update, and remove simple or variable products and place a pickup or delivery order with pay on receipt. The hosted `demo.red-sphere.com` installation remains unchanged pending a separately reviewed deployment decision. |
+| Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
+| What just finished? | The hosted demo exposes nine products, the exact nine-choice Size/Color scarf, Product and Cart authoring, Products and Orders tools, an empty/current cart, pickup and delivery checkout, and pay on receipt. RED-CMS 5.1.0 and the clean-core Instructions boundary are visible in the authenticated workspace. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. Stabilization fixes can be handled independently; hosted payment adapters require a new approved gate. |
+| What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Deploy and verify the hosted administrator and public product/cart/order path, then close the Store Lite demo target. Hosted PayPal/card adapters remain later work. |
+| What remains after this gate? | Nothing required for the basic-demo target. Hosted PayPal/card adapters remain later provider-neutral work and are not implied by this closeout. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
+
+The hosted closeout evidence and explicit no-order-submission limitation are
+recorded in
+[`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
 
 ## Status rule
 

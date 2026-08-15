@@ -1,6 +1,6 @@
 # RED-CMS Local Acceptance Suite
 
-Date: 2026-08-14
+Date: 2026-08-15
 
 ## Purpose
 
@@ -33,6 +33,18 @@ requires `databases:0 grants:0 staged-project:0 primary:unchanged`; primary
 protection uses a schema-neutral full database dump hash and does not migrate
 the configured primary. The gate does not deploy the hosted demo or use client
 data.
+
+The hosted Store Lite closeout is a deployment review, not a replacement for
+disposable acceptance. On 2026-08-15, read-only desktop and 390-by-844 browser
+inspection of `demo.red-sphere.com` confirmed RED-CMS 5.1.0, nine published
+products and Add-to-cart controls, the exact nine-choice Size/Color scarf,
+Product and Cart authoring, Products and Orders tools, the Checkout empty-cart
+state, no horizontal overflow, and no browser warnings or errors. The earlier
+same-day hosted mutation session covered a simple product, an exact scarf
+variant, quantity recalculation, pickup, delivery, and pay on receipt. No new
+hosted order or guest personal data was submitted during closeout. The complete
+scope and isolation decision are recorded in
+[`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
 
 `scripts/store-lite-browser-rehearsal.sh` is the separate opt-in integration
 gate for the externally distributed Store Lite package. It stages a temporary
@@ -1310,6 +1322,7 @@ process environment.
 - Add-on upgrade/recovery acceptance runs only in the uniquely named disposable database and a temporary first-party package outside the starter. Its 24 assertions require exact Owner `addons.upgrade` authority, a strictly higher same-type target, disabled starting state, deterministic non-executing planning, explicit historical-migration checksum-drift refusal, compatible stored setting definitions, stale-plan and start-audit refusal, a forced mid-upgrade migration failure, explicit non-loadable `upgrade_failed` reporting, preserved old identity/data/settings, remaining-only resume planning, completion-audit rollback, zero-pending final recovery, exact target identity/ledger/audit postconditions, CLI backup/current-target/state confirmations, repeat refusal, and exact fixture cleanup.
 - The separate real Store Lite upgrade rehearsal stages historical 0.1.28 and current 0.1.29 package payloads outside the starter. Its 14 assertions require all eight historical migration paths and checksums unchanged, five compatible stored settings, one preserved real order, an exact two-migration target plan, a forced failure after the fulfillment-status index, non-loadable old-identity `upgrade_failed`, remaining-only payment-status index recovery, exact 0.1.29 disabled registry/ledger/audit evidence, repeat refusal, all 46 core migrations, and cleanup `database:0 grant:0 staged-project:0 primary:unchanged`.
 - The separate Store Lite Release C3 isolation rehearsal stages current clean core plus external Store Lite 0.1.29 and creates two fresh databases. Its 14 assertions require database-bound install and enable plans, all 46 core and 10 package migrations per client, distinct USD/pickup and COP/delivery settings and products, no cross-client product reads, unchanged opposite-client fingerprints after mutation in both directions, client-local disable/re-enable runtime behavior, identical package registrar evidence, and cleanup `databases:0 grants:0 staged-project:0 primary:unchanged` using a schema-neutral full configured-primary hash.
+- The hosted Store Lite basic-demo closeout is read-only release evidence for `demo.red-sphere.com`, not an automated acceptance fixture. It requires RED-CMS 5.1.0, the separately installed Store Lite 0.1.31 package, nine public products and controls, the exact nine-choice Size/Color scarf, Product and Cart authoring, Products and Orders tools, responsive Checkout output, and clean browser logs. It submits no new order or guest personal data and authorizes no other client installation or database.
 - Operational add-on lifecycle acceptance runs only in a uniquely named disposable database and a temporary generic content package outside the clean starter. Its 21 assertions prove non-executing discovery; exact migration, setting, table, and data evidence; deterministic planning; stale-plan and forced-registrar refusal; incomplete-registry refusal; registrar-time MyISAM drift refusal before lifecycle mutation; audit rollback; successful exact registrar validation; later request bootstrap; non-executing disable; settings, migration, code, and business-row preservation; disabled bootstrap exclusion; identical-evidence re-enable; exactly two enable and one disable audits; CLI-only confirmations; and exact database/grant/package cleanup.
 - The separate real Store Lite operational lifecycle rehearsal stages current clean core plus externally distributed Store Lite 0.1.28 in a temporary supported-server project. Its 10 assertions run all 46 core and 8 package migrations, fingerprint all 15 package tables and seeded product/cart rows, require exact real registrar evidence, prove Product/Cart/create-guest-order registration after enable, prove disabled bootstrap exclusion and data preservation, reproduce the registrar hash on re-enable, record exactly two enable and one disable audits, and remove the staged project and disposable database/grant. It does not alter the Store Lite source repository, clean starter, hosted demo, or any client installation.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 35 tables unchanged.
