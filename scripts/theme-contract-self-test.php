@@ -2667,6 +2667,15 @@ try {
     red_theme_test_assert(
         is_string($controlPanelCss)
             && str_contains($controlPanelCss, '#advanced #edit_content_grid .red-admin-workspace')
+            && str_contains(
+                $controlPanelCss,
+                'div.cp_addcontent.red-admin-add-card--addon'
+            )
+            && str_contains($controlPanelCss, '#advanced .red-admin-addon-tool {')
+            && str_contains(
+                $controlPanelCss,
+                '#advanced .red-admin-addon-tool__header h2'
+            )
             && str_contains($controlPanelCss, '.red-admin-position__controls--hidden.cp_admin')
             && str_contains($controlPanelCss, '@media only screen and (max-width: 767px)')
             && is_string($controlPanelNavigationSource)
@@ -2674,7 +2683,7 @@ try {
                 $controlPanelNavigationSource,
                 "filemtime(__DIR__ . '/assets/css/cp.css')"
             ),
-        'core control-panel CSS keeps the compact editor scoped, responsive, and cache-safe'
+        'core control-panel CSS keeps editors and optional package surfaces scoped, responsive, and cache-safe'
     );
     $layoutEditorSource = file_get_contents(dirname(__DIR__) . '/admin/class/class_edit_layout.php');
     $layoutPreviewScript = file_get_contents(dirname(__DIR__) . '/admin/assets/js/layout-preview.js');
