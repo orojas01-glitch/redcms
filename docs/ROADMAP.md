@@ -31,6 +31,21 @@ These items are product direction, not active Version 5.0 features. Each
 requires its own security, data-migration, privacy, accessibility, and rollback
 design before implementation.
 
+### Version 5.1.0 Release Candidate
+
+The RED-CMS 5.1.0 clean-core release candidate passed the complete disposable
+acceptance gate on 2026-08-15: 32 installer tables, all 46 migrations, a no-op
+rerun with zero pending or drifted files, the normalized 35-table schema,
+canonical public routes, a clean runtime log, and exact temporary database and
+grant cleanup. The retained historical starter and every client database
+remained untouched.
+
+The basic Store Lite proof is complete as a separately distributed optional
+package. It is not bundled with the starter and does not broaden the 5.1.0
+release into hosted payments or the other example verticals. The formal
+`v5.1.0` Git tag and GitHub release remain the final publication gate. See
+[`RELEASE-NOTES-5.1.0.md`](RELEASE-NOTES-5.1.0.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

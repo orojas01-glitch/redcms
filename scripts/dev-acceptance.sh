@@ -5277,7 +5277,7 @@ red_acceptance_run_addon_asset_injection
 red_acceptance_check_route 'home' '/' 'starter-navigation' 'Contacto'
 red_acceptance_check_route 'contact' '/contacto/' 'id="form_contact"' 'name="message"'
 red_acceptance_check_route 'administration' '/administracion/' 'id="form_login"' 'name="password"'
-red_acceptance_check_route 'instructions' '/administracion/instructions' 'id="instructions"' 'RED-CMS'
+red_acceptance_check_route 'instructions' '/administracion/instructions' 'id="guide-overview"' 'RED-CMS'
 red_acceptance_check_route 'test-vimeo' '/administracion/test-vimeo' 'Como Agregar Contenido' 'starter-navigation'
 red_acceptance_check_not_found_route 'unmatched-route' '/codex-acceptance-missing-route/' '' '' 'route'
 
