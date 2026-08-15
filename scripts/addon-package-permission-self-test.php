@@ -155,6 +155,25 @@ try {
         $packageId,
         $temporaryRoot
     );
+    $migrationSource = file_get_contents(
+        $projectRoot . '/database/migrations/2026-08-14-addon-package-permission-audit.sql'
+    );
+    red_addon_permission_test_assert(
+        is_string($migrationSource)
+            && preg_match_all(
+                "/DATA_TYPE='int'\\s+AND COLUMN_TYPE LIKE 'int% unsigned'/",
+                $migrationSource
+            ) === 2
+            && preg_match_all(
+                "/DATA_TYPE='bigint'\\s+AND COLUMN_TYPE LIKE 'bigint% unsigned'/",
+                $migrationSource
+            ) === 1
+            && preg_match(
+                "/COLUMN_TYPE='(?:int|bigint) unsigned'/",
+                $migrationSource
+            ) === 0,
+        'permission audit migration accepts MySQL 5.7 display widths without weakening unsigned type checks'
+    );
     red_addon_permission_test_assert(
         red_addon_package_permission_storage_available($connection),
         'capability and immutable package-permission audit storage are available'
