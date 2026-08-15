@@ -153,7 +153,7 @@ $rows = [
             'Alias' => 'instructions',
             'SectionPosition' => '2',
             'SectionPositionOrder' => '1',
-            'LongDesc' => '<p><img src="../admin/images/red-cms-instructions-manual_files/image005.png"></p>',
+            'LongDesc' => '<p><img src="../admin/images/red-cms-instructions-manual_files/v51-workspace.jpg"></p>',
         ]),
         red_theme_readiness_test_article([
             'RecordID' => '966111194',

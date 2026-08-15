@@ -5,7 +5,7 @@
  * Three fixed SELECT reads reconstruct only Article 89196971 with its parent
  * Section, the two root navigation rows, and two bounded text settings. The
  * current rich body is validated against an exact canary, reduced to a strict
- * HTML/attribute policy, and its 21 confined local images are embedded for an
+ * HTML/attribute policy, and its four confined local screenshots are embedded for an
  * offline preview. The provider accepts no caller route, record, query, HTML,
  * path, media, setting, or mode and never participates in live rendering.
  */
@@ -36,35 +36,18 @@ if (!function_exists('red_theme_instructions_preview_canary')) {
             'pagePositionOrder' => 0,
             'startDate' => '1970-01-01 00:00:00',
             'expiryDate' => '9999-12-31 23:59:59',
-            'summaryBytes' => 958,
-            'summarySha256' => 'bfbc0f2f4d53a5d5564ec10eea0753cd6019a86cea71271b18cb25f4ad246114',
-            'bodyBytes' => 18907,
-            'bodySha256' => '8dc4cd54cf74d74f9d0d41be81acba2921d70044043e0f5d6520e443f61f66ad',
-            'mediaCount' => 21,
-            'mediaBytes' => 1264187,
-            'mediaManifestSha256' => 'b692747db87cfc99da551e0f7b3bd82d828eaf032facb67b1820ace3becdace4',
+            'summaryBytes' => 231,
+            'summarySha256' => '521ca58632b777e3b6f80319a1b60c7560374c4de66016a3422cb55d37055923',
+            'bodyBytes' => 7506,
+            'bodySha256' => 'ac05d87a2a7821e13083d66067b1af9e1f4ff131d3133658ba07b2416afd3c36',
+            'mediaCount' => 4,
+            'mediaBytes' => 367642,
+            'mediaManifestSha256' => '330c2c4ca83b78522e9d3484430d85fc79e3c11363089fdd23d27efcf0157994',
             'mediaFiles' => [
-                'image005.png',
-                'image010.png',
-                'image012.png',
-                'image015.png',
-                'image016.png',
-                'image017.jpg',
-                'image018.png',
-                'image019.png',
-                'image021.png',
-                'image023.jpg',
-                'image025.png',
-                'image027.png',
-                'image029.png',
-                'image031.png',
-                'image033.png',
-                'image034.png',
-                'image038.png',
-                'image041.jpg',
-                'image042.jpg',
-                'image043.jpg',
-                'image044.jpg',
+                'v51-workspace.jpg',
+                'v51-add-content.jpg',
+                'v51-site-structure.jpg',
+                'v51-move-content.jpg',
             ],
         ];
     }

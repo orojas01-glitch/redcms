@@ -56,91 +56,61 @@ function red_theme_instructions_preview_test_decode_escape($character)
     return array_key_exists($character, $map) ? $map[$character] : $character;
 }
 
+function red_theme_instructions_preview_test_sql_literal($sql, &$offset)
+{
+    $length = strlen($sql);
+    while ($offset < $length && ctype_space($sql[$offset])) {
+        $offset++;
+    }
+    if ($offset >= $length || $sql[$offset] !== "'") {
+        throw new RuntimeException('Expected a quoted Instructions seed value.');
+    }
+    $offset++;
+    $value = '';
+    while ($offset < $length) {
+        $character = $sql[$offset++];
+        if ($character === '\\') {
+            if ($offset >= $length) {
+                throw new RuntimeException('The Instructions seed ends in an escape.');
+            }
+            $value .= red_theme_instructions_preview_test_decode_escape($sql[$offset++]);
+            continue;
+        }
+        if ($character === "'") {
+            return $value;
+        }
+        $value .= $character;
+    }
+
+    throw new RuntimeException('The Instructions seed contains an unclosed string.');
+}
+
 function red_theme_instructions_preview_test_seed_values($repositoryRoot)
 {
     $sql = file_get_contents($repositoryRoot . '/db-structure.sql');
     if (!is_string($sql)) {
         throw new RuntimeException('Could not read the clean-install Instructions seed.');
     }
-    $startMarker = 'VALUES (89196971,';
-    $start = strpos($sql, $startMarker);
-    $end = $start === false ? false : strpos($sql, '),(459269660,', $start);
-    if ($start === false || $end === false) {
-        throw new RuntimeException('Could not isolate the fixed Instructions seed tuple.');
+    $marker = '-- RED-CMS 5.1 clean-core Instructions Article';
+    $start = strpos($sql, $marker);
+    if ($start === false) {
+        throw new RuntimeException('Could not find the clean-core Instructions seed update.');
     }
-    $tuple = substr(
-        $sql,
-        $start + strlen('VALUES '),
-        $end - ($start + strlen('VALUES ')) + 1
-    );
-    if ($tuple === '' || $tuple[0] !== '(' || substr($tuple, -1) !== ')') {
-        throw new RuntimeException('The fixed Instructions seed tuple is malformed.');
+    $summaryStart = strpos($sql, '`ShortDesc` = ', $start);
+    $bodyStart = strpos($sql, '`LongDesc` = ', $summaryStart === false ? $start : $summaryStart);
+    if ($summaryStart === false || $bodyStart === false) {
+        throw new RuntimeException('Could not isolate the clean-core Instructions source values.');
     }
 
-    $values = [];
-    $buffer = '';
-    $quoted = false;
-    $length = strlen($tuple);
-    for ($index = 1; $index < $length - 1; $index++) {
-        $character = $tuple[$index];
-        if ($quoted) {
-            if ($character === '\\') {
-                $index++;
-                if ($index >= $length - 1) {
-                    throw new RuntimeException('The fixed Instructions seed ends in an escape.');
-                }
-                $buffer .= red_theme_instructions_preview_test_decode_escape($tuple[$index]);
-                continue;
-            }
-            if ($character === "'") {
-                $quoted = false;
-                continue;
-            }
-            $buffer .= $character;
-            continue;
-        }
-        if ($character === "'") {
-            $quoted = true;
-            continue;
-        }
-        if ($character === ',') {
-            $values[] = trim($buffer);
-            $buffer = '';
-            continue;
-        }
-        $buffer .= $character;
-    }
-    if ($quoted) {
-        throw new RuntimeException('The fixed Instructions seed contains an unclosed string.');
-    }
-    $values[] = trim($buffer);
-    if (count($values) !== 49) {
-        throw new RuntimeException('The fixed Instructions seed column count changed.');
+    $summaryOffset = $summaryStart + strlen('`ShortDesc` = ');
+    $bodyOffset = $bodyStart + strlen('`LongDesc` = ');
+    $summary = red_theme_instructions_preview_test_sql_literal($sql, $summaryOffset);
+    $body = red_theme_instructions_preview_test_sql_literal($sql, $bodyOffset);
+    if (strpos($sql, 'WHERE `RecordID` = 89196971', $bodyOffset) === false) {
+        throw new RuntimeException('The clean-core Instructions update has no fixed Article target.');
     }
 
-    $longDescription = $values[35];
-    foreach ([
-        ['&nbsp;or&nbsp;<strong>Submenu</strong>', ''],
-        ['Top Navigation or Submenu.', 'Top Navigation.'],
-        ['How to Edit Top Navigation or Submenu(s)', 'How to Edit Top Navigation'],
-        [
-            '&nbsp;&nbsp;<strong>Submenu</strong>&nbsp;is present only in selected pages.&nbsp; Follow the instructions for both:',
-            '&nbsp; Follow these instructions:',
-        ],
-        ['&nbsp;<br />or Locate the&nbsp;<strong>Submenu &gt; Edit</strong><br />', '<br />'],
-        ['&nbsp;&nbsp;<strong>Submenus</strong>&nbsp;include only 1 (one) level. (image 18)', ''],
-        [
-            "\r\n" . '<p id="instructions-img"><img src="../admin/images/red-cms-instructions-manual_files/image040.png" alt="" width="999" height="748" border="0" /></p>',
-            '',
-        ],
-        ["\r\n" . '<p id="instructions-ref">image 18</p>', ''],
-        [', Sub-Menu(s)', ''],
-        ['SubMenus, ', ''],
-    ] as $replacement) {
-        $longDescription = str_replace($replacement[0], $replacement[1], $longDescription);
-    }
-
-    return ['summary' => $values[34], 'body' => $longDescription];
+    return ['summary' => $summary, 'body' => $body];
 }
 
 function red_theme_instructions_preview_test_rows($repositoryRoot)
@@ -466,8 +436,8 @@ try {
         'two selected Instructions renders are byte-for-byte deterministic'
     );
     red_theme_instructions_preview_test_assert(
-        $first['bytes'] === 1713794
-            && $first['sha256'] === '2dac7d6df259ddfe68388f32107a9685b5ad1e2afbac61ce90e93e09bf56485c',
+        $first['bytes'] === 509066
+            && $first['sha256'] === 'd731c02698cc8197f36fb8d2f63586fda4fdb093c005905db82cb3e02ebcba3a',
         'reviewed selected Instructions output locks its exact bytes and hash'
     );
     red_theme_instructions_preview_test_assert(
@@ -483,10 +453,10 @@ try {
         'render does not read or mutate request or session state'
     );
     red_theme_instructions_preview_test_assert(
-        substr_count($first['html'], 'data:image/') === 21
-            && substr_count($first['html'], 'loading="lazy"') === 21
-            && substr_count($first['html'], 'decoding="async"') === 21,
-        'render embeds exactly 21 bounded lazy-decoded local manual images'
+        substr_count($first['html'], 'data:image/') === 4
+            && substr_count($first['html'], 'loading="lazy"') === 4
+            && substr_count($first['html'], 'decoding="async"') === 4,
+        'render embeds exactly four bounded lazy-decoded local screenshots'
     );
     red_theme_instructions_preview_test_assert(
         strpos($first['html'], 'id="instructions-manual"') !== false
@@ -501,22 +471,22 @@ try {
     );
     red_theme_instructions_preview_test_assert(
         $first['source']['content'] === [
-            'sourceBytes' => 18907,
-            'sourceSha256' => '8dc4cd54cf74d74f9d0d41be81acba2921d70044043e0f5d6520e443f61f66ad',
-            'sanitizedBytes' => 1701993,
-            'sanitizedSha256' => '67bc1d9d8e2bfc1bf63defec03ce616eabba0542fbfc6f446bdd8f495dd13894',
-            'localLinkCount' => 14,
-            'duplicateTargetsRemoved' => 130,
+            'sourceBytes' => 7506,
+            'sourceSha256' => 'ac05d87a2a7821e13083d66067b1af9e1f4ff131d3133658ba07b2416afd3c36',
+            'sanitizedBytes' => 497598,
+            'sanitizedSha256' => '913fab88e6440a1c4e84fa612d8be80f52397f6f77de95c176c42a618f716455',
+            'localLinkCount' => 7,
+            'duplicateTargetsRemoved' => 0,
         ],
         'report locks exact source/sanitized content facts without exposing HTML'
     );
     red_theme_instructions_preview_test_assert(
         $first['source']['media'] === [
-            'count' => 21,
-            'bytes' => 1264187,
-            'manifestSha256' => 'b692747db87cfc99da551e0f7b3bd82d828eaf032facb67b1820ace3becdace4',
-            'embedded' => 21,
-            'dimensionCorrections' => 1,
+            'count' => 4,
+            'bytes' => 367642,
+            'manifestSha256' => '330c2c4ca83b78522e9d3484430d85fc79e3c11363089fdd23d27efcf0157994',
+            'embedded' => 4,
+            'dimensionCorrections' => 0,
             'externalResources' => 0,
         ],
         'report locks the exact confined media manifest and normalization facts'
@@ -526,7 +496,7 @@ try {
         is_string($sourceJson)
             && strpos($sourceJson, '<h') === false
             && strpos($sourceJson, 'data:image') === false
-            && strpos($sourceJson, 'image005') === false
+            && strpos($sourceJson, 'v51-workspace') === false
             && strpos($sourceJson, 'SELECT ') === false
             && strpos($sourceJson, $repositoryRoot) === false,
         'source report redacts body HTML, media filenames, SQL, and filesystem paths'
@@ -597,7 +567,7 @@ try {
     red_theme_instructions_preview_test_expect(
         function () use ($sanitized) {
             red_theme_preview_trusted_article_html(
-                str_replace('#interface_guidelines', 'https://example.test/manual', $sanitized)
+                str_replace('#guide-install', 'https://example.test/manual', $sanitized)
             );
         },
         'local fragment',
@@ -606,7 +576,7 @@ try {
     red_theme_instructions_preview_test_expect(
         function () use ($sanitized) {
             red_theme_preview_trusted_article_html(
-                $sanitized . '<p id="instructions">duplicate</p>'
+                $sanitized . '<p id="guide-install">duplicate</p>'
             );
         },
         'unique',
@@ -751,7 +721,7 @@ try {
     red_theme_instructions_preview_test_assert(
         $temporarySanitized['htmlSha256'] === $first['source']['content']['sanitizedSha256']
             && $temporarySanitized['mediaManifestSha256'] === $canary['mediaManifestSha256'],
-        'a confined copy of the exact 21-image inventory renders identically'
+        'a confined copy of the exact four-screenshot inventory renders identically'
     );
     $firstImage = $temporaryRoot .
         '/admin/images/red-cms-instructions-manual_files/' . $canary['mediaFiles'][0];
@@ -770,7 +740,7 @@ try {
     $temporaryRoot = red_theme_instructions_preview_test_media_root($repositoryRoot);
     unlink(
         $temporaryRoot . '/admin/images/red-cms-instructions-manual_files/' .
-        $canary['mediaFiles'][10]
+        $canary['mediaFiles'][count($canary['mediaFiles']) - 1]
     );
     red_theme_instructions_preview_test_expect(
         function () use ($rows, $temporaryRoot) {
@@ -795,9 +765,9 @@ try {
     );
     red_theme_instructions_preview_test_assert(
         is_array($manifest)
-            && $manifest['version'] === '1.2.0'
+            && $manifest['version'] === '1.3.1'
             && strpos($manifest['description'], 'Activatable portable reference package') !== false,
-        'five-layout starter retains the selected Instructions preview contract at 1.2.0'
+        'five-layout starter retains the selected Instructions preview contract at 1.3.1'
     );
 } finally {
     if ($temporaryRoot !== null) {
