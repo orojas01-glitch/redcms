@@ -254,10 +254,20 @@ try {
                 === 'POST'
             && ($schema['$defs']['publicMutationContract']['properties']['idempotency']['const'] ?? '')
                 === 'core-issued-key'
+            && in_array(
+                'server-signature',
+                $schema['$defs']['route']['properties']['authentication']['enum']
+                    ?? [],
+                true
+            )
+            && ($schema['$defs']['route']['allOf'][0]['then']['properties']['methods']['const']
+                ?? null) === ['POST']
+            && ($schema['$defs']['route']['allOf'][0]['then']['properties']['csrf']['const']
+                ?? null) === 'not-applicable'
             && ($schema['$defs']['setting']['properties']['options']['minItems'] ?? null)
                 === 1
             && ($schema['properties']['uninstall']['properties']['defaultDataAction']['const'] ?? '') === 'retain',
-        'the published schema is closed, fixes the entry point, declares bounded editors, tools, non-secret runtime-setting declarations, nested operational-form previews, write actions, public-mutation declarations, and setting choices, and defaults uninstall to data retention'
+        'the published schema is closed, fixes the entry point, declares bounded editors, tools, non-secret runtime-setting declarations, nested operational-form previews, write actions, public-mutation and data-only server-signature declarations, and setting choices, and defaults uninstall to data retention'
     );
 
     $contractSource = (string) file_get_contents($repositoryRoot . '/docs/ADD-ON-CONTRACT.md');

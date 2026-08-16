@@ -808,6 +808,17 @@ uploads, and database connections are not exposed. Current enablement gates
 still reject any route-bearing package, so this dispatcher does not activate a
 richer package by itself.
 
+P3A-1 permits `authentication: server-signature` only as a non-executing
+manifest value for one exact static public `POST` with
+`csrf: not-applicable`. It is not equivalent to anonymous browser access and
+does not weaken the rule that ordinary unsafe browser methods require CSRF.
+Neither the public GET dispatcher nor the browser public-mutation selector can
+select this route. No signature parser, raw-body reader, response, handler,
+endpoint, registrar execution, secret lookup, database query, or outbound
+request is connected. The payment-adapter profile remains activation-blocked
+until separate database-bound, ingress, registrar, and atomic lifecycle gates
+are implemented and approved.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

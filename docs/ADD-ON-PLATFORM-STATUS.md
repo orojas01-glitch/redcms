@@ -96,7 +96,7 @@ flowchart LR
     P0["COMPLETE<br/>P0. Provider-neutral contract<br/>events, secrets, replay, refunds"]
     P1["COMPLETE<br/>P1. Stripe Checkout candidate<br/>USD hosted-card pilot"]
     P2["COMPLETE<br/>P2. Non-network adapter fixture<br/>no provider account or charge"]
-    P3["GATED<br/>P3. Sandbox integration<br/>proposal defined; implementation stopped"]
+    P3["GATED<br/>P3. Sandbox integration<br/>P3A-1 contract; activation stopped"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
     P0 --> P1 --> P2 --> P3 --> P4
@@ -119,6 +119,9 @@ implementing the five-part P3 plan in
 [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
 P3 remains gated until its core profile, Store Lite transition service,
 external adapter, offline rehearsal, and sandbox proof are separately approved.
+P3A-1 supplies only the data-only adapter-profile and server-signature route
+vocabulary. Database-bound enablement evidence and every executable/provider
+step remain stopped.
 
 ## Status rule
 

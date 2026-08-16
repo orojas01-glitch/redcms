@@ -216,6 +216,8 @@ Every package declares:
 - Settings schema, including which settings are secret references
 - Ordered immutable migrations and their checksums
 - Public and administrator route declarations
+- Data-only `server-signature` route declarations for separately reviewed
+  server-to-server event profiles
 - Optional closed public-mutation declarations, separate from routes
 - Background jobs and retry policy
 - Exact outbound network hosts
@@ -1104,6 +1106,24 @@ administrator routes, HTML, redirects, uploads, files, sessions, server
 variables, database connections, or arbitrary headers. It also does not make a
 route-bearing package eligible for enablement: all current enablement profiles
 continue to reject routes until richer package lifecycle gates are reviewed.
+
+P3A-1 adds one declaration-only exception to the general unsafe-method/CSRF
+rule: a route may use `authentication: server-signature` only when it is one
+exact static public `POST` with `csrf: not-applicable`. This value does not
+verify a signature, register a handler, expose an endpoint, or enter either
+public dispatcher. Ordinary browser POST routes still require CSRF. The
+payment-adapter profile requires exactly one such route and keeps explicit
+database-bound preflight, registrar, ingress, and atomic-enablement blockers.
+
+`includes/addon_payment_adapter_preflight_helpers.php` recognizes only one
+future Store Lite Stripe Checkout adapter surface: package type `adapter`, one
+namespaced adapter, one required `redcms.store-lite` dependency, exactly two
+secret-reference setting declarations, up to six null-default ordinary
+settings, one to sixteen migrations, the single server-signature route, no UI,
+browser-mutation, permission, job, or asset surface, and only
+`api.stripe.com` as a declared outbound host. Its deterministic profile is
+manifest data only. It reads no database or secret, loads no package, opens no
+network connection, exposes no route, and cannot enable the package.
 
 ## Public Mutation Declaration Boundary
 
