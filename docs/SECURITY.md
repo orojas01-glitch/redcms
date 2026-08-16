@@ -819,6 +819,19 @@ request is connected. The payment-adapter profile remains activation-blocked
 until separate database-bound, ingress, registrar, and atomic lifecycle gates
 are implemented and approved.
 
+P3A-2 connects only the database-bound readiness portion. The preflight
+requires database-persisted Owner `addons.enable` authority, exact current
+installed-disabled adapter registry identity, an exact current enabled Store
+Lite dependency in that same selected database, immutable migration-ledger
+agreement, and present InnoDB storage for every bounded table touched by the
+guarded adapter migrations. It exposes only counts and hashes and performs no
+write. Dependency disablement, ledger drift, missing tables, unsupported
+engines, catalog drift, and absent Owner authority fail closed. It does not
+read settings, resolve either secret reference, include package PHP, register
+or expose the declared route, inspect a request, or open a network connection.
+Registrar validation, server-event ingress, and atomic enablement remain
+explicit blockers.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
