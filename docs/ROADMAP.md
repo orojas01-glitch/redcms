@@ -60,16 +60,18 @@ fixture and later gated sandbox are separate gates; see
 the fixture boundary in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 
-P3 planning is defined and all five closed P3A core-contract slices are
-implemented, but the adapter package, endpoint, and every provider step remain
-separately gated. The generic enablement command still refuses adapters and
-outbound hosts; the narrow P3A runner accepts only the exact reviewed profile.
-Store Lite has no
-payment-event transition service, and browser public-mutation ingress cannot be
-reused as a provider webhook. The P3 proposal sequences those prerequisites,
-an external adapter, offline lifecycle proof, and a newly isolated Stripe
-Sandbox without authorizing an account, key, network request, simulated
-payment, hosted change, or production work. See
+P3 planning is defined, all five closed P3A core-contract slices are
+implemented, and the separately distributed Store Lite package completes P3B
+through version 0.1.35. The adapter package, endpoint, and every provider step
+remain separately gated. The generic enablement command still refuses adapters
+and outbound hosts; the narrow P3A runner accepts only the exact reviewed
+profile. Store Lite now owns the provider-neutral transition decision,
+append-only history migration, transactional writer/service, and disposable
+lifecycle rehearsal. Browser public-mutation ingress still cannot be reused as
+a provider webhook. The P3 proposal sequences the external adapter, offline
+lifecycle proof, and a newly isolated Stripe Sandbox without authorizing an
+account, key, network request, simulated payment, hosted change, or production
+work. See
 [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
 
 P3A-1 adds the non-executing Stripe/Store Lite adapter manifest profile and a
@@ -118,8 +120,17 @@ lifecycle lock and target-package lock, then commits only the exact
 fact. It is Owner-authorized, dry-run first, backup-bound, database-bound, and
 stale-plan safe. It invokes no adapter or route handler, exposes no endpoint,
 resolves no secret value, publishes no runtime, and opens no network
-connection. P3B, the Store Lite payment-event transition service, is next; no
-package or client installation was changed by this core batch.
+connection. No package or client installation was changed by this core batch.
+
+P3B is complete in the separately distributed Store Lite package: 0.1.32 adds
+the pure provider-neutral transition decision, 0.1.33 adds the append-only
+history migration, 0.1.34 adds the typed transactional writer/service, and
+0.1.35 completes disposable lifecycle, rollback, isolation, and exact-cleanup
+rehearsal. P3C-1 is next: freeze and test a dependency-free foundation for the
+external `redcms.store-lite-stripe-checkout` package. It may define only the
+package identity and pure provider-response/event normalization contracts. It
+does not yet add a migration, registrar, route, webhook, secret, SDK, outbound
+request, Store Lite transition invocation, client deployment, or payment.
 
 ### Launch Priority: Per-Page SEO Metadata
 

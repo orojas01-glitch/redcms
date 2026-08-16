@@ -1,7 +1,9 @@
 # Store Lite Payment Adapter P3 Sandbox Proposal
 
 Status: P3 planning is approved. Separately approved P3A-1 through P3A-5 core
-slices are complete; P3A is closed and P3B through P3E remain gated.
+slices and Store Lite P3B-1 through P3B-4 are complete; P3A and P3B are
+closed. P3C-1 is the next exact gate, while P3C-2 and later work through P3E
+remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.
@@ -21,7 +23,9 @@ CLI-only atomic lifecycle runner: it proves exact stored configuration and
 opaque secret-reference availability, recomputes the complete P3A plan under
 locks, and commits only the reviewed state transition and bounded audit fact.
 None of these slices exposes the route, invokes a handler, resolves secret
-bytes, or contacts a provider.
+bytes, or contacts a provider. Store Lite 0.1.32 through 0.1.35 then complete
+the provider-neutral P3B transition, history, transactional-service, and
+lifecycle-rehearsal layers without adding an adapter or provider access.
 
 ## Outcome
 
@@ -54,8 +58,11 @@ deliberately refuse adapters, secret-bearing operational packages, outbound
 hosts, and webhook-shaped server events. The completed narrow P3A runner can
 enable only the exact reviewed adapter profile after full local evidence, but
 it does not expose the declared route or provide a general outbound HTTP
-executor. Store Lite 0.1.31 has no payment-event service,
-paid/refund/reversal transition writer, or matching status-history vocabulary.
+executor. The separately distributed Store Lite 0.1.35 package now owns the
+typed `commerce.orders` payment-event service, paid/refund/reversal transition
+writer, matching append-only history vocabulary, and lifecycle rehearsal.
+It accepts only an already-verified provider-neutral event and never receives
+provider transport or credential material.
 The existing browser public-mutation route is not a webhook endpoint: its
 Origin, anonymous-subject, CSRF, and browser idempotency contract must not be
 weakened or reused for Stripe.
@@ -116,6 +123,15 @@ installing an adapter or changing a client.
 
 ## P3B — Store Lite Payment-Event Service
 
+Status: Complete in the separately distributed Store Lite package. Version
+0.1.32 adds the pure transition decision, 0.1.33 adds one append-only history
+migration, 0.1.34 adds the typed transactional writer/service, and 0.1.35 adds
+the disposable lifecycle rehearsal. The proof covers install-disabled,
+upgrade, enable, apply, replay, refusal, disable/re-enable, rollback, two-client
+isolation, and exact database/grant/project/process cleanup. It creates no
+adapter, credential, webhook, provider object, request, payment, or client
+deployment.
+
 Upgrade the separately distributed Store Lite package through append-only
 migrations and a typed internal service. Store Lite—not the adapter—must own
 the order transition transaction.
@@ -137,9 +153,25 @@ order.
 ## P3C — Separately Distributed Stripe Adapter
 
 Create the adapter outside the clean RED-CMS starter and outside the Store Lite
-base package. Its proposed package identity is
-`redcms.store-lite-stripe-checkout`; the exact identifier and repository name
-remain review decisions until P3C begins.
+base package. Its fixed package identity is
+`redcms.store-lite-stripe-checkout`; its fixed repository name is
+`redcms-store-lite-stripe-checkout`. The repository does not exist merely
+because this document fixes those names: repository creation and visibility
+remain a separately approved external action.
+
+### P3C-1 — Dependency-Free Package Foundation
+
+The first P3C slice may create only the external package skeleton, its exact
+data-only manifest identity, and dependency-free pure contracts that normalize
+a reviewed checkout response and an already-signature-verified provider event
+into the closed P0/P2 vocabulary. Fixtures must reject extra, malformed,
+oversized, mismatched, secret-bearing, or browser-derived input without loading
+core or Store Lite runtime code.
+
+P3C-1 adds no migration, package registrar, route, webhook verifier, secret
+reference, HTTP client, Stripe SDK, outbound connection, database writer,
+Store Lite service invocation, browser return handler, client installation, or
+payment. Those capabilities require later separately reviewed P3C slices.
 
 The adapter owns only provider-specific state, including:
 

@@ -75,7 +75,8 @@ value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
 The optional post-release payment-adapter path now has all five closed P3A core
-slices. P3A-1 recognizes only the exact adapter manifest and declaration-only
+slices and all four separately distributed Store Lite P3B slices. P3A-1
+recognizes only the exact adapter manifest and declaration-only
 server-signature route. P3A-2 adds read-only Owner, same-database enabled Store
 Lite, immutable migration-ledger, and InnoDB table evidence. P3A-3 refreshes
 that evidence immediately before executing the fixed integrity-checked
@@ -91,8 +92,13 @@ backup-bound atomic runner. It requires exact stored configuration and
 value-free availability evidence for both opaque secret references, recomputes
 the full P3A plan under locks, and commits only the exact enabled transition
 plus one bounded audit fact. It still invokes no handler, resolves no secret
-value, exposes no endpoint, or contacts a provider. P3A is complete; P3B is
-next, and no adapter package or client deployment exists.
+value, exposes no endpoint, or contacts a provider. Store Lite 0.1.32 through
+0.1.35 then add the provider-neutral transition decision, append-only history
+migration, transactional writer/service, and disposable lifecycle rehearsal.
+P3A and P3B are complete. P3C-1, the dependency-free foundation for the
+separately distributed `redcms.store-lite-stripe-checkout` adapter, is next;
+no adapter repository, endpoint, dependency, provider access, or client
+deployment exists.
 Adapters, operational writable route/tool actions, richer package-runtime
 secret surfaces, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
@@ -1434,8 +1440,20 @@ request bootstrap excludes the disabled package.
     secret-reference availability evidence, repeats the complete plan under
     lifecycle and package locks, and atomically commits only the enabled state
     plus one value-free audit fact. It resolves no secret bytes, invokes no
-    handler, links no route, and contacts no provider. P3B is next; no package
-    or client was changed by this core batch.
+    handler, links no route, and contacts no provider. No package or client was
+    changed by this core batch.
+
+103. The separately distributed Store Lite package completes P3B through
+    version 0.1.35. Versions 0.1.32 through 0.1.35 respectively add the pure
+    provider-neutral transition decision, append-only payment-event history
+    migration, typed transactional writer/service, and disposable lifecycle
+    rehearsal. The rehearsal covers upgrade, enable, apply, replay, refusal,
+    disable/re-enable, rollback, two-client isolation, and exact cleanup. The
+    next exact gate is P3C-1: a dependency-free external package foundation for
+    `redcms.store-lite-stripe-checkout`, with identity and pure normalization
+    contracts only. No repository creation, dependency, endpoint, credential,
+    provider request, payment, or client deployment is authorized by this
+    status update.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

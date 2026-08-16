@@ -1,7 +1,8 @@
 # RED-CMS 5.1 And Store Lite Progress
 
 Last updated: 2026-08-16 after the published `v5.1.0` release, completed Store
-Lite basic-demo proof, and all five closed P3A payment-adapter core slices.
+Lite basic-demo proof, all five closed P3A payment-adapter core slices, and the
+separately distributed Store Lite 0.1.35 P3B lifecycle proof.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -76,8 +77,8 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3A-5 completed the separate Owner-authorized atomic adapter runner with exact stored-setting and opaque-secret-availability evidence, locked plan revalidation, transactional state/audit commit, and disposable rollback/cleanup proof. It added no adapter package, webhook, provider request, or client change. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A-1 through P3A-5 are complete and the next exact gate is P3B, the Store Lite-owned payment-event transition service. No adapter or webhook is active. |
+| What just finished? | P3B completed in separately distributed Store Lite 0.1.35: provider-neutral transition policy, append-only history migration, typed transactional service, and a disposable lifecycle rehearsal with rollback, client isolation, and exact cleanup. It added no adapter, webhook, credential, provider request, or client deployment. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A and P3B are complete. The next exact gate is P3C-1, the dependency-free identity and pure normalization-contract foundation for the separately distributed Stripe Checkout adapter. No adapter repository, endpoint, dependency, webhook, or provider access is active. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
 | What remains after this gate? | Nothing required for the basic-demo target. Hosted PayPal/card adapters remain later provider-neutral work and are not implied by this closeout. |
@@ -99,19 +100,21 @@ flowchart LR
     A3["COMPLETE<br/>P3A-3. Registrar validation"]
     A4["COMPLETE<br/>P3A-4. Closed raw event ingress"]
     A5["COMPLETE<br/>P3A-5. Atomic enablement<br/>closed core runner"]
-    P3B["NEXT<br/>P3B. Store Lite event service"]
-    P3C["GATED<br/>P3C-D. Adapter + offline proof"]
+    P3B["COMPLETE<br/>P3B. Store Lite event service<br/>through 0.1.35 lifecycle proof"]
+    P3C1["NEXT<br/>P3C-1. External adapter foundation<br/>identity + pure contracts"]
+    P3C2["GATED<br/>P3C-2+. Adapter runtime work"]
+    P3D["GATED<br/>P3D. Offline lifecycle proof"]
     P3E["GATED<br/>P3E. New Stripe Sandbox proof"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3E --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C1 --> P3C2 --> P3D --> P3E --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5 complete;
-    class P3B active;
-    class P3C,P3E,P4 gated;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B complete;
+    class P3C1 active;
+    class P3C2,P3D,P3E,P4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -138,8 +141,12 @@ dry-run-first, Owner-authorized, backup-bound atomic runner; it proves exact
 stored settings and opaque secret-reference availability, repeats the full P3A
 plan under locks, and commits only the enabled state plus a value-free audit
 fact. It invokes no handler, resolves no secret bytes, exposes no endpoint, and
-contacts no provider. P3A is complete; P3B and every provider step remain
-stopped.
+contacts no provider. P3B then adds only Store Lite-owned provider-neutral
+transition, history, transactional-service, and lifecycle-rehearsal layers in
+versions 0.1.32 through 0.1.35. P3A and P3B are complete. P3C-1 is active only
+as a separately distributed dependency-free package-foundation gate; every
+route, credential, dependency, provider request, simulated payment, and client
+deployment remains stopped.
 
 ## Status rule
 
