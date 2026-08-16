@@ -95,7 +95,7 @@ recorded in
 flowchart LR
     P0["COMPLETE<br/>P0. Provider-neutral contract<br/>events, secrets, replay, refunds"]
     P1["COMPLETE<br/>P1. Stripe Checkout candidate<br/>USD hosted-card pilot"]
-    P2["GATED<br/>P2. Non-network adapter fixture<br/>no provider account or charge"]
+    P2["COMPLETE<br/>P2. Non-network adapter fixture<br/>no provider account or charge"]
     P3["GATED<br/>P3. Sandbox integration<br/>client-local test credentials"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
@@ -103,16 +103,19 @@ flowchart LR
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1 complete;
-    class P2,P3,P4 gated;
+    class P0,P1,P2 complete;
+    class P3,P4 gated;
 ```
 
-Gates P0 and P1 define no credentials, webhook, checkout, charge, or order
-change. Read the provider-neutral contract in
+Gates P0 through P2 define no credentials, webhook, checkout, charge, order
+change, package, or database. P2 is a CLI-only contract fixture, not a payment
+integration. Read the provider-neutral contract in
 [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md) and the
 reversible USD pilot decision in
-[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md) before
-proposing P2.
+[`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md), then the
+P2 fixture record in
+[`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md), before
+proposing P3.
 
 ## Status rule
 

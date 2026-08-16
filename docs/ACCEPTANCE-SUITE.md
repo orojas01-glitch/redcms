@@ -232,6 +232,15 @@ server product state, and returns no partial line for draft, unavailable,
 currency-drifted, malformed, stale-variant, out-of-stock, unknown-field, or
 invalid-quantity input. It loads no package or core runtime and opens no
 database, request, session, cookie, route, or commerce service.
+The separate Store Lite Stripe Checkout P2 contract fixture runs alongside
+those pure Store Lite checks before any disposable database is created. It
+accepts only a selected-client immutable USD order snapshot and derives a
+closed hosted-checkout plan; validates only an opaque session reference and
+canonical Stripe HTTPS redirect; requires an already-verified raw-body boundary
+before parsed event normalization; refuses configuration, client, provider,
+order, amount, currency, timestamp, replay, refund/reversal, and browser-return
+shortcuts; and returns no order transition. It has no database, filesystem,
+request-global, package, lifecycle, provider SDK, credential, or network path.
 The separately distributed Store Lite 0.1.13 package has two additional
 cross-repository disposable database gates. Its 38-assertion migration suite
 applies the exact five manifest migrations and proves ten package-owned InnoDB

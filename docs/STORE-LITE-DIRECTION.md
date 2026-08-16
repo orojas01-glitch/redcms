@@ -733,8 +733,10 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    event, secret, webhook, replay, refund/reversal, lifecycle, and acceptance
    contract is documented without adding payment code. Gate P1 separately
    selects Stripe Checkout's hosted full-page flow as the first provisional USD
-   hosted-card candidate. The next separately approved gate is the non-network
-   adapter fixture under
+   hosted-card candidate. Completed Gate P2 is a CLI-only, non-network
+   Stripe Checkout boundary fixture under
+   [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md). The next
+   separately approved gate is a disposable client-only sandbox proposal under
    [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
 
 Events Calendar remains the second independent vertical proof. Store Lite
