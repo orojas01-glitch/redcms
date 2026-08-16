@@ -20,7 +20,9 @@ with the clean starter.
 Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
 
-The optional post-release payment-adapter track has completed P3A. Core can
+The optional post-release payment-adapter track has completed P3A and the
+separately distributed Store Lite package has completed P3B through version
+0.1.35. Core can
 recognize the closed Stripe Checkout adapter manifest, refresh exact
 Owner/same-database Store Lite/migration/InnoDB evidence, and validate one
 adapter plus one non-routable server-event registration. The temporary registry
@@ -35,8 +37,11 @@ for both opaque secret references, recomputes the complete plan under lifecycle
 and package locks, and atomically records only the reviewed adapter's
 `installed_disabled` to `enabled` transition plus one bounded audit fact. It
 still invokes no registered handler, resolves no secret value, publishes no
-route, and opens no network connection. P3B, the separately distributed Store
-Lite payment-event transition service, is next. No endpoint, adapter package,
+route, and opens no network connection. Store Lite now owns the
+provider-neutral payment-event transition decision, append-only history
+migration, transactional writer/service, and disposable lifecycle rehearsal.
+P3C-1, the dependency-free foundation of the separately distributed Stripe
+Checkout adapter, is next. No endpoint, adapter package, provider dependency,
 provider request, or client deployment is bundled or activated.
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
