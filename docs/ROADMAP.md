@@ -76,6 +76,14 @@ atomic-enablement blockers. It does not resolve a secret, load a package, open
 a connection, expose a webhook, alter Store Lite, or advance P3 beyond its
 first core-contract slice.
 
+P3A-2 adds read-only, database-selected evidence for persisted Owner enable
+authority, the exact current enabled Store Lite dependency, the adapter's
+immutable migration ledger, and every migration-touched table as InnoDB. The
+result exposes only bounded counts and hashes, changes no database fact, and
+still blocks registrar validation, server-event ingress, and atomic
+enablement. It does not inspect settings or secret values, execute package
+PHP, expose a route, contact Stripe, or alter any client installation.
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

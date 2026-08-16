@@ -5,11 +5,13 @@ sandbox creation, credential provisioning, outbound network access, webhook
 forwarding, simulated payment, and deployment are not yet authorized by this
 document. P0 through P2 remain complete; P3 remains gated.
 
-P3A-1 now implements only the data-only manifest profile and its
-`server-signature` route vocabulary. It recognizes the closed Stripe/Store
-Lite adapter surface but cannot enable a package or expose the route. The
-database-bound Owner/dependency/migration-table preflight, registrar
-validation, ingress, and atomic lifecycle runner remain later P3A work.
+P3A-1 implements the data-only manifest profile and its `server-signature`
+route vocabulary. P3A-2 now composes that profile with read-only evidence for
+persisted Owner enable authority, the exact enabled Store Lite dependency,
+the immutable adapter migration ledger, and migration-touched InnoDB tables in
+one client database. Neither slice can enable a package or expose the route.
+Registrar validation, ingress, and the atomic lifecycle runner remain later
+P3A work.
 
 ## Outcome
 
@@ -69,12 +71,17 @@ Owner-authorized, dry-run first, backup-bound, database-bound, and registration
 only. It must not resolve a secret, invoke the adapter, open a network
 connection, or expose a webhook during install or enable.
 
-The first implementation slice is intentionally smaller than the completed
-P3A gate. `includes/addon_payment_adapter_preflight_helpers.php` validates the
-manifest surface and returns deterministic blocker evidence only. The new
-`server-signature` route value is declaration-only and cannot be selected by
-the current public GET or browser public-mutation dispatchers. P3A remains
-incomplete until the database-bound and lifecycle requirements above pass.
+The first two implementation slices remain smaller than the completed P3A
+gate. `includes/addon_payment_adapter_preflight_helpers.php` validates the
+manifest surface. The separate database preflight consumes the established
+generic enablement plan, requires the target to be current and
+`installed_disabled`, requires `redcms.store-lite` to be current and enabled
+in the same selected database, verifies exact migration-ledger evidence,
+derives only bounded package-table names from the guarded immutable migration
+files, and requires every exact table to exist as InnoDB. It returns only
+counts and hashes. The `server-signature` route value remains declaration-only
+and cannot be selected by either current public dispatcher. P3A remains
+incomplete until registrar, ingress, and atomic lifecycle requirements pass.
 
 ## P3B — Store Lite Payment-Event Service
 

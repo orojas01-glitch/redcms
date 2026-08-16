@@ -1125,6 +1125,19 @@ browser-mutation, permission, job, or asset surface, and only
 manifest data only. It reads no database or secret, loads no package, opens no
 network connection, exposes no route, and cannot enable the package.
 
+`includes/addon_payment_adapter_database_preflight_helpers.php` is the
+separate P3A-2 database bridge. It consumes only a validated package, the
+current catalog, a selected client database connection, and an administrator
+record id. It reuses the established enablement plan to require persisted
+Owner `addons.enable` authority, current installed-disabled adapter identity,
+the exact current enabled `redcms.store-lite` dependency, and conflict-free
+capability and route namespaces. It also requires all declared migrations to
+match the immutable ledger, derives a bounded table set from those guarded
+migration files, and verifies every exact table exists as InnoDB. Its output
+contains counts and SHA-256 evidence, not a database name, table name, setting,
+secret reference, or value. It never includes package PHP and still blocks
+registrar validation, server-event ingress, and atomic enablement.
+
 ## Public Mutation Declaration Boundary
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic
