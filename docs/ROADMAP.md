@@ -60,6 +60,15 @@ fixture and later gated sandbox are separate gates; see
 the fixture boundary in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 
+P3 planning is defined but implementation remains gated. The current core
+intentionally refuses adapter/outbound-host enablement, Store Lite has no
+payment-event transition service, and browser public-mutation ingress cannot be
+reused as a provider webhook. The P3 proposal sequences those prerequisites,
+an external adapter, offline lifecycle proof, and a newly isolated Stripe
+Sandbox without authorizing an account, key, network request, simulated
+payment, hosted change, or production work. See
+[`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

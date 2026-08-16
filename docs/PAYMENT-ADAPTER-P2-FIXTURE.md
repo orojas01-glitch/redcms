@@ -78,8 +78,9 @@ order, customer, or business data to the clean starter.
 
 ## Next Gate
 
-P3 remains separately gated. It requires an explicit proposal and approval for
-one disposable client-only Stripe test environment, server-local test-secret
-reference, raw-body cryptographic verification, sandbox provider lookup where
-needed, lifecycle proof, rollback, and exact cleanup. It does not authorize a
-live credential, live transaction, other client, or production deployment.
+P3 remains separately gated. Its approved planning boundary divides the work
+into core profile, Store Lite transition service, external adapter, offline
+rehearsal, and Stripe Sandbox proof under
+[`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
+The proposal does not authorize implementation, credential access, network
+activity, a live transaction, another client, or production deployment.
