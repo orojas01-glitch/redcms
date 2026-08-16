@@ -96,7 +96,7 @@ flowchart LR
     P0["COMPLETE<br/>P0. Provider-neutral contract<br/>events, secrets, replay, refunds"]
     P1["COMPLETE<br/>P1. Stripe Checkout candidate<br/>USD hosted-card pilot"]
     P2["COMPLETE<br/>P2. Non-network adapter fixture<br/>no provider account or charge"]
-    P3["GATED<br/>P3. Sandbox integration<br/>P3A-2 database evidence; activation stopped"]
+    P3["GATED<br/>P3. Sandbox integration<br/>P3A-3 registrar evidence; activation stopped"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
     P0 --> P1 --> P2 --> P3 --> P4
@@ -121,8 +121,10 @@ P3 remains gated until its core profile, Store Lite transition service,
 external adapter, offline rehearsal, and sandbox proof are separately approved.
 P3A-1 supplies the data-only adapter profile and server-signature route
 vocabulary. P3A-2 adds read-only Owner, same-database Store Lite dependency,
-immutable migration-ledger, and InnoDB table evidence. Registrar validation,
-server-event ingress, atomic enablement, and every provider step remain
+immutable migration-ledger, and InnoDB table evidence. P3A-3 refreshes those
+facts and proves exact registration of one adapter and one non-routable
+server-event handler without invoking either callback or publishing runtime.
+Server-event ingress, atomic enablement, and every provider step remain
 stopped.
 
 ## Status rule

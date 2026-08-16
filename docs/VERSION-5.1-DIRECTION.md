@@ -74,6 +74,16 @@ postconditions before committing package state, replay evidence, and a
 value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
+The optional post-release payment-adapter path now has three closed core
+slices. P3A-1 recognizes only the exact adapter manifest and declaration-only
+server-signature route. P3A-2 adds read-only Owner, same-database enabled Store
+Lite, immutable migration-ledger, and InnoDB table evidence. P3A-3 refreshes
+that evidence immediately before executing the fixed integrity-checked
+registrar, requires exactly the declared adapter and route registrations, and
+discards the request-local registry without invoking either handler or
+publishing runtime. It exposes no route, secret, provider request, lifecycle
+mutation, or client deployment. Server-event ingress and atomic adapter
+enablement remain separate blocked gates.
 Adapters, operational writable route/tool actions, richer package-runtime
 secret surfaces, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.

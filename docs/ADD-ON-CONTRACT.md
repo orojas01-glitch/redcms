@@ -1138,6 +1138,19 @@ contains counts and SHA-256 evidence, not a database name, table name, setting,
 secret reference, or value. It never includes package PHP and still blocks
 registrar validation, server-event ingress, and atomic enablement.
 
+`includes/addon_payment_adapter_registrar_helpers.php` is the separate P3A-3
+registration-only bridge. Its production boundary first recomputes P3A-2 from
+the selected database, current catalog, validated package, and Owner record.
+Only then may the fixed integrity-checked entry point return its registrar.
+The request-local registry must contain exactly the one declared adapter and
+one declared server-event route; output, exceptions, duplicates, undeclared or
+missing registrations, identity drift, and evidence mismatch fail closed. Core
+does not invoke either handler and does not return or publish the registry. Its
+result contains only identities, counts, and hashes, keeps activation and state
+mutation false, and retains the server-event-ingress and atomic-enablement
+blockers. The trusted registrar receives no core request, secret, network, or
+database capability, but remains in-process PHP and therefore is not a sandbox.
+
 ## Public Mutation Declaration Boundary
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic

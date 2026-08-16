@@ -829,8 +829,21 @@ write. Dependency disablement, ledger drift, missing tables, unsupported
 engines, catalog drift, and absent Owner authority fail closed. It does not
 read settings, resolve either secret reference, include package PHP, register
 or expose the declared route, inspect a request, or open a network connection.
-Registrar validation, server-event ingress, and atomic enablement remain
-explicit blockers.
+At the P3A-2 checkpoint, registrar validation, server-event ingress, and atomic
+enablement remained explicit blockers.
+
+P3A-3 closes only the registration-shape blocker. Its production entry point
+reruns P3A-2 rather than accepting stale caller evidence, then uses the fixed
+integrity-checked registrar loader. The temporary registry must contain exactly
+the manifest-declared adapter and server-event route and no other registration.
+Core invokes neither callback, exposes no route, publishes no request runtime,
+and returns only package/registration identities, counts, and SHA-256 evidence.
+Invalid database evidence fails before package PHP loads; output, duplicate,
+undeclared, missing, checksum-drifted, or malformed registration fails closed.
+The operation changes no lifecycle, migration, setting, authority, or business
+row. Because registrar PHP is trusted in-process code rather than a sandbox,
+first-party review must still enforce its registration-only no-network and
+no-side-effect contract. Ingress and atomic enablement remain blocked.
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
