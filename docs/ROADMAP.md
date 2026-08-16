@@ -60,8 +60,9 @@ fixture and later gated sandbox are separate gates; see
 the fixture boundary in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 
-P3 planning is defined but implementation remains gated. The current core
-intentionally refuses adapter/outbound-host enablement, Store Lite has no
+P3 planning is defined and its first four closed core-contract slices are
+implemented, but adapter activation and every provider step remain gated. The
+current core intentionally refuses adapter/outbound-host enablement, Store Lite has no
 payment-event transition service, and browser public-mutation ingress cannot be
 reused as a provider webhook. The P3 proposal sequences those prerequisites,
 an external adapter, offline lifecycle proof, and a newly isolated Stripe
@@ -93,6 +94,18 @@ registry or route, resolves no secret, performs no lifecycle write, and opens
 no core network path. The registrar remains reviewed trusted in-process PHP,
 not a sandbox. Server-event ingress and atomic payment-adapter enablement remain
 explicit blockers.
+
+P3A-4 adds the closed core server-event ingress contract without linking a
+webhook. It accepts only caller-supplied evidence for the exact declared static
+`POST` path, one complete canonical three-header capture, a 1-to-65,536-byte
+raw body, and an explicit receipt time. The raw body and complete
+`Stripe-Signature` value remain transient verification material outside
+ordinary object properties; only bounded metadata and SHA-256 evidence can be
+serialized or logged. Core does not read PHP request globals, parse JSON,
+resolve a secret, verify the provider signature, invoke a handler, access a
+database, emit a response, publish a route, or contact Stripe. Provider
+verification remains P3C work, and atomic payment-adapter enablement is the
+remaining P3A blocker.
 
 ### Launch Priority: Per-Page SEO Metadata
 

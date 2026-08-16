@@ -843,7 +843,29 @@ undeclared, missing, checksum-drifted, or malformed registration fails closed.
 The operation changes no lifecycle, migration, setting, authority, or business
 row. Because registrar PHP is trusted in-process code rather than a sandbox,
 first-party review must still enforce its registration-only no-network and
-no-side-effect contract. Ingress and atomic enablement remain blocked.
+no-side-effect contract. At the P3A-3 checkpoint, ingress and atomic enablement
+remained blocked.
+
+P3A-4 closes only the core ingress-contract blocker. It requires a fresh valid
+P3A-3 plan and accepts no ambient request state: callers must supply the exact
+`POST` method, exact static path with no query, an explicitly complete and
+ordered capture of only `Content-Type`, `Content-Length`, and
+`Stripe-Signature`, the exact nonempty raw body, and an integer receipt time.
+The RED-CMS body limit is 65,536 bytes; the complete signature header is
+treated as opaque bounded verification material. Core does not parse the
+provider header, validate its timestamp, resolve the endpoint secret, or parse
+JSON. Those steps belong to the future separately distributed adapter and must
+occur in that order before database or service access.
+
+Raw body and signature bytes live only in a request-local `WeakMap` behind a
+final value-free object. JSON, debug output, object casts, and capture evidence
+contain only identities, byte count, receipt time, and SHA-256 metadata;
+cloning and serialization are refused. The helper reads no `$_SERVER`,
+`php://input`, cookie, or session; invokes no registered callback; emits no
+response; accesses no database or network; and exposes no endpoint or route.
+Malformed, incomplete, extra, duplicated, reordered, mismatched, empty, or
+oversized transport evidence fails closed. Atomic adapter enablement remains
+blocked.
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

@@ -266,6 +266,19 @@ callbacks are never returned or invoked; entrypoint/registrar output, missing
 or duplicate registrations, and tampered evidence fail closed without output
 leakage; and the core validator contains no request, setting, secret, network,
 or handler-invocation path.
+The separate 26-assertion dependency-free P3A-4 fixture binds that exact
+registrar evidence to one closed static `POST` ingress shape. It proves
+deterministic readiness, exact canonical header/body/receipt capture, exact
+unmodified by-reference verification material, and value-free JSON, debug,
+object-cast, and hash evidence. It proves cloning and serialization refusal;
+accepts opaque invalid JSON and an opaque signature only to demonstrate that
+core performs neither parsing nor provider verification; and refuses tampered
+plans, wrong methods, query targets, missing/reordered/extra headers,
+noncanonical content metadata, mismatched/empty/oversized bodies, control bytes,
+and invalid receipt time. Both registered callbacks remain uninvoked, and a
+source check proves the helper has no PHP-global request, JSON parser,
+database, secret, network, or handler path. This does not expose an endpoint or
+make the adapter enable-ready.
 The separately distributed Store Lite 0.1.13 package has two additional
 cross-repository disposable database gates. Its 38-assertion migration suite
 applies the exact five manifest migrations and proves ten package-owned InnoDB

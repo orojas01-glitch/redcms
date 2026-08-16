@@ -213,6 +213,8 @@ function red_addon_payment_adapter_registrar_test_database_plan(array $package)
     return $plan;
 }
 
+// P3A-4 reuses only the package/database fixture builders above.
+if (!defined('RED_ADDON_PAYMENT_ADAPTER_REGISTRAR_FIXTURE_ONLY')) {
 try {
     $migration =
         "CREATE TABLE RED_Addon_Stripe_Registrar_Fixture_Attempts (\n" .
@@ -422,6 +424,7 @@ try {
     red_addon_payment_adapter_registrar_test_remove_tree($temporaryRoot);
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 ?>

@@ -1,9 +1,10 @@
 # Store Lite Payment Adapter P3 Sandbox Proposal
 
-Status: P3 planning is approved. P3 implementation, Stripe account access,
-sandbox creation, credential provisioning, outbound network access, webhook
-forwarding, simulated payment, and deployment are not yet authorized by this
-document. P0 through P2 remain complete; P3 remains gated.
+Status: P3 planning is approved. Separately approved P3A-1 through P3A-4 core
+slices are complete; P3A-5 atomic enablement and P3B through P3E remain gated.
+Stripe account access, sandbox creation, credential provisioning, outbound
+network access, webhook forwarding, simulated payment, and deployment are not
+authorized by this document. P0 through P2 remain complete.
 
 P3A-1 implements the data-only manifest profile and its `server-signature`
 route vocabulary. P3A-2 composes that profile with read-only evidence for
@@ -13,8 +14,11 @@ one client database. P3A-3 refreshes that evidence, loads only the fixed
 integrity-checked entry point, and requires exactly one declared adapter and
 one declared server-event route registration. Its request-local registry is
 reduced to counts and hashes and discarded; neither registered handler is
-invoked or published. None of these slices can enable a package or expose the
-route. Ingress and the atomic lifecycle runner remain later P3A work.
+invoked or published. P3A-4 adds a closed, unlinked core ingress contract that
+preserves explicit bounded raw transport material for a future adapter
+verifier without reading a live request or parsing it. None of these slices
+can enable a package or expose the route. The atomic lifecycle runner remains
+the final P3A blocker.
 
 ## Outcome
 
@@ -74,7 +78,7 @@ Owner-authorized, dry-run first, backup-bound, database-bound, and registration
 only. It must not resolve a secret, invoke the adapter, open a network
 connection, or expose a webhook during install or enable.
 
-The first three implementation slices remain smaller than the completed P3A
+The first four implementation slices remain smaller than the completed P3A
 gate. `includes/addon_payment_adapter_preflight_helpers.php` validates the
 manifest surface. The separate database preflight consumes the established
 generic enablement plan, requires the target to be current and
@@ -85,9 +89,17 @@ files, and requires every exact table to exist as InnoDB. It returns only
 counts and hashes. The registration-only validator reruns that database
 preflight immediately before loading the fixed registrar, requires the exact
 manifest registration shape, and returns no callback or registry. The
+separate `includes/addon_payment_adapter_server_event_ingress_helpers.php`
+binds that evidence to one exact static `POST`, an explicit complete canonical
+capture of `Content-Type`, `Content-Length`, and `Stripe-Signature`, an exact
+1-to-65,536-byte raw body, and an explicit receipt time. Verification material
+is transient and excluded from JSON, debug output, object casts, cloning, and
+serialization. The helper does not read PHP request globals, parse JSON,
+resolve a secret, verify a provider signature, invoke a callback, access a
+database, emit a response, publish runtime, or contact Stripe. The
 `server-signature` route remains non-routable and cannot be selected by either
-current public dispatcher. P3A remains incomplete until ingress and atomic
-lifecycle requirements pass.
+current public dispatcher. P3A remains incomplete until the atomic lifecycle
+requirement passes.
 
 ## P3B — Store Lite Payment-Event Service
 
