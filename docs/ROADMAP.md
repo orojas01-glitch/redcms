@@ -60,9 +60,11 @@ fixture and later gated sandbox are separate gates; see
 the fixture boundary in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 
-P3 planning is defined and its first four closed core-contract slices are
-implemented, but adapter activation and every provider step remain gated. The
-current core intentionally refuses adapter/outbound-host enablement, Store Lite has no
+P3 planning is defined and all five closed P3A core-contract slices are
+implemented, but the adapter package, endpoint, and every provider step remain
+separately gated. The generic enablement command still refuses adapters and
+outbound hosts; the narrow P3A runner accepts only the exact reviewed profile.
+Store Lite has no
 payment-event transition service, and browser public-mutation ingress cannot be
 reused as a provider webhook. The P3 proposal sequences those prerequisites,
 an external adapter, offline lifecycle proof, and a newly isolated Stripe
@@ -104,8 +106,20 @@ ordinary object properties; only bounded metadata and SHA-256 evidence can be
 serialized or logged. Core does not read PHP request globals, parse JSON,
 resolve a secret, verify the provider signature, invoke a handler, access a
 database, emit a response, publish a route, or contact Stripe. Provider
-verification remains P3C work, and atomic payment-adapter enablement is the
-remaining P3A blocker.
+verification remains P3C work.
+
+P3A-5 completes the closed core profile with a separate CLI-only atomic
+enablement path. Planning refreshes P3A-2, reruns the P3A-3 registration-only
+registrar, validates the P3A-4 ingress contract, requires every exact stored
+setting, and proves that both opaque secret references are available without
+resolving either value. Apply recomputes the identical plan under the shared
+lifecycle lock and target-package lock, then commits only the exact
+`installed_disabled` to `enabled` compare-and-swap and one value-free audit
+fact. It is Owner-authorized, dry-run first, backup-bound, database-bound, and
+stale-plan safe. It invokes no adapter or route handler, exposes no endpoint,
+resolves no secret value, publishes no runtime, and opens no network
+connection. P3B, the Store Lite payment-event transition service, is next; no
+package or client installation was changed by this core batch.
 
 ### Launch Priority: Per-Page SEO Metadata
 

@@ -20,7 +20,7 @@ with the clean starter.
 Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
 
-The optional post-release payment-adapter track has reached P3A-4. Core can
+The optional post-release payment-adapter track has completed P3A. Core can
 recognize the closed Stripe Checkout adapter manifest, refresh exact
 Owner/same-database Store Lite/migration/InnoDB evidence, and validate one
 adapter plus one non-routable server-event registration. The temporary registry
@@ -29,9 +29,15 @@ can then bind explicit exact `POST` transport facts, preserve at most 65,536
 unmodified raw body bytes and the complete signature header for a future
 adapter verifier, and expose only value-free metadata. It reads no PHP request
 global, parses no JSON, verifies no provider signature, exposes no route,
-resolves no secret, writes no state, and contacts no provider. Atomic adapter
-enablement remains blocked; no endpoint, adapter, or client deployment is
-bundled or activated.
+resolves no secret, and contacts no provider. A separate CLI-only P3A-5 runner
+now requires exact stored configuration and value-free availability evidence
+for both opaque secret references, recomputes the complete plan under lifecycle
+and package locks, and atomically records only the reviewed adapter's
+`installed_disabled` to `enabled` transition plus one bounded audit fact. It
+still invokes no registered handler, resolves no secret value, publishes no
+route, and opens no network connection. P3B, the separately distributed Store
+Lite payment-event transition service, is next. No endpoint, adapter package,
+provider request, or client deployment is bundled or activated.
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
@@ -734,7 +740,15 @@ declaration, and every other registrar-bound transaction table must exist as
 InnoDB in the current client database. No registered handler is invoked. The
 command then atomically records `enabled` plus its bounded audit fact. Packages
 outside the four accepted profiles remain blocked behind a separately reviewed
-contract. The disable command is
+contract. Payment adapters use a separate narrower command,
+`scripts/admin-payment-adapter-enable.php`. Its dry run recomputes the complete
+P3A database, registrar, ingress, stored-setting, and opaque-secret-availability
+plan. Apply additionally requires exact database, package, version, plan,
+nonzero backup checksum, and `installed_disabled` confirmations, then repeats
+that plan under lifecycle and package locks before committing only the state
+compare-and-swap and value-free audit fact. It never resolves secret bytes,
+invokes either registered handler, links the server-event route, or contacts a
+provider. The disable command is
 likewise CLI-only and dry-run first. It requires the exact Owner
 `addons.disable` capability, current
 enabled package evidence, plan and nonzero backup checksums, and

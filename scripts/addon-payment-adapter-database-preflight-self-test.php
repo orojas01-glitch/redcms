@@ -377,6 +377,8 @@ function red_addon_payment_adapter_db_test_fingerprint(
     return hash('sha256', json_encode($material));
 }
 
+// P3A-5 reuses only the disposable package/database fixture builders above.
+if (!defined('RED_ADDON_PAYMENT_ADAPTER_DATABASE_FIXTURE_ONLY')) {
 $packageIds = [$adapterPackageId, $storePackageId];
 red_addon_payment_adapter_db_test_cleanup(
     $connection,
@@ -758,6 +760,7 @@ try {
     );
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 ?>
