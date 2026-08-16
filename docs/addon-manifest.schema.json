@@ -1018,6 +1018,31 @@
         "authentication",
         "csrf"
       ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "authentication": {
+                "const": "server-signature"
+              }
+            },
+            "required": ["authentication"]
+          },
+          "then": {
+            "properties": {
+              "scope": {
+                "const": "public"
+              },
+              "methods": {
+                "const": ["POST"]
+              },
+              "csrf": {
+                "const": "not-applicable"
+              }
+            }
+          }
+        }
+      ],
       "properties": {
         "id": {
           "$ref": "#/$defs/capability"
@@ -1041,7 +1066,8 @@
           }
         },
         "authentication": {
-          "enum": ["public", "admin", "member"]
+          "description": "server-signature is a data-only declaration for one future server-to-server POST boundary. It is not dispatched by the public route or browser public-mutation runtime.",
+          "enum": ["public", "admin", "member", "server-signature"]
         },
         "csrf": {
           "enum": ["required", "not-applicable"]

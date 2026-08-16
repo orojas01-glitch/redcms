@@ -3534,7 +3534,11 @@ if (!function_exists('red_addon_validate_manifest')) {
                 $authentication = isset($route['authentication']) && is_string($route['authentication'])
                     ? $route['authentication']
                     : '';
-                if (!in_array($authentication, ['public', 'admin', 'member'], true)) {
+                if (!in_array(
+                    $authentication,
+                    ['public', 'admin', 'member', 'server-signature'],
+                    true
+                )) {
                     red_addon_add_error($result, $routeContext . ' authentication is invalid.');
                 }
                 if ($scope === 'admin' && $authentication !== 'admin') {
@@ -3544,7 +3548,23 @@ if (!function_exists('red_addon_validate_manifest')) {
                 if (!in_array($csrf, ['required', 'not-applicable'], true)) {
                     red_addon_add_error($result, $routeContext . ' csrf policy is invalid.');
                 }
-                if (array_intersect($methods, ['POST', 'PUT', 'PATCH', 'DELETE']) && $csrf !== 'required') {
+                $serverSignatureRoute = $scope === 'public'
+                    && $authentication === 'server-signature'
+                    && $methods === ['POST']
+                    && $csrf === 'not-applicable';
+                if ($authentication === 'server-signature'
+                    && !$serverSignatureRoute
+                ) {
+                    red_addon_add_error(
+                        $result,
+                        $routeContext .
+                            ' server-signature routes require one public POST with CSRF not-applicable.'
+                    );
+                }
+                if (array_intersect($methods, ['POST', 'PUT', 'PATCH', 'DELETE'])
+                    && $csrf !== 'required'
+                    && !$serverSignatureRoute
+                ) {
                     red_addon_add_error($result, $routeContext . ' unsafe methods require CSRF protection.');
                 }
             }

@@ -241,6 +241,14 @@ before parsed event normalization; refuses configuration, client, provider,
 order, amount, currency, timestamp, replay, refund/reversal, and browser-return
 shortcuts; and returns no order transition. It has no database, filesystem,
 request-global, package, lifecycle, provider SDK, credential, or network path.
+The separate 26-assertion P3A-1 payment-adapter profile fixture validates one
+closed adapter package, one exact Store Lite dependency, two secret-reference
+declarations, bounded null-default ordinary settings and migrations, one
+`server-signature` POST route, and only `api.stripe.com`. It proves that the
+route is not a browser public mutation, existing activation profiles still
+reject the adapter, all richer or mismatched surfaces fail closed, the profile
+hash is deterministic, and no package, secret, database, request, route,
+runtime, or network execution occurs.
 The separately distributed Store Lite 0.1.13 package has two additional
 cross-repository disposable database gates. Its 38-assertion migration suite
 applies the exact five manifest migrations and proves ten package-owned InnoDB

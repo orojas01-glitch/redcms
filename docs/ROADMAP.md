@@ -69,6 +69,13 @@ Sandbox without authorizing an account, key, network request, simulated
 payment, hosted change, or production work. See
 [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
 
+P3A-1 adds the non-executing Stripe/Store Lite adapter manifest profile and a
+declaration-only `server-signature` POST route that neither public dispatcher
+can select. It still reports database-bound preflight, registrar, ingress, and
+atomic-enablement blockers. It does not resolve a secret, load a package, open
+a connection, expose a webhook, alter Store Lite, or advance P3 beyond its
+first core-contract slice.
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

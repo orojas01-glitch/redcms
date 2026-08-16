@@ -5,6 +5,12 @@ sandbox creation, credential provisioning, outbound network access, webhook
 forwarding, simulated payment, and deployment are not yet authorized by this
 document. P0 through P2 remain complete; P3 remains gated.
 
+P3A-1 now implements only the data-only manifest profile and its
+`server-signature` route vocabulary. It recognizes the closed Stripe/Store
+Lite adapter surface but cannot enable a package or expose the route. The
+database-bound Owner/dependency/migration-table preflight, registrar
+validation, ingress, and atomic lifecycle runner remain later P3A work.
+
 ## Outcome
 
 P3 should prove one separately distributed Stripe Checkout adapter against one
@@ -62,6 +68,13 @@ Preflight must remain non-executing. Enablement must stay CLI-only,
 Owner-authorized, dry-run first, backup-bound, database-bound, and registration
 only. It must not resolve a secret, invoke the adapter, open a network
 connection, or expose a webhook during install or enable.
+
+The first implementation slice is intentionally smaller than the completed
+P3A gate. `includes/addon_payment_adapter_preflight_helpers.php` validates the
+manifest surface and returns deterministic blocker evidence only. The new
+`server-signature` route value is declaration-only and cannot be selected by
+the current public GET or browser public-mutation dispatchers. P3A remains
+incomplete until the database-bound and lifecycle requirements above pass.
 
 ## P3B — Store Lite Payment-Event Service
 
