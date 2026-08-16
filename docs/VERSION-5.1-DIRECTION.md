@@ -74,16 +74,21 @@ postconditions before committing package state, replay evidence, and a
 value-free anonymous audit fact together. It is not an endpoint, response
 builder, browser bridge, Store Lite package, or database sandbox for arbitrary
 PHP.
-The optional post-release payment-adapter path now has three closed core
+The optional post-release payment-adapter path now has four closed core
 slices. P3A-1 recognizes only the exact adapter manifest and declaration-only
 server-signature route. P3A-2 adds read-only Owner, same-database enabled Store
 Lite, immutable migration-ledger, and InnoDB table evidence. P3A-3 refreshes
 that evidence immediately before executing the fixed integrity-checked
 registrar, requires exactly the declared adapter and route registrations, and
 discards the request-local registry without invoking either handler or
-publishing runtime. It exposes no route, secret, provider request, lifecycle
-mutation, or client deployment. Server-event ingress and atomic adapter
-enablement remain separate blocked gates.
+publishing runtime. P3A-4 binds that evidence to a closed, unlinked exact-POST
+transport contract and preserves bounded raw body plus complete signature
+header bytes for a future provider verifier while exposing only value-free
+metadata. It reads no live request, parses no JSON, verifies no signature,
+invokes no handler, resolves no secret, opens no database/network path, and
+publishes no route. Atomic adapter enablement remains the final blocked P3A
+gate; no adapter, endpoint, provider request, lifecycle mutation, or client
+deployment exists.
 Adapters, operational writable route/tool actions, richer package-runtime
 secret surfaces, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
@@ -1412,6 +1417,16 @@ request bootstrap excludes the disabled package.
     every business-specific capability are separate per-client packages; it
     does not migrate or overwrite an existing client's customized guide. See
     [`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
+
+102. The optional post-release payment-adapter foundation now reaches P3A-4.
+    Four isolated core slices recognize the exact adapter profile, prove
+    Owner/same-database Store Lite/migration/InnoDB readiness, validate the
+    registration-only adapter and route shape, and preserve explicit bounded
+    server-event raw bytes for a future verifier. The ingress helper accepts no
+    ambient request state, keeps raw body and signature bytes out of ordinary
+    object evidence, and performs no provider verification, JSON parsing,
+    callback, secret, database, network, response, route, or lifecycle work.
+    Atomic adapter enablement remains blocked; no package or client was changed.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

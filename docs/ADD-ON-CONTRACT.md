@@ -1151,6 +1151,27 @@ mutation false, and retains the server-event-ingress and atomic-enablement
 blockers. The trusted registrar receives no core request, secret, network, or
 database capability, but remains in-process PHP and therefore is not a sandbox.
 
+`includes/addon_payment_adapter_server_event_ingress_helpers.php` is the
+separate P3A-4 closed ingress contract. Its deterministic readiness plan binds
+the exact validated package/profile/snapshot identity to current P3A-3
+registration evidence, the declared static server-event route and path, exact
+`POST`, exact `application/json`, the canonical ordered relevant header set,
+and RED-CMS's 65,536-byte maximum. A capture then accepts only an explicitly
+complete three-header record, an exact nonempty raw body whose byte count
+matches canonical `Content-Length`, and an explicit bounded receipt time. It
+does not read a server request or accept a query-bearing target.
+
+The final request object retains the unmodified raw body and complete opaque
+`Stripe-Signature` value only as request-local `WeakMap` verification material.
+The future separately distributed provider adapter may retrieve those two
+values only through the internal by-reference method. All returned, JSON,
+debug, and object-cast evidence is value-free; cloning and serialization fail.
+This core slice deliberately performs no provider signature/timestamp check,
+secret resolution, JSON parsing, callback invocation, database access,
+response emission, route publication, network request, or lifecycle change.
+It therefore does not expose a webhook or make the adapter enable-ready. The
+atomic payment-adapter enablement gate remains blocked.
+
 ## Public Mutation Declaration Boundary
 
 [PUBLIC-MUTATION-BOUNDARY.md](PUBLIC-MUTATION-BOUNDARY.md) defines the generic
