@@ -20,6 +20,14 @@ with the clean starter.
 Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
 
+The optional post-release payment-adapter track has reached P3A-3. Core can
+recognize the closed Stripe Checkout adapter manifest, refresh exact
+Owner/same-database Store Lite/migration/InnoDB evidence, and validate one
+adapter plus one non-routable server-event registration. The temporary registry
+is discarded without invoking a handler, exposing a route, resolving a secret,
+writing lifecycle state, or contacting Stripe. Server-event ingress and atomic
+adapter enablement remain blocked; no adapter is bundled or activated.
+
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
 on July 25, 2026.
@@ -636,6 +644,8 @@ Run the non-executing add-on trust gate and isolated runtime-contract check:
 php scripts/addon-trust-self-test.php
 php scripts/addon-setting-values-self-test.php
 php scripts/addon-secret-availability-self-test.php
+php scripts/addon-payment-adapter-preflight-self-test.php
+php scripts/addon-payment-adapter-registrar-self-test.php
 php scripts/addon-asset-plan-self-test.php
 php scripts/addon-component-editor-self-test.php
 php scripts/addon-component-editor-renderer-self-test.php

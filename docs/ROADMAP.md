@@ -84,6 +84,16 @@ still blocks registrar validation, server-event ingress, and atomic
 enablement. It does not inspect settings or secret values, execute package
 PHP, expose a route, contact Stripe, or alter any client installation.
 
+P3A-3 adds registration-only validation. Core refreshes P3A-2 against the
+selected database before it loads the fixed integrity-checked `addon.php`,
+requires exactly one declared adapter and one declared server-event route
+registration, reduces the request-local registry to bounded counts and hashes,
+and discards it. It invokes neither registered handler, publishes no runtime
+registry or route, resolves no secret, performs no lifecycle write, and opens
+no core network path. The registrar remains reviewed trusted in-process PHP,
+not a sandbox. Server-event ingress and atomic payment-adapter enablement remain
+explicit blockers.
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

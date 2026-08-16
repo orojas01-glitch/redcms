@@ -6,12 +6,15 @@ forwarding, simulated payment, and deployment are not yet authorized by this
 document. P0 through P2 remain complete; P3 remains gated.
 
 P3A-1 implements the data-only manifest profile and its `server-signature`
-route vocabulary. P3A-2 now composes that profile with read-only evidence for
+route vocabulary. P3A-2 composes that profile with read-only evidence for
 persisted Owner enable authority, the exact enabled Store Lite dependency,
 the immutable adapter migration ledger, and migration-touched InnoDB tables in
-one client database. Neither slice can enable a package or expose the route.
-Registrar validation, ingress, and the atomic lifecycle runner remain later
-P3A work.
+one client database. P3A-3 refreshes that evidence, loads only the fixed
+integrity-checked entry point, and requires exactly one declared adapter and
+one declared server-event route registration. Its request-local registry is
+reduced to counts and hashes and discarded; neither registered handler is
+invoked or published. None of these slices can enable a package or expose the
+route. Ingress and the atomic lifecycle runner remain later P3A work.
 
 ## Outcome
 
@@ -71,7 +74,7 @@ Owner-authorized, dry-run first, backup-bound, database-bound, and registration
 only. It must not resolve a secret, invoke the adapter, open a network
 connection, or expose a webhook during install or enable.
 
-The first two implementation slices remain smaller than the completed P3A
+The first three implementation slices remain smaller than the completed P3A
 gate. `includes/addon_payment_adapter_preflight_helpers.php` validates the
 manifest surface. The separate database preflight consumes the established
 generic enablement plan, requires the target to be current and
@@ -79,9 +82,12 @@ generic enablement plan, requires the target to be current and
 in the same selected database, verifies exact migration-ledger evidence,
 derives only bounded package-table names from the guarded immutable migration
 files, and requires every exact table to exist as InnoDB. It returns only
-counts and hashes. The `server-signature` route value remains declaration-only
-and cannot be selected by either current public dispatcher. P3A remains
-incomplete until registrar, ingress, and atomic lifecycle requirements pass.
+counts and hashes. The registration-only validator reruns that database
+preflight immediately before loading the fixed registrar, requires the exact
+manifest registration shape, and returns no callback or registry. The
+`server-signature` route remains non-routable and cannot be selected by either
+current public dispatcher. P3A remains incomplete until ingress and atomic
+lifecycle requirements pass.
 
 ## P3B — Store Lite Payment-Event Service
 

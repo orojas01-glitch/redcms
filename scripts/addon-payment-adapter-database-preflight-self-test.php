@@ -14,7 +14,7 @@ $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 require_once $projectRoot . '/includes/config.php';
 require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot .
-    '/includes/addon_payment_adapter_database_preflight_helpers.php';
+    '/includes/addon_payment_adapter_registrar_helpers.php';
 
 if (!preg_match(
     '/\Aredcms_(?:acceptance|payment_adapter_db)_[A-Za-z0-9_]+\z/',
@@ -131,9 +131,26 @@ function red_addon_payment_adapter_db_test_write_package(
     if (!mkdir($directory, 0700, true) && !is_dir($directory)) {
         throw new RuntimeException('Could not create payment adapter fixture.');
     }
-    $entrypoint = "<?php\nfile_put_contents(" .
-        var_export($executionMarker, true) .
-        ", 'executed');\nreturn static function (): void {};\n";
+    if ($type === 'adapter') {
+        $entrypoint = "<?php\nfile_put_contents(" .
+            var_export($executionMarker, true) .
+            ", 'executed');\nreturn static function (\$registry): void {\n" .
+            "    \$registry->registerAdapter(" .
+            var_export($packageId . '/checkout', true) .
+            ", static function (): void { file_put_contents(" .
+            var_export($executionMarker . '-adapter-handler', true) .
+            ", 'invoked'); });\n" .
+            "    \$registry->registerRoute(" .
+            var_export($packageId . '/provider-events', true) .
+            ", static function (): void { file_put_contents(" .
+            var_export($executionMarker . '-route-handler', true) .
+            ", 'invoked'); });\n" .
+            "};\n";
+    } else {
+        $entrypoint = "<?php\nfile_put_contents(" .
+            var_export($executionMarker, true) .
+            ", 'executed');\nreturn static function (): void {};\n";
+    }
     file_put_contents($directory . '/addon.php', $entrypoint);
 
     $isAdapter = $type === 'adapter';
@@ -677,6 +694,51 @@ try {
         'all database and refusal checks leave package PHP unexecuted'
     );
 
+    $beforeRegistrar = red_addon_payment_adapter_db_test_fingerprint(
+        $connection,
+        $packageIds,
+        $actorId,
+        $tableName
+    );
+    $registrarPlan = red_addon_payment_adapter_registrar_preflight(
+        $connection,
+        $adapterPackage,
+        $actorId,
+        $catalog
+    );
+    red_addon_payment_adapter_db_test_assert(
+        red_addon_payment_adapter_registrar_preflight_is_valid(
+            $registrarPlan
+        )
+            && !empty($registrarPlan['registrarEvidenceReady'])
+            && !$registrarPlan['enableReady']
+            && !$registrarPlan['stateMutation']
+            && !$registrarPlan['runtimePublication'],
+        'fresh database evidence composes with exact registration-only validation'
+    );
+    red_addon_payment_adapter_db_test_assert(
+        file_exists($executionMarker)
+            && !file_exists($executionMarker . '-adapter-handler')
+            && !file_exists($executionMarker . '-route-handler')
+            && array_column($registrarPlan['blockers'], 'code') === [
+                'atomic_payment_adapter_enablement_required',
+                'server_event_ingress_required',
+            ],
+        'registrar executes while adapter and route handlers and later gates remain closed'
+    );
+    red_addon_payment_adapter_db_test_assert(
+        hash_equals(
+            $beforeRegistrar,
+            red_addon_payment_adapter_db_test_fingerprint(
+                $connection,
+                $packageIds,
+                $actorId,
+                $tableName
+            )
+        ),
+        'registrar validation changes no lifecycle, migration, authority, or table fact'
+    );
+
     red_addon_payment_adapter_db_test_cleanup(
         $connection,
         $packageIds,
@@ -684,7 +746,7 @@ try {
         $tableName,
         $temporaryRoot
     );
-    echo 'Payment adapter P3A-2 database preflight self-test passed: ' .
+    echo 'Payment adapter P3A-2/P3A-3 database self-test passed: ' .
         $assertions . " assertions.\n";
 } catch (Throwable $throwable) {
     red_addon_payment_adapter_db_test_cleanup(

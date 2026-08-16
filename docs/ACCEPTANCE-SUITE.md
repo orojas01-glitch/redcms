@@ -249,15 +249,23 @@ route is not a browser public mutation, existing activation profiles still
 reject the adapter, all richer or mismatched surfaces fail closed, the profile
 hash is deterministic, and no package, secret, database, request, route,
 runtime, or network execution occurs.
-The separate 15-assertion P3A-2 disposable-database fixture requires one
+The separate 18-assertion P3A-2/P3A-3 disposable-database fixture requires one
 persisted Owner with the exact enable grant, one current installed-disabled
 adapter, the exact current enabled Store Lite dependency in the same selected
 database, immutable migration-ledger agreement, and one migration-touched
 InnoDB table. It proves deterministic count/hash evidence and zero writes or
 package execution; refuses missing Owner authority, disabled Store Lite,
 ledger drift, a missing table, a non-InnoDB table, and tampered evidence; and
-removes the administrator, role, grant, registry rows, table, package files,
-database, and database grant exactly.
+then refreshes that evidence and validates exactly one adapter plus one route
+registration. It proves both callbacks remain uninvoked and the database
+fingerprint remains unchanged before removing the administrator, role, grant,
+registry rows, table, package files, database, and database grant exactly. The
+separate 13-assertion dependency-free P3A-3 fixture proves invalid evidence
+fails before package loading; exact evidence is deterministic and value-free;
+callbacks are never returned or invoked; entrypoint/registrar output, missing
+or duplicate registrations, and tampered evidence fail closed without output
+leakage; and the core validator contains no request, setting, secret, network,
+or handler-invocation path.
 The separately distributed Store Lite 0.1.13 package has two additional
 cross-repository disposable database gates. Its 38-assertion migration suite
 applies the exact five manifest migrations and proves ten package-owned InnoDB
