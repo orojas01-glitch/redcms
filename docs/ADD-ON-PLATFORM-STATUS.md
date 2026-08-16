@@ -96,7 +96,7 @@ flowchart LR
     P0["COMPLETE<br/>P0. Provider-neutral contract<br/>events, secrets, replay, refunds"]
     P1["COMPLETE<br/>P1. Stripe Checkout candidate<br/>USD hosted-card pilot"]
     P2["COMPLETE<br/>P2. Non-network adapter fixture<br/>no provider account or charge"]
-    P3["GATED<br/>P3. Sandbox integration<br/>client-local test credentials"]
+    P3["GATED<br/>P3. Sandbox integration<br/>proposal defined; implementation stopped"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
     P0 --> P1 --> P2 --> P3 --> P4
@@ -115,7 +115,10 @@ reversible USD pilot decision in
 [`PAYMENT-ADAPTER-P1-DECISION.md`](PAYMENT-ADAPTER-P1-DECISION.md), then the
 P2 fixture record in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md), before
-proposing P3.
+implementing the five-part P3 plan in
+[`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
+P3 remains gated until its core profile, Store Lite transition service,
+external adapter, offline rehearsal, and sandbox proof are separately approved.
 
 ## Status rule
 

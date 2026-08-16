@@ -166,7 +166,10 @@ or fail closed and recover through a reviewed package migration path.
 4. **P3 — sandbox integration:** configure one disposable client-only adapter
    environment; prove signature verification, server-side provider lookup when
    required, idempotency, secret isolation, disable/re-enable behavior,
-   rollback, and exact cleanup with no live charge.
+   rollback, and exact cleanup with no live charge. The approved planning
+   boundary and its separate implementation stops are recorded in
+   [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md);
+   P3 implementation remains gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is
