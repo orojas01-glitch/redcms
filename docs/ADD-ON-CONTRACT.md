@@ -1169,8 +1169,21 @@ debug, and object-cast evidence is value-free; cloning and serialization fail.
 This core slice deliberately performs no provider signature/timestamp check,
 secret resolution, JSON parsing, callback invocation, database access,
 response emission, route publication, network request, or lifecycle change.
-It therefore does not expose a webhook or make the adapter enable-ready. The
-atomic payment-adapter enablement gate remains blocked.
+It therefore does not expose a webhook or perform enablement itself.
+
+`includes/addon_payment_adapter_enable_helpers.php` is the separate P3A-5
+atomic lifecycle boundary. Its plan recomputes P3A-2 database evidence, reruns
+the fixed P3A-3 registrar, validates the P3A-4 ingress contract, loads every
+declared typed setting from per-client storage, and accepts only value-free
+availability evidence for exactly two opaque secret references. The dedicated
+CLI is dry-run first and requires exact database, package, version, plan,
+nonzero backup checksum, and `installed_disabled` confirmations for apply.
+Under the shared lifecycle lock and target-package lock, core recomputes that
+complete plan, refuses drift, and commits only the installed-disabled to
+enabled compare-and-swap plus one bounded `payment_adapter_enabled` audit fact.
+It invokes neither registered handler, resolves no secret value, links no
+route, emits no response, and opens no network connection. This closes P3A;
+P3B must separately add the Store Lite-owned payment-event transition service.
 
 ## Public Mutation Declaration Boundary
 

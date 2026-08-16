@@ -1,8 +1,7 @@
 # RED-CMS 5.1 And Store Lite Progress
 
 Last updated: 2026-08-16 after the published `v5.1.0` release, completed Store
-Lite basic-demo proof, and the first four closed P3A payment-adapter core
-slices.
+Lite basic-demo proof, and all five closed P3A payment-adapter core slices.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -77,8 +76,8 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | The hosted demo exposes nine products, the exact nine-choice Size/Color scarf, Product and Cart authoring, Products and Orders tools, an empty/current cart, pickup and delivery checkout, and pay on receipt. RED-CMS 5.1.0 and the clean-core Instructions boundary are visible in the authenticated workspace. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A-1 through P3A-4 are complete and the next exact gate is P3A-5 atomic adapter enablement. No adapter or webhook is active. |
+| What just finished? | P3A-5 completed the separate Owner-authorized atomic adapter runner with exact stored-setting and opaque-secret-availability evidence, locked plan revalidation, transactional state/audit commit, and disposable rollback/cleanup proof. It added no adapter package, webhook, provider request, or client change. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A-1 through P3A-5 are complete and the next exact gate is P3B, the Store Lite-owned payment-event transition service. No adapter or webhook is active. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
 | What remains after this gate? | Nothing required for the basic-demo target. Hosted PayPal/card adapters remain later provider-neutral work and are not implied by this closeout. |
@@ -99,8 +98,8 @@ flowchart LR
     A2["COMPLETE<br/>P3A-2. Database readiness"]
     A3["COMPLETE<br/>P3A-3. Registrar validation"]
     A4["COMPLETE<br/>P3A-4. Closed raw event ingress"]
-    A5["NEXT<br/>P3A-5. Atomic enablement<br/>still blocked"]
-    P3B["GATED<br/>P3B. Store Lite event service"]
+    A5["COMPLETE<br/>P3A-5. Atomic enablement<br/>closed core runner"]
+    P3B["NEXT<br/>P3B. Store Lite event service"]
     P3C["GATED<br/>P3C-D. Adapter + offline proof"]
     P3E["GATED<br/>P3E. New Stripe Sandbox proof"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
@@ -110,9 +109,9 @@ flowchart LR
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4 complete;
-    class A5 active;
-    class P3B,P3C,P3E,P4 gated;
+    class P0,P1,P2,A1,A2,A3,A4,A5 complete;
+    class P3B active;
+    class P3C,P3E,P4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -134,8 +133,13 @@ facts and proves exact registration of one adapter and one non-routable
 server-event handler without invoking either callback or publishing runtime.
 P3A-4 adds only a closed unlinked raw-body/signature capture contract for a
 future adapter verifier; it does not read a live request, verify a signature,
-parse JSON, expose a route, or contact Stripe. P3A-5 atomic enablement and every
-provider step remain stopped.
+parse JSON, expose a route, or contact Stripe. P3A-5 adds the separate
+dry-run-first, Owner-authorized, backup-bound atomic runner; it proves exact
+stored settings and opaque secret-reference availability, repeats the full P3A
+plan under locks, and commits only the enabled state plus a value-free audit
+fact. It invokes no handler, resolves no secret bytes, exposes no endpoint, and
+contacts no provider. P3A is complete; P3B and every provider step remain
+stopped.
 
 ## Status rule
 

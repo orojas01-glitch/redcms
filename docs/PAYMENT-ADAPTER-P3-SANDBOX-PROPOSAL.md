@@ -1,7 +1,7 @@
 # Store Lite Payment Adapter P3 Sandbox Proposal
 
-Status: P3 planning is approved. Separately approved P3A-1 through P3A-4 core
-slices are complete; P3A-5 atomic enablement and P3B through P3E remain gated.
+Status: P3 planning is approved. Separately approved P3A-1 through P3A-5 core
+slices are complete; P3A is closed and P3B through P3E remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.
@@ -16,9 +16,12 @@ one declared server-event route registration. Its request-local registry is
 reduced to counts and hashes and discarded; neither registered handler is
 invoked or published. P3A-4 adds a closed, unlinked core ingress contract that
 preserves explicit bounded raw transport material for a future adapter
-verifier without reading a live request or parsing it. None of these slices
-can enable a package or expose the route. The atomic lifecycle runner remains
-the final P3A blocker.
+verifier without reading a live request or parsing it. P3A-5 adds the separate
+CLI-only atomic lifecycle runner: it proves exact stored configuration and
+opaque secret-reference availability, recomputes the complete P3A plan under
+locks, and commits only the reviewed state transition and bounded audit fact.
+None of these slices exposes the route, invokes a handler, resolves secret
+bytes, or contacts a provider.
 
 ## Outcome
 
@@ -46,10 +49,12 @@ RED-CMS and Store Lite already provide useful foundations:
 - immutable Store Lite order snapshots whose hosted `stripe_checkout` orders
   begin with `PaymentStatus=pending`.
 
-Those foundations do not yet authorize P3. Current enablement profiles
+Those foundations do not yet authorize P3. Generic enablement profiles
 deliberately refuse adapters, secret-bearing operational packages, outbound
-hosts, and webhook-shaped server events. The manifest host declaration has no
-general outbound HTTP executor. Store Lite 0.1.31 has no payment-event service,
+hosts, and webhook-shaped server events. The completed narrow P3A runner can
+enable only the exact reviewed adapter profile after full local evidence, but
+it does not expose the declared route or provide a general outbound HTTP
+executor. Store Lite 0.1.31 has no payment-event service,
 paid/refund/reversal transition writer, or matching status-history vocabulary.
 The existing browser public-mutation route is not a webhook endpoint: its
 Origin, anonymous-subject, CSRF, and browser idempotency contract must not be
@@ -78,8 +83,8 @@ Owner-authorized, dry-run first, backup-bound, database-bound, and registration
 only. It must not resolve a secret, invoke the adapter, open a network
 connection, or expose a webhook during install or enable.
 
-The first four implementation slices remain smaller than the completed P3A
-gate. `includes/addon_payment_adapter_preflight_helpers.php` validates the
+The five implementation slices together complete only the closed P3A gate.
+`includes/addon_payment_adapter_preflight_helpers.php` validates the
 manifest surface. The separate database preflight consumes the established
 generic enablement plan, requires the target to be current and
 `installed_disabled`, requires `redcms.store-lite` to be current and enabled
@@ -98,8 +103,16 @@ serialization. The helper does not read PHP request globals, parse JSON,
 resolve a secret, verify a provider signature, invoke a callback, access a
 database, emit a response, publish runtime, or contact Stripe. The
 `server-signature` route remains non-routable and cannot be selected by either
-current public dispatcher. P3A remains incomplete until the atomic lifecycle
-requirement passes.
+current public dispatcher. The separate
+`includes/addon_payment_adapter_enable_helpers.php` and
+`scripts/admin-payment-adapter-enable.php` compose fresh database, registrar,
+ingress, stored-setting, and opaque-secret-availability evidence. Apply repeats
+the exact plan under lifecycle and package locks and atomically commits only
+`enabled` plus the value-free `payment_adapter_enabled` audit fact. It is
+Owner-authorized, dry-run first, exact-confirmation and backup bound, refuses
+stale plans, and executes no registered handler, secret-value resolution,
+route publication, response, or network request. This completes P3A without
+installing an adapter or changing a client.
 
 ## P3B — Store Lite Payment-Event Service
 

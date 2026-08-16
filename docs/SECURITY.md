@@ -815,9 +815,9 @@ does not weaken the rule that ordinary unsafe browser methods require CSRF.
 Neither the public GET dispatcher nor the browser public-mutation selector can
 select this route. No signature parser, raw-body reader, response, handler,
 endpoint, registrar execution, secret lookup, database query, or outbound
-request is connected. The payment-adapter profile remains activation-blocked
-until separate database-bound, ingress, registrar, and atomic lifecycle gates
-are implemented and approved.
+request is connected. At the P3A-1 checkpoint, the payment-adapter profile
+remained activation-blocked until the separate database-bound, ingress,
+registrar, and atomic lifecycle gates were implemented and approved.
 
 P3A-2 connects only the database-bound readiness portion. The preflight
 requires database-persisted Owner `addons.enable` authority, exact current
@@ -865,7 +865,28 @@ cloning and serialization are refused. The helper reads no `$_SERVER`,
 response; accesses no database or network; and exposes no endpoint or route.
 Malformed, incomplete, extra, duplicated, reordered, mismatched, empty, or
 oversized transport evidence fails closed. Atomic adapter enablement remains
-blocked.
+outside this ingress helper.
+
+P3A-5 provides that lifecycle transition only through the separate CLI-only
+payment-adapter runner. Its dry run refreshes the P3A-2 database evidence,
+executes only the integrity-checked registration-only P3A-3 registrar,
+validates the P3A-4 ingress plan, reconstructs every exact typed setting from
+the selected client database, and requires value-free availability evidence
+for both opaque secret references. It never resolves or returns the referenced
+secret bytes. Apply requires exact database, package, version, plan, nonzero
+backup checksum, and `installed_disabled` confirmations. Core then repeats the
+complete plan under the database-wide lifecycle lock and target-package lock,
+uses an exact state compare-and-swap, and commits that state with one bounded
+`payment_adapter_enabled` audit fact in the same transaction.
+
+Revoked Owner authority, disabled Store Lite, migration or table drift,
+configuration drift, unavailable secret references, registrar or ingress
+drift, a stale plan, repeat execution, audit failure, or an injected late
+failure all fail closed. No registered adapter or route handler is invoked; no
+secret value, request body, provider response, route publication, network
+client, or Store Lite order transition enters the runner. P3A is therefore
+complete, but no webhook or provider integration exists. P3B remains the next
+separate gate.
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
