@@ -59,6 +59,13 @@ and commits one nonce-bound claim row plus one value-free audit fact. The claim
 is not reusable and does not extend the authorization expiry. It still resolves
 no credential, invokes no package handler, and contacts no provider. See
 [P3E-8A Provider-Contact Attempt Claim](docs/PAYMENT-ADAPTER-P3E8A-CLAIM.md).
+P3E-8B2 now consumes that exact claim only through a sealed in-process
+loopback rehearsal. It commits an immutable execution-start marker before any
+registrar, secret, or handler call; restricts runtime access to exactly
+`stripe.secret-key`; invokes one typed loopback operation; and records only a
+bounded result. Once start commits, failure never authorizes retry. The gate
+opens no network connection and contacts no provider. See
+[P3E-8B2 Provider-Contact Loopback Execution](docs/PAYMENT-ADAPTER-P3E8B2-LOOPBACK-EXECUTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

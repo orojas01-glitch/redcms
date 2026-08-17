@@ -179,14 +179,23 @@ if (!function_exists('red_addon_runtime_secret_access_for_package')) {
     function red_addon_runtime_secret_access_for_package(
         $connection,
         array $package,
-        $requireEnabled = true
+        $requireEnabled = true,
+        $settingKeys = null
     ) {
         $result = red_addon_runtime_secret_access_result(
             'runtime_secret_unavailable'
         );
         $snapshot = red_addon_registry_snapshot($package);
         $manifest = $package['manifest'] ?? null;
-        if (!is_array($snapshot) || !is_array($manifest)) {
+        if (!is_array($snapshot)
+            || !is_array($manifest)
+            || !is_bool($requireEnabled)
+            || ($settingKeys !== null
+                && (!is_array($settingKeys)
+                    || !array_is_list($settingKeys)
+                    || $settingKeys === []
+                    || count($settingKeys) > 20))
+        ) {
             $result['reason'] = 'package_invalid';
             return $result;
         }
@@ -209,7 +218,24 @@ if (!function_exists('red_addon_runtime_secret_access_for_package')) {
                 $secretDefinitions[$key] = $definition;
             }
         }
+        $selectedSecretKeys = null;
+        if ($settingKeys !== null) {
+            $selectedSecretKeys = [];
+            foreach ($settingKeys as $settingKey) {
+                if (!is_string($settingKey)
+                    || !isset($secretDefinitions[$settingKey])
+                    || isset($selectedSecretKeys[$settingKey])
+                ) {
+                    $result['reason'] = 'secret_scope_invalid';
+                    return $result;
+                }
+                $selectedSecretKeys[$settingKey] = true;
+            }
+        }
         $result['settingCount'] = count($secretDefinitions);
+        if ($selectedSecretKeys !== null) {
+            $result['settingCount'] = count($selectedSecretKeys);
+        }
         if ($secretDefinitions === []) {
             $result['valid'] = true;
             $result['reason'] = 'not_applicable';
@@ -348,6 +374,11 @@ if (!function_exists('red_addon_runtime_secret_access_for_package')) {
         }
         $resolvedValues = [];
         foreach ($secretReferences as $key => $reference) {
+            if ($selectedSecretKeys !== null
+                && !isset($selectedSecretKeys[$key])
+            ) {
+                continue;
+            }
             $resolvedValue = null;
             $resolved = red_addon_secret_resolve(
                 $reference,

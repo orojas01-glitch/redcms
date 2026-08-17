@@ -157,6 +157,17 @@ deployment path is entered. The actual read-only sandbox request remains a
 separately approved P3E-8B gate. See
 [`PAYMENT-ADAPTER-P3E8A-CLAIM.md`](PAYMENT-ADAPTER-P3E8A-CLAIM.md).
 
+P3E-8B2 now closes the non-networking execution rehearsal. Core requires the
+still-active exact P3E-8A claim, commits an immutable execution-start row and
+audit before any package or secret access, integrity-checks the registrar,
+resolves only `stripe.secret-key`, and invokes one contained typed
+`provider-contact.read-only-probe-loopback` handler. It records only a closed
+bounded outcome; a committed start permanently prevents retry even if secret
+resolution, handler execution, or outcome persistence fails. No DNS, TLS,
+HTTP, Stripe, provider, Checkout, payment, webhook, Store Lite mutation,
+browser, client, or deployment path is entered. See
+[`PAYMENT-ADAPTER-P3E8B2-LOOPBACK-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B2-LOOPBACK-EXECUTION.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

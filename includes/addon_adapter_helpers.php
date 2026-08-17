@@ -169,8 +169,16 @@ if (!function_exists('red_addon_adapter_invocation_result')) {
     }
 }
 
-if (!function_exists('red_addon_adapter_invoke')) {
-    function red_addon_adapter_invoke($adapter, $operation, $input)
+if (!function_exists('red_addon_adapter_invoke_registered')) {
+    function red_addon_adapter_invoke_registered(
+        $adapter,
+        $operation,
+        $input,
+        $owner,
+        $handler,
+        $manifest,
+        $secretAccess = null
+    )
     {
         $result = red_addon_adapter_invocation_result(
             $adapter,
@@ -181,35 +189,23 @@ if (!function_exists('red_addon_adapter_invoke')) {
             || !red_addon_valid_capability($adapter)
             || !is_string($operation)
             || !is_array($input)
-        ) {
-            return $result;
-        }
-        try {
-            new RED_Addon_Adapter_Request($adapter, $operation, $input);
-        } catch (Throwable $throwable) {
-            return $result;
-        }
-
-        $owner = red_addon_runtime_owner('adapters', $adapter);
-        $handler = red_addon_runtime_handler('adapters', $adapter);
-        $manifest = is_string($owner)
-            ? red_addon_runtime_manifest($owner)
-            : null;
-        if (!is_string($owner)
+            || !is_string($owner)
             || !red_addon_valid_package_id($owner)
             || !is_callable($handler)
             || !is_array($manifest)
+            || ($manifest['id'] ?? null) !== $owner
             || !in_array(
                 $adapter,
                 $manifest['provides']['adapters'] ?? [],
                 true
             )
+            || ($secretAccess !== null
+                && (!$secretAccess instanceof RED_Addon_Runtime_Secret_Access
+                    || $secretAccess->packageId() !== $owner))
         ) {
-            $result['reason'] = 'adapter_unavailable';
             return $result;
         }
         $result['package'] = $owner;
-        $secretAccess = red_addon_runtime_secret_access($owner);
         try {
             $request = new RED_Addon_Adapter_Request(
                 $adapter,
@@ -266,6 +262,57 @@ if (!function_exists('red_addon_adapter_invoke')) {
             ? 'completed'
             : 'adapter_error';
         return $result;
+    }
+}
+
+if (!function_exists('red_addon_adapter_invoke')) {
+    function red_addon_adapter_invoke($adapter, $operation, $input)
+    {
+        $result = red_addon_adapter_invocation_result(
+            $adapter,
+            $operation,
+            'invalid_request'
+        );
+        if (!is_string($adapter)
+            || !red_addon_valid_capability($adapter)
+            || !is_string($operation)
+            || !is_array($input)
+        ) {
+            return $result;
+        }
+        try {
+            new RED_Addon_Adapter_Request($adapter, $operation, $input);
+        } catch (Throwable $throwable) {
+            return $result;
+        }
+
+        $owner = red_addon_runtime_owner('adapters', $adapter);
+        $handler = red_addon_runtime_handler('adapters', $adapter);
+        $manifest = is_string($owner)
+            ? red_addon_runtime_manifest($owner)
+            : null;
+        if (!is_string($owner)
+            || !red_addon_valid_package_id($owner)
+            || !is_callable($handler)
+            || !is_array($manifest)
+            || !in_array(
+                $adapter,
+                $manifest['provides']['adapters'] ?? [],
+                true
+            )
+        ) {
+            $result['reason'] = 'adapter_unavailable';
+            return $result;
+        }
+        return red_addon_adapter_invoke_registered(
+            $adapter,
+            $operation,
+            $input,
+            $owner,
+            $handler,
+            $manifest,
+            red_addon_runtime_secret_access($owner)
+        );
     }
 }
 

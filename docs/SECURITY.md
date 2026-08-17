@@ -944,6 +944,29 @@ only the owning package's restricted sandbox key at the final boundary, make
 at most one exact read-only request, discard the response body, and forbid any
 retry or live credential.
 
+P3E-8B2 is the first executing boundary, but only against a sealed in-process
+loopback double. It revalidates the still-active exact authorization and claim,
+then commits a nonce-derived execution-start row and bounded audit before
+registrar execution, secret resolution, or handler invocation. Start-audit
+failure rolls back before execution. Once the start commits, the attempt is
+permanently spent: missing secret material, registrar/handler failure,
+indeterminate output, interruption, result-ledger failure, or outcome-audit
+failure cannot authorize replay.
+
+Runtime secret access is restricted to exactly `stripe.secret-key`; the
+webhook secret and unrelated values are unavailable. Core validates the
+trusted registrar and invokes only the typed
+`provider-contact.read-only-probe-loopback` operation with
+`contactTarget=loopback`. Output, exceptions, buffer changes, malformed
+results, and secret disclosure fail closed. Before persisting a result, core
+locks and verifies every bounded field of the immutable start row. The result
+ledger and audit contain only closed status facts and hashes—never credential
+values, value hashes, response bodies, or response headers. This gate contains
+no provider hostname, network client, DNS, TLS, HTTP, Stripe SDK, request
+global, public route, payment, webhook, Store Lite mutation, browser, client,
+or deployment primitive. Any real sandbox transport remains separately
+approved P3E-8B3 work.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
