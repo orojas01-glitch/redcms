@@ -146,6 +146,17 @@ payment, webhook, Store Lite mutation, browser, client, or deployment path is
 entered. See
 [`PAYMENT-ADAPTER-P3E7-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E7-AUTHORIZATION.md).
 
+P3E-8A now closes the separate core-owned one-attempt claim prerequisite. It
+recomputes the exact P3E-7 decision, requires its immutable authorization row,
+revalidates current Owner and enabled same-database package state, and commits
+one second nonce-derived immutable claim row plus one value-free audit fact.
+The claim does not extend the original expiry, cannot be repeated, and remains
+non-executing: no credential, environment, package handler, DNS, TLS, HTTP,
+Stripe, Checkout, payment, webhook, Store Lite mutation, browser, client, or
+deployment path is entered. The actual read-only sandbox request remains a
+separately approved P3E-8B gate. See
+[`PAYMENT-ADAPTER-P3E8A-CLAIM.md`](PAYMENT-ADAPTER-P3E8A-CLAIM.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

@@ -53,6 +53,12 @@ audit fact, and still performs no credential resolution, network request,
 provider contact, Checkout creation, payment, webhook, Store Lite mutation, or
 client deployment. See
 [P3E-7 Provider-Contact Authorization](docs/PAYMENT-ADAPTER-P3E7-AUTHORIZATION.md).
+P3E-8A now adds the separate atomic one-attempt claim. It requires that exact
+P3E-7 row, repeats current Owner and enabled same-database package validation,
+and commits one nonce-bound claim row plus one value-free audit fact. The claim
+is not reusable and does not extend the authorization expiry. It still resolves
+no credential, invokes no package handler, and contacts no provider. See
+[P3E-8A Provider-Contact Attempt Claim](docs/PAYMENT-ADAPTER-P3E8A-CLAIM.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

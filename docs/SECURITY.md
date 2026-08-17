@@ -920,6 +920,30 @@ permission for a future runner. Execution, credential resolution, environment
 access, provider contact, Checkout, payment, webhook, Store Lite mutation, and
 client deployment all remain false.
 
+P3E-8A is a second CLI-only core boundary and is still non-networking. Dry run
+recomputes the complete P3E-7 decision, requires the exact immutable
+authorization row, and proves that no claim exists. Apply repeats lifecycle,
+package, Owner-role, capability, adapter, and Store Lite locking, then inserts
+one separate `provider-contact-attempt-claim` identity in the existing
+administrator-action ledger. The claim row binds the original plan,
+authorization, Owner subject, authorization state, nonce, actor, and original
+expiry through SHA-256 evidence. One `provider_contact_attempt_claimed` audit
+fact commits in the same transaction. Duplicate claim, changed or missing
+authorization, expiry, revocation, disabled dependency, ledger drift, audit
+failure, and active caller transaction fail closed; audit failure rolls the
+claim back. A committed claim neither extends the authorization window nor
+permits a retry.
+
+The P3E-8A helper contains no secret resolver, environment reader, network
+client, provider hostname, package callback, request global, or response body.
+It sets `executionPerformed=false` and leaves secret resolution, DNS, TLS,
+HTTP, Stripe contact, Checkout, payment, webhook, Store Lite mutation, browser
+routes, client activation, and deployment outside the gate. A future P3E-8B
+must be approved separately, revalidate the still-active exact claim, resolve
+only the owning package's restricted sandbox key at the final boundary, make
+at most one exact read-only request, discard the response body, and forbid any
+retry or live credential.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

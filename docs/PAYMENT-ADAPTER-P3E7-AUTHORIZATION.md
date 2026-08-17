@@ -79,8 +79,10 @@ credential, provider account, network client, endpoint, or client activation.
 
 ## Next stop
 
-P3E-8 may define an atomic one-attempt claim and a separately approved
-read-only Stripe Sandbox resource-miss probe. It must revalidate this exact
-authorization, claim it before contact, resolve only the owning package's
+P3E-8A now implements the non-networking atomic one-attempt claim described by
+this boundary. It revalidates this exact authorization and records a separate
+immutable claim before any possible contact. P3E-8B remains separately gated:
+it must require the still-active exact claim, resolve only the owning package's
 restricted sandbox secret at the final boundary, and retain no key, response
-body, or reusable authorization. No provider request is authorized by P3E-7.
+body, retry, or reusable authorization. No provider request is authorized by
+P3E-7 or P3E-8A.

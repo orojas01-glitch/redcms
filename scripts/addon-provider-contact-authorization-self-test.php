@@ -160,6 +160,7 @@ function red_addon_provider_contact_test_prepared(
     ];
 }
 
+if (!defined('RED_ADDON_PROVIDER_CONTACT_AUTHORIZATION_FIXTURE_ONLY')) {
 red_addon_provider_contact_test_cleanup(
     $connection,
     $packageIds,
@@ -633,6 +634,7 @@ try {
     );
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 function red_addon_provider_contact_test_scalar($connection, $sql)
