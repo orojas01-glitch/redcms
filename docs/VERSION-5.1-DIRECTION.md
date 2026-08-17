@@ -1476,6 +1476,20 @@ request bootstrap excludes the disabled package.
     Checkout, payment, webhook, Store Lite mutation, browser route, or client
     deployment. A later P3E-8 contact attempt remains separately gated.
 
+106. Added P3E-8A as the non-networking atomic claim prerequisite for one
+    future contact attempt. Core recomputes the exact P3E-7 decision, requires
+    its immutable authorization row, and repeats current Owner, capability,
+    adapter, and same-database Store Lite validation under lifecycle/package
+    and transaction locks. It then commits one distinct nonce-derived claim
+    row plus one value-free audit fact in the existing ledger. Replay, changed
+    or missing authorization, expiry, revocation, disabled dependency, ledger
+    drift, and audit failure fail closed; the claim does not extend expiry or
+    authorize a retry. The 34-assertion disposable fixture executes no package
+    handler and opens no credential, environment, DNS, TLS, HTTP, Stripe,
+    Checkout, payment, webhook, Store Lite mutation, browser, client, or
+    deployment path. The actual read-only sandbox request remains a separately
+    approved P3E-8B gate.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
