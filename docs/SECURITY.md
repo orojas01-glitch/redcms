@@ -627,10 +627,10 @@ migration evidence, settings, and business data.
 
 No web endpoint consumes the installer, enable, or disable command. Component
 dispatch is limited to the bounded core-rendered contract described below.
-Typed internal service, exact static public-route, display-only
+Typed internal service and adapter, exact static public-route, display-only
 administrator-tool, and non-executing administrator-action-preflight
-boundaries are separate reviewed implementations described below. Adapters,
-administrator write actions, upgrades, uninstall, purge, and client
+boundaries are separate reviewed implementations described below. Provider
+transport, administrator write actions, upgrades, uninstall, purge, and client
 business-package activation still require distinct backup, dependency,
 registrar, atomic lifecycle, and rollback or recovery gates.
 
@@ -667,8 +667,9 @@ controls, and templates remain forbidden. Malformed values, emitted output,
 handler exceptions, and output-buffer tampering fail closed to static fallback
 content. This component path never automatically
 invokes service, administrator-tool, administrator-action, adapter, or route
-handlers. Services and adapters remain lookup-only; routes, display tools, and
-action preflight can proceed only through their separate bounded cores. The
+handlers. Services and adapters dispatch only through their separate typed
+internal boundaries; routes, display tools, and action preflight can proceed
+only through their separate bounded cores. The
 clean starter contains no package directory or enabled state. The implemented
 enable command accepts only the constrained registration-only service,
 secret-capable registration-only service, default public component, and
@@ -794,6 +795,17 @@ excess depth/nodes/string size, and oversized encoded payloads fail before the
 handler. Output, exceptions, output-buffer changes, and malformed results are
 contained. No database connection, session, actor authority, route request, or
 automatic service call is supplied by this boundary.
+
+Internal typed adapter invocation is also implemented without an HTTP, route,
+browser, administrator, database, or provider-transport endpoint. Core requires
+exact request-local adapter ownership and manifest declaration, passes a final
+request containing only the adapter id, a bounded operation id, JSON-compatible
+input, and the owning package's private secret access, then accepts only a final
+typed result. Output, exceptions, output-buffer changes, malformed results, and
+resolved-secret disclosure fail closed. This boundary does not authorize an
+outbound host or inspect future package network code; provider transport,
+timeouts, redirects, response validation, persistence, and deployment remain
+separately reviewed gates.
 
 Public add-on routes have one deliberately narrow dispatch boundary. Core
 matches only an exact unencoded static manifest path owned by the enabled

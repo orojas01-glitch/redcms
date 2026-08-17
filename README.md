@@ -41,8 +41,12 @@ route, and opens no network connection. Store Lite now owns the
 provider-neutral payment-event transition decision, append-only history
 migration, transactional writer/service, and disposable lifecycle rehearsal.
 P3C-1, the dependency-free foundation of the separately distributed Stripe
-Checkout adapter, is next. No endpoint, adapter package, provider dependency,
-provider request, or client deployment is bundled or activated.
+Checkout adapter, has now completed external P3C packaging plus P3D-1 through
+P3D-5 offline installation, enablement, runtime ownership, and synthetic-secret
+bootstrap proofs. Core P3D-6 now adds the reusable typed adapter invocation
+boundary, while the external Stripe handler remains refusal-only. No provider
+request, public event dispatch, payment, or client deployment is bundled or
+activated.
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
@@ -288,6 +292,10 @@ features.
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results
+- Internal typed add-on adapter invocation with exact enabled runtime
+  ownership, package-bound secret access, bounded request/result objects, and
+  containment of output, exceptions, buffer changes, malformed results, and
+  secret disclosure
 - Core-owned public add-on route dispatch for exact static `GET` paths with
   public authentication, typed bounded query/result objects, JSON-only
   responses, and fail-closed package behavior
@@ -668,6 +676,7 @@ php scripts/addon-component-editor-renderer-self-test.php
 php scripts/addon-admin-tool-form-renderer-self-test.php
 php scripts/addon-runtime-self-test.php
 php scripts/addon-service-invocation-self-test.php
+php scripts/addon-adapter-invocation-self-test.php
 php scripts/addon-validate.php --all
 php scripts/admin-addon-owner.php --status
 php scripts/addon-registry-status.php --all

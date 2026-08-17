@@ -22,7 +22,7 @@ backup, migration, launch verification, and rollback gate are complete without
 copying client assets or data into the starter. Fixed add-on registration,
 fail-closed page-request loading, and safe core-owned default dispatch for an
 enabled manifest-declared component are implemented for already-recorded
-enabled packages. Typed internal service invocation, exact static public
+enabled packages. Typed internal service and adapter invocation, exact static public
 `GET` routes, and display-only permission-scoped administrator tools now have
 separate fail-closed dispatch boundaries. A separate non-executing
 administrator write-action preflight binds exact runtime owners, an
@@ -95,11 +95,12 @@ plus one bounded audit fact. It still invokes no handler, resolves no secret
 value, exposes no endpoint, or contacts a provider. Store Lite 0.1.32 through
 0.1.35 then add the provider-neutral transition decision, append-only history
 migration, transactional writer/service, and disposable lifecycle rehearsal.
-P3A and P3B are complete. P3C-1, the dependency-free foundation for the
-separately distributed `redcms.store-lite-stripe-checkout` adapter, is next;
-no adapter repository, endpoint, dependency, provider access, or client
-deployment exists.
-Adapters, operational writable route/tool actions, richer package-runtime
+P3A and P3B are complete. The separately distributed
+`redcms.store-lite-stripe-checkout` adapter has completed P3C plus P3D-1 through
+P3D-5 offline lifecycle and synthetic-secret bootstrap proof. Core P3D-6 now
+adds the reusable typed adapter invocation boundary without changing the
+external refusal-only handler. No provider access or client deployment exists.
+Operational adapters, writable route/tool actions, richer package-runtime
 secret surfaces, uninstall/purge,
 member access, publishing, payment, and integration controls remain inactive.
 The Store Lite product and security boundary is defined. Gate 2A now fixes the
@@ -1454,6 +1455,15 @@ request bootstrap excludes the disabled package.
     contracts only. No repository creation, dependency, endpoint, credential,
     provider request, payment, or client deployment is authorized by this
     status update.
+
+104. Added the P3D-6 reusable core-owned typed adapter invocation boundary.
+    It requires exact enabled request-local ownership and manifest declaration,
+    bounded immutable request/result objects, owning-package secret access, and
+    containment of output, exceptions, buffer-stack changes, malformed results,
+    and resolved-secret disclosure. The dependency-free 19-assertion fixture
+    opens no database, route, browser, provider, network, Store Lite, payment,
+    or client path. The external Stripe adapter remains separately distributed
+    and refusal-only until its next reviewed adoption gate.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
