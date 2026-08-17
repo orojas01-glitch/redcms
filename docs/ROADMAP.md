@@ -62,10 +62,13 @@ the fixture boundary in
 
 P3 planning is defined, all five closed P3A core-contract slices are
 implemented, and the separately distributed Store Lite package completes P3B
-through version 0.1.35. The adapter package, endpoint, and every provider step
-remain separately gated. The generic enablement command still refuses adapters
-and outbound hosts; the narrow P3A runner accepts only the exact reviewed
-profile. Store Lite now owns the provider-neutral transition decision,
+through version 0.1.35. The separately distributed Stripe adapter has completed
+P3C plus P3D-1 through P3D-5 offline lifecycle and synthetic-secret bootstrap
+proof. Core P3D-6 adds the reusable typed invocation boundary, while the
+external adapter handler, provider endpoint, and every network step remain
+separately gated. The generic enablement command still refuses adapters and
+outbound hosts; the narrow P3A runner accepts only the exact reviewed profile.
+Store Lite now owns the provider-neutral transition decision,
 append-only history migration, transactional writer/service, and disposable
 lifecycle rehearsal. Browser public-mutation ingress still cannot be reused as
 a provider webhook. The P3 proposal sequences the external adapter, offline
@@ -126,11 +129,12 @@ P3B is complete in the separately distributed Store Lite package: 0.1.32 adds
 the pure provider-neutral transition decision, 0.1.33 adds the append-only
 history migration, 0.1.34 adds the typed transactional writer/service, and
 0.1.35 completes disposable lifecycle, rollback, isolation, and exact-cleanup
-rehearsal. P3C-1 is next: freeze and test a dependency-free foundation for the
-external `redcms.store-lite-stripe-checkout` package. It may define only the
-package identity and pure provider-response/event normalization contracts. It
-does not yet add a migration, registrar, route, webhook, secret, SDK, outbound
-request, Store Lite transition invocation, client deployment, or payment.
+rehearsal. External P3C packaging and P3D-1 through P3D-5 offline lifecycle
+proof are complete. P3D-6 provides the generic core typed adapter call, but the
+Stripe handler remains refusal-only. Its next separately reviewed gate may
+adopt only that typed offline contract; provider transport, route dispatch,
+Store Lite mutation, browser checkout, client deployment, and payment remain
+unauthorized.
 
 ### Launch Priority: Per-Page SEO Metadata
 

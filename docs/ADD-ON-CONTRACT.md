@@ -15,13 +15,14 @@ implemented as activation-blocked prerequisites. Read-only inactive component
 creation planning and its activation-blocked atomic runner are implemented.
 Permission-enforced inactive parent metadata, read-only delete planning, and
 atomic inactive deletion with retained revision ledgers are implemented.
-Typed internal services, exact static public `GET` routes, display-only
+Typed internal services and adapters, exact static public `GET` routes,
+display-only
 administrator tools, and non-executing administrator action preflight now have
 separate fail-closed boundaries. A narrow secret-capable registration-only
 service profile permits package-specific server-local secret consumption
-through the typed service request, with core-owned result redaction. Adapters,
-operational writable route/tool actions, richer settings-bearing surfaces, and
-richer enablement remain blocked. RED-CMS does not
+through the typed service request, with core-owned result redaction.
+Operational provider transport, writable route/tool actions, richer
+settings-bearing surfaces, and richer enablement remain blocked. RED-CMS does not
 upgrade, uninstall, or purge packages through this contract yet.
 The generic public-mutation boundary now has optional closed manifest metadata,
 a value-free declaration preflight, a transaction-only declared runtime-settings
@@ -930,7 +931,8 @@ Exact static public `GET` routes may dispatch only through the core JSON
 boundary below. A declared read-only administrator tool may dispatch only
 through the fresh-permission/core-renderer boundary below. A declared
 administrator action may only establish non-executing preflight evidence
-through the separate action boundary below; adapters remain non-dispatched.
+through the separate action boundary below. Adapters dispatch only through the
+separate typed internal boundary below.
 Request failure returns
 a generic temporary-unavailability response while detailed evidence remains in
 the server log. Owner-authorized enablement is a separate reviewed lifecycle
@@ -946,6 +948,17 @@ bounds depth, nodes, keys, strings, and encoded size, and contains package
 output, exceptions, output-buffer changes, and malformed results. It supplies
 no database connection, HTTP request, session, administrator authority, or
 automatic invocation.
+
+`includes/addon_adapter_helpers.php` is the only generic core-to-package
+adapter invocation boundary. It applies the same bounded payload contract,
+resolves the exact request-local adapter owner and manifest declaration, and
+constructs final `RED_Addon_Adapter_Request` and `RED_Addon_Adapter_Result`
+objects. A package-bound secret access object may be attached only for that
+owner. Core rejects output, exceptions, buffer-stack changes, malformed
+results, and any result data or error containing resolved secret bytes. It
+supplies no provider transport, database, route request, Store Lite object,
+session, browser state, or automatic invocation. See
+[`ADD-ON-ADAPTER-INVOCATION-DIRECTION.md`](ADD-ON-ADAPTER-INVOCATION-DIRECTION.md).
 
 For the admitted `registration_only_service_with_secrets` profile, the same
 boundary attaches one package-bound `RED_Addon_Runtime_Secret_Access` object to
