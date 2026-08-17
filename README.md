@@ -46,7 +46,13 @@ P3D-5 offline installation, enablement, runtime ownership, and synthetic-secret
 bootstrap proofs. Core P3D-6 now adds the reusable typed adapter invocation
 boundary, while the external Stripe handler remains refusal-only. No provider
 request, public event dispatch, payment, or client deployment is bundled or
-activated.
+activated. P3E-7 now adds a core-owned CLI-only Owner revalidation and atomic
+one-time nonce authorization boundary for the exact external P3E-6 evidence.
+It reuses the immutable administrator-action ledger, commits one value-free
+audit fact, and still performs no credential resolution, network request,
+provider contact, Checkout creation, payment, webhook, Store Lite mutation, or
+client deployment. See
+[P3E-7 Provider-Contact Authorization](docs/PAYMENT-ADAPTER-P3E7-AUTHORIZATION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

@@ -136,6 +136,16 @@ adopt only that typed offline contract; provider transport, route dispatch,
 Store Lite mutation, browser checkout, client deployment, and payment remain
 unauthorized.
 
+P3E-7 now closes the core-owned authorization prerequisite for the later
+read-only sandbox probe. It consumes only exact value-free P3E-6 evidence,
+revalidates the database-backed Owner and enabled same-database package state,
+and atomically commits a nonce-bound immutable action row plus one audit fact.
+Original and changed-envelope nonce replay fail at the existing database
+primary key. No credential, environment, DNS, TLS, HTTP, Stripe, Checkout,
+payment, webhook, Store Lite mutation, browser, client, or deployment path is
+entered. See
+[`PAYMENT-ADAPTER-P3E7-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E7-AUTHORIZATION.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

@@ -1465,6 +1465,17 @@ request bootstrap excludes the disabled package.
     or client path. The external Stripe adapter remains separately distributed
     and refusal-only until its next reviewed adoption gate.
 
+105. Added the P3E-7 core-owned provider-contact authorization boundary. It
+    consumes only exact non-secret P3E-6 readiness/envelope evidence,
+    revalidates the current database-backed Owner plus enabled adapter and
+    same-database Store Lite state, then atomically records one nonce-bound
+    immutable action and audit fact under locked authorization/package rows.
+    Replay, expiry, revocation, subject mismatch, disabled dependency, and
+    audit failure fail closed. It reuses the released schema and performs no
+    credential resolution, environment read, network request, Stripe contact,
+    Checkout, payment, webhook, Store Lite mutation, browser route, or client
+    deployment. A later P3E-8 contact attempt remains separately gated.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

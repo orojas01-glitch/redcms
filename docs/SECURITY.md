@@ -900,6 +900,26 @@ client, or Store Lite order transition enters the runner. P3A is therefore
 complete, but no webhook or provider integration exists. P3B remains the next
 separate gate.
 
+P3E-7 is a later, separate CLI-only authorization boundary. It accepts only
+the exact closed P3E-6 readiness and prepared-envelope objects, revalidates the
+enabled trusted `redcms.store-lite-stripe-checkout` 0.1.1 package and enabled
+same-database Store Lite dependency, and derives the expected operator subject
+from the selected database plus numeric actor. A persisted Owner with the
+exact `addons.enable` grant is required on every decision; an opaque caller
+hash alone is never authority.
+
+Apply holds the shared lifecycle/package locks, then locks the Owner role,
+capability, adapter, and Store Lite rows in one InnoDB transaction. The
+existing immutable administrator-action ledger uses a nonce-derived action id
+as its unique key and stores only the plan, envelope, Owner-subject, and
+authorization-state SHA-256 values with the numeric actor. The matching
+value-free audit fact commits atomically. Duplicate nonce insertion, including
+under a changed envelope, fails closed; audit failure rolls the reservation
+back. The resulting `contactAuthorized=true` is only a pending single-attempt
+permission for a future runner. Execution, credential resolution, environment
+access, provider contact, Checkout, payment, webhook, Store Lite mutation, and
+client deployment all remain false.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
