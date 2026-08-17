@@ -140,6 +140,65 @@ if (!function_exists('red_addon_provider_contact_claim_authorization_matches')) 
     }
 }
 
+if (!function_exists('red_addon_provider_contact_claim_state_sha256')) {
+    function red_addon_provider_contact_claim_state_sha256(array $plan)
+    {
+        foreach ([
+            'packageId', 'packageVersion', 'actorAdminRecordId',
+            'ownerSubjectSha256', 'planSha256', 'authorizationSha256',
+            'authorizationNonceSha256', 'authorizationStateSha256',
+            'issuedAtUtc', 'expiresAtUtc', 'maximumAttempts',
+        ] as $key) {
+            if (!array_key_exists($key, $plan)) {
+                return '';
+            }
+        }
+        if (!red_addon_valid_package_id($plan['packageId'])
+            || $plan['packageVersion'] !== '0.1.1'
+            || (int) $plan['actorAdminRecordId'] <= 0
+            || !red_addon_provider_contact_sha256(
+                $plan['ownerSubjectSha256']
+            )
+            || !red_addon_provider_contact_sha256($plan['planSha256'])
+            || !red_addon_provider_contact_sha256(
+                $plan['authorizationSha256']
+            )
+            || !red_addon_provider_contact_sha256(
+                $plan['authorizationNonceSha256']
+            )
+            || !red_addon_provider_contact_sha256(
+                $plan['authorizationStateSha256']
+            )
+            || !is_string($plan['issuedAtUtc'])
+            || !is_string($plan['expiresAtUtc'])
+            || (int) $plan['maximumAttempts'] !== 1
+        ) {
+            return '';
+        }
+        $stateMaterial = [
+            'schema' => 1,
+            'purpose' => 'provider-contact-attempt-claim',
+            'packageId' => $plan['packageId'],
+            'packageVersion' => $plan['packageVersion'],
+            'actorAdminRecordId' => (int) $plan['actorAdminRecordId'],
+            'ownerSubjectSha256' => $plan['ownerSubjectSha256'],
+            'planSha256' => $plan['planSha256'],
+            'authorizationSha256' => $plan['authorizationSha256'],
+            'authorizationNonceSha256' =>
+                $plan['authorizationNonceSha256'],
+            'authorizationStateSha256' =>
+                $plan['authorizationStateSha256'],
+            'issuedAtUtc' => $plan['issuedAtUtc'],
+            'expiresAtUtc' => $plan['expiresAtUtc'],
+            'maximumAttempts' => 1,
+            'attemptClaimed' => true,
+            'executionPerformed' => false,
+        ];
+        $encoded = red_addon_provider_contact_encode($stateMaterial);
+        return is_string($encoded) ? hash('sha256', $encoded) : '';
+    }
+}
+
 if (!function_exists('red_addon_provider_contact_claim_plan')) {
     function red_addon_provider_contact_claim_plan(
         $connection,
@@ -236,32 +295,15 @@ if (!function_exists('red_addon_provider_contact_claim_plan')) {
             return $result;
         }
 
-        $stateMaterial = [
-            'schema' => 1,
-            'purpose' => 'provider-contact-attempt-claim',
-            'packageId' => $result['packageId'],
-            'packageVersion' => $result['packageVersion'],
-            'actorAdminRecordId' => $actorAdminRecordId,
-            'ownerSubjectSha256' => $result['ownerSubjectSha256'],
-            'planSha256' => $result['planSha256'],
-            'authorizationSha256' => $result['authorizationSha256'],
-            'authorizationNonceSha256' =>
-                $result['authorizationNonceSha256'],
-            'authorizationStateSha256' =>
-                $result['authorizationStateSha256'],
-            'issuedAtUtc' => $result['issuedAtUtc'],
-            'expiresAtUtc' => $result['expiresAtUtc'],
-            'maximumAttempts' => 1,
-            'attemptClaimed' => true,
-            'executionPerformed' => false,
-        ];
-        $encoded = red_addon_provider_contact_encode($stateMaterial);
-        if (!is_string($encoded)) {
+        $result['claimStateSha256'] =
+            red_addon_provider_contact_claim_state_sha256($result);
+        if (!red_addon_provider_contact_sha256(
+            $result['claimStateSha256']
+        )) {
             $result['status'] = 'claim_state_encoding_failed';
             $result['errors'][] = 'claim_state_encoding_failed';
             return $result;
         }
-        $result['claimStateSha256'] = hash('sha256', $encoded);
         $result['claimAvailable'] = true;
         $result['status'] = 'ready';
         $result['ready'] = true;

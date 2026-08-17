@@ -1490,6 +1490,21 @@ request bootstrap excludes the disabled package.
     deployment path. The actual read-only sandbox request remains a separately
     approved P3E-8B gate.
 
+107. Added P3E-8B2 as a sealed in-process execution rehearsal for the exact
+    P3E-8A claim. Core revalidates the active authorization, claim, Owner,
+    capability, adapter, and same-database Store Lite state, then commits an
+    immutable execution-start row and bounded audit before registrar, secret,
+    or handler access. A committed start permanently consumes the attempt.
+    Core integrity-checks the registrar, resolves only `stripe.secret-key`,
+    invokes one typed `provider-contact.read-only-probe-loopback` operation,
+    and persists one closed result plus audit after rechecking the complete
+    start row. The 32-assertion disposable fixture proves success, replay
+    refusal, pre-start rollback, post-start no-retry behavior, scoped-secret
+    isolation, bounded outcomes, forbidden-primitives absence, and exact
+    cleanup. It adds no migration or table and opens no DNS, TLS, HTTP, Stripe,
+    provider, Checkout, payment, webhook, Store Lite mutation, browser, client,
+    or deployment path.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
