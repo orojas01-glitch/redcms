@@ -1556,7 +1556,8 @@ request bootstrap excludes the disabled package.
     body/header, credential, client state, or deployment escaped. Checksummed
     private evidence passed credential scanning and final cleanup returned
     database/grant/project/process zero with the configured primary unchanged.
-    Restricted-key revocation remains a separate explicit operator action.
+    After evidence review, the operator explicitly expired the restricted key;
+    it no longer appears in the active restricted-key list.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

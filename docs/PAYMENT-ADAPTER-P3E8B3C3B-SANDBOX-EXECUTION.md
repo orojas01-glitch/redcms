@@ -57,6 +57,6 @@ its sleep-prevention process. Independent verification returned exact
 at its prior 20-table state.
 
 This gate adds no migration, table, package payload, public route, browser
-control, client state, or deployment. The one-purpose restricted key remains
-active only pending a separate explicit revocation action after evidence
-review; it must not authorize another B3C3B request.
+control, client state, or deployment. After evidence review, the operator
+explicitly expired the one-purpose restricted key. It no longer appears in the
+active restricted-key list and cannot authorize another B3C3B request.

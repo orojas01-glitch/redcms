@@ -201,7 +201,9 @@ the disposable operator path made one exact GET and recorded the expected
 bounded `404 resource_miss_observed` result. Stripe logged one matching request,
 the private evidence archive passed checksums and credential scanning, and
 cleanup returned database/grant/project/process zero with the primary
-unchanged. The key remains separately revocable and cannot authorize a retry.
+unchanged. After evidence review, the operator explicitly expired the key; it
+no longer appears in the active restricted-key list and cannot authorize a
+retry.
 See
 [`PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md).
 

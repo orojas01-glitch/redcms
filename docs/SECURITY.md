@@ -1030,9 +1030,10 @@ credential were discarded; no retry or mutation was authorized.
 
 The copied key and process value were cleared, the evidence archive contained
 no credential pattern, and disposable database/grant/staged-project/process
-cleanup reached exact zero with the configured primary unchanged. The
-one-purpose restricted key remains active only pending explicit revocation and
-must not be reused for a second request.
+cleanup reached exact zero with the configured primary unchanged. After
+evidence review, the operator explicitly expired the one-purpose restricted
+key. It no longer appears in the active restricted-key list and cannot be
+reused for a second request.
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
