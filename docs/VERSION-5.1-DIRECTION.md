@@ -1450,7 +1450,8 @@ request bootstrap excludes the disabled package.
     migration, typed transactional writer/service, and disposable lifecycle
     rehearsal. The rehearsal covers upgrade, enable, apply, replay, refusal,
     disable/re-enable, rollback, two-client isolation, and exact cleanup. The
-    next exact gate is P3C-1: a dependency-free external package foundation for
+    At that point, P3C-1 became the next exact gate: a dependency-free external
+    package foundation for
     `redcms.store-lite-stripe-checkout`, with identity and pure normalization
     contracts only. No repository creation, dependency, endpoint, credential,
     provider request, payment, or client deployment is authorized by this
@@ -1558,6 +1559,17 @@ request bootstrap excludes the disabled package.
     database/grant/project/process zero with the configured primary unchanged.
     After evidence review, the operator explicitly expired the restricted key;
     it no longer appears in the active restricted-key list.
+
+112. Defined P3E-9 as the separately gated Stripe Sandbox Checkout-creation
+    frontier. The completed P3E-8 evidence remains permanently read-only and
+    cannot authorize a POST. P3E-9A is next and may add only pure non-executing
+    request, response, expiry, and operation-profile contracts. Synthetic
+    package/core integration, new mutation-specific authorization and claim
+    evidence, the disposable operator rehearsal, one real Sandbox Session,
+    credential expiration, Session expiration, simulated payment, webhook
+    proof, browser flow, hosted-demo state, client deployment, and P4 remain
+    distinct later approvals. This planning slice adds no PHP, migration,
+    manifest, package, database, route, runtime, provider, or client change.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

@@ -169,7 +169,9 @@ or fail closed and recover through a reviewed package migration path.
    rollback, and exact cleanup with no live charge. The approved planning
    boundary and its separate implementation stops are recorded in
    [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md);
-   P3 implementation remains gated.
+   P3A through P3D and the first read-only P3E provider contact are complete.
+   P3E-9A is the next non-executing Checkout-creation contract; provider
+   mutation, payment, webhook, and deployment remain gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is
