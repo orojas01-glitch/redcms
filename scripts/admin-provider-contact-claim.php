@@ -24,7 +24,7 @@ function red_addon_provider_contact_claim_cli_usage()
         "  php scripts/admin-provider-contact-claim.php --actor-admin=ID --evidence-file=/absolute/path.json\n" .
         "  php scripts/admin-provider-contact-claim.php --actor-admin=ID --evidence-file=/absolute/path.json \\\n" .
         "    --confirm-database=NAME --confirm-package=redcms.store-lite-stripe-checkout \\\n" .
-        "    --confirm-version=0.1.1 --confirm-authorization-sha256=SHA256 \\\n" .
+        "    --confirm-version=PRINTED_VERSION --confirm-authorization-sha256=SHA256 \\\n" .
         "    --confirm-authorization-state-sha256=SHA256 --confirm-claim-state-sha256=SHA256 \\\n" .
         "    --confirm-backup-sha256=SHA256 --confirm-state=enabled --apply\n"
     );

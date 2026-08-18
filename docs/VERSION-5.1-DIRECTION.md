@@ -1505,6 +1505,20 @@ request bootstrap excludes the disabled package.
     provider, Checkout, payment, webhook, Store Lite mutation, browser, client,
     or deployment path.
 
+108. Added P3E-8B3B as the synthetic real-package execution gate. The shared
+    authorization and claim validators accept only the legacy
+    `0.1.1/disabled` profile or adapter `0.1.3/synthetic_only`; every other
+    version/mode pair fails closed. Core commits a distinct synthetic-bound
+    start hash before registrar, secret, or handler access, resolves exactly
+    `stripe.secret-key`, and invokes the integrity-checked registered adapter's
+    typed synthetic operation. Core then revalidates the closed in-memory
+    result and persists one immutable outcome plus audit. The 33-assertion
+    fixture passes beside the unchanged 33-assertion P3E-7, 34-assertion
+    P3E-8A, and 32-assertion P3E-8B2 regressions, including explicit
+    cross-profile runner refusal. No migration, DNS, TLS, HTTP,
+    Stripe, provider transport, Checkout, payment, webhook, Store Lite
+    mutation, browser, client, or deployment path is added.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

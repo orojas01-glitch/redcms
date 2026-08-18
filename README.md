@@ -66,6 +66,14 @@ registrar, secret, or handler call; restricts runtime access to exactly
 bounded result. Once start commits, failure never authorizes retry. The gate
 opens no network connection and contacts no provider. See
 [P3E-8B2 Provider-Contact Loopback Execution](docs/PAYMENT-ADAPTER-P3E8B2-LOOPBACK-EXECUTION.md).
+P3E-8B3B now adds the matching real-package integration without network
+contact. The shared evidence gate accepts only the legacy `0.1.1/disabled`
+profile or adapter `0.1.3/synthetic_only`. After the same immutable start
+commit, core resolves only `stripe.secret-key` and invokes the registered
+`provider-contact.read-only-probe-synthetic` operation. Both adapter and core
+validate the bounded in-memory result with network, provider, retry, and
+mutation false. See
+[P3E-8B3B Synthetic Package Execution](docs/PAYMENT-ADAPTER-P3E8B3B-SYNTHETIC-EXECUTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

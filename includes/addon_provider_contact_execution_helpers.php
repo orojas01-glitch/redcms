@@ -139,7 +139,7 @@ if (!function_exists('red_addon_provider_contact_secret_evidence')) {
             || !is_array($snapshot)
             || !is_array($manifest)
             || $snapshot['id'] !== 'redcms.store-lite-stripe-checkout'
-            || $snapshot['version'] !== '0.1.1'
+            || !in_array($snapshot['version'], ['0.1.1', '0.1.3'], true)
         ) {
             $result['errors'][] = 'package_invalid';
             return $result;
@@ -501,6 +501,49 @@ if (!function_exists('red_addon_provider_contact_execution_plan')) {
     }
 }
 
+if (!function_exists('red_addon_provider_contact_loopback_execution_plan')) {
+    function red_addon_provider_contact_loopback_execution_plan(
+        $connection,
+        array $package,
+        array $catalog,
+        $actorAdminRecordId,
+        array $readiness,
+        array $prepared,
+        $evaluatedAtUtc,
+        $lockRows = false,
+        $declarations = null
+    ) {
+        $result = red_addon_provider_contact_execution_plan(
+            $connection,
+            $package,
+            $catalog,
+            $actorAdminRecordId,
+            $readiness,
+            $prepared,
+            $evaluatedAtUtc,
+            $lockRows,
+            $declarations
+        );
+        if (empty($result['ready'])) {
+            return $result;
+        }
+        $contactPlan = $readiness['contactPlan'] ?? null;
+        if (!is_array($contactPlan)
+            || ($contactPlan['packageVersion'] ?? null) !== '0.1.1'
+            || ($contactPlan['runtimeProviderTransport'] ?? null)
+                !== 'disabled'
+        ) {
+            $result['valid'] = false;
+            $result['ready'] = false;
+            $result['status'] = 'loopback_profile_refused';
+            $result['executionStartAvailable'] = false;
+            $result['executionStartStateSha256'] = '';
+            $result['errors'][] = 'loopback_profile_refused';
+        }
+        return $result;
+    }
+}
+
 if (!function_exists('red_addon_provider_contact_execution_reserve')) {
     function red_addon_provider_contact_execution_reserve(
         $connection,
@@ -777,7 +820,7 @@ if (!function_exists('red_addon_provider_contact_execute_loopback')) {
                 )) {
                     throw new RuntimeException('execution_lock_failed');
                 }
-                $plan = red_addon_provider_contact_execution_plan(
+                $plan = red_addon_provider_contact_loopback_execution_plan(
                     $connection,
                     $package,
                     $catalog,

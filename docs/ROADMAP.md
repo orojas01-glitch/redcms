@@ -168,6 +168,15 @@ HTTP, Stripe, provider, Checkout, payment, webhook, Store Lite mutation,
 browser, client, or deployment path is entered. See
 [`PAYMENT-ADAPTER-P3E8B2-LOOPBACK-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B2-LOOPBACK-EXECUTION.md).
 
+P3E-8B3B now closes the synthetic real-package integration. The shared
+authorization path accepts only `0.1.1/disabled` for the retained loopback
+proof or `0.1.3/synthetic_only` for the new package operation. Core preserves
+the durable start/no-retry rule, resolves only `stripe.secret-key`, invokes
+`provider-contact.read-only-probe-synthetic`, validates the exact bounded
+non-network result, and records the immutable outcome. The actual provider
+transport remains unreachable. See
+[`PAYMENT-ADAPTER-P3E8B3B-SYNTHETIC-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B3B-SYNTHETIC-EXECUTION.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation
