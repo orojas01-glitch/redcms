@@ -154,7 +154,11 @@ if (!function_exists('red_addon_provider_contact_claim_state_sha256')) {
             }
         }
         if (!red_addon_valid_package_id($plan['packageId'])
-            || !in_array($plan['packageVersion'], ['0.1.1', '0.1.3'], true)
+            || !in_array(
+                $plan['packageVersion'],
+                ['0.1.1', '0.1.3', '0.1.4'],
+                true
+            )
             || (int) $plan['actorAdminRecordId'] <= 0
             || !red_addon_provider_contact_sha256(
                 $plan['ownerSubjectSha256']

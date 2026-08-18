@@ -177,6 +177,15 @@ non-network result, and records the immutable outcome. The actual provider
 transport remains unreachable. See
 [`PAYMENT-ADAPTER-P3E8B3B-SYNTHETIC-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B3B-SYNTHETIC-EXECUTION.md).
 
+P3E-8B3C2 now closes the core provider-operation runner gate. The shared
+authorization path adds only the exact adapter `0.1.4/provider_read_only`
+profile. Core preserves the durable start/no-retry rule, resolves only
+`stripe.secret-key`, invokes `provider-contact.read-only-probe-sandbox`, and
+records only bounded outcome evidence. Acceptance uses an integrity-checked
+in-memory handler, so the first real restricted-key sandbox GET remains the
+separate P3E-8B3C3 operator rehearsal. See
+[`PAYMENT-ADAPTER-P3E8B3C2-PROVIDER-RUNNER.md`](PAYMENT-ADAPTER-P3E8B3C2-PROVIDER-RUNNER.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

@@ -986,6 +986,24 @@ provider hostname, network client, DNS, TLS, HTTP, cURL, request global, public
 route, payment, webhook, Store Lite mutation, browser, client, or deployment
 primitive. Real provider transport remains separately approved P3E-8B3C work.
 
+P3E-8B3C2 adds only the exact core runner for adapter
+`0.1.4/provider_read_only`. The historical loopback and synthetic runners
+refuse that profile. The provider runner commits a distinct operation- and
+target-bound start before package or secret access, resolves exactly
+`stripe.secret-key`, leaves the webhook secret unavailable, and invokes only
+`provider-contact.read-only-probe-sandbox` with the complete plan and state
+hashes. It accepts only the bounded status projection with body, headers,
+credential, retry, and mutation absent. If a trusted handler was invoked but
+returns missing or malformed output, core conservatively records possible
+network/provider contact as indeterminate and never restores the attempt.
+
+The core helper contains no hostname, DNS, TLS, HTTP, cURL, socket, request
+global, route, scheduler, browser, payment, webhook, Store Lite mutation,
+client, or deployment primitive. Its disposable acceptance package registers
+an in-memory handler for the exact operation; therefore this gate performs no
+provider contact. One real restricted-key sandbox GET remains separately
+approved P3E-8B3C3 work, and no public or automatic caller exists.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

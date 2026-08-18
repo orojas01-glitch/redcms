@@ -1519,6 +1519,21 @@ request bootstrap excludes the disabled package.
     Stripe, provider transport, Checkout, payment, webhook, Store Lite
     mutation, browser, client, or deployment path is added.
 
+109. Added P3E-8B3C2 as the exact core provider-operation runner gate. The
+    shared evidence allow-list adds only adapter `0.1.4/provider_read_only`,
+    while the historical loopback and synthetic runners refuse that profile.
+    Core commits a distinct sandbox-operation start before registrar, secret,
+    or handler access, resolves only `stripe.secret-key`, invokes the exact
+    typed sandbox operation, validates the bounded result, and permanently
+    refuses replay after any committed start. Missing or malformed output
+    after handler invocation is conservatively recorded as possible
+    network/provider contact. The 37-assertion disposable acceptance
+    substitutes an integrity-checked in-memory handler, so no DNS, TLS, HTTP,
+    cURL, Stripe,
+    Checkout, payment, webhook, Store Lite mutation, public route, browser,
+    client, or deployment path is exercised. One real restricted-key GET
+    remains separately approved P3E-8B3C3 work.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

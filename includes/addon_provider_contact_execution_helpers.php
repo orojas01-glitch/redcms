@@ -139,7 +139,11 @@ if (!function_exists('red_addon_provider_contact_secret_evidence')) {
             || !is_array($snapshot)
             || !is_array($manifest)
             || $snapshot['id'] !== 'redcms.store-lite-stripe-checkout'
-            || !in_array($snapshot['version'], ['0.1.1', '0.1.3'], true)
+            || !in_array(
+                $snapshot['version'],
+                ['0.1.1', '0.1.3', '0.1.4'],
+                true
+            )
         ) {
             $result['errors'][] = 'package_invalid';
             return $result;

@@ -74,6 +74,13 @@ commit, core resolves only `stripe.secret-key` and invokes the registered
 validate the bounded in-memory result with network, provider, retry, and
 mutation false. See
 [P3E-8B3B Synthetic Package Execution](docs/PAYMENT-ADAPTER-P3E8B3B-SYNTHETIC-EXECUTION.md).
+P3E-8B3C2 now adds the exact core runner for adapter
+`0.1.4/provider_read_only`. It preserves the immutable start, scoped-secret,
+bounded-outcome, and permanent no-retry rules, while acceptance substitutes an
+integrity-checked in-memory handler. No DNS, HTTP, Stripe request, public
+caller, payment mutation, browser flow, client activation, or deployment is
+performed by this gate. See
+[P3E-8B3C2 Provider-Operation Runner](docs/PAYMENT-ADAPTER-P3E8B3C2-PROVIDER-RUNNER.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
