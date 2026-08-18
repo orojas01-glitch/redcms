@@ -173,7 +173,10 @@ if (!function_exists('red_addon_provider_contact_readiness_valid')) {
                 && ($plan['runtimeProviderTransport'] ?? null) === 'disabled')
             || (($plan['packageVersion'] ?? null) === '0.1.3'
                 && ($plan['runtimeProviderTransport'] ?? null)
-                    === 'synthetic_only');
+                    === 'synthetic_only')
+            || (($plan['packageVersion'] ?? null) === '0.1.4'
+                && ($plan['runtimeProviderTransport'] ?? null)
+                    === 'provider_read_only');
         return is_string($encoded)
             && hash_equals(
                 $readiness['planSha256'],
