@@ -1534,6 +1534,18 @@ request bootstrap excludes the disabled package.
     client, or deployment path is exercised. One real restricted-key GET
     remains separately approved P3E-8B3C3 work.
 
+110. Added P3E-8B3C3A as the server-local one-shot operator-command contract.
+    Its default dry run revalidates exact Owner, package, dependency,
+    authorization, claim, expiry, and value-free secret availability without
+    execution. Apply requires the printed state and hashes, a nonzero backup,
+    and literal sandbox-operation, target, restricted-test, one-attempt,
+    no-retry, and no-mutation confirmations. The command accepts no key
+    argument and contains exactly one B3C2 execution call site. The pure
+    40-assertion contract adds no hostname, network primitive, request global,
+    browser/public bridge, scheduler, automatic caller, provider contact,
+    payment, Store Lite mutation, client activation, or deployment. The first
+    real restricted-key GET remains separately approved P3E-8B3C3B work.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

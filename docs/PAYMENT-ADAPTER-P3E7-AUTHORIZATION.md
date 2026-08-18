@@ -9,7 +9,9 @@ It still performs no provider contact.
 P3E-7 consumes only the closed, value-free P3E-6 `readiness` and `prepared`
 objects. Core independently requires:
 
-- exact package `redcms.store-lite-stripe-checkout` version `0.1.1`;
+- exact package `redcms.store-lite-stripe-checkout` under one closed approved
+  profile: historical `0.1.1/disabled`, `0.1.3/synthetic_only`, or
+  `0.1.4/provider_read_only`;
 - current trusted package code matching its enabled client registry row;
 - enabled `redcms.store-lite` in the same selected database;
 - a database-backed Owner with the exact `addons.enable` grant;

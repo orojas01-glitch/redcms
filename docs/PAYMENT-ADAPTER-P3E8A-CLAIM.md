@@ -10,7 +10,9 @@ P3E-8A consumes the same exact value-free P3E-6 `readiness` and `prepared`
 objects used by P3E-7. Core independently recomputes the P3E-7 decision and
 requires:
 
-- exact package `redcms.store-lite-stripe-checkout` version `0.1.1`;
+- exact package `redcms.store-lite-stripe-checkout` under one closed approved
+  profile: historical `0.1.1/disabled`, `0.1.3/synthetic_only`, or
+  `0.1.4/provider_read_only`;
 - current trusted package code and enabled registry state;
 - enabled `redcms.store-lite` in the same selected database;
 - a current database-backed Owner with `addons.enable`;

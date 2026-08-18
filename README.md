@@ -81,6 +81,13 @@ integrity-checked in-memory handler. No DNS, HTTP, Stripe request, public
 caller, payment mutation, browser flow, client activation, or deployment is
 performed by this gate. See
 [P3E-8B3C2 Provider-Operation Runner](docs/PAYMENT-ADAPTER-P3E8B3C2-PROVIDER-RUNNER.md).
+P3E-8B3C3A now adds the matching server-local operator command. It defaults
+to a value-free dry run and requires exact database, package, state, evidence,
+backup, operation, target, restricted-test, one-attempt, no-retry, and
+no-mutation confirmations before its single B3C2 call site can run. The
+40-assertion command contract performs no provider contact; the first real
+restricted-key GET remains separately gated B3C3B work. See
+[P3E-8B3C3A Server-Local Operator Command](docs/PAYMENT-ADAPTER-P3E8B3C3A-OPERATOR-COMMAND.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
