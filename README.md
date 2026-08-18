@@ -100,6 +100,14 @@ binds mutation and Checkout creation false. Real write credentials, Checkout
 Session creation, payment, webhook, browser checkout, hosted-demo changes,
 client deployment, and P4 remain separately gated. See
 [P3E-9 Sandbox Checkout-Creation Frontier](docs/PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
+P3E-9A has now completed in the separately distributed adapter as a pure
+source-only contract. Its 53 focused and 921 aggregate assertions prove
+bounded expiry, read-only-profile refusal, synthetic open/unpaid response
+validation, and Checkout-URL removal while leaving installable adapter `0.1.4`
+unchanged. P3E-9B synthetic-only package/core integration is next; no key,
+network request, Checkout Session, payment, webhook, browser flow, client
+state, or deployment is authorized. See
+[P3E-9A Contract Adoption](docs/PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

@@ -2,7 +2,8 @@
 
 Last updated: 2026-08-18 after the published `v5.1.0` release, completed Store
 Lite basic-demo proof, completed payment-adapter P3A through P3D foundations,
-and the closed P3E-8B3C3B read-only Stripe Sandbox rehearsal.
+the closed P3E-8B3C3B read-only Stripe Sandbox rehearsal, and the external
+P3E-9A non-executing Checkout-creation contract.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -77,11 +78,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3E-8B3C3B completed one separately authorized read-only GET in the dedicated RED-CMS Stripe Sandbox. It returned the expected bounded resource miss, produced one matching Stripe log, retained no credential or response body, cleaned every disposable local resource, and ended with the restricted key expired. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A through P3D and the first real read-only P3E contact are complete. P3E-9A is next: a pure non-executing Checkout-creation contract. No write key, Checkout Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is authorized. |
+| What just finished? | P3E-9A completed in the external adapter repository as a pure source-only Checkout-creation contract. It reuses the P3E-1/P3E-3 contracts, adds bounded expiry and read-only-profile refusal, discards the synthetic Checkout URL, passed 53 focused and 921 aggregate assertions, and left installable adapter 0.1.4 unchanged. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9B is next: synthetic-only package/core integration for the new contract. No write key, network request, Checkout Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is authorized. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9B/C synthetic integration and new one-attempt authority, P3E-9D one real Sandbox Session, the remaining payment/webhook proof, and P4 deployment review stay separately gated. |
+| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9C new one-attempt authority, P3E-9D one real Sandbox Session, the remaining payment/webhook proof, and P4 deployment review stay separately gated. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -104,19 +105,20 @@ flowchart LR
     P3C["COMPLETE<br/>P3C. External Stripe adapter<br/>through 0.1.4 read-only profile"]
     P3D["COMPLETE<br/>P3D. Offline lifecycle + typed invocation"]
     P3E8["COMPLETE<br/>P3E-8. One read-only Sandbox GET<br/>key expired after evidence"]
-    P3E9A["NEXT<br/>P3E-9A. Non-executing<br/>Checkout-creation contract"]
-    P3E9B["GATED<br/>P3E-9B/C. Synthetic integration<br/>+ new one-attempt authority"]
+    P3E9A["COMPLETE<br/>P3E-9A. Non-executing<br/>Checkout-creation contract"]
+    P3E9B["NEXT<br/>P3E-9B. Synthetic package/core<br/>integration"]
+    P3E9C["GATED<br/>P3E-9C. New one-attempt<br/>mutation authority"]
     P3E9D["GATED<br/>P3E-9D. One Sandbox Session<br/>separate write approval"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9D --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C --> P3E9D --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8 complete;
-    class P3E9A active;
-    class P3E9B,P3E9D,P4 gated;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A complete;
+    class P3E9B active;
+    class P3E9C,P3E9D,P4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -150,10 +152,12 @@ transition, history, transactional-service, and lifecycle-rehearsal layers in
 versions 0.1.32 through 0.1.35. P3A through P3D are complete. P3E-8 then proved
 the first real provider contact through one read-only resource-miss GET in a
 dedicated blank Stripe Sandbox. The request authorized no mutation or retry,
-and its restricted key was expired after evidence review. P3E-9A is now active
-only as a pure non-executing Checkout-creation contract; every write
-credential, provider mutation, Checkout Session, payment, webhook, browser
-flow, hosted-demo change, and client deployment remains stopped. See
+and its restricted key was expired after evidence review. P3E-9A then added
+only a pure source contract in the external adapter repository; installable
+adapter `0.1.4` remained unchanged. P3E-9B is now active only as a synthetic-
+only package/core integration gate; every write credential, network request,
+provider mutation, Checkout Session, payment, webhook, browser flow, hosted-
+demo change, and client deployment remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
 ## Status rule

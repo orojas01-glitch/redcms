@@ -2,10 +2,10 @@
 
 Status: P3 planning is approved. P3A through P3D are complete, and
 P3E-8B3C3B closed the first real provider-contact rehearsal through one
-read-only Stripe Sandbox GET. P3E-9A is the next exact gate: a pure,
-non-executing Checkout-creation contract. Later synthetic integration,
-write-specific authorization, real Sandbox creation, payment, webhook, and P4
-deployment remain gated.
+read-only Stripe Sandbox GET. P3E-9A then completed as a pure external
+non-executing Checkout-creation contract. P3E-9B synthetic-only package/core
+integration is next. Write-specific authorization, real Sandbox creation,
+payment, webhook, and P4 deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.
@@ -269,11 +269,12 @@ proof must demonstrate:
 
 P3E-8B3C3B completed only the first read-only provider-contact prerequisite.
 Its mutation-disabled authorization, claim, start, result, and audit evidence
-cannot authorize Checkout creation. The next exact gate is P3E-9A, which may
-adopt only pure non-executing request, response, expiry, and operation-profile
-contracts around the already-reviewed P3E-1/P3E-3 source. It may not access a
-database, resolve a credential, invoke a package, open a connection, create a
-Checkout Session, or change any hosted or client state.
+cannot authorize Checkout creation. P3E-9A has now adopted only pure
+non-executing request, response, expiry, and operation-profile contracts around
+the already-reviewed P3E-1/P3E-3 source. It accesses no database, resolves no
+credential, invokes no package, opens no connection, creates no Checkout
+Session, and changes no hosted or client state. P3E-9B is the next exact gate:
+synthetic-only package/core integration with cross-profile refusal.
 
 The staged P3E-9 boundary and the later separate approvals for synthetic
 integration, mutation-specific authority, one real Sandbox Session, key

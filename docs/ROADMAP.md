@@ -207,14 +207,24 @@ retry.
 See
 [`PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md).
 
-P3E-9A is the next exact optional-payment gate. It may add only pure,
-non-executing Checkout-creation request, response, expiry, and operation-
-profile contracts around the already-reviewed adapter source. The completed
-P3E-8 evidence is mutation-disabled and cannot be reused. New synthetic
+The approved P3E-9 frontier limited P3E-9A to pure, non-executing Checkout-
+creation request, response, expiry, and operation-profile contracts around the
+already-reviewed adapter source. The completed P3E-8 evidence is mutation-
+disabled and cannot be reused. New synthetic
 integration, mutation-specific authorization, one real Sandbox Session, key
 expiration, Session expiration, simulated payment, webhook proof, and P4 each
 remain separate stops. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
+
+P3E-9A is now complete in the separately distributed adapter at merged commit
+`28c17a230db22e893ced272fc75e99491cee9705`. The source-only contract reuses
+the existing planner, codec, and response gate; adds bounded expiry; rejects
+read-only-profile reuse; discards the synthetic Checkout URL; and passed 53
+focused plus 921 aggregate assertions. Adapter `0.1.4` and its installable
+package remain unchanged. P3E-9B synthetic-only package/core integration is
+next; credentials, network, provider mutation, Checkout creation, payment,
+webhook, browser flow, demo/client state, and P4 remain gated. See
+[`PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md`](PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 

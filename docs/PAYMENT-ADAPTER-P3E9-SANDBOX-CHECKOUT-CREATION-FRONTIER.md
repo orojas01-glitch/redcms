@@ -1,10 +1,10 @@
 # P3E-9 Stripe Sandbox Checkout-Creation Frontier
 
-Status: planning boundary only. P3E-8B3C3B proved one exact read-only Stripe
-Sandbox request and is closed. P3E-9A is the next implementation gate, but
-this document does not add code, authorize a Stripe key, create a Checkout
-Session, make a payment, expose a browser route, change `demo.red-sphere.com`,
-or enter P4 deployment review.
+Status: active staged boundary. P3E-8B3C3B proved one exact read-only Stripe
+Sandbox request, and P3E-9A completed the pure external source contract.
+P3E-9B synthetic-only package/core integration is next. This document does not
+authorize a Stripe key, create a Checkout Session, make a payment, expose a
+browser route, change `demo.red-sphere.com`, or enter P4 deployment review.
 
 ## Why A New Gate Is Required
 
@@ -124,11 +124,12 @@ the entire Sandbox remains a separate explicit destructive decision.
 
 P3E-9 is divided so that every risk increase has a separate review:
 
-1. **P3E-9A — non-executing contract adoption.** Add only pure request,
+1. **P3E-9A — complete.** The external source adds only pure request,
    response, expiry, and operation-profile validation around the existing
-   P3E-1/P3E-3 contracts. No database, credential, package runtime, network,
-   Stripe account, or client state.
-2. **P3E-9B — synthetic package/core integration.** Register and invoke one
+   P3E-1/P3E-3 contracts. Adapter `0.1.4` and its installable package remain
+   unchanged; no database, credential, package runtime, network, Stripe
+   account, or client state was used.
+2. **P3E-9B — next.** Register and invoke one
    checkout-creation-shaped operation against an integrity-checked in-memory
    handler. Prove new evidence cannot reuse the read-only P3E-8 profile. No
    DNS, TLS, HTTP, Stripe contact, Checkout Session, or business mutation.
@@ -153,7 +154,7 @@ rotation, rollback, and cleanup requirements from the approved P3 proposal.
 This documentation-only slice is complete when:
 
 - the canonical status graphic shows P3C and P3D complete, the first P3E
-  contact complete, P3E-9A next, and P4 gated;
+  contact and P3E-9A complete, P3E-9B next, and P4 gated;
 - README, roadmap, security, acceptance, Version 5.1 direction, and the P3
   proposal agree on the frontier and exclusions;
 - no PHP, migration, manifest, package, database, credential, route, runtime,
