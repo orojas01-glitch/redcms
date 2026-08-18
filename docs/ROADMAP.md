@@ -226,6 +226,18 @@ next; credentials, network, provider mutation, Checkout creation, payment,
 webhook, browser flow, demo/client state, and P4 remain gated. See
 [`PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md`](PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md).
 
+P3E-9B is now complete across two isolated repositories. External adapter
+`0.1.5` adopts the exact P3E-9A source and adds only
+`checkout.create-sandbox-synthetic`; core P3E-9B2 validates that package and
+input, registers its integrity-checked handler, and invokes the operation only
+through the typed adapter boundary with injected scoped access. The focused
+core fixture passes 37 dependency-free assertions with exact temporary-project
+cleanup. No database, durable authority, credential resolver, network,
+provider mutation, Checkout Session, payment, webhook, browser, Store Lite,
+demo/client, or deployment path is added. P3E-9C mutation-specific one-attempt
+authority is next. See
+[`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation
