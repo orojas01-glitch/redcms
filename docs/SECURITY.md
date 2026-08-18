@@ -967,6 +967,25 @@ global, public route, payment, webhook, Store Lite mutation, browser, client,
 or deployment primitive. Any real sandbox transport remains separately
 approved P3E-8B3 work.
 
+P3E-8B3B adds a second exact non-network profile rather than widening the
+loopback runner. Authorization accepts only adapter `0.1.1` with provider
+transport `disabled`, or adapter `0.1.3` with provider transport
+`synthetic_only`. Version `0.1.2`, mode `enabled`, and every other pair are
+refused. The synthetic runner uses distinct start/outcome hashes that bind its
+operation and `synthetic-package` target while retaining the same immutable
+authorization, claim, ledger, audit, expiry, and permanent no-retry rules.
+
+After the committed start, core integrity-checks the `0.1.3` registrar,
+resolves only `stripe.secret-key`, and invokes the registered typed synthetic
+operation. The adapter explicitly requires the webhook secret to be absent.
+Its fixed in-memory evidence is projected to a closed result; core independently
+validates the exact keys, status classification, hashes, and false network,
+provider, retry, mutation, body, header, and credential flags before result
+persistence. Neither the core synthetic helper nor its fixture contains a
+provider hostname, network client, DNS, TLS, HTTP, cURL, request global, public
+route, payment, webhook, Store Lite mutation, browser, client, or deployment
+primitive. Real provider transport remains separately approved P3E-8B3C work.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

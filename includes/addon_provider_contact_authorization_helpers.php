@@ -169,6 +169,11 @@ if (!function_exists('red_addon_provider_contact_readiness_valid')) {
             return false;
         }
         $encoded = red_addon_provider_contact_encode($plan);
+        $profileValid = (($plan['packageVersion'] ?? null) === '0.1.1'
+                && ($plan['runtimeProviderTransport'] ?? null) === 'disabled')
+            || (($plan['packageVersion'] ?? null) === '0.1.3'
+                && ($plan['runtimeProviderTransport'] ?? null)
+                    === 'synthetic_only');
         return is_string($encoded)
             && hash_equals(
                 $readiness['planSha256'],
@@ -178,11 +183,10 @@ if (!function_exists('red_addon_provider_contact_readiness_valid')) {
                 === 'stripe.sandbox.read-only-resource-miss-probe'
             && ($plan['packageId'] ?? null)
                 === 'redcms.store-lite-stripe-checkout'
-            && ($plan['packageVersion'] ?? null) === '0.1.1'
+            && $profileValid
             && red_addon_provider_contact_sha256(
                 $plan['packageArtifactSha256'] ?? null
             )
-            && ($plan['runtimeProviderTransport'] ?? null) === 'disabled'
             && ($plan['method'] ?? null) === 'GET'
             && ($plan['url'] ?? null)
                 === 'https://api.stripe.com/v1/checkout/sessions/'
