@@ -94,6 +94,12 @@ Stripe Workbench showed one matching request, and local evidence/cleanup checks
 passed with no credential retention, retry, mutation, client state, or
 deployment. See
 [P3E-8B3C3B Restricted-Key Sandbox Execution](docs/PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md).
+The next frontier is P3E-9A: a pure non-executing Checkout-creation contract.
+The completed read-only authorization cannot be widened or reused because it
+binds mutation and Checkout creation false. Real write credentials, Checkout
+Session creation, payment, webhook, browser checkout, hosted-demo changes,
+client deployment, and P4 remain separately gated. See
+[P3E-9 Sandbox Checkout-Creation Frontier](docs/PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

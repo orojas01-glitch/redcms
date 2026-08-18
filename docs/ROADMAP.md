@@ -207,6 +207,15 @@ retry.
 See
 [`PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md).
 
+P3E-9A is the next exact optional-payment gate. It may add only pure,
+non-executing Checkout-creation request, response, expiry, and operation-
+profile contracts around the already-reviewed adapter source. The completed
+P3E-8 evidence is mutation-disabled and cannot be reused. New synthetic
+integration, mutation-specific authorization, one real Sandbox Session, key
+expiration, Session expiration, simulated payment, webhook proof, and P4 each
+remain separate stops. See
+[`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

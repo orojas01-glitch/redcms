@@ -1035,6 +1035,17 @@ evidence review, the operator explicitly expired the one-purpose restricted
 key. It no longer appears in the active restricted-key list and cannot be
 reused for a second request.
 
+P3E-9 must not reinterpret any of that read-only evidence as provider-mutation
+authority. Checkout Session creation requires a new operation profile, plan,
+authorization, claim, start, result, audit identity, and separately provisioned
+least-privilege restricted sandbox key. P3E-9A is non-executing and may touch
+none of those runtime surfaces. Later real creation remains limited to one
+separately approved POST from a fresh disposable installation with synthetic
+data, one exact idempotency relation, a short automatic expiry, no recovery,
+no browser navigation, no payment, no webhook, no Store Lite transition, no
+automatic retry, and no client deployment. See
+[`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

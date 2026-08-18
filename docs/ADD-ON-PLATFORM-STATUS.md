@@ -1,8 +1,8 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-16 after the published `v5.1.0` release, completed Store
-Lite basic-demo proof, all five closed P3A payment-adapter core slices, and the
-separately distributed Store Lite 0.1.35 P3B lifecycle proof.
+Last updated: 2026-08-18 after the published `v5.1.0` release, completed Store
+Lite basic-demo proof, completed payment-adapter P3A through P3D foundations,
+and the closed P3E-8B3C3B read-only Stripe Sandbox rehearsal.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -77,11 +77,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3B completed in separately distributed Store Lite 0.1.35: provider-neutral transition policy, append-only history migration, typed transactional service, and a disposable lifecycle rehearsal with rollback, client isolation, and exact cleanup. It added no adapter, webhook, credential, provider request, or client deployment. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A and P3B are complete. The next exact gate is P3C-1, the dependency-free identity and pure normalization-contract foundation for the separately distributed Stripe Checkout adapter. No adapter repository, endpoint, dependency, webhook, or provider access is active. |
+| What just finished? | P3E-8B3C3B completed one separately authorized read-only GET in the dedicated RED-CMS Stripe Sandbox. It returned the expected bounded resource miss, produced one matching Stripe log, retained no credential or response body, cleaned every disposable local resource, and ended with the restricted key expired. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3A through P3D and the first real read-only P3E contact are complete. P3E-9A is next: a pure non-executing Checkout-creation contract. No write key, Checkout Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is authorized. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. Hosted PayPal/card adapters remain later provider-neutral work and are not implied by this closeout. |
+| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9B/C synthetic integration and new one-attempt authority, P3E-9D one real Sandbox Session, the remaining payment/webhook proof, and P4 deployment review stay separately gated. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -101,20 +101,22 @@ flowchart LR
     A4["COMPLETE<br/>P3A-4. Closed raw event ingress"]
     A5["COMPLETE<br/>P3A-5. Atomic enablement<br/>closed core runner"]
     P3B["COMPLETE<br/>P3B. Store Lite event service<br/>through 0.1.35 lifecycle proof"]
-    P3C1["NEXT<br/>P3C-1. External adapter foundation<br/>identity + pure contracts"]
-    P3C2["GATED<br/>P3C-2+. Adapter runtime work"]
-    P3D["GATED<br/>P3D. Offline lifecycle proof"]
-    P3E["GATED<br/>P3E. New Stripe Sandbox proof"]
+    P3C["COMPLETE<br/>P3C. External Stripe adapter<br/>through 0.1.4 read-only profile"]
+    P3D["COMPLETE<br/>P3D. Offline lifecycle + typed invocation"]
+    P3E8["COMPLETE<br/>P3E-8. One read-only Sandbox GET<br/>key expired after evidence"]
+    P3E9A["NEXT<br/>P3E-9A. Non-executing<br/>Checkout-creation contract"]
+    P3E9B["GATED<br/>P3E-9B/C. Synthetic integration<br/>+ new one-attempt authority"]
+    P3E9D["GATED<br/>P3E-9D. One Sandbox Session<br/>separate write approval"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C1 --> P3C2 --> P3D --> P3E --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9D --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B complete;
-    class P3C1 active;
-    class P3C2,P3D,P3E,P4 gated;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8 complete;
+    class P3E9A active;
+    class P3E9B,P3E9D,P4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -127,8 +129,10 @@ P2 fixture record in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md), before
 implementing the five-part P3 plan in
 [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md).
-P3 remains gated until its core profile, Store Lite transition service,
-external adapter, offline rehearsal, and sandbox proof are separately approved.
+P3 is in progress: its core profile, Store Lite transition service, external
+adapter, offline rehearsal, and first read-only Sandbox contact are complete.
+Checkout creation and the remaining payment/webhook proof stay separately
+gated.
 P3A-1 supplies the data-only adapter profile and server-signature route
 vocabulary. P3A-2 adds read-only Owner, same-database Store Lite dependency,
 immutable migration-ledger, and InnoDB table evidence. P3A-3 refreshes those
@@ -143,10 +147,14 @@ plan under locks, and commits only the enabled state plus a value-free audit
 fact. It invokes no handler, resolves no secret bytes, exposes no endpoint, and
 contacts no provider. P3B then adds only Store Lite-owned provider-neutral
 transition, history, transactional-service, and lifecycle-rehearsal layers in
-versions 0.1.32 through 0.1.35. P3A and P3B are complete. P3C-1 is active only
-as a separately distributed dependency-free package-foundation gate; every
-route, credential, dependency, provider request, simulated payment, and client
-deployment remains stopped.
+versions 0.1.32 through 0.1.35. P3A through P3D are complete. P3E-8 then proved
+the first real provider contact through one read-only resource-miss GET in a
+dedicated blank Stripe Sandbox. The request authorized no mutation or retry,
+and its restricted key was expired after evidence review. P3E-9A is now active
+only as a pure non-executing Checkout-creation contract; every write
+credential, provider mutation, Checkout Session, payment, webhook, browser
+flow, hosted-demo change, and client deployment remains stopped. See
+[`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
 ## Status rule
 

@@ -1,9 +1,11 @@
 # Store Lite Payment Adapter P3 Sandbox Proposal
 
-Status: P3 planning is approved. Separately approved P3A-1 through P3A-5 core
-slices and Store Lite P3B-1 through P3B-4 are complete; P3A and P3B are
-closed. P3C-1 is the next exact gate, while P3C-2 and later work through P3E
-remain gated.
+Status: P3 planning is approved. P3A through P3D are complete, and
+P3E-8B3C3B closed the first real provider-contact rehearsal through one
+read-only Stripe Sandbox GET. P3E-9A is the next exact gate: a pure,
+non-executing Checkout-creation contract. Later synthetic integration,
+write-specific authorization, real Sandbox creation, payment, webhook, and P4
+deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.
@@ -262,6 +264,22 @@ proof must demonstrate:
    deleting existing evidence; and
 8. key rotation/refusal and webhook-secret rotation are rehearsed without
    disclosing either value.
+
+### Current P3E Frontier
+
+P3E-8B3C3B completed only the first read-only provider-contact prerequisite.
+Its mutation-disabled authorization, claim, start, result, and audit evidence
+cannot authorize Checkout creation. The next exact gate is P3E-9A, which may
+adopt only pure non-executing request, response, expiry, and operation-profile
+contracts around the already-reviewed P3E-1/P3E-3 source. It may not access a
+database, resolve a credential, invoke a package, open a connection, create a
+Checkout Session, or change any hosted or client state.
+
+The staged P3E-9 boundary and the later separate approvals for synthetic
+integration, mutation-specific authority, one real Sandbox Session, key
+expiration, Session expiration, simulated payment, webhook proof, and P4 are
+defined in
+[`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
 Stripe documents that API idempotency keys can be removed after at least 24
 hours and that webhook deliveries may be retried or arrive out of order.
