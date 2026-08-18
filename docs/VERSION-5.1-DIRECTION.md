@@ -1546,6 +1546,19 @@ request bootstrap excludes the disabled package.
     payment, Store Lite mutation, client activation, or deployment. The first
     real restricted-key GET remains separately approved P3E-8B3C3B work.
 
+111. Completed P3E-8B3C3B as the first real provider-contact rehearsal. A
+    dedicated blank RED-CMS Stripe sandbox and Checkout Sessions Read-only
+    restricted key were isolated from every other project. The fresh staged
+    core/Store Lite `0.1.35`/adapter `0.1.4` lifecycle committed new
+    authorization and claim evidence, verified its pre-contact backup, and
+    made one exact GET. Core recorded bounded `404 resource_miss_observed`
+    evidence; Stripe logged one matching request; no retry, mutation, response
+    body/header, credential, client state, or deployment escaped. Checksummed
+    private evidence passed credential scanning and final cleanup returned
+    database/grant/project/process zero with the configured primary unchanged.
+    After evidence review, the operator explicitly expired the restricted key;
+    it no longer appears in the active restricted-key list.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

@@ -195,6 +195,18 @@ automatic caller. The first real restricted-key sandbox GET remains separately
 approved P3E-8B3C3B work. See
 [`PAYMENT-ADAPTER-P3E8B3C3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E8B3C3A-OPERATOR-COMMAND.md).
 
+P3E-8B3C3B now closes the first real provider-contact rehearsal. The dedicated
+RED-CMS Stripe sandbox issued one Checkout Sessions Read-only restricted key;
+the disposable operator path made one exact GET and recorded the expected
+bounded `404 resource_miss_observed` result. Stripe logged one matching request,
+the private evidence archive passed checksums and credential scanning, and
+cleanup returned database/grant/project/process zero with the primary
+unchanged. After evidence review, the operator explicitly expired the key; it
+no longer appears in the active restricted-key list and cannot authorize a
+retry.
+See
+[`PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md`](PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

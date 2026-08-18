@@ -88,6 +88,12 @@ no-mutation confirmations before its single B3C2 call site can run. The
 40-assertion command contract performs no provider contact; the first real
 restricted-key GET remains separately gated B3C3B work. See
 [P3E-8B3C3A Server-Local Operator Command](docs/PAYMENT-ADAPTER-P3E8B3C3A-OPERATOR-COMMAND.md).
+P3E-8B3C3B has now completed the separately authorized real sandbox rehearsal:
+one exact restricted-key GET returned the expected bounded `404` resource miss,
+Stripe Workbench showed one matching request, and local evidence/cleanup checks
+passed with no credential retention, retry, mutation, client state, or
+deployment. See
+[P3E-8B3C3B Restricted-Key Sandbox Execution](docs/PAYMENT-ADAPTER-P3E8B3C3B-SANDBOX-EXECUTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

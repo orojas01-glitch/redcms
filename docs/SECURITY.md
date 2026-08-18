@@ -1020,6 +1020,21 @@ as bounded evidence and remains permanently non-retryable. The 40-assertion
 command test uses source inspection only and performs no provider contact.
 One real restricted-key GET remains separately approved B3C3B work.
 
+P3E-8B3C3B executed that separately authorized boundary exactly once in the
+dedicated RED-CMS Stripe sandbox. The restricted key had only Checkout Sessions
+Read permission. Core committed the immutable start before secret resolution,
+the adapter made one verified HTTPS GET to the fixed synthetic missing-session
+target, and the bounded outcome was `404 resource_miss_observed`. Stripe logged
+one matching GET and no write request. Response body/header content and the
+credential were discarded; no retry or mutation was authorized.
+
+The copied key and process value were cleared, the evidence archive contained
+no credential pattern, and disposable database/grant/staged-project/process
+cleanup reached exact zero with the configured primary unchanged. After
+evidence review, the operator explicitly expired the one-purpose restricted
+key. It no longer appears in the active restricted-key list and cannot be
+reused for a second request.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
