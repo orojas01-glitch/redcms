@@ -1004,6 +1004,22 @@ an in-memory handler for the exact operation; therefore this gate performs no
 provider contact. One real restricted-key sandbox GET remains separately
 approved P3E-8B3C3 work, and no public or automatic caller exists.
 
+P3E-8B3C3A adds the one explicit server-local command allowed to call the
+B3C2 runner. Dry run revalidates the exact package, current Owner/capability,
+same-database Store Lite, authorization, claim, expiry, and value-free secret
+availability without resolving a value, executing the registrar, writing a
+start, or contacting a provider. Apply requires every printed state/hash plus
+a nonzero backup checksum and literal confirmations for the exact sandbox
+operation, target, restricted-test mode, one attempt, no retry, and no
+mutation. The command accepts no key value or key option.
+
+The operator command contains one execution call site and no provider hostname,
+network primitive, request global, web endpoint, job, scheduler, or automatic
+caller. Any non-resource-miss result after a committed start is reported only
+as bounded evidence and remains permanently non-retryable. The 40-assertion
+command test uses source inspection only and performs no provider contact.
+One real restricted-key GET remains separately approved B3C3B work.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

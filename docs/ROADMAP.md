@@ -186,6 +186,15 @@ in-memory handler, so the first real restricted-key sandbox GET remains the
 separate P3E-8B3C3 operator rehearsal. See
 [`PAYMENT-ADAPTER-P3E8B3C2-PROVIDER-RUNNER.md`](PAYMENT-ADAPTER-P3E8B3C2-PROVIDER-RUNNER.md).
 
+P3E-8B3C3A now closes the server-local operator-command contract. The command
+defaults to a non-executing dry run and has only one call site to the B3C2
+runner. Apply requires the exact printed state and hashes, nonzero backup,
+sandbox operation/target, restricted-test mode, one attempt, no retry, and no
+mutation. It accepts no key argument and adds no browser, public, scheduled, or
+automatic caller. The first real restricted-key sandbox GET remains separately
+approved P3E-8B3C3B work. See
+[`PAYMENT-ADAPTER-P3E8B3C3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E8B3C3A-OPERATOR-COMMAND.md).
+
 ### Launch Priority: Per-Page SEO Metadata
 
 Per-page SEO metadata compatibility is the first Version 5.1 implementation

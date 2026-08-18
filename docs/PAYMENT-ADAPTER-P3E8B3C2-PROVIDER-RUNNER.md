@@ -88,10 +88,11 @@ deployment state remain unchanged.
 
 ## Next stop
 
-P3E-8B3C3 may add one explicit server-local operator rehearsal using the real
-adapter `0.1.4` handler and one restricted-test key. It must retain the exact
-Owner authorization, claim, durable start, scoped-secret, read-only GET,
-bounded evidence, and permanent no-retry rules.
+P3E-8B3C3A now adds the explicit server-local, dry-run-first operator command.
+The first real request remains B3C3B and may use the adapter `0.1.4` handler
+only with one restricted-test key. It must retain the exact Owner
+authorization, claim, durable start, scoped-secret, read-only GET, bounded
+evidence, and permanent no-retry rules.
 
 Live keys, Checkout creation, payment capture, refunds, webhooks, Store Lite
 mutation, public routes, browser checkout, scheduled work, automatic retry,
