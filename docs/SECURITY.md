@@ -1046,6 +1046,17 @@ no browser navigation, no payment, no webhook, no Store Lite transition, no
 automatic retry, and no client deployment. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
+The external P3E-9A source contract preserves that separation. Its future
+effect profile names provider mutation and Checkout creation, but its current
+execution facts keep authorization, network, provider contact/mutation,
+Checkout creation, payment, webhook, browser navigation, order mutation,
+retry, and client deployment false. It rejects the read-only credential mode,
+accepts no credential value, adds no installable package file, and discards the
+validated synthetic Checkout URL. Core does not copy or invoke the class.
+P3E-9B must separately prove exact synthetic package/core ownership and
+cross-profile refusal before any later authority or transport gate. See
+[`PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md`](PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

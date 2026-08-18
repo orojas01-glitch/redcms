@@ -1562,14 +1562,26 @@ request bootstrap excludes the disabled package.
 
 112. Defined P3E-9 as the separately gated Stripe Sandbox Checkout-creation
     frontier. The completed P3E-8 evidence remains permanently read-only and
-    cannot authorize a POST. P3E-9A is next and may add only pure non-executing
-    request, response, expiry, and operation-profile contracts. Synthetic
+    cannot authorize a POST. At that point, P3E-9A was the next gate and could
+    add only pure non-executing request, response, expiry, and operation-profile
+    contracts. Synthetic
     package/core integration, new mutation-specific authorization and claim
     evidence, the disposable operator rehearsal, one real Sandbox Session,
     credential expiration, Session expiration, simulated payment, webhook
     proof, browser flow, hosted-demo state, client deployment, and P4 remain
     distinct later approvals. This planning slice adds no PHP, migration,
     manifest, package, database, route, runtime, provider, or client change.
+
+113. Completed P3E-9A in the separately distributed Stripe Checkout adapter.
+    The dependency-free source-only contract reuses the retained P3E-1 planner,
+    P3E-3 codec, and P3E-1 response gate; adds only bounded expiry and the new
+    mutation-aware profile; rejects read-only-profile reuse; validates exact
+    synthetic open/unpaid/non-live Session facts; and discards the Checkout
+    URL. Its 53 focused and 921 aggregate assertions passed. Installable
+    adapter `0.1.4` and its package subtree remain unchanged. P3E-9B synthetic
+    package/core integration is next; credentials, network, provider mutation,
+    Checkout creation, payment, webhook, browser, Store Lite, demo/client,
+    deployment, and P4 paths remain gated.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
