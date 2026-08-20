@@ -78,11 +78,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3E-9C2 consumes one exact P3E-9C1 authorization into one distinct nonce-bound claim plus one value-free audit. Its 37-assertion disposable fixture proves fresh authority/package validation, replay and altered-evidence refusal, audit rollback, and zero execution effects. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9C3 immutable start/result and dry-run-first operator rehearsal is next. No write key, real network request, Checkout Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is authorized. |
+| What just finished? | P3E-9C3A records immutable start before one final core-owned transport-double call and one bounded result afterward. Its 36-assertion disposable fixture proves rollback, replay refusal, fault containment, permanent no-retry, and zero real provider/business effects. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9C3B dry-run-first operator rehearsal is next. No write key, real network request, Checkout Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is authorized. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9C3 start/result/operator rehearsal, P3E-9D one real Sandbox Session, the remaining payment/webhook proof, and P4 deployment review stay separately gated. |
+| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9C3B operator rehearsal, P3E-9D one real Sandbox Session, the remaining payment/webhook proof, and P4 deployment review stay separately gated. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -109,17 +109,18 @@ flowchart LR
     P3E9B["COMPLETE<br/>P3E-9B. Synthetic package/core<br/>integration"]
     P3E9C1["COMPLETE<br/>P3E-9C1. Mutation-specific<br/>authorization recorded"]
     P3E9C2["COMPLETE<br/>P3E-9C2. One-attempt<br/>claim recorded"]
-    P3E9C3["NEXT<br/>P3E-9C3. Start, result,<br/>operator rehearsal"]
+    P3E9C3A["COMPLETE<br/>P3E-9C3A. Transport-double<br/>start and result"]
+    P3E9C3B["NEXT<br/>P3E-9C3B. Dry-run-first<br/>operator rehearsal"]
     P3E9D["GATED<br/>P3E-9D. One Sandbox Session<br/>separate write approval"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3 --> P3E9D --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B --> P3E9D --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2 complete;
-    class P3E9C3 active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A complete;
+    class P3E9C3B active;
     class P3E9D,P4 gated;
 ```
 
@@ -161,10 +162,11 @@ to `0.1.5` and added the matching non-persistent core runner, still with no
 network or provider mutation. P3E-9C1 then records only a new mutation-specific
 authorization and value-free audit after fresh database-backed authority and
 package checks. P3E-9C2 then consumes only that exact authorization into one
-immutable claim plus one value-free audit and still does not start or execute
-the attempt. P3E-9C3 start/result and operator rehearsal is now active; every
-write credential, real network request, Checkout Session, payment, webhook,
-browser flow, hosted-demo change, and client deployment remains stopped. See
+immutable claim plus one value-free audit. P3E-9C3A then records start/result
+around only a core-owned transport double; every real effect remains false.
+P3E-9C3B operator rehearsal is now active; every write credential, real
+network request, Checkout Session, payment, webhook, browser flow, hosted-demo
+change, and client deployment remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
 ## Status rule

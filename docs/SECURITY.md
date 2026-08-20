@@ -1095,6 +1095,17 @@ network/provider primitive, Checkout Session, payment, webhook, browser,
 Store Lite mutation, retry, live-mode, client, migration, or table path. See
 [`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
 
+P3E-9C3A adds durable execution ordering around only a final core-owned
+transport double. It recomputes authorization and verifies the exact claim,
+then commits start and audit before invocation. A result or bounded
+indeterminate outcome is recorded afterward. Start-audit failure prevents
+invocation; any failure after committed start permanently refuses retry. The
+helper exposes no arbitrary callable and contains no credential resolver,
+package invocation, DNS/TLS/HTTP primitive, Stripe request, real Checkout
+creation, payment, webhook, browser, Store Lite mutation, live mode, client,
+migration, or table path. See
+[`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

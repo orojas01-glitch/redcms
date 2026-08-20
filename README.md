@@ -123,13 +123,18 @@ value-free audit fact commit atomically. Core P3E-9C2 now consumes only that
 exact persisted authorization into one distinct nonce-bound claim plus one
 value-free audit under fresh authority and package-state checks. It performs
 no execution start, secret resolution, network request, Checkout creation,
-payment, webhook, or Store Lite mutation. P3E-9C3 start/result and operator
-rehearsal is next. See
+payment, webhook, or Store Lite mutation. P3E-9C3A now adds immutable start and
+bounded result evidence around one final core-owned in-memory transport double.
+It commits start before invocation and permanently refuses retry afterward,
+while network, provider mutation, real Checkout creation, payment, webhook,
+and Store Lite mutation remain false. P3E-9C3B operator rehearsal is next. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
 and
-[P3E-9C2 Mutation Claim](docs/PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
+[P3E-9C2 Mutation Claim](docs/PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md)
+and
+[P3E-9C3A Transport-Double Runner](docs/PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

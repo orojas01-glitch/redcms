@@ -1619,7 +1619,17 @@ request bootstrap excludes the disabled package.
     isolation, and exact cleanup. No execution start/result, secret access,
     package invocation, network request, Checkout Session, payment, webhook,
     browser, Store Lite mutation, retry, demo/client, migration, or deployment
-    path is added. P3E-9C3 start/result and operator rehearsal is next.
+    path is added. P3E-9C3A start/result was completed as the following gate.
+
+117. Completed P3E-9C3A immutable transport-double start/result recording.
+    Core recomputes P3E-9C1 and verifies the exact P3E-9C2 claim, commits start
+    before one final in-memory double call, and records one bounded result.
+    Its 36-assertion disposable fixture proves exact hashes, success/fault
+    containment, start-audit rollback, replay refusal, and permanent no-retry
+    after committed start. The runner has no arbitrary callable, credential,
+    package invocation, network/provider request, real Checkout Session,
+    payment, webhook, browser, Store Lite mutation, demo/client, migration, or
+    deployment path. P3E-9C3B dry-run-first operator rehearsal is next.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

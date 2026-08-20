@@ -243,12 +243,18 @@ attempt. P3E-9C2 now consumes only that exact authorization into one immutable
 claim plus one value-free audit. Its 37-assertion disposable fixture proves
 replay, missing/changed/tampered authorization, expiry, fresh-authority,
 disabled-dependency, and audit-rollback refusal without starting or executing
-the attempt. P3E-9C3 is next. See
+the attempt. P3E-9C3A now commits immutable start before one core-owned
+transport-double call and records one bounded result afterward. Its
+36-assertion disposable fixture proves successful/fault outcomes, rollback,
+replay refusal, and permanent post-start no-retry with every real provider and
+business effect false. P3E-9C3B operator rehearsal is next. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
 and
-[`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
+[`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md)
+and
+[`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 
