@@ -1071,6 +1071,19 @@ new operation. P3E-9C must add new authority rather than widening old evidence.
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md).
 
+P3E-9C1 adds that distinct authority without adding execution. It requires a
+fresh database-backed Owner, `addons.enable`, exact
+`store.orders.manage`, enabled integrity-current adapter `0.1.5`, and enabled
+Store Lite `0.1.35`. An at-most-fifteen-minute envelope binds one nonce, one
+maximum attempt, and the exact P3E-9B plan/input hashes. Apply repeats the
+decision under locks and atomically commits one nonce-derived administrator
+action plus one value-free audit fact. Replay, changed evidence, expiry,
+revocation, package drift, and audit failure fail closed. The helper resolves
+no secret, invokes no package, opens no network, and does not claim or start an
+attempt, create a Checkout Session, accept payment, process a webhook, mutate
+Store Lite, authorize retry, or deploy a client. See
+[`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

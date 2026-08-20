@@ -1592,8 +1592,20 @@ request bootstrap excludes the disabled package.
     bounded no-network/no-mutation facts. The 37-assertion core fixture uses no
     database and removes its exact temporary project. No authority ledger,
     credential resolver, provider request, Checkout Session, payment, webhook,
-    browser, Store Lite, demo/client, or deployment path is added. P3E-9C new
-    mutation-specific one-attempt authority is next.
+    browser, Store Lite, demo/client, or deployment path is added. P3E-9C1
+    mutation-specific authorization was completed as the following gate.
+
+115. Completed P3E-9C1 mutation-specific authorization recording. The core
+    consumes the exact P3E-9B dry plan and revalidates current database-backed
+    Owner, `addons.enable`, exact Store Lite `store.orders.manage`, adapter
+    `0.1.5`, and Store Lite `0.1.35`. One at-most-fifteen-minute nonce permits
+    one future attempt; apply atomically records one immutable authorization
+    row and one value-free audit fact. Its 34-assertion disposable fixture
+    proves zero-write planning, replay/expiry/revocation refusal, audit rollback
+    and recovery, source isolation, and exact fixture cleanup. No claim,
+    execution, secret access, network request, Checkout Session, payment,
+    webhook, browser, Store Lite mutation, retry, demo/client, migration, or
+    deployment path is added. P3E-9C2 one-attempt claim is next.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
