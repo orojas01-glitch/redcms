@@ -40,10 +40,11 @@ navigation, Store Lite mutation, retry, live-mode, demo activation, client
 deployment, migration, or new table.
 
 P3E-8 read-only provider-contact evidence cannot be widened or reused. P3E-9C2
-must separately consume the new authorization into one attempt claim. P3E-9C3
-must separately prove start/result and a dry-run-first operator rehearsal with
-a transport double. P3E-9D remains the separately approved first real Sandbox
-Checkout Session.
+now separately consumes the new authorization into one immutable attempt claim
+without execution. P3E-9C3 must separately prove start/result and a
+dry-run-first operator rehearsal with a transport double. P3E-9D remains the
+separately approved first real Sandbox Checkout Session. See
+[`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
 
 ## Acceptance
 

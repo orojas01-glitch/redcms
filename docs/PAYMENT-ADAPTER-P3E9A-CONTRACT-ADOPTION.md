@@ -37,5 +37,6 @@ Core receives no source copy and gains no new execution path from this status
 mirror. P3E-9B later completed separately reviewed synthetic-only package/core
 integration with exact package identity, version, integrity, operation
 ownership, and cross-profile refusal. P3E-9C1 later recorded mutation-specific
-authorization only; P3E-9C2 one-attempt claim is next. P3E-9D real Sandbox
-creation, payment/webhook proof, and P4 remain gated.
+authorization, and P3E-9C2 recorded its one-attempt claim without execution.
+P3E-9C3 is next. P3E-9D real Sandbox creation, payment/webhook proof, and P4
+remain gated.

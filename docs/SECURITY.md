@@ -1084,6 +1084,17 @@ attempt, create a Checkout Session, accept payment, process a webhook, mutate
 Store Lite, authorize retry, or deploy a client. See
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md).
 
+P3E-9C2 consumes only one exact persisted P3E-9C1 row. It recomputes the
+authorization under fresh Owner, lifecycle, Store Lite permission, package,
+expiry, input, and synthetic-plan checks; locks the authorization and missing
+claim row; and atomically commits one distinct nonce-derived claim plus one
+value-free audit. Missing, changed, tampered, expired, revoked, disabled, or
+already-claimed evidence fails closed. Audit failure rolls the claim back.
+The helper has no execution start/result, secret resolver, package invocation,
+network/provider primitive, Checkout Session, payment, webhook, browser,
+Store Lite mutation, retry, live-mode, client, migration, or table path. See
+[`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
