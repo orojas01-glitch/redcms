@@ -114,9 +114,17 @@ non-persistent runner: it validates the exact package and P3E-9A input,
 integrity-checks the registrar, invokes only the synthetic operation through
 the typed adapter boundary, and accepts only bounded no-network/no-mutation
 facts. It has no database, authority ledger, credential resolver, route, CLI,
-or request-bootstrap caller. P3E-9B is therefore complete; P3E-9C new
-one-attempt mutation authority is next. See
-[P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md).
+or request-bootstrap caller. P3E-9B is therefore complete. Core P3E-9C1 now
+adds a distinct, nonce-bound, at-most-fifteen-minute authorization for one
+future Sandbox Checkout-creation attempt. Fresh database-backed Owner,
+`addons.enable`, exact Store Lite `store.orders.manage`, and exact enabled
+package state are revalidated before one immutable authorization row and one
+value-free audit fact commit atomically. It performs no claim, execution,
+secret resolution, network request, Checkout creation, payment, webhook, or
+Store Lite mutation. P3E-9C2 one-attempt claim is next. See
+[P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
+and
+[P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

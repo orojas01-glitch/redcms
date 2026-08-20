@@ -91,5 +91,7 @@ acceptance database, and temporary grant `0:0:0`; the retained
 `redcms_v51_starter` database was not migrated or modified.
 
 P3E-9B is closed by external adapter P3E-9B1 plus this core P3E-9B2 runner.
-P3E-9C is next and must separately design new mutation-specific one-attempt
-authorization, claim, start, result, audit, rollback, and cleanup evidence.
+P3E-9C1 now separately records new mutation-specific authorization rather than
+widening completed P3E-8 read-only evidence. P3E-9C2 one-attempt claim is next.
+See
+[`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md).
