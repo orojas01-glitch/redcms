@@ -1605,7 +1605,21 @@ request bootstrap excludes the disabled package.
     and recovery, source isolation, and exact fixture cleanup. No claim,
     execution, secret access, network request, Checkout Session, payment,
     webhook, browser, Store Lite mutation, retry, demo/client, migration, or
-    deployment path is added. P3E-9C2 one-attempt claim is next.
+    deployment path is added. P3E-9C2 one-attempt claim was completed as the
+    following gate.
+
+116. Completed P3E-9C2 mutation-attempt claim recording. Core recomputes the
+    exact P3E-9C1 decision and requires its matching immutable authorization
+    row under fresh Owner, `addons.enable`, Store Lite
+    `store.orders.manage`, package, input, plan, and expiry checks. Apply
+    atomically records one distinct nonce-bound claim and one value-free audit.
+    Its 37-assertion disposable fixture proves zero-write planning,
+    replay/missing/changed/tampered evidence refusal, both authority revocations,
+    dependency and expiry refusal, audit rollback and recovery, source
+    isolation, and exact cleanup. No execution start/result, secret access,
+    package invocation, network request, Checkout Session, payment, webhook,
+    browser, Store Lite mutation, retry, demo/client, migration, or deployment
+    path is added. P3E-9C3 start/result and operator rehearsal is next.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

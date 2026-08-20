@@ -119,12 +119,17 @@ adds a distinct, nonce-bound, at-most-fifteen-minute authorization for one
 future Sandbox Checkout-creation attempt. Fresh database-backed Owner,
 `addons.enable`, exact Store Lite `store.orders.manage`, and exact enabled
 package state are revalidated before one immutable authorization row and one
-value-free audit fact commit atomically. It performs no claim, execution,
-secret resolution, network request, Checkout creation, payment, webhook, or
-Store Lite mutation. P3E-9C2 one-attempt claim is next. See
+value-free audit fact commit atomically. Core P3E-9C2 now consumes only that
+exact persisted authorization into one distinct nonce-bound claim plus one
+value-free audit under fresh authority and package-state checks. It performs
+no execution start, secret resolution, network request, Checkout creation,
+payment, webhook, or Store Lite mutation. P3E-9C3 start/result and operator
+rehearsal is next. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
-[P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md).
+[P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
+and
+[P3E-9C2 Mutation Claim](docs/PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

@@ -239,10 +239,16 @@ nonce-bound mutation authorization and one value-free audit after fresh Owner,
 `addons.enable`, Store Lite `store.orders.manage`, and exact enabled-package
 validation. Its 34-assertion disposable fixture proves replay, expiry,
 revocation, and audit-rollback refusal without claiming or executing an
-attempt. P3E-9C2 one-attempt claim is next. See
+attempt. P3E-9C2 now consumes only that exact authorization into one immutable
+claim plus one value-free audit. Its 37-assertion disposable fixture proves
+replay, missing/changed/tampered authorization, expiry, fresh-authority,
+disabled-dependency, and audit-rollback refusal without starting or executing
+the attempt. P3E-9C3 is next. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
-[`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md).
+[`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
+and
+[`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 

@@ -123,6 +123,12 @@ function red_addon_checkout_mutation_test_input()
     ];
 }
 
+if (defined('RED_ADDON_CHECKOUT_MUTATION_AUTHORIZATION_FIXTURE_ONLY')
+    && RED_ADDON_CHECKOUT_MUTATION_AUTHORIZATION_FIXTURE_ONLY
+) {
+    return;
+}
+
 red_addon_checkout_mutation_test_cleanup(
     $connection,
     $packageIds,
