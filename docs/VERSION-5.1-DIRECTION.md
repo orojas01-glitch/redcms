@@ -1583,6 +1583,18 @@ request bootstrap excludes the disabled package.
     Checkout creation, payment, webhook, browser, Store Lite, demo/client,
     deployment, and P4 paths remain gated.
 
+114. Completed P3E-9B synthetic Checkout package/core integration. External
+    adapter `0.1.5` adopts byte-identical P3E-9A source and adds only one
+    synthetic operation. Core validates the exact package, closed checkout and
+    policy, mutation-aware profile, contract hash, and deterministic plan;
+    registers the integrity-checked handler; invokes it through the existing
+    typed boundary with injected one-setting secret access; and accepts only
+    bounded no-network/no-mutation facts. The 37-assertion core fixture uses no
+    database and removes its exact temporary project. No authority ledger,
+    credential resolver, provider request, Checkout Session, payment, webhook,
+    browser, Store Lite, demo/client, or deployment path is added. P3E-9C new
+    mutation-specific one-attempt authority is next.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

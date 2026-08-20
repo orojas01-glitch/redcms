@@ -104,10 +104,19 @@ P3E-9A has now completed in the separately distributed adapter as a pure
 source-only contract. Its 53 focused and 921 aggregate assertions prove
 bounded expiry, read-only-profile refusal, synthetic open/unpaid response
 validation, and Checkout-URL removal while leaving installable adapter `0.1.4`
-unchanged. P3E-9B synthetic-only package/core integration is next; no key,
-network request, Checkout Session, payment, webhook, browser flow, client
-state, or deployment is authorized. See
+unchanged. At that point, P3E-9B synthetic-only package/core integration was
+next; no key, network request, Checkout Session, payment, webhook, browser
+flow, client state, or deployment was authorized. See
 [P3E-9A Contract Adoption](docs/PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md).
+External adapter P3E-9B1 now advances the package to `0.1.5` with only
+`checkout.create-sandbox-synthetic`. Core P3E-9B2 adds the matching
+non-persistent runner: it validates the exact package and P3E-9A input,
+integrity-checks the registrar, invokes only the synthetic operation through
+the typed adapter boundary, and accepts only bounded no-network/no-mutation
+facts. It has no database, authority ledger, credential resolver, route, CLI,
+or request-bootstrap caller. P3E-9B is therefore complete; P3E-9C new
+one-attempt mutation authority is next. See
+[P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

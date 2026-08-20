@@ -170,8 +170,8 @@ or fail closed and recover through a reviewed package migration path.
    boundary and its separate implementation stops are recorded in
    [`PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md`](PAYMENT-ADAPTER-P3-SANDBOX-PROPOSAL.md);
    P3A through P3D and the first read-only P3E provider contact are complete.
-   P3E-9A is complete as an external non-executing Checkout-creation contract.
-   P3E-9B synthetic-only package/core integration is next; provider mutation,
+   P3E-9A and P3E-9B synthetic-only package/core integration are complete.
+   P3E-9C mutation-specific one-attempt authority is next; provider mutation,
    payment, webhook, and deployment remain gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,

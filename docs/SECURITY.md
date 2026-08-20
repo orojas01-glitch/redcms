@@ -1057,6 +1057,20 @@ P3E-9B must separately prove exact synthetic package/core ownership and
 cross-profile refusal before any later authority or transport gate. See
 [`PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md`](PAYMENT-ADAPTER-P3E9A-CONTRACT-ADOPTION.md).
 
+P3E-9B preserves the pre-authority boundary. Adapter `0.1.5` exposes only a
+synthetic operation, and core requires its exact integrity-current package,
+closed P3E-9A input, one injected package-owned secret-access object with one
+setting, and an unchanged plan hash. The helper has no secret resolver,
+environment reader, request global, database primitive, provider hostname, or
+network client. Existing typed invocation contains output, exceptions, buffer
+drift, malformed results, and secret disclosure. The result gate requires the
+Checkout URL, credential, body, headers, network, provider mutation, Checkout
+creation, payment, webhook, browser, order mutation, retry, and deployment to
+remain absent. P3E-8 authorization does not recognize adapter `0.1.5` or the
+new operation. P3E-9C must add new authority rather than widening old evidence.
+See
+[`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
