@@ -132,6 +132,12 @@ function red_addon_checkout_transport_test_execute(
     );
 }
 
+if (defined('RED_ADDON_CHECKOUT_TRANSPORT_DOUBLE_FIXTURE_ONLY')
+    && RED_ADDON_CHECKOUT_TRANSPORT_DOUBLE_FIXTURE_ONLY
+) {
+    return;
+}
+
 red_addon_checkout_mutation_test_cleanup(
     $connection,
     $packageIds,

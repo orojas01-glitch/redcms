@@ -5,8 +5,8 @@ Sandbox request, P3E-9A completed the pure external source contract, and
 P3E-9B completed synthetic package/core integration. P3E-9C1 records new
 mutation-specific authorization, and P3E-9C2 consumes it into one immutable
 claim. P3E-9C3A records start/result around only a core-owned transport double,
-and P3E-9C3B1 adds its CLI dry-run-first command contract. P3E-9C3B2
-disposable apply rehearsal is next. This document does not authorize a Stripe key,
+and P3E-9C3B1 adds its CLI dry-run-first command. P3E-9C3B2 completes the
+disposable apply rehearsal. P3E-9D is next and separately gated. This document does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
 
@@ -160,10 +160,10 @@ P3E-9 is divided so that every risk increase has a separate review:
    confirmations for apply, constructs one final double, and contains one C3A
    runner call. Its 45 assertions open no database and find no credential,
    package, network, shell, request, or browser primitive.
-7. **P3E-9C3B2 — next: disposable apply rehearsal.** Run dry mode,
-   confirmation refusal, and one exact apply in a fresh disposable database,
-   then finish with exact database/grant/project cleanup. No real key or
-   provider request.
+7. **P3E-9C3B2 — complete: disposable apply rehearsal.** Dry mode,
+   confirmation refusal, one exact apply, replay refusal, zero provider
+   effects, and cleanup `database:0 grant:0 staged-project:0
+   primary:unchanged` passed in a fresh current-schema database.
 8. **P3E-9D — one real Sandbox creation.** Only after P3E-9A through P3E-9C
    merge and pass independently may an operator request separate approval to
    create the restricted key and issue one exact Sandbox POST. Key expiration,
@@ -180,8 +180,8 @@ rotation, rollback, and cleanup requirements from the approved P3 proposal.
 This documentation-only slice is complete when:
 
 - the canonical status graphic shows P3C and P3D complete, the first P3E
-  contact, P3E-9A, P3E-9B, P3E-9C1, P3E-9C2, P3E-9C3A, and P3E-9C3B1
-  complete, P3E-9C3B2 next, and P4 gated;
+  contact, P3E-9A, P3E-9B, P3E-9C1, P3E-9C2, P3E-9C3A, P3E-9C3B1, and
+  P3E-9C3B2 complete, P3E-9D next and separately gated, and P4 gated;
 - README, roadmap, security, acceptance, Version 5.1 direction, and the P3
   proposal agree on the frontier and exclusions;
 - no PHP, migration, manifest, package, database, credential, route, runtime,
