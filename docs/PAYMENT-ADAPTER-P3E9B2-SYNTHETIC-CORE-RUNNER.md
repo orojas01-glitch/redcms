@@ -93,7 +93,8 @@ acceptance database, and temporary grant `0:0:0`; the retained
 P3E-9B is closed by external adapter P3E-9B1 plus this core P3E-9B2 runner.
 P3E-9C1 separately records new mutation-specific authorization rather than
 widening completed P3E-8 read-only evidence, and P3E-9C2 records its one-attempt
-claim without execution. P3E-9C3 is next. See
+claim without execution. P3E-9C3A later records transport-double start/result;
+P3E-9C3B operator rehearsal is next. See
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
 and
 [`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).

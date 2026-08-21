@@ -60,6 +60,12 @@ function red_addon_checkout_mutation_claim_test_authorize(
     );
 }
 
+if (defined('RED_ADDON_CHECKOUT_MUTATION_CLAIM_FIXTURE_ONLY')
+    && RED_ADDON_CHECKOUT_MUTATION_CLAIM_FIXTURE_ONLY
+) {
+    return;
+}
+
 red_addon_checkout_mutation_test_cleanup(
     $connection,
     $packageIds,

@@ -38,5 +38,6 @@ mirror. P3E-9B later completed separately reviewed synthetic-only package/core
 integration with exact package identity, version, integrity, operation
 ownership, and cross-profile refusal. P3E-9C1 later recorded mutation-specific
 authorization, and P3E-9C2 recorded its one-attempt claim without execution.
-P3E-9C3 is next. P3E-9D real Sandbox creation, payment/webhook proof, and P4
+P3E-9C3A later recorded transport-double start/result only; P3E-9C3B operator
+rehearsal is next. P3E-9D real Sandbox creation, payment/webhook proof, and P4
 remain gated.

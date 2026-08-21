@@ -4,8 +4,8 @@ Status: active staged boundary. P3E-8B3C3B proved one exact read-only Stripe
 Sandbox request, P3E-9A completed the pure external source contract, and
 P3E-9B completed synthetic package/core integration. P3E-9C1 records new
 mutation-specific authorization, and P3E-9C2 consumes it into one immutable
-claim without starting or executing the attempt. P3E-9C3 start/result and
-operator rehearsal is next. This document does not authorize a Stripe key,
+claim. P3E-9C3A records start/result around only a core-owned transport double.
+P3E-9C3B operator rehearsal is next. This document does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
 
@@ -149,11 +149,15 @@ P3E-9 is divided so that every risk increase has a separate review:
    37-assertion disposable fixture proves replay, altered/missing/tampered
    evidence, expiry, revocation, dependency, and rollback refusal with no
    execution or provider effect.
-5. **P3E-9C3 — next: start, result, and operator rehearsal.** Add immutable
-   start/result evidence and a dry-run-first operator command. Acceptance uses
-   a transport double and finishes with exact database/grant/project cleanup.
-   No real key or provider request.
-6. **P3E-9D — one real Sandbox creation.** Only after P3E-9A through P3E-9C
+5. **P3E-9C3A — complete: transport-double start/result.** Commit immutable
+   start before one final core-owned in-memory double call, then commit one
+   bounded result. Its 36-assertion fixture proves success/fault containment,
+   rollback, replay refusal, and permanent post-start no-retry while every real
+   provider and business effect remains false.
+6. **P3E-9C3B — next: operator rehearsal.** Add a CLI-only dry-run-first
+   command that can invoke only the reviewed double and finishes with exact
+   database/grant/project cleanup. No real key or provider request.
+7. **P3E-9D — one real Sandbox creation.** Only after P3E-9A through P3E-9C
    merge and pass independently may an operator request separate approval to
    create the restricted key and issue one exact Sandbox POST. Key expiration,
    Session expiration, test payment, webhook proof, and Sandbox deletion remain
@@ -169,8 +173,8 @@ rotation, rollback, and cleanup requirements from the approved P3 proposal.
 This documentation-only slice is complete when:
 
 - the canonical status graphic shows P3C and P3D complete, the first P3E
-  contact, P3E-9A, P3E-9B, P3E-9C1, and P3E-9C2 complete, P3E-9C3 next, and
-  P4 gated;
+  contact, P3E-9A, P3E-9B, P3E-9C1, P3E-9C2, and P3E-9C3A complete,
+  P3E-9C3B next, and P4 gated;
 - README, roadmap, security, acceptance, Version 5.1 direction, and the P3
   proposal agree on the frontier and exclusions;
 - no PHP, migration, manifest, package, database, credential, route, runtime,
