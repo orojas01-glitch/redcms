@@ -173,8 +173,9 @@ or fail closed and recover through a reviewed package migration path.
    P3E-9A and P3E-9B synthetic-only package/core integration are complete.
    P3E-9C1 records mutation-specific authorization, and P3E-9C2 records its
    one-attempt claim. P3E-9C3A transport-double start/result is complete, and
-   P3E-9C3B dry-run-first operator rehearsal is next; real provider execution,
-   payment, webhook, and deployment remain gated.
+   P3E-9C3B1 CLI command contract is complete, and P3E-9C3B2 disposable apply
+   rehearsal is next; real provider execution, payment, webhook, and deployment
+   remain gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is
