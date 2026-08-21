@@ -33,9 +33,11 @@ or new table. `executionPerformed=true` means only that the in-memory double
 was called; network, provider contact/mutation, and Checkout creation remain
 false in every bounded outcome.
 
-P3E-9C3B must separately add a CLI-only dry-run-first operator command that can
-invoke only this reviewed double. P3E-9D remains the separately approved first
-real Sandbox Checkout Session.
+P3E-9C3B1 now separately adds a CLI-only dry-run-first operator command that can
+invoke only this reviewed double. P3E-9C3B2 must rehearse its apply path in a
+fresh disposable database. P3E-9D remains the separately approved first real
+Sandbox Checkout Session. See
+[`PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md).
 
 ## Acceptance
 

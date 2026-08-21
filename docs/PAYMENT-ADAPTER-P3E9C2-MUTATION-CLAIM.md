@@ -36,9 +36,9 @@ Stripe hostname, Checkout Session, payment, webhook, browser navigation, Store
 Lite mutation, retry, live mode, demo activation, client deployment, migration,
 or new table.
 
-P3E-9C3A now separately adds immutable start/result evidence around only a
-core-owned transport double. P3E-9C3B must add the dry-run-first operator
-rehearsal. P3E-9D remains the separately approved first real Stripe Sandbox
+P3E-9C3A separately adds immutable start/result evidence around only a
+core-owned transport double, and P3E-9C3B1 adds its command contract. P3E-9C3B2
+must run the disposable apply rehearsal. P3E-9D remains the separately approved first real Stripe Sandbox
 Checkout Session. See
 [`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md).
 

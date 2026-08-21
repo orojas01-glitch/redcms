@@ -1106,6 +1106,14 @@ creation, payment, webhook, browser, Store Lite mutation, live mode, client,
 migration, or table path. See
 [`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md).
 
+P3E-9C3B1 adds only a CLI command around C3A. Default dry run invokes no
+double. Apply requires exact database/package/state/hash/nonzero-backup and
+no-effect confirmations, constructs one final double, and contains one runner
+call site. The command accepts no credential and has no secret, package,
+network, shell, request, browser, payment, webhook, Store Lite, client,
+migration, or table primitive. See
+[`PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

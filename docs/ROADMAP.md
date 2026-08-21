@@ -247,14 +247,19 @@ the attempt. P3E-9C3A now commits immutable start before one core-owned
 transport-double call and records one bounded result afterward. Its
 36-assertion disposable fixture proves successful/fault outcomes, rollback,
 replay refusal, and permanent post-start no-retry with every real provider and
-business effect false. P3E-9C3B operator rehearsal is next. See
+business effect false. P3E-9C3B1 now adds the CLI-only dry-run-first command
+contract with exact evidence, backup, hash, and no-effect confirmations; its
+45 pure assertions open no database. P3E-9C3B2 disposable apply rehearsal is
+next. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
 and
 [`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md)
 and
-[`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md).
+[`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md)
+and
+[`PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 
