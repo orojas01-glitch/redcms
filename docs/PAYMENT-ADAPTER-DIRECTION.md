@@ -174,8 +174,9 @@ or fail closed and recover through a reviewed package migration path.
    P3E-9C1 records mutation-specific authorization, and P3E-9C2 records its
    one-attempt claim. P3E-9C3A transport-double start/result is complete, and
    P3E-9C3B1 CLI command and P3E-9C3B2 disposable apply rehearsal are complete.
-   P3E-9 is ready for separately approved P3E-9D; real provider execution,
-   payment, webhook, and deployment remain gated.
+   P3E-9D0 pure real-POST preflight is complete. P3E-9D1 external adapter
+   operation adoption is next; real provider execution, payment, webhook, and
+   deployment remain gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is

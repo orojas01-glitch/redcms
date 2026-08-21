@@ -95,7 +95,8 @@ P3E-9C1 separately records new mutation-specific authorization rather than
 widening completed P3E-8 read-only evidence, and P3E-9C2 records its one-attempt
 claim without execution. P3E-9C3A later records transport-double start/result,
 and P3E-9C3B1 adds its CLI command contract. P3E-9C3B2 later completes its
-disposable apply rehearsal; P3E-9D is next and separately gated. See
+disposable apply rehearsal. P3E-9D0 later defines the pure POST contract; D1
+is next while the real provider action stays separately gated. See
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
 and
 [`PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md`](PAYMENT-ADAPTER-P3E9C2-MUTATION-CLAIM.md).

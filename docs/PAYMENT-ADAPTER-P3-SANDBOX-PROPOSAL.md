@@ -7,8 +7,9 @@ non-executing Checkout-creation contract. P3E-9B synthetic-only package/core
 integration is now complete. P3E-9C1 write-specific authorization and P3E-9C2
 one-attempt claim recording are complete. P3E-9C3A transport-double
 start/result, P3E-9C3B1 CLI command, and P3E-9C3B2 disposable apply rehearsal
-are complete. P3E-9D real Sandbox creation is next and separately gated.
-Payment, webhook, and P4 deployment remain gated.
+are complete. P3E-9D0 pure real-POST preflight is complete, and P3E-9D1
+external adapter operation adoption is next. The real Sandbox creation,
+payment, webhook, and P4 deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.
