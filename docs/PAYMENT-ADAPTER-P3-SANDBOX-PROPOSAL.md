@@ -6,9 +6,9 @@ read-only Stripe Sandbox GET. P3E-9A then completed as a pure external
 non-executing Checkout-creation contract. P3E-9B synthetic-only package/core
 integration is now complete. P3E-9C1 write-specific authorization and P3E-9C2
 one-attempt claim recording are complete. P3E-9C3A transport-double
-start/result and P3E-9C3B1 CLI command contract are complete. P3E-9C3B2
-disposable apply rehearsal is next. Real Sandbox creation, payment, webhook,
-and P4 deployment remain gated.
+start/result, P3E-9C3B1 CLI command, and P3E-9C3B2 disposable apply rehearsal
+are complete. P3E-9D real Sandbox creation is next and separately gated.
+Payment, webhook, and P4 deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.
@@ -283,8 +283,8 @@ audit after fresh Owner, lifecycle, Store Lite permission, and package checks.
 P3E-9C2 then consumes only that new authorization into one attempt claim
 rather than reusing or widening completed P3E-8 read-only evidence. It performs
 no execution. P3E-9C3A then records start/result around only a final core-owned
-transport double. P3E-9C3B1 adds its dry-run-first CLI command contract;
-P3E-9C3B2 disposable apply rehearsal is next.
+transport double. P3E-9C3B1 adds its dry-run-first CLI command, and P3E-9C3B2
+completes the disposable apply rehearsal. P3E-9D is the next separate gate.
 
 The staged P3E-9 boundary and the later separate approvals for synthetic
 integration, mutation-specific authority, one real Sandbox Session, key

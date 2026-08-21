@@ -249,8 +249,10 @@ transport-double call and records one bounded result afterward. Its
 replay refusal, and permanent post-start no-retry with every real provider and
 business effect false. P3E-9C3B1 now adds the CLI-only dry-run-first command
 contract with exact evidence, backup, hash, and no-effect confirmations; its
-45 pure assertions open no database. P3E-9C3B2 disposable apply rehearsal is
-next. See
+45 pure assertions open no database. P3E-9C3B2 now proves dry run, confirmation
+refusal, one exact apply, replay refusal, zero provider effects, and cleanup
+`database:0 grant:0 staged-project:0 primary:unchanged`. P3E-9C is complete;
+P3E-9D is next and separately gated. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -259,7 +261,9 @@ and
 and
 [`PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md`](PAYMENT-ADAPTER-P3E9C3A-TRANSPORT-DOUBLE-RUNNER.md)
 and
-[`PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md).
+[`PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md)
+and
+[`PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 

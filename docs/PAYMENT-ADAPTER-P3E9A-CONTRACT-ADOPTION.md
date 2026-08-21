@@ -39,5 +39,5 @@ integration with exact package identity, version, integrity, operation
 ownership, and cross-profile refusal. P3E-9C1 later recorded mutation-specific
 authorization, and P3E-9C2 recorded its one-attempt claim without execution.
 P3E-9C3A later recorded transport-double start/result, and P3E-9C3B1 added its
-CLI command contract. P3E-9C3B2 disposable apply rehearsal is next. P3E-9D
-real Sandbox creation, payment/webhook proof, and P4 remain gated.
+CLI command contract, and P3E-9C3B2 completed its disposable apply rehearsal.
+P3E-9D real Sandbox creation is next; payment/webhook proof and P4 remain gated.

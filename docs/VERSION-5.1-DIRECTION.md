@@ -1636,8 +1636,14 @@ request bootstrap excludes the disabled package.
     one plan call, one final-double construction, and one C3A runner call.
     Default mode invokes nothing. The command accepts no credential and has no
     package, network, shell, browser, payment, webhook, Store Lite, client,
-    migration, or deployment path. P3E-9C3B2 disposable apply rehearsal is
-    next.
+    migration, or deployment path. P3E-9C3B2 completed the following rehearsal.
+
+119. Completed P3E-9C3B2 disposable operator apply rehearsal. Staged merged
+    core and a fresh current-schema database proved dry run, incomplete-
+    confirmation refusal, one exact final-double apply, replay refusal, four
+    immutable lifecycle rows/audits, zero provider effects, and cleanup
+    `database:0 grant:0 staged-project:0 primary:unchanged`. P3E-9C is complete.
+    P3E-9D one real Sandbox Checkout Session is next and separately gated.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

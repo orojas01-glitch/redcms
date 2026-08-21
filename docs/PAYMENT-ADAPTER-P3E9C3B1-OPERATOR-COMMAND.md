@@ -22,7 +22,8 @@ Stripe hostname, request body, shell execution, browser bridge, payment,
 webhook, Store Lite mutation, client deployment, migration, or table path.
 
 `scripts/addon-sandbox-checkout-transport-operator-command-self-test.php`
-passes 45 pure source assertions and opens no database. P3E-9C3B2 must
-separately run dry-run, confirmation-refusal, and one apply against a fresh
-disposable database, then prove exact project/database/grant cleanup. P3E-9D
-remains the separately approved first real Sandbox Checkout Session.
+passes 45 pure source assertions and opens no database. P3E-9C3B2 now
+separately proves dry-run, confirmation-refusal, one apply, replay refusal, and
+exact project/database/grant cleanup. P3E-9D remains the separately approved
+first real Sandbox Checkout Session. See
+[`PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md).

@@ -1114,6 +1114,15 @@ network, shell, request, browser, payment, webhook, Store Lite, client,
 migration, or table primitive. See
 [`PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md).
 
+P3E-9C3B2 runs that exact command only against a staged project and fresh
+disposable database. Dry run and incomplete-confirmation refusal write no
+start/result. One exact apply invokes only the final in-memory double; replay
+is refused. Exit-trap cleanup proves database/grant/project removal and an
+unchanged configured primary. No credential, package handler, network,
+provider mutation, real Checkout Session, payment, webhook, Store Lite
+mutation, retry, or client effect occurs. See
+[`PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
