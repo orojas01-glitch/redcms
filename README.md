@@ -132,8 +132,10 @@ dry-run-first command contract pinned to that final double; its 45 assertions
 prove exact confirmations and absence of credentials, network, package
 handlers, or public bridges. P3E-9C3B2 has now rehearsed dry run, confirmation
 refusal, one exact in-memory-double apply, replay refusal, and exact cleanup.
-P3E-9C is complete; P3E-9D one real Sandbox Session is next and remains
-separately gated. See
+P3E-9C is complete. P3E-9D0 now defines the pure real-POST request contract
+without a database, key, or network. Its 25 assertions pin exact endpoint,
+line items, expiry, idempotency, and no-effect facts. P3E-9D1 external adapter
+operation adoption is next; the real Sandbox POST remains separately gated. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -144,7 +146,9 @@ and
 and
 [P3E-9C3B1 Operator Command](docs/PAYMENT-ADAPTER-P3E9C3B1-OPERATOR-COMMAND.md)
 and
-[P3E-9C3B2 Operator Rehearsal](docs/PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md).
+[P3E-9C3B2 Operator Rehearsal](docs/PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md)
+and
+[P3E-9D0 Real POST Preflight](docs/PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

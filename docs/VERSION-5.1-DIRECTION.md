@@ -1643,7 +1643,14 @@ request bootstrap excludes the disabled package.
     confirmation refusal, one exact final-double apply, replay refusal, four
     immutable lifecycle rows/audits, zero provider effects, and cleanup
     `database:0 grant:0 staged-project:0 primary:unchanged`. P3E-9C is complete.
-    P3E-9D one real Sandbox Checkout Session is next and separately gated.
+    P3E-9D0 pure request preflight was completed next.
+
+120. Completed P3E-9D0 pure real-POST preflight. Its 25 assertions bind exact
+    adapter `0.1.5` synthetic evidence to one future Checkout Sessions POST,
+    bounded expiry, deterministic USD lines, hash-only metadata, idempotency,
+    and a canonical request hash while every credential/network/provider/
+    business effect remains false. P3E-9D1 external adapter operation adoption
+    is next; the first real Sandbox POST remains separately gated.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

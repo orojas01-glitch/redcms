@@ -78,11 +78,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3E-9C3B2 rehearsed the merged command end to end: dry run, incomplete-confirmation refusal, one exact double-only apply, replay refusal, zero provider effects, and cleanup `database:0 grant:0 staged-project:0 primary:unchanged`. P3E-9C is complete. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9D one real Stripe Sandbox Checkout Session is next but remains separately approval-gated. No write key, provider POST, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is currently authorized. |
+| What just finished? | P3E-9D0 defines the pure future Stripe Checkout POST request: exact endpoint, form fields, expiry, USD lines, hash metadata, idempotency, and request hash. Its 25 assertions open no database or network. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9D1 external adapter real-operation adoption is next. No write key, provider POST, real Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is currently authorized. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9D one real Sandbox Session, the remaining payment/webhook proof, and P4 deployment review stay separately gated. |
+| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9D1 through D3 remain no-contact implementation gates; D4 one real Sandbox Session, payment/webhook proof, and P4 deployment review stay separately gated. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -112,17 +112,19 @@ flowchart LR
     P3E9C3A["COMPLETE<br/>P3E-9C3A. Transport-double<br/>start and result"]
     P3E9C3B1["COMPLETE<br/>P3E-9C3B1. CLI operator<br/>command contract"]
     P3E9C3B2["COMPLETE<br/>P3E-9C3B2. Disposable<br/>apply rehearsal"]
-    P3E9D["NEXT + GATED<br/>P3E-9D. One Sandbox Session<br/>separate write approval"]
+    P3E9D0["COMPLETE<br/>P3E-9D0. Pure real-POST<br/>preflight"]
+    P3E9D1["NEXT<br/>P3E-9D1. External adapter<br/>operation adoption"]
+    P3E9D4["GATED<br/>P3E-9D4. One real Sandbox<br/>Session POST"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D4 --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2 complete;
-    class P3E9D active;
-    class P4 gated;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0 complete;
+    class P3E9D1 active;
+    class P3E9D4,P4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -167,9 +169,10 @@ immutable claim plus one value-free audit. P3E-9C3A then records start/result
 around only a core-owned transport double; every real effect remains false.
 P3E-9C3B1 adds the CLI dry-run-first command, and P3E-9C3B2 completes its
 disposable apply rehearsal with zero provider effects and exact cleanup.
-P3E-9D is next but separately gated; every write credential, real network
-request, Checkout Session, payment, webhook, browser flow, hosted-demo change,
-and client deployment remains stopped. See
+P3E-9D0 now defines only the pure future POST request. P3E-9D1 adapter adoption
+is active; every write credential, real network request, Checkout Session,
+payment, webhook, browser flow, hosted-demo change, and client deployment
+remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 
 ## Status rule

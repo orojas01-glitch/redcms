@@ -1123,6 +1123,14 @@ provider mutation, real Checkout Session, payment, webhook, Store Lite
 mutation, retry, or client effect occurs. See
 [`PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md).
 
+P3E-9D0 is pure request planning only. It requires exact mutation-aware
+synthetic evidence and emits a bounded form plan for one future Stripe Sandbox
+Checkout create POST with deterministic idempotency. It contains no credential
+value/header, resolver, database, package invocation, network/shell primitive,
+response body/header, real Session, payment, webhook, browser, Store Lite,
+retry, live-mode, or client path. See
+[`PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md`](PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
