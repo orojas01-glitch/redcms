@@ -1131,6 +1131,20 @@ response body/header, real Session, payment, webhook, browser, Store Lite,
 retry, live-mode, or client path. See
 [`PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md`](PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md).
 
+P3E-9D2 accepts only corrected external adapter `0.1.7`, exact canonical D0
+evidence, and the separately named
+`checkout.create-sandbox-real-post-preflight` operation. Core removes the raw
+provider form map from the typed input, invokes the integrity-checked handler
+with `null` secret access, and accepts only an exact reconstructed name/value
+list plus closed false-effect facts. Output, exceptions, malformed data,
+changed operation identity, extra fields, and altered hashes fail closed.
+Deterministic start/result SHA-256 values are identity contracts only: no
+execution is ready or started and no result, authorization, claim, audit, or
+database row is recorded. The helper contains no credential access, resolver,
+request global, route, CLI, database, transport, provider, payment, Store Lite,
+demo/client, or deployment path. See
+[`PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md`](PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

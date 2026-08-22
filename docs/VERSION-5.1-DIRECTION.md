@@ -1649,8 +1649,21 @@ request bootstrap excludes the disabled package.
     adapter `0.1.5` synthetic evidence to one future Checkout Sessions POST,
     bounded expiry, deterministic USD lines, hash-only metadata, idempotency,
     and a canonical request hash while every credential/network/provider/
-    business effect remains false. P3E-9D1 external adapter operation adoption
-    is next; the first real Sandbox POST remains separately gated.
+    business effect remains false. External adapter P3E-9D1 then completed
+    through canonical-hash-compatible version `0.1.7`.
+
+121. Completed P3E-9D2 core real-operation preflight containment. Core requires
+    exact adapter `0.1.7` plus recomputed D0 evidence, invokes only
+    `checkout.create-sandbox-real-post-preflight` with null secret access,
+    accepts only the exact typed request and false-effect result, and derives
+    deterministic non-persistent start/result identity hashes. Its 39 focused
+    assertions contain changed evidence, malformed output, exceptions, output,
+    and changed provider-operation identity with exact temporary-project
+    cleanup. No credential, database row, execution start/result, network,
+    Stripe Session, payment, webhook, browser, Store Lite mutation, retry,
+    demo/client, or deployment path is added. P3E-9D3 no-contact
+    command/rehearsal is next; the first real Sandbox POST remains separately
+    gated.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
