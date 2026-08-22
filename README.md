@@ -138,9 +138,10 @@ canonical-hash-compatible version `0.1.7`. Core P3E-9D2 now invokes only its
 non-executing preflight operation, strictly contains the typed response, and
 derives distinct start/result identity hashes while execution remains false.
 P3E-9D3A now adds the CLI-only, dry-run-first operator command with exact
-identity and no-effect confirmations. P3E-9D3B disposable cross-repository
-no-contact rehearsal is next; the real Sandbox POST remains separately gated.
-See
+identity and no-effect confirmations. P3E-9D3B now completes the disposable
+cross-repository no-contact rehearsal with exact committed core, adapter, and
+Store Lite package sources. P3E-9D3 is complete; the real Sandbox POST remains
+separately gated. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -157,7 +158,9 @@ and
 and
 [P3E-9D2 Core Preflight Runner](docs/PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md)
 and
-[P3E-9D3A Operator Command](docs/PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md).
+[P3E-9D3A Operator Command](docs/PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md)
+and
+[P3E-9D3B No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

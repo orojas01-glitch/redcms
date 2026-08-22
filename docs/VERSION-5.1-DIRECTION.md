@@ -1672,9 +1672,20 @@ request bootstrap excludes the disabled package.
     only its non-persistent result identity. Its 68 assertions exclude
     configuration/database access, credentials, resolver, request/browser,
     network/provider, Checkout Session, payment, webhook, Store Lite mutation,
-    retry, demo/client, and deployment paths. P3E-9D3B disposable
-    cross-repository no-contact rehearsal is next; P3E-9D4 remains separately
-    gated.
+    retry, demo/client, and deployment paths. P3E-9D3B remained a separate
+    cross-repository no-contact rehearsal; P3E-9D4 remains separately gated.
+
+123. Completed P3E-9D3B disposable cross-repository no-contact rehearsal.
+    Exact merged core `f93d191`, adapter `a441588` `0.1.7`, and Store Lite
+    `f7de77e` `0.1.35` package bytes passed dry run, changed-plan-hash refusal,
+    and one contained D2 apply under disabled URL streams/network functions and
+    removed secret/proxy environment inputs. The only result was
+    `request_contract_adopted` plus a non-persistent identity; every
+    provider/business effect stayed false. Its 72 source assertions and
+    operational evidence prove no configuration/database access and cleanup
+    `staged-project:0 evidence:0 source-repositories:unchanged
+    database:not-opened`. P3E-9D3 is complete. P3E-9D4 one real Sandbox
+    Checkout Session POST remains separately unapproved and gated.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

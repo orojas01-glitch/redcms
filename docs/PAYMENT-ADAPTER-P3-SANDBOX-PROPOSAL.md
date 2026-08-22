@@ -10,8 +10,9 @@ start/result, P3E-9C3B1 CLI command, and P3E-9C3B2 disposable apply rehearsal
 are complete. P3E-9D0 pure real-POST preflight, external adapter P3E-9D1
 through corrected `0.1.7`, and core P3E-9D2 response containment/identity are
 complete. P3E-9D3A CLI-only dry-run-first command contract is complete;
-P3E-9D3B disposable no-contact rehearsal is next. The real Sandbox creation,
-payment, webhook, and P4 deployment remain gated.
+P3E-9D3B now completes the disposable no-contact rehearsal with one contained
+apply and zero provider effects. P3E-9D3 is complete. The real Sandbox
+creation, payment, webhook, and P4 deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.

@@ -258,8 +258,11 @@ External adapter P3E-9D1 is complete through canonical-hash-compatible
 contains the exact typed result, and derives non-persistent start/result
 identity hashes in 39 focused assertions. P3E-9D3A adds the CLI-only,
 dry-run-first operator command and its 68-assertion source contract without
-credentials, persistence, or network. P3E-9D3B disposable no-contact rehearsal
-is next; the real Session, payment, and webhook remain gated. See
+credentials, persistence, or network. P3E-9D3B now completes the disposable
+no-contact rehearsal: dry run, changed-confirmation refusal, one contained
+apply, zero provider effects, no database, unchanged sources, and exact
+temporary cleanup. P3E-9D3 is complete; the real Session, payment, and webhook
+remain gated. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -276,7 +279,9 @@ and
 and
 [`PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md`](PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md)
 and
-[`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md).
+[`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md)
+and
+[`PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 
