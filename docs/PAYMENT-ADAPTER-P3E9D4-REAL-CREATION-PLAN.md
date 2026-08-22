@@ -1,15 +1,15 @@
 # P3E-9D4 Real Sandbox Checkout Creation Plan
 
-Status: planning complete; implementation and provider execution are not
-authorized by this document. P3E-9D3 is merged. D4 is split into four review
-stops so the first real Stripe `POST` remains the final operational step.
+Status: planning complete; D4A external implementation is merged without
+provider execution, and D4B is next. D4 is split into four review stops so the
+first real Stripe `POST` remains the final operational step.
 
 ## Why D4 Is Not One Coding Step
 
-The merged adapter `0.1.7` exposes only
-`checkout.create-sandbox-real-post-preflight`. It deliberately cannot resolve a
-key, construct an Authorization header, or invoke the provider operation
-`checkout.create-sandbox-real-post`.
+Before D4A, merged adapter `0.1.7` exposed only
+`checkout.create-sandbox-real-post-preflight`. D4A has now added the exact
+provider operation in separately distributed `0.1.8`, but core has no caller
+and the production transport remains uninvoked.
 
 The completed mutation authorization, claim, and transport-double start/result
 evidence is bound to earlier adapter, operation, and false-effect identities.
@@ -38,6 +38,9 @@ separate approval.
 
 ## D4A — External Provider-Write Operation
 
+Status: complete in separately distributed adapter `0.1.8`, merged as
+`562b8a9`; no Stripe contact occurred.
+
 The separately distributed adapter advances from `0.1.7` to one new reviewed
 version and adds only the exact operation
 `checkout.create-sandbox-real-post`.
@@ -55,6 +58,9 @@ key, contact `api.stripe.com`, or create a Session. The installable package
 remains outside the clean core starter and has no core caller at this stop.
 
 ## D4B — Core Durable Mutation Runner
+
+Status: in progress. D4B1 fresh authorization and claim are complete without a
+caller; D4B2 durable start/result plus in-memory invocation remains next.
 
 Core adds a D4-specific runner bound to the exact new adapter version, Store
 Lite `0.1.35`, D0 request, D2 identities, order snapshot, database, actor,
@@ -155,9 +161,9 @@ Sources:
 
 ## Planning-Slice Acceptance
 
-This planning slice is complete when README, roadmap, security, acceptance,
+This planning slice was complete when README, roadmap, security, acceptance,
 Version 5.1 direction, the P3 proposal, the P3E-9 frontier, and the canonical
-status graphic all show D4A next, D4D as the first provider effect, and P4
-gated; `git diff --check` and a changed-file credential scan pass; and no PHP,
+status graphic all showed D4A next, D4D as the first provider effect, and P4
+gated; `git diff --check` and a changed-file credential scan passed; and no PHP,
 migration, manifest, package, database, key, account, network, route, runtime,
 hosted-demo, client, or provider state changes.

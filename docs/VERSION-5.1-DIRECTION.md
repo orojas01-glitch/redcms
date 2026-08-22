@@ -1689,8 +1689,9 @@ request bootstrap excludes the disabled package.
 
 124. Completed documentation-only P3E-9D4 authorization planning. The merged
     adapter `0.1.7` remains preflight-only, and prior mutation evidence remains
-    bound to earlier package/operation identities. D4A next adds only the
-    separately distributed provider-write operation with offline/loopback
+    bound to earlier package/operation identities. At that planning stop, D4A
+    was defined to add only the separately distributed provider-write
+    operation with offline/loopback
     acceptance; D4B adds fresh authority, claim, durable start/result, and an
     in-memory core runner; D4C adds a dry-run-first command and network-disabled
     no-contact rehearsal without real apply; D4D alone may create one real
@@ -1699,6 +1700,28 @@ request bootstrap excludes the disabled package.
     expiry, idempotency, and separate Session-expiration facts were rechecked.
     This slice changes no PHP, package, database, key, account, network,
     runtime, hosted/client, or provider state.
+
+125. Completed external adapter P3E-9D4A at separately distributed version
+    `0.1.8`, merged as adapter commit `562b8a9`. The package adds only the exact
+    `checkout.create-sandbox-real-post` provider-write operation, validates D1
+    preflight before secret access, fixes one-use restricted-test transport,
+    and retains only bounded non-secret outcome evidence. Focused D4A,
+    aggregate adapter, and local TLS-loopback acceptance passed with package
+    integrity and source/package parity. Core remains unchanged at this stop:
+    it has no D4A caller, and no key, Stripe request, Session, payment,
+    database, hosted/client, or deployment effect occurred. P3E-9D4B fresh
+    durable core authority, claim, start/result, and in-memory acceptance is
+    next.
+
+126. Completed core P3E-9D4B1 fresh authority and claim. The pure 20-assertion
+    evidence contract binds adapter `0.1.8` to exact D0/D2 identities. The
+    30-assertion disposable lifecycle binds database, order snapshot, Owner,
+    `addons.enable`, `store.orders.manage`, and value-free secret availability,
+    then atomically records new D4-only authorization and claim rows plus
+    audits. No execution start/result, registrar, handler, secret value,
+    network, provider, Checkout Session, payment, Store Lite mutation, hosted/
+    client, migration, or deployment effect exists. D4B2 durable start/result
+    plus in-memory invocation remains next.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

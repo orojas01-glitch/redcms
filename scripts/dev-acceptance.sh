@@ -56,6 +56,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-transport-operator-command-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-post-preflight-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-operation-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-mutation-evidence-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-operation-command-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-operation-rehearsal-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-trust-self-test.php"
@@ -5137,6 +5138,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 
 printf '%s\n' 'Running claimed sandbox Checkout transport-double start/result checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-sandbox-checkout-mutation-transport-double-self-test.php"
+
+printf '%s\n' 'Running fresh D4 Sandbox Checkout authorization and claim checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-sandbox-checkout-real-mutation-lifecycle-self-test.php"
 
 printf '%s\n' 'Running read-only public-mutation live-data preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-live-data-preflight-self-test.php"
