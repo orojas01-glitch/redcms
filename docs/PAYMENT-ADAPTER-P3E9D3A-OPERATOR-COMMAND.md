@@ -62,7 +62,9 @@ arguments and pinned identities, dry-run ordering, one contained D2 call,
 non-persistent outcome checks, forbidden credential/network/database/package
 execution primitives, and absence of a browser/public bridge.
 
-P3E-9D3B remains separate. It must exercise dry run, changed-confirmation
-refusal, one exact contained apply, and cleanup against the exact merged
-external adapter in a disposable cross-repository fixture. P3E-9D4 remains a
-separately authorized one-attempt real Stripe Sandbox POST after D3B merges.
+P3E-9D3B now separately completes dry run, changed-confirmation refusal, one
+exact contained apply, and cleanup against the exact merged external adapter
+and Store Lite dependency in a disposable cross-repository fixture. P3E-9D4
+remains a separately authorized one-attempt real Stripe Sandbox POST after D3B
+merges. See
+[`PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).

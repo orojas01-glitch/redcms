@@ -9,8 +9,9 @@ and P3E-9C3B1 adds its CLI dry-run-first command. P3E-9C3B2 completes the
 disposable apply rehearsal. P3E-9D0 defines the pure future POST, external
 adapter P3E-9D1 is complete through corrected `0.1.7`, and core P3E-9D2
 contains only the non-executing preflight result and identity hashes. P3E-9D3A
-now supplies the CLI-only dry-run-first operator command; P3E-9D3B disposable
-no-contact rehearsal is next. This document does not authorize a Stripe key,
+now supplies the CLI-only dry-run-first operator command, and P3E-9D3B
+completes its disposable no-contact rehearsal. P3E-9D3 is complete. P3E-9D4
+is next but remains separately approval-gated. This document does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
 
@@ -179,9 +180,10 @@ P3E-9 is divided so that every risk increase has a separate review:
 11. **P3E-9D3A — complete.** The CLI-only command defaults to dry run, requires
    every exact identity and no-effect confirmation for apply, and contains one
    non-executing D2 invocation without credentials, persistence, or network.
-12. **P3E-9D3B — next.** Rehearse dry run, changed-confirmation refusal, one
-   exact contained apply, and cleanup against the merged external adapter in a
-   disposable cross-repository fixture without provider contact.
+12. **P3E-9D3B — complete.** Exact merged core, adapter `0.1.7`, and Store Lite
+   `0.1.35` package bytes passed dry run, changed-confirmation refusal, one
+   exact contained apply, zero provider effects, no database, unchanged source
+   repositories, and exact disposable cleanup.
 13. **P3E-9D4 — one real Sandbox creation.** Only after earlier D gates merge
    may an operator request separate approval to create the restricted key and
    issue one exact Sandbox POST. Key expiration, Session expiration, test

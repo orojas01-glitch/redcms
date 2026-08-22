@@ -1156,6 +1156,19 @@ provider primitive. Its one accepted call can return only the non-persistent
 D2 result identity with every execution/provider effect false. See
 [`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md).
 
+P3E-9D3B rehearses that command only in a guarded temporary project assembled
+from exact committed core `f93d191`, adapter `a441588` (`0.1.7`), and Store
+Lite `f7de77e` (`0.1.35`) package bytes. It runs PHP with URL streams and common
+network functions disabled, removes common secret/proxy environment inputs,
+opens no configuration or database, and accepts no credential value or
+reference. Dry run exits before registrar/handler invocation; a changed plan
+hash is refused; one exact contained apply returns only the D2 non-persistent
+identity. Credential scans, staged-tree fingerprints, all three source-tree
+fingerprints, and exit-trap cleanup pass with `provider-effects:0` and
+`staged-project:0 evidence:0 source-repositories:unchanged
+database:not-opened`. See
+[`PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
