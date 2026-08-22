@@ -13,8 +13,9 @@ complete. P3E-9D3A CLI-only dry-run-first command contract is complete;
 P3E-9D3B now completes the disposable no-contact rehearsal with one contained
 apply and zero provider effects. P3E-9D3 is complete. D4A external adapter
 `0.1.8` is also complete without provider contact. D4B durable core execution
-is next; D4C remains the operator/no-contact rehearsal without real apply and
-D4D remains one separately authorized POST. Payment, webhook, and P4
+is complete through sealed in-memory acceptance. D4C operator/no-contact
+rehearsal without real apply is next, and D4D remains one separately
+authorized POST. Payment, webhook, and P4
 deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not

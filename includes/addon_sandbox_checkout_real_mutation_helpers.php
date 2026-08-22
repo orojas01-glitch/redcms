@@ -1388,4 +1388,518 @@ if (!function_exists('red_addon_checkout_real_mutation_record_stage')) {
     }
 }
 
+if (!function_exists('red_addon_checkout_real_mutation_typed_input')) {
+    function red_addon_checkout_real_mutation_typed_input(
+        array $input,
+        array $preflight,
+        array $plan
+    ) {
+        $projection = $preflight;
+        unset($projection['formFields']);
+        $typed = [
+            'contactTarget' => 'stripe-sandbox-real-post',
+            'checkout' => $input['checkout'] ?? null,
+            'policy' => $input['policy'] ?? null,
+            'profile' => $input['profile'] ?? null,
+            'contractSha256' => $input['contractSha256'] ?? null,
+            'realPostPreflight' => $projection,
+            'execution' => [
+                'planSha256' => $plan['preflightPlanSha256'] ?? null,
+                'claimStateSha256' => $plan['claimStateSha256'] ?? null,
+                'executionStartStateSha256' =>
+                    $plan['executionStartStateSha256'] ?? null,
+            ],
+        ];
+        return red_addon_service_payload($typed) === $typed ? $typed : null;
+    }
+}
+
+if (!function_exists('red_addon_checkout_real_mutation_bounded_outcome')) {
+    function red_addon_checkout_real_mutation_bounded_outcome(
+        array $invocation,
+        array $plan,
+        array $input,
+        array $preflight
+    ) {
+        $invoked = !empty($invocation['invoked']);
+        $execution = [
+            'planSha256' => $plan['preflightPlanSha256'] ?? '',
+            'claimStateSha256' => $plan['claimStateSha256'] ?? '',
+            'executionStartStateSha256' =>
+                $plan['executionStartStateSha256'] ?? '',
+        ];
+        $indeterminate = [
+            'valid' => true,
+            'status' => 'indeterminate',
+            'packageId' => 'redcms.store-lite-stripe-checkout',
+            'packageVersion' => '0.1.8',
+            'sourcePackageVersion' => '0.1.7',
+            'operation' => 'checkout.create-sandbox-real-post',
+            'providerOperation' => 'checkout.create-sandbox-real-post',
+            'execution' => $execution,
+            'inputSha256' => $preflight['inputSha256'] ?? '',
+            'syntheticPlanSha256' =>
+                $preflight['syntheticPlanSha256'] ?? '',
+            'contractSha256' => $input['contractSha256'] ?? '',
+            'requestSha256' => $preflight['requestSha256'] ?? '',
+            'checkout' => null,
+            'responseEvidenceSha256' => '',
+            'resultSha256' => '',
+            'restrictedTestWriteKeyRequired' => true,
+            'credentialValueIncluded' => false,
+            'authorizationHeaderIncluded' => false,
+            'responseBodyIncluded' => false,
+            'responseHeadersIncluded' => false,
+            'checkoutUrlIncluded' => false,
+            'networkAccess' => $invoked,
+            'providerContact' => $invoked,
+            'providerMutation' => $invoked,
+            'checkoutCreation' => $invoked,
+            'payment' => false,
+            'webhook' => false,
+            'browserNavigation' => false,
+            'storeLiteMutation' => false,
+            'retryAuthorized' => false,
+            'liveMode' => false,
+            'clientDeployment' => false,
+            'executionPerformed' => $invoked,
+            'errors' => ['provider_execution_indeterminate'],
+        ];
+        $data = $invocation['data'] ?? null;
+        if (!$invoked
+            || empty($invocation['success'])
+            || ($invocation['reason'] ?? null) !== 'completed'
+            || !is_array($data)
+            || !red_addon_checkout_synthetic_exact_keys(
+                $data,
+                array_keys($indeterminate)
+            )
+            || ($data['valid'] ?? null) !== true
+            || ($data['status'] ?? null) !== 'checkout_session_created'
+            || ($data['packageId'] ?? null)
+                !== 'redcms.store-lite-stripe-checkout'
+            || ($data['packageVersion'] ?? null) !== '0.1.8'
+            || ($data['sourcePackageVersion'] ?? null) !== '0.1.7'
+            || ($data['operation'] ?? null)
+                !== 'checkout.create-sandbox-real-post'
+            || ($data['providerOperation'] ?? null)
+                !== 'checkout.create-sandbox-real-post'
+            || ($data['execution'] ?? null) !== $execution
+            || ($data['inputSha256'] ?? null)
+                !== ($preflight['inputSha256'] ?? null)
+            || ($data['syntheticPlanSha256'] ?? null)
+                !== ($preflight['syntheticPlanSha256'] ?? null)
+            || ($data['contractSha256'] ?? null)
+                !== ($input['contractSha256'] ?? null)
+            || ($data['requestSha256'] ?? null)
+                !== ($preflight['requestSha256'] ?? null)
+            || !is_array($data['checkout'] ?? null)
+            || !red_addon_checkout_synthetic_exact_keys(
+                $data['checkout'],
+                [
+                    'checkoutSessionRef', 'checkoutUrlValidated', 'mode',
+                    'status', 'paymentStatus', 'amountMinor', 'currency',
+                    'expiresAtEpoch', 'recoveryEnabled', 'livemode',
+                ]
+            )
+            || !is_string($data['checkout']['checkoutSessionRef'] ?? null)
+            || preg_match(
+                '/\Acs_test_[A-Za-z0-9_]{8,200}\z/D',
+                $data['checkout']['checkoutSessionRef']
+            ) !== 1
+            || ($data['checkout']['checkoutUrlValidated'] ?? null) !== true
+            || ($data['checkout']['mode'] ?? null) !== 'payment'
+            || ($data['checkout']['status'] ?? null) !== 'open'
+            || ($data['checkout']['paymentStatus'] ?? null) !== 'unpaid'
+            || ($data['checkout']['amountMinor'] ?? null)
+                !== ($input['checkout']['amountMinor'] ?? null)
+            || ($data['checkout']['currency'] ?? null) !== 'usd'
+            || ($data['checkout']['expiresAtEpoch'] ?? null)
+                !== ($input['policy']['expiresAtEpoch'] ?? null)
+            || ($data['checkout']['recoveryEnabled'] ?? null) !== false
+            || ($data['checkout']['livemode'] ?? null) !== false
+            || !red_addon_provider_contact_sha256(
+                $data['responseEvidenceSha256'] ?? null
+            )
+            || !red_addon_provider_contact_sha256(
+                $data['resultSha256'] ?? null
+            )
+            || ($data['restrictedTestWriteKeyRequired'] ?? null) !== true
+            || ($data['credentialValueIncluded'] ?? null) !== false
+            || ($data['authorizationHeaderIncluded'] ?? null) !== false
+            || ($data['responseBodyIncluded'] ?? null) !== false
+            || ($data['responseHeadersIncluded'] ?? null) !== false
+            || ($data['checkoutUrlIncluded'] ?? null) !== false
+            || ($data['networkAccess'] ?? null) !== true
+            || ($data['providerContact'] ?? null) !== true
+            || ($data['providerMutation'] ?? null) !== true
+            || ($data['checkoutCreation'] ?? null) !== true
+            || ($data['payment'] ?? null) !== false
+            || ($data['webhook'] ?? null) !== false
+            || ($data['browserNavigation'] ?? null) !== false
+            || ($data['storeLiteMutation'] ?? null) !== false
+            || ($data['retryAuthorized'] ?? null) !== false
+            || ($data['liveMode'] ?? null) !== false
+            || ($data['clientDeployment'] ?? null) !== false
+            || ($data['executionPerformed'] ?? null) !== true
+            || ($data['errors'] ?? null) !== []
+        ) {
+            return $indeterminate;
+        }
+        return $data;
+    }
+}
+
+if (!function_exists('red_addon_checkout_real_mutation_outcome_sha256')) {
+    function red_addon_checkout_real_mutation_outcome_sha256(
+        array $plan,
+        array $outcome
+    ) {
+        $encoded = red_addon_provider_contact_encode([
+            'schema' => 1,
+            'purpose' => 'sandbox-checkout-real-post-result',
+            'packageId' => $plan['packageId'] ?? '',
+            'packageVersion' => $plan['packageVersion'] ?? '',
+            'actorAdminRecordId' =>
+                (int) ($plan['actorAdminRecordId'] ?? 0),
+            'databaseSha256' => $plan['databaseSha256'] ?? '',
+            'orderSnapshotSha256' =>
+                $plan['orderSnapshotSha256'] ?? '',
+            'preflightPlanSha256' =>
+                $plan['preflightPlanSha256'] ?? '',
+            'claimStateSha256' => $plan['claimStateSha256'] ?? '',
+            'executionStartStateSha256' =>
+                $plan['executionStartStateSha256'] ?? '',
+            'outcome' => $outcome,
+        ]);
+        return is_string($encoded) ? hash('sha256', $encoded) : '';
+    }
+}
+
+if (!function_exists('red_addon_checkout_real_mutation_outcome_audit')) {
+    function red_addon_checkout_real_mutation_outcome_audit(
+        $connection,
+        array $plan,
+        array $outcome
+    ) {
+        $detail = ($outcome['status'] ?? '')
+            === 'checkout_session_created'
+                ? 'sandbox_checkout_real_post_session_created'
+                : 'sandbox_checkout_real_post_indeterminate';
+        return red_addon_install_audit_record(
+            $connection,
+            'addon.action.completed',
+            $plan['packageId'],
+            $plan['packageVersion'],
+            $plan['actorAdminRecordId'],
+            'succeeded',
+            $detail
+        );
+    }
+}
+
+if (!function_exists('red_addon_checkout_real_mutation_execute')) {
+    function red_addon_checkout_real_mutation_execute(
+        $connection,
+        $projectRoot,
+        $actorAdminRecordId,
+        array $syntheticPlan,
+        array $input,
+        array $preflight,
+        array $preflightOutcome,
+        array $prepared,
+        $expectedAuthorizationSha256,
+        $expectedAuthorizationStateSha256,
+        $expectedClaimStateSha256,
+        $expectedExecutionStartStateSha256,
+        $evaluatedAtUtc = null,
+        $startAuditRecorder = null,
+        $outcomeAuditRecorder = null,
+        $declarations = null
+    ) {
+        $result = red_addon_checkout_real_mutation_result();
+        foreach ([
+            $expectedAuthorizationSha256,
+            $expectedAuthorizationStateSha256,
+            $expectedClaimStateSha256,
+            $expectedExecutionStartStateSha256,
+        ] as $sha256) {
+            if (!red_addon_provider_contact_sha256($sha256)) {
+                return $result;
+            }
+        }
+        if (!($connection instanceof mysqli)
+            || !is_string($projectRoot)
+            || $projectRoot === ''
+            || (int) $actorAdminRecordId <= 0
+            || red_addon_provider_contact_transaction_active($connection)
+        ) {
+            return $result;
+        }
+        $evaluatedAtUtc = $evaluatedAtUtc === null
+            ? gmdate('Y-m-d\TH:i:s\Z')
+            : $evaluatedAtUtc;
+        $startAuditRecorder = $startAuditRecorder
+            ?? static fn ($db, array $plan) =>
+                red_addon_checkout_real_mutation_audit(
+                    $db,
+                    $plan,
+                    'execution'
+                );
+        $outcomeAuditRecorder = $outcomeAuditRecorder
+            ?? 'red_addon_checkout_real_mutation_outcome_audit';
+        if (!is_callable($startAuditRecorder)
+            || !is_callable($outcomeAuditRecorder)
+            || !red_addon_lifecycle_lock($connection)
+        ) {
+            $result['status'] = 'lifecycle_locked';
+            return $result;
+        }
+        $packageId = 'redcms.store-lite-stripe-checkout';
+        $packageLocked = false;
+        try {
+            if (!red_addon_install_lock($connection, $packageId)) {
+                $result['status'] = 'package_locked';
+                return $result;
+            }
+            $packageLocked = true;
+            $catalog = red_addon_discover($projectRoot, [
+                'cmsVersion' => '5.1.0',
+                'phpVersion' => PHP_VERSION,
+            ]);
+            $package = $catalog['packages'][$packageId] ?? null;
+            if (empty($catalog['valid']) || !is_array($package)) {
+                $result['status'] = 'package_invalid';
+                return $result;
+            }
+            if (!mysqli_begin_transaction($connection)) {
+                $result['status'] = 'transaction_failed';
+                return $result;
+            }
+            try {
+                if (!red_addon_checkout_mutation_lock_state(
+                    $connection,
+                    (int) $actorAdminRecordId
+                )) {
+                    throw new RuntimeException('execution_lock_failed');
+                }
+                $plan = red_addon_checkout_real_mutation_plan(
+                    $connection,
+                    $package,
+                    $catalog,
+                    (int) $actorAdminRecordId,
+                    $syntheticPlan,
+                    $input,
+                    $preflight,
+                    $preflightOutcome,
+                    $prepared,
+                    $evaluatedAtUtc,
+                    'execution',
+                    true,
+                    $declarations
+                );
+                if (empty($plan['ready'])
+                    || !hash_equals(
+                        $expectedAuthorizationSha256,
+                        $plan['authorizationSha256'] ?? ''
+                    )
+                    || !hash_equals(
+                        $expectedAuthorizationStateSha256,
+                        $plan['authorizationStateSha256'] ?? ''
+                    )
+                    || !hash_equals(
+                        $expectedClaimStateSha256,
+                        $plan['claimStateSha256'] ?? ''
+                    )
+                    || !hash_equals(
+                        $expectedExecutionStartStateSha256,
+                        $plan['executionStartStateSha256'] ?? ''
+                    )
+                ) {
+                    throw new RuntimeException(
+                        ($plan['status'] ?? '') === 'execution_already_started'
+                            ? 'execution_already_started'
+                            : 'execution_changed'
+                    );
+                }
+                $reserved = red_addon_checkout_real_mutation_reserve(
+                    $connection,
+                    $plan,
+                    $plan['executionStartActionId'],
+                    $plan['claimStateSha256'],
+                    $plan['executionStartStateSha256']
+                );
+                if ($reserved !== 'reserved') {
+                    throw new RuntimeException(
+                        $reserved === 'duplicate'
+                            ? 'execution_already_started'
+                            : 'execution_start_failed'
+                    );
+                }
+                if (!$startAuditRecorder($connection, $plan)) {
+                    throw new RuntimeException('execution_start_audit_failed');
+                }
+                if (!mysqli_commit($connection)) {
+                    throw new RuntimeException('execution_start_commit_failed');
+                }
+                $result = $plan;
+                $result['ready'] = false;
+                $result['executionStartAvailable'] = false;
+                $result['executionStarted'] = true;
+                $result['startAuditRecorded'] = true;
+                $result['status'] = 'execution_started';
+            } catch (Throwable $throwable) {
+                mysqli_rollback($connection);
+                $result = isset($plan) && is_array($plan) ? $plan : $result;
+                $result['ready'] = false;
+                $result['executionStartAvailable'] = false;
+                $result['status'] = $throwable->getMessage();
+                $result['executionStarted'] = false;
+                $result['startAuditRecorded'] = false;
+                return $result;
+            }
+
+            $invocation = [];
+            $access = null;
+            try {
+                $registry = red_addon_runtime_register_package($package);
+                $handler = $registry->handler(
+                    'adapters',
+                    $plan['adapterId']
+                );
+                if (!is_callable($handler)) {
+                    throw new RuntimeException('registrar_invalid');
+                }
+                $result['registrarValidated'] = true;
+                $secret = red_addon_runtime_secret_access_for_package(
+                    $connection,
+                    $package,
+                    true,
+                    ['stripe.secret-key']
+                );
+                if (empty($secret['valid'])
+                    || (int) ($secret['settingCount'] ?? 0) !== 1
+                    || (int) ($secret['resolvedCount'] ?? 0) !== 1
+                    || !(($secret['access'] ?? null)
+                        instanceof RED_Addon_Runtime_Secret_Access)
+                ) {
+                    throw new RuntimeException('secret_resolution_failed');
+                }
+                $access = $secret['access'];
+                $result['secretResolution'] = true;
+                $typedInput = red_addon_checkout_real_mutation_typed_input(
+                    $input,
+                    $preflight,
+                    $plan
+                );
+                if (!is_array($typedInput)) {
+                    throw new RuntimeException('typed_input_invalid');
+                }
+                $invocation = red_addon_adapter_invoke_registered(
+                    $plan['adapterId'],
+                    $plan['operation'],
+                    $typedInput,
+                    $plan['packageId'],
+                    $handler,
+                    $package['manifest'],
+                    $access
+                );
+                $result['adapterInvoked'] = !empty($invocation['invoked']);
+            } catch (Throwable $throwable) {
+                $invocation = [];
+            }
+            unset($access, $secret, $registry, $handler, $typedInput);
+
+            $outcome = red_addon_checkout_real_mutation_bounded_outcome(
+                is_array($invocation) ? $invocation : [],
+                $plan,
+                $input,
+                $preflight
+            );
+            $result['boundedOutcome'] = $outcome;
+            foreach ([
+                'executionPerformed', 'networkAccess', 'providerContact',
+                'providerMutation', 'checkoutCreation',
+            ] as $key) {
+                $result[$key] = ($outcome[$key] ?? false) === true;
+            }
+            $result['outcomeStateSha256'] =
+                red_addon_checkout_real_mutation_outcome_sha256(
+                    $plan,
+                    $outcome
+                );
+            if (!red_addon_provider_contact_sha256(
+                $result['outcomeStateSha256']
+            )) {
+                $result['status'] = 'outcome_encoding_failed';
+                return $result;
+            }
+            if (!mysqli_begin_transaction($connection)) {
+                $result['status'] = 'outcome_transaction_failed';
+                return $result;
+            }
+            try {
+                $startRow = red_addon_checkout_real_mutation_row(
+                    $connection,
+                    $plan['packageId'],
+                    $plan['executionStartActionId'],
+                    true
+                );
+                $outcomeRow = red_addon_checkout_real_mutation_row(
+                    $connection,
+                    $plan['packageId'],
+                    $plan['outcomeActionId'],
+                    true
+                );
+                if (empty($startRow['valid'])
+                    || empty($startRow['found'])
+                    || !is_array($startRow['row'])
+                    || !red_addon_checkout_real_mutation_row_matches(
+                        $startRow['row'],
+                        $plan,
+                        $plan['claimStateSha256'],
+                        $plan['executionStartStateSha256']
+                    )
+                    || empty($outcomeRow['valid'])
+                    || !empty($outcomeRow['found'])
+                ) {
+                    throw new RuntimeException('outcome_state_changed');
+                }
+                $reserved = red_addon_checkout_real_mutation_reserve(
+                    $connection,
+                    $plan,
+                    $plan['outcomeActionId'],
+                    $plan['executionStartStateSha256'],
+                    $result['outcomeStateSha256']
+                );
+                if ($reserved !== 'reserved') {
+                    throw new RuntimeException('outcome_reservation_failed');
+                }
+                if (!$outcomeAuditRecorder($connection, $plan, $outcome)) {
+                    throw new RuntimeException('outcome_audit_failed');
+                }
+                if (!mysqli_commit($connection)) {
+                    throw new RuntimeException('outcome_commit_failed');
+                }
+                $result['valid'] = true;
+                $result['status'] = $outcome['status'];
+                $result['outcomeRecorded'] = true;
+                $result['outcomeAuditRecorded'] = true;
+                return $result;
+            } catch (Throwable $throwable) {
+                mysqli_rollback($connection);
+                $result['status'] = $throwable->getMessage();
+                $result['outcomeRecorded'] = false;
+                $result['outcomeAuditRecorded'] = false;
+                return $result;
+            }
+        } finally {
+            if ($packageLocked) {
+                red_addon_install_unlock($connection, $packageId);
+            }
+            red_addon_lifecycle_unlock($connection);
+        }
+    }
+}
+
 ?>

@@ -5142,6 +5142,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 printf '%s\n' 'Running fresh D4 Sandbox Checkout authorization and claim checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-sandbox-checkout-real-mutation-lifecycle-self-test.php"
 
+printf '%s\n' 'Running durable D4 Sandbox Checkout start/result checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-sandbox-checkout-real-mutation-execution-self-test.php"
+
 printf '%s\n' 'Running read-only public-mutation live-data preflight checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-public-mutation-live-data-preflight-self-test.php"
 

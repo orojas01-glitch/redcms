@@ -180,9 +180,10 @@ or fail closed and recover through a reviewed package migration path.
    disposable no-contact rehearsal with exact package sources, zero provider
    effects, no database, unchanged repositories, and exact cleanup. P3E-9D3
    is complete. D4A is also complete in separately distributed adapter `0.1.8`
-   at merged commit `562b8a9`, with no Stripe contact and no core caller. D4B
-   fresh durable core runner is next; D4C remains the CLI/no-contact rehearsal
-   without real apply, and D4D remains one separately authorized real POST.
+   at merged commit `562b8a9`, with no Stripe contact. D4B fresh authority,
+   durable start/result, and sealed in-memory execution are also complete. D4C
+   CLI/no-contact rehearsal without real apply is next, and D4D remains one
+   separately authorized real POST.
    Payment, webhook, and deployment remain later gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,

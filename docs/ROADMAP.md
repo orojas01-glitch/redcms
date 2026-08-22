@@ -264,13 +264,11 @@ apply, zero provider effects, no database, unchanged sources, and exact
 temporary cleanup. P3E-9D3 is complete; the real Session, payment, and webhook
 remain gated. D4A is complete in the separately distributed adapter at
 `0.1.8`: the exact provider-write operation passed offline and local-loopback
-acceptance without Stripe contact, and core still has no caller. D4B fresh
-authority, claim, durable start/result, and in-memory core acceptance is next;
-D4C remains the operator/no-contact rehearsal and D4D remains one separately
-authorized real POST. P3E-9D4B is internally split for review: D4B1 fresh
-adapter-`0.1.8`
-authorization and claim now pass 20 pure plus 30 disposable-database
-assertions; D4B2 durable start/result and in-memory invocation remains next.
+acceptance without Stripe contact. D4B is now complete: D4B1 fresh adapter-
+`0.1.8` authorization and claim pass 20 pure plus 30 disposable-database
+assertions, and D4B2 durable start/result plus one sealed in-memory invocation
+passes 29 assertions. D4C operator command/no-contact rehearsal is next; D4D
+remains one separately authorized real POST.
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

@@ -1723,6 +1723,19 @@ request bootstrap excludes the disabled package.
     client, migration, or deployment effect exists. D4B2 durable start/result
     plus in-memory invocation remains next.
 
+127. Completed core P3E-9D4B2 durable execution with 29 disposable-database
+    assertions. Start and its value-free audit commit before registrar, scoped
+    secret, or handler access; one final in-memory adapter handler returns only
+    the bounded open/unpaid/non-live Session projection; the complete start row
+    is rechecked before result and audit commit. Replay, rollback/recovery,
+    permanent no-retry after result failure, fault/malformed containment,
+    missing-secret indeterminate recording, scoped-secret isolation, and exact
+    cleanup pass. Conservative provider-effect flags acknowledge what a real
+    handler could have done, but the sealed fixture used no network and no
+    Stripe request, real Session, payment, webhook, browser, Store Lite,
+    hosted/client, migration, or deployment effect occurred. P3E-9D4C CLI and
+    no-contact rehearsal is next.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

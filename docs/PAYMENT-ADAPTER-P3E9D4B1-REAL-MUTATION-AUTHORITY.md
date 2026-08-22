@@ -1,6 +1,6 @@
 # P3E-9D4B1 Fresh Real-POST Authority And Claim
 
-Status: complete in core; durable start/result execution remains P3E-9D4B2.
+Status: complete dependency; P3E-9D4B2 durable execution is now also complete.
 
 ## Boundary
 
@@ -28,8 +28,8 @@ This slice has no execution-start write, result write, package registration,
 handler invocation, secret-value resolution, environment-value read, network
 primitive, Stripe request, Checkout Session, payment, webhook, browser caller,
 Store Lite mutation, retry, live mode, hosted/client action, migration, or new
-table. P3E-9D4B2 must separately commit start before registrar/secret/handler
-access and prove one in-memory invocation plus bounded result persistence.
+table. The later P3E-9D4B2 slice separately adds start-before-access, one
+in-memory invocation, and bounded result persistence.
 
 ## Acceptance
 
