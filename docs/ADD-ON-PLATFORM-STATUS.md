@@ -1,9 +1,10 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-21 after the published `v5.1.0` release, completed Store
+Last updated: 2026-08-22 after the published `v5.1.0` release, completed Store
 Lite basic-demo proof, completed payment-adapter P3A through P3D foundations,
 the closed P3E-8B3C3B read-only Stripe Sandbox rehearsal, P3E-9A through
-P3E-9D1 external work, and core P3E-9D2 preflight containment.
+P3E-9D1 external work, core P3E-9D2 preflight containment, and P3E-9D3A
+CLI-only operator-command contract.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, gray remains
@@ -78,11 +79,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | External adapter P3E-9D1 reached corrected `0.1.7`, and core P3E-9D2 now contains only its non-executing preflight result while deriving non-persistent start/result identity hashes. Its 39 assertions open no database or network. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9D3 CLI-only command and disposable no-contact rehearsal are next. No write key, provider POST, real Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is currently authorized. |
+| What just finished? | P3E-9D3A adds the CLI-only, dry-run-first command contract around D2. Its 68 assertions require exact identities and nine no-effect confirmations while excluding credentials, persistence, network, provider execution, and public bridges. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9D3B disposable cross-repository no-contact rehearsal is next. No write key, provider POST, real Session, payment, webhook, browser checkout, demo activation, client deployment, or P4 work is currently authorized. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9D3 remains the final no-contact command/rehearsal gate; D4 one real Sandbox Session, payment/webhook proof, and P4 deployment review stay separately gated. |
+| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, P3E-9D3B is the final no-contact rehearsal gate; D4 one real Sandbox Session, payment/webhook proof, and P4 deployment review stay separately gated. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -115,17 +116,18 @@ flowchart LR
     P3E9D0["COMPLETE<br/>P3E-9D0. Pure real-POST<br/>preflight"]
     P3E9D1["COMPLETE<br/>P3E-9D1. External adapter<br/>0.1.7 preflight adoption"]
     P3E9D2["COMPLETE<br/>P3E-9D2. Core response<br/>containment + identities"]
-    P3E9D3["NEXT<br/>P3E-9D3. CLI command<br/>+ no-contact rehearsal"]
+    P3E9D3A["COMPLETE<br/>P3E-9D3A. CLI-only<br/>operator command"]
+    P3E9D3B["NEXT<br/>P3E-9D3B. Disposable<br/>no-contact rehearsal"]
     P3E9D4["GATED<br/>P3E-9D4. One real Sandbox<br/>Session POST"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3 --> P3E9D4 --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4 --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2 complete;
-    class P3E9D3 active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A complete;
+    class P3E9D3B active;
     class P3E9D4,P4 gated;
 ```
 
@@ -173,8 +175,9 @@ P3E-9C3B1 adds the CLI dry-run-first command, and P3E-9C3B2 completes its
 disposable apply rehearsal with zero provider effects and exact cleanup.
 P3E-9D0 defines the pure future POST request. P3E-9D1 completes corrected
 external adapter `0.1.7`, and P3E-9D2 contains only its non-executing typed
-preflight result plus non-persistent identity hashes. P3E-9D3 no-contact
-command/rehearsal is active; every write credential, real network request,
+preflight result plus non-persistent identity hashes. P3E-9D3A adds its
+CLI-only dry-run-first command contract. P3E-9D3B disposable no-contact
+rehearsal is active; every write credential, real network request,
 Checkout Session, payment, webhook, browser flow, hosted-demo change, and
 client deployment remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).

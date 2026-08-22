@@ -1145,6 +1145,17 @@ request global, route, CLI, database, transport, provider, payment, Store Lite,
 demo/client, or deployment path. See
 [`PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md`](PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md).
 
+P3E-9D3A exposes that contained preflight only through a CLI command. The
+default dry run exits before registrar or handler invocation. Apply requires
+exact package/source/integrity/request/start identities, the separately named
+preflight/provider operations, one attempt, and nine explicit `no` effect
+confirmations. The command accepts no actor, database, backup, setting, secret
+reference, or credential value; loads no configuration; opens no database;
+and contains no request-global, browser bridge, shell, resolver, transport, or
+provider primitive. Its one accepted call can return only the non-persistent
+D2 result identity with every execution/provider effect false. See
+[`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

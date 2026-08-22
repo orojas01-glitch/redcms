@@ -256,8 +256,10 @@ P3E-9D0 adds only the pure real-POST request contract and 25 source assertions.
 External adapter P3E-9D1 is complete through canonical-hash-compatible
 `0.1.7`. Core P3E-9D2 invokes only its non-executing preflight operation,
 contains the exact typed result, and derives non-persistent start/result
-identity hashes in 39 focused assertions. P3E-9D3 command/rehearsal is next;
-credentials, network, the real Session, payment, and webhook remain gated. See
+identity hashes in 39 focused assertions. P3E-9D3A adds the CLI-only,
+dry-run-first operator command and its 68-assertion source contract without
+credentials, persistence, or network. P3E-9D3B disposable no-contact rehearsal
+is next; the real Session, payment, and webhook remain gated. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -272,7 +274,9 @@ and
 and
 [`PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md`](PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md)
 and
-[`PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md`](PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md).
+[`PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md`](PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md)
+and
+[`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 

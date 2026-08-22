@@ -1661,8 +1661,19 @@ request bootstrap excludes the disabled package.
     and changed provider-operation identity with exact temporary-project
     cleanup. No credential, database row, execution start/result, network,
     Stripe Session, payment, webhook, browser, Store Lite mutation, retry,
-    demo/client, or deployment path is added. P3E-9D3 no-contact
-    command/rehearsal is next; the first real Sandbox POST remains separately
+    demo/client, or deployment path is added. P3E-9D3A was kept as a separate
+    slice; the first real Sandbox POST remains gated.
+
+122. Completed P3E-9D3A CLI-only real-operation preflight command contract.
+    Dry run revalidates exact adapter `0.1.7`, source `0.1.5`, D0 request, D2
+    plan, integrity, and deterministic start identities, then exits before the
+    registrar or handler. Apply requires every printed hash and nine explicit
+    no-effect confirmations, invokes D2 once with no secret access, and accepts
+    only its non-persistent result identity. Its 68 assertions exclude
+    configuration/database access, credentials, resolver, request/browser,
+    network/provider, Checkout Session, payment, webhook, Store Lite mutation,
+    retry, demo/client, and deployment paths. P3E-9D3B disposable
+    cross-repository no-contact rehearsal is next; P3E-9D4 remains separately
     gated.
 
 Each phase requires its own migration, rollback path, relevant authorization

@@ -76,6 +76,8 @@ A separate local cross-repository proof copied the exact merged adapter
 real P3E-9A contract, and passed the D0 -> D2 plan/invocation/result path. The
 temporary project and proof script were removed afterward.
 
-P3E-9D3 remains separate: it may add a CLI-only, dry-run-first one-shot command
-and disposable no-contact rehearsal around these identities. P3E-9D4 remains
-the separately approved single real Stripe Sandbox POST.
+P3E-9D3A now separately supplies the CLI-only, dry-run-first command around
+these identities. P3E-9D3B remains the disposable cross-repository no-contact
+rehearsal. P3E-9D4 remains the separately approved single real Stripe Sandbox
+POST. See
+[`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md).
