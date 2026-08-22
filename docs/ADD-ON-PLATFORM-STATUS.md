@@ -81,10 +81,10 @@ flowchart TD
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
 | What just finished? | P3E-9D3B rehearsed exact merged core, adapter `0.1.7`, and Store Lite `0.1.35`: dry run, changed-confirmation refusal, one contained apply, zero provider effects, unchanged sources, no database, and exact temporary cleanup. P3E-9D3 is complete. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, P3E-9D4 is the next separately approval-gated step: one restricted test write key and one exact Stripe Sandbox Checkout Session POST. It is not currently authorized. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, documentation-only D4 planning splits the work into D4A external operation, D4B durable core runner, D4C operator/no-contact rehearsal, and D4D one real POST. D4A is next; no Stripe key or provider request is authorized. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, D4 one real Sandbox Session is next; key expiration, Session expiration, test payment, webhook/browser/order-transition proof, and P4 deployment review stay separately gated. |
+| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, D4A–D4C must merge before separately authorized D4D can create one real Sandbox Session. Key expiration, Session expiration, test payment, webhook/browser/order-transition proof, and P4 deployment review stay separately gated. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -119,16 +119,20 @@ flowchart LR
     P3E9D2["COMPLETE<br/>P3E-9D2. Core response<br/>containment + identities"]
     P3E9D3A["COMPLETE<br/>P3E-9D3A. CLI-only<br/>operator command"]
     P3E9D3B["COMPLETE<br/>P3E-9D3B. Disposable<br/>no-contact rehearsal"]
-    P3E9D4["NEXT / GATED<br/>P3E-9D4. One real Sandbox<br/>Session POST"]
+    P3E9D4A["NEXT<br/>P3E-9D4A. External provider-write<br/>operation, no Stripe contact"]
+    P3E9D4B["GATED<br/>P3E-9D4B. Durable core<br/>runner, in-memory acceptance"]
+    P3E9D4C["GATED<br/>P3E-9D4C. CLI command<br/>+ no-contact rehearsal"]
+    P3E9D4D["GATED<br/>P3E-9D4D. One real Sandbox<br/>Session POST"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
 
-    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4 --> P4
+    P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
     class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B complete;
-    class P3E9D4,P4 gated;
+    class P3E9D4A active;
+    class P3E9D4B,P3E9D4C,P3E9D4D,P4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -178,7 +182,8 @@ external adapter `0.1.7`, and P3E-9D2 contains only its non-executing typed
 preflight result plus non-persistent identity hashes. P3E-9D3A adds its
 CLI-only dry-run-first command contract. P3E-9D3B completes the disposable
 no-contact rehearsal with zero provider effects and exact cleanup. P3E-9D4 is
-next but separately approval-gated; every write credential, real network request,
+split into D4A external operation, D4B durable runner, D4C operator/no-contact
+rehearsal, and D4D one real POST. D4A is next; every write credential, real network request,
 Checkout Session, payment, webhook, browser flow, hosted-demo change, and
 client deployment remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).

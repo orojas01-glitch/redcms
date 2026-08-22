@@ -141,7 +141,10 @@ P3E-9D3A now adds the CLI-only, dry-run-first operator command with exact
 identity and no-effect confirmations. P3E-9D3B now completes the disposable
 cross-repository no-contact rehearsal with exact committed core, adapter, and
 Store Lite package sources. P3E-9D3 is complete; the real Sandbox POST remains
-separately gated. See
+separately gated. D4 is now fixed as four stops: D4A external provider-write
+operation without Stripe contact, D4B durable core runner with in-memory
+acceptance, D4C CLI/no-contact rehearsal, and D4D one separately authorized
+real Sandbox POST. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -160,7 +163,9 @@ and
 and
 [P3E-9D3A Operator Command](docs/PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md)
 and
-[P3E-9D3B No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).
+[P3E-9D3B No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md)
+and
+[P3E-9D4 Real Creation Plan](docs/PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

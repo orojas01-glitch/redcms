@@ -11,7 +11,9 @@ adapter P3E-9D1 is complete through corrected `0.1.7`, and core P3E-9D2
 contains only the non-executing preflight result and identity hashes. P3E-9D3A
 now supplies the CLI-only dry-run-first operator command, and P3E-9D3B
 completes its disposable no-contact rehearsal. P3E-9D3 is complete. P3E-9D4
-is next but remains separately approval-gated. This document does not authorize a Stripe key,
+is split into D4A external operation, D4B durable core runner, D4C operator/
+no-contact rehearsal, and D4D one real POST. D4A is next; D4D remains
+separately approval-gated. This document does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
 
@@ -184,10 +186,22 @@ P3E-9 is divided so that every risk increase has a separate review:
    `0.1.35` package bytes passed dry run, changed-confirmation refusal, one
    exact contained apply, zero provider effects, no database, unchanged source
    repositories, and exact disposable cleanup.
-13. **P3E-9D4 — one real Sandbox creation.** Only after earlier D gates merge
-   may an operator request separate approval to create the restricted key and
-   issue one exact Sandbox POST. Key expiration, Session expiration, test
-   payment, webhook proof, and Sandbox deletion remain distinct actions.
+13. **P3E-9D4A — external provider-write operation.** Add the separately
+   distributed exact `checkout.create-sandbox-real-post` operation with only
+   source, sealed-double, and local TLS loopback acceptance. It has no core
+   caller, Stripe key, account access, or provider contact.
+14. **P3E-9D4B — durable core runner.** Add fresh package/operation-bound
+   authorization and claim evidence, commit immutable start before secret or
+   handler access, invoke once, and record only a bounded result. Acceptance
+   uses an in-memory handler and no network.
+15. **P3E-9D4C — operator command and no-contact rehearsal.** Add exact
+   dry-run-first confirmations and rehearse dry run plus refusal and cleanup
+   with provider networking disabled. It does not run the real apply.
+16. **P3E-9D4D — one real Sandbox creation.** Only after D4A–D4C merge may an
+   operator request separate approvals to create/store the restricted key,
+   review the final dry run, issue one exact Sandbox POST, and expire the key.
+   Session expiration, test payment, webhook proof, and Sandbox deletion remain
+   distinct actions.
 
 P4 remains blocked until later P3E gates prove the hosted browser return,
 signed event verification, server-side Session reconciliation, idempotent

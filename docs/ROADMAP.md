@@ -262,7 +262,10 @@ credentials, persistence, or network. P3E-9D3B now completes the disposable
 no-contact rehearsal: dry run, changed-confirmation refusal, one contained
 apply, zero provider effects, no database, unchanged sources, and exact
 temporary cleanup. P3E-9D3 is complete; the real Session, payment, and webhook
-remain gated. See
+remain gated. Documentation-only D4 planning now splits the first real
+creation path into D4A external operation, D4B durable core runner, D4C
+operator/no-contact rehearsal, and D4D one separately authorized real POST.
+D4A is next. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -281,7 +284,9 @@ and
 and
 [`PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md`](PAYMENT-ADAPTER-P3E9D3A-OPERATOR-COMMAND.md)
 and
-[`PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).
+[`PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md)
+and
+[`PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md`](PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 
