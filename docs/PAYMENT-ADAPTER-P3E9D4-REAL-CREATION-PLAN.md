@@ -1,15 +1,16 @@
 # P3E-9D4 Real Sandbox Checkout Creation Plan
 
-Status: planning complete; D4A external implementation is merged without
-provider execution, and D4B is next. D4 is split into four review stops so the
-first real Stripe `POST` remains the final operational step.
+Status: planning complete; D4A and D4B are implemented without provider
+execution, and D4C is next. D4 is split into four review stops so the first
+real Stripe `POST` remains the final operational step.
 
 ## Why D4 Is Not One Coding Step
 
 Before D4A, merged adapter `0.1.7` exposed only
-`checkout.create-sandbox-real-post-preflight`. D4A has now added the exact
-provider operation in separately distributed `0.1.8`, but core has no caller
-and the production transport remains uninvoked.
+`checkout.create-sandbox-real-post-preflight`. D4A then added the exact
+provider operation in separately distributed `0.1.8`, and D4B added the
+durable core runner. No CLI, public, or browser caller exists yet, and the
+production transport remains uninvoked.
 
 The completed mutation authorization, claim, and transport-double start/result
 evidence is bound to earlier adapter, operation, and false-effect identities.
@@ -59,8 +60,9 @@ remains outside the clean core starter and has no core caller at this stop.
 
 ## D4B — Core Durable Mutation Runner
 
-Status: in progress. D4B1 fresh authorization and claim are complete without a
-caller; D4B2 durable start/result plus in-memory invocation remains next.
+Status: complete. D4B1 supplies fresh authorization/claim and D4B2 supplies
+durable start/result plus in-memory invocation. No CLI, public caller, or real
+provider request exists at this stop.
 
 Core adds a D4-specific runner bound to the exact new adapter version, Store
 Lite `0.1.35`, D0 request, D2 identities, order snapshot, database, actor,

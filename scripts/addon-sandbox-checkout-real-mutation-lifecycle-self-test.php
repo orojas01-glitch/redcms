@@ -209,6 +209,12 @@ function red_checkout_p3e9d4b_lifecycle_record(
     );
 }
 
+if (defined('RED_ADDON_CHECKOUT_REAL_MUTATION_LIFECYCLE_FIXTURE_ONLY')
+    && RED_ADDON_CHECKOUT_REAL_MUTATION_LIFECYCLE_FIXTURE_ONLY
+) {
+    return;
+}
+
 red_checkout_p3e9d4b_lifecycle_cleanup(
     $connection,
     $packageIds,
@@ -520,16 +526,31 @@ try {
         $projectRoot
             . '/includes/addon_sandbox_checkout_real_mutation_helpers.php'
     );
+    $executionBoundary = strpos(
+        $source,
+        "if (!function_exists('red_addon_checkout_real_mutation_typed_input'))"
+    );
+    $authoritySource = $executionBoundary === false
+        ? ''
+        : substr($source, 0, $executionBoundary);
     foreach (['curl_', 'fsockopen(', 'stream_socket_client(', 'socket_',
         'Authorization:', 'php://input', '$_POST', '$_SERVER', 'getenv(',
         'putenv(', 'shell_exec(', 'sleep(', 'usleep(',
-        'red_addon_runtime_register_package(',
-        'red_addon_adapter_invoke_registered(', 'red_addon_secret_resolve(']
+        'red_addon_secret_resolve(']
         as $forbidden
     ) {
         red_addon_checkout_mutation_test_assert(
             !str_contains($source, $forbidden),
-            $forbidden . ' is absent before the D4B execution slice'
+            $forbidden . ' is absent from the complete D4B helper'
+        );
+    }
+    foreach (['red_addon_runtime_register_package(',
+        'red_addon_adapter_invoke_registered('] as $executionPrimitive
+    ) {
+        red_addon_checkout_mutation_test_assert(
+            $authoritySource !== ''
+                && !str_contains($authoritySource, $executionPrimitive),
+            $executionPrimitive . ' is absent from D4B1 authority and claim'
         );
     }
 

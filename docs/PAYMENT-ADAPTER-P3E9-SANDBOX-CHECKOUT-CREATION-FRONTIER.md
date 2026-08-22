@@ -12,8 +12,9 @@ contains only the non-executing preflight result and identity hashes. P3E-9D3A
 now supplies the CLI-only dry-run-first operator command, and P3E-9D3B
 completes its disposable no-contact rehearsal. P3E-9D3 is complete. P3E-9D4A
 is complete in separately distributed adapter `0.1.8` without provider
-contact. D4B durable core execution is next; D4C remains the operator/no-contact
-rehearsal and D4D remains one real POST under separate approval. This document
+contact. D4B durable core execution is complete through sealed in-memory
+acceptance. D4C operator/no-contact rehearsal is next and D4D remains one real
+POST under separate approval. This document
 does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
@@ -191,11 +192,11 @@ P3E-9 is divided so that every risk increase has a separate review:
    exact `checkout.create-sandbox-real-post` operation. Source, sealed-double,
    and local TLS-loopback acceptance passed at merged adapter commit `562b8a9`;
    it still has no core caller, Stripe key, account access, or provider contact.
-14. **P3E-9D4B — next: durable core runner.** Add fresh package/operation-bound
-   authorization and claim evidence, commit immutable start before secret or
-   handler access, invoke once, and record only a bounded result. Acceptance
-   uses an in-memory handler and no network.
-15. **P3E-9D4C — operator command and no-contact rehearsal.** Add exact
+14. **P3E-9D4B — complete.** Fresh package/operation-bound authorization and
+   claim, durable start before registrar/secret/handler access, one in-memory
+   invocation, bounded result, replay refusal, and permanent no-retry pass
+   disposable acceptance without network or provider contact.
+15. **P3E-9D4C — next: operator command and no-contact rehearsal.** Add exact
    dry-run-first confirmations and rehearse dry run plus refusal and cleanup
    with provider networking disabled. It does not run the real apply.
 16. **P3E-9D4D — one real Sandbox creation.** Only after D4A–D4C merge may an

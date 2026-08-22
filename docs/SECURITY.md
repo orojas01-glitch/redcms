@@ -1186,16 +1186,24 @@ D4A is now merged only in the separately distributed adapter at version
 `0.1.8` (`562b8a9`). Its production-capable transport was never invoked during
 acceptance; sealed doubles and local TLS loopback proved the bounded contract
 without DNS, external TLS, HTTP, Stripe, Checkout creation, or payment. The
-clean core starter contains no adapter package and still has no provider-write
-caller. D4B must not reinterpret any P3E-9C row or pre-D4 package identity as
-authority for the `0.1.8` operation.
+clean core starter contains no adapter package and still has no operator or
+public provider-write caller. D4B must not reinterpret any P3E-9C row or
+pre-D4 package identity as authority for the `0.1.8` operation.
 
 P3E-9D4B1 now records only fresh D4 authorization and claim. Both bind the
 exact `0.1.8` package, D0/D2 identities, database, order snapshot, Owner,
 permissions, and value-free secret-reference availability. New action prefixes
-and state hashes prevent every P3E-9C row from satisfying D4 checks. Package
-registration, secret-value resolution, handler invocation, start/result, and
-provider-capable execution remain absent until separately reviewed D4B2.
+and state hashes prevent every P3E-9C row from satisfying D4 checks.
+
+P3E-9D4B2 now adds the durable core boundary. It commits start and audit before
+registrar, secret, or handler access; resolves only the owning package's
+`stripe.secret-key`; invokes one integrity-checked typed operation; records a
+closed bounded result only after rechecking the start row; and permanently
+refuses replay after any committed start. Fault, malformed output, missing
+secret, or result-storage ambiguity becomes a consumed indeterminate attempt.
+The 29-assertion fixture is final and in-memory with no network primitive. Core
+still exposes no CLI, route, public endpoint, browser bridge, retry, or
+automatic caller; D4C remains a separate review gate.
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
