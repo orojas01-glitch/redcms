@@ -1169,6 +1169,19 @@ fingerprints, and exit-trap cleanup pass with `provider-effects:0` and
 database:not-opened`. See
 [`PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9D3B-NO-CONTACT-REHEARSAL.md).
 
+P3E-9D4 is split so provider-capable code, durable execution, operator
+exposure, and the first provider effect cannot enter one approval. D4A may add
+only the separately distributed adapter operation with offline/loopback
+acceptance and no core caller. D4B must create fresh operation/version-bound
+authorization, claim, durable start, and bounded result evidence; earlier
+mutation rows cannot be reused. D4C adds the dry-run-first CLI command and a
+network-disabled no-contact rehearsal but does not run the real apply. D4D is
+the first real apply and separately requires key-creation, key-storage, apply,
+and key-expiration approvals. Any post-start ambiguity consumes the attempt;
+no retry, URL disclosure, payment, webhook, browser, Store Lite mutation,
+hosted/client action, or live mode is included. See
+[`PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md`](PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

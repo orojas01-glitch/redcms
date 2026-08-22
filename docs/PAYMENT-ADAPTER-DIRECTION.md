@@ -179,8 +179,10 @@ or fail closed and recover through a reviewed package migration path.
    CLI-only dry-run-first command contract, and P3E-9D3B completes the
    disposable no-contact rehearsal with exact package sources, zero provider
    effects, no database, unchanged repositories, and exact cleanup. P3E-9D3
-   is complete; real provider execution, payment, webhook, and deployment
-   remain gated.
+   is complete. D4 is split into D4A external provider-write operation without
+   Stripe contact, D4B fresh durable core runner, D4C CLI/no-contact rehearsal
+   without real apply, and D4D one separately authorized real POST. Payment,
+   webhook, and deployment remain later gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is

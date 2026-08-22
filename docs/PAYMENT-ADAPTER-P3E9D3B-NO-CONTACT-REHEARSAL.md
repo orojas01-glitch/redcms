@@ -67,8 +67,10 @@ disabled network and secret inputs, dry/refusal/apply evidence, every required
 confirmation, source-tree stability, non-invoking evidence preparation,
 credential/database/transport exclusions, and absence of public bridges.
 
-P3E-9D3 is complete. P3E-9D4 remains separate and unapproved: one restricted
-test write key and one exact Stripe Sandbox Checkout Session POST require a new
-explicit authorization immediately before the provider effect. Key expiration,
-Session expiration, test payment, webhook proof, browser checkout, Store Lite
-transition, hosted activation, and deployment remain later distinct gates.
+P3E-9D3 is complete. P3E-9D4 remains separate and unapproved, and is now split
+into D4A external operation, D4B durable core runner, D4C operator/no-contact
+rehearsal without real apply, and D4D one restricted-key-backed Stripe Sandbox
+Checkout Session POST. Key expiration, Session expiration, test payment,
+webhook proof, browser checkout, Store Lite transition, hosted activation, and
+deployment remain later distinct gates. See
+[`PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md`](PAYMENT-ADAPTER-P3E9D4-REAL-CREATION-PLAN.md).

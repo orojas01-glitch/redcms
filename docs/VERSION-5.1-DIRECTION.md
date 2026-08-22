@@ -1687,6 +1687,19 @@ request bootstrap excludes the disabled package.
     database:not-opened`. P3E-9D3 is complete. P3E-9D4 one real Sandbox
     Checkout Session POST remains separately unapproved and gated.
 
+124. Completed documentation-only P3E-9D4 authorization planning. The merged
+    adapter `0.1.7` remains preflight-only, and prior mutation evidence remains
+    bound to earlier package/operation identities. D4A next adds only the
+    separately distributed provider-write operation with offline/loopback
+    acceptance; D4B adds fresh authority, claim, durable start/result, and an
+    in-memory core runner; D4C adds a dry-run-first command and network-disabled
+    no-contact rehearsal without real apply; D4D alone may create one real
+    Session after separate key-creation, storage, apply, and expiration
+    approvals. Current official Stripe key, creation, 30-minute-through-24-hour
+    expiry, idempotency, and separate Session-expiration facts were rechecked.
+    This slice changes no PHP, package, database, key, account, network,
+    runtime, hosted/client, or provider state.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
