@@ -6,8 +6,10 @@ P3E-9B completed synthetic package/core integration. P3E-9C1 records new
 mutation-specific authorization, and P3E-9C2 consumes it into one immutable
 claim. P3E-9C3A records start/result around only a core-owned transport double,
 and P3E-9C3B1 adds its CLI dry-run-first command. P3E-9C3B2 completes the
-disposable apply rehearsal. P3E-9D0 now defines only the pure future POST;
-P3E-9D1 adapter adoption is next. This document does not authorize a Stripe key,
+disposable apply rehearsal. P3E-9D0 defines the pure future POST, external
+adapter P3E-9D1 is complete through corrected `0.1.7`, and core P3E-9D2
+contains only the non-executing preflight result and identity hashes. P3E-9D3
+is next. This document does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
 
@@ -168,10 +170,14 @@ P3E-9 is divided so that every risk increase has a separate review:
 8. **P3E-9D0 — complete: pure real-POST preflight.** Exact endpoint, encoding,
    line items, expiry, idempotency, and request hash are defined with zero
    current effects.
-9. **P3E-9D1 through D3 — next staged implementation.** Adopt the external
-   adapter operation, add core response containment/start identity, then add
-   and rehearse the one-shot command without real provider contact.
-10. **P3E-9D4 — one real Sandbox creation.** Only after earlier D gates merge
+9. **P3E-9D1 — complete.** External adapter `0.1.7` adopts the preflight
+   operation and matches core canonical input hashing without transport.
+10. **P3E-9D2 — complete.** Core invokes only that non-executing operation,
+   contains its exact response, and derives start/result identity hashes while
+   execution and persistence remain false.
+11. **P3E-9D3 — next.** Add and rehearse the CLI-only one-shot command without
+   real provider contact.
+12. **P3E-9D4 — one real Sandbox creation.** Only after earlier D gates merge
    may an operator request separate approval to create the restricted key and
    issue one exact Sandbox POST. Key expiration, Session expiration, test
    payment, webhook proof, and Sandbox deletion remain distinct actions.

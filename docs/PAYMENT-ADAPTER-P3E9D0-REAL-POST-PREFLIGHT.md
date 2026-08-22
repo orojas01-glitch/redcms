@@ -34,7 +34,8 @@ restricted keys should follow least privilege:
 pure assertions and scans out credential, network, request-global, shell,
 secret-resolution, package-registration, and adapter-invocation primitives.
 
-P3E-9D1 must separately adopt a real-post operation in the external adapter.
-P3E-9D2 must add core response containment and a new real-operation start/result
-identity. P3E-9D3 must add and rehearse a one-shot command. P3E-9D4 remains the
-separately approved single real Sandbox POST.
+P3E-9D1 is complete in canonical-hash-compatible external adapter `0.1.7`.
+P3E-9D2 is complete as core response containment plus non-persistent
+real-operation start/result identities. P3E-9D3 must add and rehearse a
+one-shot command. P3E-9D4 remains the separately approved single real Sandbox
+POST.

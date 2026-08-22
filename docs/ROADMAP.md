@@ -252,9 +252,12 @@ contract with exact evidence, backup, hash, and no-effect confirmations; its
 45 pure assertions open no database. P3E-9C3B2 now proves dry run, confirmation
 refusal, one exact apply, replay refusal, zero provider effects, and cleanup
 `database:0 grant:0 staged-project:0 primary:unchanged`. P3E-9C is complete;
-P3E-9D0 now adds only the pure real-POST request contract and 25 source
-assertions. P3E-9D1 external adapter operation adoption is next; credentials,
-network, the real Session, payment, and webhook remain gated. See
+P3E-9D0 adds only the pure real-POST request contract and 25 source assertions.
+External adapter P3E-9D1 is complete through canonical-hash-compatible
+`0.1.7`. Core P3E-9D2 invokes only its non-executing preflight operation,
+contains the exact typed result, and derives non-persistent start/result
+identity hashes in 39 focused assertions. P3E-9D3 command/rehearsal is next;
+credentials, network, the real Session, payment, and webhook remain gated. See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [`PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md`](PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -267,7 +270,9 @@ and
 and
 [`PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-P3E9C3B2-OPERATOR-REHEARSAL.md)
 and
-[`PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md`](PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md).
+[`PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md`](PAYMENT-ADAPTER-P3E9D0-REAL-POST-PREFLIGHT.md)
+and
+[`PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md`](PAYMENT-ADAPTER-P3E9D2-CORE-PREFLIGHT-RUNNER.md).
 
 ### Launch Priority: Per-Page SEO Metadata
 
