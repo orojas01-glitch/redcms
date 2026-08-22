@@ -175,9 +175,10 @@ or fail closed and recover through a reviewed package migration path.
    one-attempt claim. P3E-9C3A transport-double start/result is complete, and
    P3E-9C3B1 CLI command and P3E-9C3B2 disposable apply rehearsal are complete.
    P3E-9D0 pure real-POST preflight, external adapter P3E-9D1 `0.1.7`, and
-   core P3E-9D2 response containment/identity are complete. P3E-9D3
-   no-contact command/rehearsal is next; real provider execution, payment,
-   webhook, and deployment remain gated.
+   core P3E-9D2 response containment/identity are complete. P3E-9D3A adds the
+   CLI-only dry-run-first command contract. P3E-9D3B disposable no-contact
+   rehearsal is next; real provider execution, payment, webhook, and
+   deployment remain gated.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is

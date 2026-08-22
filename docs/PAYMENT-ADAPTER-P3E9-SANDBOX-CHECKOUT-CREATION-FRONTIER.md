@@ -8,8 +8,9 @@ claim. P3E-9C3A records start/result around only a core-owned transport double,
 and P3E-9C3B1 adds its CLI dry-run-first command. P3E-9C3B2 completes the
 disposable apply rehearsal. P3E-9D0 defines the pure future POST, external
 adapter P3E-9D1 is complete through corrected `0.1.7`, and core P3E-9D2
-contains only the non-executing preflight result and identity hashes. P3E-9D3
-is next. This document does not authorize a Stripe key,
+contains only the non-executing preflight result and identity hashes. P3E-9D3A
+now supplies the CLI-only dry-run-first operator command; P3E-9D3B disposable
+no-contact rehearsal is next. This document does not authorize a Stripe key,
 create a Checkout Session, make a payment, expose a browser route, change
 `demo.red-sphere.com`, or enter P4 deployment review.
 
@@ -175,9 +176,13 @@ P3E-9 is divided so that every risk increase has a separate review:
 10. **P3E-9D2 — complete.** Core invokes only that non-executing operation,
    contains its exact response, and derives start/result identity hashes while
    execution and persistence remain false.
-11. **P3E-9D3 — next.** Add and rehearse the CLI-only one-shot command without
-   real provider contact.
-12. **P3E-9D4 — one real Sandbox creation.** Only after earlier D gates merge
+11. **P3E-9D3A — complete.** The CLI-only command defaults to dry run, requires
+   every exact identity and no-effect confirmation for apply, and contains one
+   non-executing D2 invocation without credentials, persistence, or network.
+12. **P3E-9D3B — next.** Rehearse dry run, changed-confirmation refusal, one
+   exact contained apply, and cleanup against the merged external adapter in a
+   disposable cross-repository fixture without provider contact.
+13. **P3E-9D4 — one real Sandbox creation.** Only after earlier D gates merge
    may an operator request separate approval to create the restricted key and
    issue one exact Sandbox POST. Key expiration, Session expiration, test
    payment, webhook proof, and Sandbox deletion remain distinct actions.
