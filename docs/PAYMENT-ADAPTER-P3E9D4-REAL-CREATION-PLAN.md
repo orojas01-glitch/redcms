@@ -89,6 +89,9 @@ caller is added.
 
 ## D4C — Operator Command And No-Contact Rehearsal
 
+Status: in progress. D4C1 CLI-only command contract passes 74 assertions;
+D4C2 network-disabled no-contact rehearsal remains next. No real apply ran.
+
 The CLI-only command defaults to dry run and requires exact database, actor,
 package/version/state, backup, plan/request/order, authorization/claim/start,
 secret-availability, operation/target, one-attempt, and no-payment/no-webhook/

@@ -1205,6 +1205,16 @@ The 29-assertion fixture is final and in-memory with no network primitive. Core
 still exposes no CLI, route, public endpoint, browser bridge, retry, or
 automatic caller; D4C remains a separate review gate.
 
+P3E-9D4C1 adds only the CLI source contract around D4B2. The command defaults
+to dry run, recomputes current D4 authority and identity evidence, requires one
+nonzero backup hash and every printed confirmation, and has exactly one apply
+call site. Three provider effects must be confirmed `yes`; payment, webhook,
+browser, Store Lite mutation, Session expiration, retry, live mode, and client
+deployment must be confirmed `no`. The 74-assertion source test executes no
+command and proves credential, network, shell, secret/runtime primitive, and
+public/browser bridge absence. D4C2 must separately prove no-contact operation
+and cleanup without running real apply.
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

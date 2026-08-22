@@ -269,6 +269,9 @@ acceptance without Stripe contact. D4B is now complete: D4B1 fresh adapter-
 assertions, and D4B2 durable start/result plus one sealed in-memory invocation
 passes 29 assertions. D4C operator command/no-contact rehearsal is next; D4D
 remains one separately authorized real POST.
+P3E-9D4C is internally split for review: D4C1 CLI-only dry-run-first command
+now passes 74 pure assertions; D4C2 network-disabled cross-repository
+no-contact rehearsal remains next and must not run real apply.
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
