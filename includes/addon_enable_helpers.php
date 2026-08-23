@@ -4,15 +4,16 @@
  *
  * The transition is intentionally narrower than the manifest contract. It
  * accepts the preflight's narrow legacy profiles plus the separately proven
- * operational content-package profile. It validates the fixed first-party
- * registrar under the package advisory lock, then persists state plus its
- * bounded audit fact in one transaction.
+ * operational content-package and read-only public-utility profiles. It
+ * validates the fixed first-party registrar under the package advisory lock,
+ * then persists state plus its bounded audit fact in one transaction.
  */
 
 require_once __DIR__ . '/addon_enable_preflight_helpers.php';
 require_once __DIR__ . '/addon_install_helpers.php';
 require_once __DIR__ . '/addon_runtime_helpers.php';
 require_once __DIR__ . '/addon_operational_registrar_helpers.php';
+require_once __DIR__ . '/addon_read_only_utility_registrar_helpers.php';
 
 if (!function_exists('red_addon_enable_transition_plan')) {
     function red_addon_enable_transition_plan(
@@ -58,32 +59,63 @@ if (!function_exists('red_addon_enable_transition_plan')) {
         if (empty($preflight['declarativeGatesReady'])
             || !in_array($activationProfileId, $legacyProfiles, true)
         ) {
-            $operational = red_addon_operational_enablement_preflight(
+            $readOnlyUtility = red_addon_read_only_utility_preflight(
                 $connection,
                 $package,
                 $actorAdminRecordId,
                 $catalog
             );
-            if (empty($operational['valid'])
-                || !red_addon_operational_enablement_preflight_is_valid(
-                    $operational
+            if (!empty($readOnlyUtility['valid'])
+                && red_addon_read_only_utility_preflight_is_valid(
+                    $readOnlyUtility
                 )
-                || empty($operational['operationalEvidenceReady'])
+                && !empty($readOnlyUtility['readOnlyEvidenceReady'])
             ) {
-                $plan['errors'][] = 'supported_activation_profile_required';
-                return $plan;
+                $plan['preflightPlanSha256'] =
+                    $readOnlyUtility['planSha256'];
+                $plan['operationalEvidenceSha256'] =
+                    $readOnlyUtility['planSha256'];
+                $plan['activationProfile'] = [
+                    'id' => 'read_only_public_utility',
+                    'eligible' => true,
+                    'contractSha256' =>
+                        $readOnlyUtility['contractSha256'],
+                    'migrationCount' =>
+                        $readOnlyUtility['migrationCount'],
+                    'routeCount' => $readOnlyUtility['routeCount'],
+                    'publicAssetCount' =>
+                        $readOnlyUtility['publicAssetCount'],
+                ];
+            } else {
+                $operational = red_addon_operational_enablement_preflight(
+                    $connection,
+                    $package,
+                    $actorAdminRecordId,
+                    $catalog
+                );
+                if (empty($operational['valid'])
+                    || !red_addon_operational_enablement_preflight_is_valid(
+                        $operational
+                    )
+                    || empty($operational['operationalEvidenceReady'])
+                ) {
+                    $plan['errors'][] =
+                        'supported_activation_profile_required';
+                    return $plan;
+                }
+                $plan['preflightPlanSha256'] = $operational['planSha256'];
+                $plan['operationalEvidenceSha256'] =
+                    $operational['planSha256'];
+                $plan['activationProfile'] = [
+                    'id' => 'operational_content_package',
+                    'eligible' => true,
+                    'contractSha256' => $operational['contractSha256'],
+                    'migrationCount' => $operational['migrationCount'],
+                    'settingCount' => $operational['settingCount'],
+                    'publicMutationCount' =>
+                        $operational['publicMutationCount'],
+                ];
             }
-            $plan['preflightPlanSha256'] = $operational['planSha256'];
-            $plan['operationalEvidenceSha256'] = $operational['planSha256'];
-            $plan['activationProfile'] = [
-                'id' => 'operational_content_package',
-                'eligible' => true,
-                'contractSha256' => $operational['contractSha256'],
-                'migrationCount' => $operational['migrationCount'],
-                'settingCount' => $operational['settingCount'],
-                'publicMutationCount' =>
-                    $operational['publicMutationCount'],
-            ];
         }
 
         $material = [
@@ -277,6 +309,22 @@ if (!function_exists('red_addon_enable_package')) {
                         $registrarEvidence =
                             red_addon_operational_registrar_evidence(
                                 $connection,
+                                $registry,
+                                $package['manifest']
+                            );
+                        if (empty($registrarEvidence['valid'])) {
+                            $result['runtimeRegistrations'] = [];
+                            $result['status'] =
+                                'registrar_validation_failed';
+                            return $result;
+                        }
+                        $result['registrarEvidenceSha256'] =
+                            $registrarEvidence['registrationSha256'];
+                    } elseif (($plan['activationProfile']['id'] ?? '') ===
+                        'read_only_public_utility'
+                    ) {
+                        $registrarEvidence =
+                            red_addon_read_only_utility_registrar_evidence(
                                 $registry,
                                 $package['manifest']
                             );

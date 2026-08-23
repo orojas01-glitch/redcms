@@ -868,6 +868,16 @@ settings, and live-data gates may clear only for these constrained profiles:
   service, with the same core-owned default component renderer and no automatic
   service invocation.
 
+The separately proven `read_only_public_utility` profile is not one of the
+legacy declarative profiles above. Its independent preflight accepts only a
+`cross-cutting` package with one to four services, one to eight package-owned
+migrations, one to four exact static public `GET` routes, and one to eight
+immutable public CSS/JavaScript assets. It refuses components, permissions,
+administrator tools/forms/actions/assets, settings or secrets, public
+mutations, jobs, adapters, outbound hosts, and placeholder routes. Atomic
+enablement requires its own deterministic evidence and exact service/route
+registrar shape.
+
 The registration-only and component profiles exclude migrations, ordinary
 settings, routes, jobs, public or administrator assets, administrator tools,
 adapters, and outbound hosts. The secret-capable profile admits only its
@@ -1116,9 +1126,47 @@ responses produce only a generic temporary-unavailability response.
 
 This does not dispatch member routes, unsafe methods, placeholder routes,
 administrator routes, HTML, redirects, uploads, files, sessions, server
-variables, database connections, or arbitrary headers. It also does not make a
-route-bearing package eligible for enablement: all current enablement profiles
-continue to reject routes until richer package lifecycle gates are reviewed.
+variables, database connections, or arbitrary headers. `index.php` now
+classifies an exact registrar-owned public `GET` package route before the
+public-mutation front controller and returns the existing fixed JSON response;
+non-GET requests to that read path receive `405` and `Allow: GET`. Route-bearing
+packages remain blocked unless they satisfy a separately implemented profile;
+the narrow `read_only_public_utility` profile is the only current GET-route and
+public-asset exception.
+
+The optional `content.index-sync` service is the standardized repairable
+derived-index bridge. Core invokes only the exact enabled service owner, after
+a successful canonical content transaction commits, with operation `refresh`
+and an immutable request containing exactly `event` and `recordIds`. Events are
+closed to `article.created`, `article.updated`, `article.deleted`,
+`article.restored`, and `article.moved`; record ids are 1-64 unique positive
+integers. Core supplies no content body, actor, session, request globals,
+database handle, or client identifier. Invocation is best effort: failure is
+logged without record ids and cannot roll back the completed CMS transaction.
+Packages must retain an independently authorized full rebuild as the recovery
+path for missed notifications, hierarchy-wide changes, scheduled eligibility
+transitions, and index drift.
+
+Site Search 0.1.3 implements that recovery as a package-owned CLI operation,
+not a core scheduler or manifest job. Manual apply remains exact-plan
+confirmed. Scheduled apply requires an existing Owner with `addons.enable`,
+exact client database/package/enabled-state confirmations, and one
+non-blocking advisory lock derived from the client database. It refuses a
+simultaneous manual `--apply` or plan-hash argument, shares the incremental
+hierarchy-aware eligibility query, atomically replaces only derived
+`core-article` rows plus optional typed-provider rows, and releases the lock
+when its client-local connection closes.
+
+Store Lite 0.1.36 owns `content.search-source.store-lite` operation
+`documents.list`. Requests contain exactly a nonnegative integer cursor and a
+limit from one through eight. Responses contain only bounded public Product
+placement documents, a strictly advancing cursor, and a continuation flag.
+Site Search never reads Store Lite tables and caps a rebuild at 1,000 eligible
+placements. Provider failure, invalid ownership, malformed results,
+non-advancing cursors, or an exceeded cap fails before index commit. Price,
+currency, stock, availability value, SKU, variant commercial facts, carts,
+orders, payments, customers, administrators, settings, secrets, and database
+identities are outside the contract.
 
 P3A-1 adds one declaration-only exception to the general unsafe-method/CSRF
 rule: a route may use `authentication: server-signature` only when it is one

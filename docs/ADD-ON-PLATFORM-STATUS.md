@@ -95,6 +95,31 @@ The hosted closeout evidence and explicit no-order-submission limitation are
 recorded in
 [`STORE-LITE-DEMO-CLOSEOUT-20260815.md`](STORE-LITE-DEMO-CLOSEOUT-20260815.md).
 
+## Optional Site Search path
+
+Site Search `0.1.3` is now built and exercised locally as a separately
+distributed cross-cutting package. The RED-CMS core contains only the generic
+`read_only_public_utility` activation and early exact-GET routing prerequisites.
+The package owns its InnoDB/FULLTEXT index, query service/route, rebuild command,
+responsive AJAX assets, and the `content.index-sync` service. Canonical Article
+create, update, delete, restore, and move endpoints now issue bounded
+best-effort post-commit refreshes; disposable lifecycle proof covers every one
+of those index transitions. Install, enable, rebuild, JSON, desktop/mobile, and
+incremental synchronization checks pass locally. It is not published,
+deployed, or enabled for any retained client. The package now shares one
+hierarchy-aware eligibility query between incremental and full rebuilds and
+adds an Owner-gated, exact-confirmation, advisory-locked scheduled CLI repair
+mode. Disposable proof covers inactive/active hierarchy, future start,
+expiration, concurrent-run refusal, and a 50,000-document atomic rebuild with
+20 real searches at 125.19 ms local p95 and 128.62 ms maximum. A Store Lite
+0.1.36 typed source now supplies bounded public Product placement documents
+without exposing commercial, cart, order, payment, customer, administrator,
+setting, secret, or database facts; the two-package lifecycle passes 16
+assertions. Private GitHub publication, release-archive browser/HTTP QA, and a
+first client release remain separate gates. The package has
+been extracted to an independent unpublished local Git repository. See
+[`SITE-SEARCH-DIRECTION.md`](SITE-SEARCH-DIRECTION.md).
+
 ## Optional payment-adapter path
 
 ```mermaid

@@ -6,6 +6,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/admin_content_revision_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/addon_content_index_sync_helpers.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store');
@@ -49,6 +50,13 @@ $result = red_admin_content_revision_restore(
     $revisionId,
     $expectedCurrentHash
 );
+if (!empty($result['ok'])) {
+    red_addon_content_index_sync_notify(
+        $db->connection,
+        'article.restored',
+        [$contentRecordId]
+    );
+}
 if (empty($result['ok'])) {
     http_response_code(($result['reason'] ?? '') === 'conflict' ? 409 : 422);
 }
