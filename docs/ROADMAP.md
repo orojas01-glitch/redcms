@@ -318,9 +318,18 @@ Wompi adapter/route identity while preserving Stripe. The 18-assertion fast
 suite and exact 16-assertion disposable rehearsal prove Wompi 0.1.0 guarded
 installation as `installed_disabled`, its two empty InnoDB evidence tables,
 database preflight, registrar-only execution, repeat-install refusal, and
-cleanup `database:0 grant:0 staged-project:0 primary:unchanged`. C3C is next
-and owns atomic enable/disable plus two-client isolation without provider
-contact.
+cleanup `database:0 grant:0 staged-project:0 primary:unchanged`. At C3B close,
+C3C remained the atomic enable/disable plus two-client isolation gate without
+provider contact.
+
+C3C1 is now complete. Exact Wompi ingress uses only content type/length because
+its checksum is body-carried; Stripe retains `Stripe-Signature`. The fast
+ingress suite passes 31 assertions. In one current-schema disposable database,
+existing Stripe atomic enablement passes 24 assertions and exact Wompi passes
+17 for four settings, three opaque availability declarations, missing/stale
+refusal, injected rollback, one enable/audit, empty evidence tables, and repeat
+refusal. Exact cleanup passes with the configured primary unchanged. C3C2 is
+next and owns two-client enable/disable isolation without provider contact.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -330,7 +339,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

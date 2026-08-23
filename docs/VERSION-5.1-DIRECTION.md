@@ -1859,9 +1859,27 @@ request bootstrap excludes the disabled package.
     `database:0 grant:0 staged-project:0 primary:unchanged`. No Wompi
     enablement, credential value, provider contact, transaction, payment,
     browser, Store Lite order mutation, hosted-demo change, client data, or
-    deployment effect occurred. C3C is next and owns atomic enablement plus
-    two-client isolation. See
+    deployment effect occurred. At C3B close, C3C remained the atomic
+    enablement plus two-client isolation gate. See
     [`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
+
+135. Completed Colombia C3C1 by adding an exact Wompi body-signed ingress
+    profile and atomic enablement while preserving Stripe. Stripe still
+    requires content type/length plus `Stripe-Signature`; Wompi requires only
+    content type/length because the checksum and signed properties remain in
+    opaque JSON body bytes for later verification. The dependency-free ingress
+    suite passes 31 assertions. Enablement dynamically signs the exact profile,
+    keeps Stripe's two-secret rule, and requires three available opaque Wompi
+    references. The current-schema disposable rehearsal applies all 46 core
+    migrations, passes the existing 24-assertion Stripe atomic-enable test,
+    then passes 17 exact Wompi assertions for four settings, redacted plan
+    evidence, missing/stale refusal, injected transactional rollback, one
+    enable/audit, empty evidence tables, and repeat refusal. Cleanup proves
+    `database:0 grant:0 staged-project:0 primary:unchanged`. No real key or
+    secret, provider contact, transaction, payment, event processing, runtime
+    publication, browser, hosted-demo change, client data, or deployment
+    occurs. C3C2 is next and owns two-client enable/disable isolation. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

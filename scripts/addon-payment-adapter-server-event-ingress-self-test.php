@@ -44,6 +44,20 @@ function red_addon_payment_adapter_ingress_test_headers(
     ];
 }
 
+function red_addon_payment_adapter_ingress_test_wompi_headers($body)
+{
+    return [
+        'complete' => true,
+        'headers' => [[
+            'name' => 'Content-Type',
+            'value' => 'application/json',
+        ], [
+            'name' => 'Content-Length',
+            'value' => (string) strlen($body),
+        ]],
+    ];
+}
+
 try {
     $migration =
         "CREATE TABLE RED_Addon_Stripe_Registrar_Fixture_Attempts (\n" .
@@ -336,6 +350,106 @@ try {
         !file_exists($adapterHandlerMarker)
             && !file_exists($routeHandlerMarker),
         'all ingress operations leave adapter and route handlers uninvoked'
+    );
+
+    red_addon_payment_adapter_registrar_test_write_wompi_package(
+        $wompiPackageDirectory,
+        $wompiAdapterMarker,
+        $wompiRouteMarker
+    );
+    $wompiPackage = red_addon_payment_adapter_registrar_test_package(
+        $wompiPackageId,
+        $fixtureProject
+    );
+    $wompiDatabasePlan =
+        red_addon_payment_adapter_registrar_test_database_plan(
+            $wompiPackage
+        );
+    $wompiRegistrarPlan = red_addon_payment_adapter_validate_registrar(
+        $wompiPackage,
+        $wompiDatabasePlan
+    );
+    $wompiPlan = red_addon_payment_adapter_server_event_ingress_plan(
+        $wompiPackage,
+        $wompiRegistrarPlan
+    );
+    red_addon_payment_adapter_ingress_test_assert(
+        red_addon_payment_adapter_server_event_ingress_plan_is_valid(
+            $wompiPlan
+        )
+            && $wompiPlan['profileId']
+                === 'store_lite_wompi_adapter_v1'
+            && $wompiPlan['requiredHeaders'] === [
+                'Content-Type',
+                'Content-Length',
+            ],
+        'Wompi ingress binds exact body-signed profile without Stripe header'
+    );
+    $wompiBody = '{"event":"transaction.updated","signature":{"checksum":"' .
+        str_repeat('b', 64) . '"}}';
+    $wompiHeaders =
+        red_addon_payment_adapter_ingress_test_wompi_headers($wompiBody);
+    $wompiCapture = red_addon_payment_adapter_server_event_capture(
+        $wompiPackage,
+        $wompiRegistrarPlan,
+        'POST',
+        $wompiPlan['serverEventPath'],
+        $wompiHeaders,
+        $wompiBody,
+        1720000001
+    );
+    red_addon_payment_adapter_ingress_test_assert(
+        $wompiCapture['available']
+            && $wompiCapture['packageId'] === $wompiPackageId
+            && $wompiCapture['routeId']
+                === 'redcms.store-lite-wompi/provider-events'
+            && hash_equals(
+                $wompiCapture['bodySha256'],
+                hash('sha256', $wompiBody)
+            ),
+        'Wompi body-signed transport produces value-free capture evidence'
+    );
+    $wompiVerificationBody = null;
+    $wompiVerificationHeader = null;
+    $wompiMaterial = $wompiCapture['request']->verificationMaterial(
+        $wompiVerificationBody,
+        $wompiVerificationHeader
+    );
+    red_addon_payment_adapter_ingress_test_assert(
+        $wompiMaterial['valid']
+            && !$wompiMaterial['signaturePresent']
+            && $wompiVerificationBody === $wompiBody
+            && $wompiVerificationHeader === '',
+        'Wompi verification receives body bytes and no invented header secret'
+    );
+    $wompiExtraHeader = $wompiHeaders;
+    $wompiExtraHeader['headers'][] = [
+        'name' => 'Stripe-Signature',
+        'value' => 'not-used-by-wompi',
+    ];
+    $wompiHeaderRefused = red_addon_payment_adapter_server_event_capture(
+        $wompiPackage,
+        $wompiRegistrarPlan,
+        'POST',
+        $wompiPlan['serverEventPath'],
+        $wompiExtraHeader,
+        $wompiBody,
+        1720000001
+    );
+    red_addon_payment_adapter_ingress_test_assert(
+        !$wompiHeaderRefused['available']
+            && $wompiHeaderRefused['reason'] === 'headers_invalid',
+        'Wompi refuses an extra Stripe signature header'
+    );
+    $wrongWompiPlan = $wompiPlan;
+    $wrongWompiPlan['requiredHeaders'][] = 'Stripe-Signature';
+    red_addon_payment_adapter_ingress_test_assert(
+        !red_addon_payment_adapter_server_event_ingress_plan_is_valid(
+            $wrongWompiPlan
+        )
+            && !file_exists($wompiAdapterMarker)
+            && !file_exists($wompiRouteMarker),
+        'tampered Wompi ingress fails while both handlers remain uninvoked'
     );
     $helperSource = (string) file_get_contents(
         $projectRoot .

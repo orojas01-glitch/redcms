@@ -1298,8 +1298,11 @@ C3B now proves guarded installation and registration only in a fresh disposable
 database. Exact Wompi 0.1.0 remains `installed_disabled`; its two InnoDB tables
 are empty, setting rows remain absent, registered handlers are never invoked or
 published, and cleanup proves the database and grant absent with the configured
-primary unchanged. C3C may add only atomic enablement and two-client isolation
-proof. C4 Sandbox contact and C5 demo deployment require separate explicit
+primary unchanged. C3C1 now adds exact Wompi body-signed capture plus atomic
+enablement while keeping raw bytes opaque, secret values unresolved, handlers
+uninvoked, and runtime routes unpublished. Injected failure rolls lifecycle
+state and audit back together. C3C2 may add only two-client enable/disable and
+isolation proof. C4 Sandbox contact and C5 demo deployment require separate explicit
 approvals. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -1309,7 +1312,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

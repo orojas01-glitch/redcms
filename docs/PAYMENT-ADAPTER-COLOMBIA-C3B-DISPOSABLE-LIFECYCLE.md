@@ -1,6 +1,6 @@
 # Colombia C3B Disposable Wompi Lifecycle and Registrar Proof
 
-Status: complete locally. C3B proves exact Wompi installation as
+Status: complete on `main` through PR #163 at `ef40abf`. C3B proves exact Wompi installation as
 `installed_disabled`, its two reviewed migrations, database evidence, and
 registration-only package execution in one fresh disposable database. It does
 not enable Wompi, publish ingress/runtime handlers, configure settings or
@@ -102,12 +102,9 @@ public route publication, runtime adapter availability, Store Lite data,
 hosted-demo change, client data, or deployment. No external package is copied
 into the repository or starter distribution.
 
-## C3C boundary
+## C3C closure in two batches
 
-C3C is the next offline/disposable gate. It may extend atomic payment-adapter
-enablement and server-event ingress planning only as needed to enable the exact
-Wompi package independently in two disposable client databases. It must prove
-separate installation state, setting/secret references, tables, lifecycle
-locks, adapter/route registries, rollback, disablement, and cleanup. Real
-credential values, provider contact, payment, browser flow, hosted-demo change,
-and deployment remain later separately approved gates.
+C3C1 completes exact body-signed ingress plus one atomic enablement in a fresh
+disposable database. C3C2 still owns independent enable/disable, rollback, and
+isolation across two disposable client databases. See
+[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
