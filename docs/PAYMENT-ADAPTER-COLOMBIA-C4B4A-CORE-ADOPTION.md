@@ -87,13 +87,13 @@ Both fresh clients independently installed/configured/enabled exact package
 differed. One-client rollback/disablement did not change the peer. All
 disposable schemas, grants, and stages were removed.
 
-## C4B4B boundary
+## C4B4B follow-up
 
-C4B4B is next and remains credential-free/no-contact. It must atomically
-persist and audit fresh authorization and exactly one claim, revalidate current
-Owner/order/package/client authority under locks, refuse replay, and leave
-execution unavailable. It must not add a provider request, credential
-resolution, payment verification, or order mutation. Later gates separately
-own a sealed transport-double runner, dry-run-first CLI, and disposable no-
-contact rehearsal. C4C remains the first separately owner-authorized account/
-credential/read-only provider-contact gate.
+C4B4B later completed in core using the existing immutable administrator-
+action ledger. It atomically records the exact authorization and one claim plus
+two audits, refuses replay, and leaves execution unavailable. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
+
+C4B4C separately owns the sealed transport-double runner. Later gates own the
+dry-run-first CLI and disposable no-contact rehearsal. C4C remains the first
+separately owner-authorized account/credential/read-only provider-contact gate.

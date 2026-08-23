@@ -1379,6 +1379,19 @@ only exact package pins/tests and passes disposable single/two-client cleanup.
 C4B4B remains no-contact durable claim/replay protection. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
 
+C4B4B uses the existing immutable administrator-action ledger, not a new
+migration. Core validates exact C4B4A self-fingerprinted authorization/claim
+evidence and revalidates the current client database, Owner, `addons.enable`,
+exact `store.orders.manage` grant/declaration, enabled Wompi/Store Lite
+installations, and four setting-reference availability facts. Under lifecycle,
+package, actor, capability, installation, setting, and action-row locks, one
+transaction records authorization plus claim and two value-free audits. Any
+replay or partial failure refuses or rolls back. Successful durability activates
+replay protection but keeps execution, secret resolution, network/provider,
+payment/order, and retry effects false. C4B4C remains the no-contact sealed-
+double runner. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
