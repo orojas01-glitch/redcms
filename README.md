@@ -246,8 +246,13 @@ contract that explicitly leaves claim persistence, replay protection, and
 execution false. Exact core adoption passes 48 profile, 16 disposable install,
 existing Stripe 24 plus Wompi 17 atomic-enable, and 21 two-client assertions
 with exact cleanup and the configured primary unchanged. Core runtime helpers
-remain unchanged. C4B4B is next for durable claim/replay protection, still
-without execution, transport, or provider contact. See
+remain unchanged. C4B4B is now complete: core atomically records exact
+authorization and one claim plus two audits in the existing immutable action
+ledger, refuses replay, and rolls back all four writes on failure. Its 24-
+assertion disposable rehearsal cleans the database/grant/stage and preserves
+the configured primary. C4B4C is next for a core-owned sealed transport-double
+runner, still without a package handler, real transport, or provider contact.
+See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -274,7 +279,9 @@ and
 and
 [Colombia C4B3 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md)
 and
-[Colombia C4B4A Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+[Colombia C4B4A Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md)
+and
+[Colombia C4B4B Durable Claim](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

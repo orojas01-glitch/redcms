@@ -2024,6 +2024,25 @@ request bootstrap excludes the disabled package.
     C4C remains separately owner-gated before account/credential/read-only
     provider contact. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+142. Completed Colombia C4B4B in core without a new migration. The helper
+    validates exact self-fingerprinted C4B4A authorization/claim evidence and
+    revalidates canonical client database/scope/actor hashes, current Owner,
+    `addons.enable`, exact `store.orders.manage` grant/declaration, enabled
+    Wompi `0.1.4` and Store Lite `0.1.35`, and four setting-reference
+    availability facts. Planning writes nothing. Apply locks lifecycle,
+    package, actor, capabilities, installations, settings, and both nonce-
+    derived action identities, then atomically inserts one authorization row,
+    one claim row, and two value-free audits in the existing immutable action
+    ledger. Replay, stale state, authority revocation, package disablement,
+    wrong client scope, tampered evidence, nested transaction, and audit failure
+    fail closed; injected claim-audit failure rolls back every new row and
+    permits one clean recovery. The 24-assertion disposable rehearsal applies
+    all 46 core migrations and cleans `database:0 grant:0 staged-project:0
+    primary:unchanged`. Execution, package invocation, secret resolution,
+    network/provider, payment/order, and retry effects remain false. C4B4C is
+    next for a core-owned sealed transport-double start/result runner; C4C
+    remains separately owner-gated. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

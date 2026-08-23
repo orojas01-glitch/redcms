@@ -10,8 +10,8 @@ the C3B exact disposable install/database/registrar proof, the C3C1 exact
 body-signed ingress plus atomic-enable rehearsal, and the C3C2 two-client
 isolation proof, plus the documentation-only C4A official Wompi readiness
 audit, the C4B1 merchant-contract preflight, the C4B2 presentation/consent/
-transient-wire package, the C4B3 response-containment package, and the C4B4A
-pure no-contact attempt contract plus exact core adoption.
+transient-wire package, the C4B3 response-containment package, the C4B4A pure
+no-contact attempt contract, and the C4B4B durable claim/replay gate.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, orange is
@@ -86,11 +86,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | Colombia C4B4A publishes Wompi package 0.1.4 at `5f372b3`: pure sealed-double-only authorization, first-claim preparation, and observed-state projections. It explicitly keeps durable claim persistence, replay protection, execution, provider contact, and order mutation false. Exact core adoption and disposable proofs pass with no runtime change. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C4B4B is next: atomic durable authorization/claim plus replay protection, still credential-free/no-contact and without execution. |
+| What just finished? | Colombia C4B4B atomically stores exact Wompi 0.1.4 authorization plus one claim and two audits in the existing immutable core ledger. Replay, authority/package/client drift, and partial audit failure are refused or rolled back; execution and provider/order effects remain false. Its 24-assertion disposable rehearsal passes exact cleanup. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C4B4C is next: a core-owned sealed transport-double start/result runner, still credential-free/no-contact and without package handler or real transport. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. C4B4B durable claim/replay protection plus later transport-double, CLI, and disposable no-contact gates remain before C4C owner account/read-only retrieval. C4D one approved Sandbox transaction, C4E declined/event/rotation, and C5 deployment retain separate approval. |
+| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. C4B4C transport-double runner plus later CLI and disposable network-disabled rehearsal remain before C4C owner account/read-only retrieval. C4D one approved Sandbox transaction, C4E declined/event/rotation, and C5 deployment retain separate approval. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -167,22 +167,23 @@ flowchart LR
     CO4B2["COMPLETE<br/>Colombia C4B2. Two-contract consent<br/>+ transient wire/signature"]
     CO4B3["COMPLETE<br/>Colombia C4B3. Create/lookup<br/>response containment"]
     CO4B4A["COMPLETE<br/>Colombia C4B4A. Pure no-contact<br/>authority/claim/state"]
-    CO4B4B["ACTIVE<br/>Colombia C4B4B. Durable claim<br/>+ replay protection"]
-    CO4B4C["PENDING<br/>Later C4B. Double runner<br/>+ CLI, rehearsal"]
+    CO4B4B["COMPLETE<br/>Colombia C4B4B. Durable claim<br/>+ replay protection"]
+    CO4B4C["ACTIVE<br/>Colombia C4B4C. Sealed double<br/>start/result runner"]
+    CO4B4D["PENDING<br/>Later C4B. CLI<br/>+ network-disabled rehearsal"]
     CO4C["OWNER-GATED<br/>Colombia C4C-E. Account/read-only GET<br/>then separately approved Sandbox effects"]
     CO5["GATED<br/>Colombia C5. Demo<br/>deployment review"]
 
     P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
-    P0 --> CO0 --> CO1 --> CO2 --> CO3A --> CO3B --> CO3C1 --> CO3C2 --> CO4A --> CO4B1 --> CO4B2 --> CO4B3 --> CO4B4A --> CO4B4B --> CO4B4C --> CO4C --> CO5
+    P0 --> CO0 --> CO1 --> CO2 --> CO3A --> CO3B --> CO3C1 --> CO3C2 --> CO4A --> CO4B1 --> CO4B2 --> CO4B3 --> CO4B4A --> CO4B4B --> CO4B4C --> CO4B4D --> CO4C --> CO5
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef deferred fill:#fff7e6,stroke:#a36b00,color:#5e4100;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B,CO3C1,CO3C2,CO4A,CO4B1,CO4B2,CO4B3,CO4B4A complete;
-    class CO4B4B active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B,CO3C1,CO3C2,CO4A,CO4B1,CO4B2,CO4B3,CO4B4A,CO4B4B complete;
+    class CO4B4C active;
     class P3E9D4D,CO4C deferred;
-    class P4,CO4B4C,CO5 gated;
+    class P4,CO4B4D,CO5 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -254,9 +255,10 @@ C4B3 publishes package `0.1.3` at `277760e` with strict bounded create/lookup
 response containment, then passes the same exact adoption proofs. C4B4A
 publishes package `0.1.4` at `5f372b3` with pure sealed-double-only authority,
 claim preparation, and observed state, then passes exact adoption proofs.
-C4B4B is the active credential-free/no-contact durable claim/replay gate. C4C
-through C4E remain owner-gated before account access, credential entry, or
-provider contact.
+C4B4B adds atomic durable authorization/claim plus replay protection with a
+24-assertion disposable proof. C4B4C is the active credential-free/no-contact
+sealed transport-double runner gate. C4C through C4E remain owner-gated before
+account access, credential entry, or provider contact.
 Every write credential, real
 network request, Checkout Session or Wompi transaction, payment, webhook,
 browser flow, hosted-demo change, and client deployment remains stopped. See
@@ -285,6 +287,8 @@ The completed C4B3 package/core adoption proof is in
 [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 The completed C4B4A package/core adoption proof is in
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+The completed C4B4B durable claim proof is in
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 
 ## Status rule
 

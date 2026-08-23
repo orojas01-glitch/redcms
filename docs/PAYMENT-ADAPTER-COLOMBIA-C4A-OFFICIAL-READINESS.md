@@ -216,12 +216,19 @@ protection, execution, and every provider/order effect false. Exact core
 adoption and disposable proofs pass. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
 
-### C4B4B — next: durable claim and replay protection
+### C4B4B — complete: durable claim and replay protection
 
-C4B4B must atomically persist/audit fresh authorization and one claim while
-revalidating current client, Owner, order, and package authority. It must still
-leave execution unavailable. Later C4B gates own dry-run-first CLI confirmation,
-redacted evidence, transport doubles, and disposable no-contact rehearsals.
+C4B4B atomically persists and audits fresh authorization and one claim while
+revalidating current client, Owner, order, package, and setting-reference
+authority. Replay and partial failure fail closed, and execution remains
+unavailable. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
+
+### C4B4C — next: sealed transport-double runner
+
+C4B4C may add only a core-owned in-memory double with immutable start/result
+rows around the exact durable claim. Later C4B gates own dry-run-first CLI
+confirmation and disposable network-disabled no-contact rehearsal.
 
 ### C4C — owner-operated account and read-only provider proof
 

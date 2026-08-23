@@ -304,6 +304,15 @@ C4B4B is next and remains credential-free/no-contact for atomic durable claim
 and replay protection. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
 
+C4B4B is now complete in core. It revalidates exact C4B4A evidence plus
+current client/Owner/order/package/settings state and atomically records one
+authorization, one claim, and two audits in the existing ledger. Replay and
+partial failure fail closed; its 24-assertion disposable rehearsal passes exact
+cleanup. Execution and all provider/order effects remain false. C4B4C is next
+for a core-owned sealed transport-double start/result runner, still credential-
+free/no-contact. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
+
 ## Explicit Exclusions
 
 Gate P0 does not select a provider, add a core payment abstraction, create

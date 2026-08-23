@@ -379,6 +379,14 @@ Stripe 24 plus Wompi 17 atomic-enable, and 21 two-client assertions with exact
 cleanup and the configured primary unchanged. C4B4B is next for atomic durable
 claim and replay protection, still credential-free/no-contact and without
 execution.
+C4B4B is now complete. Core revalidates exact C4B4A evidence plus current
+client, Owner, `addons.enable`, `store.orders.manage`, Wompi/Store Lite, and
+settings state, then atomically records one authorization, one claim, and two
+audits in the existing immutable ledger. Replay, state drift, and partial audit
+failure fail closed. Its 24-assertion disposable rehearsal passes cleanup
+`database:0 grant:0 staged-project:0 primary:unchanged`; execution, secret,
+network/provider, payment/order, and retry effects remain false. C4B4C is next
+for a core-owned sealed transport-double start/result runner.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -402,7 +410,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
