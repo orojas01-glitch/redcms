@@ -248,9 +248,9 @@ official-source audit of environments, keys, acceptance contracts, Nequi
 requests, asynchronous finality, and events. It identifies missing merchant-
 token retrieval, two-contract consent, transient signing/wire construction,
 transport, lookup containment, operational-event surfaces, and one external
-package regression that still expects the superseded C2 core refusal. C4B is
-next and remains credential-free/no-contact; C4C through C4E retain separate
-owner approval for account access and every provider effect. See
+package regression that at C4A close still expected the superseded C2 core
+refusal. C4B remained credential-free/no-contact; C4C through C4E retained
+separate owner approval for account access and every provider effect. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
@@ -266,6 +266,16 @@ and
 [`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+
+C4B1 is now complete in external package `0.1.1` at `7e4f8cb` plus exact core
+adoption. The package fixes a hash-only merchant-contract GET plan and returns
+only two Wompi-controlled HTTPS links plus token/evidence hashes from a strict
+synthetic projection. Core runtime helpers remain unchanged; exact profile and
+disposable single/two-client proofs pass with cleanup and the configured
+primary unchanged. C4B2 is next and remains credential-free/no-contact for
+explicit two-contract presentation/consent evidence plus a transient server-
+side integrity/wire builder. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
 ## Explicit Exclusions
 

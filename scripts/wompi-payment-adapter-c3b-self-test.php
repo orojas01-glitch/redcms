@@ -218,11 +218,11 @@ try {
             && !empty($storePackage['valid'])
             && !empty($wompiPackage['valid'])
             && ($storePackage['manifest']['version'] ?? null) === '0.1.35'
-            && ($wompiPackage['manifest']['version'] ?? null) === '0.1.0'
+            && ($wompiPackage['manifest']['version'] ?? null) === '0.1.1'
             && count(
                 $wompiPackage['manifest']['integrity']['files'] ?? []
-            ) === 9,
-        'exact Store Lite 0.1.35 and nine-file Wompi 0.1.0 discover together'
+            ) === 11,
+        'exact Store Lite 0.1.35 and eleven-file Wompi 0.1.1 discover together'
     );
     red_wompi_c3b_assert(
         !class_exists(
@@ -282,7 +282,7 @@ try {
     );
     red_wompi_c3b_assert(
         $installed['status'] === 'installed_disabled'
-            && $installed['version'] === '0.1.0'
+            && $installed['version'] === '0.1.1'
             && $installed['appliedMigrations'] === [
                 '2026-08-23-wompi-payment-attempts',
                 '2026-08-23-wompi-event-receipts',

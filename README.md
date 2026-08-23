@@ -218,10 +218,19 @@ configured primary unchanged. Colombia C3 is complete. C4 Wompi Sandbox is
 separately owner-gated before credentials or provider contact. C4A now records
 the current official Wompi Sandbox contract and the missing engineering
 surfaces without making an account, credential, provider API, transaction, or
-deployment change. C4B is next and remains credential-free/no-contact; it must
-close acceptance retrieval, two-contract consent, transient request/signature,
-response containment, and one-attempt execution contracts before any owner-
-operated Wompi access. See
+deployment change. C4B remains credential-free/no-contact before any owner-
+operated Wompi access. Package C4B1 is now complete in the separate repository
+at `7e4f8cb`: version `0.1.1`, 11 integrity files, 34 retained offline
+assertions, 64 package/current-
+core assertions, and 29 merchant-contract assertions. Its pure request planner
+accepts only a public-key hash/availability fact; its response gate returns
+only two Wompi-controlled HTTPS contract links plus token/evidence hashes.
+Exact core adoption passes 43 profile, 16 disposable install, existing Stripe
+24 plus Wompi 17 atomic-enable, and 21 two-client assertions with exact cleanup
+and the configured primary unchanged. Core runtime helpers remain unchanged.
+C4B2 is next: explicit two-contract presentation/consent evidence plus the
+transient server-side integrity/wire builder, still without transport or
+provider contact. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -240,7 +249,9 @@ and
 and
 [Colombia C3C2 Two-Client Isolation](docs/PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
 and
-[Colombia C4A Official Readiness](docs/PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+[Colombia C4A Official Readiness](docs/PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md)
+and
+[Colombia C4B1 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

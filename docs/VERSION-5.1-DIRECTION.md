@@ -1902,8 +1902,7 @@ request bootstrap excludes the disabled package.
     [`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
 
 137. Completed Colombia C4A as a public-docs-only official Wompi readiness
-    audit
-    dated 2026-08-23. Current Wompi-owned sources establish disjoint Sandbox
+    audit dated 2026-08-23. Current Wompi-owned sources establish disjoint
     and Production hosts/value prefixes, owner-operated merchant identity and
     terms, public-key retrieval of two acceptance tokens plus two current
     contract links, explicit customer acceptance of both contracts, private-
@@ -1918,14 +1917,40 @@ request bootstrap excludes the disabled package.
     transaction transport, contained lookup parser, or operational event
     runner. Focused current-core checks and 34 external offline assertions pass;
     the full external package suite stops at its superseded C2 expectation that
-    core rejects Wompi. C4B must replace that stale package-owned assertion and
-    is therefore the next credential-free/no-contact engineering gate. C4C
+    core rejects Wompi. At C4A close, C4B still needed to replace that package-
+    owned assertion and remained the next credential-free/no-contact
+    engineering gate. C4C
     account/read-only merchant retrieval, C4D one approved Sandbox
     transaction, C4E declined/event/rotation, and C5 deployment retain separate
     owner approvals. Public documentation retrieval is the only external read;
     no account, credential, provider API request, transaction, personal data,
     database, package, demo, or deployment effect occurs. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+
+138. Completed Colombia C4B1 across the separate Wompi package and an exact
+    non-runtime core adoption. External package `0.1.1` at
+    `7e4f8cb337d746b5a483932108e5dbcd109d7d86` adds a pure hash-only Sandbox
+    merchant-contract GET planner and a strict synthetic response gate for
+    `presigned_acceptance` plus `presigned_personal_data_auth`. It returns only
+    two distinct Wompi-controlled HTTPS links plus token/contract/response/
+    projection hashes; malformed/reused tokens, wrong types, extra/missing
+    fields, reused links, foreign/HTTP/credential/query/fragment URLs, changed
+    plans, and changed projections fail closed. Raw tokens, final wire path,
+    presentation, consent, persistence, transport, provider contact, payment,
+    browser, order mutation, and retry remain false. The external suite passes
+    34 existing offline, 64 package/current-core, and 29 C4B1 assertions with
+    11 integrity files. Core runtime helpers are unchanged; exact-package pins
+    now recognize `0.1.1`/`7e4f8cb`. Focused checks pass 43 profile, 18
+    registrar, 31 ingress, and 22 clean-starter assertions. Disposable proofs
+    pass 16 install/registrar, existing Stripe 24 plus Wompi 17 atomic-enable,
+    and 21 two-client assertions with exact database/grant/stage cleanup and
+    the configured primary unchanged. No account/dashboard, credential/
+    personal value, provider API request, transaction, retained database/client
+    migration, starter package copy, demo, or deployment effect occurs. C4B2
+    is next and remains credential-free/no-contact for explicit two-contract
+    presentation/consent evidence plus a transient server-side integrity/wire
+    builder. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

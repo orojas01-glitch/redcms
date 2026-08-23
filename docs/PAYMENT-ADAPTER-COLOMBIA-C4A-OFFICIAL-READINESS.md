@@ -141,9 +141,9 @@ window remains compatible but must be rechecked at the event-execution gate.
 | Customer email and Nequi phone | Planner accepts hashes only | Ready offline, no wire values |
 | Dynamic event properties and body checksum | Pure verifier supports bounded dynamic properties and event secret | Ready offline |
 | Pending initiation plus final lookup/event agreement | Response and event gates require exact identity/amount/currency/method agreement | Ready offline |
-| Current-core external package regression | 34 offline assertions pass; the full package suite stops at its historical expectation that core rejects Wompi, which C3A intentionally superseded | **C4B blocker** |
-| `GET /merchants/{public_key}` | No provider-contact operation or response containment exists | **C4B blocker** |
-| Present two current contracts and record explicit acceptance | No Store Lite public acceptance UI or submission contract exists | **C4B blocker** |
+| Current-core external package regression | Package `0.1.1` replaces the stale assertion; exact core adoption and disposable proofs pass | **C4B1 complete** |
+| `GET /merchants/{public_key}` | Pure hash-only request planner and contained synthetic response gate exist; no final path or transport exists | **C4B1 complete offline** |
+| Present two current contracts and record explicit acceptance | Response gate returns two ordered Wompi-controlled HTTPS links, but no public presentation or consent contract exists | **C4B2 blocker** |
 | Transient raw email/phone/tokens | No bounded wire-request builder exists | **C4B blocker** |
 | Private-key Bearer and integrity signature | Values remain unresolved; no transient signer exists | **C4B blocker** |
 | `POST /transactions` | Adapter supports only `contract.probe`; all provider operations refuse | **C4B blocker** |
@@ -151,10 +151,8 @@ window remains compatible but must be rechecked at the event-execution gate.
 | Operational webhook response | Route handler deliberately refuses; no event persistence/response runner exists | Later C4 event blocker |
 
 The audit therefore authorizes no credential entry and no provider contact.
-The external package failure is a stale test expectation, not evidence of a
-runtime or provider failure. C4B must update that package-owned regression and
-restore a fully green current-core/package test before adding transport
-contracts.
+Package C4B1 has since replaced the stale expectation and restored a fully
+green current-core/package test. It adds no transport.
 
 ## Credential custody mapping
 
@@ -179,24 +177,28 @@ must never be entered during a Sandbox gate.
 This document. Public documentation read only; no account or provider API
 effect.
 
-### C4B — next: no-contact transport preflight
+### C4B1 — complete: merchant-contract preflight
 
-C4B may add only separately reviewable, dependency-free contracts for:
+Package `0.1.1` at `7e4f8cb` adds hash-only current-contract retrieval planning
+and a contained synthetic response gate. Exact core adoption and disposable
+single/two-client proofs pass with exact cleanup. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
-1. current acceptance-token/permalink retrieval planning;
-2. two-contract presentation and explicit-acceptance evidence;
-3. a transient Nequi wire-request builder containing both tokens, exact
+### C4B2 — next: consent and transient wire/signature contract
+
+C4B2 may add only separately reviewable, dependency-free contracts for:
+
+1. two-contract presentation and explicit-acceptance evidence;
+2. a transient Nequi wire-request builder containing both tokens, exact
    email/phone, unique reference, COP amount, and integrity signature;
-4. strict Sandbox-prefix/host/path enforcement;
-5. contained merchant, transaction-create, and lookup response projections;
-6. a one-attempt authorization/claim/state machine;
-7. dry-run-first CLI confirmations and redacted evidence; and
-8. transport doubles plus no-contact disposable rehearsals; and
-9. replacement of the external package's superseded C2 core-refusal assertion
-   with current-core compatibility coverage.
+3. strict Sandbox-prefix/host/path enforcement.
 
-C4B must keep every network/provider/payment effect false. It must not require
+C4B2 must keep every network/provider/payment effect false. It must not require
 the owner to enter a credential.
+
+Later C4B gates separately own contained transaction-create/lookup projections,
+a one-attempt authorization/claim/state machine, dry-run-first CLI confirmation,
+redacted evidence, transport doubles, and disposable no-contact rehearsals.
 
 ### C4C — owner-operated account and read-only provider proof
 
@@ -229,7 +231,8 @@ deployment approval for `demo.red-sphere.com`.
 
 - official facts are dated and directly linked;
 - all current C1/C2 alignments and C4 blockers are explicit;
-- the stale external-package core-refusal assertion is recorded for C4B;
+- the stale external-package core-refusal assertion is recorded and later
+  closed by C4B1;
 - Sandbox and Production remain disjoint;
 - four values remain client-local with three secret values reference-only;
 - owner account/terms acts are not automated;

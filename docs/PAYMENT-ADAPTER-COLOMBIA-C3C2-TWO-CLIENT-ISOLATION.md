@@ -117,3 +117,7 @@ C4A has since completed the dated official provider-contract/readiness audit
 with public documentation reads only and no account/provider API contact. It
 records current requirements and the hard C4B engineering blockers in
 [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+
+C4B1 later publishes package `0.1.1` at `7e4f8cb` and reruns the exact
+single/two-client lifecycle proofs without changing core runtime helpers. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
