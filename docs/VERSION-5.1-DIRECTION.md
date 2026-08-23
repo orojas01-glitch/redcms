@@ -2043,6 +2043,25 @@ request bootstrap excludes the disabled package.
     next for a core-owned sealed transport-double start/result runner; C4C
     remains separately owner-gated. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
+143. Completed Colombia C4B4C in core without a migration, package handler, or
+    secret resolver. The runner requires exact C4B4B authorization/claim rows,
+    current client/Owner/order/package/settings state, and a bounded hash-only
+    request. Under lifecycle/package and transaction locks, it commits one
+    nonce-derived start row plus audit before invoking only the final core-owned
+    sealed double. A second transaction verifies start and records one bounded
+    result plus audit. Completed output retains only request/projection hashes;
+    throwing or malformed output becomes indeterminate. Start-audit failure
+    rolls back before invocation, while any post-start result/audit failure
+    permanently spends the attempt. Replay refuses before another call. The
+    38-assertion disposable rehearsal covers missing claim, success, replay,
+    start rollback/recovery, permanent no-retry, fault, malformed output,
+    changed-start refusal, forbidden primitives, all 46 migrations, and cleanup
+    `database:0 grant:0 staged-project:0 primary:unchanged`. Execution means
+    only the in-memory double ran; package invocation, secret resolution,
+    network/Wompi, transaction creation, payment/order, and retry remain false.
+    C4B4D is next for a CLI-only dry-run-first command and network-disabled
+    disposable rehearsal; C4C remains separately owner-gated. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

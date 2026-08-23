@@ -167,6 +167,7 @@ fi
 if [[ "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c3b-self-test.php'
     && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c3c1-self-test.php'
     && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4b4b-self-test.php'
+    && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4b4c-self-test.php'
 ]]; then
     printf 'Unsupported Wompi disposable self-test: %s\n' \
         "$SELF_TEST_SCRIPT" >&2
