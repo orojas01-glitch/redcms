@@ -1979,6 +1979,28 @@ request bootstrap excludes the disabled package.
     C4B3 is next and remains credential-free/no-contact for transaction-create/
     lookup response containment. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
+140. Completed Colombia C4B3 across separate Wompi package `0.1.3` at
+    `277760e6cd727fab6795524b654ab55c4597bfa2` and exact non-runtime core
+    adoption. The dependency-free response-containment pair requires valid C2
+    plan/C4B2 wire evidence for HTTP 201 create, exact id/reference/amount/COP/
+    NEQUI/PENDING agreement, and bounded documented fields; optional personal/
+    provider detail is validated then discarded. Lookup requires untampered
+    create evidence, HTTP 200, and exact identity/reference/amount/currency/
+    method agreement. PENDING/APPROVED/DECLINED/ERROR map only to proposed
+    pending/paid/failed; VOIDED is refused. Raw response/header/personal detail,
+    payment verification, event agreement, payment/order/provider mutation,
+    and retry remain false. External checks pass 34 C2, 72 package/current-
+    core, 29 C4B1, 49 C4B2, and 48 C4B3 assertions with 15 integrity files and
+    eleven source/package pairs. Core runtime helpers remain unchanged; exact
+    pins now recognize `0.1.3`/`277760e`. Focused checks pass 47 profile, 18
+    registrar, 31 ingress, and 22 clean-starter assertions. Disposable checks
+    pass 16 install/registrar, existing Stripe 24 plus Wompi 17 atomic-enable,
+    and 21 two-client assertions with cleanup proving no database, grant, or
+    staged project remains and the configured primary unchanged. C4B4 remains
+    credential-free/no-contact for one-attempt authorization/claim/state; C4C
+    remains separately owner-gated before account/credential/read-only provider
+    contact. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

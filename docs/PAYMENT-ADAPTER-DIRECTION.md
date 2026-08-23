@@ -281,10 +281,19 @@ C4B2 is now complete in package `0.1.2` at `fdbf881` plus exact core adoption.
 It defines exactly two contract links/required controls, 15-minute consent
 evidence, and an internally constructed/discarded Sandbox signature/body/
 header/request with only redacted hashes returned. Core runtime helpers remain
-unchanged; focused and disposable proofs pass with exact cleanup. C4B3 is next
-and remains credential-free/no-contact for transaction-create/lookup response
-containment. See
+unchanged; focused and disposable proofs pass with exact cleanup. C4B3 later
+completed as the credential-free/no-contact transaction-create/lookup response
+containment gate. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
+
+C4B3 is now complete in package `0.1.3` at `277760e` plus exact core adoption.
+It strictly contains bounded already-captured create/lookup projections bound
+to C4B2 wire/create evidence, discards personal/provider detail, and maps only
+proposed pending/paid/failed outcomes with every payment/order effect false.
+Core runtime helpers remain unchanged; focused and disposable proofs pass with
+exact cleanup. C4B4 is next and remains credential-free/no-contact for one-
+attempt authorization/claim/state. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 
 ## Explicit Exclusions
 

@@ -364,8 +364,14 @@ signature/body/header/request that returns only redacted hashes/field names.
 Core runtime helpers remain unchanged. Exact adoption passes 46 profile, 16
 install/registrar, existing Stripe 24 plus Wompi 17 atomic-enable, and 21 two-
 client assertions with exact cleanup and the configured primary unchanged.
-C4B3 is next for strict transaction-create/lookup response containment, still
-credential-free/no-contact.
+C4B3 is now complete. Package `0.1.3` at `277760e` strictly contains bounded
+transaction-create/lookup responses bound to C4B2 wire/create evidence,
+discards personal/provider detail, and returns only proposed outcomes with
+every payment/order effect false. Core runtime helpers remain unchanged. Exact
+adoption passes 47 profile, 16 install/registrar, existing Stripe 24 plus Wompi
+17 atomic-enable, and 21 two-client assertions with exact cleanup and the
+configured primary unchanged. C4B4 is next for one-attempt authorization/
+claim/state, still credential-free/no-contact.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -385,7 +391,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

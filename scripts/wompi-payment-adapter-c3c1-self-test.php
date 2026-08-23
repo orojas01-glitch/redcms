@@ -179,7 +179,7 @@ try {
             && !empty($storePackage['valid'])
             && !empty($wompiPackage['valid'])
             && ($storePackage['manifest']['version'] ?? null) === '0.1.35'
-            && ($wompiPackage['manifest']['version'] ?? null) === '0.1.2',
+            && ($wompiPackage['manifest']['version'] ?? null) === '0.1.3',
         'exact Store Lite and Wompi packages discover together'
     );
     red_wompi_c3c1_assert(
@@ -370,7 +370,7 @@ try {
     red_wompi_c3c1_assert(
         $enabled['status'] === 'enabled'
             && $enabled['packageId'] === $wompiPackageId
-            && $enabled['version'] === '0.1.2'
+            && $enabled['version'] === '0.1.3'
             && hash_equals(
                 $enabled['registrationSha256'],
                 $plan['registrationSha256']
