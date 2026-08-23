@@ -111,6 +111,7 @@ function red_wompi_c3c1_state_fingerprint($connection)
     );
 }
 
+if (!defined('RED_WOMPI_C3C1_FIXTURE_ONLY')) {
 try {
     $password = password_hash('WompiC3C1-Disposable-2026!', PASSWORD_DEFAULT);
     $statement = mysqli_prepare(
@@ -422,6 +423,7 @@ try {
 } catch (Throwable $throwable) {
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 ?>

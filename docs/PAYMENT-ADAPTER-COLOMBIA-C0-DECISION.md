@@ -166,11 +166,11 @@ validate and project closed facts.
    configuration, secret-reference, outbound-host, migration, registrar, and
    transport-double acceptance. It remains outside the core starter and Store
    Lite repository.
-4. **C3 — active; C3A-C3C1 complete and C3C2 next:** prove installation,
+4. **C3 — complete through C3C2:** prove installation,
    enable/disable, one pending attempt, verified normalized outcomes,
    idempotency, reconciliation, rollback, two-client isolation, and exact
    cleanup without Wompi contact.
-5. **C4 — separately authorized Wompi Sandbox:** only after owner-operated
+5. **C4 — next, separately owner-authorized Wompi Sandbox:** only after owner-operated
    merchant registration and credential entry, prove bounded approved and
    declined Nequi test transactions, signed event and lookup agreement,
    secret isolation, credential rotation/removal, and exact cleanup. This gate

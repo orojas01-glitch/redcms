@@ -239,8 +239,11 @@ fresh disposable database. Its 16 assertions and exact cleanup pass; the fast
 registrar suite passes 18. At C3B close, C3C retained atomic enablement plus
 two-client isolation; provider contact remained later. C3C1 now completes exact
 Wompi body-signed ingress and one atomic-enable rehearsal while preserving the
-24-assertion Stripe path. C3C2 is next and owns two-client enable/disable
-isolation. See
+24-assertion Stripe path. At C3C1 close, C3C2 retained two-client enable/disable
+isolation. C3C2 now passes 21 assertions for two independent client databases,
+database-bound evidence, per-client locks, rollback, one-client disablement,
+and exact two-database cleanup. Colombia C3 is complete; C4 Sandbox credentials
+and provider contact are separately owner-gated. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
@@ -251,7 +254,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
 
 ## Explicit Exclusions
 

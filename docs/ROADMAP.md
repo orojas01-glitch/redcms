@@ -330,6 +330,16 @@ existing Stripe atomic enablement passes 24 assertions and exact Wompi passes
 refusal, injected rollback, one enable/audit, empty evidence tables, and repeat
 refusal. Exact cleanup passes with the configured primary unchanged. C3C2 is
 next and owns two-client enable/disable isolation without provider contact.
+
+C3C2 is now complete. Its 21 assertions independently install, configure, and
+enable exact Wompi in two fresh client databases. Immutable package hashes
+match while every database-bound configuration/registration/ingress/plan hash
+differs. Per-client locks coexist, same-client concurrency refuses, injected
+client-A disable rolls back without changing either fingerprint, and successful
+A disable leaves B enabled and unchanged. Cleanup proves both databases and
+grants absent, the stage removed, and the configured primary unchanged.
+Colombia C3 is complete. C4 Sandbox credentials and provider contact are next
+but separately owner-gated.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -341,7 +351,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
