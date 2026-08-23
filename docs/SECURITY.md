@@ -1302,11 +1302,22 @@ primary unchanged. C3C1 now adds exact Wompi body-signed capture plus atomic
 enablement while keeping raw bytes opaque, secret values unresolved, handlers
 uninvoked, and runtime routes unpublished. Injected failure rolls lifecycle
 state and audit back together. At C3C1 close, C3C2 retained only two-client
-enable/disable and isolation proof. C3C2 now proves separate database/configuration/registration/
-ingress/plan hashes, per-database locks, rollback, and one-client disablement
-without cross-client change. It invokes no handler and resolves no secret.
-Colombia C3 is complete. C4 Sandbox contact and C5 demo deployment require separate explicit
-approvals. See
+enable/disable and isolation proof. C3C2 now proves separate database,
+configuration, registration, ingress, and plan hashes; per-database locks;
+rollback; and one-client disablement without cross-client change. It invokes no
+handler and resolves no secret. Colombia C3 is complete.
+
+C4A now records current official Wompi environments/value families, owner-only
+account and terms acts, two acceptance tokens and contract links, explicit
+two-contract consent, private-key Bearer transaction creation, COP/Nequi
+fields, asynchronous lookup/event finality, dynamic event signatures, and
+retry timing. It confirms that raw personal data, acceptance tokens, and secret
+values have no current wire builder or transport path. C4B remains credential-
+free/no-contact and must close those engineering surfaces with strict Sandbox
+host/prefix refusal, transient values, contained responses, one-attempt state,
+redacted evidence, and transport doubles. C4C through C4E require separate
+approval for account access and each provider effect. C5 demo deployment also
+requires separate explicit approval. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
@@ -1319,7 +1330,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

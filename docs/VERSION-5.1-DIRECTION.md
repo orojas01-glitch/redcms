@@ -1901,6 +1901,32 @@ request bootstrap excludes the disabled package.
     owner-gated. See
     [`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
 
+137. Completed Colombia C4A as a public-docs-only official Wompi readiness
+    audit
+    dated 2026-08-23. Current Wompi-owned sources establish disjoint Sandbox
+    and Production hosts/value prefixes, owner-operated merchant identity and
+    terms, public-key retrieval of two acceptance tokens plus two current
+    contract links, explicit customer acceptance of both contracts, private-
+    key Bearer transaction creation, COP/unique-reference/integrity/email/
+    Nequi-phone requirements, asynchronous `PENDING` plus lookup/event
+    finality, current Nequi test outcomes, and dynamic event checksums/retries.
+    The audit confirms that the existing offline planner already binds both
+    token hashes, contract hash, customer hashes, exact Sandbox host/path,
+    setting/reference availability, event integrity, and lookup agreement. It
+    also identifies hard blockers: no merchant-token retrieval operation,
+    public two-contract acceptance UI, transient wire builder/signer,
+    transaction transport, contained lookup parser, or operational event
+    runner. Focused current-core checks and 34 external offline assertions pass;
+    the full external package suite stops at its superseded C2 expectation that
+    core rejects Wompi. C4B must replace that stale package-owned assertion and
+    is therefore the next credential-free/no-contact engineering gate. C4C
+    account/read-only merchant retrieval, C4D one approved Sandbox
+    transaction, C4E declined/event/rotation, and C5 deployment retain separate
+    owner approvals. Public documentation retrieval is the only external read;
+    no account, credential, provider API request, transaction, personal data,
+    database, package, demo, or deployment effect occurs. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
