@@ -49,6 +49,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/store-lite-product-contract-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/store-lite-cart-line-contract-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/store-lite-stripe-checkout-contract-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/payment-adapter-colombia-c1-contract-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-payment-adapter-preflight-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-payment-adapter-registrar-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-payment-adapter-server-event-ingress-self-test.php"

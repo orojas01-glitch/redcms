@@ -280,17 +280,27 @@ decision. The separately distributed candidate is
 `redcms.store-lite-wompi`; its initial customer-visible method is Nequi, its
 only currency is `COP`, and its only commercial scope is one-time Store Lite
 guest orders. Direct Nequi Push/QR remains a later client-specific candidate.
-C1 is next because the current provider-neutral contract requires a hosted
-checkout URL while direct Wompi/Nequi uses approval in the provider app. C1 may
-add only a closed `hosted_redirect`/`out_of_band_confirmation` initiation union
-plus a dependency-free offline fixture for transaction creation, integrity/
-acceptance inputs, asynchronous outcomes, signed-event and status-lookup
-reconciliation, replay/mismatch refusal, and redaction. The existing hosted
-shape must remain compatible. C1 authorizes no package, manifest, migration, credential,
-database, route, network, provider account, Wompi transaction, Nequi
-notification, payment, order transition, hosted-demo change, or deployment.
+C1 is complete because the prior provider-neutral contract required a hosted
+checkout URL while direct Wompi/Nequi uses approval in the provider app. The
+new dependency-free helper defines one canonical hosted reference/URL value
+returned unchanged and adds only a closed URL-free
+`out_of_band_confirmation` value with pending state
+and generic provider-app action. Its 55-assertion offline fixture proves COP/
+Nequi request planning, transient acceptance and personal data, distinct
+secret-reference classes, dynamic provider-ordered checksum verification,
+retry-compatible timing, exact event/lookup agreement, replay and mismatch
+refusal, closed outcomes, and redaction.
+Existing Stripe P2 remains untouched; its regression plus typed adapter and
+payment-profile regressions pass. C1
+adds no package, manifest, migration, credential, database, route, network,
+provider account, Wompi transaction, Nequi notification, payment, order
+transition, hosted-demo change, or deployment. C2 is next and may create only
+the separately distributed disabled Wompi package skeleton with offline
+transport doubles.
 See
-[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
