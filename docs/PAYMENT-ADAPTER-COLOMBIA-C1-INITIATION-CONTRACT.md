@@ -1,6 +1,6 @@
 # Colombia C1 Payment Initiation Contract
 
-Status: complete locally. C1 adds one dependency-free provider-neutral
+Status: complete and merged. C1 adds one dependency-free provider-neutral
 normalizer and one CLI-only Wompi/Nequi contract fixture. It creates no
 adapter package, runtime caller, database, credential, network request,
 provider transaction, payment, order mutation, or deployment.
@@ -108,18 +108,19 @@ P2 fixture proves its exact existing provider-specific result independently;
 Stripe authority, command, adapter, and deployment behavior therefore remain
 unchanged. Stripe D4D remains owner-deferred.
 
-## C2 Boundary
+## C2 Completion And C3 Boundary
 
-C2 is next. It may create only a separately distributed, disabled-by-default
-`redcms.store-lite-wompi` package skeleton and offline transport doubles. It
-must adopt the exact C1 union without modifying core, Store Lite, or the Stripe
-adapter; declare only the Nequi/COP one-time method; define one client-local
-public setting plus three opaque secret-reference settings; and pass manifest,
-integrity, dependency, migration, registrar, redaction, and no-network tests.
+C2 is complete in separately distributed package version `0.1.0` at commit
+`e17a371`. It adopts the exact C1 union without modifying core, Store Lite, or
+the Stripe adapter; declares only the Nequi/COP one-time method; defines one
+client-local public setting plus three opaque secret-reference settings; and
+passes 34 offline-contract plus 60 package assertions.
 
-C2 must not create or use a provider account, real or Sandbox key, acceptance
-token, customer phone/email, DNS, TLS, HTTP request, Wompi transaction, Nequi
-notification, payment, webhook ingress, browser checkout, Store Lite order
-mutation, hosted-demo change, client installation, or deployment. C3
-disposable integration, C4 Wompi Sandbox, and C5 demo deployment remain
-separate later gates.
+Generic discovery/registration passes, while the current Stripe-only core
+payment profile deliberately refuses the three-secret/Wompi-host shape. C3 is
+next and owns that profile extension plus disposable integration. C2 created
+or used no provider account, real or Sandbox key, acceptance token, customer
+phone/email, DNS, TLS, HTTP request, Wompi transaction, Nequi notification,
+payment, webhook ingress, browser checkout, Store Lite order mutation, hosted-
+demo change, client installation, or deployment. See
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).

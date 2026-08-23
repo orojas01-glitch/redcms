@@ -1,9 +1,9 @@
 # Colombia Payment Adapter C0 Decision
 
-Status: C0 decision and C1 offline initiation contract are complete; provider-
-package implementation and provider contact have not started. The owner
-deferred Stripe P3E-9D4D on 2026-08-22 without cancelling or widening any
-completed Stripe evidence.
+Status: C0 decision, C1 offline initiation contract, and C2 external package
+skeleton are complete; provider contact has not started. The owner deferred
+Stripe P3E-9D4D on 2026-08-22 without cancelling or widening any completed
+Stripe evidence.
 
 ## Decision
 
@@ -161,12 +161,12 @@ validate and project closed facts.
    contract model, asynchronous outcomes, event-checksum verification, lookup
    reconciliation, replay and mismatch refusal, and response redaction with no
    package, credential, database, or network.
-3. **C2 — next, external adapter package:** create a separately versioned, disabled-
+3. **C2 — complete, external adapter package:** create a separately versioned, disabled-
    by-default `redcms.store-lite-wompi` package with exact manifest,
    configuration, secret-reference, outbound-host, migration, registrar, and
    transport-double acceptance. It remains outside the core starter and Store
    Lite repository.
-4. **C3 — disposable core/Store Lite integration:** prove installation,
+4. **C3 — next, disposable core/Store Lite integration:** prove installation,
    enable/disable, one pending attempt, verified normalized outcomes,
    idempotency, reconciliation, rollback, two-client isolation, and exact
    cleanup without Wompi contact.

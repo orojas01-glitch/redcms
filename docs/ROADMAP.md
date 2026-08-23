@@ -291,16 +291,26 @@ secret-reference classes, dynamic provider-ordered checksum verification,
 retry-compatible timing, exact event/lookup agreement, replay and mismatch
 refusal, closed outcomes, and redaction.
 Existing Stripe P2 remains untouched; its regression plus typed adapter and
-payment-profile regressions pass. C1
-adds no package, manifest, migration, credential, database, route, network,
-provider account, Wompi transaction, Nequi notification, payment, order
-transition, hosted-demo change, or deployment. C2 is next and may create only
-the separately distributed disabled Wompi package skeleton with offline
-transport doubles.
+payment-profile regressions pass. C1 adds no package, manifest, migration,
+credential, database, route, network, provider account, Wompi transaction,
+Nequi notification, payment, order transition, hosted-demo change, or
+deployment.
+
+C2 is complete in the separate public `redcms-store-lite-wompi` repository at
+commit `e17a371`. Package `redcms.store-lite-wompi` version `0.1.0` passes 34
+offline-contract and 60 package assertions for C1 adoption, deterministic plan
+hashing, one-use double, dynamic signed events, nine-file integrity, two
+unexecuted migrations, generic discovery/registrar, explicit unsupported
+provider operations, source redaction, and cleanup. The current Stripe-only
+payment profile refuses the package with exactly `outbound_host_invalid` and
+`setting_contract_invalid`; C3 is next and owns a closed core-profile extension
+plus disposable installation/lifecycle proof without provider contact.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

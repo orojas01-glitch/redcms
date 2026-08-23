@@ -223,11 +223,21 @@ privacy, and redaction contracts without creating a package, credential,
 database, route, network request, provider transaction, payment, order change,
 or demo deployment. The 55 focused assertions plus existing Stripe/generic
 regressions pass; existing Stripe-specific helpers and results are not changed
-or wired through the new helper. C2 is next and remains a separately
-distributed offline package skeleton. See
+or wired through the new helper.
+
+C2 is complete in separately distributed public package version `0.1.0` at
+commit `e17a371`. Its 34 provider-contract plus 60 package assertions prove the
+exact C1 union, hashed plan, one-use double, dynamic signed-event verification,
+nine-file integrity, two unexecuted evidence migrations, generic discovery,
+contained registrar, refusing route, no-network source, and cleanup. Current
+Stripe-only payment-profile validation refuses the package exactly because C3
+has not generalized its two-secret/Stripe-host assumptions. C3 is next and
+remains offline/disposable. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
 
 ## Explicit Exclusions
 

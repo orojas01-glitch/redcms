@@ -1274,12 +1274,28 @@ normalizes only bounded proposed outcomes with order mutation false. Existing
 Stripe hosted and generic adapter regressions pass. The helper has no runtime
 caller and C1 adds no adapter package, manifest, migration, database row,
 credential, route, network request, Wompi transaction, Nequi notification,
-payment, order mutation, hosted-demo change, or client deployment. C2 remains
-an offline external-package gate; C4 Sandbox contact and C5 demo deployment
+payment, order mutation, hosted-demo change, or client deployment.
+
+C2 now adds only an external version `0.1.0` package at commit `e17a371`. Its
+request planner accepts hashes/availability only; its PENDING gate emits no
+URL; its sealed double is one-use and plan-bound; its event verifier resolves
+bounded dynamic properties, uses a 25-hour retry-compatible window, verifies
+the checksum, refuses replay, and requires lookup agreement. The typed package
+handler supports only a fixed false-effect `contract.probe`; provider
+operations and the declared event route refuse. Migrations inventory only
+hashed/opaque evidence and exclude personal, credential, body/header, and URL
+columns. No migration ran.
+
+Generic discovery/registration accepts the package, but the current Stripe-
+only payment profile refuses its three-secret/Wompi-host shape exactly. C3 must
+extend that closed core profile while preserving all Stripe regressions, then
+use only fresh disposable databases. C4 Sandbox contact and C5 demo deployment
 require separate explicit approvals. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
