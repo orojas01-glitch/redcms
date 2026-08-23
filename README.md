@@ -195,16 +195,21 @@ result and adds a closed
 `out_of_band_confirmation` shape for approval in a provider app. It does not
 create a package, credential, database, provider transaction, or hosted-demo
 change. C1 now passes 55 focused assertions plus the existing Stripe P2,
-generic adapter, and payment-profile regressions. C2 is next: a separately
-distributed disabled-by-default Wompi package skeleton with offline transport
-doubles only. See
+generic adapter, and payment-profile regressions. C2 is now complete in the
+separately distributed public Wompi repository at commit `e17a371`: version
+`0.1.0`, 9 integrity files, 2 unexecuted migrations, and 94 focused assertions.
+Generic discovery/registration passes; the current Stripe-only payment profile
+deliberately refuses its third secret setting and Wompi Sandbox host. C3 is
+next and owns the core-profile extension plus disposable lifecycle proof. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
 and
 [Colombia C0 Decision](docs/PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
-[Colombia C1 Initiation Contract](docs/PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
+[Colombia C1 Initiation Contract](docs/PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
+and
+[Colombia C2 External Package](docs/PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

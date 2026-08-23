@@ -1774,8 +1774,8 @@ request bootstrap excludes the disabled package.
     initiation result as incompatible with direct Nequi Push. C1 was reserved
     for only the closed `hosted_redirect`/`out_of_band_confirmation` provider-
     neutral union plus a dependency-free offline fixture and is completed in
-    item 131; C2 external package and C3 disposable
-    integration remain later, while C4 Wompi Sandbox and C5 demo deployment
+    item 131; C2 external package is completed in item 132 and C3 disposable
+    integration remains later, while C4 Wompi Sandbox and C5 demo deployment
     require separate approvals. No PHP, package, manifest, migration,
     database, route, credential, account, network request, Wompi transaction,
     Nequi notification, payment, order transition, hosted-demo change, client
@@ -1800,9 +1800,28 @@ request bootstrap excludes the disabled package.
     database, package, manifest, migration,
     credential, network, provider transaction, notification, payment, webhook,
     browser, Store Lite mutation, hosted-demo change, client data, or
-    deployment is added. C2 is next and remains an offline separately
-    distributed package-skeleton gate. See
+    deployment is added. C2 is completed in item 132. See
     [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
+
+132. Completed Colombia C2 in the new public separately distributed
+    `redcms-store-lite-wompi` repository at exact commit `e17a371`. Package
+    `redcms.store-lite-wompi` version `0.1.0` declares one Store Lite adapter,
+    exact dependency, one unset public-key setting, three secret references,
+    Sandbox-only Wompi host, one refusing event route, two unexecuted InnoDB
+    evidence migrations, and nine integrity files. Its 34 offline-contract and
+    60 package assertions prove hashed/self-fingerprinted COP/Nequi planning,
+    exact C1 out-of-band PENDING projection, one-use sealed double, dynamic
+    signed-event properties, retry-compatible checksum/lookup/replay handling,
+    bounded non-mutating outcomes, generic discovery/registrar, source/package
+    parity, forbidden-primitive and credential exclusion, and cleanup. The
+    existing Stripe-only core payment profile deliberately refuses the package
+    with only `outbound_host_invalid` and `setting_contract_invalid`; C3 is
+    next and owns a closed core-profile extension plus disposable installation
+    and lifecycle proof. No core/Store Lite/Stripe file, database, migration
+    execution, installation, enablement, setting or secret value, network,
+    provider transaction, payment, webhook ingress, browser, order mutation,
+    hosted-demo change, client data, or deployment effect occurred. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
