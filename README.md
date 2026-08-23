@@ -184,11 +184,21 @@ three intended provider effects, and eight explicit exclusions. No command
 apply, secret value, package handler, network, or provider request ran. D4C2 is
 now also complete: 92 source assertions plus exact staged dry run, incomplete/
 changed refusal, zero real apply/start/result/provider effects, and exact
-cleanup passed with adapter repair commit `44ed7b3`. D4D remains separately
-approval-gated. See
+cleanup passed with adapter repair commit `44ed7b3`. The owner deferred D4D on
+2026-08-22; the reviewed Stripe path remains available but no key, request,
+Session, payment, or deployment is authorized. Colombia C0 now selects the
+separately distributed `redcms.store-lite-wompi` candidate with customer-
+visible Nequi, `COP`, and one-time Store Lite orders. C1 is a non-network
+provider-neutral initiation-mode extension plus contract fixture: it preserves
+the existing `hosted_redirect` shape and adds a closed
+`out_of_band_confirmation` shape for approval in a provider app. It does not
+create a package, credential, database, provider transaction, or hosted-demo
+change. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
-[P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md).
+[P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
+and
+[Colombia C0 Decision](docs/PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

@@ -1,8 +1,10 @@
 # P3E-9D4 Real Sandbox Checkout Creation Plan
 
 Status: planning complete; D4A through D4C are implemented without provider
-execution, and D4D remains separately approval-gated. D4 is split into four
-review stops so the first real Stripe `POST` remains the final operational step.
+execution. The owner deferred D4D on 2026-08-22. It remains available only
+through its separate approval ladder, and no Stripe key, request, Session,
+payment, or deployment is authorized. D4 is split into four review stops so
+the first real Stripe `POST` remains the final operational step if resumed.
 
 ## Why D4 Is Not One Coding Step
 
@@ -107,8 +109,9 @@ transport apply is reserved for D4D.
 
 ## D4D — One Real Sandbox POST
 
-D4D is an operational rehearsal, not an automated test or ordinary code PR.
-It may start only after D4A–D4C are merged and reverified.
+D4D is owner-deferred. It is an operational rehearsal, not an automated test
+or ordinary code PR. If resumed, it may start only after D4A–D4C are merged
+and reverified and the owner supplies new explicit approval.
 
 Separate explicit user approvals are required for:
 

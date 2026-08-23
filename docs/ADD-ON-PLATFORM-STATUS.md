@@ -1,15 +1,13 @@
 # RED-CMS 5.1 And Store Lite Progress
 
 Last updated: 2026-08-22 after the published `v5.1.0` release, completed Store
-Lite basic-demo proof, completed payment-adapter P3A through P3D foundations,
-the closed P3E-8B3C3B read-only Stripe Sandbox rehearsal, P3E-9A through
-P3E-9D1 external work, core P3E-9D2 preflight containment, and P3E-9D3A
-CLI-only operator-command contract plus P3E-9D3B disposable no-contact
-rehearsal.
+Lite basic-demo proof, completed Stripe payment-adapter work through the D4C
+network-disabled no-contact rehearsal, the owner's deferral of D4D real
+Sandbox contact, and the Colombia C0 Wompi/Nequi provider decision.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
-objective. Green work is complete, blue is the active gate, gray remains
-gated, and gold marks an achieved release target.
+objective. Green work is complete, blue is the active gate, orange is
+owner-deferred, gray remains gated, and gold marks an achieved release target.
 
 ## Objective
 
@@ -80,11 +78,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3E-9D4C is complete locally. D4C1 supplies the 74-assertion dry-run-first command contract; D4C2 passes 92 source assertions and exact network-disabled staged dry run/refusal/cleanup with `real-apply:0 start-result:0 provider-effects:0`. Adapter repair `44ed7b3` restores all 19 package integrity hashes. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. On the optional hosted-payment path, D4D is the separately authorized first real Sandbox POST. It has not started: no Stripe key, provider request, Session, or payment is currently authorized. |
+| What just finished? | P3E-9D4C is merged with its exact network-disabled rehearsal and `real-apply:0 start-result:0 provider-effects:0`. Colombia C0 now selects the separately distributed `redcms.store-lite-wompi` candidate with customer-visible Nequi, `COP`, one-time orders, and no provider contact. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C1 is the next optional-payment gate: preserve `hosted_redirect`, add closed `out_of_band_confirmation`, and prove it with a dependency-free offline Wompi/Nequi fixture. No package, credential, database, or network is included. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. On the optional payment path, D4A–D4C must merge before separately authorized D4D can create one real Sandbox Session. Key expiration, Session expiration, test payment, webhook/browser/order-transition proof, and P4 deployment review stay separately gated. |
+| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. Colombia C1–C3 remain offline/package/integration work; C4 Wompi Sandbox and C5 demo deployment each require separate approval. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -122,17 +120,24 @@ flowchart LR
     P3E9D4A["COMPLETE<br/>P3E-9D4A. External provider-write<br/>operation, no Stripe contact"]
     P3E9D4B["COMPLETE<br/>P3E-9D4B. Durable core<br/>runner, in-memory acceptance"]
     P3E9D4C["COMPLETE<br/>P3E-9D4C. CLI command<br/>+ no-contact rehearsal"]
-    P3E9D4D["NEXT / APPROVAL GATE<br/>P3E-9D4D. One real Sandbox<br/>Session POST"]
+    P3E9D4D["OWNER-DEFERRED<br/>P3E-9D4D. One real Sandbox<br/>Session POST"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
+    CO0["COMPLETE<br/>Colombia C0. Wompi provider<br/>+ Nequi/COP decision"]
+    CO1["NEXT<br/>Colombia C1. Initiation modes<br/>+ offline contract fixture"]
+    CO2["GATED<br/>Colombia C2-C3. External package<br/>+ disposable integration"]
+    CO3["GATED<br/>Colombia C4-C5. Wompi Sandbox<br/>+ demo deployment"]
 
     P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
+    P0 --> CO0 --> CO1 --> CO2 --> CO3
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
+    classDef deferred fill:#fff7e6,stroke:#a36b00,color:#5e4100;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C complete;
-    class P3E9D4D active;
-    class P4 gated;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0 complete;
+    class CO1 active;
+    class P3E9D4D deferred;
+    class P4,CO2,CO3 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -184,11 +189,16 @@ CLI-only dry-run-first command contract. P3E-9D3B completes the disposable
 no-contact rehearsal with zero provider effects and exact cleanup. P3E-9D4A
 then completes external adapter `0.1.8` without provider contact and repair
 `44ed7b3` restores package integrity. D4B durable core execution and D4C
-operator/no-contact rehearsal are complete with real apply held at zero. D4D
-remains one real POST. Every write credential, real network request, Checkout
-Session, payment, webhook, browser flow, hosted-demo change, and client
-deployment remains stopped. See
+operator/no-contact rehearsal are complete with real apply held at zero. The
+owner deferred D4D; its approvals and evidence remain available for a later
+resumption. Colombia C0 now selects a separate Wompi adapter with only Nequi
+and COP in its initial scope. C1 adds only a closed provider-neutral
+out-of-band initiation mode plus offline fixture. Every write credential, real
+network request, Checkout Session or Wompi transaction, payment, webhook,
+browser flow, hosted-demo change, and client deployment remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
+The Colombia decision and ladder are in
+[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
 
 ## Status rule
 

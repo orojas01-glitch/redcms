@@ -15,8 +15,8 @@ apply and zero provider effects. P3E-9D3 is complete. D4A external adapter
 `0.1.8` is also complete without provider contact and its package integrity is
 repaired at `44ed7b3`. D4B durable core execution is complete through sealed
 in-memory acceptance. D4C operator/no-contact rehearsal is complete without
-real apply, and D4D remains one separately authorized POST. Payment, webhook,
-and P4 deployment remain gated.
+real apply. The owner deferred D4D on 2026-08-22; it remains separately
+approval-gated, and payment, webhook, and P4 deployment remain gated.
 Stripe account access, sandbox creation, credential provisioning, outbound
 network access, webhook forwarding, simulated payment, and deployment are not
 authorized by this document. P0 through P2 remain complete.

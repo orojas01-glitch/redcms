@@ -272,7 +272,25 @@ P3E-9D4C is complete: D4C1 CLI-only dry-run-first command passes 74 pure
 assertions, and D4C2 passes 92 source assertions plus network-disabled staged
 dry run, incomplete/changed refusal, zero real apply/start/result/provider
 effects, unchanged sources/primary, and exact cleanup. D4D remains the
-separately authorized first real Sandbox POST.
+separately authorized first real Sandbox POST, but the owner deferred it on
+2026-08-22 without cancelling or widening its reviewed evidence.
+
+Colombia payment-adapter C0 is now complete as a documentation-only provider
+decision. The separately distributed candidate is
+`redcms.store-lite-wompi`; its initial customer-visible method is Nequi, its
+only currency is `COP`, and its only commercial scope is one-time Store Lite
+guest orders. Direct Nequi Push/QR remains a later client-specific candidate.
+C1 is next because the current provider-neutral contract requires a hosted
+checkout URL while direct Wompi/Nequi uses approval in the provider app. C1 may
+add only a closed `hosted_redirect`/`out_of_band_confirmation` initiation union
+plus a dependency-free offline fixture for transaction creation, integrity/
+acceptance inputs, asynchronous outcomes, signed-event and status-lookup
+reconciliation, replay/mismatch refusal, and redaction. The existing hosted
+shape must remain compatible. C1 authorizes no package, manifest, migration, credential,
+database, route, network, provider account, Wompi transaction, Nequi
+notification, payment, order transition, hosted-demo change, or deployment.
+See
+[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
