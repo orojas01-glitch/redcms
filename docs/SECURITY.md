@@ -1312,8 +1312,8 @@ account and terms acts, two acceptance tokens and contract links, explicit
 two-contract consent, private-key Bearer transaction creation, COP/Nequi
 fields, asynchronous lookup/event finality, dynamic event signatures, and
 retry timing. It confirms that raw personal data, acceptance tokens, and secret
-values have no current wire builder or transport path. C4B remains credential-
-free/no-contact and must close those engineering surfaces with strict Sandbox
+values had no wire builder or transport path at C4A close. C4B remained
+credential-free/no-contact and had to close those engineering surfaces with strict Sandbox
 host/prefix refusal, transient values, contained responses, one-attempt state,
 redacted evidence, and transport doubles. C4C through C4E require separate
 approval for account access and each provider effect. C5 demo deployment also
@@ -1333,6 +1333,18 @@ and
 [`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+
+C4B1 adds no core runtime path. External package `0.1.1` receives only a
+public-key hash/availability fact for merchant-contract planning and returns
+only two Wompi-controlled HTTPS contract links plus token/contract/response/
+projection hashes from a pre-contained synthetic response. Raw tokens are not
+returned; final path construction, presentation, consent, persistence,
+transport, credentials, provider contact, payment, order mutation, and retry
+remain false. Core adoption changes exact test/rehearsal pins only and passes
+single/two-client disposable proofs with exact cleanup. C4B2 may add explicit
+contract presentation/consent evidence and a transient server-side integrity/
+wire builder, but still no transport or provider contact. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
