@@ -71,6 +71,23 @@ try {
     $GLOBALS['RED_ADDON_RUNTIME_CONTEXT'] =
         red_addon_public_route_test_context($route, $handler);
 
+    red_addon_public_route_test_assert(
+        red_addon_public_route_query($route['path']) === []
+            && red_addon_public_route_query(
+                $route['path'] . '?limit=10&language=sp'
+            ) === [
+                'limit' => '10',
+                'language' => 'sp',
+            ]
+            && red_addon_public_route_query(
+                $route['path'] . '?q%5B%5D=first&q%5B%5D=second'
+            ) === [
+                'q' => ['first', 'second'],
+            ]
+            && red_addon_public_route_query('/invalid path?q=test') === null,
+        'public route queries come from the bounded request target'
+    );
+
     foreach (['/unrelated', $route['path'] . '/', $route['path'] . '%2F'] as $path) {
         $unmatched = red_addon_public_route_dispatch('GET', $path, []);
         red_addon_public_route_test_assert(
@@ -242,8 +259,13 @@ try {
         strpos($index, "includes/addon_public_route_helpers.php") !== false
             && $dispatchAt !== false
             && $renderAt !== false
-            && $dispatchAt < $renderAt,
-        'the public front controller dispatches claimed add-on routes before theme output'
+            && $dispatchAt < $renderAt
+            && substr_count(
+                $index,
+                'red_addon_public_route_query('
+            ) === 2
+            && strpos($index, '$_GET ?? []') === false,
+        'the public front controller dispatches request-target queries before theme output'
     );
 } finally {
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);

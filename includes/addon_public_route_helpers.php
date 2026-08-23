@@ -198,6 +198,31 @@ if (!function_exists('red_addon_public_route_path')) {
     }
 }
 
+if (!function_exists('red_addon_public_route_query')) {
+    /**
+     * Reads only the caller-supplied query string from the request target.
+     *
+     * Apache front-controller rewrites may add an internal key to $_GET, so
+     * public add-on routes must not receive the rewritten PHP query globals.
+     */
+    function red_addon_public_route_query($requestUri)
+    {
+        if (red_addon_public_route_path($requestUri) === null) {
+            return null;
+        }
+        $rawQuery = parse_url($requestUri, PHP_URL_QUERY);
+        if ($rawQuery === null) {
+            return [];
+        }
+        if (!is_string($rawQuery)) {
+            return null;
+        }
+        $query = [];
+        parse_str($rawQuery, $query);
+        return is_array($query) ? $query : null;
+    }
+}
+
 if (!function_exists('red_addon_public_route_declaration')) {
     function red_addon_public_route_declaration($path)
     {
