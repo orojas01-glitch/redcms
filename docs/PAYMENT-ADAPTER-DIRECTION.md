@@ -243,7 +243,14 @@ Wompi body-signed ingress and one atomic-enable rehearsal while preserving the
 isolation. C3C2 now passes 21 assertions for two independent client databases,
 database-bound evidence, per-client locks, rollback, one-client disablement,
 and exact two-database cleanup. Colombia C3 is complete; C4 Sandbox credentials
-and provider contact are separately owner-gated. See
+and provider contact are separately owner-gated. C4A now completes a dated
+official-source audit of environments, keys, acceptance contracts, Nequi
+requests, asynchronous finality, and events. It identifies missing merchant-
+token retrieval, two-contract consent, transient signing/wire construction,
+transport, lookup containment, operational-event surfaces, and one external
+package regression that still expects the superseded C2 core refusal. C4B is
+next and remains credential-free/no-contact; C4C through C4E retain separate
+owner approval for account access and every provider effect. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
@@ -256,7 +263,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
 
 ## Explicit Exclusions
 

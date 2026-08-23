@@ -215,7 +215,13 @@ hashes differ, immutable package hashes match, locks remain per-client,
 injected disable rollback changes neither database, disabling client A leaves
 client B enabled, and cleanup proves both databases/grants absent with the
 configured primary unchanged. Colombia C3 is complete. C4 Wompi Sandbox is
-separately owner-gated before credentials or provider contact. See
+separately owner-gated before credentials or provider contact. C4A now records
+the current official Wompi Sandbox contract and the missing engineering
+surfaces without making an account, credential, provider API, transaction, or
+deployment change. C4B is next and remains credential-free/no-contact; it must
+close acceptance retrieval, two-contract consent, transient request/signature,
+response containment, and one-attempt execution contracts before any owner-
+operated Wompi access. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -232,7 +238,9 @@ and
 and
 [Colombia C3C1 Atomic Enablement](docs/PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md)
 and
-[Colombia C3C2 Two-Client Isolation](docs/PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
+[Colombia C3C2 Two-Client Isolation](docs/PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
+and
+[Colombia C4A Official Readiness](docs/PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

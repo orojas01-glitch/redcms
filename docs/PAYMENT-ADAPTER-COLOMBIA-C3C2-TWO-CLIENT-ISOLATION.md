@@ -1,6 +1,7 @@
 # Colombia C3C2 Wompi Two-Client Isolation
 
-Status: complete locally. C3C2 closes the offline/disposable Colombia C3 gate
+Status: complete on `main` through PR #165 at `7f4e29d`. C3C2 closes the
+offline/disposable Colombia C3 gate
 without changing a core runtime helper. It proves exact Wompi installation,
 configuration, atomic enablement, rollback, disablement, and declarative
 runtime-order isolation across two fresh client databases.
@@ -111,3 +112,8 @@ terms and test-data rules, enter client-local Sandbox public/private/integrity/
 event credentials outside Git, confirm redacted evidence and cleanup handling,
 and explicitly authorize the bounded provider-contact operation. C3C2 does not
 grant that authorization.
+
+C4A has since completed the dated official provider-contract/readiness audit
+with public documentation reads only and no account/provider API contact. It
+records current requirements and the hard C4B engineering blockers in
+[`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).

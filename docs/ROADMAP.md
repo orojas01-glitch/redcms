@@ -339,7 +339,15 @@ client-A disable rolls back without changing either fingerprint, and successful
 A disable leaves B enabled and unchanged. Cleanup proves both databases and
 grants absent, the stage removed, and the configured primary unchanged.
 Colombia C3 is complete. C4 Sandbox credentials and provider contact are next
-but separately owner-gated.
+but separately owner-gated. C4A now completes a dated, documentation-only
+official Wompi readiness audit. C4B is the next engineering gate and remains
+credential-free/no-contact: current contract retrieval planning, two-contract
+consent evidence, transient request/signature construction, contained response
+projections, one-attempt state, dry-run operator commands, and transport
+doubles. It first replaces the external package's superseded C2 core-refusal
+assertion with current-core compatibility coverage. C4C account access/read-
+only merchant retrieval, C4D one approved Sandbox transaction, C4E declined/
+event/rotation, and C5 deployment each retain their own approval gate.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -353,7 +361,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

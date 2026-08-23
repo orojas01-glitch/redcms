@@ -170,11 +170,15 @@ validate and project closed facts.
    enable/disable, one pending attempt, verified normalized outcomes,
    idempotency, reconciliation, rollback, two-client isolation, and exact
    cleanup without Wompi contact.
-5. **C4 — next, separately owner-authorized Wompi Sandbox:** only after owner-operated
-   merchant registration and credential entry, prove bounded approved and
-   declined Nequi test transactions, signed event and lookup agreement,
-   secret isolation, credential rotation/removal, and exact cleanup. This gate
-   is not authorized by C0.
+5. **C4 — active but owner-gated Wompi Sandbox:** C4A completes a dated official
+   contract/readiness audit without account or provider API effect. C4B next
+   adds only credential-free/no-contact acceptance retrieval, two-contract
+   consent,
+   transient request/signature, response containment, one-attempt, command,
+   and transport-double contracts. C4C owner account plus one read-only
+   merchant GET, C4D one approved transaction, and C4E declined/event/rotation
+   each need separate explicit authorization. C0 authorizes none of those
+   external acts.
 6. **C5 — separately approved demo deployment:** review HTTPS webhook ingress,
    retention, customer acceptance UI, order operations, backups, rollback,
    browser behavior, and client-specific configuration before enabling the
