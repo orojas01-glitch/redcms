@@ -72,12 +72,14 @@ After a successful commit, output reports `authorizationRecorded=true`,
 - Cleanup passes
   `database:0 grant:0 staged-project:0 primary:unchanged`.
 
-## Next boundary
+## C4B4C follow-up
 
-C4B4C is next and remains credential-free/no-contact. It may add only a core-
-owned sealed transport-double runner that requires these exact durable rows,
-records immutable start/result evidence, invokes no package handler or real
-network, and permanently consumes an indeterminate attempt. Later gates own the
-dry-run-first CLI and disposable network-disabled rehearsal. C4C remains the
-first separately owner-authorized account/credential/read-only provider-
-contact gate.
+C4B4C later completed as a core-owned sealed transport-double runner. It
+requires these exact durable rows, records immutable start before one in-memory
+call, records a bounded result, and permanently consumes indeterminate attempts.
+See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+
+C4B4D separately owns the dry-run-first CLI and disposable network-disabled
+rehearsal. C4C remains the first separately owner-authorized account/credential/
+read-only provider-contact gate.

@@ -387,6 +387,14 @@ failure fail closed. Its 24-assertion disposable rehearsal passes cleanup
 `database:0 grant:0 staged-project:0 primary:unchanged`; execution, secret,
 network/provider, payment/order, and retry effects remain false. C4B4C is next
 for a core-owned sealed transport-double start/result runner.
+C4B4C is now complete. Core requires exact durable C4B4B rows, commits immutable
+start before one final in-memory double, and records one bounded completed or
+indeterminate result afterward. Replay refuses before another call; post-start
+result/audit failure permanently spends the attempt. Its 38-assertion
+disposable rehearsal passes cleanup `database:0 grant:0 staged-project:0
+primary:unchanged`; package invocation, secret resolution, real network/Wompi,
+payment/order, and retry effects remain false. C4B4D is next for a CLI-only
+dry-run-first command and network-disabled disposable rehearsal.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -412,7 +420,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

@@ -1392,6 +1392,18 @@ payment/order, and retry effects false. C4B4C remains the no-contact sealed-
 double runner. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 
+C4B4C requires exact durable authorization/claim rows, current authority and
+package/setting state, and a hash-only sealed-double request. Under locks, core
+commits a nonce-derived start row and audit before invoking only the final core-
+owned double. A second transaction records a bounded result and audit. Start-
+audit failure rolls back before invocation; any post-start failure permanently
+spends the attempt. Fault or malformed output becomes a no-network/no-provider
+indeterminate result. Replay refuses before a second call. The helper contains
+no package invocation, secret resolver, network primitive, Wompi host, payment/
+order mutation, or retry. C4B4D remains the CLI/network-disabled rehearsal
+gate. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

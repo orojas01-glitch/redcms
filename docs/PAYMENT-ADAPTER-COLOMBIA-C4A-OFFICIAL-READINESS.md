@@ -224,11 +224,17 @@ authority. Replay and partial failure fail closed, and execution remains
 unavailable. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 
-### C4B4C — next: sealed transport-double runner
+### C4B4C — complete: sealed transport-double runner
 
-C4B4C may add only a core-owned in-memory double with immutable start/result
-rows around the exact durable claim. Later C4B gates own dry-run-first CLI
-confirmation and disposable network-disabled no-contact rehearsal.
+C4B4C adds only a core-owned in-memory double with immutable start/result rows
+around the exact durable claim. Start commits before invocation; replay and
+post-start retry fail closed. Exact disposable proof passes. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+
+### C4B4D — next: CLI and network-disabled rehearsal
+
+C4B4D may add only a CLI-only dry-run-first confirmation contract and a fresh
+disposable rehearsal that disables network primitives and never contacts Wompi.
 
 ### C4C — owner-operated account and read-only provider proof
 

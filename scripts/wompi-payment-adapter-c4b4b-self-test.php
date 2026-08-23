@@ -181,6 +181,7 @@ function red_wompi_c4b4b_evidence(
     return [$authorization, $claim];
 }
 
+if (!defined('RED_WOMPI_C4B4B_FIXTURE_ONLY')) {
 try {
     $password = password_hash('WompiC4B4B-Disposable-2026!', PASSWORD_DEFAULT);
     $statement = mysqli_prepare(
@@ -693,6 +694,7 @@ try {
 } catch (Throwable $throwable) {
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 ?>

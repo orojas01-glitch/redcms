@@ -313,6 +313,14 @@ for a core-owned sealed transport-double start/result runner, still credential-
 free/no-contact. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md).
 
+C4B4C is now complete in core. Start commits before one final in-memory double;
+a second transaction records a bounded completed or indeterminate result.
+Replay refuses before another call, and post-start storage failure remains
+permanently no-retry. Its 38-assertion disposable rehearsal passes exact
+cleanup with every real provider/order effect false. C4B4D is next for a CLI-
+only dry-run-first command plus network-disabled disposable rehearsal. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+
 ## Explicit Exclusions
 
 Gate P0 does not select a provider, add a core payment abstraction, create
