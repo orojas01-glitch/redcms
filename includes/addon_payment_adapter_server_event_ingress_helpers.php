@@ -40,6 +40,16 @@ if (!class_exists('RED_Addon_Payment_Adapter_Server_Event_Request', false)) {
             string $rawBody,
             string $signatureHeader
         ) {
+            $bodySignedProfile = $packageId === 'redcms.store-lite-wompi';
+            $signatureHeaderInvalid = $bodySignedProfile
+                ? $signatureHeader !== ''
+                : (strlen($signatureHeader) < 8
+                    || strlen($signatureHeader) > 4096
+                    || trim($signatureHeader) !== $signatureHeader
+                    || preg_match(
+                        '/[\x00-\x1F\x7F]/',
+                        $signatureHeader
+                    ) === 1);
             if (!red_addon_valid_package_id($packageId)
                 || !red_addon_valid_capability($routeId)
                 || strpos($routeId, $packageId . '/') !== 0
@@ -49,10 +59,7 @@ if (!class_exists('RED_Addon_Payment_Adapter_Server_Event_Request', false)) {
                 || $receivedAtUnix > 4102444800
                 || $rawBody === ''
                 || strlen($rawBody) > 65536
-                || strlen($signatureHeader) < 8
-                || strlen($signatureHeader) > 4096
-                || trim($signatureHeader) !== $signatureHeader
-                || preg_match('/[\x00-\x1F\x7F]/', $signatureHeader) === 1
+                || $signatureHeaderInvalid
             ) {
                 throw new InvalidArgumentException(
                     'Server-event request material is invalid.'
@@ -119,7 +126,7 @@ if (!class_exists('RED_Addon_Payment_Adapter_Server_Event_Request', false)) {
                 'valid' => true,
                 'bodyBytes' => $this->bodyBytes,
                 'bodySha256' => $this->bodySha256,
-                'signaturePresent' => true,
+                'signaturePresent' => $material['signatureHeader'] !== '',
             ];
         }
 
@@ -152,9 +159,13 @@ if (!class_exists('RED_Addon_Payment_Adapter_Server_Event_Request', false)) {
 if (!function_exists('red_addon_payment_adapter_ingress_plan_result')) {
     function red_addon_payment_adapter_ingress_plan_result($packageId = '')
     {
+        $packageId = is_string($packageId) ? $packageId : '';
+        $wompiProfile = $packageId === 'redcms.store-lite-wompi';
         return [
             'valid' => false,
-            'profileId' => 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $wompiProfile
+                ? 'store_lite_wompi_adapter_v1'
+                : 'store_lite_stripe_checkout_adapter_v1',
             'ingressContractReady' => false,
             'enableReady' => false,
             'activationSupported' => false,
@@ -168,17 +179,19 @@ if (!function_exists('red_addon_payment_adapter_ingress_plan_result')) {
             'databaseAccess' => false,
             'networkAccess' => false,
             'routeExposure' => false,
-            'packageId' => is_string($packageId) ? $packageId : '',
+            'packageId' => $packageId,
             'version' => '',
             'serverEventRoute' => '',
             'serverEventPath' => '',
             'method' => 'POST',
             'contentType' => 'application/json',
-            'requiredHeaders' => [
-                'Content-Type',
-                'Content-Length',
-                'Stripe-Signature',
-            ],
+            'requiredHeaders' => $wompiProfile
+                ? ['Content-Type', 'Content-Length']
+                : [
+                    'Content-Type',
+                    'Content-Length',
+                    'Stripe-Signature',
+                ],
             'maximumBodyBytes' => 65536,
             'contractSha256' => '',
             'registrarPlanSha256' => '',
@@ -283,6 +296,7 @@ if (!function_exists('red_addon_payment_adapter_server_event_ingress_plan')) {
         }
 
         $result['version'] = $snapshot['version'];
+        $result['profileId'] = $profile['profileId'];
         $result['serverEventRoute'] = $profile['serverEventRoute'];
         $result['serverEventPath'] = $profile['serverEventPath'];
         $result['contractSha256'] = $profile['contractSha256'];
@@ -321,13 +335,20 @@ if (!function_exists('red_addon_payment_adapter_server_event_ingress_plan')) {
 if (!function_exists('red_addon_payment_adapter_server_event_ingress_plan_is_valid')) {
     function red_addon_payment_adapter_server_event_ingress_plan_is_valid($plan)
     {
+        $planData = is_array($plan) ? $plan : [];
+        $packageId = is_string($planData['packageId'] ?? null)
+            ? $planData['packageId']
+            : '';
+        $expectedResult = red_addon_payment_adapter_ingress_plan_result(
+            $packageId
+        );
         if (!is_array($plan)
             || array_keys($plan) !== array_keys(
                 red_addon_payment_adapter_ingress_plan_result('')
             )
             || empty($plan['valid'])
             || ($plan['profileId'] ?? null)
-                !== 'store_lite_stripe_checkout_adapter_v1'
+                !== $expectedResult['profileId']
             || empty($plan['ingressContractReady'])
             || ($plan['enableReady'] ?? null) !== false
             || ($plan['activationSupported'] ?? null) !== false
@@ -351,11 +372,8 @@ if (!function_exists('red_addon_payment_adapter_server_event_ingress_plan_is_val
             || !red_addon_valid_route_path($plan['serverEventPath'] ?? null)
             || ($plan['method'] ?? null) !== 'POST'
             || ($plan['contentType'] ?? null) !== 'application/json'
-            || ($plan['requiredHeaders'] ?? null) !== [
-                'Content-Type',
-                'Content-Length',
-                'Stripe-Signature',
-            ]
+            || ($plan['requiredHeaders'] ?? null)
+                !== $expectedResult['requiredHeaders']
             || ($plan['maximumBodyBytes'] ?? null) !== 65536
             || !red_addon_valid_sha256($plan['contractSha256'] ?? null)
             || !red_addon_valid_sha256($plan['registrarPlanSha256'] ?? null)
@@ -393,25 +411,33 @@ if (!function_exists('red_addon_payment_adapter_server_event_ingress_plan_is_val
 
 if (!function_exists('red_addon_payment_adapter_server_event_headers')) {
     /**
-     * Requires an upstream-complete canonical capture of the three relevant
-     * header lines. Extra, missing, reordered, or duplicated lines fail closed.
+     * Requires an upstream-complete canonical capture for the selected closed
+     * provider profile. Extra, missing, reordered, or duplicated lines fail
+     * closed.
      */
-    function red_addon_payment_adapter_server_event_headers($capture)
+    function red_addon_payment_adapter_server_event_headers(
+        $capture,
+        $profileId = 'store_lite_stripe_checkout_adapter_v1'
+    )
     {
+        $bodySignedProfile = $profileId === 'store_lite_wompi_adapter_v1';
+        if (!$bodySignedProfile
+            && $profileId !== 'store_lite_stripe_checkout_adapter_v1'
+        ) {
+            return null;
+        }
+        $expectedNames = $bodySignedProfile
+            ? ['Content-Type', 'Content-Length']
+            : ['Content-Type', 'Content-Length', 'Stripe-Signature'];
         if (!is_array($capture)
             || array_keys($capture) !== ['complete', 'headers']
             || $capture['complete'] !== true
             || !is_array($capture['headers'])
             || !array_is_list($capture['headers'])
-            || count($capture['headers']) !== 3
+            || count($capture['headers']) !== count($expectedNames)
         ) {
             return null;
         }
-        $expectedNames = [
-            'Content-Type',
-            'Content-Length',
-            'Stripe-Signature',
-        ];
         $values = [];
         foreach ($capture['headers'] as $index => $header) {
             if (!is_array($header)
@@ -424,14 +450,17 @@ if (!function_exists('red_addon_payment_adapter_server_event_headers')) {
             $values[$header['name']] = $header['value'];
         }
         $contentLength = $values['Content-Length'];
-        $signature = $values['Stripe-Signature'];
+        $signature = $bodySignedProfile
+            ? ''
+            : $values['Stripe-Signature'];
         if ($values['Content-Type'] !== 'application/json'
             || preg_match('/\A[1-9][0-9]{0,4}\z/D', $contentLength) !== 1
             || (int) $contentLength > 65536
-            || strlen($signature) < 8
-            || strlen($signature) > 4096
-            || trim($signature) !== $signature
-            || preg_match('/[\x00-\x1F\x7F]/', $signature) === 1
+            || (!$bodySignedProfile
+                && (strlen($signature) < 8
+                    || strlen($signature) > 4096
+                    || trim($signature) !== $signature
+                    || preg_match('/[\x00-\x1F\x7F]/', $signature) === 1))
         ) {
             return null;
         }
@@ -509,7 +538,8 @@ if (!function_exists('red_addon_payment_adapter_server_event_capture')) {
             );
         }
         $headers = red_addon_payment_adapter_server_event_headers(
-            $headerCapture
+            $headerCapture,
+            $plan['profileId']
         );
         if (!is_array($headers)) {
             return red_addon_payment_adapter_server_event_capture_result(

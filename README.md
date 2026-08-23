@@ -205,8 +205,12 @@ assertions pass, including all 9 external hashes, while existing Stripe
 profile/registrar/ingress/synthetic/typed regressions remain green. C3B now
 passes an exact 16-assertion disposable install/database/registrar rehearsal
 with `database:0 grant:0 staged-project:0 primary:unchanged` cleanup. The fast
-Stripe-plus-Wompi registrar suite passes 18 assertions. C3C is next and owns
-atomic enablement plus two-client isolation without provider contact. See
+Stripe-plus-Wompi registrar suite passes 18 assertions. That left C3C atomic
+enablement plus two-client isolation without provider contact. C3C1 now
+completes the first half: exact Wompi body-signed ingress passes 31 fast
+assertions and the disposable rehearsal passes existing Stripe 24 plus Wompi
+17 atomic-enable assertions with exact cleanup. C3C2 is next and owns the
+two-client enable/disable isolation rehearsal. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -219,7 +223,9 @@ and
 and
 [Colombia C3A Core Profile](docs/PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md)
 and
-[Colombia C3B Disposable Lifecycle](docs/PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
+[Colombia C3B Disposable Lifecycle](docs/PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md)
+and
+[Colombia C3C1 Atomic Enablement](docs/PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

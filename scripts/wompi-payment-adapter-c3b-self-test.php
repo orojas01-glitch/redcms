@@ -17,7 +17,7 @@ require_once $projectRoot
     . '/includes/addon_payment_adapter_registrar_helpers.php';
 
 if (!preg_match(
-    '/\Aredcms_wompi_c3b_[A-Za-z0-9_]+\z/',
+    '/\Aredcms_(?:wompi_c3b|payment_adapter_db)_[A-Za-z0-9_]+\z/',
     (string) DBNAME
 )) {
     fwrite(
@@ -150,6 +150,7 @@ function red_wompi_c3b_record_enabled_store(
     );
 }
 
+if (!defined('RED_WOMPI_C3B_FIXTURE_ONLY')) {
 try {
     $password = password_hash('WompiC3B-Disposable-2026!', PASSWORD_DEFAULT);
     $statement = mysqli_prepare(
@@ -426,6 +427,7 @@ try {
 } catch (Throwable $throwable) {
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 ?>

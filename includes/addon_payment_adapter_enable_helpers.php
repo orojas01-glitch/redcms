@@ -18,9 +18,12 @@ require_once __DIR__ . '/addon_enable_helpers.php';
 if (!function_exists('red_addon_payment_adapter_enablement_result')) {
     function red_addon_payment_adapter_enablement_result($packageId = '')
     {
+        $packageId = is_string($packageId) ? $packageId : '';
         return [
             'valid' => false,
-            'profileId' => 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $packageId === 'redcms.store-lite-wompi'
+                ? 'store_lite_wompi_adapter_v1'
+                : 'store_lite_stripe_checkout_adapter_v1',
             'enableReady' => false,
             'activationSupported' => false,
             'stateMutation' => false,
@@ -31,7 +34,7 @@ if (!function_exists('red_addon_payment_adapter_enablement_result')) {
             'routeExposure' => false,
             'packageExecutionAttempted' => false,
             'registrarExecutionCompleted' => false,
-            'packageId' => is_string($packageId) ? $packageId : '',
+            'packageId' => $packageId,
             'version' => '',
             'currentState' => '',
             'targetState' => 'enabled',
@@ -98,6 +101,7 @@ if (!function_exists('red_addon_payment_adapter_enablement_plan')) {
             return $result;
         }
         $result['contractSha256'] = $profile['contractSha256'];
+        $result['profileId'] = $profile['profileId'];
         $result['settingCount'] =
             $profile['ordinarySettingCount'] + $profile['secretSettingCount'];
         $result['secretSettingCount'] = $profile['secretSettingCount'];
@@ -233,13 +237,23 @@ if (!function_exists('red_addon_payment_adapter_enablement_plan')) {
 if (!function_exists('red_addon_payment_adapter_enablement_plan_is_valid')) {
     function red_addon_payment_adapter_enablement_plan_is_valid($plan)
     {
+        $planData = is_array($plan) ? $plan : [];
+        $packageId = is_string($planData['packageId'] ?? null)
+            ? $planData['packageId']
+            : '';
+        $expectedProfileId = red_addon_payment_adapter_enablement_result(
+            $packageId
+        )['profileId'];
+        $expectedSecretCount = $expectedProfileId
+            === 'store_lite_wompi_adapter_v1'
+                ? 3
+                : 2;
         if (!is_array($plan)
             || array_keys($plan) !== array_keys(
                 red_addon_payment_adapter_enablement_result('')
             )
             || empty($plan['valid'])
-            || ($plan['profileId'] ?? null)
-                !== 'store_lite_stripe_checkout_adapter_v1'
+            || ($plan['profileId'] ?? null) !== $expectedProfileId
             || empty($plan['enableReady'])
             || empty($plan['activationSupported'])
             || ($plan['stateMutation'] ?? null) !== false
@@ -259,8 +273,10 @@ if (!function_exists('red_addon_payment_adapter_enablement_plan_is_valid')) {
             || $plan['settingCount'] > 8
             || ($plan['configuredSettingCount'] ?? null)
                 !== $plan['settingCount']
-            || ($plan['secretSettingCount'] ?? null) !== 2
-            || ($plan['availableSecretCount'] ?? null) !== 2
+            || ($plan['secretSettingCount'] ?? null)
+                !== $expectedSecretCount
+            || ($plan['availableSecretCount'] ?? null)
+                !== $expectedSecretCount
             || !red_addon_valid_sha256($plan['databaseSha256'] ?? null)
             || !red_addon_valid_sha256($plan['contractSha256'] ?? null)
             || !red_addon_valid_sha256($plan['databasePlanSha256'] ?? null)

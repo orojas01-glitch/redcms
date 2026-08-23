@@ -26,6 +26,8 @@ WOMPI_REPOSITORY="${RED_WOMPI_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-
 STORE_REVISION='f7de77eb1694fb6003340632c5018024753fe1fa'
 WOMPI_REVISION='e17a371d73f286f5586deae88ad2c73d2f233651'
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
+SELF_TEST_SCRIPT="${RED_WOMPI_SELF_TEST_SCRIPT:-wompi-payment-adapter-c3b-self-test.php}"
+BEFORE_SELF_TEST_SCRIPT="${RED_WOMPI_BEFORE_SELF_TEST_SCRIPT:-}"
 RUN_SUFFIX="$(date +%s)_$$"
 DATABASE_NAME="${RED_WOMPI_C3B_DATABASE:-redcms_wompi_c3b_$RUN_SUFFIX}"
 TEMP_ROOT=""
@@ -142,7 +144,7 @@ trap red_wompi_c3b_cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-if [[ ! "$DATABASE_NAME" =~ ^redcms_wompi_c3b_[A-Za-z0-9_]+$
+if [[ ! "$DATABASE_NAME" =~ ^redcms_(wompi_c3b|payment_adapter_db)_[A-Za-z0-9_]+$
     || ${#DATABASE_NAME} -gt 64
     || "$DATABASE_NAME" == "$RED_DB_NAME_RESOLVED"
 ]]; then
@@ -160,6 +162,32 @@ for repository in "$STORE_REPOSITORY" "$WOMPI_REPOSITORY"; do
 done
 if [[ ! -x "$FRANKENPHP_BIN" ]]; then
     printf 'FrankenPHP is unavailable: %s\n' "$FRANKENPHP_BIN" >&2
+    exit 66
+fi
+if [[ "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c3b-self-test.php'
+    && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c3c1-self-test.php'
+]]; then
+    printf 'Unsupported Wompi disposable self-test: %s\n' \
+        "$SELF_TEST_SCRIPT" >&2
+    exit 64
+fi
+if [[ ! -s "$RED_PROJECT_ROOT/scripts/$SELF_TEST_SCRIPT" ]]; then
+    printf 'Wompi disposable self-test is unavailable: %s\n' \
+        "$SELF_TEST_SCRIPT" >&2
+    exit 66
+fi
+if [[ -n "$BEFORE_SELF_TEST_SCRIPT"
+    && "$BEFORE_SELF_TEST_SCRIPT" != 'addon-payment-adapter-enable-self-test.php'
+]]; then
+    printf 'Unsupported Wompi prerequisite self-test: %s\n' \
+        "$BEFORE_SELF_TEST_SCRIPT" >&2
+    exit 64
+fi
+if [[ -n "$BEFORE_SELF_TEST_SCRIPT"
+    && ! -s "$RED_PROJECT_ROOT/scripts/$BEFORE_SELF_TEST_SCRIPT"
+]]; then
+    printf 'Wompi prerequisite self-test is unavailable: %s\n' \
+        "$BEFORE_SELF_TEST_SCRIPT" >&2
     exit 66
 fi
 if [[ "$(git -C "$STORE_REPOSITORY" rev-parse HEAD)" != "$STORE_REVISION"
@@ -268,13 +296,22 @@ RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
 RED_DB_NAME="$DATABASE_NAME" \
     "$STAGED_PROJECT/scripts/db-migrate.sh" "--database=$DATABASE_NAME"
 
+if [[ -n "$BEFORE_SELF_TEST_SCRIPT" ]]; then
+    RED_DB_HOST="$RED_DB_HOST_RESOLVED:$RED_DB_PORT_RESOLVED" \
+    RED_DB_USER="$RED_DB_USER_RESOLVED" \
+    RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
+    RED_DB_NAME="$DATABASE_NAME" \
+        "$FRANKENPHP_BIN" php-cli \
+        "$STAGED_PROJECT/scripts/$BEFORE_SELF_TEST_SCRIPT"
+fi
+
 RED_DB_HOST="$RED_DB_HOST_RESOLVED:$RED_DB_PORT_RESOLVED" \
 RED_DB_USER="$RED_DB_USER_RESOLVED" \
 RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
 RED_DB_NAME="$DATABASE_NAME" \
 RED_WOMPI_C3B_PROJECT_ROOT="$STAGED_PROJECT" \
     "$FRANKENPHP_BIN" php-cli \
-    "$STAGED_PROJECT/scripts/wompi-payment-adapter-c3b-self-test.php"
+    "$STAGED_PROJECT/scripts/$SELF_TEST_SCRIPT"
 
 RUN_SUCCEEDED=1
 printf '%s\n' 'Wompi C3B disposable lifecycle and registrar rehearsal passed before cleanup.'
