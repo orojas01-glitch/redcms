@@ -529,6 +529,12 @@ features.
   refusal, and rollback proof
 - Core-owned public-placement form and POST/CSRF endpoint with server-derived
   package/component ownership and numeric destination choices
+- Read-only composite destination provisioning preflight that binds a
+  write-disabled package preview to server-derived record IDs, explicit
+  language/layout/positions, Article-route collision checks, the existing
+  component create plan, future placement evidence, and a deterministic
+  four-operation plan hash. It has no endpoint, button, callback invocation,
+  transaction, allocation, content write, audit, or search refresh
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results
