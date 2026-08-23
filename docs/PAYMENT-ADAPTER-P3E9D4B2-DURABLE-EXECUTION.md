@@ -1,7 +1,7 @@
 # P3E-9D4B2 Durable Real-POST Execution
 
 Status: complete in core; D4C operator command and no-contact rehearsal are
-next. No real provider request occurred.
+now also complete. No real provider request occurred.
 
 ## Durable Boundary
 
@@ -50,6 +50,6 @@ public/admin/browser lifecycles, and forced rollback checks.
 The core helper has no DNS, socket, TLS, HTTP, cURL, Stripe SDK, request global,
 route, public endpoint, browser bridge, CLI command, retry loop, or deployment
 path. The acceptance handler is a final in-memory fixture and contains no
-network primitive. D4C must add the dry-run-first CLI contract and a network-
-disabled cross-repository rehearsal; it must not run real apply. D4D remains
+network primitive. The later D4C slices add the dry-run-first CLI contract and
+network-disabled cross-repository rehearsal without real apply. D4D remains
 the separately authorized first production-transport Sandbox POST.

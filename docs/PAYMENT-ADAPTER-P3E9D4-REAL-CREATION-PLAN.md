@@ -1,8 +1,8 @@
 # P3E-9D4 Real Sandbox Checkout Creation Plan
 
-Status: planning complete; D4A and D4B are implemented without provider
-execution, and D4C is next. D4 is split into four review stops so the first
-real Stripe `POST` remains the final operational step.
+Status: planning complete; D4A through D4C are implemented without provider
+execution, and D4D remains separately approval-gated. D4 is split into four
+review stops so the first real Stripe `POST` remains the final operational step.
 
 ## Why D4 Is Not One Coding Step
 
@@ -89,8 +89,9 @@ caller is added.
 
 ## D4C — Operator Command And No-Contact Rehearsal
 
-Status: in progress. D4C1 CLI-only command contract passes 74 assertions;
-D4C2 network-disabled no-contact rehearsal remains next. No real apply ran.
+Status: complete. D4C1 CLI-only command contract passes 74 assertions and D4C2
+passes 92 source assertions plus the network-disabled operational rehearsal.
+No real apply ran.
 
 The CLI-only command defaults to dry run and requires exact database, actor,
 package/version/state, backup, plan/request/order, authorization/claim/start,

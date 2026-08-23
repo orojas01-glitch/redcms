@@ -59,6 +59,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-mutation-evidence-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-operation-command-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-post-operator-command-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-post-rehearsal-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-sandbox-checkout-real-operation-rehearsal-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-trust-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-admin-tool-form-create-registration-self-test.php"

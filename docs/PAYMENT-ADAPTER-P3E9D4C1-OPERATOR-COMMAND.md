@@ -1,7 +1,7 @@
 # P3E-9D4C1 Real-POST Operator Command
 
-Status: complete as a CLI-only source contract. P3E-9D4C2 network-disabled
-no-contact rehearsal remains next. No real apply occurred.
+Status: complete dependency. P3E-9D4C2 no-contact rehearsal is now also
+complete. No real apply occurred.
 
 ## Command Boundary
 
@@ -42,7 +42,7 @@ absence of network/shell/secret/runtime primitives from command source, and
 absence of public or browser bridges. The test opens no database, reads no
 configuration, resolves no secret, executes no package, and invokes no runner.
 
-P3E-9D4C2 must separately stage exact merged core, adapter, and Store Lite
-sources in a fresh disposable current-schema database, exercise dry run and
-changed/incomplete confirmation refusal with provider networking disabled, and
-prove exact cleanup. It must never run the command's real `--apply`.
+The later P3E-9D4C2 slice separately stages exact merged core, adapter, and
+Store Lite sources in a fresh disposable current-schema database, exercises
+dry run and changed/incomplete confirmation refusal with provider networking
+disabled, and proves exact cleanup without running real `--apply`.

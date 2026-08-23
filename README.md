@@ -146,8 +146,8 @@ the exact uninvoked provider-write operation with offline and local-loopback
 acceptance, but Stripe was not contacted. D4B durable core execution is now
 complete through fresh authority/claim, start-before-access, one sealed
 in-memory invocation, bounded result, and permanent no-retry acceptance. D4C
-CLI/no-contact rehearsal is next, and D4D remains one separately authorized
-real Sandbox POST. See
+CLI/no-contact rehearsal is now also complete without real apply; D4D remains
+one separately authorized real Sandbox POST. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
@@ -181,9 +181,14 @@ and
 P3E-9D4C1 now adds the CLI-only, dry-run-first real-POST command contract with
 74 pure assertions. It requires the exact D4B identities, one nonzero backup,
 three intended provider effects, and eight explicit exclusions. No command
-apply, secret value, package handler, network, or provider request ran. D4C2
-network-disabled no-contact rehearsal remains next. See
-[P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md).
+apply, secret value, package handler, network, or provider request ran. D4C2 is
+now also complete: 92 source assertions plus exact staged dry run, incomplete/
+changed refusal, zero real apply/start/result/provider effects, and exact
+cleanup passed with adapter repair commit `44ed7b3`. D4D remains separately
+approval-gated. See
+[P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
+and
+[P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
