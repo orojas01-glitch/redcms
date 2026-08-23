@@ -173,12 +173,14 @@ validate and project closed facts.
 5. **C4 — active but owner-gated Wompi Sandbox:** C4A completes a dated official
    contract/readiness audit without account or provider API effect. C4B1 now
    adds credential-free/no-contact merchant-contract retrieval planning,
-   response containment, and exact core adoption. C4B2 next owns two-contract
-   consent plus transient request/signature contracts. Later C4B gates own
-   one-attempt, command, and transport-double contracts. C4C owner account plus
+   response containment, and exact core adoption. C4B2 adds exact two-contract
+   presentation/consent plus transient request/signature contracts and core
+   adoption. C4B3 next owns transaction-create/lookup containment. Later C4B
+   gates own one-attempt, command, and transport-double contracts. C4C owner
+   account plus
    one read-only merchant GET, C4D one approved transaction, and C4E declined/
-   event/rotation
-   each need separate explicit authorization. C0 authorizes none of those
+   event/rotation each need separate explicit authorization. C0 authorizes none
+   of those
    external acts.
 6. **C5 — separately approved demo deployment:** review HTTPS webhook ingress,
    retention, customer acceptance UI, order operations, backups, rollback,

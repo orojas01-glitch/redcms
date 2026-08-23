@@ -228,9 +228,14 @@ only two Wompi-controlled HTTPS contract links plus token/evidence hashes.
 Exact core adoption passes 43 profile, 16 disposable install, existing Stripe
 24 plus Wompi 17 atomic-enable, and 21 two-client assertions with exact cleanup
 and the configured primary unchanged. Core runtime helpers remain unchanged.
-C4B2 is next: explicit two-contract presentation/consent evidence plus the
-transient server-side integrity/wire builder, still without transport or
-provider contact. See
+C4B2 is now complete in separate package `0.1.2` at `fdbf881`: an exact two-
+link/two-control presentation model, 15-minute consent evidence, and a transient
+server-side integrity/wire preflight that returns only bounded hashes/field
+names. Exact core adoption passes 46 profile, 16 disposable install, existing
+Stripe 24 plus Wompi 17 atomic-enable, and 21 two-client assertions with exact
+cleanup and the configured primary unchanged. Core runtime helpers remain
+unchanged. C4B3 is next for strict contained transaction-create/lookup
+projections, still without transport or provider contact. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -251,7 +256,9 @@ and
 and
 [Colombia C4A Official Readiness](docs/PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md)
 and
-[Colombia C4B1 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
+[Colombia C4B1 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md)
+and
+[Colombia C4B2 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

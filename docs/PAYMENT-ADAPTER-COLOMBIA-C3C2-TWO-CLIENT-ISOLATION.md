@@ -121,3 +121,7 @@ records current requirements and the hard C4B engineering blockers in
 C4B1 later publishes package `0.1.1` at `7e4f8cb` and reruns the exact
 single/two-client lifecycle proofs without changing core runtime helpers. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
+
+C4B2 later publishes package `0.1.2` at `fdbf881` and repeats those exact
+proofs for presentation/consent/transient-wire contracts. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).

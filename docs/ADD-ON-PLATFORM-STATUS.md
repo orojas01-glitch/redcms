@@ -9,7 +9,8 @@ skeleton at commit `e17a371`, the C3A closed non-executing core Wompi profile,
 the C3B exact disposable install/database/registrar proof, the C3C1 exact
 body-signed ingress plus atomic-enable rehearsal, and the C3C2 two-client
 isolation proof, plus the documentation-only C4A official Wompi readiness
-audit and the external-package/core-adoption C4B1 merchant-contract preflight.
+audit, the C4B1 merchant-contract preflight, and the C4B2 presentation/consent/
+transient-wire package plus exact core adoption.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, orange is
@@ -84,11 +85,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | Colombia C4B1 publishes Wompi package 0.1.1 at `7e4f8cb`: a hash-only merchant-contract GET plan plus strict two-contract/token-hash response projection. Exact core adoption and single/two-client disposable proofs pass with exact cleanup and no core runtime change. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C4B2 is next: explicit two-contract presentation/consent evidence plus a transient server-side Nequi integrity/wire builder, still credential-free and no-contact. |
+| What just finished? | Colombia C4B2 publishes Wompi package 0.1.2 at `fdbf881`: exact two-link/two-control presentation, 15-minute consent evidence, and a transient Sandbox signature/body/header/request preflight that returns only redacted hashes/field names. Exact core adoption and disposable proofs pass with no runtime change. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C4B3 is next: strict contained transaction-create and lookup response projections bound to the C4B2 wire evidence, still credential-free/no-contact. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. After C4B2, contained create/lookup projections plus one-attempt, CLI, transport-double, and disposable no-contact gates remain before C4C owner account/read-only retrieval. C4D one approved Sandbox transaction, C4E declined/event/rotation, and C5 deployment retain separate approval. |
+| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. After C4B3, one-attempt authority/claim/state, CLI, transport-double, and disposable no-contact gates remain before C4C owner account/read-only retrieval. C4D one approved Sandbox transaction, C4E declined/event/rotation, and C5 deployment retain separate approval. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -162,22 +163,23 @@ flowchart LR
     CO3C2["COMPLETE<br/>Colombia C3C2. Two-client<br/>enable/disable isolation"]
     CO4A["COMPLETE<br/>Colombia C4A. Official contract<br/>+ readiness audit"]
     CO4B1["COMPLETE<br/>Colombia C4B1. Merchant contracts<br/>+ exact core adoption"]
-    CO4B2["ACTIVE<br/>Colombia C4B2. Two-contract consent<br/>+ transient wire/signature"]
-    CO4B3["PENDING<br/>Later C4B. Create/lookup +<br/>attempt, CLI, doubles, rehearsal"]
+    CO4B2["COMPLETE<br/>Colombia C4B2. Two-contract consent<br/>+ transient wire/signature"]
+    CO4B3["ACTIVE<br/>Colombia C4B3. Create/lookup<br/>response containment"]
+    CO4B4["PENDING<br/>Later C4B. Attempt authority/state<br/>+ CLI, doubles, rehearsal"]
     CO4C["OWNER-GATED<br/>Colombia C4C-E. Account/read-only GET<br/>then separately approved Sandbox effects"]
     CO5["GATED<br/>Colombia C5. Demo<br/>deployment review"]
 
     P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
-    P0 --> CO0 --> CO1 --> CO2 --> CO3A --> CO3B --> CO3C1 --> CO3C2 --> CO4A --> CO4B1 --> CO4B2 --> CO4B3 --> CO4C --> CO5
+    P0 --> CO0 --> CO1 --> CO2 --> CO3A --> CO3B --> CO3C1 --> CO3C2 --> CO4A --> CO4B1 --> CO4B2 --> CO4B3 --> CO4B4 --> CO4C --> CO5
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef deferred fill:#fff7e6,stroke:#a36b00,color:#5e4100;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B,CO3C1,CO3C2,CO4A,CO4B1 complete;
-    class CO4B2 active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B,CO3C1,CO3C2,CO4A,CO4B1,CO4B2 complete;
+    class CO4B3 active;
     class P3E9D4D,CO4C deferred;
-    class P4,CO4B3,CO5 gated;
+    class P4,CO4B4,CO5 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -243,8 +245,10 @@ enable/disable isolation, closing Colombia C3. C4A completes the dated official
 Wompi readiness audit without account or provider API contact. C4B1 publishes
 package `0.1.1` at `7e4f8cb` with pure merchant-contract planning/containment,
 then passes exact core adoption and disposable single/two-client proofs. C4B2
-is the active credential-free/no-contact consent plus transient wire/signature
-gate. C4C through C4E remain owner-gated before account access, credential
+publishes package `0.1.2` at `fdbf881` with exact presentation/consent and
+transient wire/signature evidence, then passes the same exact adoption proofs.
+C4B3 is the active credential-free/no-contact create/lookup response-
+containment gate. C4C through C4E remain owner-gated before account access, credential
 entry, or provider contact.
 Every write credential, real
 network request, Checkout Session or Wompi transaction, payment, webhook,
@@ -268,6 +272,8 @@ The completed C4A official readiness audit is in
 [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
 The completed C4B1 package/core adoption proof is in
 [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
+The completed C4B2 package/core adoption proof is in
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
 ## Status rule
 

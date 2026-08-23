@@ -1903,8 +1903,8 @@ request bootstrap excludes the disabled package.
 
 137. Completed Colombia C4A as a public-docs-only official Wompi readiness
     audit dated 2026-08-23. Current Wompi-owned sources establish disjoint
-    and Production hosts/value prefixes, owner-operated merchant identity and
-    terms, public-key retrieval of two acceptance tokens plus two current
+    Sandbox and Production hosts/value prefixes, owner-operated merchant
+    identity and terms, public-key retrieval of two acceptance tokens plus two current
     contract links, explicit customer acceptance of both contracts, private-
     key Bearer transaction creation, COP/unique-reference/integrity/email/
     Nequi-phone requirements, asynchronous `PENDING` plus lookup/event
@@ -1946,11 +1946,39 @@ request bootstrap excludes the disabled package.
     and 21 two-client assertions with exact database/grant/stage cleanup and
     the configured primary unchanged. No account/dashboard, credential/
     personal value, provider API request, transaction, retained database/client
-    migration, starter package copy, demo, or deployment effect occurs. C4B2
-    is next and remains credential-free/no-contact for explicit two-contract
+    migration, starter package copy, demo, or deployment effect occurs. At
+    C4B1 close, C4B2 remained credential-free/no-contact for explicit two-contract
     presentation/consent evidence plus a transient server-side integrity/wire
     builder. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
+
+139. Completed Colombia C4B2 across separate Wompi package `0.1.2` at
+    `fdbf88145c5858c313f6f2a3e50137e54801d683` and an exact non-runtime core
+    adoption. One pure presentation model fixes exactly two ordered Wompi-
+    controlled HTTPS links and two separately named required controls. Consent
+    evidence binds separate presentation/acceptance facts to order, subject,
+    presentation/contract/token hashes, nonce, and an exact 15-minute window.
+    A transient Sandbox-only builder reconstructs the existing transaction
+    plan, verifies injected synthetic email/phone/token values against its
+    hashes, requires test private/integrity value families, constructs the exact
+    Bearer header, integrity signature, Nequi body, and POST request inside one
+    pure call, then returns only field names and redacted hashes. The actual
+    signature is not returned: a domain-separated integrity-input hash plus a
+    second hash of the signature prevent accidental signature disclosure.
+    Email/phone and their individual hashes, raw tokens, keys, authorization,
+    signature, body, and request are not returned/persisted. The external suite
+    passes 34 C2, 70 package/current-core, 29 C4B1, and 49 C4B2 assertions with
+    14 integrity files and ten source/package pairs. Core runtime helpers are
+    unchanged; exact pins now recognize `0.1.2`/`fdbf881`. Focused checks pass
+    46 profile, 18 registrar, 31 ingress, and 22 clean-starter assertions.
+    Disposable proofs pass 16 install/registrar, existing Stripe 24 plus Wompi
+    17 atomic-enable, and 21 two-client assertions with exact cleanup and the
+    configured primary unchanged. No account/dashboard, client credential/
+    personal resolution, provider API request, transaction, retained database/
+    client migration, starter package copy, demo, or deployment effect occurs.
+    C4B3 is next and remains credential-free/no-contact for transaction-create/
+    lookup response containment. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

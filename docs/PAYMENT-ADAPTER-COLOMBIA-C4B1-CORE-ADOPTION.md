@@ -83,14 +83,11 @@ the exact package. Their database-bound hashes/settings/references differed,
 immutable package hashes matched, one-client rollback/disablement did not
 change the peer, and both databases/grants were removed.
 
-## C4B2 boundary
+## C4B2 follow-up
 
-C4B2 is next and remains credential-free/no-contact. It may add only explicit
-two-contract presentation/consent evidence and a transient server-side Nequi
-wire/signature builder. It must keep raw email/phone/tokens/signature/secret
-values out of plans, logs, evidence, responses, databases, and browser state;
-must expose no HTTP transport; and must keep provider contact, transaction,
-payment, retry, event publication, order mutation, demo, and deployment false.
+C4B2 later completed in package `0.1.2` at `fdbf881` plus exact core adoption.
+It is recorded in
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
 C4C remains the first possible owner-operated account/credential/read-only
 merchant GET gate and still requires separate explicit authorization after all

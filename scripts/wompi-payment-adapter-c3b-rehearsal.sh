@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs the exact Store Lite 0.1.35 plus Wompi 0.1.1 C3B disposable rehearsal.'
+    printf '%s\n' 'Runs the exact Store Lite 0.1.35 plus Wompi 0.1.2 C3B disposable rehearsal.'
 }
 
 if [[ $# -gt 0 ]]; then
@@ -24,7 +24,7 @@ source "$SCRIPT_DIR/db-common.sh"
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite}"
 WOMPI_REPOSITORY="${RED_WOMPI_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite-wompi}"
 STORE_REVISION='f7de77eb1694fb6003340632c5018024753fe1fa'
-WOMPI_REVISION='7e4f8cb337d746b5a483932108e5dbcd109d7d86'
+WOMPI_REVISION='fdbf88145c5858c313f6f2a3e50137e54801d683'
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 SELF_TEST_SCRIPT="${RED_WOMPI_SELF_TEST_SCRIPT:-wompi-payment-adapter-c3b-self-test.php}"
 BEFORE_SELF_TEST_SCRIPT="${RED_WOMPI_BEFORE_SELF_TEST_SCRIPT:-}"
@@ -210,7 +210,7 @@ wompi_version="$("$RED_PHP_BIN_RESOLVED" -r '
     $manifest = json_decode(file_get_contents($argv[1]), true, 64, JSON_THROW_ON_ERROR);
     echo $manifest["version"] ?? "";
 ' "$WOMPI_REPOSITORY/package/addon.json")"
-if [[ "$store_version" != '0.1.35' || "$wompi_version" != '0.1.1' ]]; then
+if [[ "$store_version" != '0.1.35' || "$wompi_version" != '0.1.2' ]]; then
     printf 'Exact package versions required; Store Lite=%s Wompi=%s.\n' \
         "$store_version" "$wompi_version" >&2
     exit 65
