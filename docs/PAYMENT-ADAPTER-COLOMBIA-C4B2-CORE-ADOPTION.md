@@ -90,13 +90,13 @@ Both fresh clients independently installed/configured/enabled exact package
 differed. One-client rollback/disablement did not change the peer. All
 disposable schemas/grants/stages were removed.
 
-## C4B3 boundary
+## C4B3 follow-up
 
-C4B3 is next and remains credential-free/no-contact. It may add only strict
-contained projections for transaction-create and transaction-lookup responses,
-binding provider id/status/reference/amount/currency/method to the C4B2 wire
-evidence without returning raw bodies/headers or authorizing payment/order
-mutation.
+C4B3 later completed in package `0.1.3` at `277760e` plus exact core adoption.
+It adds strict contained transaction-create and transaction-lookup projections
+bound to the C4B2 wire/create evidence without returning raw bodies/headers or
+authorizing payment/order mutation. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 
 Later C4B gates separately own one-attempt authorization/claim/state, CLI
 confirmation, transport doubles, and disposable no-contact rehearsals. C4C

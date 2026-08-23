@@ -1360,6 +1360,16 @@ Core adoption changes only exact package pins/tests and passes disposable
 single/two-client cleanup. C4B3 remains no-contact response containment. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
+C4B3 adds no core runtime path. External package `0.1.3` strictly contains
+already-captured synthetic create/lookup response arrays bound to C4B2 wire
+and create evidence. It validates and discards documented personal/provider
+detail, returns only bounded transaction facts, hashes, and discarded field
+names, and treats even APPROVED as a proposed outcome. Payment verification,
+event agreement, payment/order/provider mutation, and retry remain false. Core
+adoption changes only exact package pins/tests and passes disposable single/
+two-client cleanup. C4B4 remains no-contact one-attempt authority/state. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

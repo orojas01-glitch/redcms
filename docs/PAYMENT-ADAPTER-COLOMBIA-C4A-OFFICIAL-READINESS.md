@@ -146,8 +146,8 @@ window remains compatible but must be rechecked at the event-execution gate.
 | Present two current contracts and record explicit acceptance | Exact two-link/two-control presentation and 15-minute consent evidence are bound by hash | **C4B2 complete offline** |
 | Transient raw email/phone/tokens | Pure builder validates against order/consent hashes, constructs internally, then returns no raw/personal hashes | **C4B2 complete offline** |
 | Private-key Bearer and integrity signature | Sandbox-only injected values build the exact header/signature internally; only domain-separated/double-hashed evidence returns | **C4B2 complete offline** |
-| `POST /transactions` | Adapter supports only `contract.probe`; all provider operations refuse | **C4B blocker** |
-| Polling final lookup | No Wompi transport or contained lookup parser exists | **C4B blocker** |
+| `POST /transactions` | Adapter supports only `contract.probe`; C4B2 builds/discards a synthetic request and C4B3 contains a synthetic response | **transport remains a later C4B blocker** |
+| Polling final lookup | C4B3 contains an already-captured lookup projection; no Wompi transport exists | **transport remains a later C4B blocker** |
 | Operational webhook response | Route handler deliberately refuses; no event persistence/response runner exists | Later C4 event blocker |
 
 The audit therefore authorizes no credential entry and no provider contact.
@@ -198,12 +198,21 @@ C4B2 keeps every network/provider/payment effect false and requires no owner
 credential. Exact core adoption and disposable proofs pass. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
-### C4B3 — next: transaction response containment
+### C4B3 — complete: transaction response containment
 
-C4B3 separately owns contained transaction-create/lookup projections bound to
-C4B2 wire evidence. Later C4B gates own a one-attempt authorization/claim/state
-machine, dry-run-first CLI confirmation, redacted evidence, transport doubles,
-and disposable no-contact rehearsals.
+Package `0.1.3` at `277760e` strictly contains transaction-create/lookup
+projections bound to C4B2 wire and create evidence. It validates/discards
+personal/provider detail, maps only proposed outcomes, and keeps payment
+verification, event agreement, provider/order mutation, and retry false. Exact
+core adoption and disposable proofs pass. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
+
+### C4B4 — next: one-attempt authority and state
+
+C4B4 owns a bounded one-attempt authorization/claim/state machine around the
+already-contained request/response contracts. Later C4B gates own dry-run-first
+CLI confirmation, redacted evidence, transport doubles, and disposable no-
+contact rehearsals.
 
 ### C4C — owner-operated account and read-only provider proof
 
