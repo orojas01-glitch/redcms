@@ -143,9 +143,9 @@ window remains compatible but must be rechecked at the event-execution gate.
 | Pending initiation plus final lookup/event agreement | Response and event gates require exact identity/amount/currency/method agreement | Ready offline |
 | Current-core external package regression | Package `0.1.1` replaces the stale assertion; exact core adoption and disposable proofs pass | **C4B1 complete** |
 | `GET /merchants/{public_key}` | Pure hash-only request planner and contained synthetic response gate exist; no final path or transport exists | **C4B1 complete offline** |
-| Present two current contracts and record explicit acceptance | Response gate returns two ordered Wompi-controlled HTTPS links, but no public presentation or consent contract exists | **C4B2 blocker** |
-| Transient raw email/phone/tokens | No bounded wire-request builder exists | **C4B blocker** |
-| Private-key Bearer and integrity signature | Values remain unresolved; no transient signer exists | **C4B blocker** |
+| Present two current contracts and record explicit acceptance | Exact two-link/two-control presentation and 15-minute consent evidence are bound by hash | **C4B2 complete offline** |
+| Transient raw email/phone/tokens | Pure builder validates against order/consent hashes, constructs internally, then returns no raw/personal hashes | **C4B2 complete offline** |
+| Private-key Bearer and integrity signature | Sandbox-only injected values build the exact header/signature internally; only domain-separated/double-hashed evidence returns | **C4B2 complete offline** |
 | `POST /transactions` | Adapter supports only `contract.probe`; all provider operations refuse | **C4B blocker** |
 | Polling final lookup | No Wompi transport or contained lookup parser exists | **C4B blocker** |
 | Operational webhook response | Route handler deliberately refuses; no event persistence/response runner exists | Later C4 event blocker |
@@ -184,21 +184,26 @@ and a contained synthetic response gate. Exact core adoption and disposable
 single/two-client proofs pass with exact cleanup. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
-### C4B2 — next: consent and transient wire/signature contract
+### C4B2 — complete: consent and transient wire/signature contract
 
-C4B2 may add only separately reviewable, dependency-free contracts for:
+Package `0.1.2` at `fdbf881` adds separately reviewable, dependency-free
+contracts for:
 
 1. two-contract presentation and explicit-acceptance evidence;
 2. a transient Nequi wire-request builder containing both tokens, exact
    email/phone, unique reference, COP amount, and integrity signature;
 3. strict Sandbox-prefix/host/path enforcement.
 
-C4B2 must keep every network/provider/payment effect false. It must not require
-the owner to enter a credential.
+C4B2 keeps every network/provider/payment effect false and requires no owner
+credential. Exact core adoption and disposable proofs pass. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
-Later C4B gates separately own contained transaction-create/lookup projections,
-a one-attempt authorization/claim/state machine, dry-run-first CLI confirmation,
-redacted evidence, transport doubles, and disposable no-contact rehearsals.
+### C4B3 — next: transaction response containment
+
+C4B3 separately owns contained transaction-create/lookup projections bound to
+C4B2 wire evidence. Later C4B gates own a one-attempt authorization/claim/state
+machine, dry-run-first CLI confirmation, redacted evidence, transport doubles,
+and disposable no-contact rehearsals.
 
 ### C4C — owner-operated account and read-only provider proof
 

@@ -1332,7 +1332,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
 
 C4B1 adds no core runtime path. External package `0.1.1` receives only a
 public-key hash/availability fact for merchant-contract planning and returns
@@ -1341,10 +1343,22 @@ projection hashes from a pre-contained synthetic response. Raw tokens are not
 returned; final path construction, presentation, consent, persistence,
 transport, credentials, provider contact, payment, order mutation, and retry
 remain false. Core adoption changes exact test/rehearsal pins only and passes
-single/two-client disposable proofs with exact cleanup. C4B2 may add explicit
+single/two-client disposable proofs with exact cleanup. At C4B1 close, C4B2
+could add explicit
 contract presentation/consent evidence and a transient server-side integrity/
 wire builder, but still no transport or provider contact. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
+
+C4B2 adds no core runtime path. External package `0.1.2` fixes exactly two
+Wompi-controlled contract links and required controls, binds explicit consent
+to presentation/order/subject/contract/token/nonce/time evidence, and
+constructs/discards the exact Sandbox authorization/signature/body/request
+inside a pure call. Actual signature, personal data and individual hashes,
+tokens, credentials, headers, body, and request are not returned/persisted.
+Domain-separated and second-order hashes avoid exposing the signature itself.
+Core adoption changes only exact package pins/tests and passes disposable
+single/two-client cleanup. C4B3 remains no-contact response containment. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

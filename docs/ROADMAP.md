@@ -354,9 +354,18 @@ hash-based merchant-contract GET plan and strict synthetic projection of two
 current contract links plus token/evidence hashes. Core runtime helpers remain
 unchanged. Exact adoption passes 43 profile, 16 install/registrar, existing
 Stripe 24 plus Wompi 17 atomic-enable, and 21 two-client assertions with exact
-cleanup and the configured primary unchanged. C4B2 is next: explicit two-
-contract presentation/consent evidence plus a transient server-side integrity/
-wire builder, still credential-free/no-contact.
+cleanup and the configured primary unchanged. At C4B1 close, C4B2 remained
+credential-free/no-contact for explicit two-contract presentation/consent plus
+a transient server-side integrity/wire builder.
+
+C4B2 is now complete. Package `0.1.2` at `fdbf881` fixes two contract links and
+required controls, 15-minute consent evidence, and a transient Sandbox
+signature/body/header/request that returns only redacted hashes/field names.
+Core runtime helpers remain unchanged. Exact adoption passes 46 profile, 16
+install/registrar, existing Stripe 24 plus Wompi 17 atomic-enable, and 21 two-
+client assertions with exact cleanup and the configured primary unchanged.
+C4B3 is next for strict transaction-create/lookup response containment, still
+credential-free/no-contact.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -374,7 +383,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md`](PAYMENT-ADAPTER-COLOMBIA-C4A-OFFICIAL-READINESS.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B1-CORE-ADOPTION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
