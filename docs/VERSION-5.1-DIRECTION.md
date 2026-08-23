@@ -1736,6 +1736,17 @@ request bootstrap excludes the disabled package.
     hosted/client, migration, or deployment effect occurred. P3E-9D4C CLI and
     no-contact rehearsal is next.
 
+128. Completed P3E-9D4C1 CLI-only real-POST operator command contract with 74
+    pure source assertions. Default dry run exits before the single D4B2 apply
+    call site. Apply requires exact database/package/Store Lite/actor/expiry,
+    D0/D2/D4 identities, order, secret-availability, backup, operation, target,
+    one attempt, three intended provider effects, and eight excluded effects.
+    Output retains only the bounded Session reference after URL discard; every
+    other result is consumed and no-retry. The source test opens no database,
+    reads no configuration or secret, invokes no package/runner, and performs
+    no network, provider, hosted/client, or deployment effect. P3E-9D4C2
+    network-disabled no-contact rehearsal remains next.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.

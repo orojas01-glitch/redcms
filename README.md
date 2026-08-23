@@ -178,6 +178,13 @@ network or provider request occurred. See
 and
 [P3E-9D4B2 Durable Execution](docs/PAYMENT-ADAPTER-P3E9D4B2-DURABLE-EXECUTION.md).
 
+P3E-9D4C1 now adds the CLI-only, dry-run-first real-POST command contract with
+74 pure assertions. It requires the exact D4B identities, one nonzero backup,
+three intended provider effects, and eight explicit exclusions. No command
+apply, secret value, package handler, network, or provider request ran. D4C2
+network-disabled no-contact rehearsal remains next. See
+[P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md).
+
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)
 on July 25, 2026.
