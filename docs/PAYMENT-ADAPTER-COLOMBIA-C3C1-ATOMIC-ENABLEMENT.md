@@ -1,6 +1,6 @@
 # Colombia C3C1 Wompi Ingress and Atomic Enablement
 
-Status: complete locally. C3C1 adds the exact Wompi body-signed ingress shape
+Status: complete on `main` through PR #164 at `91b4a62`. C3C1 adds the exact Wompi body-signed ingress shape
 and proves one atomic enablement in a fresh disposable database. It does not
 publish a route at runtime, invoke a handler, resolve a secret, contact Wompi,
 create a payment, or change the hosted demo.
@@ -116,12 +116,11 @@ transaction, Nequi notification, payment, event processing, order mutation,
 runtime route publication, browser flow, hosted-demo change, client data,
 external package copy into core, or deployment.
 
-## C3C2 boundary
+## C3C2 closure
 
-C3C2 is the next offline/disposable gate. It must repeat the exact package
-installation and enablement independently in two fresh client databases with
-different public values and secret references, prove all hashes/state/tables/
-registries remain client-local, disable one client without changing the other,
-prove rollback and lifecycle-lock behavior, and clean both databases and
-grants with the configured primary unchanged. Provider contact and real
-credential values remain separately approval-gated.
+C3C2 completes exact package installation and enablement independently in two
+fresh client databases with different public values and secret references. It
+proves database-bound hashes, state, tables, lifecycle locks, declarative
+runtime order, rollback, and disablement remain client-local, then cleans both
+databases/grants with the configured primary unchanged. See
+[`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).

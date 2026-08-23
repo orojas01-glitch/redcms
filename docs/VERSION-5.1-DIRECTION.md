@@ -1878,8 +1878,28 @@ request bootstrap excludes the disabled package.
     `database:0 grant:0 staged-project:0 primary:unchanged`. No real key or
     secret, provider contact, transaction, payment, event processing, runtime
     publication, browser, hosted-demo change, client data, or deployment
-    occurs. C3C2 is next and owns two-client enable/disable isolation. See
+    occurs. At C3C1 close, C3C2 remained the separate two-client
+    enable/disable isolation gate. See
     [`PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md`](PAYMENT-ADAPTER-COLOMBIA-C3C1-ATOMIC-ENABLEMENT.md).
+
+136. Completed Colombia C3C2 without changing core runtime behavior. One
+    exact-package rehearsal creates two fresh client databases/grants, applies
+    all 46 core migrations to each, and passes 21 assertions. Both clients
+    independently install, configure, and atomically enable Wompi. Immutable
+    contract/manifest/inventory hashes match while database, settings,
+    availability, registration, ingress, and plan hashes differ. Neither
+    client contains the other's marker/reference. Lifecycle locks coexist
+    across databases and refuse same-database contention. Injected client-A
+    disable failure rolls back without changing either fingerprint; successful
+    A disable retains its settings/migrations/tables and empty evidence while
+    B remains enabled and unchanged. Declarative runtime order excludes Wompi
+    only from A; repeat disable refuses. Cleanup proves
+    `databases:0 grants:0 staged-project:0 primary:unchanged`. No handler,
+    secret resolution, provider contact, payment, runtime publication, browser,
+    hosted-demo change, client data, or deployment occurs. Colombia C3 is
+    complete. C4 Wompi Sandbox credentials/contact is next and separately
+    owner-gated. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-COLOMBIA-C3C2-TWO-CLIENT-ISOLATION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
