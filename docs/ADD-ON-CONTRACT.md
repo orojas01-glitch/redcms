@@ -1741,6 +1741,31 @@ enablement eligibility. Existing enablement profiles still reject packages
 that provide administrator tools, so this generic core boundary does not
 activate Store Lite or any richer package.
 
+### Component destination provisioning preflight
+
+`includes/addon_component_destination_preflight_helpers.php` is the first
+read-only boundary for a future core-owned destination coordinator. Trusted
+core code supplies one normalized preview envelope, server-derived route and
+component record identifiers, explicit language/layout/position confirmation,
+and the package component values. The helper requires the package preview to
+remain `writesEnabled: false`, carry a valid plan hash, request confirmation,
+and identify an exact root alias path.
+
+The preflight reuses the existing component create and publish authorization,
+schema, runtime ownership, active-theme layout, active language-home target,
+hierarchy, alias-collision, record-availability, package-table, and value
+validation. It projects a core Article route, inactive component creation plan,
+future placement, target-state hash, fixed four-step operation order, and one
+deterministic composite plan hash. It never starts a transaction, allocates an
+identifier, invokes a package callback, creates a route/component/revision,
+publishes content, writes an audit, refreshes search, exposes an endpoint, or
+renders a button.
+
+This preflight is not execution authority. A later coordinator must rederive
+the package preview, lock and revalidate every stage, use the existing
+revisioned Article/component/publish writers, retain restartable checkpoint
+evidence, and notify search only after the relevant write commits.
+
 ## Data, Migration, And Client Isolation
 
 - Every add-on installation and migration ledger is scoped to one client

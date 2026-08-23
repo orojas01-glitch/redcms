@@ -20,6 +20,8 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_component_editor_publish_helpers.php';
 require_once $projectRoot
+    . '/includes/addon_component_destination_preflight_helpers.php';
+require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
@@ -831,6 +833,140 @@ try {
         $plan['values'] === ['title' => 'Package row', 'quantity' => 5]
             && $plan['transactionTables'] === [$packageTable],
         'package values and transaction tables are normalized exactly'
+    );
+
+    $positionOptions = red_admin_article_layout_position_options(
+        $connection,
+        $layout,
+        false
+    );
+    $destinationPosition = (int) array_key_first($positionOptions);
+    $destinationRequest = [
+        'packagePreview' => [
+            'schema' => 1,
+            'planSha256' => str_repeat('d', 64),
+            'intent' => 'provision',
+            'ready' => true,
+            'requiresConfirmation' => true,
+            'writesEnabled' => false,
+            'path' => '/product-fixture',
+        ],
+        'routeRecordId' => $targetPageRecordId,
+        'componentRecordId' => $contentRecordId,
+        'title' => 'Product fixture',
+        'alias' => 'product-fixture',
+        'language' => 'sp',
+        'layout' => $layout,
+        'routePagePosition' => $destinationPosition,
+        'routePagePositionOrder' => 0,
+        'componentPagePosition' => $destinationPosition,
+        'componentPagePositionOrder' => 1,
+        'componentValues' => $submittedValues,
+    ];
+    $destinationBefore = red_addon_editor_create_test_record_fingerprint(
+        $connection,
+        $contentRecordId,
+        $packageTable
+    );
+    $destination = red_addon_component_destination_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $destinationRequest
+    );
+    $destinationRepeated = red_addon_component_destination_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $destinationRequest
+    );
+    $destinationAfter = red_addon_editor_create_test_record_fingerprint(
+        $connection,
+        $contentRecordId,
+        $packageTable
+    );
+    red_addon_editor_create_test_assert(
+        !empty($destination['ready'])
+            && $destination['reason'] === 'ready'
+            && $destination['package'] === $packageId
+            && $destination['component'] === $componentId
+            && $destination['createPermission'] === $createPermission
+            && $destination['publishPermission'] === $publishPermission
+            && preg_match(
+                '/\A[a-f0-9]{64}\z/D',
+                $destination['componentCreatePlanHash']
+            ) === 1
+            && preg_match(
+                '/\A[a-f0-9]{64}\z/D',
+                $destination['planHash']
+            ) === 1,
+        'destination preflight composes exact create and publish authority'
+    );
+    red_addon_editor_create_test_assert(
+        $destination['routeValues'] === [
+            'RecordID' => $targetPageRecordId,
+            'Title' => 'Product fixture',
+            'Component' => 'Article',
+            'Alias' => 'product-fixture',
+            'Sections' => 'home',
+            'Categories' => '',
+            'SubCategories' => '',
+            'Layout' => $layout,
+            'PagePosition' => $destinationPosition,
+            'PagePositionOrder' => 0,
+            'Active' => 'Y',
+            'Language' => 'sp',
+        ]
+            && $destination['placementValues']['Article'] ===
+                'product-fixture'
+            && $destination['placementValues']['PagePosition'] ===
+                $destinationPosition
+            && $destination['operations'] === [
+                'core.article-route.create',
+                'core.addon-component.create',
+                'core.addon-component.publish',
+                'content.search.refresh',
+            ],
+        'destination plan fixes the root route, placement, and operation order'
+    );
+    red_addon_editor_create_test_assert(
+        $destinationRepeated === $destination
+            && $destinationBefore === $destinationAfter
+            && $creatorCalls === 0
+            && $loaderCalls === 0,
+        'destination preflight is deterministic and read-only without callbacks'
+    );
+
+    $unsafePreview = $destinationRequest;
+    $unsafePreview['packagePreview']['writesEnabled'] = true;
+    $refusedDestination = red_addon_component_destination_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $unsafePreview
+    );
+    red_addon_editor_create_test_assert(
+        empty($refusedDestination['ready'])
+            && $refusedDestination['reason'] === 'preview_invalid',
+        'write-enabled or malformed package preview evidence fails closed'
+    );
+
+    $duplicateIds = $destinationRequest;
+    $duplicateIds['routeRecordId'] = $contentRecordId;
+    $refusedDestination = red_addon_component_destination_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $duplicateIds
+    );
+    red_addon_editor_create_test_assert(
+        empty($refusedDestination['ready'])
+            && $refusedDestination['reason'] === 'invalid_request',
+        'route and component identifiers must be distinct server-derived values'
     );
     red_addon_editor_create_test_assert(
         preg_match('/\A[a-f0-9]{64}\z/', $plan['planHash']) === 1
