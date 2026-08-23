@@ -178,8 +178,8 @@ validate and project closed facts.
    adoption. C4B3 adds strict transaction-create/lookup containment plus exact
    core adoption. C4B4A adds pure one-attempt authorization/claim/state plus
    exact core adoption. C4B4B adds durable claim/replay protection. C4B4C owns
-   the sealed transport-double runner. C4B4D next owns the command and network-
-   disabled rehearsal contracts. C4C owner
+   the sealed transport-double runner. C4B4D now owns the completed command and
+   network-disabled rehearsal contracts. C4C owner
    account plus
    one read-only merchant GET, C4D one approved transaction, and C4E declined/
    event/rotation each need separate explicit authorization. C0 authorizes none

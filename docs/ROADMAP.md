@@ -393,8 +393,21 @@ indeterminate result afterward. Replay refuses before another call; post-start
 result/audit failure permanently spends the attempt. Its 38-assertion
 disposable rehearsal passes cleanup `database:0 grant:0 staged-project:0
 primary:unchanged`; package invocation, secret resolution, real network/Wompi,
-payment/order, and retry effects remain false. C4B4D is next for a CLI-only
+payment/order, and retry effects remain false. C4B4D then owns the CLI-only
 dry-run-first command and network-disabled disposable rehearsal.
+C4B4D is now complete. The CLI defaults to a zero-write dry run and requires
+exact database/package/state plus client/database/actor/order/plan/wire/
+authorization/claim/request/start hashes, a nonzero backup hash, one attempt,
+no retry, network disabled, and explicit provider/transaction/payment/order
+denials before it may invoke only the final sealed double. Its network-disabled
+disposable rehearsal proves the 55-assertion source contract, dry run,
+incomplete-confirmation refusal, one apply, replay refusal, exact four rows/four
+audits, empty Wompi attempt/event tables, and cleanup `database:0 grant:0
+staged-project:0 evidence:0 environment:clear source-repositories:unchanged
+primary:unchanged`. No account, credential, provider contact, transaction,
+payment, order, demo, or deployment effect occurs. C4C is next and remains
+separately owner-gated for account readiness, isolated Sandbox value entry,
+and one bounded read-only merchant retrieval.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -422,7 +435,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

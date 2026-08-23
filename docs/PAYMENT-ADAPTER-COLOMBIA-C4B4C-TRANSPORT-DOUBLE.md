@@ -65,8 +65,9 @@ mutation, and retry to remain false.
 
 ## Next boundary
 
-C4B4D is next and remains credential-free/no-contact. It may add only a CLI-
-only, dry-run-first operator command with exact evidence/confirmation gates and
-a disposable rehearsal whose runtime disables network primitives and never
-invokes any real apply path. C4C remains the first separately owner-authorized
-account/credential/read-only provider-contact gate.
+C4B4D is now complete and remains credential-free/no-contact. It adds only a
+CLI-only, dry-run-first operator command with exact evidence/confirmation gates
+and a disposable rehearsal whose runtime disables network primitives and
+invokes only this sealed double. C4C remains the first separately owner-
+authorized account/credential/read-only provider-contact gate. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).

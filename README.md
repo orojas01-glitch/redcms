@@ -253,9 +253,13 @@ assertion disposable rehearsal cleans the database/grant/stage and preserves
 the configured primary. C4B4C is now complete: core commits start before one
 final in-memory double call, records a bounded result, refuses replay, and
 permanently spends post-start failures. Its 38-assertion disposable rehearsal
-passes exact cleanup. C4B4D is next for a dry-run-first CLI and network-
-disabled no-contact rehearsal, still without a package handler, real transport,
-or provider contact. See
+passes exact cleanup. C4B4D is now complete: its CLI defaults to dry run and
+requires every exact bounded identity/denial before one sealed-double apply.
+The network-disabled disposable rehearsal passes the 55-assertion source
+contract, dry run, incomplete-confirmation refusal, one apply, replay refusal,
+four durable rows/four audits, zero provider effects, and exact cleanup. C4C is
+next and remains separately owner-gated before account access, isolated
+Sandbox value entry, or one read-only provider request. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -286,7 +290,9 @@ and
 and
 [Colombia C4B4B Durable Claim](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4B-DURABLE-CLAIM.md)
 and
-[Colombia C4B4C Transport Double](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+[Colombia C4B4C Transport Double](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md)
+and
+[Colombia C4B4D Operator Rehearsal](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

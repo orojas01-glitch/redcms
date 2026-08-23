@@ -231,10 +231,14 @@ around the exact durable claim. Start commits before invocation; replay and
 post-start retry fail closed. Exact disposable proof passes. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
 
-### C4B4D — next: CLI and network-disabled rehearsal
+### C4B4D — complete: CLI and network-disabled rehearsal
 
-C4B4D may add only a CLI-only dry-run-first confirmation contract and a fresh
-disposable rehearsal that disables network primitives and never contacts Wompi.
+C4B4D adds only a CLI-only dry-run-first confirmation contract and a fresh
+disposable rehearsal that disables network primitives and never contacts
+Wompi. The source contract passes 55 assertions; dry run, incomplete-
+confirmation refusal, one sealed-double apply, replay refusal, four rows/four
+audits, empty Wompi business tables, and exact cleanup pass. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
 ### C4C — owner-operated account and read-only provider proof
 

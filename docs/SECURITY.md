@@ -1400,9 +1400,22 @@ audit failure rolls back before invocation; any post-start failure permanently
 spends the attempt. Fault or malformed output becomes a no-network/no-provider
 indeterminate result. Replay refuses before a second call. The helper contains
 no package invocation, secret resolver, network primitive, Wompi host, payment/
-order mutation, or retry. C4B4D remains the CLI/network-disabled rehearsal
-gate. See
+order mutation, or retry. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+
+C4B4D adds one CLI-only command that defaults to a zero-write dry run. Apply
+requires exact bounded database/package/state and client/database/actor/order/
+plan/wire/authorization/claim/request/start identities, a nonzero backup hash,
+one attempt, no retry, network disabled, and explicit provider/transaction/
+payment/order denials. It can construct only the final core-owned sealed
+double. Its disposable runtime disables URL streams plus common cURL/socket
+functions and clears proxy and secret-value environments. Dry run, incomplete
+confirmation, one apply, replay refusal, four rows/four audits, empty Wompi
+attempt/event tables, exact cleanup, and unchanged source/primary database are
+proved. The command contains no credential input, secret resolver, registrar/
+handler, network primitive, Wompi host, browser bridge, or arbitrary callable.
+C4C remains the first separately owner-authorized provider-contact gate. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

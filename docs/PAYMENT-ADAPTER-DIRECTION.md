@@ -317,9 +317,11 @@ C4B4C is now complete in core. Start commits before one final in-memory double;
 a second transaction records a bounded completed or indeterminate result.
 Replay refuses before another call, and post-start storage failure remains
 permanently no-retry. Its 38-assertion disposable rehearsal passes exact
-cleanup with every real provider/order effect false. C4B4D is next for a CLI-
-only dry-run-first command plus network-disabled disposable rehearsal. See
-[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+cleanup with every real provider/order effect false. C4B4D now completes the
+CLI-only dry-run-first command plus network-disabled disposable rehearsal. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
 ## Explicit Exclusions
 
