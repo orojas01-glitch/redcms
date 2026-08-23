@@ -99,7 +99,7 @@ if (is_string($redPublicReadMethod)
             $redPublicReadRoute = red_addon_public_route_dispatch(
                 $redPublicReadMethod,
                 $redPublicReadTarget,
-                $_GET ?? []
+                red_addon_public_route_query($redPublicReadTarget)
             );
         }
     } catch (Throwable $exception) {
@@ -345,7 +345,7 @@ try {
 $redAddonPublicRoute = red_addon_public_route_dispatch(
     $_SERVER['REQUEST_METHOD'] ?? '',
     $_SERVER['REQUEST_URI'] ?? '',
-    $_GET ?? []
+    red_addon_public_route_query($_SERVER['REQUEST_URI'] ?? '')
 );
 if (!empty($redAddonPublicRoute['claimed'])) {
     while (ob_get_level() > $redThemeRequestBufferLevel) {
