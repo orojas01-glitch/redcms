@@ -14,9 +14,12 @@ require_once __DIR__ . '/addon_runtime_helpers.php';
 if (!function_exists('red_addon_payment_adapter_registrar_result')) {
     function red_addon_payment_adapter_registrar_result($packageId = '')
     {
+        $packageId = is_string($packageId) ? $packageId : '';
         return [
             'valid' => false,
-            'profileId' => 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $packageId === 'redcms.store-lite-wompi'
+                ? 'store_lite_wompi_adapter_v1'
+                : 'store_lite_stripe_checkout_adapter_v1',
             'registrarEvidenceReady' => false,
             'enableReady' => false,
             'activationSupported' => false,
@@ -28,7 +31,7 @@ if (!function_exists('red_addon_payment_adapter_registrar_result')) {
             'secretResolution' => false,
             'networkAccess' => false,
             'routeExposure' => false,
-            'packageId' => is_string($packageId) ? $packageId : '',
+            'packageId' => $packageId,
             'version' => '',
             'adapter' => '',
             'serverEventRoute' => '',
@@ -102,7 +105,7 @@ if (!function_exists('red_addon_payment_adapter_registration_fingerprint')) {
         $encoded = json_encode(
             [
                 'schema' => 1,
-                'profileId' => 'store_lite_stripe_checkout_adapter_v1',
+                'profileId' => $result['profileId'],
                 'packageId' => $result['packageId'],
                 'version' => $result['version'],
                 'contractSha256' => $result['contractSha256'],
@@ -148,6 +151,7 @@ if (!function_exists('red_addon_payment_adapter_validate_registrar')) {
             return $result;
         }
         $result['contractSha256'] = $profile['contractSha256'];
+        $result['profileId'] = $profile['profileId'];
         $result['adapter'] = $profile['adapter'];
         $result['serverEventRoute'] = $profile['serverEventRoute'];
         $result['gates']['adapterContract'] = 'passed';
@@ -249,13 +253,26 @@ if (!function_exists('red_addon_payment_adapter_registrar_preflight')) {
 if (!function_exists('red_addon_payment_adapter_registrar_preflight_is_valid')) {
     function red_addon_payment_adapter_registrar_preflight_is_valid($plan)
     {
+        $planData = is_array($plan) ? $plan : [];
+        $packageId = is_string($planData['packageId'] ?? null)
+            ? $planData['packageId']
+            : '';
+        $expectedProfileId = red_addon_payment_adapter_registrar_result(
+            $packageId
+        )['profileId'];
+        $wompiShapeValid = $expectedProfileId
+            !== 'store_lite_wompi_adapter_v1'
+            || (($planData['adapter'] ?? null)
+                    === 'redcms.store-lite-wompi/checkout'
+                && ($planData['serverEventRoute'] ?? null)
+                    === 'redcms.store-lite-wompi/provider-events');
         if (!is_array($plan)
             || array_keys($plan) !== array_keys(
                 red_addon_payment_adapter_registrar_result('')
             )
             || empty($plan['valid'])
-            || ($plan['profileId'] ?? null)
-                !== 'store_lite_stripe_checkout_adapter_v1'
+            || ($plan['profileId'] ?? null) !== $expectedProfileId
+            || !$wompiShapeValid
             || empty($plan['registrarEvidenceReady'])
             || ($plan['enableReady'] ?? null) !== false
             || ($plan['activationSupported'] ?? null) !== false

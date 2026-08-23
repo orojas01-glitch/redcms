@@ -1816,8 +1816,9 @@ request bootstrap excludes the disabled package.
     parity, forbidden-primitive and credential exclusion, and cleanup. The
     existing Stripe-only core payment profile deliberately refuses the package
     with only `outbound_host_invalid` and `setting_contract_invalid`; C3A
-    closes the profile portion in item 133, while C3B owns disposable
-    installation and registrar proof. No core/Store Lite/Stripe file, database,
+    closes the profile portion in item 133, while C3B was reserved for
+    disposable installation and registrar proof. No core/Store Lite/Stripe
+    file, database,
     migration
     execution, installation, enablement, setting or secret value, network,
     provider transaction, payment, webhook ingress, browser, order mutation,
@@ -1839,9 +1840,28 @@ request bootstrap excludes the disabled package.
     false and the four downstream blockers remain. No database, Wompi package
     install, migration, registrar execution for Wompi, enablement, setting,
     secret, provider request, payment, browser, Store Lite mutation, hosted-
-    demo change, client data, or deployment effect occurred. C3B is next and
-    owns disposable database/migration/registrar proof. See
+    demo change, client data, or deployment effect occurred. At C3A close, C3B
+    remained the separate disposable database/migration/registrar proof. See
     [`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
+
+134. Completed Colombia C3B by removing the registrar's final Stripe-only
+    profile constant and adding exact Wompi profile/adapter/route validation.
+    The dependency-free registrar suite passes 18 assertions and preserves the
+    26-assertion Stripe ingress suite. A separate real-package rehearsal
+    requires clean Store Lite `0.1.35` at `f7de77e` and Wompi `0.1.0` at
+    `e17a371`, creates one fresh disposable database/grant, applies all 46 core
+    migrations, records the exact Store Lite identity/11-migration enabled
+    baseline, and guarded-installs Wompi as `installed_disabled`. Its 16
+    assertions prove two applied migrations, two empty InnoDB tables, no
+    settings, exact database evidence, registrar-only adapter/refusing-route
+    registration without handler invocation or publication, repeat-install
+    refusal, bounded audit, and registrar database non-mutation. Cleanup proves
+    `database:0 grant:0 staged-project:0 primary:unchanged`. No Wompi
+    enablement, credential value, provider contact, transaction, payment,
+    browser, Store Lite order mutation, hosted-demo change, client data, or
+    deployment effect occurred. C3C is next and owns atomic enablement plus
+    two-client isolation. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

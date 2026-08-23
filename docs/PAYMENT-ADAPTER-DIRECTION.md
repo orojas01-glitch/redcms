@@ -233,15 +233,20 @@ contained registrar, refusing route, no-network source, and cleanup. Current
 Stripe-only payment-profile validation originally refused the package exactly.
 C3A now adds only exact non-executing `store_lite_wompi_adapter_v1` validation,
 including signed setting-key lists, and preserves all Stripe profile/registrar/
-ingress/synthetic/typed regressions. C3B is next and owns downstream disposable
-database/migration/registrar proof; enablement remains later. See
+ingress/synthetic/typed regressions. C3B now proves exact Wompi guarded install,
+two migrations/tables, database evidence, and registrar-only execution in one
+fresh disposable database. Its 16 assertions and exact cleanup pass; the fast
+registrar suite passes 18. C3C is next and owns atomic enablement plus
+two-client isolation; provider contact remains later. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
 
 ## Explicit Exclusions
 

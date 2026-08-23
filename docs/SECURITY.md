@@ -1294,16 +1294,22 @@ trusting counts. Every effect and the existing four downstream blockers remain
 false/present. All existing Stripe profile, registrar, ingress, synthetic, and
 typed regressions pass unchanged.
 
-C3B must extend only downstream database and registrar planning and use only
-fresh disposable databases. C4 Sandbox contact and C5 demo deployment require
-separate explicit approvals. See
+C3B now proves guarded installation and registration only in a fresh disposable
+database. Exact Wompi 0.1.0 remains `installed_disabled`; its two InnoDB tables
+are empty, setting rows remain absent, registered handlers are never invoked or
+published, and cleanup proves the database and grant absent with the configured
+primary unchanged. C3C may add only atomic enablement and two-client isolation
+proof. C4 Sandbox contact and C5 demo deployment require separate explicit
+approvals. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

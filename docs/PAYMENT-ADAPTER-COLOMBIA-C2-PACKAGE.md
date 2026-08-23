@@ -78,11 +78,11 @@ Stripe assertion. The package is still not claimed to be installable, enable-
 ready, or runtime-ready because downstream database/registrar/ingress/
 enablement helpers remain separately gated.
 
-## C3B boundary
+## C3B closure and C3C boundary
 
-C3B may change only downstream database and registrar planning to recognize
-this exact profile and prove it in fresh disposable databases. It must
-preserve:
+C3B changes only downstream registrar planning to recognize this exact profile
+and proves guarded installation/database/registrar evidence in one fresh
+disposable database. It preserves:
 
 - clean-starter exclusion of the external package;
 - exact per-client database and settings/secret isolation;
@@ -90,11 +90,14 @@ preserve:
 - non-executing discovery and migration planning;
 - contained registrar validation;
 - disabled-by-default and no-route-publication behavior;
-- exact enable/disable and rollback boundaries;
-- two-client isolation and exact cleanup; and
+- later enable/disable and rollback boundaries;
+- later two-client isolation plus exact current cleanup; and
 - every existing Stripe profile and regression.
 
-C3B must not create a Wompi account, key value, provider request, transaction,
+C3B creates no Wompi account, key value, provider request, transaction,
 Nequi notification, payment, public webhook ingress, browser flow, Store Lite
 order mutation, hosted-demo change, client deployment, or production host.
-Wompi Sandbox contact remains C4 and separately approval-gated.
+Its 16-assertion rehearsal cleans the database/grant/stage with the configured
+primary unchanged. C3C owns atomic enablement and two-client isolation. Wompi
+Sandbox contact remains C4 and separately approval-gated. See
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).

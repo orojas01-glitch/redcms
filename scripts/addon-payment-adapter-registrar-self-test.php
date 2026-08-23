@@ -22,6 +22,11 @@ $packageDirectory =
 $adapterHandlerMarker = $temporaryRoot . '/adapter-handler-invoked';
 $routeHandlerMarker = $temporaryRoot . '/route-handler-invoked';
 $invalidPlanMarker = $temporaryRoot . '/invalid-plan-package-loaded';
+$wompiPackageId = 'redcms.store-lite-wompi';
+$wompiPackageDirectory =
+    $fixtureProject . '/addons/redcms/store-lite-wompi';
+$wompiAdapterMarker = $temporaryRoot . '/wompi-adapter-invoked';
+$wompiRouteMarker = $temporaryRoot . '/wompi-route-invoked';
 
 function red_addon_payment_adapter_registrar_test_assert($condition, $message)
 {
@@ -178,6 +183,139 @@ function red_addon_payment_adapter_registrar_test_package(
     );
 }
 
+function red_addon_payment_adapter_registrar_test_write_wompi_package(
+    $directory,
+    $adapterMarker,
+    $routeMarker
+) {
+    if (!is_dir($directory . '/migrations')
+        && !mkdir($directory . '/migrations', 0700, true)
+        && !is_dir($directory . '/migrations')
+    ) {
+        throw new RuntimeException('Could not create Wompi registrar fixture.');
+    }
+    $entrypoint = "<?php\nreturn static function (\$registry): void {\n" .
+        "    \$registry->registerAdapter(" .
+        var_export('redcms.store-lite-wompi/checkout', true) .
+        ", static function (): void { file_put_contents(" .
+        var_export($adapterMarker, true) . ", 'invoked'); });\n" .
+        "    \$registry->registerRoute(" .
+        var_export('redcms.store-lite-wompi/provider-events', true) .
+        ", static function (): void { file_put_contents(" .
+        var_export($routeMarker, true) . ", 'invoked'); });\n" .
+        "};\n";
+    $attemptsPath = 'migrations/2026-08-23-create-payment-attempts.sql';
+    $eventsPath = 'migrations/2026-08-23-create-event-receipts.sql';
+    $attemptsSql = "CREATE TABLE RED_Addon_Wompi_Registrar_Attempts (\n" .
+        "  RecordID bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+        "  PRIMARY KEY (RecordID)\n" .
+        ") ENGINE=InnoDB;\n";
+    $eventsSql = "CREATE TABLE RED_Addon_Wompi_Registrar_Events (\n" .
+        "  RecordID bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+        "  PRIMARY KEY (RecordID)\n" .
+        ") ENGINE=InnoDB;\n";
+    $files = [
+        'addon.php' => $entrypoint,
+        $attemptsPath => $attemptsSql,
+        $eventsPath => $eventsSql,
+    ];
+    foreach ($files as $path => $contents) {
+        file_put_contents($directory . '/' . $path, $contents);
+    }
+    $integrityFiles = [];
+    foreach ($files as $path => $contents) {
+        $integrityFiles[] = [
+            'path' => $path,
+            'sha256' => hash('sha256', $contents),
+        ];
+    }
+    $manifest = [
+        '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
+        'schemaVersion' => 1,
+        'id' => 'redcms.store-lite-wompi',
+        'name' => 'Wompi registrar fixture',
+        'description' => 'Registration-only C3B Wompi fixture.',
+        'version' => '0.1.0',
+        'type' => 'adapter',
+        'compatibility' => [
+            'cms' => '>=5.1 <6.0',
+            'php' => '>=8.2 <9.0',
+        ],
+        'provides' => [
+            'components' => [],
+            'services' => [],
+            'adminTools' => [],
+            'adapters' => ['redcms.store-lite-wompi/checkout'],
+        ],
+        'dependencies' => [
+            'required' => [[
+                'id' => 'redcms.store-lite',
+                'version' => '>=0.1.35 <1.0',
+            ]],
+            'optional' => [],
+        ],
+        'permissions' => [],
+        'settings' => [[
+            'key' => 'wompi.public-key',
+            'label' => 'Wompi public key',
+            'type' => 'text',
+            'secret' => false,
+            'default' => null,
+        ], [
+            'key' => 'wompi.private-key',
+            'label' => 'Wompi private key reference',
+            'type' => 'secret-reference',
+            'secret' => true,
+        ], [
+            'key' => 'wompi.integrity-key',
+            'label' => 'Wompi integrity key reference',
+            'type' => 'secret-reference',
+            'secret' => true,
+        ], [
+            'key' => 'wompi.event-secret',
+            'label' => 'Wompi event secret reference',
+            'type' => 'secret-reference',
+            'secret' => true,
+        ]],
+        'migrations' => [[
+            'id' => '2026-08-23-wompi-payment-attempts',
+            'path' => $attemptsPath,
+            'sha256' => hash('sha256', $attemptsSql),
+        ], [
+            'id' => '2026-08-23-wompi-event-receipts',
+            'path' => $eventsPath,
+            'sha256' => hash('sha256', $eventsSql),
+        ]],
+        'routes' => [[
+            'id' => 'redcms.store-lite-wompi/provider-events',
+            'scope' => 'public',
+            'path' => '/addons/redcms/store-lite-wompi/provider-events',
+            'methods' => ['POST'],
+            'authentication' => 'server-signature',
+            'csrf' => 'not-applicable',
+        ]],
+        'publicMutationContracts' => [],
+        'jobs' => [],
+        'outboundHosts' => ['sandbox.wompi.co'],
+        'assets' => ['public' => [], 'admin' => []],
+        'integrity' => [
+            'entrypoint' => 'addon.php',
+            'files' => $integrityFiles,
+        ],
+        'uninstall' => [
+            'defaultDataAction' => 'retain',
+            'allowExplicitPurge' => false,
+        ],
+    ];
+    file_put_contents(
+        $directory . '/addon.json',
+        json_encode(
+            $manifest,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        ) . "\n"
+    );
+}
+
 function red_addon_payment_adapter_registrar_test_database_plan(array $package)
 {
     $profile = red_addon_payment_adapter_profile($package['manifest']);
@@ -193,9 +331,9 @@ function red_addon_payment_adapter_registrar_test_database_plan(array $package)
     $plan['migrationEvidenceSha256'] = hash('sha256', 'migration');
     $plan['tableEvidenceSha256'] = hash('sha256', 'table');
     $plan['dependencyCount'] = 1;
-    $plan['migrationCount'] = 1;
-    $plan['tableCount'] = 1;
-    $plan['innoDbTableCount'] = 1;
+    $plan['migrationCount'] = $profile['migrationCount'];
+    $plan['tableCount'] = $profile['migrationCount'];
+    $plan['innoDbTableCount'] = $profile['migrationCount'];
     foreach ([
         'adapterContract', 'authorization', 'trust', 'registry',
         'dependencies', 'capabilityNamespace', 'routeNamespace',
@@ -405,6 +543,68 @@ try {
     red_addon_payment_adapter_registrar_test_assert(
         !red_addon_payment_adapter_registrar_preflight_is_valid($tampered),
         'tampered registration evidence fails its deterministic contract'
+    );
+
+    red_addon_payment_adapter_registrar_test_write_wompi_package(
+        $wompiPackageDirectory,
+        $wompiAdapterMarker,
+        $wompiRouteMarker
+    );
+    $wompiPackage = red_addon_payment_adapter_registrar_test_package(
+        $wompiPackageId,
+        $fixtureProject
+    );
+    red_addon_payment_adapter_registrar_test_assert(
+        !empty($wompiPackage['valid']),
+        'exact Wompi registrar fixture passes generic package trust'
+    );
+    $wompiDatabasePlan =
+        red_addon_payment_adapter_registrar_test_database_plan(
+            $wompiPackage
+        );
+    red_addon_payment_adapter_registrar_test_assert(
+        red_addon_payment_adapter_database_preflight_is_valid(
+            $wompiDatabasePlan
+        )
+            && $wompiDatabasePlan['migrationCount'] === 2,
+        'Wompi fixture supplies exact two-migration database evidence'
+    );
+    $wompiResult = red_addon_payment_adapter_validate_registrar(
+        $wompiPackage,
+        $wompiDatabasePlan
+    );
+    red_addon_payment_adapter_registrar_test_assert(
+        red_addon_payment_adapter_registrar_preflight_is_valid($wompiResult)
+            && $wompiResult['profileId']
+                === 'store_lite_wompi_adapter_v1'
+            && $wompiResult['adapter']
+                === 'redcms.store-lite-wompi/checkout'
+            && $wompiResult['serverEventRoute']
+                === 'redcms.store-lite-wompi/provider-events'
+            && $wompiResult['registrationCount'] === 2,
+        'Wompi registrar evidence binds the exact closed profile and ids'
+    );
+    red_addon_payment_adapter_registrar_test_assert(
+        !file_exists($wompiAdapterMarker)
+            && !file_exists($wompiRouteMarker)
+            && !$wompiResult['handlerInvocation']
+            && !$wompiResult['runtimePublication']
+            && !$wompiResult['networkAccess']
+            && !$wompiResult['routeExposure'],
+        'Wompi handlers remain uninvoked, unpublished, and offline'
+    );
+    $wrongWompiProfile = $wompiResult;
+    $wrongWompiProfile['profileId'] =
+        'store_lite_stripe_checkout_adapter_v1';
+    $wrongWompiProfile['planSha256'] =
+        red_addon_payment_adapter_registrar_fingerprint(
+            $wrongWompiProfile
+        );
+    red_addon_payment_adapter_registrar_test_assert(
+        !red_addon_payment_adapter_registrar_preflight_is_valid(
+            $wrongWompiProfile
+        ),
+        'Wompi package evidence cannot be relabeled as the Stripe profile'
     );
     $helperSource = (string) file_get_contents(
         $projectRoot . '/includes/addon_payment_adapter_registrar_helpers.php'
