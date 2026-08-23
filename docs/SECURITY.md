@@ -1203,7 +1203,8 @@ refuses replay after any committed start. Fault, malformed output, missing
 secret, or result-storage ambiguity becomes a consumed indeterminate attempt.
 The 29-assertion fixture is final and in-memory with no network primitive. Core
 still exposes no CLI, route, public endpoint, browser bridge, retry, or
-automatic caller; D4C remains a separate review gate.
+automatic caller. D4C was implemented through separate command and no-contact
+review gates.
 
 P3E-9D4C1 adds only the CLI source contract around D4B2. The command defaults
 to dry run, recomputes current D4 authority and identity evidence, requires one
@@ -1212,8 +1213,19 @@ call site. Three provider effects must be confirmed `yes`; payment, webhook,
 browser, Store Lite mutation, Session expiration, retry, live mode, and client
 deployment must be confirmed `no`. The 74-assertion source test executes no
 command and proves credential, network, shell, secret/runtime primitive, and
-public/browser bridge absence. D4C2 must separately prove no-contact operation
-and cleanup without running real apply.
+public/browser bridge absence. The later D4C2 slice separately proves
+no-contact operation and cleanup without running real apply.
+
+P3E-9D4C2 now proves that no-contact boundary operationally. Exact core,
+discovery-valid adapter repair `44ed7b3`, and Store Lite sources are staged in
+one guarded temporary project. A runtime probe verifies URL streams and common
+cURL/socket functions are unavailable; secret-value and proxy inputs are
+removed. Only dry run and incomplete/changed apply refusals execute, leaving
+the D4 ledger at authorization/claim only with zero start/result. The fully
+confirmed apply set is never invoked. All temporary database, grant, files,
+environment inputs, and evidence are removed; source repositories and the
+configured disposable primary remain unchanged. D4D remains a separate
+explicit authorization gate.
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

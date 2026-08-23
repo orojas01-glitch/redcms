@@ -267,11 +267,12 @@ remain gated. D4A is complete in the separately distributed adapter at
 acceptance without Stripe contact. D4B is now complete: D4B1 fresh adapter-
 `0.1.8` authorization and claim pass 20 pure plus 30 disposable-database
 assertions, and D4B2 durable start/result plus one sealed in-memory invocation
-passes 29 assertions. D4C operator command/no-contact rehearsal is next; D4D
-remains one separately authorized real POST.
-P3E-9D4C is internally split for review: D4C1 CLI-only dry-run-first command
-now passes 74 pure assertions; D4C2 network-disabled cross-repository
-no-contact rehearsal remains next and must not run real apply.
+passes 29 assertions.
+P3E-9D4C is complete: D4C1 CLI-only dry-run-first command passes 74 pure
+assertions, and D4C2 passes 92 source assertions plus network-disabled staged
+dry run, incomplete/changed refusal, zero real apply/start/result/provider
+effects, unchanged sources/primary, and exact cleanup. D4D remains the
+separately authorized first real Sandbox POST.
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

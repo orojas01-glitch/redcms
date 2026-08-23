@@ -1747,6 +1747,19 @@ request bootstrap excludes the disabled package.
     no network, provider, hosted/client, or deployment effect. P3E-9D4C2
     network-disabled no-contact rehearsal remains next.
 
+129. Completed P3E-9D4C2 with 92 pure source assertions and one opt-in
+    network-disabled cross-repository rehearsal. Exact core, discovery-valid
+    adapter repair `44ed7b3`, and Store Lite `0.1.35` sources are staged; a
+    runtime probe proves URL streams and common cURL/socket functions disabled;
+    secret-value/proxy inputs are removed; and one fresh current-schema
+    database records only package identity, opaque settings, Owner/permissions,
+    D4 authorization, and claim. Dry run passes, incomplete and changed apply
+    are refused, the fully confirmed apply is never invoked, and ledger
+    evidence remains `2:2:0` with `real-apply:0 start-result:0
+    provider-effects:0`. Database, grant, staged files, evidence, environment,
+    source repositories, and primary cleanup pass exactly. P3E-9D4D remains
+    the separately authorized first real Sandbox POST.
+
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
 administrator verification.
