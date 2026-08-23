@@ -46,6 +46,85 @@ if (is_string($redAddonAssetRequestUri)
     exit;
 }
 
+$redPublicReadMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+$redPublicReadTarget = $_SERVER['REQUEST_URI'] ?? '';
+if (is_string($redPublicReadMethod)
+    && $redPublicReadMethod !== ''
+    && is_string($redPublicReadTarget)
+    && str_starts_with($redPublicReadTarget, '/addons/')
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__ . '/includes/addon_runtime_helpers.php';
+    require_once __DIR__ . '/includes/addon_public_route_helpers.php';
+
+    $redPublicReadConnection = null;
+    $redPublicReadRoute = red_addon_public_route_result();
+    try {
+        $redPublicReadConnection = @mysqli_connect(
+            red_config_value(
+                'DBHOST',
+                ['RED_DB_HOST', 'DBHOST'],
+                'localhost'
+            ),
+            red_config_value('DBUSER', ['RED_DB_USER', 'DBUSER'], ''),
+            red_config_value('DBPASS', ['RED_DB_PASS', 'DBPASS'], ''),
+            red_config_value('DBNAME', ['RED_DB_NAME', 'DBNAME'], '')
+        );
+        if (!$redPublicReadConnection
+            || !@mysqli_set_charset($redPublicReadConnection, 'utf8mb4')
+        ) {
+            throw new RuntimeException(
+                'The public read-route database connection is unavailable.'
+            );
+        }
+        red_addon_runtime_request_bootstrap(
+            $redPublicReadConnection,
+            __DIR__
+        );
+        $redPublicReadPath = red_addon_public_route_path(
+            $redPublicReadTarget
+        );
+        $redPublicReadDeclaration = $redPublicReadPath !== null
+            ? red_addon_public_route_declaration($redPublicReadPath)
+            : null;
+        $redPublicReadContract = is_array($redPublicReadDeclaration)
+            ? ($redPublicReadDeclaration['route'] ?? null)
+            : null;
+        if (is_array($redPublicReadContract)
+            && ($redPublicReadContract['scope'] ?? null) === 'public'
+            && ($redPublicReadContract['authentication'] ?? null) === 'public'
+            && ($redPublicReadContract['csrf'] ?? null) === 'not-applicable'
+            && in_array('GET', $redPublicReadContract['methods'] ?? [], true)
+        ) {
+            $redPublicReadRoute = red_addon_public_route_dispatch(
+                $redPublicReadMethod,
+                $redPublicReadTarget,
+                $_GET ?? []
+            );
+        }
+    } catch (Throwable $exception) {
+        error_log(
+            'RED-CMS public add-on read route failed: ' .
+            $exception->getMessage()
+        );
+        $redPublicReadRoute = red_addon_public_route_response(
+            red_addon_public_route_result('runtime_unavailable'),
+            503,
+            ['ok' => false, 'error' => 'temporarily_unavailable'],
+            'runtime_unavailable'
+        );
+        $redPublicReadRoute['claimed'] = true;
+    } finally {
+        if ($redPublicReadConnection instanceof mysqli) {
+            mysqli_close($redPublicReadConnection);
+        }
+    }
+    if (!empty($redPublicReadRoute['claimed'])) {
+        red_addon_public_route_emit($redPublicReadRoute);
+        exit;
+    }
+}
+
 $redPublicMutationMethod = $_SERVER['REQUEST_METHOD'] ?? '';
 $redPublicMutationTarget = $_SERVER['REQUEST_URI'] ?? '';
 if (is_string($redPublicMutationMethod)

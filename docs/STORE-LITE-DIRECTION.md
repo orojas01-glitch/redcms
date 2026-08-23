@@ -742,6 +742,14 @@ Store Lite is releasable only after disposable isolated acceptance proves:
    [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md). The next
    separately approved gate is a disposable client-only sandbox proposal under
    [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
+38. Completed the Store Lite 0.1.36 public search-source contract. Store Lite
+   owns `content.search-source.store-lite` and projects only eligible published
+   Product placements as bounded title, summary, language, canonical URL,
+   non-commercial keywords, and update time. Site Search 0.1.3 consumes only
+   that typed service, never Store Lite tables. The 16-assertion disposable
+   lifecycle proves install, enable, search, refresh, unavailable removal,
+   provider disable cleanup, re-enable recovery, and exact fixture cleanup.
+   No hosted demo or retained client installation was changed.
 
 Events Calendar remains the second independent vertical proof. Store Lite
 implementation must not add calendar, appointment, donation, restaurant, or

@@ -1995,6 +1995,64 @@ dispatcher must additionally prove that its supported
 web-server boundary preserves or rejects duplicate critical headers before PHP
 and cannot turn any request value into trusted-origin configuration.
 
+## Read-Only Public Utility And Site Search
+
+The `read_only_public_utility` lifecycle profile is a closed exception for
+operator-reviewed cross-cutting packages. It admits only exact public `GET`
+routes, typed services, package-owned migrations, and immutable public assets.
+Components, administrator surfaces, settings/secrets, public mutations, jobs,
+adapters, outbound hosts, and admin assets fail the profile before package
+execution. Atomic enablement repeats current trust, migration, dependency,
+namespace, route, and exact registrar evidence under the existing lifecycle
+locks.
+
+The pre-theme front controller classifies only a current registrar-owned route
+whose declaration is public, public-authenticated, CSRF not-applicable, and
+includes `GET`. This occurs before the public-mutation dispatcher so a read
+route cannot be reinterpreted as a mutation. Other package paths continue to
+the mutation boundary. Core supplies no session, administrator identity,
+request globals, database handle, HTML, redirect, arbitrary header, or upload
+surface to the handler.
+
+Site Search `0.1.3` opens a separate short-lived client-local connection and a
+read-only transaction, selects only its package-owned derived index, rolls the
+transaction back, and closes the connection. Query input is valid UTF-8,
+control-free, two to eighty characters, limited to six full-text prefix tokens,
+and returns at most eight text-only results. The core route boundary retains
+its 32 KiB response ceiling and fixed `no-store`/`nosniff` JSON headers. The
+browser uses an explicit mount marker, same-origin credentials, request
+cancellation, and DOM `textContent`; package result HTML is never accepted.
+
+The rebuild command is CLI-only, Owner/`addons.enable` gated, dry-run-first,
+and exact-plan confirmed. It reads only active, started, unexpired Article
+pages beneath an existing active Section/Category/Subcategory hierarchy,
+writes only `RED_Addon_SiteSearch_Documents`, and atomically replaces only the
+derived `core-article` source. Version 0.1.3 additionally implements
+the closed `content.index-sync` service for canonical Article create, update,
+delete, restore, and move events. Core invokes it only after commit and passes
+only one closed event name plus 1-64 record ids; it supplies no body, actor,
+session, request globals, database handle, or client identifier. The package
+reloads eligibility and public hierarchy from the client-local database and
+atomically replaces or removes only those derived rows. Failure is contained,
+logged generically without ids, and cannot roll back the completed CMS write.
+Scheduled full rebuild retains current Owner authority and exact
+database/package/enabled-state confirmations, refuses manual apply/plan
+arguments, and holds one non-blocking client-database advisory lock. It adds no
+core scheduler, manifest job, route, setting, secret, or cross-client state.
+This repairs missed events, hierarchy-wide changes, start/expiry transitions,
+and drift.
+
+Optional Store Lite 0.1.36 owns the only product-table knowledge and returns at
+most eight public placement documents per typed-service call. Site Search
+validates and deduplicates at most 1,000 placements and atomically replaces the
+derived `store-lite-product` rows with core Article rows. It refuses price,
+currency, stock, availability value, SKU, variant commercial facts, cart,
+order, payment, customer, administrator, setting, secret, and database
+identity fields. A missing or disabled provider becomes an empty source and
+removes stale Store Lite rows; a malformed or failing enabled provider rolls
+the rebuild back. There is still no private/member source, network request, or
+deployment.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

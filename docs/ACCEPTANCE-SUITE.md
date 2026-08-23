@@ -1452,6 +1452,39 @@ process environment.
 - The separate Store Lite Release C3 isolation rehearsal stages current clean core plus external Store Lite 0.1.29 and creates two fresh databases. Its 14 assertions require database-bound install and enable plans, all 46 core and 10 package migrations per client, distinct USD/pickup and COP/delivery settings and products, no cross-client product reads, unchanged opposite-client fingerprints after mutation in both directions, client-local disable/re-enable runtime behavior, identical package registrar evidence, and cleanup `databases:0 grants:0 staged-project:0 primary:unchanged` using a schema-neutral full configured-primary hash.
 - The hosted Store Lite basic-demo closeout is read-only release evidence for `demo.red-sphere.com`, not an automated acceptance fixture. It requires RED-CMS 5.1.0, the separately installed Store Lite 0.1.31 package, nine public products and controls, the exact nine-choice Size/Color scarf, Product and Cart authoring, Products and Orders tools, responsive Checkout output, and clean browser logs. It submits no new order or guest personal data and authorizes no other client installation or database.
 - Operational add-on lifecycle acceptance runs only in a uniquely named disposable database and a temporary generic content package outside the clean starter. Its 21 assertions prove non-executing discovery; exact migration, setting, table, and data evidence; deterministic planning; stale-plan and forced-registrar refusal; incomplete-registry refusal; registrar-time MyISAM drift refusal before lifecycle mutation; audit rollback; successful exact registrar validation; later request bootstrap; non-executing disable; settings, migration, code, and business-row preservation; disabled bootstrap exclusion; identical-evidence re-enable; exactly two enable and one disable audits; CLI-only confirmations; and exact database/grant/package cleanup.
+- Read-only public-utility acceptance begins with the dependency-free profile
+  fixture. It requires a cross-cutting package with bounded services,
+  package-owned migrations, exact static public `GET` routes, and immutable
+  public assets; refuses unsafe/placeholder routes, mutations, administrator
+  assets, and wrong package types; proves exact service/route registrar shape;
+  and verifies that the front controller classifies declared GET routes before
+  public mutations. The separate Site Search local rehearsal then uses one
+  fresh disposable database for all 46 core migrations, exact package
+  integrity, dry-run-first install/enable, profile-specific registrar
+  validation, atomic derived-index replacement, 200 bounded JSON, short-query
+  empty success, 405 method refusal, checksum assets, and desktop/mobile AJAX,
+  Escape, console/network, and overflow checks. The package rehearsal is not a
+  clean-core fixture and must remove its staged package, database, and grant.
+  A separate 30-assertion real-package rehearsal proves post-commit
+  create/update/deactivate/restore/move/delete refreshes, removal of ineligible
+  rows, public-URL replacement, invalid-notification refusal, active/inactive
+  hierarchy repair, future-start and expiry transitions, advisory-lock
+  concurrency refusal, and exact Article/index/hierarchy cleanup in another
+  fresh disposable database.
+  The separate seven-assertion scale rehearsal inserts exactly 50,000
+  disposable Article sources, rebuilds 50,001 derived rows atomically in
+  18,726.82 ms, samples 20 real searches at 125.19 ms local p95 and 128.62 ms
+  maximum, then removes every scale source and returns the index to its exact
+  one-document baseline. These timings are local development evidence, not a
+  production SLA or supported-hosting/browser measurement.
+  The separate 16-assertion two-package rehearsal validates Store Lite 0.1.36
+  at 39/39 files and Site Search 0.1.3 at 9/9 files, installs and enables both,
+  indexes and finds one real placed Product, refreshes changed text, removes an
+  unavailable Product, removes stale provider rows on Store Lite disable,
+  restores them after re-enable, and cleans its Article/product/placement/index
+  fixtures exactly. No price, currency, stock, availability value, SKU, cart,
+  order, payment, customer, administrator, setting, secret, or database
+  identity crosses the typed provider result.
 - The separate real Store Lite operational lifecycle rehearsal stages current clean core plus externally distributed Store Lite 0.1.28 in a temporary supported-server project. Its 10 assertions run all 46 core and 8 package migrations, fingerprint all 15 package tables and seeded product/cart rows, require exact real registrar evidence, prove Product/Cart/create-guest-order registration after enable, prove disabled bootstrap exclusion and data preservation, reproduce the registrar hash on re-enable, record exactly two enable and one disable audits, and remove the staged project and disposable database/grant. It does not alter the Store Lite source repository, clean starter, hosted demo, or any client installation.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 35 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.

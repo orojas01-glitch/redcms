@@ -8,6 +8,7 @@ require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_content_revision_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/addon_content_index_sync_helpers.php';
 
 $recordId = isset($_POST['RecordID']) ? (int) $_POST['RecordID'] : 0;
 $invalidComponent = array_key_exists('Component', $_POST)
@@ -57,6 +58,11 @@ $success = red_admin_content_revision_transaction(
 );
 if ($success) {
 	red_admin_content_revision_response_headers($connection, $recordId);
+	red_addon_content_index_sync_notify(
+		$connection,
+		'article.updated',
+		[$recordId]
+	);
 }
 echo $success ? 'yes' : 'no';
 $db->close();

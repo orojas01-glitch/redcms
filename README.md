@@ -493,6 +493,22 @@ features.
 - Core-owned public add-on route dispatch for exact static `GET` paths with
   public authentication, typed bounded query/result objects, JSON-only
   responses, and fail-closed package behavior
+- Owner-authorized `read_only_public_utility` activation for separately
+  distributed cross-cutting packages with exact static public `GET` routes,
+  package-owned migrations, immutable public CSS/JavaScript, no mutation or
+  administrator surface, and profile-specific registrar validation
+- Best-effort post-commit `content.index-sync` notification for canonical
+  Article create, update, delete, restore, and move events. Core passes only a
+  closed event name plus 1-64 record ids; package failure cannot roll back the
+  completed CMS write, and the package-owned full rebuild remains the repair
+  path for hierarchy, drift, and time-based eligibility changes. Site Search
+  0.1.3 retains the exact-confirmation, Owner-gated, advisory-locked scheduled CLI
+  mode without adding a core scheduler or manifest job
+- Optional Store Lite search-source integration through Store Lite 0.1.36's
+  typed `content.search-source.store-lite` service. Site Search reads no Store
+  Lite table and accepts no price, currency, stock, availability value, SKU,
+  cart, order, payment, customer, administrator, setting, secret, or database
+  identity
 - Read-only public-mutation declaration and live-data preflights that bind one
   trusted installed-disabled package to value-free per-client migration,
   InnoDB-table, typed-setting, opaque-secret-availability, and core

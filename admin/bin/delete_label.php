@@ -18,6 +18,7 @@ red_start_session(); ?>
 <?php require $_SERVER['DOCUMENT_ROOT'].'/includes/admin_tool_helpers.php' ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php' ?>
 <?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_content_revision_helpers.php' ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'].'/includes/addon_content_index_sync_helpers.php' ?>
 <?php
 red_require_admin(true);
 
@@ -30,6 +31,8 @@ red_require_admin(true);
 	$T = red_admin_tool_text($_POST['T'] ?? '');
 	$db= new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 	$response = 'no';
+	$indexSyncEvent = '';
+	$indexSyncRecordIds = [];
 
 	switch ($T)
 	{
@@ -101,8 +104,19 @@ red_require_admin(true);
 					red_seo_table_available($db->connection) ? ['RED_Page_SEO'] : []
 				)
 			) ? 'yes' : 'no';
+			if ($response === 'yes') {
+				$indexSyncEvent = 'article.deleted';
+				$indexSyncRecordIds = [$RecordID];
+			}
 		break;
 		
+	}
+	if ($indexSyncEvent !== '') {
+		red_addon_content_index_sync_notify(
+			$db->connection,
+			$indexSyncEvent,
+			$indexSyncRecordIds
+		);
 	}
 	echo $response;
 	$db->close();
