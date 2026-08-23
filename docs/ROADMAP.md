@@ -311,9 +311,16 @@ dependency/version, ordinary plus three secret setting keys, two migration
 ids/paths, event route/path, and Sandbox host are required and fingerprinted.
 The new test passes 30 fixture and 41 exact published-package assertions; all
 nine external hashes and existing Stripe profile, registrar, ingress,
-synthetic-checkout, and typed-adapter regressions pass. C3B is next and may
-extend only downstream database and registrar planning for fresh disposable
-install-disabled/migration/registration proof without provider contact.
+synthetic-checkout, and typed-adapter regressions pass.
+
+C3B is now complete. The registrar signs the selected closed profile and exact
+Wompi adapter/route identity while preserving Stripe. The 18-assertion fast
+suite and exact 16-assertion disposable rehearsal prove Wompi 0.1.0 guarded
+installation as `installed_disabled`, its two empty InnoDB evidence tables,
+database preflight, registrar-only execution, repeat-install refusal, and
+cleanup `database:0 grant:0 staged-project:0 primary:unchanged`. C3C is next
+and owns atomic enable/disable plus two-client isolation without provider
+contact.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -321,7 +328,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

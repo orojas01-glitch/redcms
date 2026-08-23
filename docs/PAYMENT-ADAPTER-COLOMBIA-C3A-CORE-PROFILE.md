@@ -1,6 +1,7 @@
 # Colombia C3A Closed Core Wompi Profile
 
-Status: complete locally. C3A changes only non-executing core manifest-profile
+Status: complete on `main` through PR #162 at `f0ee7e0`. C3A changes only
+non-executing core manifest-profile
 validation and its tests. No database, package installation, registrar
 execution for Wompi, setting, secret, network, provider, or deployment effect
 occurs.
@@ -82,17 +83,16 @@ the same four blockers:
 - registrar validation; and
 - server-event ingress.
 
-C3A does not make the Wompi package installable or enable-ready because the
-downstream database/registrar/ingress/enablement helpers still encode the
-Stripe profile identity and two-secret expectations.
+At C3A close, the Wompi package was not yet installable or enable-ready because
+downstream database/registrar/ingress/enablement proof remained separately
+gated. C3B closes only the database and registrar portions below.
 
-## C3B boundary
+## C3B closure
 
-C3B may extend only the downstream database and registrar planning necessary
-to install the exact published package into a fresh disposable database as
-`installed_disabled`, apply its two reviewed migrations, and validate its
-contained adapter/refusing-route registrations. It must preserve every Stripe
-test and keep ingress publication, enablement, secret values, provider contact,
-payment, browser flow, Store Lite mutation, hosted-demo change, client data,
-and deployment absent. Later C3 still owns enable/disable and two-client
-isolation if they do not fit the same reviewable batch.
+C3B completed the downstream database and registrar proof in a separate batch.
+It installs the exact published package into a fresh disposable database as
+`installed_disabled`, applies its two reviewed migrations, validates its
+contained adapter/refusing-route registrations, and cleans the database/grant/
+stage with the configured primary unchanged. C3C still owns enable/disable and
+two-client isolation. See
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).

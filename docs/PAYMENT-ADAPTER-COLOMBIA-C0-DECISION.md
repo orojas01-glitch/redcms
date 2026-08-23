@@ -166,7 +166,7 @@ validate and project closed facts.
    configuration, secret-reference, outbound-host, migration, registrar, and
    transport-double acceptance. It remains outside the core starter and Store
    Lite repository.
-4. **C3 — active; C3A complete and C3B next:** prove installation,
+4. **C3 — active; C3A-C3B complete and C3C next:** prove installation,
    enable/disable, one pending attempt, verified normalized outcomes,
    idempotency, reconciliation, rollback, two-client isolation, and exact
    cleanup without Wompi contact.

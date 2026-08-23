@@ -5,8 +5,8 @@ Lite basic-demo proof, completed Stripe payment-adapter work through the D4C
 network-disabled no-contact rehearsal, the owner's deferral of D4D real
 Sandbox contact, the Colombia C0 Wompi/Nequi provider decision, the C1
 provider-neutral initiation-mode contract, and the external C2 Wompi package
-skeleton at commit `e17a371`, plus the C3A closed non-executing core Wompi
-profile.
+skeleton at commit `e17a371`, the C3A closed non-executing core Wompi profile,
+and the C3B exact disposable install/database/registrar proof.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, orange is
@@ -81,11 +81,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | Colombia C3A adds only exact `store_lite_wompi_adapter_v1` non-executing validation. It passes 30 fixture and 41 published-package assertions; all 9 Wompi hashes plus existing Stripe profile/registrar/ingress/synthetic/typed regressions pass. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C3B is next: extend database and registrar planning for exact Wompi 0.1.0, then install disabled and apply two migrations only in a fresh disposable database. |
+| What just finished? | Colombia C3B installs exact Wompi 0.1.0 disabled, applies its two migrations, proves two empty InnoDB tables, and validates only its adapter plus refusing route. The real-package rehearsal passes 16 assertions and cleanup proves database/grant/stage zero with the primary unchanged. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C3C is next: atomic Wompi enable/disable and two-client isolation, still without provider contact. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. C3B database/registrar proof and later C3 enablement/two-client isolation remain offline/disposable; C4 Wompi Sandbox and C5 demo deployment each require separate approval. |
+| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. C3C enablement/two-client isolation remains offline/disposable; C4 Wompi Sandbox and C5 demo deployment each require separate approval. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -129,8 +129,8 @@ flowchart LR
     CO1["COMPLETE<br/>Colombia C1. Initiation modes<br/>+ 55-assertion offline fixture"]
     CO2["COMPLETE<br/>Colombia C2. External package<br/>94 assertions + commit e17a371"]
     CO3A["COMPLETE<br/>Colombia C3A. Closed core<br/>Wompi manifest profile"]
-    CO3B["NEXT<br/>Colombia C3B. Disposable<br/>database + registrar proof"]
-    CO3C["GATED<br/>Colombia C3 later. Enablement<br/>+ two-client isolation"]
+    CO3B["COMPLETE<br/>Colombia C3B. Disposable<br/>database + registrar proof"]
+    CO3C["NEXT<br/>Colombia C3C. Enablement<br/>+ two-client isolation"]
     CO4["GATED<br/>Colombia C4-C5. Wompi Sandbox<br/>+ demo deployment"]
 
     P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
@@ -140,10 +140,10 @@ flowchart LR
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef deferred fill:#fff7e6,stroke:#a36b00,color:#5e4100;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A complete;
-    class CO3B active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B complete;
+    class CO3C active;
     class P3E9D4D deferred;
-    class P4,CO3C,CO4 gated;
+    class P4,CO4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -202,8 +202,9 @@ and COP in its initial scope. C1 adds only a closed provider-neutral
 out-of-band initiation mode plus a 55-assertion offline fixture. C2 is the
 separately distributed 0.1.0 package at `e17a371`; its 94 assertions pass and
 the former Stripe-only core profile refusal is closed by C3A's exact non-
-executing Wompi profile. C3B owns database/migration/registrar proof, while
-later C3 still owns enablement and two-client isolation.
+executing Wompi profile. C3B completes exact disposable installation,
+migrations, database evidence, and registrar-only execution. C3C now owns
+enablement and two-client isolation.
 Every write credential, real
 network request, Checkout Session or Wompi transaction, payment, webhook,
 browser flow, hosted-demo change, and client deployment remains stopped. See
@@ -216,6 +217,8 @@ The external C2 package record is in
 [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
 The completed C3A core profile is in
 [`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
+The completed C3B disposable proof is in
+[`PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md`](PAYMENT-ADAPTER-COLOMBIA-C3B-DISPOSABLE-LIFECYCLE.md).
 
 ## Status rule
 
