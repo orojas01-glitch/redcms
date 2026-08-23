@@ -1225,7 +1225,52 @@ the D4 ledger at authorization/claim only with zero start/result. The fully
 confirmed apply set is never invoked. All temporary database, grant, files,
 environment inputs, and evidence are removed; source repositories and the
 configured disposable primary remain unchanged. D4D remains a separate
-explicit authorization gate.
+explicit authorization gate and was owner-deferred on 2026-08-22. Deferral
+does not authorize key reuse, provider contact, a Checkout Session, payment,
+webhook, browser flow, Store Lite mutation, hosted-demo change, or deployment.
+
+Colombia C0 selects only a future separately distributed
+`redcms.store-lite-wompi` candidate with customer-visible Nequi, `COP`, and
+one-time Store Lite guest orders. The candidate must preserve a client-local
+non-secret Wompi public-key setting plus distinct opaque secret references for
+the private key, integrity key, and event secret. No private, integrity, or
+event-secret value may enter the database, clean starter, package defaults,
+fixtures, commands, logs, audits, evidence, or browser output. The event secret
+is not interchangeable with the private or integrity key. Sandbox and
+production hosts, keys, event URLs, provider identities, and data must remain
+disjoint.
+
+The existing guest-order email and phone may be read transiently only from the
+locked client-local order snapshot for one exact request. The adapter must not
+duplicate either value into payment-attempt history, normalized events,
+provider references, idempotency material, diagnostics, or audits. Provider
+payloads remain in memory only until signature/checksum, reference, amount,
+currency, environment, method, and closed status validation finish.
+
+Wompi transaction creation, `PENDING`, browser return, dashboard display,
+email receipt, or an unverified lookup/event can never mark an order paid.
+Only a verified final `APPROVED` fact may propose the provider-neutral `paid`
+event, and Store Lite must still recheck the immutable order reference, exact
+integer COP amount, currency, replay identity, current attempt, and order
+state. `DECLINED`, `ERROR`, mismatch, malformed content, ambiguous transport,
+unknown event properties, invalid checksum, or unavailable reconciliation
+fails closed.
+
+Direct Wompi/Nequi initiation returns no hosted checkout URL. Colombia C1 may
+add only a closed provider-neutral `out_of_band_confirmation` result alongside
+the unchanged `hosted_redirect` shape. Out-of-band success requires an opaque
+reference, no URL, pending state, and the generic action
+`approve_in_provider_app`; mixed, unknown, provider-named, URL-bearing, or
+paid-on-initiation results fail closed. The browser must remain on a RED-CMS-
+owned pending surface and cannot contact Wompi or receive the provider
+reference.
+
+Colombia C1 otherwise remains dependency-free and offline-only. It may add no
+adapter package, manifest, migration, database row, credential, route, network
+request, Wompi transaction, Nequi notification, payment, order mutation,
+hosted-demo change, or client deployment. C4 Sandbox contact and C5 demo
+deployment require separate explicit approvals. See
+[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

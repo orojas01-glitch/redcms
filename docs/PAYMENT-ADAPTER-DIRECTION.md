@@ -183,8 +183,8 @@ or fail closed and recover through a reviewed package migration path.
    with no Stripe contact; repair commit `44ed7b3` restores exact package
    integrity. D4B fresh authority, durable start/result, and sealed in-memory
    execution are also complete. D4C CLI/no-contact rehearsal is complete with
-   real apply held at zero, and D4D remains one separately authorized real POST.
-   Payment, webhook, and deployment remain later gated.
+   real apply held at zero. The owner deferred D4D on 2026-08-22; no Stripe
+   key, request, Session, payment, webhook, or deployment is authorized.
 5. **P4 — deployment review:** approve one client's ingress, secret rotation,
    outbound-host allowlist, operational order workflow, browser behavior,
    backups, retention, and rollback plan. A separate explicit approval is
@@ -193,6 +193,26 @@ or fail closed and recover through a reviewed package migration path.
 Every implementation gate must run against disposable databases and isolated
 fixtures, leave no payment package or business data in the clean starter, and
 preserve every other client installation and database.
+
+## Colombia Candidate Lane
+
+Colombia C0 is complete as a separate provider decision. It selects
+`redcms.store-lite-wompi` as an optional, separately distributed candidate,
+with only customer-visible Nequi, `COP`, and one-time Store Lite guest orders
+in the initial scope. This does not revise Stripe P1, bundle a second adapter,
+or make Store Lite provider-specific. Direct Nequi Push/QR remains a later
+client-specific alternative.
+
+C1 is the next gate because direct Wompi/Nequi Push has no hosted URL. C1 may
+add only a closed initiation-mode union that preserves the existing
+`hosted_redirect` result and adds `out_of_band_confirmation` with an opaque
+reference, no URL, pending state, and generic provider-app action. Its
+dependency-free offline fixture must prove the Wompi/Nequi request,
+asynchronous outcome, status reconciliation, event-checksum, replay/mismatch,
+privacy, and redaction contracts without creating a package, credential,
+database, route, network request, provider transaction, payment, order change,
+or demo deployment. See
+[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
 
 ## Explicit Exclusions
 

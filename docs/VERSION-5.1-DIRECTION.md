@@ -1758,7 +1758,29 @@ request bootstrap excludes the disabled package.
     evidence remains `2:2:0` with `real-apply:0 start-result:0
     provider-effects:0`. Database, grant, staged files, evidence, environment,
     source repositories, and primary cleanup pass exactly. P3E-9D4D remains
-    the separately authorized first real Sandbox POST.
+    the separately authorized first real Sandbox POST if resumed and is now
+    owner-deferred as recorded below.
+
+130. Recorded the Colombia C0 provider decision after the owner deferred
+    Stripe P3E-9D4D on 2026-08-22. The separately distributed candidate is
+    `redcms.store-lite-wompi`, with only customer-visible Nequi, `COP`, and
+    one-time Store Lite guest orders in the initial scope. Direct Nequi
+    Push/QR remains a later client-specific alternative. The dated official-
+    provider review records separate Wompi Sandbox/production environments,
+    asynchronous transaction status, lookup plus signed-event
+    reconciliation, current customer-acceptance requirements, one client-local
+    public setting plus three secret-reference classes, and personal-data
+    minimization. The review also identifies the current hosted-URL-only
+    initiation result as incompatible with direct Nequi Push. C1 is next and
+    may add only the closed `hosted_redirect`/`out_of_band_confirmation`
+    provider-neutral union plus a dependency-free offline fixture; C2 external
+    package and C3 disposable
+    integration remain later, while C4 Wompi Sandbox and C5 demo deployment
+    require separate approvals. No PHP, package, manifest, migration,
+    database, route, credential, account, network request, Wompi transaction,
+    Nequi notification, payment, order transition, hosted-demo change, client
+    data, or deployment is added by C0. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
