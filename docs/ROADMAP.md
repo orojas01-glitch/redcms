@@ -303,14 +303,25 @@ hashing, one-use double, dynamic signed events, nine-file integrity, two
 unexecuted migrations, generic discovery/registrar, explicit unsupported
 provider operations, source redaction, and cleanup. The current Stripe-only
 payment profile refuses the package with exactly `outbound_host_invalid` and
-`setting_contract_invalid`; C3 is next and owns a closed core-profile extension
-plus disposable installation/lifecycle proof without provider contact.
+`setting_contract_invalid` before C3A.
+
+C3A is now complete. Only exact package id `redcms.store-lite-wompi` selects
+the new `store_lite_wompi_adapter_v1` data-only profile. Exact adapter,
+dependency/version, ordinary plus three secret setting keys, two migration
+ids/paths, event route/path, and Sandbox host are required and fingerprinted.
+The new test passes 30 fixture and 41 exact published-package assertions; all
+nine external hashes and existing Stripe profile, registrar, ingress,
+synthetic-checkout, and typed-adapter regressions pass. C3B is next and may
+extend only downstream database and registrar planning for fresh disposable
+install-disabled/migration/registration proof without provider contact.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

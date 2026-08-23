@@ -1286,16 +1286,24 @@ operations and the declared event route refuse. Migrations inventory only
 hashed/opaque evidence and exclude personal, credential, body/header, and URL
 columns. No migration ran.
 
-Generic discovery/registration accepts the package, but the current Stripe-
-only payment profile refuses its three-secret/Wompi-host shape exactly. C3 must
-extend that closed core profile while preserving all Stripe regressions, then
-use only fresh disposable databases. C4 Sandbox contact and C5 demo deployment
-require separate explicit approvals. See
+Generic discovery/registration accepts the package. C3A now recognizes its
+exact id/adapter/dependency/settings/migrations/route/Sandbox-host surface only
+as `store_lite_wompi_adapter_v1`. Profile evidence includes ordered, unique,
+disjoint setting-key lists, and validation rechecks the exact keys rather than
+trusting counts. Every effect and the existing four downstream blockers remain
+false/present. All existing Stripe profile, registrar, ingress, synthetic, and
+typed regressions pass unchanged.
+
+C3B must extend only downstream database and registrar planning and use only
+fresh disposable databases. C4 Sandbox contact and C5 demo deployment require
+separate explicit approvals. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

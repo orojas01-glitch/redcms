@@ -1815,13 +1815,33 @@ request bootstrap excludes the disabled package.
     bounded non-mutating outcomes, generic discovery/registrar, source/package
     parity, forbidden-primitive and credential exclusion, and cleanup. The
     existing Stripe-only core payment profile deliberately refuses the package
-    with only `outbound_host_invalid` and `setting_contract_invalid`; C3 is
-    next and owns a closed core-profile extension plus disposable installation
-    and lifecycle proof. No core/Store Lite/Stripe file, database, migration
+    with only `outbound_host_invalid` and `setting_contract_invalid`; C3A
+    closes the profile portion in item 133, while C3B owns disposable
+    installation and registrar proof. No core/Store Lite/Stripe file, database,
+    migration
     execution, installation, enablement, setting or secret value, network,
     provider transaction, payment, webhook ingress, browser, order mutation,
     hosted-demo change, client data, or deployment effect occurred. See
     [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
+
+133. Completed Colombia C3A by extending only the dependency-free payment-
+    adapter manifest-profile helper. Exact package id
+    `redcms.store-lite-wompi` selects `store_lite_wompi_adapter_v1`; all
+    existing fixtures retain the Stripe profile. Wompi requires the exact
+    adapter, Store Lite dependency/range, one ordinary and three secret
+    setting keys, two migration ids/paths, event route/path, and sole Sandbox
+    host. Ordered/unique/disjoint normalized setting-key lists are included in
+    the deterministic profile evidence and independently revalidated. The
+    focused test passes 30 fixture and 41 exact published-package assertions,
+    including all nine external hashes. Existing Stripe profile 26, registrar
+    13, ingress 26, synthetic-checkout 37, and typed-adapter 19 assertions pass.
+    All activation/runtime/state/package/secret/network/route effects remain
+    false and the four downstream blockers remain. No database, Wompi package
+    install, migration, registrar execution for Wompi, enablement, setting,
+    secret, provider request, payment, browser, Store Lite mutation, hosted-
+    demo change, client data, or deployment effect occurred. C3B is next and
+    owns disposable database/migration/registrar proof. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
