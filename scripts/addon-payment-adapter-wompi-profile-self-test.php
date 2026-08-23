@@ -39,7 +39,7 @@ function red_wompi_c3a_manifest(): array
         'id' => 'redcms.store-lite-wompi',
         'name' => 'RED-CMS Store Lite Wompi',
         'description' => 'Closed C3A Wompi payment-adapter fixture.',
-        'version' => '0.1.3',
+        'version' => '0.1.4',
         'type' => 'adapter',
         'compatibility' => [
             'cms' => '>=5.1 <6.0',
@@ -318,7 +318,7 @@ try {
             is_array($externalManifest)
                 && ($externalManifest['id'] ?? null)
                     === 'redcms.store-lite-wompi'
-                && ($externalManifest['version'] ?? null) === '0.1.3',
+                && ($externalManifest['version'] ?? null) === '0.1.4',
             'external package identity and version are exact'
         );
         $externalProfile = red_addon_payment_adapter_profile(

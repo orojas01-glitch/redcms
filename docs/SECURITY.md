@@ -1370,6 +1370,15 @@ adoption changes only exact package pins/tests and passes disposable single/
 two-client cleanup. C4B4 remains no-contact one-attempt authority/state. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 
+C4B4A adds no core runtime path. External package `0.1.4` binds hash-only
+client/database/actor/time authority to exact C2/C4B2 evidence, prepares only
+the first claim, and projects C4B3 observations. Its valid result must keep
+`claimPersisted`, `replayProtectionActive`, and `executionAuthorized` false;
+provider/payment/order/retry effects also remain false. Core adoption changes
+only exact package pins/tests and passes disposable single/two-client cleanup.
+C4B4B remains no-contact durable claim/replay protection. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and

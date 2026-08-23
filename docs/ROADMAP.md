@@ -370,8 +370,15 @@ discards personal/provider detail, and returns only proposed outcomes with
 every payment/order effect false. Core runtime helpers remain unchanged. Exact
 adoption passes 47 profile, 16 install/registrar, existing Stripe 24 plus Wompi
 17 atomic-enable, and 21 two-client assertions with exact cleanup and the
-configured primary unchanged. C4B4 is next for one-attempt authorization/
-claim/state, still credential-free/no-contact.
+configured primary unchanged. C4B4A is now complete. Package `0.1.4` at
+`5f372b3` supplies pure sealed-double-only authorization, first-claim
+preparation, and observed state while requiring claim persistence, replay
+protection, and execution to remain false. Core runtime helpers remain
+unchanged. Exact adoption passes 48 profile, 16 install/registrar, existing
+Stripe 24 plus Wompi 17 atomic-enable, and 21 two-client assertions with exact
+cleanup and the configured primary unchanged. C4B4B is next for atomic durable
+claim and replay protection, still credential-free/no-contact and without
+execution.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -393,7 +400,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B2-CORE-ADOPTION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

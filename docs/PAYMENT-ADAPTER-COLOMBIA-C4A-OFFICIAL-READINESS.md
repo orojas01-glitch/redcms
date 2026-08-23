@@ -207,12 +207,21 @@ verification, event agreement, provider/order mutation, and retry false. Exact
 core adoption and disposable proofs pass. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 
-### C4B4 — next: one-attempt authority and state
+### C4B4A — complete: pure no-contact attempt contract
 
-C4B4 owns a bounded one-attempt authorization/claim/state machine around the
-already-contained request/response contracts. Later C4B gates own dry-run-first
-CLI confirmation, redacted evidence, transport doubles, and disposable no-
-contact rehearsals.
+Package `0.1.4` at `5f372b3` binds a bounded no-contact authorization and first-
+claim preparation to the already-contained request/response contracts. It
+projects only observed state and explicitly leaves claim persistence, replay
+protection, execution, and every provider/order effect false. Exact core
+adoption and disposable proofs pass. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+
+### C4B4B — next: durable claim and replay protection
+
+C4B4B must atomically persist/audit fresh authorization and one claim while
+revalidating current client, Owner, order, and package authority. It must still
+leave execution unavailable. Later C4B gates own dry-run-first CLI confirmation,
+redacted evidence, transport doubles, and disposable no-contact rehearsals.
 
 ### C4C — owner-operated account and read-only provider proof
 
