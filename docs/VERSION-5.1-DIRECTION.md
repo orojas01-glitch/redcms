@@ -1771,16 +1771,38 @@ request bootstrap excludes the disabled package.
     reconciliation, current customer-acceptance requirements, one client-local
     public setting plus three secret-reference classes, and personal-data
     minimization. The review also identifies the current hosted-URL-only
-    initiation result as incompatible with direct Nequi Push. C1 is next and
-    may add only the closed `hosted_redirect`/`out_of_band_confirmation`
-    provider-neutral union plus a dependency-free offline fixture; C2 external
-    package and C3 disposable
+    initiation result as incompatible with direct Nequi Push. C1 was reserved
+    for only the closed `hosted_redirect`/`out_of_band_confirmation` provider-
+    neutral union plus a dependency-free offline fixture and is completed in
+    item 131; C2 external package and C3 disposable
     integration remain later, while C4 Wompi Sandbox and C5 demo deployment
     require separate approvals. No PHP, package, manifest, migration,
     database, route, credential, account, network request, Wompi transaction,
     Nequi notification, payment, order transition, hosted-demo change, client
     data, or deployment is added by C0. See
     [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
+
+131. Completed Colombia C1 with one dependency-free provider-neutral payment-
+    initiation helper and a 55-assertion CLI-only Wompi/Nequi fixture. The
+    closed union defines a canonical ordered `hosted_redirect` reference/HTTPS-
+    URL value returned unchanged and adds only URL-free
+    `out_of_band_confirmation` with opaque reference, pending state, and
+    generic provider-app action. Invalid/mixed
+    shapes and any paid initiation fail closed. The fixture plans one COP/
+    Nequi request, returns only hashes and false effects, excludes personal,
+    acceptance, signature, and secret-reference material, verifies and binds
+    bounded provider-ordered signed properties with retry-compatible timing,
+    requires matching lookup evidence, refuses replay and identity/amount/
+    currency/status mismatches, and emits only
+    proposed paid/failed evidence with order mutation false. Existing Stripe
+    P2 remains untouched; its regression plus typed-adapter and payment-profile
+    regressions pass. The helper has no runtime caller; no configuration,
+    database, package, manifest, migration,
+    credential, network, provider transaction, notification, payment, webhook,
+    browser, Store Lite mutation, hosted-demo change, client data, or
+    deployment is added. C2 is next and remains an offline separately
+    distributed package-skeleton gate. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

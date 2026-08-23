@@ -3,7 +3,8 @@
 Last updated: 2026-08-22 after the published `v5.1.0` release, completed Store
 Lite basic-demo proof, completed Stripe payment-adapter work through the D4C
 network-disabled no-contact rehearsal, the owner's deferral of D4D real
-Sandbox contact, and the Colombia C0 Wompi/Nequi provider decision.
+Sandbox contact, the Colombia C0 Wompi/Nequi provider decision, and the C1
+provider-neutral initiation-mode contract plus offline fixture.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, orange is
@@ -78,11 +79,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | P3E-9D4C is merged with its exact network-disabled rehearsal and `real-apply:0 start-result:0 provider-effects:0`. Colombia C0 now selects the separately distributed `redcms.store-lite-wompi` candidate with customer-visible Nequi, `COP`, one-time orders, and no provider contact. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C1 is the next optional-payment gate: preserve `hosted_redirect`, add closed `out_of_band_confirmation`, and prove it with a dependency-free offline Wompi/Nequi fixture. No package, credential, database, or network is included. |
+| What just finished? | Colombia C1 passes 55 assertions: a canonical `hosted_redirect` value is returned unchanged, closed URL-free `out_of_band_confirmation` is added, and the offline Wompi/Nequi request/event/lookup fixture proves dynamic signed properties, retry-compatible timing, mismatch, replay, and data redaction. Existing Stripe P2 remains untouched and its regressions pass. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C2 is next: a separately distributed, disabled-by-default `redcms.store-lite-wompi` package skeleton with offline doubles only. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. Colombia C1–C3 remain offline/package/integration work; C4 Wompi Sandbox and C5 demo deployment each require separate approval. |
+| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. Colombia C2 package and C3 disposable integration remain offline; C4 Wompi Sandbox and C5 demo deployment each require separate approval. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -123,21 +124,22 @@ flowchart LR
     P3E9D4D["OWNER-DEFERRED<br/>P3E-9D4D. One real Sandbox<br/>Session POST"]
     P4["GATED<br/>P4. Client deployment review<br/>explicit production approval"]
     CO0["COMPLETE<br/>Colombia C0. Wompi provider<br/>+ Nequi/COP decision"]
-    CO1["NEXT<br/>Colombia C1. Initiation modes<br/>+ offline contract fixture"]
-    CO2["GATED<br/>Colombia C2-C3. External package<br/>+ disposable integration"]
-    CO3["GATED<br/>Colombia C4-C5. Wompi Sandbox<br/>+ demo deployment"]
+    CO1["COMPLETE<br/>Colombia C1. Initiation modes<br/>+ 55-assertion offline fixture"]
+    CO2["NEXT<br/>Colombia C2. External package<br/>+ offline transport doubles"]
+    CO3["GATED<br/>Colombia C3. Disposable<br/>core + Store Lite integration"]
+    CO4["GATED<br/>Colombia C4-C5. Wompi Sandbox<br/>+ demo deployment"]
 
     P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
-    P0 --> CO0 --> CO1 --> CO2 --> CO3
+    P0 --> CO0 --> CO1 --> CO2 --> CO3 --> CO4
 
     classDef complete fill:#e7f6ed,stroke:#27764a,color:#183d2a;
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef deferred fill:#fff7e6,stroke:#a36b00,color:#5e4100;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0 complete;
-    class CO1 active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1 complete;
+    class CO2 active;
     class P3E9D4D deferred;
-    class P4,CO2,CO3 gated;
+    class P4,CO3,CO4 gated;
 ```
 
 Gates P0 through P2 define no credentials, webhook, checkout, charge, order
@@ -193,12 +195,15 @@ operator/no-contact rehearsal are complete with real apply held at zero. The
 owner deferred D4D; its approvals and evidence remain available for a later
 resumption. Colombia C0 now selects a separate Wompi adapter with only Nequi
 and COP in its initial scope. C1 adds only a closed provider-neutral
-out-of-band initiation mode plus offline fixture. Every write credential, real
+out-of-band initiation mode plus a 55-assertion offline fixture. C2 is the
+separately distributed package skeleton and remains offline. Every write credential, real
 network request, Checkout Session or Wompi transaction, payment, webhook,
 browser flow, hosted-demo change, and client deployment remains stopped. See
 [`PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md`](PAYMENT-ADAPTER-P3E9-SANDBOX-CHECKOUT-CREATION-FRONTIER.md).
 The Colombia decision and ladder are in
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
+The completed C1 contract is in
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
 
 ## Status rule
 

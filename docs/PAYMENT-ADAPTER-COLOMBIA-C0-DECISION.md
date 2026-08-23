@@ -1,8 +1,9 @@
 # Colombia Payment Adapter C0 Decision
 
-Status: C0 decision complete; implementation and provider contact have not
-started. The owner deferred Stripe P3E-9D4D on 2026-08-22 without cancelling
-or widening any completed Stripe evidence.
+Status: C0 decision and C1 offline initiation contract are complete; provider-
+package implementation and provider contact have not started. The owner
+deferred Stripe P3E-9D4D on 2026-08-22 without cancelling or widening any
+completed Stripe evidence.
 
 ## Decision
 
@@ -49,11 +50,11 @@ absolute HTTPS hosted-checkout URL. Direct Wompi/Nequi does not fit that shape:
 it creates an asynchronous transaction and asks the customer to approve it in
 the Nequi app.
 
-C1 must therefore define a closed additive initiation-mode union before any
-Wompi package exists:
+C1 therefore defines a closed additive initiation-mode union before any Wompi
+package exists:
 
 - `hosted_redirect`: preserves the existing Stripe-compatible reference plus
-  HTTPS URL contract unchanged; or
+  HTTPS URL semantics without modifying or wiring existing Stripe helpers; or
 - `out_of_band_confirmation`: requires an opaque provider reference, no URL,
   a pending state, and the provider-neutral customer action
   `approve_in_provider_app`.
@@ -153,14 +154,14 @@ validate and project closed facts.
 1. **C0 — complete decision:** record the candidate, provider facts, fixed
    scope, privacy boundary, exclusions, and separate approval gates. No
    provider account, package, runtime, or data change.
-2. **C1 — next, initiation-mode contract and offline fixture:** add the closed
+2. **C1 — complete, initiation-mode contract and offline fixture:** add the closed
    `hosted_redirect`/`out_of_band_confirmation` union without changing the
    existing hosted shape; then prove one COP/Nequi request model, integrity-key
    availability by opaque reference, a transient current-acceptance-token/
    contract model, asynchronous outcomes, event-checksum verification, lookup
    reconciliation, replay and mismatch refusal, and response redaction with no
    package, credential, database, or network.
-3. **C2 — external adapter package:** create a separately versioned, disabled-
+3. **C2 — next, external adapter package:** create a separately versioned, disabled-
    by-default `redcms.store-lite-wompi` package with exact manifest,
    configuration, secret-reference, outbound-host, migration, registrar, and
    transport-double acceptance. It remains outside the core starter and Store
@@ -180,13 +181,14 @@ validate and project closed facts.
    method on `demo.red-sphere.com`. Production remains a later client-specific
    decision.
 
-## C1 Fixed Scope
+## C1 Completed Scope
 
-C1 may add only the provider-neutral initiation-mode type/validation extension,
+C1 adds only the provider-neutral initiation-mode type/validation extension,
 a dependency-free non-network contract fixture, and governing documentation.
-The existing `hosted_redirect` shape must remain byte-for-byte compatible, and
-unknown/mixed modes or a URL on `out_of_band_confirmation` must fail closed.
-C1 must not create the adapter package, manifest, migration, database row,
+The canonical `hosted_redirect` input value must be returned unchanged, while
+existing Stripe helpers and callers remain untouched. Unknown/mixed modes or a
+URL on `out_of_band_confirmation` must fail closed.
+C1 does not create the adapter package, manifest, migration, database row,
 public checkout control, webhook route, provider account, credential, token,
 HTTP request, Wompi transaction, Nequi notification, payment, order
 transition, hosted-demo change, or client deployment.
@@ -195,6 +197,11 @@ The fixture must keep transport behind a sealed double and prove that
 credentials and personal data cannot appear in normalized output. Direct
 Nequi, Wompi cards/PSE, subscriptions, refunds, reversals, retries, browser
 return, public webhook ingress, Sandbox contact, and production are excluded.
+
+C1 passes 55 focused assertions in
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
+The existing hosted value remains unchanged, the new out-of-band value is
+closed and URL-free, and no runtime caller or provider effect is added.
 
 ## Open Commercial Gates
 

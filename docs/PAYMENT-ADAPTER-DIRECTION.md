@@ -74,10 +74,20 @@ request containing only:
 - bounded display facts already present in the order snapshot, if the selected
   provider requires them.
 
-The adapter returns only an opaque provider checkout reference and a validated
-absolute HTTPS hosted-checkout URL. The browser can navigate to that URL, but
-a browser return, cancellation, timeout, query string, or client-side script
-cannot create an order, mark one paid, or change fulfillment status.
+The adapter returns one opaque provider checkout reference through exactly one
+closed initiation mode:
+
+- `hosted_redirect` defines a canonical value containing the opaque reference
+  and one validated absolute HTTPS hosted-checkout URL; or
+- `out_of_band_confirmation` contains the opaque reference, fixed `pending`
+  state, and generic `approve_in_provider_app` customer action, with no URL.
+
+The browser may navigate only for `hosted_redirect`. For out-of-band approval,
+it remains on a RED-CMS-owned pending surface and must never contact the
+provider directly or receive the opaque provider reference. A browser return,
+cancellation, timeout, query string, client-side script, pending state, or
+provider-app instruction cannot create an order, mark one paid, or change
+fulfillment status.
 
 The adapter may create at most one current checkout attempt for the same order
 and internal idempotency relation. Retry behavior must either return the same
@@ -203,16 +213,21 @@ in the initial scope. This does not revise Stripe P1, bundle a second adapter,
 or make Store Lite provider-specific. Direct Nequi Push/QR remains a later
 client-specific alternative.
 
-C1 is the next gate because direct Wompi/Nequi Push has no hosted URL. C1 may
-add only a closed initiation-mode union that preserves the existing
+C1 is complete because direct Wompi/Nequi Push has no hosted URL. It adds only
+a closed initiation-mode union that defines the canonical
 `hosted_redirect` result and adds `out_of_band_confirmation` with an opaque
 reference, no URL, pending state, and generic provider-app action. Its
 dependency-free offline fixture must prove the Wompi/Nequi request,
 asynchronous outcome, status reconciliation, event-checksum, replay/mismatch,
 privacy, and redaction contracts without creating a package, credential,
 database, route, network request, provider transaction, payment, order change,
-or demo deployment. See
-[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md).
+or demo deployment. The 55 focused assertions plus existing Stripe/generic
+regressions pass; existing Stripe-specific helpers and results are not changed
+or wired through the new helper. C2 is next and remains a separately
+distributed offline package skeleton. See
+[`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md).
 
 ## Explicit Exclusions
 

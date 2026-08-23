@@ -325,20 +325,24 @@ Any transition outside the approved state map fails closed.
 Store Lite can operate without an online-payment adapter. Pay-on-receipt is a
 package setting, not a simulated payment event.
 
-When hosted checkout is added:
+When online payment initiation is added:
 
 - the provider adapter is a separate package and lifecycle unit;
 - credentials remain outside public content and package manifests;
 - Store Lite passes only a bounded checkout request to the adapter;
-- the adapter returns an opaque provider checkout reference and URL;
+- the adapter returns one opaque provider reference through either the closed
+  hosted reference/HTTPS-URL value or the closed pending out-of-band provider-
+  app value;
 - only a verified server-to-server event can mark an order paid;
 - signature, amount, currency, order identity, duplicate, replay, refund, and
   reversal checks are mandatory; and
-- browser redirects display status but do not authorize a transition.
+- browser redirects or provider-app instructions display status but do not
+  authorize a transition.
 
-Store Lite must not depend on PayPal-specific field names or callback behavior.
-The first adapter may use PayPal, but the commerce contract remains
-provider-neutral. The complete Gate P0 direction is in
+Store Lite must not depend on provider-specific field names, methods, URLs, or
+callback behavior. The additive C1 initiation contract preserves hosted
+redirects and adds URL-free out-of-band confirmation without naming Wompi or
+Nequi in Store Lite runtime behavior. The complete Gate P0 direction is in
 [`PAYMENT-ADAPTER-DIRECTION.md`](PAYMENT-ADAPTER-DIRECTION.md).
 
 ## Administrator Boundary
