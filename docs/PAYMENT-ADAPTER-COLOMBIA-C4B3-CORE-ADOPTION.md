@@ -85,12 +85,15 @@ Both fresh clients independently installed/configured/enabled exact package
 differed. One-client rollback/disablement did not change the peer. All
 disposable schemas, grants, and stages were removed.
 
-## C4B4 boundary
+## C4B4A follow-up
 
-C4B4 is next and remains credential-free/no-contact. It may add only bounded
-one-attempt execution authorization, claim, and state evidence around the
-already-contained C4B2 request and C4B3 response contracts. It must not add a
-real provider request, credential resolution, payment verification, or order
-mutation. Later no-contact gates separately own the CLI command, sealed
-transport doubles, and disposable rehearsal. C4C remains the first separately
-owner-authorized account/credential/read-only provider-contact gate.
+C4B4A later completed in package `0.1.4` at `5f372b3` plus exact core
+adoption. It adds pure sealed-double-only authorization, first-claim
+preparation, and observed-state projections while keeping claim persistence,
+replay protection, and execution false. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+
+C4B4B separately owns durable authorization/claim and replay protection. Later
+no-contact gates own the runner, CLI command, and rehearsal. C4C remains the
+first separately owner-authorized account/credential/read-only provider-
+contact gate.

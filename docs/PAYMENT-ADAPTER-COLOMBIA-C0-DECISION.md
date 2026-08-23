@@ -176,7 +176,8 @@ validate and project closed facts.
    response containment, and exact core adoption. C4B2 adds exact two-contract
    presentation/consent plus transient request/signature contracts and core
    adoption. C4B3 adds strict transaction-create/lookup containment plus exact
-   core adoption. C4B4 next owns one-attempt authorization/claim/state; later
+   core adoption. C4B4A adds pure one-attempt authorization/claim/state plus
+   exact core adoption. C4B4B next owns durable claim/replay protection; later
    C4B gates own command and transport-double contracts. C4C owner
    account plus
    one read-only merchant GET, C4D one approved transaction, and C4E declined/

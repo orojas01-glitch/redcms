@@ -301,7 +301,7 @@ try {
             && !empty($storePackage['valid'])
             && !empty($wompiPackage['valid'])
             && ($storePackage['manifest']['version'] ?? null) === '0.1.35'
-            && ($wompiPackage['manifest']['version'] ?? null) === '0.1.3',
+            && ($wompiPackage['manifest']['version'] ?? null) === '0.1.4',
         'both clients share only exact reviewed package code and identities'
     );
 

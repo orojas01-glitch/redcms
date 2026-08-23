@@ -2001,6 +2001,29 @@ request bootstrap excludes the disabled package.
     remains separately owner-gated before account/credential/read-only provider
     contact. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
+141. Completed Colombia C4B4A across separate Wompi package `0.1.4` at
+    `5f372b3a2e35723f638a03cf089deedc238c99a4` and exact non-runtime core
+    adoption. The dependency-free contract binds exact C2 plan/C4B2 wire,
+    client/database/actor/secret-availability/nonce hashes, fresh authority,
+    enabled package/Store Lite facts, one attempt/no retry, and a maximum 15-
+    minute window to sealed-double-only no-contact authorization. First-claim
+    preparation requires a distinct nonce, attempt one, and empty prior-claim
+    evidence, then sets remaining attempts to zero while explicitly keeping
+    claim persistence, replay protection, and execution false. Exact C4B3
+    create/lookup evidence projects only claim-prepared, pending-observed,
+    approved-observed, or failed-observed state; payment verification, event
+    agreement, provider/order mutation, and retry remain false. External checks
+    pass 34 C2, 74 package/current-core, 29 C4B1, 49 C4B2, 48 C4B3, and 52
+    C4B4A assertions with 16 integrity files and twelve source/package pairs.
+    Core runtime helpers remain unchanged; exact pins now recognize `0.1.4`/
+    `5f372b3`. Focused checks pass 48 profile, 18 registrar, 31 ingress, and 22
+    clean-starter assertions. Disposable checks pass 16 install/registrar,
+    existing Stripe 24 plus Wompi 17 atomic-enable, and 21 two-client assertions
+    with exact cleanup and the configured primary unchanged. C4B4B remains
+    credential-free/no-contact for atomic durable claim and replay protection;
+    C4C remains separately owner-gated before account/credential/read-only
+    provider contact. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

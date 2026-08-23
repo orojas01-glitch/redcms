@@ -295,6 +295,15 @@ exact cleanup. C4B4 is next and remains credential-free/no-contact for one-
 attempt authorization/claim/state. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B3-CORE-ADOPTION.md).
 
+C4B4A is now complete in package `0.1.4` at `5f372b3` plus exact core
+adoption. It supplies pure sealed-double-only authorization, first-claim
+preparation, and observed state while explicitly leaving durable claim
+persistence, replay protection, and execution false. Core runtime helpers
+remain unchanged; focused and disposable proofs pass with exact cleanup.
+C4B4B is next and remains credential-free/no-contact for atomic durable claim
+and replay protection. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4A-CORE-ADOPTION.md).
+
 ## Explicit Exclusions
 
 Gate P0 does not select a provider, add a core payment abstraction, create
