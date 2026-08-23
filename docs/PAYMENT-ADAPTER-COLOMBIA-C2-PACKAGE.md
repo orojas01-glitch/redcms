@@ -58,29 +58,31 @@ or checkout URL.
   project-boundary audits passed.
 - Local and GitHub `main` both resolve to the exact commit above.
 
-## Deliberate C3 blocker
+## C3A profile closure
 
 Generic RED-CMS add-on discovery validates the package, its dependency,
 settings, route, migrations, outbound host, and all nine integrity hashes. The
 contained generic registrar sees only the declared adapter and refusing route.
 
-The current core payment-adapter profile is still
-`store_lite_stripe_checkout_adapter_v1`; it requires exactly two secret
-settings and outbound host `api.stripe.com`. It therefore refuses the Wompi
+Before C3A, the only core payment-adapter profile was
+`store_lite_stripe_checkout_adapter_v1`; it required exactly two secret
+settings and outbound host `api.stripe.com`, and therefore refused the Wompi
 manifest with exactly:
 
 - `outbound_host_invalid`; and
 - `setting_contract_invalid`.
 
-This refusal is required C2 evidence. The package is not claimed to be
-installable, enable-ready, or runtime-ready. C3 must generalize or add a
-separately closed core profile for this exact package while preserving every
-existing Stripe assertion and refusal.
+That refusal remains required historical C2 evidence. C3A now adds the exact
+`store_lite_wompi_adapter_v1` non-executing profile and preserves every existing
+Stripe assertion. The package is still not claimed to be installable, enable-
+ready, or runtime-ready because downstream database/registrar/ingress/
+enablement helpers remain separately gated.
 
-## C3 boundary
+## C3B boundary
 
-C3 may change core only to recognize this exact provider-neutral/Wompi profile
-and prove it in fresh disposable databases. It must preserve:
+C3B may change only downstream database and registrar planning to recognize
+this exact profile and prove it in fresh disposable databases. It must
+preserve:
 
 - clean-starter exclusion of the external package;
 - exact per-client database and settings/secret isolation;
@@ -92,7 +94,7 @@ and prove it in fresh disposable databases. It must preserve:
 - two-client isolation and exact cleanup; and
 - every existing Stripe profile and regression.
 
-C3 must not create a Wompi account, key value, provider request, transaction,
+C3B must not create a Wompi account, key value, provider request, transaction,
 Nequi notification, payment, public webhook ingress, browser flow, Store Lite
 order mutation, hosted-demo change, client deployment, or production host.
 Wompi Sandbox contact remains C4 and separately approval-gated.

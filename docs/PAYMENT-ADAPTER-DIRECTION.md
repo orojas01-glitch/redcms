@@ -230,14 +230,18 @@ commit `e17a371`. Its 34 provider-contract plus 60 package assertions prove the
 exact C1 union, hashed plan, one-use double, dynamic signed-event verification,
 nine-file integrity, two unexecuted evidence migrations, generic discovery,
 contained registrar, refusing route, no-network source, and cleanup. Current
-Stripe-only payment-profile validation refuses the package exactly because C3
-has not generalized its two-secret/Stripe-host assumptions. C3 is next and
-remains offline/disposable. See
+Stripe-only payment-profile validation originally refused the package exactly.
+C3A now adds only exact non-executing `store_lite_wompi_adapter_v1` validation,
+including signed setting-key lists, and preserves all Stripe profile/registrar/
+ingress/synthetic/typed regressions. C3B is next and owns downstream disposable
+database/migration/registrar proof; enablement remains later. See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md`](PAYMENT-ADAPTER-COLOMBIA-C1-INITIATION-CONTRACT.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md`](PAYMENT-ADAPTER-COLOMBIA-C3A-CORE-PROFILE.md).
 
 ## Explicit Exclusions
 
