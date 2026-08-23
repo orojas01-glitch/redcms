@@ -2059,9 +2059,27 @@ request bootstrap excludes the disabled package.
     `database:0 grant:0 staged-project:0 primary:unchanged`. Execution means
     only the in-memory double ran; package invocation, secret resolution,
     network/Wompi, transaction creation, payment/order, and retry remain false.
-    C4B4D is next for a CLI-only dry-run-first command and network-disabled
+    C4B4D then owns the CLI-only dry-run-first command and network-disabled
     disposable rehearsal; C4C remains separately owner-gated. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md).
+144. Completed Colombia C4B4D as a CLI-only, dry-run-first operator gate and
+    network-disabled disposable rehearsal. The command accepts only one exact
+    bounded authorization/claim JSON file, performs one C4B4C plan, and writes
+    nothing by default. Apply requires exact database/package/enabled state,
+    client/database/actor/order/plan/wire/authorization/claim/request/start
+    identities, nonzero backup evidence, one attempt, no retry, disabled
+    network, and explicit provider/transaction/payment/order denials before it
+    constructs one final sealed double and calls the runner once. Its pure
+    source contract passes 55 assertions. The disposable rehearsal disables
+    URL streams plus common cURL/socket functions, clears proxy and secret-
+    value environments, applies all 46 migrations, proves dry run, incomplete-
+    confirmation refusal, one apply, replay refusal, four rows/four audits,
+    empty Wompi attempt/event tables, and cleanup `database:0 grant:0 staged-
+    project:0 evidence:0 environment:clear source-repositories:unchanged
+    primary:unchanged`. No account, credential, provider contact, transaction,
+    payment, order, demo, or deployment effect occurs. C4C is next and remains
+    separately owner-gated. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
