@@ -257,9 +257,13 @@ passes exact cleanup. C4B4D is now complete: its CLI defaults to dry run and
 requires every exact bounded identity/denial before one sealed-double apply.
 The network-disabled disposable rehearsal passes the 55-assertion source
 contract, dry run, incomplete-confirmation refusal, one apply, replay refusal,
-four durable rows/four audits, zero provider effects, and exact cleanup. C4C is
-next and remains separately owner-gated before account access, isolated
-Sandbox value entry, or one read-only provider request. See
+four durable rows/four audits, zero provider effects, and exact cleanup. C4C1
+is now complete: external Wompi `0.1.5` at `cc2ddd0` owns one bounded read-only
+merchant transport, while exact core adoption passes 51 profile assertions and
+a 13-assertion disposable sealed-double rehearsal with all 47 migrations and
+exact cleanup. The real transport was not invoked. C4C2 is active for the
+Owner-gated CLI plus no-contact rehearsal; C4C3 remains the first real account/
+Sandbox-value/read-only provider-contact step. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -292,7 +296,9 @@ and
 and
 [Colombia C4B4C Transport Double](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md)
 and
-[Colombia C4B4D Operator Rehearsal](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
+[Colombia C4B4D Operator Rehearsal](docs/PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md)
+and
+[Colombia C4C1 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

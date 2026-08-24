@@ -2077,9 +2077,23 @@ request bootstrap excludes the disabled package.
     empty Wompi attempt/event tables, and cleanup `database:0 grant:0 staged-
     project:0 evidence:0 environment:clear source-repositories:unchanged
     primary:unchanged`. No account, credential, provider contact, transaction,
-    payment, order, demo, or deployment effect occurs. C4C is next and remains
+    payment, order, demo, or deployment effect occurs. C4C then remains
     separately owner-gated. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
+145. Completed Colombia C4C1 without account/dashboard or provider contact.
+    External Wompi `0.1.5` at `cc2ddd0` adds exactly one TLS-verified Sandbox
+    merchant-contract GET, strict no-redirect/proxy/auth/retry bounds, response
+    containment, and a sealed no-network double. Its full external suite passes
+    321 assertions with 19 integrity files. Core pins only the reviewed
+    `0.1.5`/commit pair, passes 51 profile assertions, and adds a 13-assertion
+    disposable adoption rehearsal. After all 47 migrations it proves exact
+    install-disabled/enable/registrar state, one sealed double, bounded links/
+    hashes, empty Wompi business tables, and cleanup `database:0 grant:0 staged-
+    project:0 primary:unchanged`. No real key value, DNS, TLS, HTTP, Wompi,
+    transaction, payment, order, demo, or deployment effect occurs. C4C2 next
+    owns the Owner-gated CLI/no-contact rehearsal; C4C3 remains the first real
+    read-only provider contact. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

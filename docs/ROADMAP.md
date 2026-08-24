@@ -405,9 +405,18 @@ incomplete-confirmation refusal, one apply, replay refusal, exact four rows/four
 audits, empty Wompi attempt/event tables, and cleanup `database:0 grant:0
 staged-project:0 evidence:0 environment:clear source-repositories:unchanged
 primary:unchanged`. No account, credential, provider contact, transaction,
-payment, order, demo, or deployment effect occurs. C4C is next and remains
+payment, order, demo, or deployment effect occurs. C4C then remains
 separately owner-gated for account readiness, isolated Sandbox value entry,
 and one bounded read-only merchant retrieval.
+C4C1 is now complete before any account or provider contact. External Wompi
+`0.1.5` at `cc2ddd0` implements one TLS-verified read-only merchant-contract
+GET with strict response containment and a sealed double. Its complete suite
+passes 321 assertions. Core exact-package acceptance passes 51 profile
+assertions and a 13-assertion fresh-database adoption rehearsal after all 47
+migrations, with Wompi business tables empty and cleanup `database:0 grant:0
+staged-project:0 primary:unchanged`. C4C2 is next for the Owner-gated CLI plus
+disposable no-contact rehearsal. C4C3 retains the separately confirmed owner
+account/Sandbox-value/one-GET boundary; no transaction is authorized.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -437,7 +446,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4C-TRANSPORT-DOUBLE.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
