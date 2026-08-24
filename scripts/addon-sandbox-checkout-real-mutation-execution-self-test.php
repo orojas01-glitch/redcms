@@ -465,6 +465,8 @@ try {
             && !empty($executed['registrarValidated'])
             && !empty($executed['secretResolution'])
             && !empty($executed['adapterInvoked'])
+            && ($executed['adapterInvocationReason'] ?? '') === 'completed'
+            && ($executed['adapterErrorCode'] ?? null) === ''
             && !empty($executed['outcomeRecorded'])
             && !empty($executed['outcomeAuditRecorded'])
             && $GLOBALS['RED_P3E9D4B2_REGISTRAR_CALLS'] === 1
@@ -642,7 +644,10 @@ try {
             && !empty($missing['outcomeRecorded'])
             && $GLOBALS['RED_P3E9D4B2_HANDLER_CALLS'] === $callsBeforeMissing
             && empty($missing['boundedOutcome']['networkAccess'])
-            && empty($missing['boundedOutcome']['providerMutation']),
+            && empty($missing['boundedOutcome']['providerMutation'])
+            && ($missing['adapterInvocationReason'] ?? '')
+                === 'core_exception'
+            && ($missing['adapterErrorCode'] ?? null) === '',
         'missing secret after start records no-invocation indeterminate result'
     );
     putenv('RED_ADDON_SECRET_VALUES_JSON=' . json_encode([

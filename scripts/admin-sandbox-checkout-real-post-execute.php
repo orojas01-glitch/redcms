@@ -436,6 +436,16 @@ printf(
     "Failure stage: %s\n",
     is_array($outcome) ? ($outcome['failureStage'] ?? 'unavailable') : 'unavailable'
 );
+printf(
+    "Adapter invocation reason: %s\n",
+    $result['adapterInvocationReason'] ?? 'unavailable'
+);
+printf(
+    "Adapter error code: %s\n",
+    ($result['adapterErrorCode'] ?? '') === ''
+        ? 'none'
+        : $result['adapterErrorCode']
+);
 echo 'Attempt consumed: '
     . (!empty($result['executionStarted']) ? 'yes' : 'no') . "\n";
 echo "Retry authorized: no\n";

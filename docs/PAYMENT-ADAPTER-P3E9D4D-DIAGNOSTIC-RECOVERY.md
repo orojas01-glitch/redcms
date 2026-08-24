@@ -60,6 +60,13 @@ validates only the bounded outcome and failure stage, checks the durable
 `4:4:2` ledger, prints no Session reference or raw provider material, and then
 removes the database, grant, staged project, evidence, and secret file.
 
+The server-local command also reports a transient closed adapter invocation
+reason and error code. Reasons are limited to core/adapter lifecycle vocabulary;
+adapter errors are limited to the four `real_post_*_refused`/`real_post_failed`
+codes already emitted by the package. These diagnostics are not added to the
+bounded provider outcome, result hash, audit row, database, package payload, or
+browser response.
+
 `RED_D4D_RECOVERY_NETWORK_MODE=offline` is the acceptance-only mode. It
 disables URL streams and common cURL/socket functions for the apply runtime,
 proves the complete durable recovery lifecycle with a synthetic restricted-key
