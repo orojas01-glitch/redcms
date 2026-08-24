@@ -2109,6 +2109,22 @@ request bootstrap excludes the disabled package.
     explicitly false, so C4C3A must add them before C4C3B one owner-operated
     real GET. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+147. Completed Colombia C4C3A as the durable, provider-double-only execution
+    gate. Fresh 15-minute hash-only authorization binds current client, Owner,
+    exact packages/settings, one nonce, one attempt/no retry, network disabled,
+    and every real provider/business authorization false. Planning is zero-
+    write. Apply commits one start row/audit before one final core provider
+    double, then records one bounded result/audit; replay refuses before another
+    invocation, while post-start failure remains permanently no-retry. The CLI
+    defaults to dry run and requires every printed identity/hash/denial plus a
+    nonzero backup hash. The disposable proof passes 32 durable and 78 command-
+    contract assertions, one apply, two rows/two audits, replay refusal, empty
+    Wompi business tables, all 47 migrations, and exact cleanup. No enrollment,
+    account, tax selection, real key, network, Wompi request, transaction,
+    payment, event, order, demo, or deployment occurs. C4C3B is owner-deferred
+    and requires a new explicit authorization before exactly one real read-only
+    GET. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

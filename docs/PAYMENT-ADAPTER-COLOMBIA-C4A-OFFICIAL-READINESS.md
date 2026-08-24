@@ -254,19 +254,21 @@ and a disposable rehearsal that invokes the sealed double, never the real
 transport. Durability and replay protection remain explicitly false. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
 
-### C4C3A — next: durable real-target execution gate
+### C4C3A — complete: durable provider-double execution gate
 
-C4C3A must add immutable start-before-contact/result evidence, one-attempt
-replay protection, a dry-run-first real-target CLI, and a provider-double
-rehearsal without Wompi contact.
+C4C3A adds immutable start-before-invocation/result evidence, one-attempt replay
+protection, a dry-run-first CLI, and a network-disabled provider-double
+rehearsal. It does not contain or invoke the real Wompi transport. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 
-### C4C3B — owner-operated account and read-only provider proof
+### C4C3B — owner-deferred account and read-only provider proof
 
-Only after C4C3A is merged, the owner may register or sign into Wompi, complete
-current merchant/terms requirements, and enter isolated Sandbox values into one
-non-production RED-CMS installation. A separately confirmed first provider
-contact is exactly one bounded public-key merchant GET used to retrieve current
-contract links/token hashes. It creates no transaction.
+When the owner chooses to resume, a new explicit authorization is required to
+register or sign into Wompi, complete current merchant/terms requirements, and
+enter isolated Sandbox values into one non-production RED-CMS installation. A
+separately confirmed first provider contact is exactly one bounded public-key
+merchant GET used to retrieve current contract links/token hashes. It creates
+no transaction. C4C3A evidence cannot authorize this step.
 
 ### C4D — one approved Sandbox Nequi transaction
 

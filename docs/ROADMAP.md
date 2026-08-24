@@ -419,10 +419,13 @@ dry-run-first source contract and a network-disabled disposable rehearsal.
 Dry run loads no package PHP. Fully confirmed apply invokes only one sealed
 merchant-read double, retains no raw key/body/token, leaves Wompi business and
 action/audit rows `0:0:0:0`, and explicitly has no durable attempt or replay
-protection. Cleanup is exact after all 47 migrations. C4C3A next owns durable
-start/result, the real-target CLI, and provider-double rehearsal; C4C3B retains
-the owner account/Sandbox-value/exactly-one-GET boundary. No transaction is
-authorized.
+protection. Cleanup is exact after all 47 migrations. C4C3A is now complete:
+32 durable assertions and a 78-assertion CLI contract prove zero-write dry run,
+incomplete-confirmation refusal, start-before-one-provider-double, bounded
+result, two durable rows/two audits, replay refusal, empty Wompi business
+tables, and exact cleanup under disabled network primitives. C4C3B is owner-
+deferred and retains the account/Sandbox-value/exactly-one-GET boundary. No
+transaction is authorized.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -456,7 +459,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

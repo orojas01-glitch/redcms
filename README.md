@@ -264,9 +264,11 @@ a 13-assertion disposable sealed-double rehearsal with all 47 migrations and
 exact cleanup. The real transport was not invoked. C4C2 is now complete with a
 67-assertion dry-run-first command contract plus a fresh-database no-contact
 rehearsal. Apply can invoke only one sealed double and explicitly has no durable
-attempt or replay protection. C4C3A is next for durable start/result plus the
-real-target CLI/provider-double rehearsal; C4C3B remains the first real account/
-Sandbox-value/exactly-one-GET step. See
+attempt or replay protection. C4C3A is now complete: the CLI remains dry-run-
+first, commits start before one core provider double, records bounded result,
+refuses replay, and passes 32 durable plus 78 command-contract assertions in a
+network-disabled disposable rehearsal. C4C3B is owner-deferred and remains the
+first real account/Sandbox-value/exactly-one-GET step. See
 [P3E-9D4C1 Operator Command](docs/PAYMENT-ADAPTER-P3E9D4C1-OPERATOR-COMMAND.md)
 and
 [P3E-9D4C2 No-Contact Rehearsal](docs/PAYMENT-ADAPTER-P3E9D4C2-NO-CONTACT-REHEARSAL.md)
@@ -303,7 +305,9 @@ and
 and
 [Colombia C4C1 Core Adoption](docs/PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md)
 and
-[Colombia C4C2 Operator Rehearsal](docs/PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+[Colombia C4C2 Operator Rehearsal](docs/PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md)
+and
+[Colombia C4C3A Durable Provider Double](docs/PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 
 RED-CMS 5.0 Bonsai and Milestone 5 are complete on `main`. The release
 checkpoint was merged through [pull request #2](https://github.com/orojas01-glitch/redcms/pull/2)

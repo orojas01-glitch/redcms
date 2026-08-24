@@ -14,8 +14,8 @@ transient-wire package, the C4B3 response-containment package, the C4B4A pure
 no-contact attempt contract, the C4B4B durable claim/replay gate, and the
 C4B4C sealed transport-double start/result runner, plus the C4B4D dry-run CLI
 and network-disabled disposable rehearsal, and C4C1 external Wompi `0.1.5`
-read-only transport plus exact sealed-double core adoption, followed by the
-C4C2 dry-run/sealed-double operator rehearsal.
+read-only transport plus exact sealed-double core adoption, the C4C2 dry-run/
+sealed-double operator rehearsal, and the C4C3A durable provider-double gate.
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, orange is
@@ -90,11 +90,11 @@ flowchart TD
 | Question | Current answer |
 | --- | --- |
 | Where are we? | The Store Lite v1 basic-demo target is achieved. Release C3, the direct-PHP adapter, hosted Store Lite 0.1.31 deployment, responsive public verification, and RED-CMS 5.1 Basic instructions are complete. |
-| What just finished? | Colombia C4C2 adds a 67-assertion dry-run-first command and network-disabled disposable rehearsal. Apply can invoke only one sealed double; durable attempt, replay protection, real provider contact, and business rows remain zero. |
-| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D is owner-deferred. Colombia C4C3A is active for durable real-target execution and a provider-double rehearsal; C4C3B remains the separately confirmed one real merchant GET. |
+| What just finished? | Colombia C4C3A adds fresh hash-only authority, zero-write dry run, durable start/result around one core provider double, replay refusal, and a network-disabled disposable rehearsal. It passes 32 durable and 78 command-contract assertions with two rows/two audits and zero business rows. |
+| What is active now? | No required gate remains inside the Store Lite v1 basic-demo target. RED-CMS 5.1.0 is formally released. Stripe D4D and Colombia C4C3B are owner-deferred. C4C3B remains the first real account/Sandbox-value/read-only Wompi GET and requires new explicit authorization. |
 | What can the demo do today? | Administrators can create/edit products, place Product and Cart components, and review Products and Orders tools. Public visitors can add, update, and remove simple or bounded-variable products, then use the guest-checkout form with pickup or delivery and pay on receipt. |
 | What remains inside Gate 2D2? | Nothing. Gate 2D2 is closed by the supported-server Store Lite browser evidence. |
-| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D may be resumed later through its existing approval ladder. Colombia C4C3A durable execution, C4C3B owner account/read-only retrieval, C4D one approved Sandbox transaction, C4E declined/event/rotation, and C5 deployment each retain separate gates. |
+| What remains after this gate? | Nothing required for the basic-demo target. Stripe D4D or Colombia C4C3B may be resumed later through their approval ladders. C4D one approved Sandbox transaction, C4E declined/event/rotation, and C5 deployment remain separately gated behind C4C3B. |
 | What is intentionally outside this target? | Hosted payment adapters and Events Calendar, Appointments, Donations, and Restaurant Ordering. Those remain separate later packages or gates. |
 
 The hosted closeout evidence and explicit no-order-submission limitation are
@@ -176,8 +176,8 @@ flowchart LR
     CO4B4D["COMPLETE<br/>Colombia C4B4D. CLI<br/>+ network-disabled rehearsal"]
     CO4C1["COMPLETE<br/>Colombia C4C1. Wompi 0.1.5 read transport<br/>+ sealed-double core adoption"]
     CO4C2["COMPLETE<br/>Colombia C4C2. Sealed-double CLI<br/>+ no-contact rehearsal"]
-    CO4C3A["ACTIVE<br/>Colombia C4C3A. Durable real-target<br/>runner + provider double"]
-    CO4C3B["OWNER-GATED<br/>Colombia C4C3B-E. Account/read-only GET<br/>then separately approved Sandbox effects"]
+    CO4C3A["COMPLETE<br/>Colombia C4C3A. Durable start/result<br/>+ provider-double rehearsal"]
+    CO4C3B["OWNER-DEFERRED<br/>Colombia C4C3B-E. Account/read-only GET<br/>then separately approved Sandbox effects"]
     CO5["GATED<br/>Colombia C5. Demo<br/>deployment review"]
 
     P0 --> P1 --> P2 --> A1 --> A2 --> A3 --> A4 --> A5 --> P3B --> P3C --> P3D --> P3E8 --> P3E9A --> P3E9B --> P3E9C1 --> P3E9C2 --> P3E9C3A --> P3E9C3B1 --> P3E9C3B2 --> P3E9D0 --> P3E9D1 --> P3E9D2 --> P3E9D3A --> P3E9D3B --> P3E9D4A --> P3E9D4B --> P3E9D4C --> P3E9D4D --> P4
@@ -187,8 +187,7 @@ flowchart LR
     classDef active fill:#e7f0ff,stroke:#315f9d,color:#1f3f6a,stroke-width:3px;
     classDef deferred fill:#fff7e6,stroke:#a36b00,color:#5e4100;
     classDef gated fill:#eef1f5,stroke:#697684,color:#26323d;
-    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B,CO3C1,CO3C2,CO4A,CO4B1,CO4B2,CO4B3,CO4B4A,CO4B4B,CO4B4C,CO4B4D,CO4C1,CO4C2 complete;
-    class CO4C3A active;
+    class P0,P1,P2,A1,A2,A3,A4,A5,P3B,P3C,P3D,P3E8,P3E9A,P3E9B,P3E9C1,P3E9C2,P3E9C3A,P3E9C3B1,P3E9C3B2,P3E9D0,P3E9D1,P3E9D2,P3E9D3A,P3E9D3B,P3E9D4A,P3E9D4B,P3E9D4C,CO0,CO1,CO2,CO3A,CO3B,CO3C1,CO3C2,CO4A,CO4B1,CO4B2,CO4B3,CO4B4A,CO4B4B,CO4B4C,CO4B4D,CO4C1,CO4C2,CO4C3A complete;
     class P3E9D4D,CO4C3B deferred;
     class P4,CO5 gated;
 ```
@@ -266,13 +265,13 @@ C4B4B adds atomic durable authorization/claim plus replay protection with a
 24-assertion disposable proof. C4B4C adds immutable start/result around one
 sealed double with a 38-assertion disposable proof. C4B4D completes the 55-
 assertion CLI source contract plus network-disabled disposable rehearsal with
-one sealed-double apply and exact cleanup. C4C2 through C4E remain gated
-before account access, credential entry, or provider contact. C4C1 publishes
+one sealed-double apply and exact cleanup. C4C1 publishes
 Wompi `0.1.5` at `cc2ddd0` with one bounded read-only transport and completes
 exact sealed-double core adoption; its real transport remains uninvoked. C4C2
 completes the dry-run/sealed-double operator rehearsal with durability/replay
-explicitly false. C4C3A is the active durable execution gate and C4C3B retains
-the real one-GET boundary.
+explicitly false. C4C3A completes durable start/result around one core provider
+double with exact network-disabled cleanup. C4C3B is owner-deferred and retains
+the first real one-GET boundary; C4D through C4E remain gated behind it.
 Every write credential, real
 network request, Checkout Session or Wompi transaction, payment, webhook,
 browser flow, hosted-demo change, and client deployment remains stopped. See
@@ -311,6 +310,8 @@ The completed C4C1 transport/adoption proof is in
 [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 The completed C4C2 operator/no-contact proof is in
 [`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+The completed C4C3A durable provider-double proof is in
+[`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 
 ## Status rule
 

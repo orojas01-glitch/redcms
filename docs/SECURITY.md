@@ -1439,9 +1439,19 @@ no-network double. The command contains no cURL/socket, real transport
 construction, adapter registration/invocation, secret access, production host,
 transaction, or browser bridge. It writes no start/result row and explicitly
 reports durability/replay false; therefore it cannot authorize the real GET.
-C4C3A must add immutable start-before-contact/result evidence and a real-target
-CLI/provider-double rehearsal before C4C3B owner contact. See
-[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+C4C3A now adds immutable start-before-invocation/result evidence and a CLI-only
+provider-double rehearsal. Fresh hash-only evidence expires in 15 minutes and
+fixes one attempt/no retry, network disabled, provider-double only, and all real
+provider/business authorizations false. Planning writes nothing. Apply commits
+start/audit before one final typed double and result/audit afterward. Replay is
+refused before another call; after start, faults and storage failures remain
+permanently no-retry. The command contains no real transport, secret resolver,
+Wompi host, network primitive, package adapter invocation, or browser bridge.
+C4C3B is owner-deferred and must use a fresh, separate real-contact
+authorization; C4C3A evidence cannot authorize it. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
