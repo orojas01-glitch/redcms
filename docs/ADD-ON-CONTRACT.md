@@ -1877,6 +1877,34 @@ identifiers, expose an endpoint, or render administrator controls. Search
 remains the next post-commit best-effort stage and cannot roll back the already
 published content.
 
+### Component destination search completion stage
+
+`includes/addon_component_destination_completion_helpers.php` closes the
+restartable destination sequence after publication. It accepts only the exact
+retained `component_published` execution, rederives the package-owned
+write-disabled preview, and reuses the locked publication reconciliation to
+prove the original composite plan, Article route, public component parent,
+package baseline, revisions, placement audit, actor, target, and all three
+checkpoint hashes before any notification.
+
+Core then invokes the existing closed `content.index-sync` bridge with exactly
+`article.created` and the numeric Article route id. No component id, body,
+package value, actor, session, request global, database handle, or client
+identity is sent. The already-published content is outside this best-effort
+call: unavailable, failed, malformed, output-emitting, or throwing search
+services map only to terminal `failed` evidence and cannot roll back or alter
+the route/component.
+
+The existing compare-and-swap checkpoint advances `component_published` to
+`completed` and stores only `succeeded` or `failed`. If notification succeeds
+but terminal checkpointing fails, the ledger remains pending and exact retry
+may repeat the idempotent repairable refresh before closing; it never creates,
+publishes, revises, or audits content again. A completed replay revalidates the
+published content and returns its retained outcome without another search
+call. Preview, plan, route, component, actor, revision, audit, target, package,
+placement, or terminal-state drift fails closed. This remains an internal
+boundary with no endpoint, button, allocation, provider, or client activation.
+
 ## Data, Migration, And Client Isolation
 
 - Every add-on installation and migration ledger is scoped to one client

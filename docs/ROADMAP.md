@@ -1120,6 +1120,18 @@ Caller transactions, stale/reused plans, revoked grants,
 destination drift, unsupported positions, transaction loss, postcondition
 mismatch, revision failure, and audit failure roll back.
 
+The restartable destination sequence now also closes its post-commit search
+stage. Core rederives and reconciles the exact published route/component before
+sending only `article.created` plus the new numeric Article route id through
+the existing best-effort `content.index-sync` bridge. It then records only
+terminal `succeeded` or `failed` evidence. Search failure cannot roll back the
+published route/component; a failed terminal checkpoint leaves the refresh
+repairably retryable, while completed replay performs no second notification.
+The focused current-schema rehearsal applies all 47 migrations and passes 126
+assertions for notification/checkpoint gap recovery, success, contained
+failure mapping, replay, changed-plan and placement-drift refusal, exact
+fixture cleanup, and `database:0 grant:0 primary:unchanged`.
+
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service
 registration shape is accepted, but the complete Store Lite manifest remains

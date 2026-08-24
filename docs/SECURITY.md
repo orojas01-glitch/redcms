@@ -363,6 +363,16 @@ add-on packages without executing them.
   and current parent/package hashes. Core derives package, component, manifest,
   grants, theme positions, target ownership, and the exact plan again on the
   server; no package callback chooses placement or receives request data.
+- Destination completion is a separate internal post-commit boundary. Before
+  search invocation it rederives the write-disabled package preview and
+  reconciles the exact route, public component, package state, revisions,
+  placement audit, actor, target, and immutable plan/checkpoint hashes. The
+  search service receives only `article.created` plus the numeric Article route
+  id. Failure is contained as terminal `failed` evidence and cannot roll back
+  or modify published content. A notification/checkpoint crash gap may repeat
+  the idempotent repairable refresh, but completed replay sends nothing. No
+  endpoint, browser input, body, component value, actor, session, client
+  identity, provider call, or cross-database state crosses this boundary.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit

@@ -110,7 +110,11 @@ The package owns its InnoDB/FULLTEXT index, query service/route, rebuild command
 responsive AJAX assets, and the `content.index-sync` service. Canonical Article
 create, update, delete, restore, and move endpoints now issue bounded
 best-effort post-commit refreshes; disposable lifecycle proof covers every one
-of those index transitions. Install, enable, rebuild, JSON, desktop/mobile, and
+of those index transitions. The generic destination coordinator now also
+reconciles a newly published route/component before issuing the same bounded
+`article.created` refresh and durably closes success or contained failure;
+completed replay does not notify again. Install, enable, rebuild, JSON,
+desktop/mobile, and
 incremental synchronization checks pass locally. It is not published,
 deployed, or enabled for any retained client. The package now shares one
 hierarchy-aware eligibility query between incremental and full rebuilds and
