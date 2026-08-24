@@ -2094,6 +2094,21 @@ request bootstrap excludes the disabled package.
     owns the Owner-gated CLI/no-contact rehearsal; C4C3 remains the first real
     read-only provider contact. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
+146. Completed Colombia C4C2 as a CLI-only, dry-run-first merchant-read double
+    gate. A new core preflight requires exact current-client Owner/order
+    authority, enabled Store Lite `0.1.35` and Wompi `0.1.5`, one `pub_test_`
+    setting, and three opaque references while returning hashes only and
+    loading no package PHP. The 67-assertion command contract requires every
+    printed identity/denial plus nonzero backup before apply. Apply loads only
+    the five merchant-contract class files and invokes one sealed no-network
+    double; package adapter, real cURL transport, secret resolution, and Wompi
+    contact remain unreachable. The disposable rehearsal runs all 47
+    migrations, proves dry run, incomplete refusal, one double apply, zero
+    Wompi business/action/audit rows, and cleanup `database:0 grant:0 staged-
+    project:0 primary:unchanged`. Durable attempt and replay protection remain
+    explicitly false, so C4C3A must add them before C4C3B one owner-operated
+    real GET. See
+    [`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile

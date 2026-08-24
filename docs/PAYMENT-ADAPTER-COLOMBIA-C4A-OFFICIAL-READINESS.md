@@ -247,15 +247,22 @@ plus a sealed no-network double. Exact core adoption and disposable proof pass
 without account access or provider contact. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 
-### C4C2 — next: Owner-gated CLI and no-contact rehearsal
+### C4C2 — complete: sealed-double CLI and no-contact rehearsal
 
-C4C2 may add only the core-owned current-client/Owner/package/setting/evidence/
-one-attempt command and a disposable rehearsal that invokes the sealed double,
-never the real transport.
+C4C2 adds only the core-owned current-client/Owner/package/setting/hash command
+and a disposable rehearsal that invokes the sealed double, never the real
+transport. Durability and replay protection remain explicitly false. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
 
-### C4C3 — owner-operated account and read-only provider proof
+### C4C3A — next: durable real-target execution gate
 
-Only after C4C2 is merged, the owner may register or sign into Wompi, complete
+C4C3A must add immutable start-before-contact/result evidence, one-attempt
+replay protection, a dry-run-first real-target CLI, and a provider-double
+rehearsal without Wompi contact.
+
+### C4C3B — owner-operated account and read-only provider proof
+
+Only after C4C3A is merged, the owner may register or sign into Wompi, complete
 current merchant/terms requirements, and enter isolated Sandbox values into one
 non-production RED-CMS installation. A separately confirmed first provider
 contact is exactly one bounded public-key merchant GET used to retrieve current

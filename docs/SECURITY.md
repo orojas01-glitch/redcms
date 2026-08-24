@@ -1430,6 +1430,19 @@ Owner/database/evidence CLI and no-contact rehearsal before C4C3 may perform
 one confirmed real GET. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 
+C4C2 adds a hash-only current-client preflight and CLI-only command that
+defaults to dry run. It validates exact Owner/order authority, package versions/
+states, Sandbox public-key prefix/hash, and three reference hashes without
+returning values or resolving secrets. Apply requires every printed identity
+and denial, then loads only reviewed merchant classes and invokes one sealed
+no-network double. The command contains no cURL/socket, real transport
+construction, adapter registration/invocation, secret access, production host,
+transaction, or browser bridge. It writes no start/result row and explicitly
+reports durability/replay false; therefore it cannot authorize the real GET.
+C4C3A must add immutable start-before-contact/result evidence and a real-target
+CLI/provider-double rehearsal before C4C3B owner contact. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and
 the fixed `read-only` mode. Core resolves the enabled request-local owner and
