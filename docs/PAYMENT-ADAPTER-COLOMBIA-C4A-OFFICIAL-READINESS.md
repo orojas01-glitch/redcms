@@ -240,13 +240,26 @@ confirmation refusal, one sealed-double apply, replay refusal, four rows/four
 audits, empty Wompi business tables, and exact cleanup pass. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
-### C4C — owner-operated account and read-only provider proof
+### C4C1 — complete: transport implementation and core adoption
 
-Only after C4B is merged, the owner may register or sign into Wompi, complete
-current merchant/terms requirements, and enter four Sandbox values into one
-isolated non-production RED-CMS installation. A separately authorized first
-provider contact should be the bounded public-key merchant GET used to retrieve
-current contract links/tokens. It creates no transaction.
+External package `0.1.5` implements one bounded read-only Sandbox merchant GET
+plus a sealed no-network double. Exact core adoption and disposable proof pass
+without account access or provider contact. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
+
+### C4C2 — next: Owner-gated CLI and no-contact rehearsal
+
+C4C2 may add only the core-owned current-client/Owner/package/setting/evidence/
+one-attempt command and a disposable rehearsal that invokes the sealed double,
+never the real transport.
+
+### C4C3 — owner-operated account and read-only provider proof
+
+Only after C4C2 is merged, the owner may register or sign into Wompi, complete
+current merchant/terms requirements, and enter isolated Sandbox values into one
+non-production RED-CMS installation. A separately confirmed first provider
+contact is exactly one bounded public-key merchant GET used to retrieve current
+contract links/token hashes. It creates no transaction.
 
 ### C4D — one approved Sandbox Nequi transaction
 

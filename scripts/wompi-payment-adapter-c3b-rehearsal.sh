@@ -24,7 +24,8 @@ source "$SCRIPT_DIR/db-common.sh"
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite}"
 WOMPI_REPOSITORY="${RED_WOMPI_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite-wompi}"
 STORE_REVISION='f7de77eb1694fb6003340632c5018024753fe1fa'
-WOMPI_REVISION='5f372b3a2e35723f638a03cf089deedc238c99a4'
+WOMPI_REVISION="${RED_WOMPI_REVISION:-5f372b3a2e35723f638a03cf089deedc238c99a4}"
+WOMPI_VERSION="${RED_WOMPI_VERSION:-0.1.4}"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 SELF_TEST_SCRIPT="${RED_WOMPI_SELF_TEST_SCRIPT:-wompi-payment-adapter-c3b-self-test.php}"
 BEFORE_SELF_TEST_SCRIPT="${RED_WOMPI_BEFORE_SELF_TEST_SCRIPT:-}"
@@ -168,6 +169,7 @@ if [[ "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c3b-self-test.php'
     && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c3c1-self-test.php'
     && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4b4b-self-test.php'
     && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4b4c-self-test.php'
+    && "$SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4c1-self-test.php'
 ]]; then
     printf 'Unsupported Wompi disposable self-test: %s\n' \
         "$SELF_TEST_SCRIPT" >&2
@@ -198,6 +200,15 @@ if [[ "$(git -C "$STORE_REPOSITORY" rev-parse HEAD)" != "$STORE_REVISION"
     printf 'Store Lite must be clean at %s.\n' "$STORE_REVISION" >&2
     exit 65
 fi
+if [[ !( "$WOMPI_VERSION" == '0.1.4'
+          && "$WOMPI_REVISION" == '5f372b3a2e35723f638a03cf089deedc238c99a4' )
+    && !( "$WOMPI_VERSION" == '0.1.5'
+          && "$WOMPI_REVISION" == 'cc2ddd03ab54f663a089f7d059d802180e555d15' )
+]]; then
+    printf 'Unsupported Wompi version/revision pair: %s %s.\n' \
+        "$WOMPI_VERSION" "$WOMPI_REVISION" >&2
+    exit 64
+fi
 if [[ "$(git -C "$WOMPI_REPOSITORY" rev-parse HEAD)" != "$WOMPI_REVISION"
     || -n "$(git -C "$WOMPI_REPOSITORY" status --short)"
 ]]; then
@@ -212,7 +223,7 @@ wompi_version="$("$RED_PHP_BIN_RESOLVED" -r '
     $manifest = json_decode(file_get_contents($argv[1]), true, 64, JSON_THROW_ON_ERROR);
     echo $manifest["version"] ?? "";
 ' "$WOMPI_REPOSITORY/package/addon.json")"
-if [[ "$store_version" != '0.1.35' || "$wompi_version" != '0.1.4' ]]; then
+if [[ "$store_version" != '0.1.35' || "$wompi_version" != "$WOMPI_VERSION" ]]; then
     printf 'Exact package versions required; Store Lite=%s Wompi=%s.\n' \
         "$store_version" "$wompi_version" >&2
     exit 65

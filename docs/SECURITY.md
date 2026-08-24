@@ -1414,8 +1414,21 @@ confirmation, one apply, replay refusal, four rows/four audits, empty Wompi
 attempt/event tables, exact cleanup, and unchanged source/primary database are
 proved. The command contains no credential input, secret resolver, registrar/
 handler, network primitive, Wompi host, browser bridge, or arbitrary callable.
-C4C remains the first separately owner-authorized provider-contact gate. See
+C4C remained the first separately owner-authorized provider-contact ladder. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
+
+C4C1 implements but does not invoke the first read-only Wompi transport.
+External package `0.1.5` accepts only a hash-matching `pub_test_` value and one
+fixed Sandbox merchant-contract GET. TLS peer/host verification, GET, no
+redirect/proxy/auth header, connection/total-time/header/body ceilings, and no
+retry are fixed. Raw public key, response body/headers, and acceptance tokens
+are cleared before the typed result. Production prefixes/host, private/
+integrity/event secret use, provider mutation, transaction, payment, event,
+order mutation, and retry are absent. Core adoption invokes only the sealed
+no-network double in a fresh database and cleans all state. C4C2 must add the
+Owner/database/evidence CLI and no-contact rehearsal before C4C3 may perform
+one confirmed real GET. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 
 Display-only add-on administrator tools require an optional closed manifest
 contract that maps one provided tool to one already-requested permission and

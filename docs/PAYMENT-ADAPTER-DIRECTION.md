@@ -323,6 +323,14 @@ CLI-only dry-run-first command plus network-disabled disposable rehearsal. See
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md).
 
+C4C1 is now complete without provider contact. External Wompi `0.1.5` at
+`cc2ddd0` contains one bounded read-only merchant-contract transport plus a
+sealed no-network double; its full suite passes 321 assertions. Exact core
+adoption passes 51 profile and 13 disposable assertions with all 47 migrations,
+empty Wompi business tables, and exact cleanup. C4C2 next owns the Owner-gated
+CLI/no-contact rehearsal; C4C3 remains the first real one-GET boundary. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
+
 ## Explicit Exclusions
 
 Gate P0 does not select a provider, add a core payment abstraction, create

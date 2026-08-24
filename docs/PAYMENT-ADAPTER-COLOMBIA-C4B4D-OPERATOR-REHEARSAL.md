@@ -64,8 +64,9 @@ client installation, retained database, demo change, or deployment occurs.
 
 ## Next boundary
 
-C4C is now the next and first separately owner-authorized provider-contact
-gate. It is limited to owner account readiness, isolated Sandbox value entry,
-and one bounded read-only merchant retrieval. C4D one approved Sandbox Nequi
-transaction, C4E declined/event/rotation evidence, and C5 deployment remain
-separate later approvals.
+C4C1 has since implemented and adopted the read-only transport without contact.
+C4C2 now owns the CLI/no-contact gate, and C4C3 remains the first separately
+confirmed owner account/Sandbox-value/read-only provider request. C4D one
+approved Sandbox Nequi transaction, C4E declined/event/rotation evidence, and
+C5 deployment remain separate later approvals. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
