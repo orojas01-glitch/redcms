@@ -28,6 +28,8 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_component_destination_component_helpers.php';
 require_once $projectRoot
+    . '/includes/addon_component_destination_publish_helpers.php';
+require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
@@ -154,6 +156,10 @@ function red_addon_editor_create_test_cleanup(
                     'redcms_destination_component_checkpoint_fail',
                 ],
                 [
+                    'RED_Addon_Component_Destination_Executions',
+                    'redcms_destination_publish_checkpoint_fail',
+                ],
+                [
                     'RED_Addon_Component_Revisions',
                     'redcms_component_delete_package_revision_fail',
                 ],
@@ -233,6 +239,12 @@ function red_addon_editor_create_test_cleanup(
             "DELETE FROM RED_Admin_Activity_Log
              WHERE TargetType='component' AND TargetRecordID="
                 . (int) $contentRecordId
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Admin_Activity_Log
+             WHERE TargetType='component' AND TargetRecordID="
+                . (int) $destinationComponentRecordId
         );
         mysqli_query(
             $connection,
@@ -1441,6 +1453,168 @@ try {
         "UPDATE RED_Articles SET Title='Coordinator route fixture'
          WHERE RecordID=$destinationComponentRecordId"
     );
+
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Addon_Component_Destination_Executions
+         ADD CONSTRAINT redcms_destination_publish_checkpoint_fail
+         CHECK (`Stage` <> 'component_published')"
+    );
+    $previewCallsBeforePublishFailure = $previewCalls;
+    $failedPublish = red_addon_component_destination_component_publish(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($failedPublish['published'])
+            && $failedPublish['reason'] === 'checkpoint_failed'
+            && $failedPublish['stage'] === 'component_created'
+            && $previewCalls === $previewCallsBeforePublishFailure + 2
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*) FROM RED_Articles
+                     WHERE RecordID=$destinationComponentRecordId
+                       AND Component='$componentId' AND Active='Y'
+                       AND Article='coordinator-route'
+                       AND PagePosition=$destinationPosition),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$destinationComponentRecordId
+                       AND RevisionNumber=2 AND Operation='move'),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE EventName='component.public_placed'
+                       AND TargetType='component'
+                       AND TargetRecordID=$destinationComponentRecordId
+                       AND ActorAdminRecordID=$adminRecordId),
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_Component_Destination_Executions
+                     WHERE PackageID='$packageId'
+                       AND PlanSHA256='" . $routePlan['planHash'] . "'
+                       AND Stage='component_created'
+                       AND PlacementStateSHA256 IS NULL))"
+            ) === '1:1:1:1',
+        'publish checkpoint failure retains one committed public placement and component checkpoint'
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Destination_Executions
+         DROP CHECK redcms_destination_publish_checkpoint_fail'
+    );
+
+    $previewCallsBeforePublishRetry = $previewCalls;
+    $publishedComponent = red_addon_component_destination_component_publish(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($publishedComponent['published'])
+            && !empty($publishedComponent['resumed'])
+            && $publishedComponent['reason'] === 'resumed'
+            && $publishedComponent['stage'] === 'component_published'
+            && red_addon_valid_sha256(
+                $publishedComponent['placementStateSha256']
+            )
+            && $publishedComponent['revisionId'] > 0
+            && $publishedComponent['revisionNumber'] === 2
+            && $previewCalls === $previewCallsBeforePublishRetry + 2,
+        'retry reconciles the committed placement and advances the component checkpoint'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT COUNT(*) FROM RED_Articles
+                 WHERE RecordID=$destinationComponentRecordId
+                   AND Active='Y' AND Article='coordinator-route'),
+                (SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                 WHERE ContentRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                 WHERE EventName='component.public_placed'
+                   AND TargetRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $routePlan['planHash'] . "'
+                   AND Stage='component_published'
+                   AND PlacementStateSHA256='"
+                    . $publishedComponent['placementStateSha256'] . "'))"
+        ) === '1:2:1:1:1',
+        'published checkpoint binds one placement, move revision, baseline, and audit fact'
+    );
+
+    $previewCallsBeforePublishReplay = $previewCalls;
+    $replayedPublish = red_addon_component_destination_component_publish(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($replayedPublish['published'])
+            && !empty($replayedPublish['resumed'])
+            && $replayedPublish['reason'] === 'resumed'
+            && $replayedPublish['revisionId'] ===
+                $publishedComponent['revisionId']
+            && hash_equals(
+                $publishedComponent['placementStateSha256'],
+                $replayedPublish['placementStateSha256']
+            )
+            && $previewCalls === $previewCallsBeforePublishReplay + 2,
+        'exact publish-stage replay rederives preview without another move or audit'
+    );
+
+    $changedPublishRequest = $routeExecutionRequest;
+    $changedPublishRequest['componentValues']['quantity'] = '6';
+    $changedPublish = red_addon_component_destination_component_publish(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $changedPublishRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($changedPublish['published'])
+            && $changedPublish['reason'] === 'placement_drift',
+        'changed package values cannot resume the immutable published plan'
+    );
+
+    mysqli_query(
+        $connection,
+        'UPDATE RED_Articles SET PagePositionOrder=2 WHERE RecordID='
+            . $destinationComponentRecordId
+    );
+    $driftedPublish = red_addon_component_destination_component_publish(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($driftedPublish['published'])
+            && $driftedPublish['reason'] === 'placement_drift',
+        'published parent or revision drift fails closed without another placement'
+    );
+    mysqli_query(
+        $connection,
+        'UPDATE RED_Articles SET PagePositionOrder=1 WHERE RecordID='
+            . $destinationComponentRecordId
+    );
+
     red_addon_editor_create_test_assert(
         red_addon_component_destination_execution_storage_available(
             $connection
@@ -2939,7 +3113,8 @@ try {
         $connection,
         'ALTER TABLE RED_Admin_Activity_Log ADD CONSTRAINT '
             . '`redcms_component_publish_audit_fail` CHECK '
-            . "(`EventName` <> 'component.public_placed')"
+            . "(`EventName` <> 'component.public_placed' "
+            . "OR `TargetRecordID` <> $contentRecordId)"
     );
     $refused = red_addon_component_editor_publish_values(
         $connection,
