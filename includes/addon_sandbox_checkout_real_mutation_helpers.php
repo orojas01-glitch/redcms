@@ -62,6 +62,8 @@ if (!function_exists('red_addon_checkout_real_mutation_result')) {
             'registrarValidated' => false,
             'secretResolution' => false,
             'adapterInvoked' => false,
+            'adapterInvocationReason' => '',
+            'adapterErrorCode' => '',
             'boundedOutcome' => null,
             'outcomeRecorded' => false,
             'outcomeAuditRecorded' => false,
@@ -1824,10 +1826,42 @@ if (!function_exists('red_addon_checkout_real_mutation_execute')) {
                     $access
                 );
                 $result['adapterInvoked'] = !empty($invocation['invoked']);
+                $allowedReasons = [
+                    'invalid_request', 'adapter_output', 'adapter_failed',
+                    'invalid_result', 'secret_disclosure', 'adapter_error',
+                    'completed',
+                ];
+                $allowedErrors = [
+                    '', 'real_post_input_refused',
+                    'real_post_preflight_refused',
+                    'real_post_secret_refused', 'real_post_failed',
+                ];
+                $invocationReason = is_string($invocation['reason'] ?? null)
+                    ? $invocation['reason']
+                    : '';
+                $adapterError = is_string($invocation['error'] ?? null)
+                    ? $invocation['error']
+                    : '';
+                $result['adapterInvocationReason'] = in_array(
+                    $invocationReason,
+                    $allowedReasons,
+                    true
+                ) ? $invocationReason : 'unavailable';
+                $result['adapterErrorCode'] = in_array(
+                    $adapterError,
+                    $allowedErrors,
+                    true
+                ) ? $adapterError : 'unavailable';
             } catch (Throwable $throwable) {
                 $invocation = [];
+                $result['adapterInvocationReason'] = 'core_exception';
+                $result['adapterErrorCode'] = '';
             }
-            unset($access, $secret, $registry, $handler, $typedInput);
+            unset(
+                $access, $secret, $registry, $handler, $typedInput,
+                $allowedReasons, $allowedErrors, $invocationReason,
+                $adapterError
+            );
 
             $outcome = red_addon_checkout_real_mutation_bounded_outcome(
                 is_array($invocation) ? $invocation : [],

@@ -459,6 +459,8 @@ APPLY_STATUS=$?
 set -e
 OUTCOME="$(awk -F': ' '$1 == "Outcome" { print $2; exit }' "$TEMP_ROOT/apply.txt")"
 FAILURE_STAGE="$(awk -F': ' '$1 == "Failure stage" { print $2; exit }' "$TEMP_ROOT/apply.txt")"
+ADAPTER_INVOCATION_REASON="$(awk -F': ' '$1 == "Adapter invocation reason" { print $2; exit }' "$TEMP_ROOT/apply.txt")"
+ADAPTER_ERROR_CODE="$(awk -F': ' '$1 == "Adapter error code" { print $2; exit }' "$TEMP_ROOT/apply.txt")"
 grep -Fx 'Attempt consumed: yes' "$TEMP_ROOT/apply.txt" >/dev/null
 if [[ "$APPLY_STATUS" -eq 0 ]]; then
     if [[ "$OUTCOME" != 'checkout_session_created'
@@ -478,6 +480,12 @@ elif [[ "$APPLY_STATUS" -eq 1 ]]; then
     fi
 else
     echo "Unexpected D4D recovery command status: $APPLY_STATUS" >&2
+    exit 65
+fi
+if [[ ! "$ADAPTER_INVOCATION_REASON" =~ ^(invalid_request|adapter_output|adapter_failed|invalid_result|secret_disclosure|adapter_error|completed|core_exception|unavailable)$
+    || ! "$ADAPTER_ERROR_CODE" =~ ^(none|real_post_input_refused|real_post_preflight_refused|real_post_secret_refused|real_post_failed|unavailable)$
+]]; then
+    echo 'Adapter diagnostic codes failed bounded validation.' >&2
     exit 65
 fi
 if [[ "$RECOVERY_NETWORK_MODE" == 'offline' ]]; then
@@ -515,4 +523,4 @@ fi
 [[ "$(repository_fingerprint "$STORE_ROOT")" == "$STORE_SOURCE_BEFORE" ]]
 
 RUN_SUCCEEDED=1
-echo "P3E-9D4D diagnostic recovery completed: core:$CORE_COMMIT adapter:$EXPECTED_ADAPTER_COMMIT store-lite:$EXPECTED_STORE_COMMIT network-mode:$RECOVERY_NETWORK_MODE dry-run:1 real-apply:1 outcome:$OUTCOME failure-stage:$FAILURE_STAGE payment:0 webhook:0 browser:0 store-mutation:0 retry:0 live-mode:0 deployment:0 ledger:$POST_APPLY_COUNTS"
+echo "P3E-9D4D diagnostic recovery completed: core:$CORE_COMMIT adapter:$EXPECTED_ADAPTER_COMMIT store-lite:$EXPECTED_STORE_COMMIT network-mode:$RECOVERY_NETWORK_MODE dry-run:1 real-apply:1 outcome:$OUTCOME failure-stage:$FAILURE_STAGE adapter-reason:$ADAPTER_INVOCATION_REASON adapter-error:$ADAPTER_ERROR_CODE payment:0 webhook:0 browser:0 store-mutation:0 retry:0 live-mode:0 deployment:0 ledger:$POST_APPLY_COUNTS"
