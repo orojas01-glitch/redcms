@@ -1,7 +1,7 @@
 # P3E-9D4D Diagnostic Recovery
 
-Status: local offline diagnostic implementation complete on 2026-08-24. A
-new provider attempt remains separately authorization-gated.
+Status: local contract-parity repair and offline diagnostic recovery complete
+on 2026-08-24. A new provider attempt remains separately authorization-gated.
 
 The first D4D operational attempt created a Checkout-Sessions-Write-only
 restricted key in the dedicated `RED-CMS Store Lite Development` Sandbox and
@@ -36,6 +36,8 @@ outcome remains conservative, attempt-consuming, and no-retry.
 
 - Stripe adapter aggregate suite passes, including 89 D4A assertions.
 - RED-CMS focused D4C1 command checks pass 74 assertions.
+- The recovery harness source contract passes 67 assertions and requires the
+  exact network-disabled transport-boundary result after preflight adoption.
 - The restartable D4C2 rehearsal stages preserved Store Lite `0.1.35` by
   commit while permitting current Store Lite main to advance independently.
 - Full RED-CMS acceptance passes against a fresh disposable current-schema
@@ -72,16 +74,21 @@ The 2026-08-24 provider-mode harness completed `indeterminate` at
 POST in the Sandbox log. The same merged sources reproduced the failure in
 network-disabled mode with transient diagnostics
 `adapter-reason=adapter_error` and
-`adapter-error=real_post_preflight_refused`. The remaining defect is therefore
-inside the core-to-adapter real-POST preflight contract, before credentialed
-transport or Stripe contact.
+`adapter-error=real_post_preflight_refused`. Offline field-by-field parity then
+isolated the defect to the fixed D4 evidence input: it carried a placeholder
+contract digest instead of the deterministic adapter-owned P3E-9A contract
+digest. Replacing only that fixture digest made contract adoption plus input
+and request digests match exactly; no validation rule was weakened.
 
 `RED_D4D_RECOVERY_NETWORK_MODE=offline` is the acceptance-only mode. It
 disables URL streams and common cURL/socket functions for the apply runtime,
 proves the complete durable recovery lifecycle with a synthetic restricted-key
-shape, and must end `indeterminate` at `adapter_invocation_failed` without DNS,
-TLS, HTTP, or Stripe contact. Provider mode does not retry and does not expire
-the dashboard key; key expiration remains a separately confirmed owner action.
+shape, and must pass adapter preflight before ending `indeterminate` at
+`transport_exchange_failed`, with adapter reason `completed` and adapter error
+`none`, without DNS, TLS, HTTP, or Stripe contact. The repaired run used core
+commit `44f0f12`, preserved ledger `4:4:2`, and completed exact cleanup. Provider
+mode does not retry and does not expire the dashboard key; key expiration
+remains a separately confirmed owner action.
 
 A future D4D recovery attempt requires a new explicit authorization, a new
 least-privilege restricted Sandbox key, a fresh disposable database and

@@ -90,7 +90,9 @@ function red_checkout_p3e9d4b_evidence_input()
             'oneAttempt' => true,
             'automaticRetry' => false,
         ],
-        'contractSha256' => str_repeat('c', 64),
+        // Exact deterministic P3E-9A contract for the fixed D4 fixture input.
+        'contractSha256' =>
+            '3e0d98a688dc334c2f382b1518ed6992069b8919714beffd0bb984e55b2b8cfb',
     ];
 }
 
@@ -245,6 +247,11 @@ red_checkout_p3e9d4b_evidence_delete($temporaryRoot);
 try {
     $package = red_checkout_p3e9d4b_evidence_package($packageDirectory);
     $input = red_checkout_p3e9d4b_evidence_input();
+    red_checkout_p3e9d4b_evidence_assert(
+        ($input['contractSha256'] ?? '')
+            === '3e0d98a688dc334c2f382b1518ed6992069b8919714beffd0bb984e55b2b8cfb',
+        'fixed D4 input retains the exact adapter contract digest'
+    );
     $syntheticPlan = red_checkout_p3e9d4b_evidence_synthetic_plan($input);
     $preflight = red_addon_checkout_real_post_preflight(
         $syntheticPlan,

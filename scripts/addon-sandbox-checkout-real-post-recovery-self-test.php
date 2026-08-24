@@ -30,6 +30,10 @@ foreach ([
     'no-contact-runtime:ready', 'PHP_INI_SCAN_DIR="$TEMP_ROOT/php-ini"',
     'PHP_INI_SCAN_DIR="$TEMP_ROOT/php-ini-contact"',
     "RECOVERY_NETWORK_MODE\" == 'offline'",
+    "FAILURE_STAGE\" != 'transport_exchange_failed'",
+    "ADAPTER_INVOCATION_REASON\" != 'completed'",
+    "ADAPTER_ERROR_CODE\" != 'none'",
+    'Offline recovery did not reach the sealed transport boundary.',
 ] as $runtime) {
     $assert(str_contains($source, $runtime), $runtime . ' is fixed');
 }
