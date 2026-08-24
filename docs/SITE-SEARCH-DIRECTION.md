@@ -10,7 +10,7 @@ a bounded cross-cutting read-only utility. Search PHP, migrations, index rows,
 CSS, JavaScript, and source integrations remain outside the core repository.
 
 The package id is `redcms.site-search`. Its current reviewed version is `0.1.4`
-at private-repository main commit `1e16547`.
+at private-repository main commit `193c1a1` and tag `v0.1.4`.
 It declares the typed `content.search` and `content.index-sync` services, one
 exact static public `GET` route, one package-owned migration, and two immutable
 public assets. It has no component, administrator tool, public mutation,
@@ -59,13 +59,13 @@ folder from another client.
 
 `RED_Addon_SiteSearch_Documents` is derived, client-local InnoDB data with a
 FULLTEXT key over title, summary, body text, and keywords. The unique source
-identity is source type, source record id, and language. Version 0.1.3 indexes
+identity is source type, source record id, and language. Version 0.1.4 indexes
 only active, started, unexpired core `Article` pages with a nonempty public
 alias whose stored Section/Category/SubCategory hierarchy exists and remains
 active. HTML is converted to plain UTF-8 text before storage, and page URLs are
 rebuilt from that hierarchy.
 
-Version 0.1.3 also refreshes only the affected core Article rows after a
+Version 0.1.4 also refreshes only the affected core Article rows after a
 successful canonical create, update, delete, restore, or move transaction.
 Core invokes the exact enabled service owner after commit with one closed event
 name and 1-64 record ids. Notification is deliberately best effort: a package
@@ -83,7 +83,7 @@ gates, refuses manual apply/plan arguments, and uses one non-blocking advisory
 lock per client database. It adds no core scheduler, public route, manifest
 job, setting, secret, or shared client state.
 
-## Current local proof and remaining gates
+## Current proof and remaining gates
 
 The package now has its own adjacent local Git repository at
 `/Users/oscarrojas/Documents/redcms-site-search`. It passes pure normalization,
@@ -93,15 +93,13 @@ hierarchy deactivation/reactivation, future-start/expiry repair, concurrent
 rebuild refusal, a 50,000-document atomic rebuild with 125.19 ms local query
 p95, a 16-assertion Store Lite provider lifecycle, desktop, and mobile
 interaction checks against fresh disposable databases.
-This is local evidence only: the repository has no commit or remote, no GitHub
-repository or package release was published, no retained starter/client
-database was changed, and no site was deployed.
+Private release `v0.1.4` contains the reproducible reviewed archive. The first
+client-local installation on `demo.red-sphere.com` is enabled with its own
+database/index, Spanish header mount, exact immutable assets, ten-minute cPanel
+scheduled repair command, and demo-specific log. Live HTTP and desktop/mobile
+QA returned real Article and Store Lite results with zero browser/runtime
+errors. This does not authorize another client installation.
 
-Before a first client release:
-
-1. Review and commit the independent local package, create its private GitHub
-   repository, and tag an immutable reviewed version.
-2. Repeat responsive browser/HTTP QA against the reviewed release archive on
-   the intended supported hosting profile.
-3. Review each client mount, language, schedule, index contents, backup, and rollback
-   before installation or enablement.
+Before each later client release, independently review the pinned archive,
+database, Owner, theme mount, language, PHP command, schedule, index contents,
+backup, rollback, and hosted browser/HTTP behavior.

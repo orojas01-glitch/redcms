@@ -373,6 +373,14 @@ add-on packages without executing them.
   the idempotent repairable refresh, but completed replay sends nothing. No
   endpoint, browser input, body, component value, actor, session, client
   identity, provider call, or cross-database state crosses this boundary.
+- The internal destination coordinator loads only the exact package/plan
+  execution and starts at its first unfinished durable stage. It creates no
+  outer transaction or lock, cannot skip identity agreement, and delegates all
+  preview rederivation, authorization, lock, write, reconciliation, and
+  checkpoint ownership to the selected stage. Failure stops downstream work;
+  retry resumes from retained evidence, and terminal replay performs no second
+  package callback, placement, audit, or Search notification. No endpoint,
+  browser value, scheduler, provider, or client identifier is added.
 - Compatibility, dependencies, routes, unsafe-method CSRF policy, settings,
   migrations, assets, and outbound hosts fail closed.
 - Current Guest, Webmaster, and legacy Superadmin roles receive no implicit
@@ -2180,8 +2188,9 @@ currency, stock, availability value, SKU, variant commercial facts, cart,
 order, payment, customer, administrator, setting, secret, and database
 identity fields. A missing or disabled provider becomes an empty source and
 removes stale Store Lite rows; a malformed or failing enabled provider rolls
-the rebuild back. There is still no private/member source, network request, or
-deployment.
+the rebuild back. There is still no private/member source or network request.
+The first private demo installation is client-local; core performs no package
+deployment and receives no authority over later clients.
 
 ## Multi-User Authorization
 

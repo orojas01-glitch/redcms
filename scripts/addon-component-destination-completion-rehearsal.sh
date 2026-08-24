@@ -152,7 +152,7 @@ TEST_STATUS=$?
 set -e
 printf '%s\n' "$OUTPUT"
 [[ "$TEST_STATUS" -eq 0 ]]
-grep -F 'passed (126 assertions).' <<< "$OUTPUT" >/dev/null
+grep -F 'passed (132 assertions).' <<< "$OUTPUT" >/dev/null
 
-printf 'Destination completion rehearsal passed: migrations:%s assertions:126 search:best-effort terminal:durable\n' \
+printf 'Destination completion rehearsal passed: migrations:%s assertions:132 search:best-effort terminal:durable coordinator:restartable\n' \
     "$MIGRATION_COUNT"

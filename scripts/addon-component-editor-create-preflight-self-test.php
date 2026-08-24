@@ -32,6 +32,8 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_component_destination_completion_helpers.php';
 require_once $projectRoot
+    . '/includes/addon_component_destination_coordinator_helpers.php';
+require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
@@ -53,6 +55,8 @@ $targetPageRecordId = 2147000977;
 $duplicateTargetPageRecordId = 2147000978;
 $destinationRouteRecordId = 2147000979;
 $destinationComponentRecordId = 2147000980;
+$coordinatorRouteRecordId = 2147000981;
+$coordinatorComponentRecordId = 2147000982;
 $packageId = 'redcms.editor-create-fixture';
 $componentId = 'redcms.editor-create-fixture/item';
 $previewService = 'content.destination-preview.fixture';
@@ -124,6 +128,8 @@ function red_addon_editor_create_test_cleanup(
     $duplicateTargetPageRecordId,
     $destinationRouteRecordId,
     $destinationComponentRecordId,
+    $coordinatorRouteRecordId,
+    $coordinatorComponentRecordId,
     $packageId,
     $packageTable
 ) {
@@ -166,6 +172,10 @@ function red_addon_editor_create_test_cleanup(
                 [
                     'RED_Addon_Component_Destination_Executions',
                     'redcms_destination_completion_checkpoint_fail',
+                ],
+                [
+                    'RED_Addon_Component_Destination_Executions',
+                    'redcms_destination_coordinator_completion_fail',
                 ],
                 [
                     'RED_Addon_Component_Revisions',
@@ -214,6 +224,11 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Page_SEO WHERE OwnerRecordID='
+                . (int) $coordinatorRouteRecordId
+        );
+        mysqli_query(
+            $connection,
             'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
                 . (int) $contentRecordId
         );
@@ -221,6 +236,11 @@ function red_addon_editor_create_test_cleanup(
             $connection,
             'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
                 . (int) $destinationComponentRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
+                . (int) $coordinatorComponentRecordId
         );
         mysqli_query(
             $connection,
@@ -244,6 +264,12 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Content_Revisions WHERE ContentRecordID IN ('
+                . (int) $coordinatorRouteRecordId . ','
+                . (int) $coordinatorComponentRecordId . ')'
+        );
+        mysqli_query(
+            $connection,
             "DELETE FROM RED_Admin_Activity_Log
              WHERE TargetType='component' AND TargetRecordID="
                 . (int) $contentRecordId
@@ -259,6 +285,14 @@ function red_addon_editor_create_test_cleanup(
             "DELETE FROM RED_Admin_Activity_Log
              WHERE TargetType='article' AND TargetRecordID="
                 . (int) $destinationRouteRecordId
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Admin_Activity_Log
+             WHERE (TargetType='component' AND TargetRecordID="
+                . (int) $coordinatorComponentRecordId . ")
+                OR (TargetType='article' AND TargetRecordID="
+                . (int) $coordinatorRouteRecordId . ')'
         );
         mysqli_query(
             $connection,
@@ -286,6 +320,12 @@ function red_addon_editor_create_test_cleanup(
             $connection,
             'DELETE FROM RED_Articles WHERE RecordID='
                 . (int) $destinationComponentRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Articles WHERE RecordID IN ('
+                . (int) $coordinatorRouteRecordId . ','
+                . (int) $coordinatorComponentRecordId . ')'
         );
         foreach (
             [
@@ -452,10 +492,16 @@ function red_addon_editor_create_test_context(
             &$loaderCalls,
             $packageTable
         ): array {
-            global $destinationComponentRecordId, $destinationLoaderCalls;
-            if ((int) $context['contentRecordId'] ===
-                $destinationComponentRecordId
-            ) {
+            global $destinationComponentRecordId,
+                $coordinatorComponentRecordId, $destinationLoaderCalls;
+            if (in_array(
+                (int) $context['contentRecordId'],
+                [
+                    $destinationComponentRecordId,
+                    $coordinatorComponentRecordId,
+                ],
+                true
+            )) {
                 $destinationLoaderCalls++;
             } else {
                 $loaderCalls++;
@@ -492,10 +538,16 @@ function red_addon_editor_create_test_context(
                 array $values
             ) use (&$creatorCalls, &$creatorMode, $packageTable): bool {
                 global $destinationComponentRecordId,
+                    $coordinatorComponentRecordId,
                     $destinationCreatorCalls;
-                if ((int) $context['contentRecordId'] ===
-                    $destinationComponentRecordId
-                ) {
+                if (in_array(
+                    (int) $context['contentRecordId'],
+                    [
+                        $destinationComponentRecordId,
+                        $coordinatorComponentRecordId,
+                    ],
+                    true
+                )) {
                     $destinationCreatorCalls++;
                 } else {
                     $creatorCalls++;
@@ -645,7 +697,8 @@ function red_addon_editor_create_test_context(
             RED_Addon_Service_Request $request
         ): RED_Addon_Service_Result {
             global $indexSyncCalls, $indexSyncMode,
-                $destinationRouteRecordId, $destinationComponentRecordId;
+                $destinationRouteRecordId, $destinationComponentRecordId,
+                $coordinatorRouteRecordId, $coordinatorComponentRecordId;
             $indexSyncCalls++;
             if ($indexSyncMode === 'emit') {
                 echo 'unsafe-index-sync-output';
@@ -653,14 +706,15 @@ function red_addon_editor_create_test_context(
             if ($indexSyncMode === 'throw') {
                 throw new RuntimeException('private index sync failure');
             }
+            $input = $request->input();
+            $acceptedIds = [
+                [$destinationRouteRecordId, $destinationComponentRecordId],
+                [$coordinatorRouteRecordId, $coordinatorComponentRecordId],
+            ];
             if ($request->operation() !== 'refresh'
-                || $request->input() !== [
-                    'event' => 'component.published',
-                    'recordIds' => [
-                        $destinationRouteRecordId,
-                        $destinationComponentRecordId,
-                    ],
-                ]
+                || array_keys($input) !== ['event', 'recordIds']
+                || $input['event'] !== 'component.published'
+                || !in_array($input['recordIds'], $acceptedIds, true)
             ) {
                 return RED_Addon_Service_Result::failure(
                     'index_sync_request_invalid'
@@ -703,6 +757,8 @@ try {
         $duplicateTargetPageRecordId,
         $destinationRouteRecordId,
         $destinationComponentRecordId,
+        $coordinatorRouteRecordId,
+        $coordinatorComponentRecordId,
         $packageId,
         $packageTable
     );
@@ -1825,6 +1881,237 @@ try {
         $connection,
         'UPDATE RED_Articles SET PagePositionOrder=1 WHERE RecordID='
             . $destinationComponentRecordId
+    );
+
+    $coordinatorRequest = $routeExecutionRequest;
+    $coordinatorRequest['previewInput'] = ['alias' => 'coordinator-full'];
+    $coordinatorRequest['routeRecordId'] = $coordinatorRouteRecordId;
+    $coordinatorRequest['componentRecordId'] = $coordinatorComponentRecordId;
+    $coordinatorRequest['title'] = 'Full coordinator fixture';
+    $coordinatorRequest['alias'] = 'coordinator-full';
+    $coordinatorRequest['componentPagePositionOrder'] = 2;
+    $coordinatorPreview = red_addon_component_destination_route_preview(
+        $manifest,
+        $coordinatorRequest
+    );
+    $coordinatorPlan = red_addon_component_destination_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        red_addon_component_destination_route_preflight_request(
+            $coordinatorRequest,
+            $coordinatorPreview
+        )
+    );
+    red_addon_editor_create_test_assert(
+        is_array($coordinatorPreview)
+            && !empty($coordinatorPlan['ready'])
+            && red_addon_valid_sha256($coordinatorPlan['planHash']),
+        'full coordinator starts from one exact immutable destination plan'
+    );
+
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Addon_Component_Destination_Executions
+         ADD CONSTRAINT redcms_destination_coordinator_completion_fail
+         CHECK (PlanSHA256 <> '" . $coordinatorPlan['planHash'] . "'
+                OR Stage <> 'completed')"
+    );
+    $creatorCallsBeforeCoordinator = $destinationCreatorCalls;
+    $indexCallsBeforeCoordinator = $indexSyncCalls;
+    $failedCoordinator = red_addon_component_destination_coordinate(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $coordinatorRequest,
+        $coordinatorPlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        empty($failedCoordinator['completed'])
+            && !empty($failedCoordinator['routeCreated'])
+            && !empty($failedCoordinator['componentCreated'])
+            && !empty($failedCoordinator['componentPublished'])
+            && empty($failedCoordinator['completionRecorded'])
+            && $failedCoordinator['stageAttempts'] === 4
+            && $failedCoordinator['completedStages'] === 3
+            && $failedCoordinator['failedStage'] === 'completion'
+            && $failedCoordinator['reason'] === 'checkpoint_failed'
+            && $failedCoordinator['stage'] === 'component_published'
+            && $destinationCreatorCalls ===
+                $creatorCallsBeforeCoordinator + 1
+            && $indexSyncCalls === $indexCallsBeforeCoordinator + 1
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*) FROM RED_Articles
+                     WHERE RecordID IN (
+                        $coordinatorRouteRecordId,
+                        $coordinatorComponentRecordId
+                     )),
+                    (SELECT COUNT(*) FROM `$packageTable`
+                     WHERE ContentRecordID=$coordinatorComponentRecordId),
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_Component_Destination_Executions
+                     WHERE PackageID='$packageId'
+                       AND PlanSHA256='" . $coordinatorPlan['planHash'] . "'
+                       AND Stage='component_published'
+                       AND SearchNotification='pending'))"
+            ) === '2:1:1',
+        'coordinator stops after a contained terminal-checkpoint failure with published content retained'
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Destination_Executions
+         DROP CHECK redcms_destination_coordinator_completion_fail'
+    );
+
+    $resumedCoordinator = red_addon_component_destination_coordinate(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $coordinatorRequest,
+        $coordinatorPlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        !empty($resumedCoordinator['completed'])
+            && !empty($resumedCoordinator['resumed'])
+            && !empty($resumedCoordinator['routeCreated'])
+            && !empty($resumedCoordinator['componentCreated'])
+            && !empty($resumedCoordinator['componentPublished'])
+            && !empty($resumedCoordinator['completionRecorded'])
+            && !empty($resumedCoordinator['notificationSucceeded'])
+            && $resumedCoordinator['stageAttempts'] === 1
+            && $resumedCoordinator['completedStages'] === 4
+            && $resumedCoordinator['failedStage'] === ''
+            && $resumedCoordinator['stage'] === 'completed'
+            && $resumedCoordinator['searchNotification'] === 'succeeded'
+            && $resumedCoordinator['reason'] === 'resumed'
+            && $destinationCreatorCalls ===
+                $creatorCallsBeforeCoordinator + 1
+            && $indexSyncCalls === $indexCallsBeforeCoordinator + 2,
+        'one retry resumes all retained stage evidence and repeats only repairable search completion: '
+            . json_encode([
+                'result' => $resumedCoordinator,
+                'creatorCalls' => $destinationCreatorCalls,
+                'expectedCreatorCalls' =>
+                    $creatorCallsBeforeCoordinator + 1,
+                'indexCalls' => $indexSyncCalls,
+                'expectedIndexCalls' => $indexCallsBeforeCoordinator + 2,
+            ])
+    );
+
+    $indexCallsBeforeCoordinatorReplay = $indexSyncCalls;
+    $replayedCoordinator = red_addon_component_destination_coordinate(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $coordinatorRequest,
+        $coordinatorPlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        !empty($replayedCoordinator['completed'])
+            && !empty($replayedCoordinator['resumed'])
+            && $replayedCoordinator['stageAttempts'] === 1
+            && $replayedCoordinator['completedStages'] === 4
+            && $replayedCoordinator['searchNotification'] === 'succeeded'
+            && $destinationCreatorCalls ===
+                $creatorCallsBeforeCoordinator + 1
+            && $indexSyncCalls === $indexCallsBeforeCoordinatorReplay,
+        'terminal coordinator replay revalidates every stage without duplicate package or search writes'
+    );
+
+    $changedCoordinatorRequest = $coordinatorRequest;
+    $changedCoordinatorRequest['componentValues']['quantity'] = '6';
+    $refusedCoordinator = red_addon_component_destination_coordinate(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $changedCoordinatorRequest,
+        $coordinatorPlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        empty($refusedCoordinator['completed'])
+            && $refusedCoordinator['stageAttempts'] === 1
+            && $refusedCoordinator['completedStages'] === 3
+            && $refusedCoordinator['failedStage'] === 'completion'
+            && $refusedCoordinator['reason'] === 'placement_drift'
+            && $destinationCreatorCalls ===
+                $creatorCallsBeforeCoordinator + 1
+            && $indexSyncCalls === $indexCallsBeforeCoordinatorReplay,
+        'coordinator resumes from durable progress and refuses changed immutable input without downstream work'
+    );
+
+    mysqli_query(
+        $connection,
+        "DELETE FROM RED_Addon_Component_Destination_Executions
+         WHERE PackageID='$packageId'
+           AND PlanSHA256='" . $coordinatorPlan['planHash'] . "'"
+    );
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
+            . $coordinatorComponentRecordId
+    );
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Content_Revisions WHERE ContentRecordID IN ('
+            . $coordinatorRouteRecordId . ','
+            . $coordinatorComponentRecordId . ')'
+    );
+    mysqli_query(
+        $connection,
+        "DELETE FROM RED_Admin_Activity_Log
+         WHERE (TargetType='article' AND TargetRecordID="
+            . $coordinatorRouteRecordId . ")
+            OR (TargetType='component' AND TargetRecordID="
+            . $coordinatorComponentRecordId . ')'
+    );
+    mysqli_query(
+        $connection,
+        'DELETE FROM `' . $packageTable . '` WHERE ContentRecordID='
+            . $coordinatorComponentRecordId
+    );
+    mysqli_query(
+        $connection,
+        'DELETE FROM RED_Articles WHERE RecordID IN ('
+            . $coordinatorRouteRecordId . ','
+            . $coordinatorComponentRecordId . ')'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT COUNT(*) FROM RED_Articles WHERE RecordID IN (
+                    $coordinatorRouteRecordId,
+                    $coordinatorComponentRecordId
+                )),
+                (SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID IN (
+                    $coordinatorRouteRecordId,
+                    $coordinatorComponentRecordId
+                 )),
+                (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                 WHERE ContentRecordID=$coordinatorComponentRecordId),
+                (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                 WHERE TargetRecordID IN (
+                    $coordinatorRouteRecordId,
+                    $coordinatorComponentRecordId
+                 )),
+                (SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $coordinatorPlan['planHash'] . "'))"
+        ) === '0:0:0:0:0',
+        'full coordinator fixture cleans its route, component, revisions, audits, and checkpoint exactly'
     );
 
     red_addon_editor_create_test_assert(
@@ -3805,6 +4092,8 @@ try {
         $duplicateTargetPageRecordId,
         $destinationRouteRecordId,
         $destinationComponentRecordId,
+        $coordinatorRouteRecordId,
+        $coordinatorComponentRecordId,
         $packageId,
         $packageTable
     );
@@ -3846,6 +4135,8 @@ try {
         $duplicateTargetPageRecordId,
         $destinationRouteRecordId,
         $destinationComponentRecordId,
+        $coordinatorRouteRecordId,
+        $coordinatorComponentRecordId,
         $packageId,
         $packageTable
     );

@@ -1906,6 +1906,26 @@ call. Preview, plan, route, component, actor, revision, audit, target, package,
 placement, or terminal-state drift fails closed. This remains an internal
 boundary with no endpoint, button, allocation, provider, or client activation.
 
+### Component destination restartable coordinator
+
+`includes/addon_component_destination_coordinator_helpers.php` is the single
+internal orchestration entry point for the four implemented stages. It accepts
+only the same manifest, component, actor, closed request, and immutable plan
+hash. It loads the durable execution once and begins at the first unfinished
+stage: route for a new or `planned` execution, component for `route_created`,
+publication for `component_created`, and completion for
+`component_published` or `completed`.
+
+The coordinator adds no outer lock or transaction. Every selected stage still
+rederives the package preview and owns its existing lifecycle/theme/package/
+execution locks, atomic write, reconciliation, and compare-and-swap checkpoint.
+It stops after the first contained refusal and returns only bounded progress,
+identity, stage, hash, and terminal Search evidence. Exact retry resumes from
+the retained ledger stage. A completed replay invokes only terminal
+reconciliation and sends no second Search notification. This boundary exposes
+no endpoint, browser input, administrator button, identifier allocation,
+package-specific behavior, scheduler, provider contact, or client state.
+
 ## Data, Migration, And Client Isolation
 
 - Every add-on installation and migration ledger is scoped to one client

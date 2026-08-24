@@ -1128,10 +1128,19 @@ the existing best-effort `content.index-sync` bridge. It then records only
 terminal `succeeded` or `failed` evidence. Search failure cannot roll back the
 published route/component; a failed terminal checkpoint leaves the refresh
 repairably retryable, while completed replay performs no second notification.
-The focused current-schema rehearsal applies all 47 migrations and passes 126
+The focused current-schema rehearsal applies all 47 migrations and passes 132
 assertions for notification/checkpoint gap recovery, success, contained
 failure mapping, replay, changed-plan and placement-drift refusal, exact
 fixture cleanup, and `database:0 grant:0 primary:unchanged`.
+
+The four stages now have one internal restartable coordinator. It loads the
+exact durable execution once, starts at the first unfinished stage, and leaves
+each stage's existing preview, locks, atomic commit, reconciliation, and
+checkpoint unchanged. Focused proof forces a terminal checkpoint failure after
+route, component, and publication have committed; retry begins at completion,
+repeats only the repairable Search refresh, and terminal replay adds no package
+or Search write. The coordinator adds no endpoint, administrator control,
+identifier allocator, scheduler, package behavior, provider, or deployment.
 
 The Store Lite product and security direction is now defined without adding
 commerce behavior or data to core. Its generic component-plus-service

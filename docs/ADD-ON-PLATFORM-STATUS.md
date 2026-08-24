@@ -103,8 +103,8 @@ recorded in
 
 ## Optional Site Search path
 
-Site Search `0.1.4` at `1e16547` is now published in its separate private
-repository and exercised locally as a separately
+Site Search `0.1.4` is now tagged and published from private-repository main at
+`193c1a1` with a reproducible release archive. It is exercised as a separately
 distributed cross-cutting package. The RED-CMS core contains only the generic
 `read_only_public_utility` activation and early exact-GET routing prerequisites.
 The package owns its InnoDB/FULLTEXT index, query service/route, rebuild command,
@@ -116,8 +116,11 @@ reconciles a newly published route/component before issuing the bounded
 `component.published` route/component refresh and durably closes success or contained failure;
 completed replay does not notify again. Install, enable, rebuild, JSON,
 desktop/mobile, and
-incremental synchronization checks pass locally. It is not published,
-deployed, or enabled for any retained client. The package now shares one
+incremental synchronization checks pass locally. The first client-local
+installation is enabled on `demo.red-sphere.com`; its exact GET route, immutable
+asset hashes, Article and Store Lite results, desktop/mobile interaction, one
+manual scheduled rebuild, and ten-minute cPanel repair cron are live-verified.
+The package now shares one
 hierarchy-aware eligibility query between incremental and full rebuilds and
 adds an Owner-gated, exact-confirmation, advisory-locked scheduled CLI repair
 mode. Disposable proof covers inactive/active hierarchy, future start,
@@ -127,8 +130,8 @@ expiration, concurrent-run refusal, and a 50,000-document atomic rebuild with
 without exposing commercial, cart, order, payment, customer, administrator,
 setting, secret, or database facts; the two-package lifecycle passes 16
 assertions, including refresh through the destination-publication event.
-Release-archive browser/HTTP QA and a first client release remain separate
-gates. See
+Other client releases remain separate database/configuration/theme/schedule/
+rollback gates. See
 [`SITE-SEARCH-DIRECTION.md`](SITE-SEARCH-DIRECTION.md).
 
 ## Optional payment-adapter path
