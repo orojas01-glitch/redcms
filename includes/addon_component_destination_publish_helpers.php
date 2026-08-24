@@ -434,7 +434,11 @@ if (!function_exists('red_addon_component_destination_publish_checkpoint')) {
                             $transactionReason = 'placement_drift';
                             throw new RuntimeException($transactionReason);
                         }
-                        if ($execution['stage'] === 'component_published') {
+                        if (in_array(
+                            $execution['stage'],
+                            ['component_published', 'completed'],
+                            true
+                        )) {
                             if (!hash_equals(
                                 $execution['placementStateSha256'],
                                 $published['stateHash']

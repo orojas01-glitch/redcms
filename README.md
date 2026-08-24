@@ -581,6 +581,11 @@ features.
   create/move/baseline revisions, bounded placement audit, and composite
   placement hash before recording `component_published`. A retry across the
   two commits never places or audits twice; search notification remains pending
+- Internal destination completion stage that rederives and reconciles the exact
+  published route/component before issuing one bounded best-effort
+  `article.created` notification for the new Article route. It then records
+  only `completed/succeeded` or `completed/failed`; search failure cannot roll
+  back content, and completed replay never notifies again
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results

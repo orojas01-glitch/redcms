@@ -732,6 +732,7 @@ if (!function_exists('red_addon_component_destination_execution_checkpoint')) {
                         $transactionReason = 'checkpoint_failed';
                         throw new RuntimeException($transactionReason);
                     }
+                    $transactionReason = 'checkpoint_failed';
                     $updated = mysqli_stmt_execute($statement)
                         && mysqli_stmt_affected_rows($statement) === 1;
                     mysqli_stmt_close($statement);

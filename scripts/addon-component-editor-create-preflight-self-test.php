@@ -30,10 +30,12 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_component_destination_publish_helpers.php';
 require_once $projectRoot
+    . '/includes/addon_component_destination_completion_helpers.php';
+require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
-    '/\Aredcms_(?:acceptance|addon_editor_create|rev_base|store_lite_browser)_[A-Za-z0-9_]+\z/',
+    '/\Aredcms_(?:acceptance|addon_editor_create|addon_destination_completion|rev_base|store_lite_browser)_[A-Za-z0-9_]+\z/',
     (string) DBNAME
 )) {
     fwrite(
@@ -69,6 +71,8 @@ $creatorMode = 'valid';
 $deleterMode = 'valid';
 $previewCalls = 0;
 $previewMode = 'valid';
+$indexSyncCalls = 0;
+$indexSyncMode = 'valid';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -158,6 +162,10 @@ function red_addon_editor_create_test_cleanup(
                 [
                     'RED_Addon_Component_Destination_Executions',
                     'redcms_destination_publish_checkpoint_fail',
+                ],
+                [
+                    'RED_Addon_Component_Destination_Executions',
+                    'redcms_destination_completion_checkpoint_fail',
                 ],
                 [
                     'RED_Addon_Component_Revisions',
@@ -361,7 +369,7 @@ function red_addon_editor_create_test_manifest(
         'compatibility' => ['cms' => '>=5.1 <6.0', 'php' => '>=8.2 <9.0'],
         'provides' => [
             'components' => [$componentId],
-            'services' => [$previewService],
+            'services' => [$previewService, 'content.index-sync'],
             'adminTools' => [],
             'adapters' => [],
         ],
@@ -631,6 +639,35 @@ function red_addon_editor_create_test_context(
             ]);
         }
     );
+    $registry->registerService(
+        'content.index-sync',
+        static function (
+            RED_Addon_Service_Request $request
+        ): RED_Addon_Service_Result {
+            global $indexSyncCalls, $indexSyncMode,
+                $destinationRouteRecordId;
+            $indexSyncCalls++;
+            if ($indexSyncMode === 'emit') {
+                echo 'unsafe-index-sync-output';
+            }
+            if ($indexSyncMode === 'throw') {
+                throw new RuntimeException('private index sync failure');
+            }
+            if ($request->operation() !== 'refresh'
+                || $request->input() !== [
+                    'event' => 'article.created',
+                    'recordIds' => [$destinationRouteRecordId],
+                ]
+            ) {
+                return RED_Addon_Service_Result::failure(
+                    'index_sync_request_invalid'
+                );
+            }
+            return $indexSyncMode === 'fail'
+                ? RED_Addon_Service_Result::failure('index_sync_failed')
+                : RED_Addon_Service_Result::success(['refreshed' => true]);
+        }
+    );
     $registry->assertComplete();
     return new RED_Addon_Runtime_Context(
         [$packageId],
@@ -639,6 +676,22 @@ function red_addon_editor_create_test_context(
 }
 
 try {
+    red_addon_editor_create_test_assert(
+        red_addon_component_destination_completion_search([
+            'attempted' => true,
+            'completed' => false,
+            'event' => 'article.created',
+            'recordCount' => 1,
+            'reason' => 'service_failed',
+        ]) === [
+            'attempted' => true,
+            'succeeded' => false,
+            'event' => 'article.created',
+            'recordCount' => 1,
+            'checkpoint' => 'failed',
+        ],
+        'contained search failure maps only to terminal failed evidence'
+    );
     red_addon_editor_create_test_cleanup(
         $connection,
         $adminRecordId,
@@ -1608,6 +1661,162 @@ try {
         empty($driftedPublish['published'])
             && $driftedPublish['reason'] === 'placement_drift',
         'published parent or revision drift fails closed without another placement'
+    );
+    mysqli_query(
+        $connection,
+        'UPDATE RED_Articles SET PagePositionOrder=1 WHERE RecordID='
+            . $destinationComponentRecordId
+    );
+
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Addon_Component_Destination_Executions
+         ADD CONSTRAINT redcms_destination_completion_checkpoint_fail
+         CHECK (`Stage` <> 'completed')"
+    );
+    $previewCallsBeforeCompletionFailure = $previewCalls;
+    $indexSyncCallsBeforeCompletionFailure = $indexSyncCalls;
+    $failedCompletion = red_addon_component_destination_complete(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        empty($failedCompletion['completed'])
+            && $failedCompletion['reason'] === 'checkpoint_failed'
+            && !empty($failedCompletion['notificationAttempted'])
+            && !empty($failedCompletion['notificationSucceeded'])
+            && $failedCompletion['notificationEvent'] === 'article.created'
+            && $failedCompletion['notificationRecordCount'] === 1
+            && $previewCalls === $previewCallsBeforeCompletionFailure + 2
+            && $indexSyncCalls === $indexSyncCallsBeforeCompletionFailure + 1
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $routePlan['planHash'] . "'
+                   AND Stage='component_published'
+                   AND SearchNotification='pending'"
+            ) === '1',
+        'notification success cannot hide a failed terminal checkpoint'
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Destination_Executions
+         DROP CHECK redcms_destination_completion_checkpoint_fail'
+    );
+
+    $previewCallsBeforeCompletionRetry = $previewCalls;
+    $completedDestination = red_addon_component_destination_complete(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        !empty($completedDestination['completed'])
+            && empty($completedDestination['resumed'])
+            && $completedDestination['reason'] === 'completed'
+            && $completedDestination['stage'] === 'completed'
+            && $completedDestination['searchNotification'] === 'succeeded'
+            && !empty($completedDestination['notificationAttempted'])
+            && !empty($completedDestination['notificationSucceeded'])
+            && $previewCalls === $previewCallsBeforeCompletionRetry + 2
+            && $indexSyncCalls === $indexSyncCallsBeforeCompletionFailure + 2,
+        'retry repeats only the repairable refresh and durably completes success'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT COUNT(*) FROM RED_Articles
+                 WHERE RecordID IN (
+                    $destinationRouteRecordId,
+                    $destinationComponentRecordId
+                 )),
+                (SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID IN (
+                    $destinationRouteRecordId,
+                    $destinationComponentRecordId
+                 )),
+                (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                 WHERE ContentRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*) FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $routePlan['planHash'] . "'
+                   AND Stage='completed'
+                   AND SearchNotification='succeeded'))"
+        ) === '2:3:1:1',
+        'completion changes only terminal notification evidence'
+    );
+
+    $previewCallsBeforeCompletionReplay = $previewCalls;
+    $replayedCompletion = red_addon_component_destination_complete(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        !empty($replayedCompletion['completed'])
+            && !empty($replayedCompletion['resumed'])
+            && $replayedCompletion['reason'] === 'resumed'
+            && $replayedCompletion['searchNotification'] === 'succeeded'
+            && empty($replayedCompletion['notificationAttempted'])
+            && !empty($replayedCompletion['notificationSucceeded'])
+            && $previewCalls === $previewCallsBeforeCompletionReplay + 2
+            && $indexSyncCalls === $indexSyncCallsBeforeCompletionFailure + 2,
+        'completed replay revalidates content without another notification'
+    );
+
+    $changedCompletionRequest = $routeExecutionRequest;
+    $changedCompletionRequest['componentValues']['quantity'] = '6';
+    $changedCompletion = red_addon_component_destination_complete(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $changedCompletionRequest,
+        $routePlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        empty($changedCompletion['completed'])
+            && $changedCompletion['reason'] === 'placement_drift'
+            && $indexSyncCalls === $indexSyncCallsBeforeCompletionFailure + 2,
+        'changed package values cannot replay terminal completion'
+    );
+
+    mysqli_query(
+        $connection,
+        'UPDATE RED_Articles SET PagePositionOrder=2 WHERE RecordID='
+            . $destinationComponentRecordId
+    );
+    $driftedCompletion = red_addon_component_destination_complete(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash'],
+        $projectRoot
+    );
+    red_addon_editor_create_test_assert(
+        empty($driftedCompletion['completed'])
+            && $driftedCompletion['reason'] === 'placement_drift'
+            && $indexSyncCalls === $indexSyncCallsBeforeCompletionFailure + 2,
+        'published placement drift fails closed without another notification'
     );
     mysqli_query(
         $connection,
@@ -3643,7 +3852,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on destination-checkpoint/component-creation/public-placement/atomic-delete self-test passed ('
+    'Add-on destination-checkpoint/component-creation/public-placement/search-completion/atomic-delete self-test passed ('
         . $assertions . " assertions).\n"
 );
 

@@ -2125,6 +2125,20 @@ request bootstrap excludes the disabled package.
     and requires a new explicit authorization before exactly one real read-only
     GET. See
     [`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
+148. Completed the generic add-on component destination search/completion
+    stage after the separately merged route, inactive-component, and public-
+    placement stages. Core rederives the write-disabled package preview and
+    reconciles the immutable plan, Article route, public component, package
+    baseline, revisions, audit, actor, target, and all checkpoint hashes before
+    sending only `article.created` plus the numeric Article route id through
+    `content.index-sync`. Search success or contained failure advances the
+    execution to terminal `completed` with only `succeeded` or `failed` stored.
+    A notification/checkpoint gap is repairably retryable; completed replay
+    sends no second notification. The focused current-schema rehearsal applies
+    all 47 migrations and passes 126 assertions with exact database/grant/
+    fixture cleanup and the configured primary unchanged. No endpoint, client
+    package, retained database, provider, Wompi, payment, demo, or deployment
+    effect occurs.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
