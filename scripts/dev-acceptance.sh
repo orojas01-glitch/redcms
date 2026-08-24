@@ -54,6 +54,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-payment-adapter-wompi-profile-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/wompi-payment-adapter-c4b4d-command-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/wompi-payment-adapter-c4c2-command-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/wompi-payment-adapter-c4c3a-command-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-payment-adapter-registrar-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-payment-adapter-server-event-ingress-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-provider-contact-operator-command-self-test.php"

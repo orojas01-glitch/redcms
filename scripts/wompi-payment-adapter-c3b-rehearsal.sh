@@ -190,6 +190,7 @@ if [[ -n "$BEFORE_SELF_TEST_SCRIPT"
 fi
 if [[ -n "$AFTER_SELF_TEST_SCRIPT"
     && "$AFTER_SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4c2-operator-inner.sh'
+    && "$AFTER_SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4c3a-inner.sh'
 ]]; then
     printf 'Unsupported Wompi post-fixture rehearsal: %s\n' \
         "$AFTER_SELF_TEST_SCRIPT" >&2

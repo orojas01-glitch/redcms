@@ -336,9 +336,14 @@ disabled disposable rehearsal. It revalidates current-client Owner/package/
 setting hashes, loads no package code in dry run, and fully confirmed apply can
 invoke only one sealed merchant-read double. No durable attempt or replay
 protection is claimed; all Wompi business/action/audit counts remain zero and
-cleanup is exact after 47 migrations. C4C3A next owns durable real-target
-execution; C4C3B remains the first real one-GET step. See
-[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+cleanup is exact after 47 migrations. C4C3A is now complete with fresh hash-
+only authority, zero-write planning, start-before-one-core-provider-double,
+bounded result, replay refusal, 32 durable and 78 command-contract assertions,
+and exact network-disabled disposable cleanup. C4C3B is owner-deferred and
+remains the first real one-GET step. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md`](PAYMENT-ADAPTER-COLOMBIA-C4C3A-DURABLE-PROVIDER-DOUBLE.md).
 
 ## Explicit Exclusions
 
