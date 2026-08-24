@@ -1766,6 +1766,34 @@ the package preview, lock and revalidate every stage, use the existing
 revisioned Article/component/publish writers, retain restartable checkpoint
 evidence, and notify search only after the relevant write commits.
 
+### Component destination execution checkpoints
+
+`RED_Addon_Component_Destination_Executions` and
+`includes/addon_component_destination_execution_helpers.php` provide the
+durable, core-owned checkpoint foundation for that future coordinator. One
+exact composite plan reserves its package/component identity, package and core
+plan hashes, server-derived route/component record identifiers, and reserving
+administrator. Unique record-identifier indexes prevent two incomplete plans
+from claiming the same future route or component.
+
+The only valid forward states are `planned`, `route_created`,
+`component_created`, `component_published`, and `completed`. Each content stage
+adds one SHA-256 postcondition through a transaction-protected compare-and-swap.
+Exact repeats resume without duplicating the row or changing evidence; changed
+actors, hashes, stages, identifiers, disabled packages, caller-owned
+transactions, unsupported storage, and reverse/skipped transitions fail
+closed. Completion records only whether the post-commit search notification
+succeeded or failed, because search remains repairable and cannot roll back
+already committed CMS content.
+
+This checkpoint helper is still not the content executor. It does not invoke a
+package preview or component callback, create an Article/component/revision,
+publish a placement, write an activity audit, notify search, allocate record
+identifiers, expose an endpoint, or render administrator controls. The next
+coordinator layer must rederive the write-disabled package preview and prove
+each existing revisioned writer's postcondition before advancing its matching
+checkpoint.
+
 ## Data, Migration, And Client Isolation
 
 - Every add-on installation and migration ledger is scoped to one client

@@ -282,6 +282,8 @@ red_acceptance_primary_snapshot() {
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RevisionID, ContentRecordID, PackageID, ComponentID, RevisionNumber, Operation, ActorAdminRecordID, ActorAlias, Snapshot, StateHash, RestoredFromRevisionID, CreatedAt))), 0) FROM RED_Addon_Component_Revisions),
             (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, ActionID, TargetRecordID, PlanSHA256, ContractSHA256, PreviousStateSHA256, StateSHA256, ActorAdminRecordID, CompletedAt))), 0) FROM RED_Addon_Admin_Action_Executions),
+            (SELECT COUNT(*) FROM RED_Addon_Component_Destination_Executions),
+            (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', PackageID, PlanSHA256, ComponentID, PackagePlanSHA256, RouteRecordID, ComponentRecordID, ActorAdminRecordID, Stage, RouteStateSHA256, ComponentStateSHA256, PlacementStateSHA256, SearchNotification, CreatedAt, UpdatedAt))), 0) FROM RED_Addon_Component_Destination_Executions),
             (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Subjects),
             (SELECT COALESCE(SUM(CRC32(CONCAT_WS('#', RecordID, SubjectTokenSHA256, CreatedAt, ExpiresAt))), 0) FROM RED_Addon_Public_Mutation_Subjects),
             (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_CSRF_Tokens),
@@ -1516,6 +1518,7 @@ red_acceptance_all_table_checksums() {
             RED_Addon_Permission_Activity_Log,
             RED_Addon_Component_Revisions,
             RED_Addon_Admin_Action_Executions,
+            RED_Addon_Component_Destination_Executions,
             RED_Addon_Public_Mutation_Subjects,
             RED_Addon_Public_Mutation_CSRF_Tokens,
             RED_Addon_Public_Mutation_Rate_Limits,
@@ -5225,6 +5228,7 @@ canonical_counts="$(red_acceptance_app_mysql --execute="
         (SELECT COUNT(*) FROM RED_Addon_Permission_Activity_Log),
         (SELECT COUNT(*) FROM RED_Addon_Component_Revisions),
         (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
+        (SELECT COUNT(*) FROM RED_Addon_Component_Destination_Executions),
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Subjects),
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_CSRF_Tokens),
         (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Rate_Limits),
@@ -5292,19 +5296,20 @@ addon_registry_foreign_keys="$(red_acceptance_app_mysql --execute="
       AND CONSTRAINT_NAME IN (
         'fk_red_addon_migrations_installation',
         'fk_red_addon_settings_installation',
-        'fk_red_addon_admin_action_execution_installation'
+        'fk_red_addon_admin_action_execution_installation',
+        'fk_red_addon_destination_installation'
       );
 ")"
 
-red_acceptance_assert_equals 'final table/engine/charset state' '35:35:0' "$final_table_state"
+red_acceptance_assert_equals 'final table/engine/charset state' '36:36:0' "$final_table_state"
 red_acceptance_assert_equals \
     'canonical installer row counts' \
-    '2:0:0:0:0:0:0:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
+    '2:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:9:4:2:1:11:2:4:2:3:2:0:0:0:0:0:0:0:0:0' \
     "$canonical_counts"
 red_acceptance_assert_equals 'relationship error counts' '0:0:0:0:0:0:0:0:0:0:0:0:0:0' "$relationship_errors"
 red_acceptance_assert_equals 'area parent foreign keys' '2' "$area_parent_foreign_keys"
 red_acceptance_assert_equals 'administrator authorization foreign keys' '2' "$admin_authorization_foreign_keys"
-red_acceptance_assert_equals 'add-on registry foreign keys' '3' "$addon_registry_foreign_keys"
+red_acceptance_assert_equals 'add-on registry foreign keys' '4' "$addon_registry_foreign_keys"
 
 printf '%s\n' 'Running disposable theme contract serialization checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$SCRIPT_DIR/theme-contract-lock-self-test.sh"

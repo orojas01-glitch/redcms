@@ -8,7 +8,7 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 RED-CMS 5.1.0 was formally released on 2026-08-15 as
 [`v5.1.0`](https://github.com/orojas01-glitch/redcms/releases/tag/v5.1.0).
-The clean installer, all 46 migrations, normalized schema, canonical routes,
+The clean installer, all 47 migrations, normalized schema, canonical routes,
 add-on and CMS lifecycles, forced rollback, runtime log, and exact disposable
 database/grant cleanup passed against a fresh temporary current-schema
 baseline. See [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md).
@@ -535,6 +535,13 @@ features.
   component create plan, future placement evidence, and a deterministic
   four-operation plan hash. It has no endpoint, button, callback invocation,
   transaction, allocation, content write, audit, or search refresh
+- Empty per-client destination-execution ledger plus internal forward-only
+  checkpoint helpers for exact plan reservation, unique route/component ID
+  claims, deterministic replay, and compare-and-swap progress through planned,
+  route-created, component-created, component-published, and completed states.
+  This foundation stores only bounded identities, hashes, stage, actor, and
+  search-notification outcome; it remains unlinked from content writers,
+  package callbacks, endpoints, and administrator UI
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results

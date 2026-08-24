@@ -1,6 +1,6 @@
 <?php
 /**
- * Disposable checks for component creation, parent metadata, placement, and deletion.
+ * Disposable checks for destination checkpoints, creation, placement, and deletion.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -21,6 +21,8 @@ require_once $projectRoot
     . '/includes/addon_component_editor_publish_helpers.php';
 require_once $projectRoot
     . '/includes/addon_component_destination_preflight_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_component_destination_execution_helpers.php';
 require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
@@ -157,6 +159,14 @@ function red_addon_editor_create_test_cleanup(
         mysqli_query(
             $connection,
             'DELETE FROM RED_Page_SEO WHERE OwnerRecordID=' . (int) $contentRecordId
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Addon_Component_Destination_Executions
+             WHERE PackageID='" . mysqli_real_escape_string(
+                 $connection,
+                 $packageId
+             ) . "'"
         );
         mysqli_query(
             $connection,
@@ -937,6 +947,206 @@ try {
             && $creatorCalls === 0
             && $loaderCalls === 0,
         'destination preflight is deterministic and read-only without callbacks'
+    );
+
+    red_addon_editor_create_test_assert(
+        red_addon_component_destination_execution_storage_available(
+            $connection
+        ),
+        'destination execution checkpoint storage matches the exact schema'
+    );
+    $reservation = red_addon_component_destination_execution_reserve(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $destinationRequest,
+        $destination['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($reservation['reserved'])
+            && empty($reservation['resumed'])
+            && $reservation['stage'] === 'planned'
+            && $reservation['searchNotification'] === 'pending'
+            && $reservation['routeStateSha256'] === ''
+            && $reservation['componentStateSha256'] === ''
+            && $reservation['placementStateSha256'] === ''
+            && $destinationBefore ===
+                red_addon_editor_create_test_record_fingerprint(
+                    $connection,
+                    $contentRecordId,
+                    $packageTable
+                ),
+        'exact provisioning plan reserves bounded evidence without content writes'
+    );
+    $reservationRepeated = red_addon_component_destination_execution_reserve(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $destinationRequest,
+        $destination['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($reservationRepeated['reserved'])
+            && !empty($reservationRepeated['resumed'])
+            && $reservationRepeated['stage'] === 'planned'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'"
+            ) === '1',
+        'exact reservation replay resumes one immutable execution row'
+    );
+    $staleReservation = red_addon_component_destination_execution_reserve(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $destinationRequest,
+        str_repeat('e', 64)
+    );
+    red_addon_editor_create_test_assert(
+        empty($staleReservation['reserved'])
+            && $staleReservation['reason'] === 'stale_plan',
+        'changed coordinator plan hash is refused before ledger mutation'
+    );
+
+    $routeStateSha256 = str_repeat('1', 64);
+    $componentStateSha256 = str_repeat('2', 64);
+    $placementStateSha256 = str_repeat('3', 64);
+    $routeCheckpoint = red_addon_component_destination_execution_checkpoint(
+        $connection,
+        $packageId,
+        $destination['planHash'],
+        $adminRecordId,
+        'planned',
+        'route_created',
+        $routeStateSha256
+    );
+    $routeCheckpointRepeated =
+        red_addon_component_destination_execution_checkpoint(
+            $connection,
+            $packageId,
+            $destination['planHash'],
+            $adminRecordId,
+            'planned',
+            'route_created',
+            $routeStateSha256
+        );
+    red_addon_editor_create_test_assert(
+        !empty($routeCheckpoint['checkpointed'])
+            && empty($routeCheckpoint['resumed'])
+            && $routeCheckpoint['stage'] === 'route_created'
+            && $routeCheckpoint['routeStateSha256'] === $routeStateSha256
+            && !empty($routeCheckpointRepeated['checkpointed'])
+            && !empty($routeCheckpointRepeated['resumed']),
+        'route checkpoint is compare-and-swap guarded and replayable'
+    );
+    $wrongActorCheckpoint =
+        red_addon_component_destination_execution_checkpoint(
+            $connection,
+            $packageId,
+            $destination['planHash'],
+            $adminRecordId + 1,
+            'route_created',
+            'component_created',
+            $componentStateSha256
+        );
+    red_addon_editor_create_test_assert(
+        empty($wrongActorCheckpoint['checkpointed'])
+            && $wrongActorCheckpoint['reason'] === 'actor_mismatch',
+        'checkpoint continuation remains bound to the reserving actor'
+    );
+    $componentCheckpoint =
+        red_addon_component_destination_execution_checkpoint(
+            $connection,
+            $packageId,
+            $destination['planHash'],
+            $adminRecordId,
+            'route_created',
+            'component_created',
+            $componentStateSha256
+        );
+    $placementCheckpoint =
+        red_addon_component_destination_execution_checkpoint(
+            $connection,
+            $packageId,
+            $destination['planHash'],
+            $adminRecordId,
+            'component_created',
+            'component_published',
+            $placementStateSha256
+        );
+    red_addon_editor_create_test_assert(
+        $componentCheckpoint['stage'] === 'component_created'
+            && $componentCheckpoint['componentStateSha256'] ===
+                $componentStateSha256
+            && $placementCheckpoint['stage'] === 'component_published'
+            && $placementCheckpoint['placementStateSha256'] ===
+                $placementStateSha256,
+        'component and placement checkpoints retain only state hashes'
+    );
+    $completedCheckpoint =
+        red_addon_component_destination_execution_checkpoint(
+            $connection,
+            $packageId,
+            $destination['planHash'],
+            $adminRecordId,
+            'component_published',
+            'completed',
+            '',
+            'failed'
+        );
+    red_addon_editor_create_test_assert(
+        !empty($completedCheckpoint['checkpointed'])
+            && $completedCheckpoint['stage'] === 'completed'
+            && $completedCheckpoint['searchNotification'] === 'failed'
+            && $completedCheckpoint['routeStateSha256'] === $routeStateSha256
+            && $completedCheckpoint['componentStateSha256'] ===
+                $componentStateSha256
+            && $completedCheckpoint['placementStateSha256'] ===
+                $placementStateSha256,
+        'best-effort search failure can close content completion durably'
+    );
+    $terminalCheckpoint =
+        red_addon_component_destination_execution_checkpoint(
+            $connection,
+            $packageId,
+            $destination['planHash'],
+            $adminRecordId,
+            'planned',
+            'route_created',
+            str_repeat('4', 64)
+        );
+    red_addon_editor_create_test_assert(
+        empty($terminalCheckpoint['checkpointed'])
+            && $terminalCheckpoint['reason'] === 'stale_stage',
+        'completed execution cannot regress or overwrite checkpoint evidence'
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Addon_Component_Destination_Executions
+         SET SearchNotification='pending'
+         WHERE PackageID='$packageId'
+           AND PlanSHA256='" . $destination['planHash'] . "'"
+    );
+    $malformedCheckpoint = red_addon_component_destination_execution_load(
+        $connection,
+        $packageId,
+        $destination['planHash']
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Addon_Component_Destination_Executions
+         SET SearchNotification='failed'
+         WHERE PackageID='$packageId'
+           AND PlanSHA256='" . $destination['planHash'] . "'"
+    );
+    red_addon_editor_create_test_assert(
+        $malformedCheckpoint === null,
+        'stage and hash shape drift fails closed during checkpoint loading'
     );
 
     $unsafePreview = $destinationRequest;
@@ -2728,10 +2938,14 @@ try {
                 (SELECT COUNT(*) FROM RED_Admin_Activity_Log
                  WHERE TargetType='component'
                    AND TargetRecordID=$contentRecordId),
+                (SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='"
+                    . mysqli_real_escape_string($connection, $packageId) . "'),
                 (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
                  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"
                     . $packageTable . "'))"
-        ) === '0:0:0:0:0',
+        ) === '0:0:0:0:0:0',
         'the disposable creation fixture cleans all database state'
     );
 } catch (Throwable $throwable) {
@@ -2750,7 +2964,7 @@ try {
 
 fwrite(
     STDOUT,
-    'Add-on component creation/parent-metadata/public-placement/atomic-delete self-test passed ('
+    'Add-on destination-checkpoint/component-creation/public-placement/atomic-delete self-test passed ('
         . $assertions . " assertions).\n"
 );
 
