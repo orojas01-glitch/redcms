@@ -146,8 +146,11 @@ the exact uninvoked provider-write operation with offline and local-loopback
 acceptance, but Stripe was not contacted. D4B durable core execution is now
 complete through fresh authority/claim, start-before-access, one sealed
 in-memory invocation, bounded result, and permanent no-retry acceptance. D4C
-CLI/no-contact rehearsal is now also complete without real apply; D4D remains
-one separately authorized real Sandbox POST. See
+CLI/no-contact rehearsal is now also complete without real apply; the first
+D4D operational attempt reached no Stripe request and its unused key was
+expired. A bounded local diagnostic recovery contract is documented in
+[`docs/PAYMENT-ADAPTER-P3E9D4D-DIAGNOSTIC-RECOVERY.md`](docs/PAYMENT-ADAPTER-P3E9D4D-DIAGNOSTIC-RECOVERY.md); a new provider attempt remains separately
+authorization-gated. See
 [P3E-9B2 Synthetic Core Runner](docs/PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and
 [P3E-9C1 Mutation Authorization](docs/PAYMENT-ADAPTER-P3E9C1-MUTATION-AUTHORIZATION.md)
