@@ -45,6 +45,28 @@ outcome remains conservative, attempt-consuming, and no-retry.
 
 ## Next gate
 
+The permanent server-local harness is:
+
+```text
+scripts/sandbox-checkout-real-post-diagnostic-recovery.sh \
+  --secret-values-file=/private/tmp/redcms-stripe-d4d-recovery-secret-values.json \
+  --confirm-provider-recovery=yes
+```
+
+Provider mode is the default. It requires the exact mode-`0600` regular secret
+inventory, one fresh disposable database, every D4 confirmation, and one
+attempt. It preserves the command exit status while clearing the secret,
+validates only the bounded outcome and failure stage, checks the durable
+`4:4:2` ledger, prints no Session reference or raw provider material, and then
+removes the database, grant, staged project, evidence, and secret file.
+
+`RED_D4D_RECOVERY_NETWORK_MODE=offline` is the acceptance-only mode. It
+disables URL streams and common cURL/socket functions for the apply runtime,
+proves the complete durable recovery lifecycle with a synthetic restricted-key
+shape, and must end `indeterminate` at `adapter_invocation_failed` without DNS,
+TLS, HTTP, or Stripe contact. Provider mode does not retry and does not expire
+the dashboard key; key expiration remains a separately confirmed owner action.
+
 A future D4D recovery attempt requires a new explicit authorization, a new
 least-privilege restricted Sandbox key, a fresh disposable database and
 authorization/claim, review of the dry run, exactly one apply, review of the
