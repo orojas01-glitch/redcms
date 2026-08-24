@@ -2130,7 +2130,8 @@ request bootstrap excludes the disabled package.
     placement stages. Core rederives the write-disabled package preview and
     reconciles the immutable plan, Article route, public component, package
     baseline, revisions, audit, actor, target, and all checkpoint hashes before
-    sending only `article.created` plus the numeric Article route id through
+    sending only `component.published` plus the numeric Article route and
+    component ids through
     `content.index-sync`. Search success or contained failure advances the
     execution to terminal `completed` with only `succeeded` or `failed` stored.
     A notification/checkpoint gap is repairably retryable; completed replay

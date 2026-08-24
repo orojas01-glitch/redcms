@@ -51,8 +51,8 @@ if (!function_exists('red_addon_component_destination_completion_search')) {
             ]
             || !is_bool($result['attempted'])
             || !is_bool($result['completed'])
-            || $result['event'] !== 'article.created'
-            || $result['recordCount'] !== 1
+            || $result['event'] !== 'component.published'
+            || $result['recordCount'] !== 2
             || !is_string($result['reason'])
             || $result['reason'] === ''
         ) {
@@ -61,8 +61,8 @@ if (!function_exists('red_addon_component_destination_completion_search')) {
         return [
             'attempted' => $result['attempted'],
             'succeeded' => $result['completed'],
-            'event' => 'article.created',
-            'recordCount' => 1,
+            'event' => 'component.published',
+            'recordCount' => 2,
             'checkpoint' => $result['completed'] ? 'succeeded' : 'failed',
         ];
     }
@@ -179,16 +179,16 @@ if (!function_exists('red_addon_component_destination_complete')) {
                 $execution['searchNotification'];
             $result['notificationSucceeded'] =
                 $execution['searchNotification'] === 'succeeded';
-            $result['notificationEvent'] = 'article.created';
-            $result['notificationRecordCount'] = 1;
+            $result['notificationEvent'] = 'component.published';
+            $result['notificationRecordCount'] = 2;
             $result['reason'] = 'resumed';
             return $result;
         }
 
         $notification = red_addon_content_index_sync_notify(
             $connection,
-            'article.created',
-            [$execution['routeRecordId']],
+            'component.published',
+            [$execution['routeRecordId'], $execution['componentRecordId']],
             $projectRoot
         );
         $search = is_array($notification)
@@ -198,8 +198,8 @@ if (!function_exists('red_addon_component_destination_complete')) {
             $search = [
                 'attempted' => false,
                 'succeeded' => false,
-                'event' => 'article.created',
-                'recordCount' => 1,
+                'event' => 'component.published',
+                'recordCount' => 2,
                 'checkpoint' => 'failed',
             ];
         }

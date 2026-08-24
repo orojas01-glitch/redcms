@@ -367,8 +367,8 @@ add-on packages without executing them.
   search invocation it rederives the write-disabled package preview and
   reconciles the exact route, public component, package state, revisions,
   placement audit, actor, target, and immutable plan/checkpoint hashes. The
-  search service receives only `article.created` plus the numeric Article route
-  id. Failure is contained as terminal `failed` evidence and cannot roll back
+  search service receives only `component.published` plus the numeric Article
+  route and component ids. Failure is contained as terminal `failed` evidence and cannot roll back
   or modify published content. A notification/checkpoint crash gap may repeat
   the idempotent repairable refresh, but completed replay sends nothing. No
   endpoint, browser input, body, component value, actor, session, client
@@ -2143,7 +2143,7 @@ the mutation boundary. Core supplies no session, administrator identity,
 request globals, database handle, HTML, redirect, arbitrary header, or upload
 surface to the handler.
 
-Site Search `0.1.3` opens a separate short-lived client-local connection and a
+Site Search `0.1.4` opens a separate short-lived client-local connection and a
 read-only transaction, selects only its package-owned derived index, rolls the
 transaction back, and closes the connection. Query input is valid UTF-8,
 control-free, two to eighty characters, limited to six full-text prefix tokens,
@@ -2156,9 +2156,10 @@ The rebuild command is CLI-only, Owner/`addons.enable` gated, dry-run-first,
 and exact-plan confirmed. It reads only active, started, unexpired Article
 pages beneath an existing active Section/Category/Subcategory hierarchy,
 writes only `RED_Addon_SiteSearch_Documents`, and atomically replaces only the
-derived `core-article` source. Version 0.1.3 additionally implements
+derived `core-article` source. Version 0.1.4 implements
 the closed `content.index-sync` service for canonical Article create, update,
-delete, restore, and move events. Core invokes it only after commit and passes
+delete, restore, and move events plus destination `component.published`. Core
+invokes it only after commit and passes
 only one closed event name plus 1-64 record ids; it supplies no body, actor,
 session, request globals, database handle, or client identifier. The package
 reloads eligibility and public hierarchy from the client-local database and
@@ -2171,7 +2172,7 @@ core scheduler, manifest job, route, setting, secret, or cross-client state.
 This repairs missed events, hierarchy-wide changes, start/expiry transitions,
 and drift.
 
-Optional Store Lite 0.1.36 owns the only product-table knowledge and returns at
+Optional Store Lite 0.1.43 owns the only product-table knowledge and returns at
 most eight public placement documents per typed-service call. Site Search
 validates and deduplicates at most 1,000 placements and atomically replaces the
 derived `store-lite-product` rows with core Article rows. It refuses price,

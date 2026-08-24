@@ -1139,7 +1139,8 @@ derived-index bridge. Core invokes only the exact enabled service owner, after
 a successful canonical content transaction commits, with operation `refresh`
 and an immutable request containing exactly `event` and `recordIds`. Events are
 closed to `article.created`, `article.updated`, `article.deleted`,
-`article.restored`, and `article.moved`; record ids are 1-64 unique positive
+`article.restored`, `article.moved`, and `component.published`; record ids are
+1-64 unique positive
 integers. Core supplies no content body, actor, session, request globals,
 database handle, or client identifier. Invocation is best effort: failure is
 logged without record ids and cannot roll back the completed CMS transaction.
@@ -1147,7 +1148,7 @@ Packages must retain an independently authorized full rebuild as the recovery
 path for missed notifications, hierarchy-wide changes, scheduled eligibility
 transitions, and index drift.
 
-Site Search 0.1.3 implements that recovery as a package-owned CLI operation,
+Site Search 0.1.4 implements that recovery as a package-owned CLI operation,
 not a core scheduler or manifest job. Manual apply remains exact-plan
 confirmed. Scheduled apply requires an existing Owner with `addons.enable`,
 exact client database/package/enabled-state confirmations, and one
@@ -1157,7 +1158,7 @@ hierarchy-aware eligibility query, atomically replaces only derived
 `core-article` rows plus optional typed-provider rows, and releases the lock
 when its client-local connection closes.
 
-Store Lite 0.1.36 owns `content.search-source.store-lite` operation
+Store Lite 0.1.43 owns `content.search-source.store-lite` operation
 `documents.list`. Requests contain exactly a nonnegative integer cursor and a
 limit from one through eight. Responses contain only bounded public Product
 placement documents, a strictly advancing cursor, and a continuation flag.
@@ -1888,9 +1889,9 @@ package baseline, revisions, placement audit, actor, target, and all three
 checkpoint hashes before any notification.
 
 Core then invokes the existing closed `content.index-sync` bridge with exactly
-`article.created` and the numeric Article route id. No component id, body,
-package value, actor, session, request global, database handle, or client
-identity is sent. The already-published content is outside this best-effort
+`component.published` and the numeric route/component ids. No body, package
+value, actor, session, request global, database handle, or client identity is
+sent. The already-published content is outside this best-effort
 call: unavailable, failed, malformed, output-emitting, or throwing search
 services map only to terminal `failed` evidence and cannot roll back or alter
 the route/component.

@@ -645,7 +645,7 @@ function red_addon_editor_create_test_context(
             RED_Addon_Service_Request $request
         ): RED_Addon_Service_Result {
             global $indexSyncCalls, $indexSyncMode,
-                $destinationRouteRecordId;
+                $destinationRouteRecordId, $destinationComponentRecordId;
             $indexSyncCalls++;
             if ($indexSyncMode === 'emit') {
                 echo 'unsafe-index-sync-output';
@@ -655,8 +655,11 @@ function red_addon_editor_create_test_context(
             }
             if ($request->operation() !== 'refresh'
                 || $request->input() !== [
-                    'event' => 'article.created',
-                    'recordIds' => [$destinationRouteRecordId],
+                    'event' => 'component.published',
+                    'recordIds' => [
+                        $destinationRouteRecordId,
+                        $destinationComponentRecordId,
+                    ],
                 ]
             ) {
                 return RED_Addon_Service_Result::failure(
@@ -680,14 +683,14 @@ try {
         red_addon_component_destination_completion_search([
             'attempted' => true,
             'completed' => false,
-            'event' => 'article.created',
-            'recordCount' => 1,
+            'event' => 'component.published',
+            'recordCount' => 2,
             'reason' => 'service_failed',
         ]) === [
             'attempted' => true,
             'succeeded' => false,
-            'event' => 'article.created',
-            'recordCount' => 1,
+            'event' => 'component.published',
+            'recordCount' => 2,
             'checkpoint' => 'failed',
         ],
         'contained search failure maps only to terminal failed evidence'
@@ -1690,8 +1693,8 @@ try {
             && $failedCompletion['reason'] === 'checkpoint_failed'
             && !empty($failedCompletion['notificationAttempted'])
             && !empty($failedCompletion['notificationSucceeded'])
-            && $failedCompletion['notificationEvent'] === 'article.created'
-            && $failedCompletion['notificationRecordCount'] === 1
+            && $failedCompletion['notificationEvent'] === 'component.published'
+            && $failedCompletion['notificationRecordCount'] === 2
             && $previewCalls === $previewCallsBeforeCompletionFailure + 2
             && $indexSyncCalls === $indexSyncCallsBeforeCompletionFailure + 1
             && red_addon_editor_create_test_scalar(
