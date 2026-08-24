@@ -19,6 +19,7 @@ if (!function_exists('red_addon_content_index_sync_events')) {
             'article.deleted',
             'article.restored',
             'article.moved',
+            'component.published',
         ];
     }
 }

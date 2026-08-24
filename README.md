@@ -583,7 +583,8 @@ features.
   two commits never places or audits twice; search notification remains pending
 - Internal destination completion stage that rederives and reconciles the exact
   published route/component before issuing one bounded best-effort
-  `article.created` notification for the new Article route. It then records
+  `component.published` notification with only the route and component ids. It
+  then records
   only `completed/succeeded` or `completed/failed`; search failure cannot roll
   back content, and completed replay never notifies again
 - Internal typed add-on service invocation with exact enabled runtime
@@ -607,7 +608,7 @@ features.
   path for hierarchy, drift, and time-based eligibility changes. Site Search
   0.1.3 retains the exact-confirmation, Owner-gated, advisory-locked scheduled CLI
   mode without adding a core scheduler or manifest job
-- Optional Store Lite search-source integration through Store Lite 0.1.36's
+- Optional Store Lite search-source integration through Store Lite 0.1.43's
   typed `content.search-source.store-lite` service. Site Search reads no Store
   Lite table and accepts no price, currency, stock, availability value, SKU,
   cart, order, payment, customer, administrator, setting, secret, or database

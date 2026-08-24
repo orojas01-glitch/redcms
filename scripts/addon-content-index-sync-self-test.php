@@ -33,6 +33,16 @@ red_addon_content_index_sync_test_assert(
     'record ids are positive, unique, and sorted'
 );
 red_addon_content_index_sync_test_assert(
+    red_addon_content_index_sync_request(
+        'component.published',
+        [12, 11]
+    ) === [
+        'event' => 'component.published',
+        'recordIds' => [11, 12],
+    ],
+    'published destinations use the same bounded identifier envelope'
+);
+red_addon_content_index_sync_test_assert(
     red_addon_content_index_sync_request('unknown', [1]) === null,
     'unknown events are refused'
 );

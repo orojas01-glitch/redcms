@@ -1122,7 +1122,8 @@ mismatch, revision failure, and audit failure roll back.
 
 The restartable destination sequence now also closes its post-commit search
 stage. Core rederives and reconciles the exact published route/component before
-sending only `article.created` plus the new numeric Article route id through
+sending only `component.published` plus the new numeric Article route and
+component ids through
 the existing best-effort `content.index-sync` bridge. It then records only
 terminal `succeeded` or `failed` evidence. Search failure cannot roll back the
 published route/component; a failed terminal checkpoint leaves the refresh

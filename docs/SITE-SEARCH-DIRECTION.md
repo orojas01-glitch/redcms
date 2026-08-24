@@ -9,7 +9,8 @@ clean RED-CMS 5.1 starter contains only the generic capability needed to admit
 a bounded cross-cutting read-only utility. Search PHP, migrations, index rows,
 CSS, JavaScript, and source integrations remain outside the core repository.
 
-The package id is `redcms.site-search`. Its current local version is `0.1.3`.
+The package id is `redcms.site-search`. Its current reviewed version is `0.1.4`
+at private-repository main commit `1e16547`.
 It declares the typed `content.search` and `content.index-sync` services, one
 exact static public `GET` route, one package-owned migration, and two immutable
 public assets. It has no component, administrator tool, public mutation,
@@ -74,7 +75,7 @@ The rebuild command is CLI-only, Owner-gated through `addons.enable`, dry-runs
 by default, reads one consistent core source snapshot, and requires exact
 database, package, enabled-state, and plan-SHA confirmations before atomically
 replacing the `core-article` and optional `store-lite-product` source rows. The
-Store Lite source is obtained only through Store Lite 0.1.36's typed provider
+Store Lite source is obtained only through Store Lite 0.1.43's typed provider
 service and contains no price, currency, stock, availability value, SKU, cart,
 order, payment, customer, administrator, setting, secret, or database identity.
 Scheduled mode retains the Owner and exact database/package/enabled-state
