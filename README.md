@@ -587,6 +587,11 @@ features.
   then records
   only `completed/succeeded` or `completed/failed`; search failure cannot roll
   back content, and completed replay never notifies again
+- Internal stage-aware destination coordinator that loads the durable execution
+  once, begins at the first unfinished route/component/publication/completion
+  stage, stops on the first contained failure, and resumes without an outer
+  transaction, duplicate package callback, placement, audit, or terminal Search
+  notification. It adds no endpoint or identifier allocation
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results

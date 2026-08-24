@@ -2136,10 +2136,22 @@ request bootstrap excludes the disabled package.
     execution to terminal `completed` with only `succeeded` or `failed` stored.
     A notification/checkpoint gap is repairably retryable; completed replay
     sends no second notification. The focused current-schema rehearsal applies
-    all 47 migrations and passes 126 assertions with exact database/grant/
+    all 47 migrations and passes 132 assertions with exact database/grant/
     fixture cleanup and the configured primary unchanged. No endpoint, client
     package, retained database, provider, Wompi, payment, demo, or deployment
     effect occurs.
+149. Completed the internal restartable destination coordinator. Core loads
+    the exact package/plan execution once and begins at route, component,
+    publication, or completion according to the first unfinished durable
+    stage. It adds no outer transaction or lock; each stage retains preview
+    rederivation, authorization, serialization, atomic writes, reconciliation,
+    and compare-and-swap checkpoint ownership. The focused proof forces a
+    terminal checkpoint failure after three committed stages, resumes directly
+    at completion, repeats only the repairable Search refresh, suppresses all
+    terminal-replay package/Search writes, refuses changed immutable input, and
+    cleans the second coordinator fixture exactly. No endpoint, UI, allocation,
+    scheduler, package-specific behavior, provider, Wompi, payment, or
+    deployment effect occurs.
 
 Each phase requires its own migration, rollback path, relevant authorization
 tests, disposable-database acceptance coverage, and desktop/mobile
