@@ -36,6 +36,8 @@ outcome remains conservative, attempt-consuming, and no-retry.
 
 - Stripe adapter aggregate suite passes, including 89 D4A assertions.
 - RED-CMS focused D4C1 command checks pass 74 assertions.
+- The restartable D4C2 rehearsal stages preserved Store Lite `0.1.35` by
+  commit while permitting current Store Lite main to advance independently.
 - Full RED-CMS acceptance passes against a fresh disposable current-schema
   primary and acceptance database, followed by exact database/grant cleanup.
 - The retained starter, hosted demo, Store Lite current main, `.codex/`, and
