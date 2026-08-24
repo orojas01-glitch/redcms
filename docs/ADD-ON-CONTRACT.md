@@ -1850,6 +1850,33 @@ endpoint, or render administrator controls. A separately distributed package
 must also normalize its exact component-created intermediate state to the same
 preview plan before real package integration can cross this gate.
 
+### Component destination public-placement stage
+
+`includes/addon_component_destination_publish_helpers.php` is the third
+restartable destination write stage. It accepts only an exact
+`component_created` execution, rederives the package preview and original
+composite plan, reconciles the retained route and inactive component evidence,
+and invokes the existing atomic publication writer with the exact route target,
+position, parent state, package state, and publication plan.
+
+That existing writer commits the seven derived public-placement fields, one
+core `move` revision, and one bounded `component.public_placed` administrator
+audit fact in its own transaction while preserving the package row and route.
+Core then reacquires the lifecycle and active-theme locks, rederives the
+preview, locks the installation and execution row, reconstructs the original
+destination plan, and proves the exact route, public parent, package baseline,
+core create/move revisions, actor, audit, target, and composite placement state
+before advancing the ledger to `component_published` in a second transaction.
+If the process stops or checkpointing fails between those commits, exact retry
+reconciliation advances the retained checkpoint without publishing or auditing
+a second time. Preview, plan, route, parent, package, actor, revision, audit,
+target, or placement drift fails closed.
+
+This internal boundary does not notify search, complete the execution, allocate
+identifiers, expose an endpoint, or render administrator controls. Search
+remains the next post-commit best-effort stage and cannot roll back the already
+published content.
+
 ## Data, Migration, And Client Isolation
 
 - Every add-on installation and migration ledger is scoped to one client

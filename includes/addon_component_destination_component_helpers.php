@@ -341,6 +341,8 @@ if (!function_exists('red_addon_component_destination_component_reconcile')) {
         return red_addon_valid_sha256($stateHash)
             ? [
                 'stateHash' => $stateHash,
+                'parentStateHash' => $parent['stateHash'],
+                'packageStateHash' => $parent['packageStateHash'],
                 'parentRevisionId' =>
                     (int) ($parentRevision['RevisionID'] ?? 0),
                 'packageRevisionId' =>

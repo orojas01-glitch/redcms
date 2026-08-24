@@ -575,6 +575,12 @@ features.
   and dual initial revisions under lifecycle/theme locks before recording the
   component-created checkpoint. A retry across the two commits never invokes
   the package creator twice; it does not publish, notify search, or expose UI
+- Internal restartable destination publication stage that uses the existing
+  atomic placement writer, then separately rederives the package preview and
+  reconciles the exact route, public parent/package state, original plan,
+  create/move/baseline revisions, bounded placement audit, and composite
+  placement hash before recording `component_published`. A retry across the
+  two commits never places or audits twice; search notification remains pending
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results
