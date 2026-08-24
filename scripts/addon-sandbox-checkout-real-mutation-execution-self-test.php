@@ -156,6 +156,7 @@ return static function ($registry): void {
                 'liveMode' => false,
                 'clientDeployment' => false,
                 'executionPerformed' => true,
+                'failureStage' => 'none',
                 'errors' => [],
             ]);
         }

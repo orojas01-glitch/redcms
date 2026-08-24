@@ -432,6 +432,10 @@ printf(
     "Result state SHA-256: %s\n",
     $result['outcomeStateSha256'] ?? ''
 );
+printf(
+    "Failure stage: %s\n",
+    is_array($outcome) ? ($outcome['failureStage'] ?? 'unavailable') : 'unavailable'
+);
 echo 'Attempt consumed: '
     . (!empty($result['executionStarted']) ? 'yes' : 'no') . "\n";
 echo "Retry authorized: no\n";

@@ -1428,6 +1428,24 @@ if (!function_exists('red_addon_checkout_real_mutation_bounded_outcome')) {
             'executionStartStateSha256' =>
                 $plan['executionStartStateSha256'] ?? '',
         ];
+        $failureStage = !$invoked
+            ? 'core_invocation_failed'
+            : 'adapter_invocation_failed';
+        $data = $invocation['data'] ?? null;
+        $allowedFailureStages = [
+            'none', 'preflight_refused', 'transport_exchange_failed',
+            'exchange_invariant_failed', 'response_decode_failed',
+            'response_acceptance_failed',
+        ];
+        if (is_array($data)
+            && in_array(
+                $data['failureStage'] ?? null,
+                $allowedFailureStages,
+                true
+            )
+        ) {
+            $failureStage = $data['failureStage'];
+        }
         $indeterminate = [
             'valid' => true,
             'status' => 'indeterminate',
@@ -1463,9 +1481,9 @@ if (!function_exists('red_addon_checkout_real_mutation_bounded_outcome')) {
             'liveMode' => false,
             'clientDeployment' => false,
             'executionPerformed' => $invoked,
+            'failureStage' => $failureStage,
             'errors' => ['provider_execution_indeterminate'],
         ];
-        $data = $invocation['data'] ?? null;
         if (!$invoked
             || empty($invocation['success'])
             || ($invocation['reason'] ?? null) !== 'completed'
@@ -1476,6 +1494,7 @@ if (!function_exists('red_addon_checkout_real_mutation_bounded_outcome')) {
             )
             || ($data['valid'] ?? null) !== true
             || ($data['status'] ?? null) !== 'checkout_session_created'
+            || ($data['failureStage'] ?? null) !== 'none'
             || ($data['packageId'] ?? null)
                 !== 'redcms.store-lite-stripe-checkout'
             || ($data['packageVersion'] ?? null) !== '0.1.8'

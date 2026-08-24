@@ -31,7 +31,7 @@ try {
             && str_contains($shell, 'origin/main')
             && str_contains(
                 $shell,
-                '44ed7b3bd8f84f3f24340a6afc39881e8dee8c5d'
+                '3e61ea4ac74293464db1b779703f79d071eb2d40'
             )
             && str_contains(
                 $shell,
