@@ -554,6 +554,12 @@ features.
   This foundation stores only bounded identities, hashes, stage, actor, and
   search-notification outcome; it remains unlinked from content writers,
   package callbacks, endpoints, and administrator UI
+- Internal destination route stage that requires an exact package-owned typed
+  preview service, rederives its write-disabled preview before planning and
+  again under lifecycle/theme locks, then atomically commits one Article route,
+  immutable create revision, bounded article-created audit, and route-created
+  checkpoint. Exact retries reconcile and resume; Store Lite does not yet
+  declare the preview service, and no endpoint/UI invokes this writer
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results

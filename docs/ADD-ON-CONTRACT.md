@@ -1794,6 +1794,36 @@ coordinator layer must rederive the write-disabled package preview and prove
 each existing revisioned writer's postcondition before advancing its matching
 checkpoint.
 
+### Component destination Article route stage
+
+`includes/addon_component_destination_route_helpers.php` is the first real,
+restartable destination write stage. Trusted core code supplies a declared
+typed service identity/operation/input plus the server-derived destination
+request and confirmed composite plan hash. The service must be owned by the
+same enabled package and return exactly the normalized seven-field,
+`writesEnabled: false` preview envelope accepted by the read-only composite
+preflight.
+
+Core invokes that typed preview once before reservation and again while holding
+the shared add-on lifecycle and active-theme locks. Under one database
+transaction it locks the enabled installation and execution row, revalidates
+the exact plan, inserts one active Article route through the existing unlocked
+Article writer, records one immutable `create` content revision and one
+`article.created` administrator audit fact, advances the execution from
+`planned` to `route_created` with the exact route state hash, verifies every
+postcondition, and commits. Route/revision/audit/checkpoint failures roll back
+together while leaving the separately committed `planned` reservation
+available for retry. Exact completed-stage replay rederives the preview,
+reconciles the route/revision/audit/hash, and returns without duplicate writes;
+preview or route drift fails closed.
+
+This remains an internal core boundary. It does not allocate identifiers,
+create package component data, publish a component, notify search, expose an
+endpoint, or render administrator controls. Store Lite `0.1.39` does not yet
+declare/register the required typed destination-preview service, so this stage
+cannot be invoked for Store Lite until its private package contract and tests
+advance separately.
+
 ## Data, Migration, And Client Isolation
 
 - Every add-on installation and migration ledger is scoped to one client

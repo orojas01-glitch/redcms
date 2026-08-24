@@ -24,6 +24,8 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_component_destination_execution_helpers.php';
 require_once $projectRoot
+    . '/includes/addon_component_destination_route_helpers.php';
+require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
@@ -43,8 +45,11 @@ $adminRecordId = 2147000975;
 $contentRecordId = 2147000976;
 $targetPageRecordId = 2147000977;
 $duplicateTargetPageRecordId = 2147000978;
+$destinationRouteRecordId = 2147000979;
+$destinationComponentRecordId = 2147000980;
 $packageId = 'redcms.editor-create-fixture';
 $componentId = 'redcms.editor-create-fixture/item';
+$previewService = 'content.destination-preview.fixture';
 $createPermission = 'fixture.editor-create.create';
 $viewPermission = 'fixture.editor-create.view';
 $editPermission = 'fixture.editor-create.edit';
@@ -56,6 +61,8 @@ $loaderCalls = 0;
 $deleterCalls = 0;
 $creatorMode = 'valid';
 $deleterMode = 'valid';
+$previewCalls = 0;
+$previewMode = 'valid';
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -105,6 +112,8 @@ function red_addon_editor_create_test_cleanup(
     $contentRecordId,
     $targetPageRecordId,
     $duplicateTargetPageRecordId,
+    $destinationRouteRecordId,
+    $destinationComponentRecordId,
     $packageId,
     $packageTable
 ) {
@@ -131,6 +140,10 @@ function red_addon_editor_create_test_cleanup(
                 [
                     'RED_Admin_Activity_Log',
                     'redcms_component_publish_audit_fail',
+                ],
+                [
+                    'RED_Admin_Activity_Log',
+                    'redcms_destination_route_audit_fail',
                 ],
                 [
                     'RED_Addon_Component_Revisions',
@@ -174,6 +187,11 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Page_SEO WHERE OwnerRecordID='
+                . (int) $destinationRouteRecordId
+        );
+        mysqli_query(
+            $connection,
             'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
                 . (int) $contentRecordId
         );
@@ -189,9 +207,20 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Content_Revisions WHERE ContentRecordID='
+                . (int) $destinationRouteRecordId
+        );
+        mysqli_query(
+            $connection,
             "DELETE FROM RED_Admin_Activity_Log
              WHERE TargetType='component' AND TargetRecordID="
                 . (int) $contentRecordId
+        );
+        mysqli_query(
+            $connection,
+            "DELETE FROM RED_Admin_Activity_Log
+             WHERE TargetType='article' AND TargetRecordID="
+                . (int) $destinationRouteRecordId
         );
         mysqli_query(
             $connection,
@@ -209,6 +238,16 @@ function red_addon_editor_create_test_cleanup(
             $connection,
             'DELETE FROM RED_Articles WHERE RecordID='
                 . (int) $duplicateTargetPageRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Articles WHERE RecordID='
+                . (int) $destinationRouteRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Articles WHERE RecordID='
+                . (int) $destinationComponentRecordId
         );
         foreach (
             [
@@ -278,7 +317,8 @@ function red_addon_editor_create_test_manifest(
     $viewPermission,
     $editPermission,
     $deletePermission,
-    $publishPermission
+    $publishPermission,
+    $previewService
 ) {
     return [
         '$schema' => 'https://red-sphere.com/schemas/addon-manifest-v1.json',
@@ -291,7 +331,7 @@ function red_addon_editor_create_test_manifest(
         'compatibility' => ['cms' => '>=5.1 <6.0', 'php' => '>=8.2 <9.0'],
         'provides' => [
             'components' => [$componentId],
-            'services' => [],
+            'services' => [$previewService],
             'adminTools' => [],
             'adapters' => [],
         ],
@@ -506,6 +546,46 @@ function red_addon_editor_create_test_context(
             [$packageTable]
         );
     }
+    $serviceId = $manifest['provides']['services'][0] ?? '';
+    $registry->registerService(
+        $serviceId,
+        static function (
+            RED_Addon_Service_Request $request
+        ): RED_Addon_Service_Result {
+            global $previewCalls, $previewMode;
+            $previewCalls++;
+            if ($previewMode === 'emit') {
+                echo 'unsafe-preview-output';
+            }
+            if ($previewMode === 'throw') {
+                throw new RuntimeException('private preview failure');
+            }
+            $input = $request->input();
+            if ($request->operation() !== 'destination.preview'
+                || array_keys($input) !== ['alias']
+                || !is_string($input['alias'])
+                || preg_match(
+                    '/\A[a-z][a-z0-9._-]{0,63}\z/D',
+                    $input['alias']
+                ) !== 1
+            ) {
+                return RED_Addon_Service_Result::failure(
+                    'destination_preview_request_invalid'
+                );
+            }
+            return RED_Addon_Service_Result::success([
+                'schema' => 1,
+                'planSha256' => $previewMode === 'stale'
+                    ? str_repeat('e', 64)
+                    : str_repeat('d', 64),
+                'intent' => 'provision',
+                'ready' => true,
+                'requiresConfirmation' => true,
+                'writesEnabled' => false,
+                'path' => '/' . rawurlencode($input['alias']),
+            ]);
+        }
+    );
     $registry->assertComplete();
     return new RED_Addon_Runtime_Context(
         [$packageId],
@@ -520,6 +600,8 @@ try {
         $contentRecordId,
         $targetPageRecordId,
         $duplicateTargetPageRecordId,
+        $destinationRouteRecordId,
+        $destinationComponentRecordId,
         $packageId,
         $packageTable
     );
@@ -530,7 +612,8 @@ try {
         $viewPermission,
         $editPermission,
         $deletePermission,
-        $publishPermission
+        $publishPermission,
+        $previewService
     );
 
     $undeclared = $manifest;
@@ -949,6 +1032,208 @@ try {
         'destination preflight is deterministic and read-only without callbacks'
     );
 
+    $routeExecutionRequest = [
+        'previewService' => $previewService,
+        'previewOperation' => 'destination.preview',
+        'previewInput' => ['alias' => 'coordinator-route'],
+        'routeRecordId' => $destinationRouteRecordId,
+        'componentRecordId' => $destinationComponentRecordId,
+        'title' => 'Coordinator route fixture',
+        'alias' => 'coordinator-route',
+        'language' => 'sp',
+        'layout' => $layout,
+        'routePagePosition' => $destinationPosition,
+        'routePagePositionOrder' => 0,
+        'componentPagePosition' => $destinationPosition,
+        'componentPagePositionOrder' => 1,
+        'componentValues' => $submittedValues,
+    ];
+    $routePreview = red_addon_component_destination_route_preview(
+        $manifest,
+        $routeExecutionRequest
+    );
+    $routePlanRequest =
+        red_addon_component_destination_route_preflight_request(
+            $routeExecutionRequest,
+            $routePreview
+        );
+    $routePlan = red_addon_component_destination_preflight(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routePlanRequest
+    );
+    red_addon_editor_create_test_assert(
+        is_array($routePreview)
+            && !empty($routePlan['ready'])
+            && red_addon_valid_sha256($routePlan['planHash']),
+        'typed package preview composes one exact route-stage plan'
+    );
+
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Admin_Activity_Log
+         ADD CONSTRAINT redcms_destination_route_audit_fail
+         CHECK (`EventName` <> 'article.created')"
+    );
+    $previewCallsBeforeRouteFailure = $previewCalls;
+    $failedRoute = red_addon_component_destination_route_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($failedRoute['created'])
+            && $failedRoute['reason'] === 'audit_failed'
+            && $failedRoute['stage'] === 'planned'
+            && $previewCalls === $previewCallsBeforeRouteFailure + 2
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*) FROM RED_Articles
+                     WHERE RecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE TargetType='article'
+                       AND TargetRecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_Component_Destination_Executions
+                     WHERE PackageID='$packageId'
+                       AND PlanSHA256='" . $routePlan['planHash'] . "'
+                       AND Stage='planned'))"
+            ) === '0:0:0:1',
+        'late route audit failure rolls back content while retaining planned retry evidence'
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Admin_Activity_Log
+         DROP CHECK redcms_destination_route_audit_fail'
+    );
+
+    $previewCallsBeforeRoute = $previewCalls;
+    $createdRoute = red_addon_component_destination_route_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($createdRoute['created'])
+            && empty($createdRoute['resumed'])
+            && $createdRoute['reason'] === 'route_created'
+            && $createdRoute['stage'] === 'route_created'
+            && red_addon_valid_sha256($createdRoute['routeStateSha256'])
+            && $createdRoute['revisionId'] > 0
+            && $previewCalls === $previewCallsBeforeRoute + 2,
+        'route stage rederives preview and commits route revision audit and checkpoint'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT COUNT(*) FROM RED_Articles
+                 WHERE RecordID=$destinationRouteRecordId
+                   AND Component='Article' AND Alias='coordinator-route'
+                   AND Active='Y' AND Language='sp'),
+                (SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$destinationRouteRecordId
+                   AND RevisionNumber=1 AND Operation='create'
+                   AND SnapshotHash='" . $createdRoute['routeStateSha256'] . "'),
+                (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                 WHERE EventName='article.created' AND TargetType='article'
+                   AND TargetRecordID=$destinationRouteRecordId
+                   AND ActorAdminRecordID=$adminRecordId),
+                (SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $routePlan['planHash'] . "'
+                   AND Stage='route_created'
+                   AND RouteStateSHA256='"
+                    . $createdRoute['routeStateSha256'] . "'))"
+        ) === '1:1:1:1',
+        'route stage stores one exact public route and bounded evidence set'
+    );
+    $previewCallsBeforeRouteReplay = $previewCalls;
+    $replayedRoute = red_addon_component_destination_route_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($replayedRoute['created'])
+            && !empty($replayedRoute['resumed'])
+            && $replayedRoute['reason'] === 'resumed'
+            && $replayedRoute['revisionId'] === $createdRoute['revisionId']
+            && hash_equals(
+                $createdRoute['routeStateSha256'],
+                $replayedRoute['routeStateSha256']
+            )
+            && $previewCalls === $previewCallsBeforeRouteReplay + 2,
+        'exact route-stage replay rederives preview and resumes without duplicate writes'
+    );
+    $changedRouteRequest = $routeExecutionRequest;
+    $changedRouteRequest['componentValues']['quantity'] = '6';
+    $changedRoute = red_addon_component_destination_route_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $changedRouteRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($changedRoute['created'])
+            && $changedRoute['reason'] === 'stale_plan'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*) FROM RED_Articles
+                     WHERE RecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE TargetType='article'
+                       AND TargetRecordID=$destinationRouteRecordId))"
+            ) === '1:1:1',
+        'changed package component values fail exact route-stage replay'
+    );
+    $previewMode = 'stale';
+    $staleRoute = red_addon_component_destination_route_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    $previewMode = 'valid';
+    red_addon_editor_create_test_assert(
+        empty($staleRoute['created'])
+            && $staleRoute['reason'] === 'stale_plan'
+            && red_addon_editor_create_test_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':',
+                    (SELECT COUNT(*) FROM RED_Articles
+                     WHERE RecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*) FROM RED_Content_Revisions
+                     WHERE ContentRecordID=$destinationRouteRecordId),
+                    (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                     WHERE TargetType='article'
+                       AND TargetRecordID=$destinationRouteRecordId))"
+            ) === '1:1:1',
+        'changed package preview fails before route-stage replay or mutation'
+    );
+
     red_addon_editor_create_test_assert(
         red_addon_component_destination_execution_storage_available(
             $connection
@@ -995,7 +1280,8 @@ try {
                 $connection,
                 "SELECT COUNT(*)
                  FROM RED_Addon_Component_Destination_Executions
-                 WHERE PackageID='$packageId'"
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $destination['planHash'] . "'"
             ) === '1',
         'exact reservation replay resumes one immutable execution row'
     );
@@ -2923,6 +3209,8 @@ try {
         $contentRecordId,
         $targetPageRecordId,
         $duplicateTargetPageRecordId,
+        $destinationRouteRecordId,
+        $destinationComponentRecordId,
         $packageId,
         $packageTable
     );
@@ -2938,6 +3226,13 @@ try {
                 (SELECT COUNT(*) FROM RED_Admin_Activity_Log
                  WHERE TargetType='component'
                    AND TargetRecordID=$contentRecordId),
+                (SELECT COUNT(*) FROM RED_Articles
+                 WHERE RecordID=$destinationRouteRecordId),
+                (SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$destinationRouteRecordId),
+                (SELECT COUNT(*) FROM RED_Admin_Activity_Log
+                 WHERE TargetType='article'
+                   AND TargetRecordID=$destinationRouteRecordId),
                 (SELECT COUNT(*)
                  FROM RED_Addon_Component_Destination_Executions
                  WHERE PackageID='"
@@ -2945,7 +3240,7 @@ try {
                 (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
                  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"
                     . $packageTable . "'))"
-        ) === '0:0:0:0:0:0',
+        ) === '0:0:0:0:0:0:0:0:0',
         'the disposable creation fixture cleans all database state'
     );
 } catch (Throwable $throwable) {
@@ -2955,6 +3250,8 @@ try {
         $contentRecordId,
         $targetPageRecordId,
         $duplicateTargetPageRecordId,
+        $destinationRouteRecordId,
+        $destinationComponentRecordId,
         $packageId,
         $packageTable
     );
