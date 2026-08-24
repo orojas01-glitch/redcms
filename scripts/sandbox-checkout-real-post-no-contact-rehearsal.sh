@@ -52,17 +52,16 @@ app_mysql() {
 
 primary_snapshot() {
     app_mysql --database="$RED_DB_NAME_RESOLVED" --execute="
-        SELECT CONCAT_WS(':',
+        SELECT SHA2(CONCAT_WS(':',
+            DATABASE(),
             (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA=DATABASE()),
-            (SELECT COUNT(*) FROM RED_Schema_Migrations),
-            (SELECT COUNT(*) FROM RED_Addon_Installations),
-            (SELECT COUNT(*) FROM RED_Addon_Migrations),
-            (SELECT COUNT(*) FROM RED_Addon_Settings),
-            (SELECT COUNT(*) FROM RED_Addon_Admin_Action_Executions),
-            (SELECT COUNT(*) FROM RED_Addon_Activity_Log),
-            (SELECT COUNT(*) FROM RED_Admin_Roles),
-            (SELECT COUNT(*) FROM RED_Admin_Capabilities));
+            COALESCE((SELECT GROUP_CONCAT(
+                CONCAT(TABLE_NAME, '/', COALESCE(ENGINE, ''), '/',
+                    COALESCE(TABLE_ROWS, 0))
+                ORDER BY TABLE_NAME SEPARATOR '|')
+             FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA=DATABASE()), '')), 256);
     "
 }
 
@@ -135,14 +134,12 @@ if [[ ! -x "$FRANKENPHP_BIN"
 fi
 
 CORE_COMMIT="$(git -C "$RED_PROJECT_ROOT" rev-parse "$CORE_REVISION^{commit}")"
-ADAPTER_MAIN="$(git -C "$ADAPTER_ROOT" rev-parse 'main^{commit}')"
-STORE_MAIN="$(git -C "$STORE_ROOT" rev-parse 'main^{commit}')"
-[[ "$ADAPTER_MAIN" == "$EXPECTED_ADAPTER_COMMIT" ]] || {
-    echo "Adapter main is not exact 0.1.8: $ADAPTER_MAIN" >&2
+git -C "$ADAPTER_ROOT" cat-file -e "$EXPECTED_ADAPTER_COMMIT^{commit}" || {
+    echo 'Exact reviewed adapter diagnostic commit is unavailable.' >&2
     exit 65
 }
-[[ "$STORE_MAIN" == "$EXPECTED_STORE_COMMIT" ]] || {
-    echo "Store Lite main is not exact 0.1.35: $STORE_MAIN" >&2
+git -C "$STORE_ROOT" cat-file -e "$EXPECTED_STORE_COMMIT^{commit}" || {
+    echo 'Exact historical Store Lite 0.1.35 commit is unavailable.' >&2
     exit 65
 }
 CORE_SOURCE_BEFORE="$(repository_fingerprint "$RED_PROJECT_ROOT")"
@@ -230,7 +227,11 @@ DATABASE_CREATED=1
 admin_mysql --execute="GRANT ALL PRIVILEGES ON \`$REHEARSAL_DATABASE\`.* TO '$APP_ACCOUNT_USER'@'$APP_ACCOUNT_HOST';"
 GRANT_CREATED=1
 app_mysql "$REHEARSAL_DATABASE" < "$STAGED_PROJECT/db-structure.sql"
-RED_DB_NAME="$REHEARSAL_DATABASE" "$STAGED_PROJECT/scripts/db-migrate.sh" >/dev/null
+RED_DB_HOST="$RED_DB_HOST_PORT" \
+RED_DB_USER="$RED_DB_USER_RESOLVED" \
+RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
+RED_DB_NAME="$REHEARSAL_DATABASE" \
+    "$STAGED_PROJECT/scripts/db-migrate.sh" >/dev/null
 
 export RED_DB_HOST="$RED_DB_HOST_PORT"
 export RED_DB_USER="$RED_DB_USER_RESOLVED"

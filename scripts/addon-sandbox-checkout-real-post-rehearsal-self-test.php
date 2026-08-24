@@ -37,9 +37,19 @@ try {
                 $shell,
                 'f7de77eb1694fb6003340632c5018024753fe1fa'
             )
+            && str_contains(
+                $shell,
+                'cat-file -e "$EXPECTED_STORE_COMMIT^{commit}"'
+            )
+            && str_contains(
+                $shell,
+                'cat-file -e "$EXPECTED_ADAPTER_COMMIT^{commit}"'
+            )
+            && !str_contains($shell, 'ADAPTER_MAIN=')
+            && !str_contains($shell, 'STORE_MAIN=')
             && str_contains($shell, '"$EXPECTED_ADAPTER_COMMIT:package"')
             && str_contains($shell, '"$EXPECTED_STORE_COMMIT:package"'),
-        'rehearsal stages exact merged core, adapter, and Store Lite package sources'
+        'rehearsal stages exact merged core and adapter plus the preserved Store Lite payment-contract commit'
     );
     foreach ([
         'allow_url_fopen=0', 'disable_functions=curl_exec',
