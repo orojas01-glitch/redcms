@@ -1819,10 +1819,36 @@ preview or route drift fails closed.
 
 This remains an internal core boundary. It does not allocate identifiers,
 create package component data, publish a component, notify search, expose an
-endpoint, or render administrator controls. Store Lite `0.1.39` does not yet
-declare/register the required typed destination-preview service, so this stage
-cannot be invoked for Store Lite until its private package contract and tests
-advance separately.
+endpoint, or render administrator controls. Separately distributed packages
+must keep their preview plan stable across the exact route-only intermediate
+state before this stage can be invoked safely.
+
+### Component destination inactive-component stage
+
+`includes/addon_component_destination_component_helpers.php` is the second
+restartable destination write stage. It accepts only an existing exact
+`route_created` execution, rederives the package-owned write-disabled preview,
+reconciles the route evidence, and reuses the existing atomic component creator
+to commit one inactive, hidden, unrouted parent, one package row, one core
+`create` revision, and one package `baseline` revision.
+
+The component creator intentionally owns that first transaction. Core then
+reacquires the add-on lifecycle and active-theme locks, rederives the preview
+again, locks the enabled installation and execution row, reconstructs the
+original component-create and composite plans, and proves the exact route,
+parent, package, actor, revision, and state hashes before advancing the ledger
+from `route_created` to `component_created` in a second transaction. If the
+process stops or checkpointing fails between those commits, the retained route
+checkpoint and committed inactive component are safe to retry: exact
+reconciliation advances the checkpoint without invoking the package creator a
+second time. Preview, plan, route, parent, package, actor, or revision drift
+fails closed.
+
+This remains an internal core boundary. It does not activate or place the
+component, mutate the route, notify search, allocate identifiers, expose an
+endpoint, or render administrator controls. A separately distributed package
+must also normalize its exact component-created intermediate state to the same
+preview plan before real package integration can cross this gate.
 
 ## Data, Migration, And Client Isolation
 

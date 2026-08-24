@@ -563,8 +563,14 @@ features.
   preview service, rederives its write-disabled preview before planning and
   again under lifecycle/theme locks, then atomically commits one Article route,
   immutable create revision, bounded article-created audit, and route-created
-  checkpoint. Exact retries reconcile and resume; Store Lite does not yet
-  declare the preview service, and no endpoint/UI invokes this writer
+  checkpoint. Exact retries reconcile and resume; no endpoint/UI invokes this
+  writer
+- Internal restartable destination component stage that uses the existing
+  atomic inactive-component creator, then separately rederives the package
+  preview and reconciles the exact route, parent/package state, original plan,
+  and dual initial revisions under lifecycle/theme locks before recording the
+  component-created checkpoint. A retry across the two commits never invokes
+  the package creator twice; it does not publish, notify search, or expose UI
 - Internal typed add-on service invocation with exact enabled runtime
   ownership, immutable request/result objects, bounded JSON-compatible values,
   and containment of output, exceptions, buffer changes, and malformed results
