@@ -490,9 +490,11 @@ if [[ ! "$ADAPTER_INVOCATION_REASON" =~ ^(invalid_request|adapter_output|adapter
 fi
 if [[ "$RECOVERY_NETWORK_MODE" == 'offline' ]]; then
     if [[ "$OUTCOME" != 'indeterminate'
-        || "$FAILURE_STAGE" != 'adapter_invocation_failed'
+        || "$FAILURE_STAGE" != 'transport_exchange_failed'
+        || "$ADAPTER_INVOCATION_REASON" != 'completed'
+        || "$ADAPTER_ERROR_CODE" != 'none'
     ]]; then
-        echo 'Offline recovery did not fail at the sealed adapter boundary.' >&2
+        echo 'Offline recovery did not reach the sealed transport boundary.' >&2
         exit 65
     fi
 fi
