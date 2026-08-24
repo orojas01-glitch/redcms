@@ -26,6 +26,8 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_component_destination_route_helpers.php';
 require_once $projectRoot
+    . '/includes/addon_component_destination_component_helpers.php';
+require_once $projectRoot
     . '/includes/addon_component_editor_delete_helpers.php';
 
 if (!preg_match(
@@ -58,6 +60,8 @@ $publishPermission = 'fixture.editor-create.publish';
 $packageTable = 'RED_Addon_Component_Editor_Create_Fixture';
 $creatorCalls = 0;
 $loaderCalls = 0;
+$destinationCreatorCalls = 0;
+$destinationLoaderCalls = 0;
 $deleterCalls = 0;
 $creatorMode = 'valid';
 $deleterMode = 'valid';
@@ -146,6 +150,10 @@ function red_addon_editor_create_test_cleanup(
                     'redcms_destination_route_audit_fail',
                 ],
                 [
+                    'RED_Addon_Component_Destination_Executions',
+                    'redcms_destination_component_checkpoint_fail',
+                ],
+                [
                     'RED_Addon_Component_Revisions',
                     'redcms_component_delete_package_revision_fail',
                 ],
@@ -197,6 +205,11 @@ function red_addon_editor_create_test_cleanup(
         );
         mysqli_query(
             $connection,
+            'DELETE FROM RED_Addon_Component_Revisions WHERE ContentRecordID='
+                . (int) $destinationComponentRecordId
+        );
+        mysqli_query(
+            $connection,
             'DELETE FROM RED_Content_Revisions WHERE ContentRecordID='
                 . (int) $contentRecordId
         );
@@ -209,6 +222,11 @@ function red_addon_editor_create_test_cleanup(
             $connection,
             'DELETE FROM RED_Content_Revisions WHERE ContentRecordID='
                 . (int) $destinationRouteRecordId
+        );
+        mysqli_query(
+            $connection,
+            'DELETE FROM RED_Content_Revisions WHERE ContentRecordID='
+                . (int) $destinationComponentRecordId
         );
         mysqli_query(
             $connection,
@@ -414,7 +432,14 @@ function red_addon_editor_create_test_context(
             &$loaderCalls,
             $packageTable
         ): array {
-            $loaderCalls++;
+            global $destinationComponentRecordId, $destinationLoaderCalls;
+            if ((int) $context['contentRecordId'] ===
+                $destinationComponentRecordId
+            ) {
+                $destinationLoaderCalls++;
+            } else {
+                $loaderCalls++;
+            }
             $statement = mysqli_prepare(
                 $connection,
                 'SELECT Title, Quantity FROM `' . $packageTable
@@ -446,7 +471,15 @@ function red_addon_editor_create_test_context(
                 array $context,
                 array $values
             ) use (&$creatorCalls, &$creatorMode, $packageTable): bool {
-                $creatorCalls++;
+                global $destinationComponentRecordId,
+                    $destinationCreatorCalls;
+                if ((int) $context['contentRecordId'] ===
+                    $destinationComponentRecordId
+                ) {
+                    $destinationCreatorCalls++;
+                } else {
+                    $creatorCalls++;
+                }
                 if (array_keys($context) !== [
                         'component',
                         'contentRecordId',
@@ -1234,6 +1267,180 @@ try {
         'changed package preview fails before route-stage replay or mutation'
     );
 
+    mysqli_query(
+        $connection,
+        "ALTER TABLE RED_Addon_Component_Destination_Executions
+         ADD CONSTRAINT redcms_destination_component_checkpoint_fail
+         CHECK (`Stage` <> 'component_created')"
+    );
+    $previewCallsBeforeComponentFailure = $previewCalls;
+    $failedComponent = red_addon_component_destination_component_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    $failedComponentFingerprint = red_addon_editor_create_test_scalar(
+        $connection,
+        "SELECT CONCAT_WS(':',
+            (SELECT COUNT(*) FROM RED_Articles
+             WHERE RecordID=$destinationComponentRecordId
+               AND Component='$componentId' AND Active='N'
+               AND Alias='' AND PagePosition=0),
+            (SELECT COUNT(*) FROM `$packageTable`
+             WHERE ContentRecordID=$destinationComponentRecordId),
+            (SELECT COUNT(*) FROM RED_Content_Revisions
+             WHERE ContentRecordID=$destinationComponentRecordId
+               AND RevisionNumber=1 AND Operation='create'),
+            (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+             WHERE ContentRecordID=$destinationComponentRecordId
+               AND RevisionNumber=1 AND Operation='baseline'),
+            (SELECT COUNT(*)
+             FROM RED_Addon_Component_Destination_Executions
+             WHERE PackageID='$packageId'
+               AND PlanSHA256='" . $routePlan['planHash'] . "'
+               AND Stage='route_created'
+               AND ComponentStateSHA256 IS NULL))"
+    );
+    red_addon_editor_create_test_assert(
+        empty($failedComponent['created'])
+            && $failedComponent['reason'] === 'checkpoint_failed'
+            && $failedComponent['stage'] === 'route_created'
+            && $destinationCreatorCalls === 1
+            && $previewCalls === $previewCallsBeforeComponentFailure + 2
+            && $failedComponentFingerprint === '1:1:1:1:1',
+        'checkpoint failure retains one committed inactive component and the route checkpoint: '
+            . json_encode([
+                'result' => $failedComponent,
+                'creatorCalls' => $destinationCreatorCalls,
+                'previewDelta' =>
+                    $previewCalls - $previewCallsBeforeComponentFailure,
+                'fingerprint' => $failedComponentFingerprint,
+            ])
+    );
+    mysqli_query(
+        $connection,
+        'ALTER TABLE RED_Addon_Component_Destination_Executions
+         DROP CHECK redcms_destination_component_checkpoint_fail'
+    );
+
+    $previewCallsBeforeComponentRetry = $previewCalls;
+    $createdComponent = red_addon_component_destination_component_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($createdComponent['created'])
+            && !empty($createdComponent['resumed'])
+            && $createdComponent['reason'] === 'resumed'
+            && $createdComponent['stage'] === 'component_created'
+            && red_addon_valid_sha256(
+                $createdComponent['componentStateSha256']
+            )
+            && $createdComponent['parentRevisionId'] > 0
+            && $createdComponent['packageRevisionId'] > 0
+            && $destinationCreatorCalls === 1
+            && $previewCalls === $previewCallsBeforeComponentRetry + 2,
+        'retry reconciles the committed component and advances the retained route checkpoint'
+    );
+    red_addon_editor_create_test_assert(
+        red_addon_editor_create_test_scalar(
+            $connection,
+            "SELECT CONCAT_WS(':',
+                (SELECT COUNT(*) FROM RED_Articles
+                 WHERE RecordID=$destinationRouteRecordId),
+                (SELECT COUNT(*) FROM RED_Articles
+                 WHERE RecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*) FROM `$packageTable`
+                 WHERE ContentRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*) FROM RED_Content_Revisions
+                 WHERE ContentRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*) FROM RED_Addon_Component_Revisions
+                 WHERE ContentRecordID=$destinationComponentRecordId),
+                (SELECT COUNT(*)
+                 FROM RED_Addon_Component_Destination_Executions
+                 WHERE PackageID='$packageId'
+                   AND PlanSHA256='" . $routePlan['planHash'] . "'
+                   AND Stage='component_created'
+                   AND ComponentStateSHA256='"
+                    . $createdComponent['componentStateSha256'] . "'))"
+        ) === '1:1:1:1:1:1',
+        'component checkpoint binds one route, component, package row, and revision pair'
+    );
+
+    $previewCallsBeforeComponentReplay = $previewCalls;
+    $replayedComponent = red_addon_component_destination_component_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        !empty($replayedComponent['created'])
+            && !empty($replayedComponent['resumed'])
+            && $replayedComponent['reason'] === 'resumed'
+            && $replayedComponent['parentRevisionId'] ===
+                $createdComponent['parentRevisionId']
+            && $replayedComponent['packageRevisionId'] ===
+                $createdComponent['packageRevisionId']
+            && hash_equals(
+                $createdComponent['componentStateSha256'],
+                $replayedComponent['componentStateSha256']
+            )
+            && $destinationCreatorCalls === 1
+            && $previewCalls === $previewCallsBeforeComponentReplay + 2,
+        'exact component-stage replay rederives preview without duplicate package writes'
+    );
+
+    $changedComponentRequest = $routeExecutionRequest;
+    $changedComponentRequest['componentValues']['quantity'] = '6';
+    $changedComponent = red_addon_component_destination_component_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $changedComponentRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($changedComponent['created'])
+            && $changedComponent['reason'] === 'component_drift'
+            && $destinationCreatorCalls === 1,
+        'changed component values cannot resume the immutable destination plan'
+    );
+
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Title='Drifted component shell'
+         WHERE RecordID=$destinationComponentRecordId"
+    );
+    $driftedComponent = red_addon_component_destination_component_create(
+        $connection,
+        $manifest,
+        $componentId,
+        $adminRecordId,
+        $routeExecutionRequest,
+        $routePlan['planHash']
+    );
+    red_addon_editor_create_test_assert(
+        empty($driftedComponent['created'])
+            && $driftedComponent['reason'] === 'component_drift'
+            && $destinationCreatorCalls === 1,
+        'parent or revision drift fails closed without a second creator call'
+    );
+    mysqli_query(
+        $connection,
+        "UPDATE RED_Articles SET Title='Coordinator route fixture'
+         WHERE RecordID=$destinationComponentRecordId"
+    );
     red_addon_editor_create_test_assert(
         red_addon_component_destination_execution_storage_available(
             $connection

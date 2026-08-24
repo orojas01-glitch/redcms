@@ -205,6 +205,56 @@ if (!function_exists('red_addon_component_editor_create_plan_hash')) {
     }
 }
 
+if (!function_exists('red_addon_component_editor_create_plan')) {
+    function red_addon_component_editor_create_plan(
+        $packageId,
+        $componentId,
+        $contentRecordId,
+        $adminRecordId,
+        $permission,
+        array $parentValues,
+        array $values,
+        array $transactionTables
+    ) {
+        $contentRecordId = filter_var(
+            $contentRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $adminRecordId = filter_var(
+            $adminRecordId,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        if (!is_string($packageId)
+            || !red_addon_valid_package_id($packageId)
+            || !is_string($componentId)
+            || !red_addon_valid_capability($componentId)
+            || $contentRecordId === false
+            || $adminRecordId === false
+            || !is_string($permission)
+            || !red_addon_valid_permission($permission)
+        ) {
+            return null;
+        }
+        $plan = [
+            'schema' => 1,
+            'package' => $packageId,
+            'component' => $componentId,
+            'contentRecordId' => (string) $contentRecordId,
+            'actorRecordId' => (string) $adminRecordId,
+            'permission' => $permission,
+            'parentValues' => $parentValues,
+            'values' => $values,
+            'transactionTables' => $transactionTables,
+        ];
+        $planHash = red_addon_component_editor_create_plan_hash($plan);
+        return $planHash === ''
+            ? null
+            : ['plan' => $plan, 'planHash' => $planHash];
+    }
+}
+
 if (!function_exists('red_addon_component_editor_create_preflight')) {
     function red_addon_component_editor_create_preflight(
         $connection,
@@ -349,19 +399,17 @@ if (!function_exists('red_addon_component_editor_create_preflight')) {
             return $result;
         }
 
-        $plan = [
-            'schema' => 1,
-            'package' => $packageId,
-            'component' => $componentId,
-            'contentRecordId' => (string) $contentRecordId,
-            'actorRecordId' => (string) $adminRecordId,
-            'permission' => $result['permission'],
-            'parentValues' => $parent,
-            'values' => $validated['values'],
-            'transactionTables' => $tables,
-        ];
-        $planHash = red_addon_component_editor_create_plan_hash($plan);
-        if ($planHash === '') {
+        $plan = red_addon_component_editor_create_plan(
+            $packageId,
+            $componentId,
+            $contentRecordId,
+            $adminRecordId,
+            $result['permission'],
+            $parent,
+            $validated['values'],
+            $tables
+        );
+        if (!is_array($plan)) {
             $result['reason'] = 'plan_unavailable';
             return $result;
         }
@@ -369,7 +417,7 @@ if (!function_exists('red_addon_component_editor_create_preflight')) {
         $result['ready'] = true;
         $result['parentValues'] = $parent;
         $result['values'] = $validated['values'];
-        $result['planHash'] = $planHash;
+        $result['planHash'] = $plan['planHash'];
         $result['reason'] = 'ready';
         return $result;
     }
