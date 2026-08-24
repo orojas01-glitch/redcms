@@ -113,6 +113,41 @@ if (!function_exists('red_addon_component_destination_route_available')) {
     }
 }
 
+if (!function_exists('red_addon_component_destination_plan_hash')) {
+    function red_addon_component_destination_plan_hash(array $plan)
+    {
+        if (array_keys($plan) !== [
+            'schema',
+            'package',
+            'component',
+            'actorRecordId',
+            'packagePlanSha256',
+            'routeValues',
+            'componentRecordId',
+            'componentParentMetadata',
+            'componentValues',
+            'componentCreatePlanHash',
+            'targetStateHash',
+            'placementValues',
+            'operations',
+        ]
+            || $plan['schema'] !== 1
+            || !red_addon_valid_package_id($plan['package'] ?? null)
+            || !red_addon_valid_capability($plan['component'] ?? null)
+            || !red_addon_valid_sha256(
+                $plan['packagePlanSha256'] ?? null
+            )
+            || !red_addon_valid_sha256(
+                $plan['componentCreatePlanHash'] ?? null
+            )
+            || !red_addon_valid_sha256($plan['targetStateHash'] ?? null)
+        ) {
+            return '';
+        }
+        return red_addon_component_editor_publish_hash($plan);
+    }
+}
+
 if (!function_exists('red_addon_component_destination_preflight')) {
     function red_addon_component_destination_preflight(
         $connection,
@@ -415,7 +450,7 @@ if (!function_exists('red_addon_component_destination_preflight')) {
             'placementValues' => $placement,
             'operations' => $operations,
         ];
-        $planHash = red_addon_component_editor_publish_hash($plan);
+        $planHash = red_addon_component_destination_plan_hash($plan);
         if (!red_addon_valid_sha256($planHash)) {
             $result['reason'] = 'plan_unavailable';
             return $result;

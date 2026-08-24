@@ -16,6 +16,7 @@ if (!function_exists('red_admin_audit_event_allowed')) {
             'administrator.deleted',
             'administrator.owner_bootstrapped',
             'component.public_placed',
+            'article.created',
         ], true);
     }
 }
@@ -23,7 +24,11 @@ if (!function_exists('red_admin_audit_event_allowed')) {
 if (!function_exists('red_admin_audit_target_allowed')) {
     function red_admin_audit_target_allowed($targetType)
     {
-        return in_array($targetType, ['administrator', 'component'], true);
+        return in_array(
+            $targetType,
+            ['administrator', 'component', 'article'],
+            true
+        );
     }
 }
 
@@ -32,6 +37,9 @@ if (!function_exists('red_admin_audit_event_target_allowed')) {
     {
         if ($eventName === 'component.public_placed') {
             return $targetType === 'component';
+        }
+        if ($eventName === 'article.created') {
+            return $targetType === 'article';
         }
         return str_starts_with($eventName, 'administrator.')
             && $targetType === 'administrator';
