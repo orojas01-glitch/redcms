@@ -331,6 +331,15 @@ empty Wompi business tables, and exact cleanup. C4C2 next owns the Owner-gated
 CLI/no-contact rehearsal; C4C3 remains the first real one-GET boundary. See
 [`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
 
+C4C2 is now complete as a 67-assertion dry-run-first command plus network-
+disabled disposable rehearsal. It revalidates current-client Owner/package/
+setting hashes, loads no package code in dry run, and fully confirmed apply can
+invoke only one sealed merchant-read double. No durable attempt or replay
+protection is claimed; all Wompi business/action/audit counts remain zero and
+cleanup is exact after 47 migrations. C4C3A next owns durable real-target
+execution; C4C3B remains the first real one-GET step. See
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
+
 ## Explicit Exclusions
 
 Gate P0 does not select a provider, add a core payment abstraction, create

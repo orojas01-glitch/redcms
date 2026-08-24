@@ -414,9 +414,15 @@ GET with strict response containment and a sealed double. Its complete suite
 passes 321 assertions. Core exact-package acceptance passes 51 profile
 assertions and a 13-assertion fresh-database adoption rehearsal after all 47
 migrations, with Wompi business tables empty and cleanup `database:0 grant:0
-staged-project:0 primary:unchanged`. C4C2 is next for the Owner-gated CLI plus
-disposable no-contact rehearsal. C4C3 retains the separately confirmed owner
-account/Sandbox-value/one-GET boundary; no transaction is authorized.
+staged-project:0 primary:unchanged`. C4C2 is now complete with a 67-assertion
+dry-run-first source contract and a network-disabled disposable rehearsal.
+Dry run loads no package PHP. Fully confirmed apply invokes only one sealed
+merchant-read double, retains no raw key/body/token, leaves Wompi business and
+action/audit rows `0:0:0:0`, and explicitly has no durable attempt or replay
+protection. Cleanup is exact after all 47 migrations. C4C3A next owns durable
+start/result, the real-target CLI, and provider-double rehearsal; C4C3B retains
+the owner account/Sandbox-value/exactly-one-GET boundary. No transaction is
+authorized.
 See
 [`PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md`](PAYMENT-ADAPTER-COLOMBIA-C0-DECISION.md)
 and
@@ -448,7 +454,9 @@ and
 and
 [`PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4B4D-OPERATOR-REHEARSAL.md)
 and
-[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md).
+[`PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md`](PAYMENT-ADAPTER-COLOMBIA-C4C1-CORE-ADOPTION.md)
+and
+[`PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md`](PAYMENT-ADAPTER-COLOMBIA-C4C2-OPERATOR-REHEARSAL.md).
 See
 [`PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md`](PAYMENT-ADAPTER-P3E9B2-SYNTHETIC-CORE-RUNNER.md)
 and

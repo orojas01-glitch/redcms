@@ -29,6 +29,7 @@ WOMPI_VERSION="${RED_WOMPI_VERSION:-0.1.4}"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 SELF_TEST_SCRIPT="${RED_WOMPI_SELF_TEST_SCRIPT:-wompi-payment-adapter-c3b-self-test.php}"
 BEFORE_SELF_TEST_SCRIPT="${RED_WOMPI_BEFORE_SELF_TEST_SCRIPT:-}"
+AFTER_SELF_TEST_SCRIPT="${RED_WOMPI_AFTER_SELF_TEST_SCRIPT:-}"
 RUN_SUFFIX="$(date +%s)_$$"
 DATABASE_NAME="${RED_WOMPI_C3B_DATABASE:-redcms_wompi_c3b_$RUN_SUFFIX}"
 TEMP_ROOT=""
@@ -187,6 +188,20 @@ if [[ -n "$BEFORE_SELF_TEST_SCRIPT"
         "$BEFORE_SELF_TEST_SCRIPT" >&2
     exit 64
 fi
+if [[ -n "$AFTER_SELF_TEST_SCRIPT"
+    && "$AFTER_SELF_TEST_SCRIPT" != 'wompi-payment-adapter-c4c2-operator-inner.sh'
+]]; then
+    printf 'Unsupported Wompi post-fixture rehearsal: %s\n' \
+        "$AFTER_SELF_TEST_SCRIPT" >&2
+    exit 64
+fi
+if [[ -n "$AFTER_SELF_TEST_SCRIPT"
+    && ! -s "$RED_PROJECT_ROOT/scripts/$AFTER_SELF_TEST_SCRIPT"
+]]; then
+    printf 'Wompi post-fixture rehearsal is unavailable: %s\n' \
+        "$AFTER_SELF_TEST_SCRIPT" >&2
+    exit 66
+fi
 if [[ -n "$BEFORE_SELF_TEST_SCRIPT"
     && ! -s "$RED_PROJECT_ROOT/scripts/$BEFORE_SELF_TEST_SCRIPT"
 ]]; then
@@ -325,6 +340,16 @@ RED_DB_NAME="$DATABASE_NAME" \
 RED_WOMPI_C3B_PROJECT_ROOT="$STAGED_PROJECT" \
     "$FRANKENPHP_BIN" php-cli \
     "$STAGED_PROJECT/scripts/$SELF_TEST_SCRIPT"
+
+if [[ -n "$AFTER_SELF_TEST_SCRIPT" ]]; then
+    RED_DB_HOST="$RED_DB_HOST_RESOLVED:$RED_DB_PORT_RESOLVED" \
+    RED_DB_USER="$RED_DB_USER_RESOLVED" \
+    RED_DB_PASS="$RED_DB_PASS_RESOLVED" \
+    RED_DB_NAME="$DATABASE_NAME" \
+    RED_WOMPI_C3B_PROJECT_ROOT="$STAGED_PROJECT" \
+    FRANKENPHP_BIN="$FRANKENPHP_BIN" \
+        "$STAGED_PROJECT/scripts/$AFTER_SELF_TEST_SCRIPT"
+fi
 
 RUN_SUCCEEDED=1
 printf '%s\n' 'Wompi C3B disposable lifecycle and registrar rehearsal passed before cleanup.'
