@@ -1,7 +1,7 @@
 # P3E-9D4D Diagnostic Recovery
 
-Status: local contract-parity repair and offline diagnostic recovery complete
-on 2026-08-24. A new provider attempt remains separately authorization-gated.
+Status: local contract-parity and fresh-expiry repairs complete on 2026-08-24.
+A new provider attempt remains separately authorization-gated.
 
 The first D4D operational attempt created a Checkout-Sessions-Write-only
 restricted key in the dedicated `RED-CMS Store Lite Development` Sandbox and
@@ -11,6 +11,15 @@ showed zero requests, the key remained `Last used —`, and no Checkout Session,
 payment, webhook, browser navigation, Store Lite mutation, live-mode action,
 or deployment occurred. The unused key was then expired, and all temporary
 secret files, databases, grants, and runner files were removed.
+
+After the contract-parity repair merged, one separately confirmed recovery
+attempt reached Stripe exactly once. Stripe recorded one
+`POST /v1/checkout/sessions` and returned HTTP `400 invalid_request_error`
+because the fixed `expires_at` value was already in the past. No Checkout
+Session or payment was created, no retry occurred, the durable ledger remained
+`4:4:2`, and exact local cleanup passed. The temporary restricted key showed
+current use, was explicitly expired after evidence review, and Stripe then
+showed no restricted keys.
 
 ## Bounded failure stage
 
@@ -38,6 +47,8 @@ outcome remains conservative, attempt-consuming, and no-retry.
 - RED-CMS focused D4C1 command checks pass 74 assertions.
 - The recovery harness source contract passes 67 assertions and requires the
   exact network-disabled transport-boundary result after preflight adoption.
+- The D4C2 rehearsal source contract passes 94 assertions and requires one
+  action-time one-hour expiry plus an adapter-derived contract digest.
 - The restartable D4C2 rehearsal stages preserved Store Lite `0.1.35` by
   commit while permitting current Store Lite main to advance independently.
 - Full RED-CMS acceptance passes against a fresh disposable current-schema
@@ -69,7 +80,7 @@ codes already emitted by the package. These diagnostics are not added to the
 bounded provider outcome, result hash, audit row, database, package payload, or
 browser response.
 
-The 2026-08-24 provider-mode harness completed `indeterminate` at
+The first 2026-08-24 provider-mode harness completed `indeterminate` at
 `adapter_invocation_failed`; Stripe showed the restricted key as unused and no
 POST in the Sandbox log. The same merged sources reproduced the failure in
 network-disabled mode with transient diagnostics
@@ -80,6 +91,14 @@ contract digest instead of the deterministic adapter-owned P3E-9A contract
 digest. Replacing only that fixture digest made contract adoption plus input
 and request digests match exactly; no validation rule was weakened.
 
+The later one-request provider recovery completed `indeterminate` at
+`response_decode_failed`, with adapter reason `completed` and adapter error
+`none`. Stripe's authoritative log isolated the next defect to the expired
+fixture timestamp. The operational rehearsal now captures `time()` once,
+sets `expiresAtEpoch` to one hour later, and derives the matching contract
+digest from the integrity-validated staged adapter package. Deterministic unit
+fixtures retain their fixed timestamps and digest.
+
 `RED_D4D_RECOVERY_NETWORK_MODE=offline` is the acceptance-only mode. It
 disables URL streams and common cURL/socket functions for the apply runtime,
 proves the complete durable recovery lifecycle with a synthetic restricted-key
@@ -89,6 +108,10 @@ shape, and must pass adapter preflight before ending `indeterminate` at
 commit `44f0f12`, preserved ledger `4:4:2`, and completed exact cleanup. Provider
 mode does not retry and does not expire the dashboard key; key expiration
 remains a separately confirmed owner action.
+
+The fresh-expiry repair passed the same real-package offline proof at core
+commit `98e2984`, ending only at `transport_exchange_failed` with adapter reason
+`completed`, adapter error `none`, ledger `4:4:2`, and exact cleanup.
 
 A future D4D recovery attempt requires a new explicit authorization, a new
 least-privilege restricted Sandbox key, a fresh disposable database and
