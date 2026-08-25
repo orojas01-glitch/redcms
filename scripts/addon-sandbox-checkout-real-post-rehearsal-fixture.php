@@ -106,6 +106,30 @@ if (empty($catalog['valid'])
         ], JSON_UNESCAPED_SLASHES)
     );
 }
+$adapterDirectory = realpath((string) ($adapterPackage['path'] ?? ''));
+$expectedAdapterDirectory = realpath(
+    $stagedProject . '/addons/redcms/store-lite-stripe-checkout'
+);
+if (!is_string($adapterDirectory)
+    || !is_string($expectedAdapterDirectory)
+    || $adapterDirectory !== $expectedAdapterDirectory
+) {
+    throw new RuntimeException('Exact staged adapter path refused.');
+}
+foreach ([
+    'StripeCheckoutResponseNormalizer.php',
+    'StripeSandboxCheckoutTransportPlanner.php',
+    'StripeSandboxCheckoutTransportResponseGate.php',
+    'StripeBoundedJsonDecoder.php',
+    'StripeSandboxCheckoutWireCodec.php',
+    'StripeSandboxCheckoutCreationContract.php',
+] as $contractFile) {
+    $contractPath = $adapterDirectory . '/' . $contractFile;
+    if (!is_file($contractPath)) {
+        throw new RuntimeException('Exact staged contract source refused.');
+    }
+    require_once $contractPath;
+}
 $storeRecorded = red_addon_payment_adapter_db_test_record_installation(
     $connection,
     $storePackage,
@@ -146,7 +170,26 @@ $declarations = red_addon_secret_reference_declarations(
     [$apiReference],
     ''
 );
+$createdAtEpoch = time();
 $input = red_checkout_p3e9d4b_evidence_input();
+$input['policy']['createdAtEpoch'] = $createdAtEpoch;
+$input['policy']['expiresAtEpoch'] = $createdAtEpoch + 3600;
+$checkoutContract =
+    RED_CMS_Store_Lite_Stripe_Sandbox_Checkout_Creation_Contract::prepare(
+        $input['checkout'],
+        $input['policy'],
+        $input['profile']
+    );
+if (($checkoutContract['valid'] ?? null) !== true
+    || !red_addon_checkout_synthetic_sha256(
+        $checkoutContract['contractSha256'] ?? null
+    )
+    || ($checkoutContract['errors'] ?? null) !== []
+) {
+    throw new RuntimeException('Fresh staged Checkout contract refused.');
+}
+$input['contractSha256'] = $checkoutContract['contractSha256'];
+$checkoutContract = null;
 $syntheticPlan = red_checkout_p3e9d4b_evidence_synthetic_plan($input);
 $preflight = red_addon_checkout_real_post_preflight($syntheticPlan, $input);
 $preflightOutcome = red_checkout_p3e9d4b_evidence_outcome(

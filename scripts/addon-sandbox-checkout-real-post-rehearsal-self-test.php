@@ -160,6 +160,35 @@ try {
         'fixture consumes exact staged packages and never replaces their source'
     );
     red_checkout_p3e9d4c2_assert(
+        str_contains($fixture, '$createdAtEpoch = time();')
+            && str_contains(
+                $fixture,
+                '$input[\'policy\'][\'createdAtEpoch\'] = $createdAtEpoch;'
+            )
+            && str_contains(
+                $fixture,
+                '$input[\'policy\'][\'expiresAtEpoch\'] = $createdAtEpoch + 3600;'
+            )
+            && !str_contains($fixture, '1787025600')
+            && !str_contains($fixture, '1787027400'),
+        'operational evidence uses one fresh one-hour Checkout window'
+    );
+    red_checkout_p3e9d4c2_assert(
+        str_contains(
+            $fixture,
+            "'StripeSandboxCheckoutCreationContract.php'"
+        )
+            && str_contains(
+                $fixture,
+                'RED_CMS_Store_Lite_Stripe_Sandbox_Checkout_Creation_Contract::prepare('
+            )
+            && str_contains(
+                $fixture,
+                '$input[\'contractSha256\'] = $checkoutContract[\'contractSha256\'];'
+            ),
+        'fresh evidence derives its contract digest from exact staged package code'
+    );
+    red_checkout_p3e9d4c2_assert(
         str_contains($fixture, "'input' => \$input")
             && str_contains($fixture, "'preflight' => \$preflight")
             && str_contains(
