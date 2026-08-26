@@ -2192,6 +2192,19 @@ the rebuild back. There is still no private/member source or network request.
 The first private demo installation is client-local; core performs no package
 deployment and receives no authority over later clients.
 
+The internal subscription Checkout coordinator binds only Store Lite `0.1.49`
+service `commerce.subscriptions` to Stripe Checkout adapter `0.1.9`. It loads
+one authoritative intent/offer projection, prepares and accepts only synthetic
+Sandbox evidence, independently validates the exact Stripe hosted URL, and
+persists only a Session-reference hash plus pending/inactive lifecycle evidence.
+It rejects version or owner drift, foreign origins, malformed typed results,
+and any claimed network, provider, Checkout-creation, subscription-creation, or
+browser effect. The transient URL is returned with a no-store `303` handoff
+model but is neither stored nor emitted. There is no route, controller, request
+reader, response writer, secret resolver, provider transport, webhook ingress,
+or browser navigation in this gate. See
+`docs/SUBSCRIPTION-CHECKOUT-COORDINATOR.md`.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.
