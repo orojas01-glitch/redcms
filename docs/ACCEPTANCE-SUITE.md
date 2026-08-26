@@ -1524,6 +1524,22 @@ process environment.
   order, payment, customer, administrator, setting, secret, or database
   identity crosses the typed provider result.
 - The separate real Store Lite operational lifecycle rehearsal stages current clean core plus externally distributed Store Lite 0.1.28 in a temporary supported-server project. Its 10 assertions run all 46 core and 8 package migrations, fingerprint all 15 package tables and seeded product/cart rows, require exact real registrar evidence, prove Product/Cart/create-guest-order registration after enable, prove disabled bootstrap exclusion and data preservation, reproduce the registrar hash on re-enable, record exactly two enable and one disable audits, and remove the staged project and disposable database/grant. It does not alter the Store Lite source repository, clean starter, hosted demo, or any client installation.
+- Subscription launch-candidate acceptance combines the clean core with external
+  Store Lite `0.1.49` and Stripe Checkout adapter `0.1.9`. The focused fixture
+  validates exact identities, four-stage ordering, independent hosted-URL
+  validation, hashed-only Store persistence, transient no-store redirect data,
+  version drift, foreign-origin refusal, and zero external effects. The separate
+  12-assertion disposable rehearsal applies all 47 core, 15 Store Lite, and two
+  adapter migrations; installs and enables both packages with opaque references
+  but no values; creates one provider-neutral recurring intent; coordinates and
+  replays one synthetic Checkout result; records exactly one pending/inactive
+  lifecycle history row; leaves both adapter business tables empty; disables
+  the adapter and proves coordination stops; and cleans
+  `database:0 grant:0 staged-project:0 primary:unchanged`. No secret resolution,
+  DNS, TLS, HTTP, Stripe contact, Checkout or subscription creation, response
+  emission, browser navigation, webhook, client installation, demo change, or
+  deployment occurs. The public response bridge and all provider-facing proof
+  remain separate launch gates.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 36 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.
 - The Section-delete lifecycle uses a disposable Webmaster, Section, and two Articles only inside the disposable database. It requires count-aware confirmation, CSRF refusal with unchanged state, one transaction that archives every related Article before deleting the Section, exact response reporting, recovery through **Inactive Articles**, an active-theme 404 at the old route, and zero targeted artifacts. Form/Gallery child rows and media are deliberately left attached to their preserved parent Articles.
