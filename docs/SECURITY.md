@@ -2239,6 +2239,16 @@ Raw provider references leave the adapter only as hashes. The helper performs
 no request parsing, signature verification, secret resolution, route exposure,
 network access, Stripe contact, response emission, or deployment.
 
+The unlinked add-on webhook request boundary preserves up to 262,144 untouched
+UTF-8 body bytes plus a bounded signature header in a dedicated internal object.
+It does not change the ordinary 16 KB service/adapter payload ceiling. Only a
+manifest-declared `POST` route with `server-signature` authentication, exact
+package ownership, and one scoped secret setting may enter the boundary.
+Handler results remain bounded and are rejected if they disclose the raw body,
+signature header, or secret. The fixture joins this boundary to the inert
+Stripe `0.1.12` signature verifier using synthetic data only. No public
+dispatcher or front controller calls the boundary.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.
