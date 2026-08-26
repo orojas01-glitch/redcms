@@ -25,14 +25,22 @@ Stripe adapter `0.1.12` signature-envelope verifier using a 20 KB synthetic
 event and process-local synthetic signing secret. It also proves the ordinary
 adapter request still rejects a 20 KB payload.
 
+The later subscription delivery fixture now joins the exact adapter `0.1.14`
+manifest declaration and one-secret request scope to the restartable event
+coordinator. Applied, recovered, replayed, and terminally refused deliveries
+return only bounded acknowledgement and hash evidence. Invalid signatures use
+`400`; restartable journal/projection failures use `500`. Expanded API-key
+scope is refused before handler invocation.
+
 This helper is absent from `index.php`, runtime bootstrap, and every public
 route dispatcher. It reads no request globals, resolves no configured secret,
 emits no response, and performs no network, Stripe, database, payment, browser,
 or deployment action.
 
-## Next gate
+## Current boundary
 
-A later offline slice may add a replay ledger and a non-operational package
-handler rehearsal. Linking a real request reader, activating an endpoint,
-provisioning a webhook secret, or deploying to a client each remains separately
-authorized work.
+The non-operational package-handler rehearsal is complete. The actual adapter
+registrar still retains its throwing placeholder, and neither `index.php` nor
+runtime bootstrap references the composed handler. Linking a real request
+reader, activating an endpoint, provisioning a configured webhook secret, or
+deploying to a client each remains separately authorized work.

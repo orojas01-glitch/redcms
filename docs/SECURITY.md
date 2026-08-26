@@ -2261,6 +2261,17 @@ signature header, or secret. The fixture joins this boundary to the inert
 Stripe `0.1.12` signature verifier using synthetic data only. No public
 dispatcher or front controller calls the boundary.
 
+The non-operational Stripe adapter `0.1.14` route rehearsal now composes that
+same boundary with the restartable delivery coordinator. It requires the exact
+manifest route and package owner plus a request-local access object containing
+only `stripe.webhook-secret`. The process-local synthetic value is cleared
+after signature verification. Expanded API-key scope, manifest drift, invalid
+signatures, output, exceptions, raw request data, and private provider fields
+are contained. Successful, recovered, replayed, and terminally refused events
+return only bounded acknowledgement and hash evidence. The package registrar's
+throwing placeholder is unchanged, and no front-controller or bootstrap link
+exists.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

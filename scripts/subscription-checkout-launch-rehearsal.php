@@ -50,7 +50,7 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_subscription_event_journal_helpers.php';
 require_once $projectRoot
-    . '/includes/addon_subscription_event_delivery_coordinator_helpers.php';
+    . '/includes/addon_subscription_event_webhook_handler_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -762,13 +762,14 @@ try {
     $eventSignatureVerifier = static fn (
         string $rawBody,
         string $signatureHeader,
+        string $endpointSecret,
         int $receivedAt
     ): array =>
         RED_CMS_Store_Lite_Stripe_Sandbox_Webhook_Signature_Envelope::
             verify(
                 $rawBody,
                 $signatureHeader,
-                'whsec_synthetic_launch_event_123456789',
+                $endpointSecret,
                 $receivedAt
             );
     $eventProjector = static function (
@@ -796,10 +797,22 @@ try {
             $evidence
         );
     };
-    $eventDeliveryInterrupted =
-        red_addon_subscription_event_delivery_coordinate(
+    $eventWebhookAccess = new RED_Addon_Runtime_Secret_Access(
+        $adapterPackageId,
+        ['stripe.webhook-secret' => $eventSecret]
+    );
+    $eventWebhookHandler = static function (
+        RED_Addon_Webhook_Request $webhookRequest
+    ) use (
+        $eventBinding,
+        $eventSignatureVerifier,
+        $eventProjector,
+        $eventJournal,
+        $eventReceivedAt
+    ): RED_Addon_Webhook_Result {
+        return red_addon_subscription_event_webhook_handle(
+            $webhookRequest,
             $eventBinding,
-            $eventRequest,
             $eventSignatureVerifier,
             $eventProjector,
             $eventJournal,
@@ -809,48 +822,51 @@ try {
                 red_addon_adapter_invoke($adapter, $operation, $input),
             $eventReceivedAt + 10
         );
-    $eventDeliveryRecovered =
-        red_addon_subscription_event_delivery_coordinate(
-            $eventBinding,
-            $eventRequest,
-            $eventSignatureVerifier,
-            $eventProjector,
-            $eventJournal,
-            static fn ($service, $operation, $input) =>
-                red_addon_service_invoke($service, $operation, $input),
-            static fn ($adapter, $operation, $input) =>
-                red_addon_adapter_invoke($adapter, $operation, $input),
-            $eventReceivedAt + 20
+    };
+    $eventRoute =
+        'redcms.store-lite-stripe-checkout/provider-events';
+    $invokeEventRoute = static fn (): array =>
+        red_addon_webhook_invoke_registered(
+            $eventRoute,
+            $eventRequest['rawBody'],
+            $eventRequest['signatureHeader'],
+            $eventRequest['receivedAt'],
+            $adapterPackageId,
+            $eventWebhookHandler,
+            $adapterPackage['manifest'],
+            $eventWebhookAccess
         );
-    $eventDeliveryReplay =
-        red_addon_subscription_event_delivery_coordinate(
-            $eventBinding,
-            $eventRequest,
-            $eventSignatureVerifier,
-            $eventProjector,
-            $eventJournal,
-            static fn ($service, $operation, $input) =>
-                red_addon_service_invoke($service, $operation, $input),
-            static fn ($adapter, $operation, $input) =>
-                red_addon_adapter_invoke($adapter, $operation, $input),
-            $eventReceivedAt + 30
-        );
+    $eventDeliveryInterrupted = $invokeEventRoute();
+    $eventDeliveryRecovered = $invokeEventRoute();
+    $eventDeliveryReplay = $invokeEventRoute();
     red_subscription_launch_assert(
-        ($eventDeliveryInterrupted['status'] ?? '') === 'verified'
-            && ($eventDeliveryInterrupted['restartable'] ?? false) === true
-            && ($eventDeliveryInterrupted['lifecycleApplied'] ?? false)
+        ($eventDeliveryInterrupted['invoked'] ?? false) === true
+            && ($eventDeliveryInterrupted['success'] ?? true) === false
+            && ($eventDeliveryInterrupted['statusCode'] ?? 0) === 500
+            && ($eventDeliveryInterrupted['error'] ?? '')
+                === 'subscription_webhook_retry_required'
+            && ($eventDeliveryRecovered['success'] ?? false) === true
+            && ($eventDeliveryRecovered['statusCode'] ?? 0) === 200
+            && ($eventDeliveryRecovered['data']['outcome'] ?? '')
+                === 'subscription_event_applied'
+            && ($eventDeliveryRecovered['data']['recovered'] ?? false)
                 === true
-            && ($eventDeliveryRecovered['valid'] ?? false) === true
-            && ($eventDeliveryRecovered['status'] ?? '') === 'applied'
-            && ($eventDeliveryRecovered['lifecycleReplayed'] ?? false)
-                === true
-            && ($eventDeliveryRecovered['journalCompleted'] ?? false)
-                === true
-            && ($eventDeliveryRecovered['lifecycleResultSha256'] ?? '')
-                === ($eventDeliveryInterrupted['lifecycleResultSha256'] ?? '')
-            && ($eventDeliveryReplay['status'] ?? '') === 'replayed'
-            && ($eventDeliveryReplay['lifecycleResultSha256'] ?? '')
-                === ($eventDeliveryRecovered['lifecycleResultSha256'] ?? '')
+            && ($eventDeliveryReplay['success'] ?? false) === true
+            && ($eventDeliveryReplay['data']['outcome'] ?? '')
+                === 'subscription_event_replayed'
+            && ($eventDeliveryReplay['data']['lifecycleResultSha256'] ?? '')
+                === ($eventDeliveryRecovered['data']['lifecycleResultSha256']
+                    ?? '')
+            && red_subscription_launch_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':', ReceiptStatus,
+                    LOWER(HEX(LifecycleResultSHA256)))
+                 FROM RED_Addon_StoreLite_Stripe_Subscription_Event_Receipts
+                 WHERE EventRefSHA256=UNHEX('"
+                    . hash('sha256', $eventRef) . "')"
+            ) === 'applied:'
+                . ($eventDeliveryRecovered['data']['lifecycleResultSha256']
+                    ?? '')
             && red_subscription_launch_scalar(
                 $connection,
                 "SELECT CONCAT_WS(':', SubscriptionStatus,
@@ -866,9 +882,9 @@ try {
             ) === 'active:active:2',
         'raw signed subscription event recovers after lifecycle commit and replays without another lifecycle row ('
             . implode(':', [
-                $eventDeliveryInterrupted['status'] ?? 'missing',
-                $eventDeliveryRecovered['status'] ?? 'missing',
-                $eventDeliveryReplay['status'] ?? 'missing',
+                (string) ($eventDeliveryInterrupted['statusCode'] ?? 0),
+                $eventDeliveryRecovered['data']['outcome'] ?? 'missing',
+                $eventDeliveryReplay['data']['outcome'] ?? 'missing',
             ]) . ')'
     );
     } else {
@@ -1053,6 +1069,9 @@ try {
         'networkAccess' => false,
         'providerContact' => false,
         'secretResolution' => false,
+        'syntheticWebhookSecretResolution' => true,
+        'internalWebhookBoundaryInvoked' => true,
+        'publicRouteExposure' => false,
         'checkoutCreation' => false,
         'subscriptionCreation' => false,
         'browserNavigation' => false,
