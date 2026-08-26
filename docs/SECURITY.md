@@ -2193,7 +2193,7 @@ The first private demo installation is client-local; core performs no package
 deployment and receives no authority over later clients.
 
 The internal subscription Checkout coordinator binds only Store Lite `0.1.49`
-service `commerce.subscriptions` to Stripe Checkout adapter `0.1.9`. It loads
+service `commerce.subscriptions` to Stripe Checkout adapter `0.1.10`. It loads
 one authoritative intent/offer projection, prepares and accepts only synthetic
 Sandbox evidence, independently validates the exact Stripe hosted URL, and
 persists only a Session-reference hash plus pending/inactive lifecycle evidence.
@@ -2215,6 +2215,19 @@ The local desktop/mobile rehearsal cancels the navigation event before leaving
 localhost and proves foreign origins fail closed. The new response helper and
 emitter are absent from `index.php`; provider contact, real Checkout, response
 linking, external browser navigation, webhooks, and deployment remain gated.
+
+Adapter `0.1.10` and the unlinked core provider-operation coordinator add the
+final offline real-POST path. Core requires one short-lived, one-attempt
+authority packet and a durable adapter-owned journal. The journal records a
+hash-only `started` row before adapter access, then a hash-only `completed` row
+only after exact provider-result validation and Store Lite pending/inactive
+persistence. Started/completed rows permanently refuse retry and expose no URL.
+The package-owned table contains no credential, Checkout URL, response bytes or
+headers, customer data, or payment data. Sealed tests model provider effects but
+replace transport with an in-memory exchange, so no actual network/provider
+effect occurs. The coordinator, journal, and response helper remain absent from
+the front controller; owner authorization, secret resolution, real Stripe
+contact, browser navigation, webhooks, and deployment remain gated.
 
 ## Multi-User Authorization
 

@@ -15,7 +15,7 @@ $binding = static fn (): array => [
     'storePackageVersion' => '0.1.49',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.9',
+    'stripePackageVersion' => '0.1.10',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $offer = [
