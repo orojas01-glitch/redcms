@@ -5,7 +5,7 @@ distributed Store Lite and Stripe Checkout add-ons. The first closed binding is:
 
 - RED-CMS `5.1.0`
 - Store Lite `0.1.50`, service `commerce.subscriptions`
-- Stripe Checkout adapter `0.1.13`, adapter
+- Stripe Checkout adapter `0.1.14`, adapter
   `redcms.store-lite-stripe-checkout/checkout`
 
 The coordinator performs four typed stages in order:
@@ -55,7 +55,7 @@ request after the subscription intent commits.
 
 ## Real provider-operation boundary
 
-Stripe adapter `0.1.13` adds the exact real subscription POST operation, while
+Stripe adapter `0.1.14` retains the exact real subscription POST operation, while
 core adds an unlinked one-attempt coordinator and durable hash-only journal.
 The journal commits `started` before adapter access, records only hashed terminal
 evidence, and permanently refuses retry after either a started or completed
@@ -66,7 +66,7 @@ handoff. See `docs/SUBSCRIPTION-CHECKOUT-PROVIDER-OPERATION.md`.
 ## Verified subscription-event boundary
 
 Store Lite `0.1.50` adds the read-only
-`subscription.lifecycle.load` operation, and Stripe adapter `0.1.13` adds the
+`subscription.lifecycle.load` operation, and Stripe adapter `0.1.14` retains the
 pure `subscription.event.normalize-sandbox-verified` operation. The unlinked
 core event coordinator loads the current lifecycle from Store Lite, asks the
 adapter to normalize one already-verified bounded event, and submits only the
@@ -82,12 +82,21 @@ This helper does not parse a request, verify a signature, resolve a webhook
 secret, expose a route, contact Stripe, or emit a response. Those ingress
 effects remain a separate gate.
 
-Adapter `0.1.13` adds a fourth hash-only receipt migration. Core's unlinked
+Adapter `0.1.14` retains the fourth hash-only receipt migration. Core's unlinked
 transactional journal inspects, claims, and completes those receipts under row
 locks and exact enabled-package identity. The disposable rehearsal proves
 `absent → verified → applied`, then returns the completed lifecycle-result hash
 on replay without invoking Store Lite again. Drift, duplicate completion, and
 caller-owned transactions fail closed.
+
+The restartable delivery coordinator now joins signature verification,
+transactional receipt claim, raw-event projection, and Store Lite lifecycle
+application in one internal operation. Lifecycle-result evidence is canonical
+across first application and recovery. If Store Lite commits but receipt
+completion is interrupted, the next invocation recognizes the exact last-event
+evidence, performs no second lifecycle mutation or adapter normalization, and
+closes the original receipt with the same result hash. Completed receipts stop
+before projection and lifecycle work.
 
 Run the focused and cross-repository offline checks with:
 
@@ -96,6 +105,7 @@ php scripts/addon-subscription-checkout-coordinator-self-test.php
 php scripts/addon-subscription-checkout-public-response-self-test.php
 php scripts/addon-subscription-checkout-provider-operation-self-test.php
 php scripts/addon-subscription-event-coordinator-self-test.php
+php scripts/addon-subscription-event-delivery-coordinator-self-test.php
 scripts/subscription-checkout-launch-rehearsal.sh
 node scripts/subscription-checkout-browser-qa.cjs
 ```
@@ -103,8 +113,9 @@ node scripts/subscription-checkout-browser-qa.cjs
 The database rehearsal stages the clean core and both external packages into a temporary
 project, applies all core and package migrations to a fresh database, enables
 both packages with opaque secret references only, coordinates and replays one
-synthetic subscription, applies one sealed verified activation event, refuses
-its repeated delivery without another lifecycle row, builds the redacted public response, disables the
+synthetic subscription, applies one signed synthetic activation event, injects
+a receipt-completion interruption, recovers without another lifecycle row,
+replays the completed receipt, builds the redacted public response, disables the
 adapter to prove fail-closed ownership, and removes the database, grant, and
 staged project. It verifies the configured primary database is unchanged. The
 separate browser rehearsal covers desktop, mobile, keyboard submission,
@@ -115,12 +126,10 @@ navigation, and foreign-origin refusal.
 
 This internal coordinator is not a public Checkout bridge. Launch still needs:
 
-1. raw-body parsing plus Stripe signature verification with a scoped Sandbox
-   webhook secret;
-2. a replay ledger and non-operational route rehearsal around the verified
-   event coordinator;
-3. separately authorized Sandbox webhook endpoint activation and test-event
+1. a non-operational route rehearsal joining the manifest-owned webhook
+   request boundary to the restartable coordinator;
+2. separately authorized Sandbox webhook endpoint activation and test-event
    delivery;
-4. one real browser navigation and return-path rehearsal;
-5. final supported-server recovery and client-isolation acceptance; and
-6. separately authorized installation and deployment to `demo.red-sphere.com`.
+3. one real browser navigation and return-path rehearsal;
+4. final supported-server recovery and client-isolation acceptance; and
+5. separately authorized installation and deployment to `demo.red-sphere.com`.

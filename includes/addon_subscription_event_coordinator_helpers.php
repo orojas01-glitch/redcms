@@ -47,7 +47,7 @@ if (!function_exists('red_addon_subscription_event_binding_valid')) {
     {
         return red_addon_subscription_checkout_binding_valid($binding)
             && ($binding['storePackageVersion'] ?? '') === '0.1.50'
-            && ($binding['stripePackageVersion'] ?? '') === '0.1.13';
+            && ($binding['stripePackageVersion'] ?? '') === '0.1.14';
     }
 }
 
@@ -144,6 +144,205 @@ if (!function_exists('red_addon_subscription_event_projection_valid')) {
     }
 }
 
+if (!function_exists('red_addon_subscription_event_verified_shape_valid')) {
+    function red_addon_subscription_event_verified_shape_valid($event)
+    {
+        if (!is_array($event)
+            || array_keys($event) !== [
+                'verification', 'replayStatus', 'eventRef', 'eventType',
+                'intentReference', 'offerStateSha256',
+                'checkoutSessionRef', 'providerSubscriptionRef',
+                'providerStatus', 'currentPeriodEndEpoch',
+                'eventEvidenceSha256', 'occurredAt', 'receivedAt',
+                'livemode',
+            ]
+            || ($event['verification'] ?? '') !== 'verified'
+            || ($event['replayStatus'] ?? '') !== 'unseen'
+            || preg_match(
+                '/\Aevt_[A-Za-z0-9_]{8,160}\z/D',
+                $event['eventRef'] ?? ''
+            ) !== 1
+            || preg_match(
+                '/\Asint_[a-f0-9]{32}\z/D',
+                $event['intentReference'] ?? ''
+            ) !== 1
+            || !red_addon_valid_sha256(
+                $event['offerStateSha256'] ?? null
+            )
+            || !red_addon_valid_sha256(
+                $event['eventEvidenceSha256'] ?? null
+            )
+            || !is_int($event['occurredAt'] ?? null)
+            || !is_int($event['receivedAt'] ?? null)
+            || $event['occurredAt'] < 1
+            || $event['receivedAt'] < $event['occurredAt']
+            || $event['receivedAt'] > $event['occurredAt'] + 2592000
+            || $event['receivedAt'] > 4102444800
+            || ($event['livemode'] ?? null) !== false
+        ) {
+            return false;
+        }
+        $checkout = $event['checkoutSessionRef'];
+        $subscription = $event['providerSubscriptionRef'];
+        $periodEnd = $event['currentPeriodEndEpoch'];
+        if ($checkout !== null
+            && (!is_string($checkout)
+                || preg_match(
+                    '/\Acs_test_[A-Za-z0-9_]{16,160}\z/D',
+                    $checkout
+                ) !== 1)
+        ) {
+            return false;
+        }
+        if ($subscription !== null
+            && (!is_string($subscription)
+                || preg_match(
+                    '/\Asub_[A-Za-z0-9_]{8,160}\z/D',
+                    $subscription
+                ) !== 1)
+        ) {
+            return false;
+        }
+        if ($periodEnd !== null
+            && (!is_int($periodEnd)
+                || $periodEnd < 1
+                || $periodEnd > 4102444800)
+        ) {
+            return false;
+        }
+        $type = $event['eventType'] ?? '';
+        $expectedStatus = [
+            'checkout.session.completed' => 'complete_paid',
+            'invoice.paid' => 'paid_active',
+            'invoice.payment_failed' => 'payment_failed',
+            'customer.subscription.deleted' => 'canceled',
+            'checkout.session.expired' => 'expired',
+        ][$type] ?? null;
+        if ($expectedStatus === null
+            || ($event['providerStatus'] ?? '') !== $expectedStatus
+        ) {
+            return false;
+        }
+        return match ($type) {
+            'checkout.session.completed' =>
+                is_string($checkout)
+                && is_string($subscription)
+                && is_int($periodEnd),
+            'invoice.paid', 'invoice.payment_failed',
+            'customer.subscription.deleted' =>
+                $checkout === null && is_string($subscription),
+            'checkout.session.expired' =>
+                is_string($checkout)
+                && $subscription === null
+                && $periodEnd === null,
+            default => false,
+        };
+    }
+}
+
+if (!function_exists('red_addon_subscription_event_replay_projection')) {
+    function red_addon_subscription_event_replay_projection(
+        $current,
+        $verifiedEvent
+    ) {
+        if (!is_array($current)
+            || !red_addon_subscription_event_verified_shape_valid(
+                $verifiedEvent
+            )
+            || ($current['intentReference'] ?? '')
+                !== $verifiedEvent['intentReference']
+            || ($current['offerStateSha256'] ?? '')
+                !== $verifiedEvent['offerStateSha256']
+            || ($current['lastEventEvidenceSha256'] ?? '')
+                !== $verifiedEvent['eventEvidenceSha256']
+        ) {
+            return null;
+        }
+        $type = $verifiedEvent['eventType'];
+        $providerSha256 = is_string(
+            $verifiedEvent['providerSubscriptionRef']
+        ) ? hash(
+            'sha256',
+            $verifiedEvent['providerSubscriptionRef']
+        ) : null;
+        $checkoutSha256 = is_string($verifiedEvent['checkoutSessionRef'])
+            ? hash('sha256', $verifiedEvent['checkoutSessionRef'])
+            : null;
+        $periodEnd = $verifiedEvent['currentPeriodEndEpoch'];
+        $matches = false;
+        $outcome = '';
+        if ($type === 'checkout.session.completed') {
+            $outcome = 'activated';
+            $matches = ($current['subscriptionStatus'] ?? '') === 'active'
+                && ($current['entitlementStatus'] ?? '') === 'active'
+                && ($current['providerSubscriptionRefSha256'] ?? null)
+                    === $providerSha256
+                && ($current['currentPeriodEndEpoch'] ?? null) === $periodEnd
+                && ($current['checkoutSessionRefSha256'] ?? '')
+                    === $checkoutSha256;
+        } elseif ($type === 'invoice.paid') {
+            $outcome = 'renewed';
+            $matches = ($current['subscriptionStatus'] ?? '') === 'active'
+                && ($current['entitlementStatus'] ?? '') === 'active'
+                && ($current['providerSubscriptionRefSha256'] ?? null)
+                    === $providerSha256
+                && ($current['currentPeriodEndEpoch'] ?? null) === $periodEnd;
+        } elseif ($type === 'invoice.payment_failed') {
+            $outcome = 'past_due';
+            $matches = ($current['subscriptionStatus'] ?? '') === 'past_due'
+                && ($current['entitlementStatus'] ?? '') === 'revoked'
+                && ($current['providerSubscriptionRefSha256'] ?? null)
+                    === $providerSha256
+                && ($current['currentPeriodEndEpoch'] ?? null) === $periodEnd;
+        } elseif ($type === 'customer.subscription.deleted') {
+            $outcome = 'canceled';
+            $matches = ($current['subscriptionStatus'] ?? '') === 'canceled'
+                && ($current['entitlementStatus'] ?? '') === 'revoked'
+                && ($current['providerSubscriptionRefSha256'] ?? null)
+                    === $providerSha256
+                && ($current['currentPeriodEndEpoch'] ?? null) === $periodEnd;
+        } elseif ($type === 'checkout.session.expired') {
+            $outcome = 'expired';
+            $matches = ($current['subscriptionStatus'] ?? '') === 'expired'
+                && ($current['entitlementStatus'] ?? '') === 'inactive'
+                && ($current['providerSubscriptionRefSha256'] ?? null)
+                    === null
+                && ($current['currentPeriodEndEpoch'] ?? null) === null
+                && ($current['checkoutSessionRefSha256'] ?? '')
+                    === $checkoutSha256;
+        }
+        if (!$matches) {
+            return null;
+        }
+        return [
+            'valid' => true,
+            'event' => [
+                'verification' => 'verified',
+                'replayStatus' => 'unseen',
+                'intentReference' => $verifiedEvent['intentReference'],
+                'offerStateSha256' => $verifiedEvent['offerStateSha256'],
+                'outcome' => $outcome,
+                'providerSubscriptionRefSha256' => $providerSha256,
+                'currentPeriodEndEpoch' => $periodEnd,
+                'eventEvidenceSha256' =>
+                    $verifiedEvent['eventEvidenceSha256'],
+                'occurredAt' => $verifiedEvent['occurredAt'],
+            ],
+            'providerEventType' => $type,
+            'providerEventRefSha256' => hash(
+                'sha256',
+                $verifiedEvent['eventRef']
+            ),
+            'checkoutSessionRefSha256' => $checkoutSha256,
+            'receivedAt' => $verifiedEvent['receivedAt'],
+            'rawProviderReferenceIncluded' => false,
+            'rawCheckoutReferenceIncluded' => false,
+            'customerDataIncluded' => false,
+            'errors' => [],
+        ];
+    }
+}
+
 if (!function_exists('red_addon_subscription_event_coordinate')) {
     function red_addon_subscription_event_coordinate(
         $binding,
@@ -198,21 +397,33 @@ if (!function_exists('red_addon_subscription_event_coordinate')) {
                 'checkoutSessionRefSha256' =>
                     $currentData['checkoutSessionRefSha256'],
             ];
-            $normalized = $adapterInvoker(
-                $binding['stripeAdapter'],
-                'subscription.event.normalize-sandbox-verified',
-                [
-                    'expected' => $expected,
-                    'verifiedEvent' => $verifiedEvent,
-                ]
-            );
-            $normalizedData = is_array($normalized)
-                ? ($normalized['data'] ?? null) : null;
-            if (!red_addon_subscription_checkout_invocation_valid(
-                $normalized,
-                $binding['stripePackageId'],
-                'subscription.event.normalize-sandbox-verified'
-            ) || !red_addon_subscription_event_projection_valid(
+            $normalizedData =
+                red_addon_subscription_event_replay_projection(
+                    $currentData,
+                    $verifiedEvent
+                );
+            $recovered = is_array($normalizedData);
+            if (!$recovered) {
+                $normalized = $adapterInvoker(
+                    $binding['stripeAdapter'],
+                    'subscription.event.normalize-sandbox-verified',
+                    [
+                        'expected' => $expected,
+                        'verifiedEvent' => $verifiedEvent,
+                    ]
+                );
+                $normalizedData = is_array($normalized)
+                    ? ($normalized['data'] ?? null) : null;
+                if (!red_addon_subscription_checkout_invocation_valid(
+                    $normalized,
+                    $binding['stripePackageId'],
+                    'subscription.event.normalize-sandbox-verified'
+                )) {
+                    $result['reason'] = 'subscription_event_refused';
+                    return $result;
+                }
+            }
+            if (!red_addon_subscription_event_projection_valid(
                 $normalizedData,
                 $intentReference,
                 $currentData['offerStateSha256']
@@ -221,7 +432,7 @@ if (!function_exists('red_addon_subscription_event_coordinate')) {
                 return $result;
             }
             $event = $normalizedData['event'];
-            $applied = $serviceInvoker(
+            $applied = $recovered ? null : $serviceInvoker(
                 $binding['storeService'],
                 'subscription.event.apply',
                 [
@@ -229,8 +440,9 @@ if (!function_exists('red_addon_subscription_event_coordinate')) {
                     'event' => $event,
                 ]
             );
-            $appliedData = is_array($applied)
-                ? ($applied['data'] ?? null) : null;
+            $appliedData = $recovered ? array_replace($currentData, [
+                'status' => 'replayed',
+            ]) : (is_array($applied) ? ($applied['data'] ?? null) : null);
             $status = is_array($appliedData)
                 ? ($appliedData['status'] ?? '') : '';
             $target = [
@@ -240,11 +452,12 @@ if (!function_exists('red_addon_subscription_event_coordinate')) {
                 'canceled' => ['canceled', 'revoked'],
                 'expired' => ['expired', 'inactive'],
             ][$event['outcome']] ?? null;
-            if (!red_addon_subscription_checkout_invocation_valid(
-                $applied,
-                $binding['storePackageId'],
-                'subscription.event.apply'
-            )
+            if ((!$recovered
+                && !red_addon_subscription_checkout_invocation_valid(
+                    $applied,
+                    $binding['storePackageId'],
+                    'subscription.event.apply'
+                ))
                 || !in_array($status, ['applied', 'replayed'], true)
                 || !is_array($target)
                 || ($appliedData['intentReference'] ?? '')
@@ -274,8 +487,12 @@ if (!function_exists('red_addon_subscription_event_coordinate')) {
                     $normalizedData['providerEventType'],
                 'providerEventRefSha256' =>
                     $normalizedData['providerEventRefSha256'],
-                'event' => $event,
-                'status' => $status,
+                'eventEvidenceSha256' =>
+                    $event['eventEvidenceSha256'],
+                'providerSubscriptionRefSha256' =>
+                    $event['providerSubscriptionRefSha256'],
+                'currentPeriodEndEpoch' =>
+                    $event['currentPeriodEndEpoch'],
                 'subscriptionStatus' => $target[0],
                 'entitlementStatus' => $target[1],
             ], JSON_UNESCAPED_SLASHES
