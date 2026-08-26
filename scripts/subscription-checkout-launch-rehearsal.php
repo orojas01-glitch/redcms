@@ -47,6 +47,8 @@ require_once $projectRoot
     . '/includes/addon_subscription_checkout_provider_journal_helpers.php';
 require_once $projectRoot
     . '/includes/addon_subscription_event_coordinator_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_subscription_event_journal_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -196,7 +198,7 @@ try {
             && is_array($storePackage)
             && is_array($adapterPackage)
             && ($storePackage['manifest']['version'] ?? '') === '0.1.50'
-            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.11',
+            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.13',
         'exact Store Lite and Stripe launch candidates are trusted'
     );
 
@@ -283,7 +285,7 @@ try {
     );
     red_subscription_launch_assert(
         ($adapterInstalled['status'] ?? '') === 'installed_disabled'
-            && count($adapterInstalled['appliedMigrations'] ?? []) === 3
+            && count($adapterInstalled['appliedMigrations'] ?? []) === 4
             && !empty($adapterEnablePlan['enableReady'])
             && ($adapterEnabled['status'] ?? '') === 'enabled',
         'Stripe adapter installs and enables with opaque references only'
@@ -598,7 +600,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.11',
+            'stripePackageVersion' => '0.1.13',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -617,7 +619,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.11',
+            'stripePackageVersion' => '0.1.13',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -728,6 +730,38 @@ try {
         'receivedAt' => 1787630600,
         'livemode' => false,
     ];
+    $eventClaimEvidence = [
+        'eventRefSha256' => hash(
+            'sha256',
+            $verifiedSubscriptionEvent['eventRef']
+        ),
+        'rawBodySha256' => hash(
+            'sha256',
+            'subscription-launch-sealed-raw-body'
+        ),
+        'signatureEvidenceSha256' => hash(
+            'sha256',
+            'subscription-launch-sealed-signature'
+        ),
+        'providerEventType' =>
+            $verifiedSubscriptionEvent['eventType'],
+        'claimStateSha256' => hash(
+            'sha256',
+            'subscription-launch-event-claim'
+        ),
+        'signedAtEpoch' => 1787630550,
+        'receivedAtEpoch' => 1787630600,
+    ];
+    $eventJournalAbsent = red_addon_subscription_event_journal(
+        $connection,
+        'inspect',
+        $eventClaimEvidence
+    );
+    $eventJournalClaimed = red_addon_subscription_event_journal(
+        $connection,
+        'claim',
+        $eventClaimEvidence
+    );
     $eventCoordinated = red_addon_subscription_event_coordinate(
         [
             'storePackageId' => 'redcms.store-lite',
@@ -735,7 +769,7 @@ try {
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' =>
                 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.11',
+            'stripePackageVersion' => '0.1.13',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -746,32 +780,39 @@ try {
         static fn ($adapter, $operation, $input) =>
             red_addon_adapter_invoke($adapter, $operation, $input)
     );
-    $eventReplayRefused = red_addon_subscription_event_coordinate(
+    $eventCompletionEvidence = array_merge(
+        $eventClaimEvidence,
         [
-            'storePackageId' => 'redcms.store-lite',
-            'storePackageVersion' => '0.1.50',
-            'storeService' => 'commerce.subscriptions',
-            'stripePackageId' =>
-                'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.11',
-            'stripeAdapter' =>
-                'redcms.store-lite-stripe-checkout/checkout',
-        ],
-        $intentReference,
-        $verifiedSubscriptionEvent,
-        static fn ($service, $operation, $input) =>
-            red_addon_service_invoke($service, $operation, $input),
-        static fn ($adapter, $operation, $input) =>
-            red_addon_adapter_invoke($adapter, $operation, $input)
+            'status' => 'applied',
+            'intentReference' => $intentReference,
+            'eventEvidenceSha256' =>
+                $eventCoordinated['eventEvidenceSha256'] ?? '',
+            'lifecycleResultSha256' =>
+                $eventCoordinated['lifecycleResultSha256'] ?? '',
+            'completedAtEpoch' => 1787630610,
+        ]
+    );
+    $eventJournalCompleted = red_addon_subscription_event_journal(
+        $connection,
+        'complete',
+        $eventCompletionEvidence
+    );
+    $eventJournalReplay = red_addon_subscription_event_journal(
+        $connection,
+        'inspect',
+        $eventClaimEvidence
     );
     red_subscription_launch_assert(
-        ($eventCoordinated['valid'] ?? false) === true
+        ($eventJournalAbsent['status'] ?? '') === 'absent'
+            && ($eventJournalClaimed['status'] ?? '') === 'verified'
+            && ($eventCoordinated['valid'] ?? false) === true
             && ($eventCoordinated['status'] ?? '') === 'applied'
             && ($eventCoordinated['subscriptionStatus'] ?? '') === 'active'
             && ($eventCoordinated['entitlementStatus'] ?? '') === 'active'
-            && ($eventReplayRefused['valid'] ?? true) === false
-            && ($eventReplayRefused['reason'] ?? '')
-                === 'subscription_event_refused'
+            && ($eventJournalCompleted['status'] ?? '') === 'applied'
+            && ($eventJournalReplay['status'] ?? '') === 'applied'
+            && ($eventJournalReplay['lifecycleResultSha256'] ?? '')
+                === ($eventCoordinated['lifecycleResultSha256'] ?? '')
             && red_subscription_launch_scalar(
                 $connection,
                 "SELECT CONCAT_WS(':', SubscriptionStatus,
@@ -785,7 +826,14 @@ try {
                         $intentReference
                     ) . "'"
             ) === 'active:active:2',
-        'verified subscription event activates once and repeat delivery adds no lifecycle row'
+        'verified subscription event claims, applies, completes, and replays without another lifecycle row ('
+            . implode(':', [
+                $eventJournalAbsent['status'] ?? 'missing',
+                $eventJournalClaimed['status'] ?? 'missing',
+                $eventCoordinated['status'] ?? 'missing',
+                $eventJournalCompleted['status'] ?? 'missing',
+                $eventJournalReplay['status'] ?? 'missing',
+            ]) . ')'
     );
     } else {
         $providerJournal =
@@ -795,7 +843,7 @@ try {
             'schema' => 1,
             'purpose' => 'subscription-sandbox-secret-availability',
             'packageId' => $adapterPackageId,
-            'packageVersion' => '0.1.11',
+            'packageVersion' => '0.1.13',
             'settingKey' => 'stripe.secret-key',
             'settingsStateSha256' =>
                 $secretAccessEvidence['stateSha256'] ?? '',
@@ -818,7 +866,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.11',
+                'stripePackageVersion' => '0.1.13',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -839,7 +887,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.11',
+                'stripePackageVersion' => '0.1.13',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -964,7 +1012,7 @@ try {
         'mode' => $runMode,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.50',
-        'stripeAdapterVersion' => '0.1.11',
+        'stripeAdapterVersion' => '0.1.13',
         'assertions' => $assertions,
         'networkAccess' => false,
         'providerContact' => false,
