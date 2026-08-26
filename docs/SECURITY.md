@@ -2193,7 +2193,7 @@ The first private demo installation is client-local; core performs no package
 deployment and receives no authority over later clients.
 
 The internal subscription Checkout coordinator binds only Store Lite `0.1.50`
-service `commerce.subscriptions` to Stripe Checkout adapter `0.1.13`. It loads
+service `commerce.subscriptions` to Stripe Checkout adapter `0.1.14`. It loads
 one authoritative intent/offer projection, prepares and accepts only synthetic
 Sandbox evidence, independently validates the exact Stripe hosted URL, and
 persists only a Session-reference hash plus pending/inactive lifecycle evidence.
@@ -2216,7 +2216,7 @@ localhost and proves foreign origins fail closed. The new response helper and
 emitter are absent from `index.php`; provider contact, real Checkout, response
 linking, external browser navigation, webhooks, and deployment remain gated.
 
-Adapter `0.1.13` and the unlinked core provider-operation coordinator add the
+Adapter `0.1.14` and the unlinked core provider-operation coordinator retain the
 final offline real-POST path. Core requires one short-lived, one-attempt
 authority packet and a durable adapter-owned journal. The journal records a
 hash-only `started` row before adapter access, then a hash-only `completed` row
@@ -2229,7 +2229,7 @@ effect occurs. The coordinator, journal, and response helper remain absent from
 the front controller; owner authorization, secret resolution, real Stripe
 contact, browser navigation, webhooks, and deployment remain gated.
 
-Store Lite `0.1.50`, Stripe adapter `0.1.13`, and the unlinked core
+Store Lite `0.1.50`, Stripe adapter `0.1.14`, and the unlinked core
 subscription-event coordinator add the first provider-neutral entitlement
 bridge. Core loads the current lifecycle from Store Lite, passes it with one
 already-verified bounded event to the adapter, then applies only the adapter's
@@ -2238,6 +2238,18 @@ pending access once and refuses repeated delivery without a second history row.
 Raw provider references leave the adapter only as hashes. The helper performs
 no request parsing, signature verification, secret resolution, route exposure,
 network access, Stripe contact, response emission, or deployment.
+
+The restartable delivery coordinator adds the missing internal join across the
+Stripe signature envelope, transactional hash-only receipt, raw-event
+projector, and provider-neutral lifecycle coordinator. It canonicalizes the
+lifecycle-result hash independently of first-apply versus recovery status. A
+failure after Store Lite commits but before receipt completion therefore leaves
+the receipt `verified`; an exact retry recognizes Store Lite's matching
+last-event evidence, skips adapter normalization and a second lifecycle write,
+and completes the receipt with the original hash. A completed receipt replays
+without projecting or invoking Store Lite. The coordinator is still absent
+from the front controller and exposes no route, response, provider contact,
+payment, browser action, or deployment.
 
 The unlinked add-on webhook request boundary preserves up to 262,144 untouched
 UTF-8 body bytes plus a bounded signature header in a dedicated internal object.

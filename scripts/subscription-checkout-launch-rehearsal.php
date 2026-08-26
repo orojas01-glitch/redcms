@@ -49,6 +49,8 @@ require_once $projectRoot
     . '/includes/addon_subscription_event_coordinator_helpers.php';
 require_once $projectRoot
     . '/includes/addon_subscription_event_journal_helpers.php';
+require_once $projectRoot
+    . '/includes/addon_subscription_event_delivery_coordinator_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -198,7 +200,7 @@ try {
             && is_array($storePackage)
             && is_array($adapterPackage)
             && ($storePackage['manifest']['version'] ?? '') === '0.1.50'
-            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.13',
+            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.14',
         'exact Store Lite and Stripe launch candidates are trusted'
     );
 
@@ -600,7 +602,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.13',
+            'stripePackageVersion' => '0.1.14',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -619,7 +621,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.13',
+            'stripePackageVersion' => '0.1.14',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -710,109 +712,145 @@ try {
         ),
         'adapter tables and result contain no provider attempt or secret'
     );
-    $verifiedSubscriptionEvent = [
-        'verification' => 'verified',
-        'replayStatus' => 'unseen',
-        'eventRef' => 'evt_SubscriptionLaunchLifecycle1234',
-        'eventType' => 'checkout.session.completed',
-        'intentReference' => $intentReference,
-        'offerStateSha256' => $intentCreated['offerStateSha256'],
-        'checkoutSessionRef' => $sessionRef,
-        'providerSubscriptionRef' =>
-            'sub_SubscriptionLaunchLifecycle1234',
-        'providerStatus' => 'complete_paid',
-        'currentPeriodEndEpoch' => 1790308800,
-        'eventEvidenceSha256' => hash(
-            'sha256',
-            'subscription-launch-verified-event'
-        ),
-        'occurredAt' => 1787630500,
-        'receivedAt' => 1787630600,
+    $eventSecret = 'whsec_synthetic_launch_event_123456789';
+    $eventRef = 'evt_SubscriptionLaunchLifecycle1234';
+    $eventReceivedAt = 1787630600;
+    $rawSubscriptionEvent = json_encode([
+        'id' => $eventRef,
+        'object' => 'event',
+        'api_version' => '2024-09-30.acacia',
+        'created' => 1787630500,
+        'data' => ['object' => [
+            'id' => $sessionRef,
+            'object' => 'checkout.session',
+            'client_reference_id' => $intentReference,
+            'metadata' => [
+                'redcms_offer_state_sha256' =>
+                    $intentCreated['offerStateSha256'],
+            ],
+            'status' => 'complete',
+            'payment_status' => 'paid',
+            'subscription' => [
+                'id' => 'sub_SubscriptionLaunchLifecycle1234',
+                'current_period_end' => 1790308800,
+            ],
+            'customer_details' => [
+                'email' => 'private@subscription-launch.example.test',
+            ],
+        ]],
         'livemode' => false,
+        'type' => 'checkout.session.completed',
+    ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    $eventRequest = [
+        'rawBody' => $rawSubscriptionEvent,
+        'signatureHeader' => 't=' . $eventReceivedAt . ',v1=' . hash_hmac(
+            'sha256',
+            $eventReceivedAt . '.' . $rawSubscriptionEvent,
+            $eventSecret
+        ),
+        'receivedAt' => $eventReceivedAt,
     ];
-    $eventClaimEvidence = [
-        'eventRefSha256' => hash(
-            'sha256',
-            $verifiedSubscriptionEvent['eventRef']
-        ),
-        'rawBodySha256' => hash(
-            'sha256',
-            'subscription-launch-sealed-raw-body'
-        ),
-        'signatureEvidenceSha256' => hash(
-            'sha256',
-            'subscription-launch-sealed-signature'
-        ),
-        'providerEventType' =>
-            $verifiedSubscriptionEvent['eventType'],
-        'claimStateSha256' => hash(
-            'sha256',
-            'subscription-launch-event-claim'
-        ),
-        'signedAtEpoch' => 1787630550,
-        'receivedAtEpoch' => 1787630600,
+    $eventBinding = [
+        'storePackageId' => 'redcms.store-lite',
+        'storePackageVersion' => '0.1.50',
+        'storeService' => 'commerce.subscriptions',
+        'stripePackageId' => 'redcms.store-lite-stripe-checkout',
+        'stripePackageVersion' => '0.1.14',
+        'stripeAdapter' =>
+            'redcms.store-lite-stripe-checkout/checkout',
     ];
-    $eventJournalAbsent = red_addon_subscription_event_journal(
-        $connection,
-        'inspect',
-        $eventClaimEvidence
-    );
-    $eventJournalClaimed = red_addon_subscription_event_journal(
-        $connection,
-        'claim',
-        $eventClaimEvidence
-    );
-    $eventCoordinated = red_addon_subscription_event_coordinate(
-        [
-            'storePackageId' => 'redcms.store-lite',
-            'storePackageVersion' => '0.1.50',
-            'storeService' => 'commerce.subscriptions',
-            'stripePackageId' =>
-                'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.13',
-            'stripeAdapter' =>
-                'redcms.store-lite-stripe-checkout/checkout',
-        ],
-        $intentReference,
-        $verifiedSubscriptionEvent,
-        static fn ($service, $operation, $input) =>
-            red_addon_service_invoke($service, $operation, $input),
-        static fn ($adapter, $operation, $input) =>
-            red_addon_adapter_invoke($adapter, $operation, $input)
-    );
-    $eventCompletionEvidence = array_merge(
-        $eventClaimEvidence,
-        [
-            'status' => 'applied',
-            'intentReference' => $intentReference,
-            'eventEvidenceSha256' =>
-                $eventCoordinated['eventEvidenceSha256'] ?? '',
-            'lifecycleResultSha256' =>
-                $eventCoordinated['lifecycleResultSha256'] ?? '',
-            'completedAtEpoch' => 1787630610,
-        ]
-    );
-    $eventJournalCompleted = red_addon_subscription_event_journal(
-        $connection,
-        'complete',
-        $eventCompletionEvidence
-    );
-    $eventJournalReplay = red_addon_subscription_event_journal(
-        $connection,
-        'inspect',
-        $eventClaimEvidence
-    );
+    $eventSignatureVerifier = static fn (
+        string $rawBody,
+        string $signatureHeader,
+        int $receivedAt
+    ): array =>
+        RED_CMS_Store_Lite_Stripe_Sandbox_Webhook_Signature_Envelope::
+            verify(
+                $rawBody,
+                $signatureHeader,
+                'whsec_synthetic_launch_event_123456789',
+                $receivedAt
+            );
+    $eventProjector = static function (
+        array $envelope,
+        string $rawBody
+    ): array {
+        $decoded = RED_CMS_Store_Lite_Stripe_Bounded_Json_Decoder::decode(
+            $rawBody
+        );
+        return RED_CMS_Store_Lite_Stripe_Sandbox_Subscription_Raw_Event_Projector::
+            project($envelope, $decoded['value'] ?? []);
+    };
+    $eventCompletionFailures = 1;
+    $eventJournal = static function (
+        string $operation,
+        array $evidence
+    ) use ($connection, &$eventCompletionFailures): array {
+        if ($operation === 'complete' && $eventCompletionFailures > 0) {
+            $eventCompletionFailures--;
+            return red_addon_subscription_event_journal_result();
+        }
+        return red_addon_subscription_event_journal(
+            $connection,
+            $operation,
+            $evidence
+        );
+    };
+    $eventDeliveryInterrupted =
+        red_addon_subscription_event_delivery_coordinate(
+            $eventBinding,
+            $eventRequest,
+            $eventSignatureVerifier,
+            $eventProjector,
+            $eventJournal,
+            static fn ($service, $operation, $input) =>
+                red_addon_service_invoke($service, $operation, $input),
+            static fn ($adapter, $operation, $input) =>
+                red_addon_adapter_invoke($adapter, $operation, $input),
+            $eventReceivedAt + 10
+        );
+    $eventDeliveryRecovered =
+        red_addon_subscription_event_delivery_coordinate(
+            $eventBinding,
+            $eventRequest,
+            $eventSignatureVerifier,
+            $eventProjector,
+            $eventJournal,
+            static fn ($service, $operation, $input) =>
+                red_addon_service_invoke($service, $operation, $input),
+            static fn ($adapter, $operation, $input) =>
+                red_addon_adapter_invoke($adapter, $operation, $input),
+            $eventReceivedAt + 20
+        );
+    $eventDeliveryReplay =
+        red_addon_subscription_event_delivery_coordinate(
+            $eventBinding,
+            $eventRequest,
+            $eventSignatureVerifier,
+            $eventProjector,
+            $eventJournal,
+            static fn ($service, $operation, $input) =>
+                red_addon_service_invoke($service, $operation, $input),
+            static fn ($adapter, $operation, $input) =>
+                red_addon_adapter_invoke($adapter, $operation, $input),
+            $eventReceivedAt + 30
+        );
     red_subscription_launch_assert(
-        ($eventJournalAbsent['status'] ?? '') === 'absent'
-            && ($eventJournalClaimed['status'] ?? '') === 'verified'
-            && ($eventCoordinated['valid'] ?? false) === true
-            && ($eventCoordinated['status'] ?? '') === 'applied'
-            && ($eventCoordinated['subscriptionStatus'] ?? '') === 'active'
-            && ($eventCoordinated['entitlementStatus'] ?? '') === 'active'
-            && ($eventJournalCompleted['status'] ?? '') === 'applied'
-            && ($eventJournalReplay['status'] ?? '') === 'applied'
-            && ($eventJournalReplay['lifecycleResultSha256'] ?? '')
-                === ($eventCoordinated['lifecycleResultSha256'] ?? '')
+        ($eventDeliveryInterrupted['status'] ?? '') === 'verified'
+            && ($eventDeliveryInterrupted['restartable'] ?? false) === true
+            && ($eventDeliveryInterrupted['lifecycleApplied'] ?? false)
+                === true
+            && ($eventDeliveryRecovered['valid'] ?? false) === true
+            && ($eventDeliveryRecovered['status'] ?? '') === 'applied'
+            && ($eventDeliveryRecovered['lifecycleReplayed'] ?? false)
+                === true
+            && ($eventDeliveryRecovered['journalCompleted'] ?? false)
+                === true
+            && ($eventDeliveryRecovered['lifecycleResultSha256'] ?? '')
+                === ($eventDeliveryInterrupted['lifecycleResultSha256'] ?? '')
+            && ($eventDeliveryReplay['status'] ?? '') === 'replayed'
+            && ($eventDeliveryReplay['lifecycleResultSha256'] ?? '')
+                === ($eventDeliveryRecovered['lifecycleResultSha256'] ?? '')
             && red_subscription_launch_scalar(
                 $connection,
                 "SELECT CONCAT_WS(':', SubscriptionStatus,
@@ -826,13 +864,11 @@ try {
                         $intentReference
                     ) . "'"
             ) === 'active:active:2',
-        'verified subscription event claims, applies, completes, and replays without another lifecycle row ('
+        'raw signed subscription event recovers after lifecycle commit and replays without another lifecycle row ('
             . implode(':', [
-                $eventJournalAbsent['status'] ?? 'missing',
-                $eventJournalClaimed['status'] ?? 'missing',
-                $eventCoordinated['status'] ?? 'missing',
-                $eventJournalCompleted['status'] ?? 'missing',
-                $eventJournalReplay['status'] ?? 'missing',
+                $eventDeliveryInterrupted['status'] ?? 'missing',
+                $eventDeliveryRecovered['status'] ?? 'missing',
+                $eventDeliveryReplay['status'] ?? 'missing',
             ]) . ')'
     );
     } else {
@@ -843,7 +879,7 @@ try {
             'schema' => 1,
             'purpose' => 'subscription-sandbox-secret-availability',
             'packageId' => $adapterPackageId,
-            'packageVersion' => '0.1.13',
+            'packageVersion' => '0.1.14',
             'settingKey' => 'stripe.secret-key',
             'settingsStateSha256' =>
                 $secretAccessEvidence['stateSha256'] ?? '',
@@ -866,7 +902,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.13',
+                'stripePackageVersion' => '0.1.14',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -887,7 +923,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.13',
+                'stripePackageVersion' => '0.1.14',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1012,7 +1048,7 @@ try {
         'mode' => $runMode,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.50',
-        'stripeAdapterVersion' => '0.1.13',
+        'stripeAdapterVersion' => '0.1.14',
         'assertions' => $assertions,
         'networkAccess' => false,
         'providerContact' => false,
