@@ -87,42 +87,60 @@ if (!function_exists('red_addon_subscription_checkout_coordinator_result_valid')
         $subjectRecordId,
         $offerId
     ) {
-        return is_array($coordinated)
-            && ($coordinated['valid'] ?? null) === true
-            && ($coordinated['ready'] ?? null) === true
-            && ($coordinated['status'] ?? '') === 'synthetic_redirect_ready'
-            && ($coordinated['reason'] ?? '') === 'synthetic_redirect_ready'
-            && ($coordinated['subjectRecordId'] ?? null) === $subjectRecordId
-            && ($coordinated['offerId'] ?? null) === $offerId
-            && red_addon_subscription_checkout_public_url_valid(
+        if (!is_array($coordinated)
+            || ($coordinated['valid'] ?? null) !== true
+            || ($coordinated['ready'] ?? null) !== true
+            || !in_array(
+                $coordinated['status'] ?? '',
+                ['synthetic_redirect_ready', 'real_redirect_ready'],
+                true
+            )
+            || ($coordinated['reason'] ?? '')
+                !== ($coordinated['status'] ?? '')
+            || ($coordinated['subjectRecordId'] ?? null) !== $subjectRecordId
+            || ($coordinated['offerId'] ?? null) !== $offerId
+            || !red_addon_subscription_checkout_public_url_valid(
                 $coordinated['checkoutUrl'] ?? null
             )
-            && ($coordinated['httpStatus'] ?? null) === 303
-            && ($coordinated['cacheControl'] ?? '') === 'no-store'
-            && ($coordinated['navigationMode'] ?? '') === 'location.assign'
-            && ($coordinated['transientOnly'] ?? null) === true
-            && ($coordinated['responseEmission'] ?? null) === false
-            && ($coordinated['browserNavigation'] ?? null) === false
-            && empty($coordinated['networkAccess'])
-            && empty($coordinated['providerContact'])
-            && empty($coordinated['providerMutation'])
-            && empty($coordinated['checkoutCreation'])
-            && empty($coordinated['subscriptionCreation'])
-            && red_addon_valid_sha256(
+            || ($coordinated['httpStatus'] ?? null) !== 303
+            || ($coordinated['cacheControl'] ?? '') !== 'no-store'
+            || ($coordinated['navigationMode'] ?? '') !== 'location.assign'
+            || ($coordinated['transientOnly'] ?? null) !== true
+            || ($coordinated['responseEmission'] ?? null) !== false
+            || ($coordinated['browserNavigation'] ?? null) !== false
+            || !red_addon_valid_sha256(
                 $coordinated['contractSha256'] ?? null
             )
-            && red_addon_valid_sha256(
+            || !red_addon_valid_sha256(
                 $coordinated['requestSha256'] ?? null
             )
-            && red_addon_valid_sha256(
+            || !red_addon_valid_sha256(
                 $coordinated['responseEvidenceSha256'] ?? null
             )
-            && red_addon_valid_sha256(
+            || !red_addon_valid_sha256(
                 $coordinated['resultSha256'] ?? null
             )
-            && red_addon_valid_sha256(
+            || !red_addon_valid_sha256(
                 $coordinated['checkoutSessionRefSha256'] ?? null
-            );
+            )
+        ) {
+            return false;
+        }
+        if ($coordinated['status'] === 'synthetic_redirect_ready') {
+            return empty($coordinated['networkAccess'])
+                && empty($coordinated['providerContact'])
+                && empty($coordinated['providerMutation'])
+                && empty($coordinated['checkoutCreation'])
+                && empty($coordinated['subscriptionCreation']);
+        }
+        return ($coordinated['journalStarted'] ?? null) === true
+            && ($coordinated['journalCompleted'] ?? null) === true
+            && ($coordinated['networkAccess'] ?? null) === true
+            && ($coordinated['providerContact'] ?? null) === true
+            && ($coordinated['providerMutation'] ?? null) === true
+            && ($coordinated['checkoutCreation'] ?? null) === true
+            && ($coordinated['subscriptionCreation'] ?? null) === true
+            && ($coordinated['retryAuthorized'] ?? null) === false;
     }
 }
 

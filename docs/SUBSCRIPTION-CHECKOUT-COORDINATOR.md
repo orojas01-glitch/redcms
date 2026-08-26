@@ -5,7 +5,7 @@ distributed Store Lite and Stripe Checkout add-ons. The first closed binding is:
 
 - RED-CMS `5.1.0`
 - Store Lite `0.1.49`, service `commerce.subscriptions`
-- Stripe Checkout adapter `0.1.9`, adapter
+- Stripe Checkout adapter `0.1.10`, adapter
   `redcms.store-lite-stripe-checkout/checkout`
 
 The coordinator performs four typed stages in order:
@@ -53,11 +53,22 @@ the operational public-mutation endpoint yet. Linking them requires the later
 provider operation to supply a real, validated Checkout result in the same
 request after the subscription intent commits.
 
+## Real provider-operation boundary
+
+Stripe adapter `0.1.10` adds the exact real subscription POST operation, while
+core adds an unlinked one-attempt coordinator and durable hash-only journal.
+The journal commits `started` before adapter access, records only hashed terminal
+evidence, and permanently refuses retry after either a started or completed
+attempt. A successful sealed result must persist Store Lite pending/inactive
+state and a completed journal row before it can enter the redacted browser
+handoff. See `docs/SUBSCRIPTION-CHECKOUT-PROVIDER-OPERATION.md`.
+
 Run the focused and cross-repository offline checks with:
 
 ```text
 php scripts/addon-subscription-checkout-coordinator-self-test.php
 php scripts/addon-subscription-checkout-public-response-self-test.php
+php scripts/addon-subscription-checkout-provider-operation-self-test.php
 scripts/subscription-checkout-launch-rehearsal.sh
 node scripts/subscription-checkout-browser-qa.cjs
 ```
@@ -76,8 +87,8 @@ navigation, and foreign-origin refusal.
 
 This internal coordinator is not a public Checkout bridge. Launch still needs:
 
-1. a fresh Stripe Sandbox provider-contact authorization and owner-entered
-   secret availability;
+1. a fresh owner-confirmed Stripe Sandbox authority packet and owner-entered
+   secret availability tied to the current client/package/plan hashes;
 2. one real Sandbox Checkout Session and connection of its validated result to
    the unlinked public response bridge;
 3. one real browser navigation and return-path rehearsal;

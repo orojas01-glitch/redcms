@@ -1525,11 +1525,11 @@ process environment.
   identity crosses the typed provider result.
 - The separate real Store Lite operational lifecycle rehearsal stages current clean core plus externally distributed Store Lite 0.1.28 in a temporary supported-server project. Its 10 assertions run all 46 core and 8 package migrations, fingerprint all 15 package tables and seeded product/cart rows, require exact real registrar evidence, prove Product/Cart/create-guest-order registration after enable, prove disabled bootstrap exclusion and data preservation, reproduce the registrar hash on re-enable, record exactly two enable and one disable audits, and remove the staged project and disposable database/grant. It does not alter the Store Lite source repository, clean starter, hosted demo, or any client installation.
 - Subscription launch-candidate acceptance combines the clean core with external
-  Store Lite `0.1.49` and Stripe Checkout adapter `0.1.9`. The focused fixture
+  Store Lite `0.1.49` and Stripe Checkout adapter `0.1.10`. The focused fixture
   validates exact identities, four-stage ordering, independent hosted-URL
   validation, hashed-only Store persistence, transient no-store redirect data,
   version drift, foreign-origin refusal, and zero external effects. The separate
-  13-assertion disposable rehearsal applies all 47 core, 15 Store Lite, and two
+  14-assertion disposable rehearsal applies all 47 core, 15 Store Lite, and three
   adapter migrations; installs and enables both packages with opaque references
   but no values; creates one provider-neutral recurring intent; coordinates and
   replays one synthetic Checkout result; records exactly one pending/inactive
@@ -1541,6 +1541,18 @@ process environment.
   emission, browser navigation, webhook, client installation, demo change, or
   deployment occurs. The public response bridge and all provider-facing proof
   remain separate launch gates.
+- Subscription provider-operation acceptance adds a 12-assertion adapter sealed
+  exchange fixture, a nine-assertion core coordinator fixture, and the real
+  package-owned hash-only journal inside the disposable cross-repository run.
+  It requires adapter `0.1.10`, one recurring request, deterministic
+  idempotency, durable `started` before invocation, exact provider-result and
+  Store pending/inactive agreement, durable `completed`, redacted browser
+  handoff compatibility, and permanent no-retry after started/completed or
+  indeterminate outcomes. The journal persists no Checkout URL, credential,
+  provider body/header, customer, or payment value. Its provider exchange is a
+  sealed in-memory double; actual network/provider/Checkout effects remain
+  false, and cleanup remains
+  `database:0 grant:0 staged-project:0 primary:unchanged`.
 - Subscription browser-handoff acceptance adds an 11-assertion pure response
   fixture plus a rendered local Chrome rehearsal at `1440x1000` and `390x844`.
   It requires exact completed/replayed subscription-intent evidence, matching

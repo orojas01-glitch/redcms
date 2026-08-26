@@ -32,7 +32,7 @@ require_once $projectRoot . '/includes/addon_disable_helpers.php';
 require_once $projectRoot
     . '/includes/addon_payment_adapter_enable_helpers.php';
 require_once $projectRoot
-    . '/includes/addon_subscription_checkout_public_response_helpers.php';
+    . '/includes/addon_subscription_checkout_provider_journal_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -182,7 +182,7 @@ try {
             && is_array($storePackage)
             && is_array($adapterPackage)
             && ($storePackage['manifest']['version'] ?? '') === '0.1.49'
-            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.9',
+            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.10',
         'exact Store Lite and Stripe launch candidates are trusted'
     );
 
@@ -269,7 +269,7 @@ try {
     );
     red_subscription_launch_assert(
         ($adapterInstalled['status'] ?? '') === 'installed_disabled'
-            && count($adapterInstalled['appliedMigrations'] ?? []) === 2
+            && count($adapterInstalled['appliedMigrations'] ?? []) === 3
             && !empty($adapterEnablePlan['enableReady'])
             && ($adapterEnabled['status'] ?? '') === 'enabled',
         'Stripe adapter installs and enables with opaque references only'
@@ -417,6 +417,13 @@ try {
             'after_expiration' => null,
         ],
     ];
+    $syntheticBody = json_encode(
+        $synthetic['projection'],
+        JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+    );
+    $synthetic['envelope']['bodyBytes'] = strlen($syntheticBody);
+    $synthetic['envelope']['bodySha256'] = hash('sha256', $syntheticBody);
+    $synthetic['envelope']['tlsVersion'] = 'TLSv1.2';
     $coordinated = red_addon_subscription_checkout_coordinate_current(
         9501,
         'launch-membership-monthly',
@@ -459,6 +466,160 @@ try {
                 $intentReference
             ),
         'completed intent receives one transient redacted AJAX handoff'
+    );
+    $providerJournal =
+        red_addon_subscription_provider_database_journal($connection);
+    $sealedProviderCounter = (object) ['calls' => 0];
+    $sealedProviderAdapter = static function (
+        string $adapter,
+        string $operation,
+        array $input
+    ) use (
+        $sealedProviderCounter,
+        $synthetic
+    ): array {
+        $exchange = new class(
+            $synthetic['projection'],
+            $synthetic['envelope'],
+            $sealedProviderCounter
+        ) implements
+            RED_CMS_Store_Lite_Stripe_Sandbox_Checkout_Real_Post_Exchange {
+            private int $calls = 0;
+
+            public function __construct(
+                private readonly array $projection,
+                private readonly array $envelope,
+                private readonly object $sharedCounter
+            ) {}
+
+            public function exchange(array $wireRequest): array
+            {
+                $this->calls++;
+                $this->sharedCounter->calls++;
+                return [
+                    'statusCode' => 200,
+                    'headers' => [[
+                        'name' => 'content-type',
+                        'value' => 'application/json',
+                    ], [
+                        'name' => 'request-id',
+                        'value' => $this->envelope['requestId'],
+                    ]],
+                    'body' => json_encode(
+                        $this->projection,
+                        JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+                    ),
+                    'tlsVersion' => 'TLSv1.2',
+                    'redirectCount' => 0,
+                ];
+            }
+
+            public function calls(): int
+            {
+                return $this->calls;
+            }
+        };
+        $outcome =
+            RED_CMS_Store_Lite_Stripe_Sandbox_Subscription_Checkout_Real_Post_Operation::
+                execute(
+                    $input['intent'],
+                    $input['offer'],
+                    $input['policy'],
+                    $input['execution'],
+                    $exchange
+                );
+        return [
+            'invoked' => true,
+            'success' => true,
+            'adapter' => $adapter,
+            'package' => 'redcms.store-lite-stripe-checkout',
+            'operation' => $operation,
+            'data' => $outcome,
+            'error' => '',
+            'reason' => 'completed',
+        ];
+    };
+    $providerAuthority = [
+        'authorized' => true,
+        'authorizationSha256' => hash(
+            'sha256',
+            'subscription-launch-provider-authority'
+        ),
+        'secretAvailabilitySha256' => hash(
+            'sha256',
+            'subscription-launch-secret-availability'
+        ),
+        'issuedAtEpoch' => 1787630100,
+        'expiresAtEpoch' => 1787630700,
+        'maximumAttempts' => 1,
+        'retryAuthorized' => false,
+    ];
+    $providerCoordinated = red_addon_subscription_provider_operation(
+        [
+            'storePackageId' => 'redcms.store-lite',
+            'storePackageVersion' => '0.1.49',
+            'storeService' => 'commerce.subscriptions',
+            'stripePackageId' => 'redcms.store-lite-stripe-checkout',
+            'stripePackageVersion' => '0.1.10',
+            'stripeAdapter' =>
+                'redcms.store-lite-stripe-checkout/checkout',
+        ],
+        9501,
+        'launch-membership-monthly',
+        $policy,
+        $providerAuthority,
+        static fn ($service, $operation, $input) =>
+            red_addon_service_invoke($service, $operation, $input),
+        $sealedProviderAdapter,
+        $providerJournal
+    );
+    $spentProvider = red_addon_subscription_provider_operation(
+        [
+            'storePackageId' => 'redcms.store-lite',
+            'storePackageVersion' => '0.1.49',
+            'storeService' => 'commerce.subscriptions',
+            'stripePackageId' => 'redcms.store-lite-stripe-checkout',
+            'stripePackageVersion' => '0.1.10',
+            'stripeAdapter' =>
+                'redcms.store-lite-stripe-checkout/checkout',
+        ],
+        9501,
+        'launch-membership-monthly',
+        $policy,
+        $providerAuthority,
+        static fn ($service, $operation, $input) =>
+            red_addon_service_invoke($service, $operation, $input),
+        $sealedProviderAdapter,
+        $providerJournal
+    );
+    red_subscription_launch_assert(
+        ($providerCoordinated['status'] ?? '') === 'real_redirect_ready'
+            && ($providerCoordinated['journalCompleted'] ?? false) === true
+            && ($providerCoordinated['checkoutUrl'] ?? '') === $checkoutUrl
+            && ($spentProvider['status'] ?? '') === 'attempt_spent'
+            && $sealedProviderCounter->calls === 1
+            && red_subscription_launch_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':', AttemptStatus,
+                    LOWER(HEX(ResultSHA256)),
+                    LOWER(HEX(CheckoutSessionRefSHA256)))
+                 FROM
+                   RED_Addon_StoreLite_Stripe_Subscription_Checkout_Operations
+                 WHERE IntentReference='"
+                    . mysqli_real_escape_string(
+                        $connection,
+                        $intentReference
+                    ) . "'"
+            ) === 'completed:'
+                . $providerCoordinated['resultSha256'] . ':'
+                . hash('sha256', $sessionRef),
+        'sealed provider operation journals once and permanently refuses retry ('
+            . implode(':', [
+                $providerCoordinated['status'] ?? 'missing',
+                $providerCoordinated['reason'] ?? 'missing',
+                $spentProvider['status'] ?? 'missing',
+                (string) $sealedProviderCounter->calls,
+            ]) . ')'
     );
     red_subscription_launch_assert(
         red_subscription_launch_scalar(
@@ -543,7 +704,7 @@ try {
         'ok' => true,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.49',
-        'stripeAdapterVersion' => '0.1.9',
+        'stripeAdapterVersion' => '0.1.10',
         'assertions' => $assertions,
         'networkAccess' => false,
         'providerContact' => false,
