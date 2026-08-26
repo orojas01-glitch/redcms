@@ -11,12 +11,24 @@ $projectRoot = realpath(
     (string) getenv('RED_SUBSCRIPTION_LAUNCH_PROJECT_ROOT')
 );
 $databaseName = (string) getenv('RED_DB_NAME');
+$runMode = (string) getenv('RED_SUBSCRIPTION_LAUNCH_MODE');
+$runMode = $runMode === '' ? 'sealed' : $runMode;
+$ownerAuthorizationSha256 = (string) getenv(
+    'RED_SUBSCRIPTION_OWNER_AUTHORIZATION_SHA256'
+);
 if (!is_string($projectRoot)
     || !is_dir($projectRoot)
     || preg_match(
         '/\Aredcms_subscription_launch_[A-Za-z0-9_]+\z/D',
         $databaseName
     ) !== 1
+    || !in_array($runMode, ['sealed', 'real'], true)
+    || ($runMode === 'real'
+        && (getenv('RED_SUBSCRIPTION_REAL_ATTEMPT_CONFIRMED') !== '1'
+            || preg_match(
+                '/\A[a-f0-9]{64}\z/D',
+                $ownerAuthorizationSha256
+            ) !== 1))
 ) {
     fwrite(STDERR, "Subscription launch rehearsal refused unsafe input.\n");
     exit(64);
@@ -288,12 +300,32 @@ try {
             && $loadErrors === [],
         'dependency order is exact before request-local registration'
     );
+    $runtimeSecrets = [];
+    $secretAccessEvidence = null;
+    if ($runMode === 'real') {
+        $secretAccessEvidence = red_addon_runtime_secret_access_for_package(
+            $connection,
+            $adapterPackage,
+            true,
+            ['stripe.secret-key']
+        );
+        red_subscription_launch_assert(
+            ($secretAccessEvidence['valid'] ?? false) === true
+                && ($secretAccessEvidence['resolvedCount'] ?? 0) === 1
+                && ($secretAccessEvidence['access'] ?? null)
+                    instanceof RED_Addon_Runtime_Secret_Access,
+            'owner-entered restricted key is available only to the scoped adapter operation'
+        );
+        $runtimeSecrets[$adapterPackageId] =
+            $secretAccessEvidence['access'];
+    }
     red_addon_runtime_set_request_context(new RED_Addon_Runtime_Context(
         $loadOrder,
         [
             $storePackageId => $storeRegistry,
             $adapterPackageId => $adapterRegistry,
-        ]
+        ],
+        $runtimeSecrets
     ));
     red_subscription_launch_assert(
         red_addon_runtime_owner('services', 'commerce.subscriptions')
@@ -371,18 +403,22 @@ try {
         $intentCreated['intentStateSha256'],
         $intentCreated['offerStateSha256']
     );
-    $sessionRef = 'cs_test_SubscriptionLaunchCandidate1234';
-    $checkoutUrl = 'https://checkout.stripe.com/c/pay/' . $sessionRef
-        . '#synthetic-launch-fragment';
+    $createdAtEpoch = $runMode === 'real' ? time() : 1787630400;
     $policy = [
         'apiVersion' => '2024-09-30.acacia',
         'successUrl' =>
             'https://shop.subscription-launch.example.test/complete',
         'cancelUrl' =>
             'https://shop.subscription-launch.example.test/subscription',
-        'createdAtEpoch' => 1787630400,
-        'expiresAtEpoch' => 1787632200,
+        'createdAtEpoch' => $createdAtEpoch,
+        'expiresAtEpoch' => $createdAtEpoch + 1800,
     ];
+    $synthetic = null;
+    $realAttemptEvidence = null;
+    if ($runMode === 'sealed') {
+    $sessionRef = 'cs_test_SubscriptionLaunchCandidate1234';
+    $checkoutUrl = 'https://checkout.stripe.com/c/pay/' . $sessionRef
+        . '#synthetic-launch-fragment';
     $synthetic = [
         'envelope' => [
             'statusCode' => 200,
@@ -670,6 +706,148 @@ try {
             ),
         'adapter tables and result contain no provider attempt or secret'
     );
+    } else {
+        $providerJournal =
+            red_addon_subscription_provider_database_journal($connection);
+        $authorityIssuedAt = time();
+        $secretAvailabilitySha256 = hash('sha256', json_encode([
+            'schema' => 1,
+            'purpose' => 'subscription-sandbox-secret-availability',
+            'packageId' => $adapterPackageId,
+            'packageVersion' => '0.1.10',
+            'settingKey' => 'stripe.secret-key',
+            'settingsStateSha256' =>
+                $secretAccessEvidence['stateSha256'] ?? '',
+            'resolvedCount' => 1,
+            'valueIncluded' => false,
+        ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+        $providerAuthority = [
+            'authorized' => true,
+            'authorizationSha256' => $ownerAuthorizationSha256,
+            'secretAvailabilitySha256' => $secretAvailabilitySha256,
+            'issuedAtEpoch' => $authorityIssuedAt,
+            'expiresAtEpoch' => $authorityIssuedAt + 900,
+            'maximumAttempts' => 1,
+            'retryAuthorized' => false,
+        ];
+        $providerCoordinated = red_addon_subscription_provider_operation(
+            [
+                'storePackageId' => 'redcms.store-lite',
+                'storePackageVersion' => '0.1.49',
+                'storeService' => 'commerce.subscriptions',
+                'stripePackageId' =>
+                    'redcms.store-lite-stripe-checkout',
+                'stripePackageVersion' => '0.1.10',
+                'stripeAdapter' =>
+                    'redcms.store-lite-stripe-checkout/checkout',
+            ],
+            9501,
+            'launch-membership-monthly',
+            $policy,
+            $providerAuthority,
+            static fn ($service, $operation, $input) =>
+                red_addon_service_invoke($service, $operation, $input),
+            static fn ($adapter, $operation, $input) =>
+                red_addon_adapter_invoke($adapter, $operation, $input),
+            $providerJournal
+        );
+        $spentProvider = red_addon_subscription_provider_operation(
+            [
+                'storePackageId' => 'redcms.store-lite',
+                'storePackageVersion' => '0.1.49',
+                'storeService' => 'commerce.subscriptions',
+                'stripePackageId' =>
+                    'redcms.store-lite-stripe-checkout',
+                'stripePackageVersion' => '0.1.10',
+                'stripeAdapter' =>
+                    'redcms.store-lite-stripe-checkout/checkout',
+            ],
+            9501,
+            'launch-membership-monthly',
+            $policy,
+            $providerAuthority,
+            static fn ($service, $operation, $input) =>
+                red_addon_service_invoke($service, $operation, $input),
+            static fn ($adapter, $operation, $input) =>
+                red_addon_adapter_invoke($adapter, $operation, $input),
+            $providerJournal
+        );
+        red_subscription_launch_assert(
+            ($providerCoordinated['status'] ?? '')
+                === 'real_redirect_ready'
+                && ($providerCoordinated['journalStarted'] ?? false) === true
+                && ($providerCoordinated['journalCompleted'] ?? false) === true
+                && ($providerCoordinated['networkAccess'] ?? false) === true
+                && ($providerCoordinated['providerContact'] ?? false) === true
+                && ($providerCoordinated['checkoutCreation'] ?? false) === true
+                && ($providerCoordinated['subscriptionCreation'] ?? false)
+                    === true
+                && ($providerCoordinated['browserNavigation'] ?? true)
+                    === false
+                && ($providerCoordinated['retryAuthorized'] ?? true)
+                    === false
+                && ($spentProvider['status'] ?? '') === 'attempt_spent',
+            'one owner-authorized Sandbox attempt completes and replay is refused ('
+                . implode(':', [
+                    $providerCoordinated['status'] ?? 'missing',
+                    $providerCoordinated['reason'] ?? 'missing',
+                    $spentProvider['status'] ?? 'missing',
+                ]) . ')'
+        );
+        $publicResponse = red_addon_subscription_checkout_public_response(
+            [
+                'completed' => true,
+                'replayed' => false,
+                'outcome' => 'accepted',
+                'route' => 'redcms.store-lite/subscription-intent',
+                'mutation' =>
+                    'redcms.store-lite/create-subscription-intent',
+                'reason' => 'completed',
+            ],
+            9501,
+            'launch-membership-monthly',
+            $providerCoordinated
+        );
+        red_subscription_launch_assert(
+            red_addon_subscription_checkout_public_response_valid(
+                $publicResponse
+            )
+                && ($publicResponse['navigationAuthorized'] ?? false) === true,
+            'real result is browser-handoff valid but remains un-emitted'
+        );
+        $realAttemptEvidence = [
+            'status' => 'subscription_checkout_session_created',
+            'authorizationSha256' => $ownerAuthorizationSha256,
+            'secretAvailabilitySha256' => $secretAvailabilitySha256,
+            'planSha256' => $providerCoordinated['planSha256'],
+            'executionStartStateSha256' =>
+                $providerCoordinated['executionStartStateSha256'],
+            'contractSha256' => $providerCoordinated['contractSha256'],
+            'requestSha256' => $providerCoordinated['requestSha256'],
+            'responseEvidenceSha256' =>
+                $providerCoordinated['responseEvidenceSha256'],
+            'resultSha256' => $providerCoordinated['resultSha256'],
+            'checkoutSessionRefSha256' =>
+                $providerCoordinated['checkoutSessionRefSha256'],
+            'checkoutUrlSha256' => hash(
+                'sha256',
+                $providerCoordinated['checkoutUrl']
+            ),
+            'networkAccess' => true,
+            'providerContact' => true,
+            'checkoutCreation' => true,
+            'subscriptionCreation' => true,
+            'browserNavigation' => false,
+            'webhook' => false,
+            'payment' => false,
+            'retryAuthorized' => false,
+            'liveMode' => false,
+            'clientDeployment' => false,
+        ];
+        $providerCoordinated['checkoutUrl'] = '';
+        $publicResponse['checkoutUrl'] = '';
+        $publicResponse['body'] = '';
+    }
 
     $disablePlan = red_addon_disable_transition_plan(
         $connection,
@@ -700,8 +878,9 @@ try {
         'disabled adapter removes ownership and blocks coordination'
     );
 
-    echo json_encode([
+    $launchEvidence = [
         'ok' => true,
+        'mode' => $runMode,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.49',
         'stripeAdapterVersion' => '0.1.10',
@@ -710,8 +889,25 @@ try {
         'providerContact' => false,
         'secretResolution' => false,
         'checkoutCreation' => false,
+        'subscriptionCreation' => false,
         'browserNavigation' => false,
-    ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
+        'webhookActivation' => false,
+        'payment' => false,
+        'retryAuthorized' => false,
+        'liveMode' => false,
+        'demoDeployment' => false,
+    ];
+    if ($runMode === 'real') {
+        $launchEvidence = array_merge(
+            $launchEvidence,
+            $realAttemptEvidence ?? [],
+            ['secretResolution' => true]
+        );
+    }
+    echo json_encode(
+        $launchEvidence,
+        JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+    ) . "\n";
 } catch (Throwable $throwable) {
     fwrite(STDERR, $throwable->getMessage() . "\n");
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
