@@ -5,7 +5,7 @@ distributed Store Lite and Stripe Checkout add-ons. The first closed binding is:
 
 - RED-CMS `5.1.0`
 - Store Lite `0.1.50`, service `commerce.subscriptions`
-- Stripe Checkout adapter `0.1.11`, adapter
+- Stripe Checkout adapter `0.1.13`, adapter
   `redcms.store-lite-stripe-checkout/checkout`
 
 The coordinator performs four typed stages in order:
@@ -55,7 +55,7 @@ request after the subscription intent commits.
 
 ## Real provider-operation boundary
 
-Stripe adapter `0.1.11` adds the exact real subscription POST operation, while
+Stripe adapter `0.1.13` adds the exact real subscription POST operation, while
 core adds an unlinked one-attempt coordinator and durable hash-only journal.
 The journal commits `started` before adapter access, records only hashed terminal
 evidence, and permanently refuses retry after either a started or completed
@@ -66,7 +66,7 @@ handoff. See `docs/SUBSCRIPTION-CHECKOUT-PROVIDER-OPERATION.md`.
 ## Verified subscription-event boundary
 
 Store Lite `0.1.50` adds the read-only
-`subscription.lifecycle.load` operation, and Stripe adapter `0.1.11` adds the
+`subscription.lifecycle.load` operation, and Stripe adapter `0.1.13` adds the
 pure `subscription.event.normalize-sandbox-verified` operation. The unlinked
 core event coordinator loads the current lifecycle from Store Lite, asks the
 adapter to normalize one already-verified bounded event, and submits only the
@@ -81,6 +81,13 @@ row.
 This helper does not parse a request, verify a signature, resolve a webhook
 secret, expose a route, contact Stripe, or emit a response. Those ingress
 effects remain a separate gate.
+
+Adapter `0.1.13` adds a fourth hash-only receipt migration. Core's unlinked
+transactional journal inspects, claims, and completes those receipts under row
+locks and exact enabled-package identity. The disposable rehearsal proves
+`absent → verified → applied`, then returns the completed lifecycle-result hash
+on replay without invoking Store Lite again. Drift, duplicate completion, and
+caller-owned transactions fail closed.
 
 Run the focused and cross-repository offline checks with:
 

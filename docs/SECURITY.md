@@ -719,7 +719,7 @@ behind an exact preflight plan. The bounded component-editor data loader may
 read package-owned values only through the exact enabled registrar owner and
 returns nothing unless core validation accepts the complete result.
 
-The separately distributed Store Lite 0.1.11 Product component keeps its
+The separately distributed Store Lite 0.1.13 Product component keeps its
 business relationship in a package-owned InnoDB table with restrictive foreign
 keys to the numeric core parent and package Product parent. Its create, update,
 and delete callbacks require the surrounding core transaction; its runtime
@@ -2193,7 +2193,7 @@ The first private demo installation is client-local; core performs no package
 deployment and receives no authority over later clients.
 
 The internal subscription Checkout coordinator binds only Store Lite `0.1.50`
-service `commerce.subscriptions` to Stripe Checkout adapter `0.1.11`. It loads
+service `commerce.subscriptions` to Stripe Checkout adapter `0.1.13`. It loads
 one authoritative intent/offer projection, prepares and accepts only synthetic
 Sandbox evidence, independently validates the exact Stripe hosted URL, and
 persists only a Session-reference hash plus pending/inactive lifecycle evidence.
@@ -2216,7 +2216,7 @@ localhost and proves foreign origins fail closed. The new response helper and
 emitter are absent from `index.php`; provider contact, real Checkout, response
 linking, external browser navigation, webhooks, and deployment remain gated.
 
-Adapter `0.1.11` and the unlinked core provider-operation coordinator add the
+Adapter `0.1.13` and the unlinked core provider-operation coordinator add the
 final offline real-POST path. Core requires one short-lived, one-attempt
 authority packet and a durable adapter-owned journal. The journal records a
 hash-only `started` row before adapter access, then a hash-only `completed` row
@@ -2229,7 +2229,7 @@ effect occurs. The coordinator, journal, and response helper remain absent from
 the front controller; owner authorization, secret resolution, real Stripe
 contact, browser navigation, webhooks, and deployment remain gated.
 
-Store Lite `0.1.50`, Stripe adapter `0.1.11`, and the unlinked core
+Store Lite `0.1.50`, Stripe adapter `0.1.13`, and the unlinked core
 subscription-event coordinator add the first provider-neutral entitlement
 bridge. Core loads the current lifecycle from Store Lite, passes it with one
 already-verified bounded event to the adapter, then applies only the adapter's
