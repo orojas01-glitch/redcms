@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subscription Checkout Browser Rehearsal</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: #f4f1ea;
+      color: #18211c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 32px 18px;
+      background:
+        radial-gradient(circle at 14% 18%, rgba(178, 134, 70, .16), transparent 34%),
+        linear-gradient(145deg, #f8f5ee, #e9efe9);
+    }
+    main {
+      width: min(100%, 680px);
+      border: 1px solid rgba(24, 33, 28, .14);
+      border-radius: 24px;
+      padding: clamp(26px, 6vw, 54px);
+      background: rgba(255, 255, 255, .9);
+      box-shadow: 0 28px 80px rgba(34, 45, 38, .13);
+    }
+    .eyebrow {
+      margin: 0 0 14px;
+      color: #766036;
+      font-size: .75rem;
+      font-weight: 750;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 14ch;
+      margin: 0;
+      font-family: Georgia, serif;
+      font-size: clamp(2.15rem, 7vw, 4.5rem);
+      font-weight: 500;
+      line-height: .98;
+      letter-spacing: -.045em;
+    }
+    .summary {
+      max-width: 48ch;
+      margin: 24px 0 30px;
+      color: #536057;
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+    .price {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .price strong { font-size: 1.65rem; }
+    .price span { color: #68736c; }
+    button {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      background: #183d2d;
+      color: #fff;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+    button:hover { background: #22533e; transform: translateY(-1px); }
+    button:focus-visible { outline: 3px solid #b78b43; outline-offset: 3px; }
+    button:disabled { cursor: wait; opacity: .72; transform: none; }
+    [data-red-addon-public-mutation-status] {
+      min-height: 24px;
+      margin: 15px 2px 0;
+      color: #455149;
+      font-size: .91rem;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+    }
+  </style>
+  <script>
+    window.addEventListener('redcms:subscription-checkout-ready', function (event) {
+      event.preventDefault();
+      document.documentElement.dataset.checkoutUrl = event.detail.checkoutUrl;
+      document.documentElement.dataset.navigationPrevented = 'true';
+    });
+  </script>
+  <script src="/js/public-addon-mutation.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Store Lite membership</p>
+    <h1>Studio membership</h1>
+    <p class="summary">A local browser rehearsal of the secure subscription handoff. No provider request or external navigation occurs.</p>
+    <p class="price"><strong>$29.00</strong><span>per month</span></p>
+    <form
+      action="/addons/redcms/store-lite/subscription-intent"
+      method="post"
+      enctype="application/x-www-form-urlencoded"
+      data-red-addon-public-mutation-form
+      data-red-csrf-header="X-RED-CMS-CSRF"
+      data-red-idempotency-header="Idempotency-Key"
+      data-red-csrf-token="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      data-red-idempotency-key="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    >
+      <input type="hidden" name="offer" value="studio-membership-monthly">
+      <button type="submit">Subscribe monthly</button>
+      <p data-red-addon-public-mutation-status role="status" aria-live="polite">Ready for secure checkout.</p>
+    </form>
+  </main>
+</body>
+</html>

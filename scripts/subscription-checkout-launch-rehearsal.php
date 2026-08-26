@@ -32,7 +32,7 @@ require_once $projectRoot . '/includes/addon_disable_helpers.php';
 require_once $projectRoot
     . '/includes/addon_payment_adapter_enable_helpers.php';
 require_once $projectRoot
-    . '/includes/addon_subscription_checkout_coordinator_helpers.php';
+    . '/includes/addon_subscription_checkout_public_response_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -434,6 +434,31 @@ try {
             && ($coordinated['responseEmission'] ?? true) === false
             && ($coordinated['browserNavigation'] ?? true) === false,
         'real packages complete the four-stage synthetic coordinator'
+    );
+    $publicResponse = red_addon_subscription_checkout_public_response(
+        [
+            'completed' => true,
+            'replayed' => false,
+            'outcome' => 'accepted',
+            'route' => 'redcms.store-lite/subscription-intent',
+            'mutation' => 'redcms.store-lite/create-subscription-intent',
+            'reason' => 'completed',
+        ],
+        9501,
+        'launch-membership-monthly',
+        $coordinated
+    );
+    red_subscription_launch_assert(
+        red_addon_subscription_checkout_public_response_valid(
+            $publicResponse
+        )
+            && ($publicResponse['checkoutUrl'] ?? '') === $checkoutUrl
+            && ($publicResponse['navigationAuthorized'] ?? false) === true
+            && !str_contains(
+                $publicResponse['body'] ?? '',
+                $intentReference
+            ),
+        'completed intent receives one transient redacted AJAX handoff'
     );
     red_subscription_launch_assert(
         red_subscription_launch_scalar(

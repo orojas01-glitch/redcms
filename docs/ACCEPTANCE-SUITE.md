@@ -1529,17 +1529,31 @@ process environment.
   validates exact identities, four-stage ordering, independent hosted-URL
   validation, hashed-only Store persistence, transient no-store redirect data,
   version drift, foreign-origin refusal, and zero external effects. The separate
-  12-assertion disposable rehearsal applies all 47 core, 15 Store Lite, and two
+  13-assertion disposable rehearsal applies all 47 core, 15 Store Lite, and two
   adapter migrations; installs and enables both packages with opaque references
   but no values; creates one provider-neutral recurring intent; coordinates and
   replays one synthetic Checkout result; records exactly one pending/inactive
-  lifecycle history row; leaves both adapter business tables empty; disables
+  lifecycle history row; builds one redacted AJAX handoff; leaves both adapter
+  business tables empty; disables
   the adapter and proves coordination stops; and cleans
   `database:0 grant:0 staged-project:0 primary:unchanged`. No secret resolution,
   DNS, TLS, HTTP, Stripe contact, Checkout or subscription creation, response
   emission, browser navigation, webhook, client installation, demo change, or
   deployment occurs. The public response bridge and all provider-facing proof
   remain separate launch gates.
+- Subscription browser-handoff acceptance adds an 11-assertion pure response
+  fixture plus a rendered local Chrome rehearsal at `1440x1000` and `390x844`.
+  It requires exact completed/replayed subscription-intent evidence, matching
+  subject and offer ids, independent Stripe Sandbox URL validation, no-store
+  headers, a redacted browser body, and distinct non-crossing authorization
+  hashes for two client-local contexts. Keyboard submission freezes the command,
+  updates the live region to `Redirecting to secure checkout…`, and dispatches
+  one cancelable handoff event; the fixture cancels it before external
+  navigation. Both viewports have zero console/network errors and no horizontal
+  overflow. A foreign origin produces the fixed failure state and no handoff
+  event. The response helper remains unlinked from the front controller, so no
+  provider contact, Checkout, secret resolution, Stripe navigation, webhook,
+  client change, demo change, or deployment occurs.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 36 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.
 - The Section-delete lifecycle uses a disposable Webmaster, Section, and two Articles only inside the disposable database. It requires count-aware confirmation, CSRF refusal with unchanged state, one transaction that archives every related Article before deleting the Section, exact response reporting, recovery through **Inactive Articles**, an active-theme 404 at the old route, and zero targeted artifacts. Form/Gallery child rows and media are deliberately left attached to their preserved parent Articles.

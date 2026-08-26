@@ -2205,6 +2205,17 @@ reader, response writer, secret resolver, provider transport, webhook ingress,
 or browser navigation in this gate. See
 `docs/SUBSCRIPTION-CHECKOUT-COORDINATOR.md`.
 
+The next unlinked browser-handoff layer accepts only a completed or replayed
+subscription-intent execution plus the exact matching coordinator result. It
+returns a bounded no-store JSON body containing only the validated Stripe
+Sandbox URL and `location.assign` instruction. The shared controller rechecks
+the origin and Session path before requesting navigation. Subject ids, intent
+references, internal hashes, package values, and secrets never enter the body.
+The local desktop/mobile rehearsal cancels the navigation event before leaving
+localhost and proves foreign origins fail closed. The new response helper and
+emitter are absent from `index.php`; provider contact, real Checkout, response
+linking, external browser navigation, webhooks, and deployment remain gated.
+
 ## Multi-User Authorization
 
 Administrator component and utility selections are now server-side authorization rules, not presentation-only settings.

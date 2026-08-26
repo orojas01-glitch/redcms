@@ -945,3 +945,11 @@ This planning slice does not authorize:
 28. Store Lite can then implement its separately distributed catalog and cart
     behavior against the accepted generic contract. Checkout and payments stay
     later, provider-neutral work.
+29. Added the unlinked subscription Checkout browser handoff. It composes only
+    an exact completed/replayed Store Lite subscription-intent execution and the
+    matching synthetic coordinator result into a redacted no-store AJAX body.
+    The existing browser controller independently validates the Stripe Sandbox
+    URL and requests `location.assign`; local desktop/mobile QA cancels the
+    event before navigation. The response helper and emitter remain absent from
+    the front controller until a separately authorized real provider operation
+    can supply the validated Checkout result.
