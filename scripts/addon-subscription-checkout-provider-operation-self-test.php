@@ -14,10 +14,10 @@ $assert = static function (bool $condition, string $message) use (&$assertions):
 };
 $binding = [
     'storePackageId' => 'redcms.store-lite',
-    'storePackageVersion' => '0.1.49',
+    'storePackageVersion' => '0.1.50',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.10',
+    'stripePackageVersion' => '0.1.11',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $offer = [
@@ -162,7 +162,7 @@ try {
                 'valid' => true,
                 'status' => 'subscription_checkout_session_created',
                 'packageId' => 'redcms.store-lite-stripe-checkout',
-                'packageVersion' => '0.1.10',
+                'packageVersion' => '0.1.11',
                 'operation' => $operation,
                 'intentReference' => $intentReference,
                 'checkoutSessionRef' => $session,

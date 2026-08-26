@@ -4,8 +4,8 @@ RED-CMS 5.1 includes an internal, non-routable coordinator for the separately
 distributed Store Lite and Stripe Checkout add-ons. The first closed binding is:
 
 - RED-CMS `5.1.0`
-- Store Lite `0.1.49`, service `commerce.subscriptions`
-- Stripe Checkout adapter `0.1.10`, adapter
+- Store Lite `0.1.50`, service `commerce.subscriptions`
+- Stripe Checkout adapter `0.1.11`, adapter
   `redcms.store-lite-stripe-checkout/checkout`
 
 The coordinator performs four typed stages in order:
@@ -55,7 +55,7 @@ request after the subscription intent commits.
 
 ## Real provider-operation boundary
 
-Stripe adapter `0.1.10` adds the exact real subscription POST operation, while
+Stripe adapter `0.1.11` adds the exact real subscription POST operation, while
 core adds an unlinked one-attempt coordinator and durable hash-only journal.
 The journal commits `started` before adapter access, records only hashed terminal
 evidence, and permanently refuses retry after either a started or completed
@@ -63,12 +63,32 @@ attempt. A successful sealed result must persist Store Lite pending/inactive
 state and a completed journal row before it can enter the redacted browser
 handoff. See `docs/SUBSCRIPTION-CHECKOUT-PROVIDER-OPERATION.md`.
 
+## Verified subscription-event boundary
+
+Store Lite `0.1.50` adds the read-only
+`subscription.lifecycle.load` operation, and Stripe adapter `0.1.11` adds the
+pure `subscription.event.normalize-sandbox-verified` operation. The unlinked
+core event coordinator loads the current lifecycle from Store Lite, asks the
+adapter to normalize one already-verified bounded event, and submits only the
+resulting provider-neutral event to `subscription.event.apply`.
+
+Activation, renewal, past-due revocation, cancellation, and uncompleted
+Checkout expiry are closed transitions. Raw provider event, Checkout, and
+Subscription references do not enter the core result. Repeated delivery after
+a completed transition is refused without adding a second lifecycle-history
+row.
+
+This helper does not parse a request, verify a signature, resolve a webhook
+secret, expose a route, contact Stripe, or emit a response. Those ingress
+effects remain a separate gate.
+
 Run the focused and cross-repository offline checks with:
 
 ```text
 php scripts/addon-subscription-checkout-coordinator-self-test.php
 php scripts/addon-subscription-checkout-public-response-self-test.php
 php scripts/addon-subscription-checkout-provider-operation-self-test.php
+php scripts/addon-subscription-event-coordinator-self-test.php
 scripts/subscription-checkout-launch-rehearsal.sh
 node scripts/subscription-checkout-browser-qa.cjs
 ```
@@ -76,7 +96,8 @@ node scripts/subscription-checkout-browser-qa.cjs
 The database rehearsal stages the clean core and both external packages into a temporary
 project, applies all core and package migrations to a fresh database, enables
 both packages with opaque secret references only, coordinates and replays one
-synthetic subscription, builds the redacted public response, disables the
+synthetic subscription, applies one sealed verified activation event, refuses
+its repeated delivery without another lifecycle row, builds the redacted public response, disables the
 adapter to prove fail-closed ownership, and removes the database, grant, and
 staged project. It verifies the configured primary database is unchanged. The
 separate browser rehearsal covers desktop, mobile, keyboard submission,
@@ -87,11 +108,12 @@ navigation, and foreign-origin refusal.
 
 This internal coordinator is not a public Checkout bridge. Launch still needs:
 
-1. a fresh owner-confirmed Stripe Sandbox authority packet and owner-entered
-   secret availability tied to the current client/package/plan hashes;
-2. one real Sandbox Checkout Session and connection of its validated result to
-   the unlinked public response bridge;
-3. one real browser navigation and return-path rehearsal;
-4. externally reachable signed webhook ingestion and verified lifecycle events;
+1. raw-body parsing plus Stripe signature verification with a scoped Sandbox
+   webhook secret;
+2. a replay ledger and non-operational route rehearsal around the verified
+   event coordinator;
+3. separately authorized Sandbox webhook endpoint activation and test-event
+   delivery;
+4. one real browser navigation and return-path rehearsal;
 5. final supported-server recovery and client-isolation acceptance; and
 6. separately authorized installation and deployment to `demo.red-sphere.com`.
