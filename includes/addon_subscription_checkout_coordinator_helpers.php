@@ -85,11 +85,11 @@ if (!function_exists('red_addon_subscription_checkout_binding_valid')) {
                 'stripePackageId', 'stripePackageVersion', 'stripeAdapter',
             ]
             && ($binding['storePackageId'] ?? '') === 'redcms.store-lite'
-            && ($binding['storePackageVersion'] ?? '') === '0.1.49'
+            && ($binding['storePackageVersion'] ?? '') === '0.1.50'
             && ($binding['storeService'] ?? '') === 'commerce.subscriptions'
             && ($binding['stripePackageId'] ?? '')
                 === 'redcms.store-lite-stripe-checkout'
-            && ($binding['stripePackageVersion'] ?? '') === '0.1.10'
+            && ($binding['stripePackageVersion'] ?? '') === '0.1.11'
             && ($binding['stripeAdapter'] ?? '')
                 === 'redcms.store-lite-stripe-checkout/checkout';
     }
