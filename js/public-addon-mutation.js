@@ -159,8 +159,35 @@
         setStatus(state, 'This action is unavailable. Refresh the page.');
     }
 
+    function checkoutUrl(value) {
+        if (typeof value !== 'string'
+            || value.length < 1
+            || value.length > 4096
+            || /[\u0000-\u001F\u007F]/.test(value)
+        ) {
+            return null;
+        }
+        var url;
+        try {
+            url = new URL(value);
+        } catch (error) {
+            return null;
+        }
+        if (url.protocol !== 'https:'
+            || url.hostname !== 'checkout.stripe.com'
+            || url.port !== ''
+            || url.username !== ''
+            || url.password !== ''
+            || url.search !== ''
+            || !/^\/c\/pay\/cs_test_[A-Za-z0-9_]{16,160}$/.test(url.pathname)
+        ) {
+            return null;
+        }
+        return url.href === value ? value : null;
+    }
+
     function responseResult(response, body, expectedUrl) {
-        if (typeof body !== 'string' || body.length < 1 || body.length > 128) {
+        if (typeof body !== 'string' || body.length < 1 || body.length > 4608) {
             return null;
         }
         var contentType = response.headers.get('Content-Type');
@@ -182,6 +209,24 @@
             return null;
         }
         var keys = Object.keys(payload).sort();
+        if (response.status === 200
+            && keys.join(',')
+                === 'checkoutUrl,navigationMode,ok,outcome'
+            && payload.ok === true
+            && payload.outcome === 'subscription_checkout_ready'
+            && payload.navigationMode === 'location.assign'
+        ) {
+            var redirect = checkoutUrl(payload.checkoutUrl);
+            if (redirect === null) {
+                return null;
+            }
+            return {
+                complete: true,
+                refresh: false,
+                redirect: redirect,
+                message: 'Redirecting to secure checkout…'
+            };
+        }
         if (response.status === 200
             && keys.join(',') === 'ok,outcome'
             && payload.ok === true
@@ -231,6 +276,7 @@
 
     async function send(state) {
         var refresh = false;
+        var redirect = '';
         setBusy(state, true);
         setStatus(state, 'Updating…');
         try {
@@ -263,6 +309,7 @@
             } else {
                 state.finished = result.complete;
                 refresh = result.refresh;
+                redirect = result.redirect || '';
                 setStatus(state, result.message);
             }
         } catch (error) {
@@ -270,6 +317,19 @@
             setStatus(state, 'Could not complete this update. Try again.');
         }
         setBusy(state, false);
+        if (redirect !== '') {
+            var navigation = new CustomEvent(
+                'redcms:subscription-checkout-ready',
+                {
+                    cancelable: true,
+                    detail: Object.freeze({checkoutUrl: redirect})
+                }
+            );
+            if (window.dispatchEvent(navigation)) {
+                window.location.assign(redirect);
+            }
+            return;
+        }
         if (refresh) {
             window.setTimeout(function () {
                 window.location.reload();
