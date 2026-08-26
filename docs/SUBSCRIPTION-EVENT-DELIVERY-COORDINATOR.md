@@ -26,6 +26,10 @@ decoder, raw-event projector, and verified-event normalizer with synthetic
 in-memory data. It covers first application, terminal replay, a forced
 post-lifecycle receipt-completion interruption, exact recovery, invalid
 signature refusal, malformed correlation metadata, and private-data exclusion.
+It also invokes the exact adapter manifest route through the core webhook
+boundary with only `stripe.webhook-secret` available. Expanded secret scope is
+rejected before invocation; terminal lifecycle refusal is journaled and safely
+acknowledged without provider retry.
 
 The disposable database rehearsal installs and enables exact Store Lite
 `0.1.50` and Stripe adapter `0.1.14` packages, executes the same interruption
@@ -35,5 +39,8 @@ database, grant, and staged project while the configured primary database hash
 remains unchanged.
 
 No public dispatcher or front-controller route invokes this helper. It resolves
-no real secret, contacts no provider, activates no webhook endpoint, emits no
-response, navigates no browser, processes no payment, and deploys nothing.
+one process-local synthetic secret only inside the rehearsal, resolves no
+configured or real secret, contacts no provider, activates no webhook endpoint,
+emits no response, navigates no browser, processes no payment, and deploys
+nothing. See
+[`SUBSCRIPTION-EVENT-WEBHOOK-ROUTE-REHEARSAL.md`](SUBSCRIPTION-EVENT-WEBHOOK-ROUTE-REHEARSAL.md).

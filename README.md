@@ -25,8 +25,10 @@ to Stripe adapter `0.1.14` through one restartable internal coordinator. It
 joins signature verification, transactional receipt claim, raw-event
 projection, and lifecycle application. A disposable failure after lifecycle
 commit recovers with the same result hash and no second Store Lite mutation.
-The coordinator remains unlinked from the public route and performs no real
-secret resolution, provider contact, payment, browser action, or deployment.
+The exact manifest declaration and one-secret internal webhook boundary now
+drive that coordinator in both focused and disposable-database rehearsals.
+The handler remains unlinked from the public route and performs no real secret
+resolution, provider contact, payment, browser action, or deployment.
 See [Subscription Event Delivery Coordinator](docs/SUBSCRIPTION-EVENT-DELIVERY-COORDINATOR.md).
 
 The optional post-release payment-adapter track has completed P3A and the

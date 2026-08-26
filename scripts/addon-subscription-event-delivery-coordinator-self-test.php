@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__)
-    . '/includes/addon_subscription_event_delivery_coordinator_helpers.php';
+    . '/includes/addon_subscription_event_webhook_handler_helpers.php';
 
 $adapterRoot = realpath(
     dirname(__DIR__) . '/../redcms-store-lite-stripe-checkout/package'
@@ -278,6 +278,18 @@ try {
         ),
         'delivery coordinator has no request global, database, network, secret, or response primitive'
     );
+    $handlerSource = (string) file_get_contents(
+        dirname(__DIR__)
+            . '/includes/addon_subscription_event_webhook_handler_helpers.php'
+    );
+    $assert(
+        !preg_match(
+            '/\$_(?:GET|POST|COOKIE|SERVER|SESSION|ENV)'
+                . '|\b(?:mysqli|PDO|curl|fsockopen|getenv|header|setcookie)\b/',
+            $handlerSource
+        ),
+        'webhook handler composition has no request global, database, network, or response primitive'
+    );
 
     $first = red_addon_subscription_event_delivery_coordinate(
         $binding,
@@ -527,9 +539,299 @@ try {
         'coordinator exposes no route or external effect'
     );
 
+    $manifest = json_decode(
+        (string) file_get_contents($adapterRoot . '/addon.json'),
+        true,
+        64,
+        JSON_THROW_ON_ERROR
+    );
+    $route = 'redcms.store-lite-stripe-checkout/provider-events';
+    $package = 'redcms.store-lite-stripe-checkout';
+    $webhookAccess = new RED_Addon_Runtime_Secret_Access(
+        $package,
+        ['stripe.webhook-secret' => $secret]
+    );
+    $webhookSignatureVerifier = static function (
+        string $rawBody,
+        string $signatureHeader,
+        string $endpointSecret,
+        int $received
+    ): array {
+        return RED_CMS_Store_Lite_Stripe_Sandbox_Webhook_Signature_Envelope::
+            verify(
+                $rawBody,
+                $signatureHeader,
+                $endpointSecret,
+                $received
+            );
+    };
+    $completedAt = $receivedAt + 90;
+    $webhookHandler = static function (
+        RED_Addon_Webhook_Request $webhookRequest
+    ) use (
+        $binding,
+        $webhookSignatureVerifier,
+        $eventProjector,
+        $journalInvoker,
+        $serviceInvoker,
+        $adapterInvoker,
+        $completedAt
+    ): RED_Addon_Webhook_Result {
+        return red_addon_subscription_event_webhook_handle(
+            $webhookRequest,
+            $binding,
+            $webhookSignatureVerifier,
+            $eventProjector,
+            $journalInvoker,
+            $serviceInvoker,
+            $adapterInvoker,
+            $completedAt
+        );
+    };
+
+    $rows = [];
+    $state = $initialState;
+    $failCompletionOnce = false;
+    $routeRequest = $makeRequest(
+        'evt_DeliveryCoordinatorRoute123456',
+        ['redcms_offer_state_sha256' => $offer]
+    );
+    $beforeRouteApply = $applyCalls;
+    $routed = red_addon_webhook_invoke_registered(
+        $route,
+        $routeRequest['rawBody'],
+        $routeRequest['signatureHeader'],
+        $routeRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $assert(
+        $routed['invoked']
+            && $routed['success']
+            && $routed['statusCode'] === 200
+            && ($routed['data']['acknowledged'] ?? false)
+            && ($routed['data']['outcome'] ?? '')
+                === 'subscription_event_applied'
+            && ($routed['data']['applied'] ?? false)
+            && $applyCalls === $beforeRouteApply + 1,
+        'manifest-owned internal boundary applies and acknowledges one event'
+    );
+    $tamperedDelivery = $first;
+    $tamperedDelivery['networkAccess'] = true;
+    $foreignTypeDelivery = $first;
+    $foreignTypeDelivery['providerEventType'] = 'charge.succeeded';
+    $assert(
+        red_addon_subscription_event_webhook_data($tamperedDelivery) === null
+            && red_addon_subscription_event_webhook_data(
+                $foreignTypeDelivery
+            ) === null,
+        'acknowledgement refuses external-effect claims and foreign event types'
+    );
+    $routeEncoded = json_encode(
+        $routed,
+        JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+    );
+    $assert(
+        !str_contains($routeEncoded, $routeRequest['rawBody'])
+            && !str_contains(
+                $routeEncoded,
+                $routeRequest['signatureHeader']
+            )
+            && !str_contains($routeEncoded, $secret)
+            && !str_contains($routeEncoded, 'private@example.test')
+            && ($routed['data']['rawBodyIncluded'] ?? true) === false
+            && ($routed['data']['secretIncluded'] ?? true) === false,
+        'acknowledgement contains only bounded hash evidence'
+    );
+    $routeReplay = red_addon_webhook_invoke_registered(
+        $route,
+        $routeRequest['rawBody'],
+        $routeRequest['signatureHeader'],
+        $routeRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $assert(
+        $routeReplay['success']
+            && ($routeReplay['data']['outcome'] ?? '')
+                === 'subscription_event_replayed'
+            && ($routeReplay['data']['replayed'] ?? false)
+            && $applyCalls === $beforeRouteApply + 1,
+        'completed route delivery replays without another lifecycle write'
+    );
+
+    $badRouteSignature = $routeRequest;
+    $badRouteSignature['signatureHeader'] =
+        't=' . $receivedAt . ',v1=' . str_repeat('0', 64);
+    $badRoute = red_addon_webhook_invoke_registered(
+        $route,
+        $badRouteSignature['rawBody'],
+        $badRouteSignature['signatureHeader'],
+        $badRouteSignature['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $assert(
+        $badRoute['invoked']
+            && !$badRoute['success']
+            && $badRoute['statusCode'] === 400
+            && $badRoute['error']
+                === 'subscription_webhook_signature_refused',
+        'invalid route signature is refused before journal access'
+    );
+    $expandedAccess = new RED_Addon_Runtime_Secret_Access($package, [
+        'stripe.secret-key' => 'rk_test_synthetic_route_scope_123456',
+        'stripe.webhook-secret' => $secret,
+    ]);
+    $assert(
+        red_addon_webhook_invoke_registered(
+            $route,
+            $routeRequest['rawBody'],
+            $routeRequest['signatureHeader'],
+            $routeRequest['receivedAt'],
+            $package,
+            $webhookHandler,
+            $manifest,
+            $expandedAccess
+        )['invoked'] === false,
+        'route boundary refuses expanded API-key secret scope'
+    );
+    $apiOnlyAccess = new RED_Addon_Runtime_Secret_Access(
+        $package,
+        ['stripe.secret-key' => 'rk_test_synthetic_route_scope_123456']
+    );
+    $apiOnly = red_addon_webhook_invoke_registered(
+        $route,
+        $routeRequest['rawBody'],
+        $routeRequest['signatureHeader'],
+        $routeRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $apiOnlyAccess
+    );
+    $assert(
+        $apiOnly['invoked']
+            && !$apiOnly['success']
+            && $apiOnly['statusCode'] === 500
+            && $apiOnly['error']
+                === 'subscription_webhook_secret_unavailable',
+        'API-key-only scope cannot substitute for the webhook secret'
+    );
+
+    $rows = [];
+    $state = $initialState;
+    $failCompletionOnce = true;
+    $routeRecoveryRequest = $makeRequest(
+        'evt_DeliveryCoordinatorRouteRecovery123',
+        ['redcms_offer_state_sha256' => $offer]
+    );
+    $beforeRouteRecoveryApply = $applyCalls;
+    $routeInterrupted = red_addon_webhook_invoke_registered(
+        $route,
+        $routeRecoveryRequest['rawBody'],
+        $routeRecoveryRequest['signatureHeader'],
+        $routeRecoveryRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $routeRecovered = red_addon_webhook_invoke_registered(
+        $route,
+        $routeRecoveryRequest['rawBody'],
+        $routeRecoveryRequest['signatureHeader'],
+        $routeRecoveryRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $assert(
+        !$routeInterrupted['success']
+            && $routeInterrupted['statusCode'] === 500
+            && $routeInterrupted['error']
+                === 'subscription_webhook_retry_required'
+            && $routeRecovered['success']
+            && ($routeRecovered['data']['recovered'] ?? false)
+            && $applyCalls === $beforeRouteRecoveryApply + 1,
+        'retry response recovers a post-lifecycle receipt interruption once'
+    );
+
+    $rows = [];
+    $state = array_replace($initialState, [
+        'offerStateSha256' => str_repeat('8', 64),
+    ]);
+    $routeRefusedRequest = $makeRequest(
+        'evt_DeliveryCoordinatorRouteRefused1234',
+        ['redcms_offer_state_sha256' => $offer]
+    );
+    $routeRefused = red_addon_webhook_invoke_registered(
+        $route,
+        $routeRefusedRequest['rawBody'],
+        $routeRefusedRequest['signatureHeader'],
+        $routeRefusedRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $assert(
+        $routeRefused['success']
+            && $routeRefused['statusCode'] === 200
+            && ($routeRefused['data']['outcome'] ?? '')
+                === 'subscription_event_refused'
+            && ($routeRefused['data']['acknowledged'] ?? false)
+            && !($routeRefused['data']['applied'] ?? true),
+        'terminal lifecycle refusal is journaled and acknowledged without retry'
+    );
+
+    $frontController = (string) file_get_contents(
+        dirname(__DIR__) . '/index.php'
+    );
+    $bootstrap = (string) file_get_contents(
+        dirname(__DIR__) . '/includes/bootstrap.php'
+    );
+    $packageEntrypoint = (string) file_get_contents(
+        $adapterRoot . '/addon.php'
+    );
+    $assert(
+        !str_contains(
+            $frontController,
+            'red_addon_subscription_event_webhook_handle'
+        )
+            && !str_contains(
+                $bootstrap,
+                'red_addon_subscription_event_webhook_handle'
+            )
+            && !str_contains(
+                $frontController,
+                'addon_subscription_event_webhook_handler_helpers.php'
+            )
+            && !str_contains(
+                $bootstrap,
+                'addon_subscription_event_webhook_handler_helpers.php'
+            )
+            && str_contains(
+                $packageEntrypoint,
+                'p3c4_route_handler_not_operational'
+            )
+            && !str_contains(
+                $packageEntrypoint,
+                'red_addon_subscription_event_webhook_handle'
+            ),
+        'handler remains absent from public bootstrap and package registration'
+    );
+
     echo 'Subscription event delivery coordinator passed '
         . $assertions . " assertions.\n";
-    echo "Only synthetic in-memory signatures and events were used; no route, database, network, Stripe, payment, browser, or deployment action occurred.\n";
+    echo "Only the unlinked internal route boundary and synthetic in-memory evidence were used; no public route, database, network, Stripe, payment, browser, or deployment action occurred.\n";
 } catch (Throwable $throwable) {
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);

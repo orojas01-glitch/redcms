@@ -126,10 +126,8 @@ navigation, and foreign-origin refusal.
 
 This internal coordinator is not a public Checkout bridge. Launch still needs:
 
-1. a non-operational route rehearsal joining the manifest-owned webhook
-   request boundary to the restartable coordinator;
-2. separately authorized Sandbox webhook endpoint activation and test-event
+1. separately authorized Sandbox webhook endpoint activation and test-event
    delivery;
-3. one real browser navigation and return-path rehearsal;
-4. final supported-server recovery and client-isolation acceptance; and
-5. separately authorized installation and deployment to `demo.red-sphere.com`.
+2. one real browser navigation and return-path rehearsal;
+3. final supported-server recovery and client-isolation acceptance; and
+4. separately authorized installation and deployment to `demo.red-sphere.com`.
