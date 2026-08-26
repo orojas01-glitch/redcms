@@ -46,6 +46,99 @@ if (is_string($redAddonAssetRequestUri)
     exit;
 }
 
+$redSubscriptionWebhookTarget = $_SERVER['REQUEST_URI'] ?? '';
+if (is_string($redSubscriptionWebhookTarget)
+    && $redSubscriptionWebhookTarget
+        === '/addons/redcms/store-lite-stripe-checkout/provider-events'
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__
+        . '/includes/addon_subscription_webhook_runtime_helpers.php';
+
+    $redSubscriptionWebhookEnabled =
+        red_addon_subscription_webhook_endpoint_enabled();
+    if (!$redSubscriptionWebhookEnabled) {
+        red_addon_subscription_webhook_emit(
+            red_addon_subscription_webhook_response(
+                404,
+                ['ok' => false, 'error' => 'not_found'],
+                'endpoint_disabled'
+            )
+        );
+        exit;
+    }
+    if ($redSubscriptionWebhookEnabled) {
+        $redSubscriptionWebhookMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        if ($redSubscriptionWebhookMethod !== 'POST') {
+            red_addon_subscription_webhook_emit(
+                red_addon_subscription_webhook_response(
+                    405,
+                    ['ok' => false, 'error' => 'method_not_allowed'],
+                    'method_invalid'
+                )
+            );
+            exit;
+        }
+        if (red_addon_subscription_webhook_preflight($_SERVER) === null) {
+            red_addon_subscription_webhook_emit(
+                red_addon_subscription_webhook_response(
+                    400,
+                    ['ok' => false, 'error' => 'invalid_request'],
+                    'transport_invalid'
+                )
+            );
+            exit;
+        }
+        $redSubscriptionWebhookConnection = null;
+        try {
+            $redSubscriptionWebhookConnection = @mysqli_connect(
+                red_config_value(
+                    'DBHOST',
+                    ['RED_DB_HOST', 'DBHOST'],
+                    'localhost'
+                ),
+                red_config_value('DBUSER', ['RED_DB_USER', 'DBUSER'], ''),
+                red_config_value('DBPASS', ['RED_DB_PASS', 'DBPASS'], ''),
+                red_config_value('DBNAME', ['RED_DB_NAME', 'DBNAME'], '')
+            );
+            if (!$redSubscriptionWebhookConnection
+                || !@mysqli_set_charset(
+                    $redSubscriptionWebhookConnection,
+                    'utf8mb4'
+                )
+            ) {
+                throw new RuntimeException(
+                    'Subscription webhook database is unavailable.'
+                );
+            }
+            $redSubscriptionWebhookResult =
+                red_addon_subscription_webhook_dispatch_current(
+                    $redSubscriptionWebhookConnection,
+                    __DIR__
+                );
+        } catch (Throwable $exception) {
+            error_log('RED-CMS subscription webhook failed.');
+            $redSubscriptionWebhookResult =
+                red_addon_subscription_webhook_response(
+                    503,
+                    ['ok' => false, 'error' => 'temporarily_unavailable'],
+                    'endpoint_unavailable'
+                );
+        } finally {
+            unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+            if ($redSubscriptionWebhookConnection instanceof mysqli) {
+                mysqli_close($redSubscriptionWebhookConnection);
+            }
+        }
+        if (!empty($redSubscriptionWebhookResult['claimed'])) {
+            red_addon_subscription_webhook_emit(
+                $redSubscriptionWebhookResult
+            );
+            exit;
+        }
+    }
+}
+
 $redPublicReadMethod = $_SERVER['REQUEST_METHOD'] ?? '';
 $redPublicReadTarget = $_SERVER['REQUEST_URI'] ?? '';
 if (is_string($redPublicReadMethod)

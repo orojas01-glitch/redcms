@@ -2261,7 +2261,7 @@ signature header, or secret. The fixture joins this boundary to the inert
 Stripe `0.1.12` signature verifier using synthetic data only. No public
 dispatcher or front controller calls the boundary.
 
-The non-operational Stripe adapter `0.1.14` route rehearsal now composes that
+The Stripe adapter `0.1.14` route composition requires that
 same boundary with the restartable delivery coordinator. It requires the exact
 manifest route and package owner plus a request-local access object containing
 only `stripe.webhook-secret`. The process-local synthetic value is cleared
@@ -2269,8 +2269,18 @@ after signature verification. Expanded API-key scope, manifest drift, invalid
 signatures, output, exceptions, raw request data, and private provider fields
 are contained. Successful, recovered, replayed, and terminally refused events
 return only bounded acknowledgement and hash evidence. The package registrar's
-throwing placeholder is unchanged, and no front-controller or bootstrap link
-exists.
+throwing placeholder is unchanged.
+
+The core-owned production-shaped endpoint is linked early in `index.php` but
+is dark by default. It requires exact query-free path, direct HTTPS, `POST`,
+JSON content type, bounded exact body length, printable Stripe signature, no
+transfer/content encoding, and matching canonical/`HTTP_` content aliases when
+the server supplies both. Transport preflight happens before database access or
+body I/O. Runtime assembly pins Store Lite `0.1.50` and Stripe adapter `0.1.14`,
+requires both enabled/current, and resolves only `stripe.webhook-secret`.
+Public responses contain only `ok` or stable generic errors with no-store,
+nosniff, and exact length headers. Server-local enablement must explicitly set
+`sandbox` mode; live events are still rejected by the adapter contract.
 
 ## Multi-User Authorization
 

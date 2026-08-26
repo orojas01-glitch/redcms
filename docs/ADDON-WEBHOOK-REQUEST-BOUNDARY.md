@@ -32,15 +32,17 @@ return only bounded acknowledgement and hash evidence. Invalid signatures use
 `400`; restartable journal/projection failures use `500`. Expanded API-key
 scope is refused before handler invocation.
 
-This helper is absent from `index.php`, runtime bootstrap, and every public
-route dispatcher. It reads no request globals, resolves no configured secret,
-emits no response, and performs no network, Stripe, database, payment, browser,
-or deployment action.
+The generic helper itself still reads no request globals. The Stripe-specific
+endpoint now links a separate direct-HTTPS capture and strict response emitter
+from `index.php`, guarded by default-disabled `sandbox` configuration. It
+resolves only the adapter's configured webhook secret after transport
+preflight and database/package validation.
 
 ## Current boundary
 
-The non-operational package-handler rehearsal is complete. The actual adapter
-registrar still retains its throwing placeholder, and neither `index.php` nor
-runtime bootstrap references the composed handler. Linking a real request
-reader, activating an endpoint, provisioning a configured webhook secret, or
-deploying to a client each remains separately authorized work.
+The non-operational package-handler rehearsal and the production-shaped local
+endpoint implementation are complete. The adapter registrar still retains its
+throwing placeholder; core owns the exact scoped composition. The endpoint is
+off unless both its enable flag and `sandbox` mode are set server-side.
+Provisioning a real configured secret, deploying, activating the Stripe
+destination, or sending a provider test event remain separately authorized.

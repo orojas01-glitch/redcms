@@ -36,6 +36,9 @@ replays it. Cleanup proves `database:0 grant:0 staged-project:0
 primary:unchanged`.
 
 The adapter registrar still exposes only its throwing non-operational
-placeholder. No server request reader, public dispatcher, endpoint activation,
-configured secret provisioning, network request, Stripe contact, payment,
-browser action, live mode, or demo deployment is added.
+placeholder. A later core-owned endpoint now supplies the direct-HTTPS request
+reader and strict response emitter behind default-disabled `sandbox` gates;
+see [`SUBSCRIPTION-WEBHOOK-ENDPOINT.md`](SUBSCRIPTION-WEBHOOK-ENDPOINT.md).
+No endpoint activation, configured secret provisioning, network request,
+Stripe contact, payment, browser action, live mode, or demo deployment occurred
+in either gate.
