@@ -1,0 +1,10 @@
+{
+	admin off
+	auto_https disable_redirects
+}
+
+https://localhost:{$RED_SUBSCRIPTION_WEBHOOK_PROOF_PORT} {
+	tls {$RED_SUBSCRIPTION_WEBHOOK_PROOF_CERT} {$RED_SUBSCRIPTION_WEBHOOK_PROOF_KEY}
+	root * {$RED_SUBSCRIPTION_WEBHOOK_PROOF_ROOT}
+	php_server
+}

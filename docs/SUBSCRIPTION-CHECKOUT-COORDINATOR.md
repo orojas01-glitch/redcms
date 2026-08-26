@@ -126,8 +126,8 @@ navigation, and foreign-origin refusal.
 
 This internal coordinator is not a public Checkout bridge. Launch still needs:
 
-1. separately authorized Sandbox webhook endpoint activation and test-event
-   delivery;
+1. separately authorized server configuration/deployment plus Stripe Sandbox
+   webhook endpoint activation and test-event delivery;
 2. one real browser navigation and return-path rehearsal;
 3. final supported-server recovery and client-isolation acceptance; and
 4. separately authorized installation and deployment to `demo.red-sphere.com`.

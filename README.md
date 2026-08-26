@@ -27,8 +27,10 @@ projection, and lifecycle application. A disposable failure after lifecycle
 commit recovers with the same result hash and no second Store Lite mutation.
 The exact manifest declaration and one-secret internal webhook boundary now
 drive that coordinator in both focused and disposable-database rehearsals.
-The handler remains unlinked from the public route and performs no real secret
-resolution, provider contact, payment, browser action, or deployment.
+The production-shaped HTTPS endpoint is linked but default-disabled; it becomes
+eligible only with explicit server-local enablement in `sandbox` mode. Local
+TLS and disposable-database proofs pass, while no real secret, provider
+contact, payment, browser action, endpoint activation, or deployment occurred.
 See [Subscription Event Delivery Coordinator](docs/SUBSCRIPTION-EVENT-DELIVERY-COORDINATOR.md).
 
 The optional post-release payment-adapter track has completed P3A and the

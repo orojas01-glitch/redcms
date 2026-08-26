@@ -38,9 +38,9 @@ tables, proves only one additional lifecycle-history row, and removes the
 database, grant, and staged project while the configured primary database hash
 remains unchanged.
 
-No public dispatcher or front-controller route invokes this helper. It resolves
-one process-local synthetic secret only inside the rehearsal, resolves no
-configured or real secret, contacts no provider, activates no webhook endpoint,
-emits no response, navigates no browser, processes no payment, and deploys
-nothing. See
+The production-shaped front-controller endpoint can now invoke this helper only
+after exact direct-HTTPS preflight and two server-local gates: enabled plus
+`sandbox` mode. Its disposable proofs resolve one process-local synthetic
+secret; no configured or real secret, provider contact, webhook activation,
+payment, browser action, or deployment occurred. See
 [`SUBSCRIPTION-EVENT-WEBHOOK-ROUTE-REHEARSAL.md`](SUBSCRIPTION-EVENT-WEBHOOK-ROUTE-REHEARSAL.md).

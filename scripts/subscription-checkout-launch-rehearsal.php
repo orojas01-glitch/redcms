@@ -50,7 +50,7 @@ require_once $projectRoot
 require_once $projectRoot
     . '/includes/addon_subscription_event_journal_helpers.php';
 require_once $projectRoot
-    . '/includes/addon_subscription_event_webhook_handler_helpers.php';
+    . '/includes/addon_subscription_webhook_runtime_helpers.php';
 
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
@@ -886,6 +886,125 @@ try {
                 $eventDeliveryRecovered['data']['outcome'] ?? 'missing',
                 $eventDeliveryReplay['data']['outcome'] ?? 'missing',
             ]) . ')'
+    );
+
+    $renewalReceivedAt = 1787630700;
+    $renewalEventRef = 'evt_SubscriptionLaunchRenewal123456';
+    $renewalBody = json_encode([
+        'id' => $renewalEventRef,
+        'object' => 'event',
+        'api_version' => '2024-09-30.acacia',
+        'created' => 1787630650,
+        'data' => ['object' => [
+            'id' => 'in_SubscriptionLaunchRenewal123456',
+            'object' => 'invoice',
+            'subscription' => 'sub_SubscriptionLaunchLifecycle1234',
+            'subscription_details' => ['metadata' => [
+                'redcms_intent_reference' => $intentReference,
+                'redcms_offer_state_sha256' =>
+                    $intentCreated['offerStateSha256'],
+            ]],
+            'period_end' => 1792987200,
+            'status' => 'paid',
+            'paid' => true,
+            'customer_email' =>
+                'private-renewal@subscription-launch.example.test',
+        ]],
+        'livemode' => false,
+        'type' => 'invoice.paid',
+    ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    $renewalServer = [
+        'REQUEST_METHOD' => 'POST',
+        'REQUEST_URI' => red_addon_subscription_webhook_path(),
+        'HTTPS' => 'on',
+        'CONTENT_TYPE' => 'application/json',
+        'CONTENT_LENGTH' => (string) strlen($renewalBody),
+        'HTTP_STRIPE_SIGNATURE' =>
+            't=' . $renewalReceivedAt . ',v1=' . hash_hmac(
+                'sha256',
+                $renewalReceivedAt . '.' . $renewalBody,
+                $eventSecret
+            ),
+    ];
+    $renewalCapture = red_addon_subscription_webhook_capture(
+        $renewalServer,
+        $renewalBody,
+        $renewalReceivedAt
+    );
+    $previousSecretReferences = getenv('RED_ADDON_SECRET_REFERENCES');
+    $previousSecretValues = getenv('RED_ADDON_SECRET_VALUES_JSON');
+    putenv('RED_ADDON_SECRET_REFERENCES=' . $webhookReference);
+    putenv('RED_ADDON_SECRET_VALUES_JSON=' . json_encode(
+        [$webhookReference => $eventSecret],
+        JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+    ));
+    unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+    try {
+        $renewalRunner = static fn (array $request): array =>
+            red_addon_subscription_webhook_runtime_run(
+                $connection,
+                $projectRoot,
+                $request
+            );
+        $renewalFirst = red_addon_subscription_webhook_dispatch(
+            'POST',
+            red_addon_subscription_webhook_path(),
+            $renewalCapture,
+            true,
+            $renewalRunner
+        );
+        $renewalReplay = red_addon_subscription_webhook_dispatch(
+            'POST',
+            red_addon_subscription_webhook_path(),
+            $renewalCapture,
+            true,
+            $renewalRunner
+        );
+    } finally {
+        unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+        $previousSecretReferences === false
+            ? putenv('RED_ADDON_SECRET_REFERENCES')
+            : putenv(
+                'RED_ADDON_SECRET_REFERENCES='
+                    . $previousSecretReferences
+            );
+        $previousSecretValues === false
+            ? putenv('RED_ADDON_SECRET_VALUES_JSON')
+            : putenv(
+                'RED_ADDON_SECRET_VALUES_JSON=' . $previousSecretValues
+            );
+    }
+    red_subscription_launch_assert(
+        ($renewalCapture['valid'] ?? false) === true
+            && ($renewalFirst['status'] ?? 0) === 200
+            && ($renewalFirst['body'] ?? '') === '{"ok":true}'
+            && ($renewalReplay['status'] ?? 0) === 200
+            && ($renewalReplay['body'] ?? '') === '{"ok":true}'
+            && red_subscription_launch_scalar(
+                $connection,
+                "SELECT CONCAT_WS(':', SubscriptionStatus,
+                    EntitlementStatus, CurrentPeriodEndEpoch,
+                    (SELECT COUNT(*) FROM
+                        RED_Addon_StoreLite_Subscription_Status_History))
+                 FROM RED_Addon_StoreLite_Subscriptions
+                 WHERE IntentReference='"
+                    . mysqli_real_escape_string(
+                        $connection,
+                        $intentReference
+                    ) . "'"
+            ) === 'active:active:1792987200:3'
+            && red_subscription_launch_scalar(
+                $connection,
+                "SELECT ReceiptStatus
+                 FROM RED_Addon_StoreLite_Stripe_Subscription_Event_Receipts
+                 WHERE EventRefSHA256=UNHEX('"
+                    . hash('sha256', $renewalEventRef) . "')"
+            ) === 'applied'
+            && getenv('RED_ADDON_SECRET_REFERENCES')
+                === $previousSecretReferences
+            && getenv('RED_ADDON_SECRET_VALUES_JSON')
+                === $previousSecretValues,
+        'production-shaped endpoint resolves only a synthetic webhook secret, renews once, replays, and restores the environment'
     );
     } else {
         $providerJournal =
