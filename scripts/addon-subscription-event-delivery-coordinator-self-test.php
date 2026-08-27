@@ -49,7 +49,8 @@ $receivedAt = 1787630600;
 
 $makeRequest = static function (
     string $eventRef,
-    array $metadata
+    array $metadata,
+    string $apiVersion = '2024-09-30.acacia'
 ) use (
     $secret,
     $intent,
@@ -62,7 +63,7 @@ $makeRequest = static function (
     $event = [
         'id' => $eventRef,
         'object' => 'event',
-        'api_version' => '2024-09-30.acacia',
+        'api_version' => $apiVersion,
         'created' => 1787630500,
         'data' => ['object' => [
             'id' => $checkout,
@@ -290,6 +291,39 @@ try {
         ),
         'webhook handler composition has no request global, database, network, or response primitive'
     );
+
+    $dahliaRequest = $makeRequest(
+        'evt_DeliveryCoordinatorDahlia123',
+        ['redcms_offer_state_sha256' => $offer],
+        '2026-07-29.dahlia'
+    );
+    $dahliaEnvelope = $signatureVerifier(
+        $dahliaRequest['rawBody'],
+        $dahliaRequest['signatureHeader'],
+        $dahliaRequest['receivedAt']
+    );
+    $assert(
+        ($dahliaEnvelope['valid'] ?? false) === true
+            && red_addon_subscription_delivery_envelope_valid(
+                $dahliaEnvelope,
+                $dahliaRequest['rawBody'],
+                $dahliaRequest['receivedAt']
+            ),
+        'delivery coordinator accepts the deployed Dahlia Stripe API version'
+    );
+    $unsupportedEnvelope = array_replace(
+        $dahliaEnvelope,
+        ['apiVersion' => '2026-08-27.unsupported']
+    );
+    $assert(
+        !red_addon_subscription_delivery_envelope_valid(
+            $unsupportedEnvelope,
+            $dahliaRequest['rawBody'],
+            $dahliaRequest['receivedAt']
+        ),
+        'delivery coordinator refuses API versions outside the exact allowlist'
+    );
+    $signatureCalls = 0;
 
     $first = red_addon_subscription_event_delivery_coordinate(
         $binding,
