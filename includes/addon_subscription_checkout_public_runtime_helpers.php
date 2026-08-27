@@ -115,8 +115,21 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_execution')
 }
 
 if (!function_exists('red_addon_subscription_checkout_public_runtime_refusal')) {
-    function red_addon_subscription_checkout_public_runtime_refusal()
+    function red_addon_subscription_checkout_public_runtime_refusal(
+        $diagnosticStage = ''
+    )
     {
+        if (is_string($diagnosticStage)
+            && preg_match(
+                '/\A[a-z][a-z0-9_]{0,79}\z/D',
+                $diagnosticStage
+            ) === 1
+        ) {
+            error_log(
+                'RED-CMS subscription Checkout runtime refused: '
+                . $diagnosticStage
+            );
+        }
         return red_addon_public_mutation_response_refusal(
             'runtime_unavailable'
         );
@@ -137,14 +150,15 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
         )) {
             return $response;
         }
-        $refused = red_addon_subscription_checkout_public_runtime_refusal();
         if (!($connection instanceof mysqli)
             || !is_string($projectRoot)
             || !is_dir($projectRoot)
             || !red_addon_public_mutation_dispatch_capture_valid($capture)
             || !red_addon_subscription_checkout_public_runtime_enabled()
         ) {
-            return $refused;
+            return red_addon_subscription_checkout_public_runtime_refusal(
+                'input_unavailable'
+            );
         }
 
         try {
@@ -159,7 +173,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 || ($selection['mutation'] ?? '')
                     !== 'redcms.store-lite/create-subscription-intent'
             ) {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'route_selection_unavailable'
+                );
             }
             $execution =
                 red_addon_subscription_checkout_public_runtime_execution(
@@ -168,7 +184,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 );
             $manifest = red_addon_runtime_manifest('redcms.store-lite');
             if (!is_array($execution) || !is_array($manifest)) {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'execution_unavailable'
+                );
             }
             $request = red_addon_public_mutation_http_request_normalize(
                 $manifest,
@@ -205,7 +223,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     $offerId
                 ) !== 1
             ) {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'request_projection_unavailable'
+                );
             }
 
             $catalog = red_addon_discover($projectRoot, [
@@ -218,7 +238,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 || !is_array($adapterPackage)
                 || ($adapterPackage['manifest']['version'] ?? '') !== '0.1.15'
             ) {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'adapter_package_unavailable'
+                );
             }
             $secret = red_addon_runtime_secret_access_for_package(
                 $connection,
@@ -235,7 +257,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 || !$secret['access'] instanceof
                     RED_Addon_Runtime_Secret_Access
             ) {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'adapter_secret_unavailable'
+                );
             }
 
             $adapterId = 'redcms.store-lite-stripe-checkout/checkout';
@@ -255,7 +279,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     'commerce.subscriptions'
                 ) !== 'redcms.store-lite'
             ) {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'runtime_binding_unavailable'
+                );
             }
 
             $origin =
@@ -263,7 +289,9 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     $connection
                 );
             if ($origin === '') {
-                return $refused;
+                return red_addon_subscription_checkout_public_runtime_refusal(
+                    'return_origin_unavailable'
+                );
             }
             $now = time();
             $authorizationSha256 = red_server_config_value(
@@ -331,11 +359,22 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 $offerId,
                 $coordinated
             );
-            return red_addon_subscription_checkout_public_response_valid(
+            if (red_addon_subscription_checkout_public_response_valid(
                 $public
-            ) ? $public : $refused;
+            )) {
+                return $public;
+            }
+            $providerReason = is_array($coordinated)
+                && is_string($coordinated['reason'] ?? null)
+                    ? $coordinated['reason']
+                    : 'result_unavailable';
+            return red_addon_subscription_checkout_public_runtime_refusal(
+                'provider_' . $providerReason
+            );
         } catch (Throwable $throwable) {
-            return $refused;
+            return red_addon_subscription_checkout_public_runtime_refusal(
+                'runtime_exception'
+            );
         }
     }
 }
