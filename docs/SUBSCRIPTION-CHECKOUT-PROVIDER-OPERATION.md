@@ -1,7 +1,7 @@
 # Subscription Checkout Provider Operation
 
-The final offline provider-operation contract binds RED-CMS 5.1, Store Lite
-`0.1.49`, and Stripe adapter `0.1.10` without contacting Stripe.
+The provider-operation contract binds RED-CMS 5.1, Store Lite `0.1.50`, and
+Stripe adapter `0.1.15`.
 
 `includes/addon_subscription_checkout_provider_operation_helpers.php` requires
 one short-lived, one-attempt authority packet, reloads the exact client-local
@@ -35,10 +35,12 @@ pending/inactive Store state, and exact cleanup. The provider exchange is an
 in-memory sealed double; no DNS, TLS, HTTP, Stripe, secret resolution, Checkout,
 browser navigation, webhook, payment, client, demo, or deployment effect occurs.
 
-## Remaining explicit gate
+## Operational gate
 
-Before one real request, core still needs a fresh owner-confirmed authority
-packet tied to current package, client database, secret-availability, plan, and
-expiry evidence. The owner enters the restricted Stripe Sandbox key outside the
-repository. Only then may one attempt invoke the already-adopted adapter
-operation. Browser navigation and webhooks remain separate confirmations.
+The public runtime remains disabled until server-local configuration supplies
+an owner-confirmed authorization hash. Each accepted intent creates a fresh
+short-lived authority packet tied to the current package, client database,
+secret-availability state, plan, and expiry evidence. Only the restricted
+Stripe Sandbox API-key scope enters the adapter request; the webhook secret is
+withheld. Browser navigation and signed webhook lifecycle confirmation remain
+separate evidence.

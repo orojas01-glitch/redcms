@@ -1,4 +1,28 @@
 <?php
+$redSubscriptionCheckoutReturnTarget = $_SERVER['REQUEST_URI'] ?? '';
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET'
+    && is_string($redSubscriptionCheckoutReturnTarget)
+    && in_array(
+        $redSubscriptionCheckoutReturnTarget,
+        ['/subscription/complete', '/subscription/cancel'],
+        true
+    )
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__
+        . '/includes/addon_subscription_checkout_return_helpers.php';
+    $redSubscriptionCheckoutReturn = red_addon_subscription_checkout_return(
+        'GET',
+        $redSubscriptionCheckoutReturnTarget
+    );
+    if (!empty($redSubscriptionCheckoutReturn['claimed'])) {
+        red_addon_subscription_checkout_return_emit(
+            $redSubscriptionCheckoutReturn
+        );
+        exit;
+    }
+}
+
 $redAddonAssetRequestUri = $_SERVER['REQUEST_URI'] ?? '';
 if (is_string($redAddonAssetRequestUri)
     && str_starts_with($redAddonAssetRequestUri, '/_red/addons/')
