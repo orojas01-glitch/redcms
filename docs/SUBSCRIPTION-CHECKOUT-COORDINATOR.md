@@ -28,7 +28,7 @@ persist it, emit an HTTP response, call `location.assign`, resolve a secret,
 contact Stripe, create a Checkout Session or subscription, process a webhook,
 or grant entitlement. Those are later launch gates with separate authorization.
 
-## Unlinked public browser handoff
+## Gated public browser handoff
 
 `includes/addon_subscription_checkout_public_response_helpers.php` now joins
 only an exact completed or replayed Store Lite subscription-intent execution to
@@ -48,10 +48,17 @@ rehearsal to inspect the validated URL without navigating away or contacting
 Stripe. Foreign origins, malformed responses, ordinary mutation responses, and
 network failures retain their existing fail-closed behavior.
 
-The response helper and emitter are deliberately not called by `index.php` or
-the operational public-mutation endpoint yet. Linking them requires the later
-provider operation to supply a real, validated Checkout result in the same
-request after the subscription intent commits.
+The operational public-mutation endpoint now links this handoff only for the
+exact Store Lite subscription-intent route. It recomputes the subject and
+offer from the already validated request, requires an explicit server-local
+Sandbox enable flag and authorization hash, resolves only the Stripe API-key
+scope, records the one-attempt provider journal before contact, persists the
+pending/inactive lifecycle, and emits the Checkout URL only after every stage
+completes. Ordinary public mutations retain their existing response path.
+
+The front controller also owns fixed no-store return pages at
+`/subscription/complete` and `/subscription/cancel`. The success copy does not
+claim entitlement before a signed provider event activates it.
 
 ## Real provider-operation boundary
 
@@ -103,6 +110,7 @@ Run the focused and cross-repository offline checks with:
 ```text
 php scripts/addon-subscription-checkout-coordinator-self-test.php
 php scripts/addon-subscription-checkout-public-response-self-test.php
+php scripts/addon-subscription-checkout-public-runtime-self-test.php
 php scripts/addon-subscription-checkout-provider-operation-self-test.php
 php scripts/addon-subscription-event-coordinator-self-test.php
 php scripts/addon-subscription-event-delivery-coordinator-self-test.php
@@ -124,10 +132,10 @@ navigation, and foreign-origin refusal.
 
 ## Remaining launch gates
 
-This internal coordinator is not a public Checkout bridge. Launch still needs:
+The public bridge remains disabled by default. Launch still needs:
 
-1. separately authorized server configuration/deployment plus Stripe Sandbox
-   webhook endpoint activation and test-event delivery;
-2. one real browser navigation and return-path rehearsal;
-3. final supported-server recovery and client-isolation acceptance; and
-4. separately authorized installation and deployment to `demo.red-sphere.com`.
+1. separately authorized server configuration/deployment;
+2. one published Store Lite subscription offer and component placement;
+3. one real Sandbox browser navigation, return, and provider-originated
+   activation-event rehearsal; and
+4. separately authorized live-mode configuration and smoke purchase.

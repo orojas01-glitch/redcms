@@ -16,6 +16,18 @@ require_once __DIR__ . '/addon_public_mutation_dispatch_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_frankenphp_ingress_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_direct_ingress_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_response_emitter_helpers.php';
+require_once __DIR__
+    . '/addon_subscription_checkout_public_runtime_helpers.php';
+
+if (!function_exists('red_addon_public_mutation_endpoint_response_valid')) {
+    function red_addon_public_mutation_endpoint_response_valid($response)
+    {
+        return red_addon_public_mutation_response_emitter_valid($response)
+            || red_addon_subscription_checkout_public_response_valid(
+                $response
+            );
+    }
+}
 
 if (!function_exists('red_addon_public_mutation_endpoint_result')) {
     function red_addon_public_mutation_endpoint_result(
@@ -210,7 +222,7 @@ if (!function_exists('red_addon_public_mutation_endpoint_dispatch')) {
             );
             return $result;
         }
-        if (!red_addon_public_mutation_response_emitter_valid(
+        if (!red_addon_public_mutation_endpoint_response_valid(
             $dispatch['response']
         )) {
             $result = red_addon_public_mutation_endpoint_result(
@@ -251,13 +263,40 @@ if (!function_exists('red_addon_public_mutation_endpoint_dispatch_current')) {
             : red_addon_public_mutation_server_request_result(
                 'transport_unavailable'
             );
-        return red_addon_public_mutation_endpoint_dispatch(
+        $result = red_addon_public_mutation_endpoint_dispatch(
             $connection,
             $method,
             $requestTarget,
             $capture,
             $enabled
         );
+        if ($enabled
+            && $method === 'POST'
+            && red_addon_subscription_checkout_public_runtime_target(
+                $requestTarget
+            )
+            && ($result['claimed'] ?? false) === true
+            && ($result['reason'] ?? '') === 'endpoint_ready'
+        ) {
+            $result['response'] =
+                red_addon_subscription_checkout_public_runtime_complete(
+                    $connection,
+                    dirname(__DIR__),
+                    $requestTarget,
+                    $capture,
+                    [
+                        'claimed' => $result['claimed'],
+                        'response' => $result['response'],
+                        'reason' => 'completed',
+                    ]
+                );
+            if (!red_addon_subscription_checkout_public_response_valid(
+                $result['response']
+            )) {
+                $result['reason'] = 'endpoint_unavailable';
+            }
+        }
+        return $result;
     }
 }
 
@@ -288,7 +327,7 @@ if (!function_exists('red_addon_public_mutation_endpoint_result_valid')) {
             ],
             true
         )
-            && red_addon_public_mutation_response_emitter_valid(
+            && red_addon_public_mutation_endpoint_response_valid(
                 $result['response']
             );
     }
@@ -303,6 +342,14 @@ if (!function_exists('red_addon_public_mutation_endpoint_emit')) {
             throw new InvalidArgumentException(
                 'Public-mutation endpoint result is invalid.'
             );
+        }
+        if (red_addon_subscription_checkout_public_response_valid(
+            $result['response']
+        )) {
+            red_addon_subscription_checkout_public_response_emit(
+                $result['response']
+            );
+            return;
         }
         red_addon_public_mutation_response_emit($result['response']);
     }
