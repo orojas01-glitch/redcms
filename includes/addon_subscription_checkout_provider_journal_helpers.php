@@ -245,7 +245,7 @@ if (!function_exists('red_addon_subscription_provider_journal')) {
                      SELECT ?, ?, ?, UNHEX(?), UNHEX(?), UNHEX(?), \'started\'
                      FROM RED_Addon_Installations
                      WHERE PackageID=\'redcms.store-lite-stripe-checkout\'
-                       AND PackageVersion=\'0.1.14\'
+                       AND PackageVersion=\'0.1.15\'
                        AND LifecycleState=\'enabled\''
                 );
                 $parameters = [
