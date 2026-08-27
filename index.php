@@ -115,6 +115,11 @@ if (is_string($redSubscriptionWebhookTarget)
         }
         $redSubscriptionWebhookConnection = null;
         try {
+            if (!red_runtime_database_constants_bootstrap()) {
+                throw new RuntimeException(
+                    'Subscription runtime database configuration is unavailable.'
+                );
+            }
             $redSubscriptionWebhookConnection = @mysqli_connect(
                 red_config_value(
                     'DBHOST',
@@ -267,6 +272,11 @@ if (is_string($redPublicMutationMethod)
     if (red_addon_public_mutation_endpoint_enabled()) {
         $redPublicMutationConnection = null;
         try {
+            if (!red_runtime_database_constants_bootstrap()) {
+                throw new RuntimeException(
+                    'Public-mutation runtime database configuration is unavailable.'
+                );
+            }
             $redPublicMutationConnection = @mysqli_connect(
                 red_config_value(
                     'DBHOST',

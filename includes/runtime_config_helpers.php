@@ -88,4 +88,40 @@ if (!function_exists('red_server_config_value')) {
     }
 }
 
+if (!function_exists('red_runtime_database_constants_bootstrap')) {
+    /**
+     * Defines only the legacy database constants required by package-owned
+     * runtime services on early front-controller routes. Values come from the
+     * server-only environment/local configuration boundary, never request
+     * headers. Existing constants are preserved exactly.
+     */
+    function red_runtime_database_constants_bootstrap()
+    {
+        $definitions = [
+            'DBHOST' => ['DBHOST', ['RED_DB_HOST', 'DBHOST'], 'localhost'],
+            'DBUSER' => ['DBUSER', ['RED_DB_USER', 'DBUSER'], ''],
+            'DBPASS' => ['DBPASS', ['RED_DB_PASS', 'DBPASS'], ''],
+            'DBNAME' => ['DBNAME', ['RED_DB_NAME', 'DBNAME'], ''],
+        ];
+        foreach ($definitions as $constant => $definition) {
+            if (!defined($constant)) {
+                $value = red_server_config_value(
+                    $definition[0],
+                    $definition[1],
+                    $definition[2]
+                );
+                if (!is_string($value)
+                    || !define($constant, $value)
+                ) {
+                    return false;
+                }
+            }
+            if (!is_string(constant($constant))) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 ?>
