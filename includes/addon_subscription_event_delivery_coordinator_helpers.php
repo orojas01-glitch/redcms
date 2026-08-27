@@ -66,7 +66,11 @@ if (!function_exists('red_addon_subscription_delivery_envelope_valid')) {
             || ($envelope['valid'] ?? null) !== true
             || ($envelope['verification'] ?? '') !== 'verified'
             || ($envelope['providerEnvironment'] ?? '') !== 'sandbox'
-            || ($envelope['apiVersion'] ?? '') !== '2024-09-30.acacia'
+            || !in_array(
+                $envelope['apiVersion'] ?? '',
+                ['2024-09-30.acacia', '2026-07-29.dahlia'],
+                true
+            )
             || !red_addon_valid_sha256(
                 $envelope['eventRefSha256'] ?? null
             )
