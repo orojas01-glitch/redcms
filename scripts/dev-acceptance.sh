@@ -61,6 +61,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-subscription-checkout-coordinator-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-subscription-checkout-public-response-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-subscription-checkout-public-runtime-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/runtime-database-constants-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-subscription-checkout-provider-operation-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-subscription-event-coordinator-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-subscription-event-delivery-coordinator-self-test.php"
