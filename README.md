@@ -21,7 +21,7 @@ Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
 
 The current offline subscription-event release gate binds Store Lite `0.1.50`
-to Stripe adapter `0.1.14` through one restartable internal coordinator. It
+to Stripe adapter `0.1.15` through one restartable internal coordinator. It
 joins signature verification, transactional receipt claim, raw-event
 projection, and lifecycle application. A disposable failure after lifecycle
 commit recovers with the same result hash and no second Store Lite mutation.

@@ -1,7 +1,7 @@
 # Subscription Event Delivery Coordinator
 
 Status: complete as an unlinked internal recovery boundary for Store Lite
-`0.1.50` and Stripe adapter `0.1.14`.
+`0.1.50` and Stripe adapter `0.1.15`.
 
 The coordinator joins four previously separate stages in one operation:
 
@@ -32,7 +32,7 @@ rejected before invocation; terminal lifecycle refusal is journaled and safely
 acknowledged without provider retry.
 
 The disposable database rehearsal installs and enables exact Store Lite
-`0.1.50` and Stripe adapter `0.1.14` packages, executes the same interruption
+`0.1.50` and Stripe adapter `0.1.15` packages, executes the same interruption
 and recovery against the real transactional receipt and Store Lite lifecycle
 tables, proves only one additional lifecycle-history row, and removes the
 database, grant, and staged project while the configured primary database hash

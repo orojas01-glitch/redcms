@@ -57,7 +57,7 @@ if (!function_exists('red_addon_subscription_webhook_runtime_run')) {
                 || !is_array($store)
                 || !is_array($adapter)
                 || ($store['manifest']['version'] ?? '') !== '0.1.50'
-                || ($adapter['manifest']['version'] ?? '') !== '0.1.14'
+                || ($adapter['manifest']['version'] ?? '') !== '0.1.15'
             ) {
                 return $unavailable;
             }
@@ -175,7 +175,7 @@ if (!function_exists('red_addon_subscription_webhook_runtime_run')) {
                         'storePackageVersion' => '0.1.50',
                         'storeService' => 'commerce.subscriptions',
                         'stripePackageId' => $adapterId,
-                        'stripePackageVersion' => '0.1.14',
+                        'stripePackageVersion' => '0.1.15',
                         'stripeAdapter' => $adapterId . '/checkout',
                     ],
                     $signatureVerifier,
