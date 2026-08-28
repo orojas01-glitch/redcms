@@ -177,10 +177,16 @@ if (!function_exists('red_addon_subscription_event_journal')) {
             if ($row === []) return red_addon_subscription_event_journal_result('absent');
             if (!is_array($row)
                 || $row['rawBodySha256'] !== $evidence['rawBodySha256']
-                || $row['signatureEvidenceSha256']
-                    !== $evidence['signatureEvidenceSha256']
+                || !red_addon_valid_sha256(
+                    $row['signatureEvidenceSha256']
+                )
                 || $row['providerEventType'] !== $evidence['providerEventType']
-                || $row['claimStateSha256'] !== $evidence['claimStateSha256']
+                || !red_addon_valid_sha256($row['claimStateSha256'])
+                || $row['signedAtEpoch'] < 1
+                || $row['receivedAtEpoch'] < 1
+                || abs(
+                    $row['receivedAtEpoch'] - $row['signedAtEpoch']
+                ) > 300
                 || !in_array($row['status'], ['verified','applied','refused'], true)
             ) return $unavailable;
             $result = red_addon_subscription_event_journal_result($row['status']);
@@ -214,7 +220,7 @@ if (!function_exists('red_addon_subscription_event_journal')) {
                             'verified', ?, ?
                      FROM RED_Addon_Installations
                      WHERE PackageID='redcms.store-lite-stripe-checkout'
-                       AND PackageVersion='0.1.16'
+                       AND PackageVersion='0.1.17'
                        AND LifecycleState='enabled'"
                 );
                 $parameters = [

@@ -1,7 +1,7 @@
 # Subscription Event Delivery Coordinator
 
 Status: complete as an unlinked internal recovery boundary for Store Lite
-`0.1.50` and Stripe adapter `0.1.16`.
+`0.1.50` and Stripe adapter `0.1.17`.
 
 The coordinator joins four previously separate stages in one operation:
 
@@ -20,7 +20,12 @@ lifecycle-result hash without a second Store Lite mutation or adapter
 normalization, and the receipt completes. A lifecycle refusal with a valid
 projected intent closes as `refused`; an event that cannot safely project an
 intent remains visibly `verified` and fail-closed for later operational review.
-With adapter `0.1.16`, an unexpanded completed Checkout is a valid deferred
+Stripe may sign each attempt for the same immutable event with a fresh
+timestamp. After that fresh signature succeeds, receipt recovery matches the
+event-reference hash, exact raw-body hash, and provider event type, then reuses
+the original receipt claim fingerprint. A changed body or event type still
+fails closed, and the stored signing evidence is never replaced.
+With adapter `0.1.17`, an unexpanded completed Checkout is a valid deferred
 projection: it cannot supply an authoritative subscription period, so the
 normalizer terminally refuses and acknowledges it without mutation. The
 correlated current Dahlia paid invoice supplies subscription metadata through
@@ -35,11 +40,12 @@ signature refusal, malformed correlation metadata, and private-data exclusion.
 It also invokes the exact adapter manifest route through the core webhook
 boundary with only `stripe.webhook-secret` available. Expanded secret scope is
 rejected before invocation; terminal lifecycle refusal is journaled and safely
-acknowledged without provider retry. The focused fixture now passes 30
-assertions, including the unexpanded Checkout deferral.
+acknowledged without provider retry. The focused fixture now passes 31
+assertions, including the unexpanded Checkout deferral and freshly signed
+retry recovery.
 
 The disposable database rehearsal installs and enables exact Store Lite
-`0.1.50` and Stripe adapter `0.1.16` packages, executes the same interruption
+`0.1.50` and Stripe adapter `0.1.17` packages, executes the same interruption
 and recovery against the real transactional receipt and Store Lite lifecycle
 tables, proves only one additional lifecycle-history row, and removes the
 database, grant, and staged project while the configured primary database hash

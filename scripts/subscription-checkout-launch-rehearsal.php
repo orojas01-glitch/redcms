@@ -200,7 +200,7 @@ try {
             && is_array($storePackage)
             && is_array($adapterPackage)
             && ($storePackage['manifest']['version'] ?? '') === '0.1.50'
-            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.16',
+            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.17',
         'exact Store Lite and Stripe launch candidates are trusted'
     );
 
@@ -602,7 +602,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.16',
+            'stripePackageVersion' => '0.1.17',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -621,7 +621,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.16',
+            'stripePackageVersion' => '0.1.17',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -755,7 +755,7 @@ try {
         'storePackageVersion' => '0.1.50',
         'storeService' => 'commerce.subscriptions',
         'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-        'stripePackageVersion' => '0.1.16',
+        'stripePackageVersion' => '0.1.17',
         'stripeAdapter' =>
             'redcms.store-lite-stripe-checkout/checkout',
     ];
@@ -807,8 +807,7 @@ try {
         $eventBinding,
         $eventSignatureVerifier,
         $eventProjector,
-        $eventJournal,
-        $eventReceivedAt
+        $eventJournal
     ): RED_Addon_Webhook_Result {
         return red_addon_subscription_event_webhook_handle(
             $webhookRequest,
@@ -820,25 +819,45 @@ try {
                 red_addon_service_invoke($service, $operation, $input),
             static fn ($adapter, $operation, $input) =>
                 red_addon_adapter_invoke($adapter, $operation, $input),
-            $eventReceivedAt + 10
+            $webhookRequest->receivedAt() + 10
         );
     };
     $eventRoute =
         'redcms.store-lite-stripe-checkout/provider-events';
-    $invokeEventRoute = static fn (): array =>
+    $invokeEventRoute = static fn (array $request): array =>
         red_addon_webhook_invoke_registered(
             $eventRoute,
-            $eventRequest['rawBody'],
-            $eventRequest['signatureHeader'],
-            $eventRequest['receivedAt'],
+            $request['rawBody'],
+            $request['signatureHeader'],
+            $request['receivedAt'],
             $adapterPackageId,
             $eventWebhookHandler,
             $adapterPackage['manifest'],
             $eventWebhookAccess
         );
-    $eventDeliveryInterrupted = $invokeEventRoute();
-    $eventDeliveryRecovered = $invokeEventRoute();
-    $eventDeliveryReplay = $invokeEventRoute();
+    $retryEventRequest = static function (
+        array $request,
+        int $receivedAt
+    ) use ($eventSecret): array {
+        return [
+            'rawBody' => $request['rawBody'],
+            'signatureHeader' => 't=' . $receivedAt . ',v1=' . hash_hmac(
+                'sha256',
+                $receivedAt . '.' . $request['rawBody'],
+                $eventSecret
+            ),
+            'receivedAt' => $receivedAt,
+        ];
+    };
+    $eventDeliveryInterrupted = $invokeEventRoute($eventRequest);
+    $eventDeliveryRecovered = $invokeEventRoute($retryEventRequest(
+        $eventRequest,
+        $eventReceivedAt + 120
+    ));
+    $eventDeliveryReplay = $invokeEventRoute($retryEventRequest(
+        $eventRequest,
+        $eventReceivedAt + 240
+    ));
     red_subscription_launch_assert(
         ($eventDeliveryInterrupted['invoked'] ?? false) === true
             && ($eventDeliveryInterrupted['success'] ?? true) === false
@@ -880,7 +899,7 @@ try {
                         $intentReference
                     ) . "'"
             ) === 'active:active:2',
-        'raw signed subscription event recovers after lifecycle commit and replays without another lifecycle row ('
+        'freshly signed retries recover after lifecycle commit and replay without another lifecycle row ('
             . implode(':', [
                 (string) ($eventDeliveryInterrupted['statusCode'] ?? 0),
                 $eventDeliveryRecovered['data']['outcome'] ?? 'missing',
@@ -1014,7 +1033,7 @@ try {
             'schema' => 1,
             'purpose' => 'subscription-sandbox-secret-availability',
             'packageId' => $adapterPackageId,
-            'packageVersion' => '0.1.16',
+            'packageVersion' => '0.1.17',
             'settingKey' => 'stripe.secret-key',
             'settingsStateSha256' =>
                 $secretAccessEvidence['stateSha256'] ?? '',
@@ -1037,7 +1056,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.16',
+                'stripePackageVersion' => '0.1.17',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1058,7 +1077,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.16',
+                'stripePackageVersion' => '0.1.17',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1183,7 +1202,7 @@ try {
         'mode' => $runMode,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.50',
-        'stripeAdapterVersion' => '0.1.16',
+        'stripeAdapterVersion' => '0.1.17',
         'assertions' => $assertions,
         'networkAccess' => false,
         'providerContact' => false,

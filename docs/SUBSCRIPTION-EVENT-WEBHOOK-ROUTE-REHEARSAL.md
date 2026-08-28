@@ -1,7 +1,7 @@
 # Subscription Event Webhook Route Rehearsal
 
 Status: complete as a non-operational internal rehearsal for Stripe adapter
-`0.1.16` and Store Lite `0.1.50`.
+`0.1.17` and Store Lite `0.1.50`.
 
 The rehearsal passes the exact manifest declaration
 `redcms.store-lite-stripe-checkout/provider-events` through the core webhook
