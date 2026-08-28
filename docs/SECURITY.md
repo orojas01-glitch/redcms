@@ -2193,7 +2193,7 @@ The first private demo installation is client-local; core performs no package
 deployment and receives no authority over later clients.
 
 The internal subscription Checkout coordinator binds only Store Lite `0.1.50`
-service `commerce.subscriptions` to Stripe Checkout adapter `0.1.17`. It loads
+service `commerce.subscriptions` to Stripe Checkout adapter `0.1.18`. It loads
 one authoritative intent/offer projection, prepares and accepts only synthetic
 Sandbox evidence, independently validates the exact Stripe hosted URL, and
 persists only a Session-reference hash plus pending/inactive lifecycle evidence.
@@ -2216,7 +2216,7 @@ localhost and proves foreign origins fail closed. The new response helper and
 emitter are absent from `index.php`; provider contact, real Checkout, response
 linking, external browser navigation, webhooks, and deployment remain gated.
 
-Adapter `0.1.17` and the unlinked core provider-operation coordinator retain the
+Adapter `0.1.18` and the unlinked core provider-operation coordinator retain the
 final offline real-POST path. Core requires one short-lived, one-attempt
 authority packet and a durable adapter-owned journal. The journal records a
 hash-only `started` row before adapter access, then a hash-only `completed` row
@@ -2229,7 +2229,7 @@ effect occurs. The coordinator, journal, and response helper remain absent from
 the front controller; owner authorization, secret resolution, real Stripe
 contact, browser navigation, webhooks, and deployment remain gated.
 
-Store Lite `0.1.50`, Stripe adapter `0.1.17`, and the unlinked core
+Store Lite `0.1.50`, Stripe adapter `0.1.18`, and the unlinked core
 subscription-event coordinator add the first provider-neutral entitlement
 bridge. Core loads the current lifecycle from Store Lite, passes it with one
 already-verified bounded event to the adapter, then applies only the adapter's
@@ -2261,7 +2261,7 @@ signature header, or secret. The fixture joins this boundary to the inert
 Stripe `0.1.12` signature verifier using synthetic data only. No public
 dispatcher or front controller calls the boundary.
 
-The Stripe adapter `0.1.17` route composition requires that
+The Stripe adapter `0.1.18` route composition requires that
 same boundary with the restartable delivery coordinator. It requires the exact
 manifest route and package owner plus a request-local access object containing
 only `stripe.webhook-secret`. The process-local synthetic value is cleared
@@ -2279,13 +2279,13 @@ supplies both. A declared length must be no more than 262,144 bytes; missing
 length or exact chunked delivery is accepted only because the raw input read is
 capped at 262,145 bytes and then refused above 262,144. Conflicting length and
 transfer metadata is refused. Transport preflight happens before database
-access or body I/O. Runtime assembly pins Store Lite `0.1.50` and Stripe adapter `0.1.17`,
+access or body I/O. Runtime assembly pins Store Lite `0.1.50` and Stripe adapter `0.1.18`,
 requires both enabled/current, and resolves only `stripe.webhook-secret`.
 Public responses contain only `ok` or stable generic errors with no-store,
 nosniff, and exact length headers. Server-local enablement must explicitly set
 `sandbox` mode; live events are still rejected by the adapter contract.
 
-Adapter `0.1.17` also separates Checkout acknowledgement from entitlement
+Adapter `0.1.18` also separates Checkout acknowledgement from entitlement
 activation for real Stripe payloads. An unexpanded completed Checkout carries
 the subscription reference but no authoritative billing-period end, so it is
 projected as `complete_paid_deferred`, terminally refused by the lifecycle

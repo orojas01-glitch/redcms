@@ -17,7 +17,7 @@ $binding = [
     'storePackageVersion' => '0.1.50',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.17',
+    'stripePackageVersion' => '0.1.18',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $offer = [
@@ -162,7 +162,7 @@ try {
                 'valid' => true,
                 'status' => 'subscription_checkout_session_created',
                 'packageId' => 'redcms.store-lite-stripe-checkout',
-                'packageVersion' => '0.1.17',
+                'packageVersion' => '0.1.18',
                 'operation' => $operation,
                 'intentReference' => $intentReference,
                 'checkoutSessionRef' => $session,

@@ -200,7 +200,7 @@ try {
             && is_array($storePackage)
             && is_array($adapterPackage)
             && ($storePackage['manifest']['version'] ?? '') === '0.1.50'
-            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.17',
+            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.18',
         'exact Store Lite and Stripe launch candidates are trusted'
     );
 
@@ -602,7 +602,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.17',
+            'stripePackageVersion' => '0.1.18',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -621,7 +621,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.17',
+            'stripePackageVersion' => '0.1.18',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -718,7 +718,7 @@ try {
     $rawSubscriptionEvent = json_encode([
         'id' => $eventRef,
         'object' => 'event',
-        'api_version' => '2024-09-30.acacia',
+        'api_version' => '2026-07-29.dahlia',
         'created' => 1787630500,
         'data' => ['object' => [
             'id' => $sessionRef,
@@ -755,7 +755,7 @@ try {
         'storePackageVersion' => '0.1.50',
         'storeService' => 'commerce.subscriptions',
         'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-        'stripePackageVersion' => '0.1.17',
+        'stripePackageVersion' => '0.1.18',
         'stripeAdapter' =>
             'redcms.store-lite-stripe-checkout/checkout',
     ];
@@ -912,20 +912,49 @@ try {
     $renewalBody = json_encode([
         'id' => $renewalEventRef,
         'object' => 'event',
-        'api_version' => '2024-09-30.acacia',
+        'api_version' => '2026-07-29.dahlia',
         'created' => 1787630650,
         'data' => ['object' => [
             'id' => 'in_SubscriptionLaunchRenewal123456',
             'object' => 'invoice',
-            'subscription' => 'sub_SubscriptionLaunchLifecycle1234',
-            'subscription_details' => ['metadata' => [
-                'redcms_intent_reference' => $intentReference,
-                'redcms_offer_state_sha256' =>
-                    $intentCreated['offerStateSha256'],
-            ]],
-            'period_end' => 1792987200,
+            'parent' => [
+                'type' => 'subscription_details',
+                'subscription_details' => [
+                    'metadata' => [
+                        'redcms_intent_reference' => $intentReference,
+                        'redcms_offer_state_sha256' =>
+                            $intentCreated['offerStateSha256'],
+                    ],
+                    'subscription' =>
+                        'sub_SubscriptionLaunchLifecycle1234',
+                ],
+            ],
+            'lines' => [
+                'object' => 'list',
+                'data' => [[
+                    'id' => 'il_SubscriptionLaunchRenewal123456',
+                    'object' => 'line_item',
+                    'livemode' => false,
+                    'metadata' => [
+                        'redcms_intent_reference' => $intentReference,
+                        'redcms_offer_state_sha256' =>
+                            $intentCreated['offerStateSha256'],
+                    ],
+                    'parent' => [
+                        'type' => 'subscription_item_details',
+                        'subscription_item_details' => [
+                            'subscription' =>
+                                'sub_SubscriptionLaunchLifecycle1234',
+                        ],
+                    ],
+                    'period' => [
+                        'start' => 1790308800,
+                        'end' => 1792987200,
+                    ],
+                ]],
+            ],
+            'period_end' => 1787630650,
             'status' => 'paid',
-            'paid' => true,
             'customer_email' =>
                 'private-renewal@subscription-launch.example.test',
         ]],
@@ -945,6 +974,23 @@ try {
                 $eventSecret
             ),
     ];
+    $renewalSignatureHeader = $renewalServer['HTTP_STRIPE_SIGNATURE'];
+    $renewalEnvelopeDiagnostic =
+        RED_CMS_Store_Lite_Stripe_Sandbox_Webhook_Signature_Envelope::verify(
+            $renewalBody,
+            $renewalSignatureHeader,
+            $eventSecret,
+            $renewalReceivedAt
+        );
+    $renewalDecodedDiagnostic =
+        RED_CMS_Store_Lite_Stripe_Bounded_Json_Decoder::decode(
+            $renewalBody
+        );
+    $renewalProjectionDiagnostic =
+        RED_CMS_Store_Lite_Stripe_Sandbox_Subscription_Raw_Event_Projector::project(
+            $renewalEnvelopeDiagnostic,
+            $renewalDecodedDiagnostic['value'] ?? []
+        );
     $renewalCapture = red_addon_subscription_webhook_capture(
         $renewalServer,
         $renewalBody,
@@ -958,13 +1004,21 @@ try {
         JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
     ));
     unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+    $renewalRuntimeEvidence = [];
     try {
-        $renewalRunner = static fn (array $request): array =>
-            red_addon_subscription_webhook_runtime_run(
+        $renewalRunner = static function (array $request) use (
+            $connection,
+            $projectRoot,
+            &$renewalRuntimeEvidence
+        ): array {
+            $result = red_addon_subscription_webhook_runtime_run(
                 $connection,
                 $projectRoot,
                 $request
             );
+            $renewalRuntimeEvidence[] = $result;
+            return $result;
+        };
         $renewalFirst = red_addon_subscription_webhook_dispatch(
             'POST',
             red_addon_subscription_webhook_path(),
@@ -1023,7 +1077,34 @@ try {
                 === $previousSecretReferences
             && getenv('RED_ADDON_SECRET_VALUES_JSON')
                 === $previousSecretValues,
-        'production-shaped endpoint resolves only a synthetic webhook secret, renews once, replays, and restores the environment'
+        'production-shaped endpoint accepts the Dahlia paid invoice without a legacy paid boolean, resolves only a synthetic webhook secret, renews once, replays, and restores the environment ('
+            . implode(':', [
+                ($renewalCapture['valid'] ?? false) ? 'captured' : 'capture-failed',
+                (string) ($renewalFirst['status'] ?? 0),
+                $renewalFirst['body'] ?? 'no-first-body',
+                (string) ($renewalReplay['status'] ?? 0),
+                $renewalReplay['body'] ?? 'no-replay-body',
+                json_encode(
+                    $renewalRuntimeEvidence,
+                    JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+                ),
+                json_encode([
+                    'envelope' =>
+                        $renewalEnvelopeDiagnostic['valid'] ?? false,
+                    'decoder' =>
+                        $renewalDecodedDiagnostic['valid'] ?? false,
+                    'projection' =>
+                        $renewalProjectionDiagnostic['valid'] ?? false,
+                    'projectionErrors' =>
+                        $renewalProjectionDiagnostic['errors'] ?? [],
+                    'providerStatus' =>
+                        $renewalProjectionDiagnostic['verifiedEvent']
+                            ['providerStatus'] ?? null,
+                    'periodEnd' =>
+                        $renewalProjectionDiagnostic['verifiedEvent']
+                            ['currentPeriodEndEpoch'] ?? null,
+                ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            ]) . ')'
     );
     } else {
         $providerJournal =
@@ -1033,7 +1114,7 @@ try {
             'schema' => 1,
             'purpose' => 'subscription-sandbox-secret-availability',
             'packageId' => $adapterPackageId,
-            'packageVersion' => '0.1.17',
+            'packageVersion' => '0.1.18',
             'settingKey' => 'stripe.secret-key',
             'settingsStateSha256' =>
                 $secretAccessEvidence['stateSha256'] ?? '',
@@ -1056,7 +1137,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.17',
+                'stripePackageVersion' => '0.1.18',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1077,7 +1158,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.17',
+                'stripePackageVersion' => '0.1.18',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1202,7 +1283,7 @@ try {
         'mode' => $runMode,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.50',
-        'stripeAdapterVersion' => '0.1.17',
+        'stripeAdapterVersion' => '0.1.18',
         'assertions' => $assertions,
         'networkAccess' => false,
         'providerContact' => false,

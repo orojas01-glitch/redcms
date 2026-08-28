@@ -25,7 +25,7 @@ Stripe adapter `0.1.12` signature-envelope verifier using a 20 KB synthetic
 event and process-local synthetic signing secret. It also proves the ordinary
 adapter request still rejects a 20 KB payload.
 
-The later subscription delivery fixture now joins the exact adapter `0.1.17`
+The later subscription delivery fixture now joins the exact adapter `0.1.18`
 manifest declaration and one-secret request scope to the restartable event
 coordinator. Applied, recovered, replayed, and terminally refused deliveries
 return only bounded acknowledgement and hash evidence. Invalid signatures use
