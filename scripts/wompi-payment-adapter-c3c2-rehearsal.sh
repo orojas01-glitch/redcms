@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs exact Wompi C3C2 two-client enable/disable isolation.'
+    printf '%s\n' 'Runs current Store Lite 0.1.50 and Wompi 0.1.5 two-client enable/disable isolation.'
 }
 
 if [[ $# -gt 0 ]]; then
@@ -23,8 +23,8 @@ source "$SCRIPT_DIR/db-common.sh"
 
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite}"
 WOMPI_REPOSITORY="${RED_WOMPI_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite-wompi}"
-STORE_REVISION='f7de77eb1694fb6003340632c5018024753fe1fa'
-WOMPI_REVISION='5f372b3a2e35723f638a03cf089deedc238c99a4'
+STORE_REVISION='56727d2de0bbd2c476316f62001a429b354c599f'
+WOMPI_REVISION='cc2ddd03ab54f663a089f7d059d802180e555d15'
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 CLIENT_A_DATABASE="${RED_WOMPI_C3C2_CLIENT_A_DATABASE:-redcms_payment_adapter_db_c2a_$$}"
 CLIENT_B_DATABASE="${RED_WOMPI_C3C2_CLIENT_B_DATABASE:-redcms_wompi_c3c2_b_$$}"

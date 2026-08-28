@@ -30,10 +30,12 @@ client profile, dry-run-first archive builder, exact revision/integrity checks,
 secret-pattern scan, release evidence, and checksum manifest. A fresh
 Store Lite `0.1.50` plus Wompi `0.1.5` disposable rehearsal now passes current
 package discovery, disabled installation, atomic enablement, the sealed
-no-network operation, and exact database/grant cleanup. Wompi remains blocked
-before its first merchant-account request. PayPal is visible in the provider
-roadmap but is refused by the release builder until its separate adapter
-package exists. See
+no-network operation, and exact database/grant cleanup. A separate current
+two-client rehearsal passes 21 isolation assertions and removes both disposable
+databases and grants without changing the configured primary. Wompi remains
+blocked before its first merchant-account request. PayPal is visible in the
+provider roadmap but is refused by the release builder until its separate
+adapter package exists. See
 [`CLIENT-DEPLOYMENT-KIT.md`](CLIENT-DEPLOYMENT-KIT.md) and
 [`PAYMENT-PROVIDER-READINESS.md`](PAYMENT-PROVIDER-READINESS.md).
 

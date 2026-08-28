@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "core": {
     "id": "redcms",
     "version": "5.1.0",
