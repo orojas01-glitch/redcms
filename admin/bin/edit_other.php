@@ -10,6 +10,7 @@ require $_SERVER['DOCUMENT_ROOT'].'/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_article_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_authorization_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_other_ui_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_content_revision_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/includes/admin_seo_helpers.php';
 
 $RecordID = (int) ($_POST['RecordID'] ?? 0);
@@ -65,6 +66,7 @@ $articleOptions = red_admin_other_preserve_option(
     $Article
 );
 $seoValues = red_admin_seo_values($db->connection, 'article', $RecordID);
+$currentHash = red_admin_content_revision_current_hash($db->connection, $RecordID);
 $db->close();
 
 $csrfToken = red_csrf_token();
@@ -93,7 +95,9 @@ if ($pathParts !== []) {
     $publicUrl .= '/'.implode('/', $pathParts);
 }
 
-$html = red_admin_article_scalar($row['ShortDesc'] ?? '');
+$shortHtml = red_admin_article_scalar($row['ShortDesc'] ?? '');
+$longHtml = red_admin_article_scalar($row['LongDesc'] ?? '');
+$legacyMismatch = $shortHtml !== $longHtml;
 red_admin_render_other_form([
     'mode' => 'edit',
     'returnTarget' => 'edit_content_grid',
@@ -108,8 +112,11 @@ red_admin_render_other_form([
     'positionOrder' => $positionOrder,
     'positionOptions' => $positionOptions,
     'varPosition' => $VarPosition,
-    'html' => $html,
-    'preferredEditorMode' => red_admin_other_preferred_editor_mode($html, 'edit'),
+    'html' => $shortHtml,
+    'shortHtml' => $shortHtml,
+    'longHtml' => $longHtml,
+    'legacyMismatch' => $legacyMismatch,
+    'preferredEditorMode' => red_admin_other_preferred_editor_mode($shortHtml, 'edit'),
     'sectionOptions' => $sectionOptions,
     'categoryOptions' => $categoryOptions,
     'subCategoryOptions' => $subCategoryOptions,
@@ -122,6 +129,7 @@ red_admin_render_other_form([
     'uploadUrls' => $uploadUrls,
     'publicUrl' => $publicUrl,
     'recordId' => $RecordID,
+    'currentHash' => $currentHash,
     'editedBy' => red_admin_text($_SESSION['alias'] ?? ''),
     'csrfToken' => $csrfToken,
     'seoValues' => $seoValues,

@@ -6,6 +6,13 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
+RED-CMS 5.1.1 is the focused maintenance release for reliable Other-component
+editing. It makes one administrator HTML source canonical across embedded and
+dedicated routes, mirrors exact bytes to `ShortDesc` and `LongDesc`, and
+requires explicit reconciliation when a legacy Other record already differs.
+It does not change Article's intentionally independent short and long fields.
+See [RED-CMS 5.1.1 Release Notes](docs/RELEASE-NOTES-5.1.1.md).
+
 RED-CMS 5.1.0 was formally released on 2026-08-15 as
 [`v5.1.0`](https://github.com/orojas01-glitch/redcms/releases/tag/v5.1.0).
 The clean installer, all 47 migrations, normalized schema, canonical routes,
@@ -1158,6 +1165,7 @@ database.
 ## Documentation
 
 - [Administrator Manual Introduction](docs/ADMIN-MANUAL-INTRODUCTION.md)
+- [RED-CMS 5.1.1 Release Notes](docs/RELEASE-NOTES-5.1.1.md)
 - [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Theme Author Guide](docs/THEME-AUTHOR-GUIDE.md)

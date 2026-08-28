@@ -2,9 +2,9 @@
 /**
  * Shared presentation helpers for the modern Other create/edit workspace.
  *
- * Other.ShortDesc remains the authoritative trusted HTML source. The visual
- * editor is an unnamed staging surface so opening or saving an existing block
- * cannot silently normalize its stored markup.
+ * Other uses one trusted administrator HTML source mirrored to ShortDesc and
+ * LongDesc. The visual editor is an unnamed staging surface so opening or
+ * saving an existing block cannot silently normalize its stored markup.
  */
 
 require_once __DIR__.'/admin_article_helpers.php';
@@ -93,6 +93,9 @@ if (!function_exists('red_admin_render_other_form')) {
             'positionOptions' => [],
             'varPosition' => 'PagePosition',
             'html' => '',
+            'shortHtml' => '',
+            'longHtml' => '',
+            'legacyMismatch' => false,
             'preferredEditorMode' => 'visual',
             'sectionOptions' => '',
             'categoryOptions' => '',
@@ -106,6 +109,7 @@ if (!function_exists('red_admin_render_other_form')) {
             'uploadUrls' => [],
             'publicUrl' => '',
             'recordId' => 0,
+            'currentHash' => '',
             'language' => '',
             'layout' => '',
             'editedBy' => '',
@@ -117,6 +121,7 @@ if (!function_exists('red_admin_render_other_form')) {
         $mode = $isEdit ? 'edit' : 'create';
         $preferredMode = $context['preferredEditorMode'] === 'html' ? 'html' : 'visual';
         $advancedMarkup = $preferredMode === 'html';
+        $legacyMismatch = $isEdit && !empty($context['legacyMismatch']);
         $formId = $isEdit ? 'update_content' : 'insert_content';
         $messageId = $isEdit ? 'msggbox_update_content' : 'msggbox_insert_content';
         $returnLabel = $isEdit ? 'Show content' : 'All content types';
@@ -163,6 +168,7 @@ if (!function_exists('red_admin_render_other_form')) {
     method="post"
     data-red-other-form
     data-other-mode="<?php echo red_admin_area_html($mode); ?>"
+    data-legacy-mismatch="<?php echo $legacyMismatch ? 'true' : 'false'; ?>"
     data-preferred-editor-mode="<?php echo red_admin_area_html($preferredMode); ?>"
     data-advanced-markup="<?php echo $advancedMarkup ? 'true' : 'false'; ?>"
     data-submit-url="<?php echo red_admin_area_html($context['submitUrl']); ?>"
@@ -237,10 +243,31 @@ if (!function_exists('red_admin_render_other_form')) {
 
             <section class="red-admin-article-panel red-admin-other-editor-panel" aria-labelledby="other-content-title">
                 <div class="red-admin-article-panel__heading red-admin-other-editor-heading">
-                    <div><span class="red-admin-article-panel__step">02</span><h3 id="other-content-title">Content editor</h3></div>
-                    <span class="red-admin-editor-status" data-other-editor-status data-state="loading" role="status" aria-live="polite"><?php echo $preferredMode === 'html' ? 'HTML source ready' : 'Loading visual tools…'; ?></span>
+                    <div><span class="red-admin-article-panel__step">02</span><h3 id="other-content-title"><?php echo $legacyMismatch ? 'Resolve legacy content' : 'Content editor'; ?></h3></div>
+                    <span class="red-admin-editor-status" data-other-editor-status data-state="<?php echo $legacyMismatch ? 'warning' : 'loading'; ?>" role="status" aria-live="polite"><?php echo $legacyMismatch ? 'Selection required to reconcile' : ($preferredMode === 'html' ? 'HTML source ready' : 'Loading visual tools…'); ?></span>
                 </div>
 
+                <?php if ($legacyMismatch) { ?>
+                    <div class="red-admin-other-reconciliation" data-other-reconciliation>
+                        <div class="red-admin-other-reconciliation__notice">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 17H3z"></path><path d="M12 9v5M12 17h.01"></path></svg>
+                            <p><strong>This legacy Other block has two different saved versions.</strong> Embedded and list placements use the editor/listing version; its dedicated page uses the dedicated-page version. Neither will be overwritten until you explicitly choose one.</p>
+                        </div>
+                        <div class="red-admin-other-reconciliation__choices" role="radiogroup" aria-label="Choose the canonical Other content">
+                            <label class="red-admin-other-reconciliation__choice">
+                                <input type="radio" name="OtherReconcileSource" value="short" data-other-reconcile-source />
+                                <span class="red-admin-other-reconciliation__choice-heading"><strong>Use editor/listing version</strong><small>Currently saved in ShortDesc</small></span>
+                                <textarea readonly rows="12" aria-label="Editor and listing HTML source"><?php echo red_admin_area_html($context['shortHtml']); ?></textarea>
+                            </label>
+                            <label class="red-admin-other-reconciliation__choice">
+                                <input type="radio" name="OtherReconcileSource" value="long" data-other-reconcile-source />
+                                <span class="red-admin-other-reconciliation__choice-heading"><strong>Use dedicated-page version</strong><small>Currently saved in LongDesc</small></span>
+                                <textarea readonly rows="12" aria-label="Dedicated page HTML source"><?php echo red_admin_area_html($context['longHtml']); ?></textarea>
+                            </label>
+                        </div>
+                        <p class="red-admin-other-reconciliation__footer">Saving a choice writes that exact version to both fields in one transaction and keeps one complete pre-change revision. You can save metadata without choosing; both content fields will then remain untouched.</p>
+                    </div>
+                <?php } else { ?>
                 <?php if ($advancedMarkup) { ?>
                     <div class="red-admin-other-structure-note" data-other-structure-note>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 17H3z"></path><path d="M12 9v5M12 17h.01"></path></svg>
@@ -281,6 +308,7 @@ if (!function_exists('red_admin_render_other_form')) {
                         <div class="red-admin-other-trust-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"></path><path d="M9 12l2 2 4-5"></path></svg><p><strong>Trusted administrator HTML.</strong> This code is rendered on the public page as entered. Do not paste scripts or markup from an unknown source.</p></div>
                     </div>
                 </div>
+                <?php } ?>
             </section>
 
             <details class="red-admin-article-advanced" data-other-advanced>
@@ -333,10 +361,13 @@ if (!function_exists('red_admin_render_other_form')) {
 
             <input type="hidden" name="RecordID" id="RecordID" value="<?php echo (int) $context['recordId']; ?>" />
             <input type="hidden" name="EditedBy" id="EditedBy" value="<?php echo red_admin_area_html($context['editedBy']); ?>" />
+            <input type="hidden" name="OtherContentAction" value="<?php echo $isEdit ? 'preserve' : 'create'; ?>" data-other-content-action />
+            <input type="hidden" name="OtherContentBase64" value="" data-other-content-base64 />
             <?php if (!$isEdit) { ?>
                 <input type="hidden" name="Language" id="Language" value="<?php echo red_admin_area_html($context['language']); ?>" />
                 <input type="hidden" name="Layout" id="Layout" value="<?php echo red_admin_area_html($context['layout']); ?>" />
-                <input type="hidden" name="Component" id="Component" value="Other" />
+            <?php } else { ?>
+                <input type="hidden" name="CurrentHash" value="<?php echo red_admin_area_html($context['currentHash']); ?>" data-other-current-hash />
             <?php } ?>
             <input type="hidden" name="csrf_token" value="<?php echo red_admin_area_html($context['csrfToken']); ?>" />
 

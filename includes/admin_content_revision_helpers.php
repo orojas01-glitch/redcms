@@ -381,6 +381,173 @@ if (!function_exists('red_admin_content_revision_tables')) {
     }
 }
 
+if (!function_exists('red_admin_content_revision_lock_current')) {
+    function red_admin_content_revision_lock_current($connection, $contentRecordId)
+    {
+        $contentRecordId = (int) $contentRecordId;
+        if ($contentRecordId <= 0) {
+            return null;
+        }
+
+        try {
+            $stmt = mysqli_prepare(
+                $connection,
+                'SELECT RecordID FROM RED_Articles WHERE RecordID=? LIMIT 1 FOR UPDATE'
+            );
+            if (!$stmt) {
+                return null;
+            }
+            mysqli_stmt_bind_param($stmt, 'i', $contentRecordId);
+            if (!mysqli_stmt_execute($stmt)) {
+                mysqli_stmt_close($stmt);
+                return null;
+            }
+            mysqli_stmt_store_result($stmt);
+            $found = mysqli_stmt_num_rows($stmt) === 1;
+            mysqli_stmt_close($stmt);
+            return $found
+                ? red_admin_content_revision_capture($connection, $contentRecordId)
+                : null;
+        } catch (Throwable $exception) {
+            error_log('Content revision row lock failed: ' . $exception->getMessage());
+            return null;
+        }
+    }
+}
+
+if (!function_exists('red_admin_content_revision_guarded_transaction')) {
+    function red_admin_content_revision_guarded_transaction(
+        $connection,
+        $contentRecordId,
+        $expectedCurrentHash,
+        $callback,
+        array $tables,
+        $operation = 'save'
+    ) {
+        $expectedCurrentHash = red_admin_content_revision_scalar($expectedCurrentHash);
+        if (!is_callable($callback)
+            || preg_match('/\A[a-f0-9]{64}\z/', $expectedCurrentHash) !== 1
+        ) {
+            return ['ok' => false, 'reason' => 'invalid'];
+        }
+
+        $failureReason = 'failed';
+        $success = red_admin_theme_contract_write_transaction(
+            $connection,
+            function () use (
+                $connection,
+                $contentRecordId,
+                $expectedCurrentHash,
+                $callback,
+                $operation,
+                &$failureReason
+            ) {
+                $current = red_admin_content_revision_lock_current($connection, $contentRecordId);
+                if (!$current) {
+                    $failureReason = 'invalid';
+                    return false;
+                }
+                if (!hash_equals(red_admin_content_revision_hash($current), $expectedCurrentHash)) {
+                    $failureReason = 'conflict';
+                    return false;
+                }
+                if (!red_admin_content_revision_checkpoint($connection, $contentRecordId)) {
+                    $failureReason = 'revision';
+                    return false;
+                }
+                if (!(bool) call_user_func($callback, $current)) {
+                    $failureReason = 'write';
+                    return false;
+                }
+                if (!red_admin_content_revision_record_current($connection, $contentRecordId, $operation)) {
+                    $failureReason = 'revision';
+                    return false;
+                }
+                $failureReason = 'saved';
+                return true;
+            },
+            red_admin_content_revision_tables($connection, $tables)
+        );
+
+        return [
+            'ok' => (bool) $success,
+            'reason' => $success ? 'saved' : $failureReason,
+            'currentHash' => $success
+                ? red_admin_content_revision_current_hash($connection, $contentRecordId)
+                : '',
+        ];
+    }
+}
+
+if (!function_exists('red_admin_content_revision_reconciliation_transaction')) {
+    function red_admin_content_revision_reconciliation_transaction(
+        $connection,
+        $contentRecordId,
+        $expectedCurrentHash,
+        $callback,
+        array $tables
+    ) {
+        $expectedCurrentHash = red_admin_content_revision_scalar($expectedCurrentHash);
+        if (!is_callable($callback)
+            || preg_match('/\A[a-f0-9]{64}\z/', $expectedCurrentHash) !== 1
+            || !red_admin_content_revision_table_available($connection)
+        ) {
+            return ['ok' => false, 'reason' => 'invalid'];
+        }
+
+        $failureReason = 'failed';
+        $success = red_admin_theme_contract_write_transaction(
+            $connection,
+            function () use (
+                $connection,
+                $contentRecordId,
+                $expectedCurrentHash,
+                $callback,
+                &$failureReason
+            ) {
+                $current = red_admin_content_revision_lock_current($connection, $contentRecordId);
+                if (!$current) {
+                    $failureReason = 'invalid';
+                    return false;
+                }
+                if (!hash_equals(red_admin_content_revision_hash($current), $expectedCurrentHash)) {
+                    $failureReason = 'conflict';
+                    return false;
+                }
+
+                // A legacy mismatch needs exactly one complete pre-change
+                // snapshot. The chosen synchronized state is the live record;
+                // restoring this checkpoint brings both former values back.
+                if (!red_admin_content_revision_insert_snapshot(
+                    $connection,
+                    $current,
+                    'checkpoint',
+                    0,
+                    true
+                )) {
+                    $failureReason = 'revision';
+                    return false;
+                }
+                if (!(bool) call_user_func($callback, $current)) {
+                    $failureReason = 'write';
+                    return false;
+                }
+                $failureReason = 'reconciled';
+                return true;
+            },
+            red_admin_content_revision_tables($connection, $tables)
+        );
+
+        return [
+            'ok' => (bool) $success,
+            'reason' => $success ? 'reconciled' : $failureReason,
+            'currentHash' => $success
+                ? red_admin_content_revision_current_hash($connection, $contentRecordId)
+                : '',
+        ];
+    }
+}
+
 if (!function_exists('red_admin_content_revision_transaction')) {
     function red_admin_content_revision_transaction(
         $connection,

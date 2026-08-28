@@ -31,6 +31,17 @@ These items are product direction, not active Version 5.0 features. Each
 requires its own security, data-migration, privacy, accessibility, and rollback
 design before implementation.
 
+### Version 5.1.1 Other Content Maintenance
+
+Version 5.1.1 is a maintenance release based on the `v5.1.0` tag. Other
+creation and content updates now derive component identity from persisted core
+state, preserve one byte-exact administrator source, and write that value to
+both `ShortDesc` and `LongDesc` inside the existing revision transaction.
+Legacy mismatches expose both stored versions and require an explicit choice;
+the selected value is synchronized only after one complete pre-change
+checkpoint commits with the write. Article, SEO-only, placement-only,
+image-only, and unrelated metadata behavior remains independent.
+
 ### Version 5.1.0 Release
 
 RED-CMS 5.1.0 was released on 2026-08-15 as

@@ -15,6 +15,7 @@ $component = red_admin_article_clean_value('Component', $_POST['Component'] ?? '
 $seoInput = red_admin_seo_collect_post($_POST);
 if ($recordId <= 0
     || $component === ''
+    || $component === 'Other'
     || (!red_admin_article_has_payload($_POST) && !$seoInput['present'])
     || !$seoInput['valid']
 ) {

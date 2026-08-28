@@ -176,7 +176,7 @@ try {
     }
 
     red_addon_test_assert(
-        defined('RED_CMS_VERSION') && RED_CMS_VERSION === '5.1.0',
+        defined('RED_CMS_VERSION') && RED_CMS_VERSION === '5.1.1',
         'the runtime advertises the exact RED-CMS 5.1 release identity'
     );
 
