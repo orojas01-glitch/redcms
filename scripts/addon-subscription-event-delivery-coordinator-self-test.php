@@ -38,7 +38,7 @@ $binding = [
     'storePackageVersion' => '0.1.50',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.17',
+    'stripePackageVersion' => '0.1.18',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $secret = 'whsec_synthetic_delivery_coordinator_123456789';

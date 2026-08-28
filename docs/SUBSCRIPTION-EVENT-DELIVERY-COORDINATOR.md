@@ -1,7 +1,7 @@
 # Subscription Event Delivery Coordinator
 
 Status: complete as an unlinked internal recovery boundary for Store Lite
-`0.1.50` and Stripe adapter `0.1.17`.
+`0.1.50` and Stripe adapter `0.1.18`.
 
 The coordinator joins four previously separate stages in one operation:
 
@@ -25,7 +25,7 @@ timestamp. After that fresh signature succeeds, receipt recovery matches the
 event-reference hash, exact raw-body hash, and provider event type, then reuses
 the original receipt claim fingerprint. A changed body or event type still
 fails closed, and the stored signing evidence is never replaced.
-With adapter `0.1.17`, an unexpanded completed Checkout is a valid deferred
+With adapter `0.1.18`, an unexpanded completed Checkout is a valid deferred
 projection: it cannot supply an authoritative subscription period, so the
 normalizer terminally refuses and acknowledges it without mutation. The
 correlated current Dahlia paid invoice supplies subscription metadata through
@@ -45,7 +45,7 @@ assertions, including the unexpanded Checkout deferral and freshly signed
 retry recovery.
 
 The disposable database rehearsal installs and enables exact Store Lite
-`0.1.50` and Stripe adapter `0.1.17` packages, executes the same interruption
+`0.1.50` and Stripe adapter `0.1.18` packages, executes the same interruption
 and recovery against the real transactional receipt and Store Lite lifecycle
 tables, proves only one additional lifecycle-history row, and removes the
 database, grant, and staged project while the configured primary database hash

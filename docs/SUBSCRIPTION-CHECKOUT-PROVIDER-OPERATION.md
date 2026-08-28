@@ -1,7 +1,7 @@
 # Subscription Checkout Provider Operation
 
 The provider-operation contract binds RED-CMS 5.1, Store Lite `0.1.50`, and
-Stripe adapter `0.1.17`.
+Stripe adapter `0.1.18`.
 
 `includes/addon_subscription_checkout_provider_operation_helpers.php` requires
 one short-lived, one-attempt authority packet, reloads the exact client-local

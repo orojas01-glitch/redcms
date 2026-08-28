@@ -28,13 +28,13 @@ Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
 
 The current offline subscription-event release gate binds Store Lite `0.1.50`
-to Stripe adapter `0.1.17` through one restartable internal coordinator. It
+to Stripe adapter `0.1.18` through one restartable internal coordinator. It
 joins signature verification, transactional receipt claim, raw-event
 projection, and lifecycle application. A disposable failure after lifecycle
 commit recovers with the same result hash and no second Store Lite mutation.
 The exact manifest declaration and one-secret internal webhook boundary now
 drive that coordinator in both focused and disposable-database rehearsals.
-Adapter `0.1.17` treats Stripe's unexpanded completed Checkout as a terminally
+Adapter `0.1.18` treats Stripe's unexpanded completed Checkout as a terminally
 deferred acknowledgement and activates access only from the correlated paid
 invoice, whose subscription and period are extracted from the current Dahlia
 parent/line shape without retaining private invoice data.

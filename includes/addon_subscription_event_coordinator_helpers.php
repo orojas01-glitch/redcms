@@ -47,7 +47,7 @@ if (!function_exists('red_addon_subscription_event_binding_valid')) {
     {
         return red_addon_subscription_checkout_binding_valid($binding)
             && ($binding['storePackageVersion'] ?? '') === '0.1.50'
-            && ($binding['stripePackageVersion'] ?? '') === '0.1.17';
+            && ($binding['stripePackageVersion'] ?? '') === '0.1.18';
     }
 }
 

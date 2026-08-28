@@ -32,7 +32,7 @@ to the canonical value. Preflight still precedes database access and body I/O.
 ## Runtime and secret scope
 
 Runtime assembly pins RED-CMS `5.1.0`, Store Lite `0.1.50`, and Stripe adapter
-`0.1.17`. Both packages must be enabled/current with exact manifest and
+`0.1.18`. Both packages must be enabled/current with exact manifest and
 inventory evidence. Core registers only that dependency pair and resolves only
 the configured `stripe.webhook-secret` reference. The Stripe API key is outside
 this request context.
