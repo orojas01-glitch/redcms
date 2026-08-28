@@ -6,12 +6,12 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
-Release-candidate verification for RED-CMS 5.1.0 passed on 2026-08-15. The
-clean installer, all 46 migrations, normalized schema, canonical routes,
-add-on and CMS lifecycles, forced rollback, runtime log, and exact disposable
-database/grant cleanup passed against a fresh temporary current-schema
-baseline. The formal `v5.1.0` Git tag and GitHub release have not been created
-yet. See [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md).
+RED-CMS 5.1.1 is the focused maintenance release for reliable Other-component
+editing. It makes one administrator HTML source canonical across embedded and
+dedicated routes, mirrors exact bytes to `ShortDesc` and `LongDesc`, and
+requires explicit reconciliation when a legacy Other record already differs.
+It does not change Article's intentionally independent short and long fields.
+See [RED-CMS 5.1.1 Release Notes](docs/RELEASE-NOTES-5.1.1.md).
 
 The separately distributed Store Lite 0.1.31 basic-demo proof is complete on
 its isolated demo installation. Store Lite remains optional and is not bundled
@@ -780,6 +780,7 @@ database.
 ## Documentation
 
 - [Administrator Manual Introduction](docs/ADMIN-MANUAL-INTRODUCTION.md)
+- [RED-CMS 5.1.1 Release Notes](docs/RELEASE-NOTES-5.1.1.md)
 - [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Theme Author Guide](docs/THEME-AUTHOR-GUIDE.md)

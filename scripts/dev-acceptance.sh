@@ -5137,6 +5137,9 @@ RED_SEO_TEST_DATABASE="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PRO
 printf '%s\n' 'Running content revision lifecycle checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/content-revisions-self-test.php"
 
+printf '%s\n' 'Running canonical Other content and legacy reconciliation checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/other-content-self-test.php"
+
 printf '%s\n' 'Running page layout distribution lifecycle checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/layout-distribution-self-test.php"
 

@@ -8196,6 +8196,110 @@ dl#cp_accordion dd .sub_menu  li{list-style:none;line-height:30px!important;padd
 	line-height: 1.5;
 }
 
+#advanced .red-admin-other-reconciliation {
+	display: grid;
+	gap: 14px;
+}
+
+#advanced .red-admin-other-reconciliation__notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 11px;
+	padding: 13px 14px;
+	border: 1px solid #d9c78f;
+	border-radius: 11px;
+	background: #fff9e8;
+	color: #655323;
+}
+
+#advanced .red-admin-other-reconciliation__notice svg {
+	flex: 0 0 21px;
+	width: 21px;
+	height: 21px;
+	fill: none;
+	stroke: #9b7c20;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 1.8;
+}
+
+#advanced .red-admin-other-reconciliation__notice p,
+#advanced .red-admin-other-reconciliation__footer {
+	margin: 0;
+	font-size: 11px;
+	line-height: 1.55;
+}
+
+#advanced .red-admin-other-reconciliation__choices {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 13px;
+}
+
+#advanced .red-admin-other-reconciliation__choice {
+	display: grid;
+	grid-template-columns: 22px minmax(0, 1fr);
+	gap: 10px;
+	min-width: 0;
+	padding: 13px;
+	border: 1px solid #cfd7e1;
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 7px 18px rgba(35, 45, 65, .06);
+	cursor: pointer;
+}
+
+#advanced .red-admin-other-reconciliation__choice:has(input:checked) {
+	border-color: #7567bd;
+	box-shadow: 0 0 0 3px rgba(117, 103, 189, .13);
+}
+
+#advanced .red-admin-other-reconciliation__choice input {
+	width: 18px;
+	height: 18px;
+	margin: 2px 0 0;
+	accent-color: #6253aa;
+}
+
+#advanced .red-admin-other-reconciliation__choice-heading {
+	display: grid;
+	gap: 3px;
+	min-width: 0;
+}
+
+#advanced .red-admin-other-reconciliation__choice-heading strong {
+	color: #303a4a;
+	font-size: 12px;
+}
+
+#advanced .red-admin-other-reconciliation__choice-heading small {
+	color: #768292;
+	font-size: 10px;
+}
+
+#advanced .red-admin-other-reconciliation__choice textarea {
+	grid-column: 1 / -1;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 235px;
+	margin: 2px 0 0;
+	padding: 13px;
+	border: 1px solid #293447;
+	border-radius: 8px;
+	background: #111925;
+	color: #d8e2ef;
+	font: 400 11px/1.55 Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+	resize: vertical;
+	white-space: pre;
+}
+
+#advanced .red-admin-other-reconciliation__footer {
+	padding: 10px 12px;
+	border-radius: 9px;
+	background: #eef0f6;
+	color: #5f6b7a;
+}
+
 #advanced .red-admin-other-modebar {
 	display: flex;
 	align-items: center;
@@ -8536,7 +8640,8 @@ dl#cp_accordion dd .sub_menu  li{list-style:none;line-height:30px!important;padd
 	}
 
 	#advanced .red-admin-other-identity-grid,
-	#advanced .red-admin-other-supporting-grid {
+	#advanced .red-admin-other-supporting-grid,
+	#advanced .red-admin-other-reconciliation__choices {
 		grid-template-columns: minmax(0, 1fr);
 	}
 }

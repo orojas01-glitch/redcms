@@ -69,6 +69,23 @@
         return find(form, '[data-other-html-source]');
     }
 
+    function utf8Base64(value) {
+        var bytes;
+        var binary = '';
+        var index;
+
+        value = String(value || '');
+        if (window.TextEncoder) {
+            bytes = new window.TextEncoder().encode(value);
+            for (index = 0; index < bytes.length; index += 1) {
+                binary += String.fromCharCode(bytes[index]);
+            }
+            return window.btoa(binary);
+        }
+
+        return window.btoa(unescape(encodeURIComponent(value)));
+    }
+
     function visualField(form) {
         return find(form, '[data-other-visual-editor]');
     }
@@ -323,6 +340,7 @@
             ? editor.getContent()
             : (stage ? stage.value : source.value));
         form._redOtherSourceSnapshot = source.value;
+        form._redOtherSourceDirty = true;
         form._redOtherVisualDirty = false;
         if (editor && typeof editor.setDirty === 'function') {
             editor.setDirty(false);
@@ -459,10 +477,12 @@
         }
 
         form._redOtherSourceSnapshot = source.value;
+        form._redOtherSourceDirty = false;
         updateSourceStats(form);
 
         source.addEventListener('input', function () {
             form._redOtherSourceSnapshot = source.value;
+            form._redOtherSourceDirty = true;
             updateSourceStats(form);
             setEditorStatus(form, 'Unsaved HTML changes', 'changed');
         });
@@ -711,6 +731,12 @@
                 var successful = xhr.status >= 200 && xhr.status < 300 && synchronizeImage(form, uploader, response);
 
                 if (successful) {
+                    var revisionHash = xhr.getResponseHeader('X-RED-Revision-Hash');
+                    var currentHash = find(form, '[data-other-current-hash]');
+
+                    if (currentHash && /^[a-f0-9]{64}$/.test(String(revisionHash || ''))) {
+                        currentHash.value = revisionHash;
+                    }
                     progress.style.width = '100%';
                     uploader.classList.add('is-complete');
                     status.textContent = 'Uploaded successfully';
@@ -868,6 +894,56 @@
         return true;
     }
 
+    function prepareContentPayload(form) {
+        var action = find(form, '[data-other-content-action]');
+        var encoded = find(form, '[data-other-content-base64]');
+        var selectedSource = find(form, '[data-other-reconcile-source]:checked');
+        var source = sourceField(form);
+        var mode = formMode(form);
+
+        if (!action || !encoded) {
+            return false;
+        }
+
+        encoded.value = '';
+        if (mode === 'create') {
+            action.value = 'create';
+            encoded.value = utf8Base64(source ? source.value : '');
+            return true;
+        }
+        if (form.getAttribute('data-legacy-mismatch') === 'true') {
+            if (selectedSource) {
+                action.value = 'reconcile';
+            } else {
+                action.value = 'preserve';
+            }
+            return true;
+        }
+        if (form._redOtherSourceDirty) {
+            action.value = 'update';
+            encoded.value = utf8Base64(source ? source.value : '');
+            return true;
+        }
+
+        action.value = 'preserve';
+        return true;
+    }
+
+    function initializeReconciliation(form) {
+        Array.prototype.forEach.call(form.querySelectorAll('[data-other-reconcile-source]'), function (choice) {
+            choice.addEventListener('change', function () {
+                setEditorStatus(
+                    form,
+                    choice.value === 'long'
+                        ? 'Dedicated-page version selected'
+                        : 'Editor/listing version selected',
+                    'changed'
+                );
+                setMessage(form, 'Your selected legacy version will become the one canonical Other content when saved.', 'warning');
+            });
+        });
+    }
+
     function submitForm(form) {
         var mode = formMode(form);
         var submitUrl = form.getAttribute('data-submit-url')
@@ -879,6 +955,10 @@
 
         if (currentEditorMode(form) === 'visual') {
             syncVisualToSource(form);
+        }
+        if (!prepareContentPayload(form)) {
+            setMessage(form, 'The HTML block content could not be prepared safely.', 'error');
+            return false;
         }
         setSaving(form, true);
         setMessage(form, 'Saving HTML block…', 'progress');
@@ -903,7 +983,13 @@
                 }
 
                 setSaving(form, false);
-                setMessage(form, 'The HTML block could not be saved. Review the fields and try again.', 'error');
+                if (String(data).trim() === 'stale') {
+                    setMessage(form, 'This block changed after you opened it. Reload the editor before saving.', 'error');
+                } else if (String(data).trim() === 'reconcile') {
+                    setMessage(form, 'Choose which saved legacy version should become canonical before changing its content.', 'error');
+                } else {
+                    setMessage(form, 'The HTML block could not be saved. Review the fields and try again.', 'error');
+                }
             },
             error: function () {
                 setSaving(form, false);
@@ -970,6 +1056,7 @@
         form.setAttribute('data-red-other-ready', 'true');
         form._redOtherUploadsInFlight = 0;
         form._redOtherVisualDirty = false;
+        form._redOtherSourceDirty = false;
         scopeEditorIdentity(form);
         initializeSourceEditor(form);
         initializeModeTabs(form);
@@ -977,6 +1064,7 @@
         initializeAdvancedPanel(form);
         initializeDateControls(form);
         initializeRemovalChoices(form);
+        initializeReconciliation(form);
         Array.prototype.forEach.call(form.querySelectorAll('[data-other-upload]'), function (uploader) {
             initializeUploader(form, uploader);
         });

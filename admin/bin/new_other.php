@@ -56,7 +56,7 @@ foreach (['BigPict', 'SmallPict'] as $uploadCase) {
 red_admin_render_other_form([
     'mode' => 'create',
     'returnTarget' => 'add_content_grid',
-    'submitUrl' => '/admin/bin/insert_content.php',
+    'submitUrl' => '/admin/bin/insert_other.php',
     'title' => '',
     'active' => 'Y',
     'homeFeature' => '',
@@ -65,6 +65,9 @@ red_admin_render_other_form([
     'positionOptions' => $positionOptions,
     'varPosition' => $VarPosition,
     'html' => '',
+    'shortHtml' => '',
+    'longHtml' => '',
+    'legacyMismatch' => false,
     'preferredEditorMode' => 'visual',
     'sectionOptions' => $sectionOptions,
     'categoryOptions' => $categoryOptions,

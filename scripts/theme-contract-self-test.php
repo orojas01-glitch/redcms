@@ -17,6 +17,7 @@ require_once dirname(__DIR__) . '/includes/admin_ftp_ui_helpers.php';
 require_once dirname(__DIR__) . '/includes/admin_gallery_helpers.php';
 require_once dirname(__DIR__) . '/includes/admin_gallery_ui_helpers.php';
 require_once dirname(__DIR__) . '/includes/admin_other_ui_helpers.php';
+require_once dirname(__DIR__) . '/includes/admin_other_content_helpers.php';
 require_once dirname(__DIR__) . '/includes/admin_user_helpers.php';
 require_once dirname(__DIR__) . '/includes/admin_area_helpers.php';
 require_once dirname(__DIR__) . '/includes/admin_tool_helpers.php';
@@ -3447,7 +3448,9 @@ try {
     );
     $newOtherSource = file_get_contents(dirname(__DIR__) . '/admin/bin/new_other.php');
     $editOtherSource = file_get_contents(dirname(__DIR__) . '/admin/bin/edit_other.php');
+    $insertOtherSource = file_get_contents(dirname(__DIR__) . '/admin/bin/insert_other.php');
     $otherUiSource = file_get_contents(dirname(__DIR__) . '/includes/admin_other_ui_helpers.php');
+    $otherContentSource = file_get_contents(dirname(__DIR__) . '/includes/admin_other_content_helpers.php');
     $otherFormScript = file_get_contents(dirname(__DIR__) . '/admin/assets/js/other-form.js');
     red_theme_test_assert(
         red_admin_other_preferred_editor_mode('', 'create') === 'visual'
@@ -3476,29 +3479,38 @@ try {
             && str_contains($otherUiSource, 'This block stays in HTML mode')
             && str_contains($otherUiSource, 'Visual editing is unavailable for structured template HTML')
             && str_contains($otherUiSource, 'Simple blocks only')
-            && str_contains($otherUiSource, 'Tab moves to the next control'),
-        'Other chooses approachable Visual mode for simple content and lossless HTML mode for structured source while retaining one canonical ShortDesc field'
+            && str_contains($otherUiSource, 'Tab moves to the next control')
+            && str_contains($otherUiSource, 'Use editor/listing version')
+            && str_contains($otherUiSource, 'Use dedicated-page version')
+            && str_contains($otherUiSource, 'name="OtherReconcileSource"')
+            && str_contains($otherUiSource, 'data-other-current-hash'),
+        'Other chooses lossless source handling and exposes both legacy states for explicit reconciliation'
     );
     red_theme_test_assert(
         is_string($newOtherSource)
             && is_string($editOtherSource)
+            && is_string($insertOtherSource)
+            && is_string($otherContentSource)
             && str_contains($newOtherSource, 'red_admin_render_other_form([')
             && str_contains($editOtherSource, 'red_admin_render_other_form([')
             && str_contains($newOtherSource, "red_admin_require_component_selection(\$db->connection, 'Other')")
             && str_contains($editOtherSource, "red_admin_text(\$row['Component'] ?? '') !== 'Other'")
-            && str_contains($newOtherSource, "'submitUrl' => '/admin/bin/insert_content.php'")
+            && str_contains($newOtherSource, "'submitUrl' => '/admin/bin/insert_other.php'")
             && str_contains($editOtherSource, "'submitUrl' => '/admin/bin/update_content.php'")
             && str_contains($editOtherSource, "'deleteUrl' => '/admin/bin/delete_label.php'")
             && str_contains($newOtherSource, "'AuthComponent' => 'Other'")
             && str_contains($otherUiSource, 'id="insert_content"') === false
             && str_contains($otherUiSource, "\$formId = \$isEdit ? 'update_content' : 'insert_content'")
-            && str_contains($otherUiSource, 'name="Component" id="Component" value="Other"')
+            && !str_contains($otherUiSource, 'name="Component"')
             && str_contains($otherUiSource, 'name="RecordID" id="RecordID"')
             && str_contains($otherUiSource, 'name="EditedBy" id="EditedBy"')
             && str_contains($otherUiSource, 'name="csrf_token"')
+            && str_contains($insertOtherSource, 'red_require_admin(true)')
+            && str_contains($insertOtherSource, 'red_admin_other_registry_component')
+            && str_contains($otherContentSource, "['ShortDesc' => \$html, 'LongDesc' => \$html]")
             && !str_contains($newOtherSource, 'jquery.filedrop')
             && !str_contains($editOtherSource, 'jquery.filedrop'),
-        'Other Add/Edit use the shared polished workspace while preserving authorization, exact generic endpoints, record fields, component identity, CSRF, and upload authorization'
+        'Other Add/Edit preserve authorization and CSRF while deriving component identity server-side and mirroring one canonical source'
     );
     red_theme_test_assert(
         is_string($otherFormScript)
@@ -3527,6 +3539,9 @@ try {
             && str_contains($otherFormScript, "payload.append('pic', file, file.name)")
             && str_contains($otherFormScript, "xhr.setRequestHeader('X-CSRF-Token'")
             && str_contains($otherFormScript, 'data: window.jQuery(form).serialize()')
+            && str_contains($otherFormScript, 'utf8Base64')
+            && str_contains($otherFormScript, "action.value = 'reconcile'")
+            && str_contains($otherFormScript, "action.value = 'preserve'")
             && str_contains($otherFormScript, 'document.execCommand(\'copy\')')
             && is_string($controlPanelCss)
             && str_contains($controlPanelCss, '#advanced .red-admin-other-mode-tabs')

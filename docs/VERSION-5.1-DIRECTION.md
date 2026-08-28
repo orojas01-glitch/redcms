@@ -1,8 +1,10 @@
 # RED-CMS 5.1 Direction
 
-Status: the RED-CMS 5.1.0 release candidate passed its full disposable
-current-schema acceptance gate on 2026-08-15. The formal Git tag and GitHub
-release remain pending. Store Lite 0.1.31 completed the optional add-on model's
+Status: RED-CMS 5.1.1 is the focused Other-content maintenance release based
+on the reviewed `v5.1.0` tag. It synchronizes exact Other HTML across embedded
+and dedicated routes while requiring explicit reconciliation of legacy field
+mismatches; Article and non-content updates remain independent. Store Lite
+0.1.31 completed the optional add-on model's
 basic-demo proof in its isolated demo installation and remains outside the
 clean starter. Per-page SEO compatibility, including the
 approved constrained JSON-LD core, non-executing add-on trust validation,
