@@ -130,6 +130,113 @@ if (!function_exists('red_addon_subscription_webhook_candidate')) {
     }
 }
 
+if (!function_exists('red_addon_subscription_webhook_content_type_valid')) {
+    function red_addon_subscription_webhook_content_type_valid($value)
+    {
+        if (!is_string($value)
+            || strlen($value) < 16
+            || strlen($value) > 128
+            || trim($value) !== $value
+            || preg_match('/[^\x20-\x7E]/', $value) === 1
+        ) {
+            return false;
+        }
+        $parts = array_map('trim', explode(';', $value));
+        if (strtolower(array_shift($parts)) !== 'application/json') {
+            return false;
+        }
+        if ($parts === []) {
+            return true;
+        }
+        return count($parts) === 1
+            && preg_match(
+                '/\Acharset\s*=\s*(?:utf-8|"utf-8")\z/Di',
+                $parts[0]
+            ) === 1;
+    }
+}
+
+if (!function_exists('red_addon_subscription_webhook_preflight_reason')) {
+    function red_addon_subscription_webhook_preflight_reason($server)
+    {
+        if (!is_array($server)) {
+            return 'server_invalid';
+        }
+        if (($server['REQUEST_METHOD'] ?? null) !== 'POST') {
+            return 'method_invalid';
+        }
+        if (!red_addon_subscription_webhook_candidate(
+            $server['REQUEST_URI'] ?? null
+        )) {
+            return 'target_invalid';
+        }
+        if (!in_array($server['HTTPS'] ?? null, ['on', '1'], true)) {
+            return 'https_invalid';
+        }
+        if (array_key_exists('HTTP_CONTENT_TYPE', $server)
+            && ($server['HTTP_CONTENT_TYPE'] ?? null)
+                !== ($server['CONTENT_TYPE'] ?? null)
+        ) {
+            return 'content_type_alias_invalid';
+        }
+        if (array_key_exists('HTTP_CONTENT_LENGTH', $server)
+            && ($server['HTTP_CONTENT_LENGTH'] ?? null)
+                !== ($server['CONTENT_LENGTH'] ?? null)
+        ) {
+            return 'content_length_alias_invalid';
+        }
+        if (array_key_exists('HTTP_CONTENT_ENCODING', $server)
+            || array_key_exists('CONTENT_ENCODING', $server)
+        ) {
+            return 'content_encoding_invalid';
+        }
+        if (!red_addon_subscription_webhook_content_type_valid(
+            $server['CONTENT_TYPE'] ?? null
+        )) {
+            return 'content_type_invalid';
+        }
+
+        $httpTransfer = $server['HTTP_TRANSFER_ENCODING'] ?? null;
+        $transfer = $server['TRANSFER_ENCODING'] ?? null;
+        if ($httpTransfer !== null
+            && $transfer !== null
+            && $httpTransfer !== $transfer
+        ) {
+            return 'transfer_alias_invalid';
+        }
+        $transferValue = $httpTransfer ?? $transfer;
+        $hasLength = array_key_exists('CONTENT_LENGTH', $server);
+        if ($hasLength) {
+            $length = $server['CONTENT_LENGTH'] ?? null;
+            if (!is_string($length)
+                || preg_match('/\A[1-9][0-9]{0,5}\z/D', $length) !== 1
+                || (int) $length > 262144
+            ) {
+                return 'content_length_invalid';
+            }
+            if ($transferValue !== null) {
+                return 'transfer_conflict';
+            }
+        } elseif ($transferValue !== null
+            && (!is_string($transferValue)
+                || strtolower(trim($transferValue)) !== 'chunked')
+        ) {
+            return 'transfer_invalid';
+        }
+
+        $signature = $server['HTTP_STRIPE_SIGNATURE'] ?? null;
+        if (!is_string($signature)
+            || strlen($signature) < 8
+            || strlen($signature) > 4096
+            || trim($signature) !== $signature
+            || preg_match('/[^\x21-\x7E]/', $signature) === 1
+        ) {
+            return 'signature_header_invalid';
+        }
+        return '';
+    }
+}
+
 if (!function_exists('red_addon_subscription_webhook_capture_result')) {
     function red_addon_subscription_webhook_capture_result(
         $reason = 'transport_unavailable'
@@ -145,43 +252,19 @@ if (!function_exists('red_addon_subscription_webhook_capture_result')) {
 if (!function_exists('red_addon_subscription_webhook_preflight')) {
     function red_addon_subscription_webhook_preflight($server)
     {
-        if (!is_array($server)
-            || ($server['REQUEST_METHOD'] ?? null) !== 'POST'
-            || !red_addon_subscription_webhook_candidate(
-                $server['REQUEST_URI'] ?? null
-            )
-            || !in_array($server['HTTPS'] ?? null, ['on', '1'], true)
-            || (array_key_exists('HTTP_CONTENT_TYPE', $server)
-                && ($server['HTTP_CONTENT_TYPE'] ?? null)
-                    !== ($server['CONTENT_TYPE'] ?? null))
-            || (array_key_exists('HTTP_CONTENT_LENGTH', $server)
-                && ($server['HTTP_CONTENT_LENGTH'] ?? null)
-                    !== ($server['CONTENT_LENGTH'] ?? null))
-            || array_key_exists('HTTP_TRANSFER_ENCODING', $server)
-            || array_key_exists('TRANSFER_ENCODING', $server)
-            || array_key_exists('HTTP_CONTENT_ENCODING', $server)
-            || array_key_exists('CONTENT_ENCODING', $server)
-            || ($server['CONTENT_TYPE'] ?? null) !== 'application/json'
-            || !is_string($server['CONTENT_LENGTH'] ?? null)
-            || preg_match(
-                '/\A[1-9][0-9]{0,5}\z/D',
-                $server['CONTENT_LENGTH'] ?? ''
-            ) !== 1
-            || (int) $server['CONTENT_LENGTH'] > 262144
-            || !is_string($server['HTTP_STRIPE_SIGNATURE'] ?? null)
-            || strlen($server['HTTP_STRIPE_SIGNATURE']) < 8
-            || strlen($server['HTTP_STRIPE_SIGNATURE']) > 4096
-            || trim($server['HTTP_STRIPE_SIGNATURE'])
-                !== $server['HTTP_STRIPE_SIGNATURE']
-            || preg_match(
-                '/[^\x21-\x7E]/',
-                $server['HTTP_STRIPE_SIGNATURE']
-            ) === 1
-        ) {
+        $reason = red_addon_subscription_webhook_preflight_reason($server);
+        if ($reason !== '') {
+            if (PHP_SAPI !== 'cli') {
+                error_log(
+                    'RED-CMS subscription webhook transport refused: '
+                    . $reason
+                );
+            }
             return null;
         }
         return [
-            'bodyBytes' => (int) $server['CONTENT_LENGTH'],
+            'bodyBytes' => array_key_exists('CONTENT_LENGTH', $server)
+                ? (int) $server['CONTENT_LENGTH'] : 0,
             'signatureHeader' => $server['HTTP_STRIPE_SIGNATURE'],
         ];
     }
@@ -194,9 +277,13 @@ if (!function_exists('red_addon_subscription_webhook_capture')) {
         $receivedAt
     ) {
         $preflight = red_addon_subscription_webhook_preflight($server);
+        $bodyBytes = is_string($rawBody) ? strlen($rawBody) : 0;
         if (!is_array($preflight)
             || !is_string($rawBody)
-            || strlen($rawBody) !== $preflight['bodyBytes']
+            || $bodyBytes < 2
+            || $bodyBytes > 262144
+            || ($preflight['bodyBytes'] !== 0
+                && $bodyBytes !== $preflight['bodyBytes'])
             || preg_match('//u', $rawBody) !== 1
             || !is_int($receivedAt)
             || $receivedAt < 1
@@ -209,7 +296,7 @@ if (!function_exists('red_addon_subscription_webhook_capture')) {
         try {
             $request = new RED_Addon_Subscription_Webhook_Ingress_Request(
                 $receivedAt,
-                strlen($rawBody),
+                $bodyBytes,
                 hash('sha256', $rawBody),
                 $rawBody,
                 $preflight['signatureHeader']
@@ -234,7 +321,13 @@ if (!function_exists('red_addon_subscription_webhook_capture_current')) {
         if (!is_array($preflight)) {
             return red_addon_subscription_webhook_capture_result();
         }
-        $rawBody = file_get_contents('php://input');
+        $rawBody = file_get_contents(
+            'php://input',
+            false,
+            null,
+            0,
+            262145
+        );
         if (!is_string($rawBody)) {
             return red_addon_subscription_webhook_capture_result();
         }

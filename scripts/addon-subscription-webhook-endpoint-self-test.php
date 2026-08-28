@@ -66,6 +66,45 @@ try {
         ],
         'direct HTTPS preflight preserves only length and signature material'
     );
+    $charsetServer = array_replace($server, [
+        'CONTENT_TYPE' => 'application/json; charset=UTF-8',
+    ]);
+    $assert(
+        red_addon_subscription_webhook_preflight($charsetServer)
+            === $preflight,
+        'Stripe-compatible UTF-8 JSON content type is accepted'
+    );
+    $lengthlessServer = $server;
+    unset($lengthlessServer['CONTENT_LENGTH']);
+    $assert(
+        red_addon_subscription_webhook_preflight($lengthlessServer)
+            === [
+                'bodyBytes' => 0,
+                'signatureHeader' => $signature,
+            ]
+            && (red_addon_subscription_webhook_capture(
+                $lengthlessServer,
+                $body,
+                $receivedAt
+            )['valid'] ?? false),
+        'bounded capture accepts a transport without declared length'
+    );
+    $chunkedServer = array_replace($lengthlessServer, [
+        'HTTP_TRANSFER_ENCODING' => 'chunked',
+    ]);
+    $assert(
+        red_addon_subscription_webhook_preflight($chunkedServer)
+            === [
+                'bodyBytes' => 0,
+                'signatureHeader' => $signature,
+            ]
+            && (red_addon_subscription_webhook_capture(
+                $chunkedServer,
+                $body,
+                $receivedAt
+            )['valid'] ?? false),
+        'bounded capture accepts an exact chunked Stripe transport'
+    );
     $capture = red_addon_subscription_webhook_capture(
         $server,
         $body,
@@ -119,10 +158,19 @@ try {
             'REQUEST_URI' => $path . '?attempt=1',
         ]),
         'type' => array_replace($server, [
-            'CONTENT_TYPE' => 'application/json; charset=UTF-8',
+            'CONTENT_TYPE' => 'text/plain',
+        ]),
+        'charset' => array_replace($server, [
+            'CONTENT_TYPE' => 'application/json; charset=ISO-8859-1',
         ]),
         'transfer' => array_replace($server, [
             'HTTP_TRANSFER_ENCODING' => 'chunked',
+        ]),
+        'transfer-unsupported' => array_replace($lengthlessServer, [
+            'HTTP_TRANSFER_ENCODING' => 'gzip',
+        ]),
+        'content-encoding' => array_replace($server, [
+            'HTTP_CONTENT_ENCODING' => 'gzip',
         ]),
         'alias-drift' => array_replace($server, [
             'HTTP_CONTENT_TYPE' => 'text/plain',
@@ -146,6 +194,18 @@ try {
         red_addon_subscription_webhook_preflight($matchingAliases)
             === $preflight,
         'supported-server content aliases must match canonical values exactly'
+    );
+    $assert(
+        red_addon_subscription_webhook_preflight_reason($server) === ''
+            && red_addon_subscription_webhook_preflight_reason(
+                array_replace($server, ['CONTENT_TYPE' => 'text/plain'])
+            ) === 'content_type_invalid'
+            && red_addon_subscription_webhook_preflight_reason(
+                array_replace($server, [
+                    'HTTP_TRANSFER_ENCODING' => 'chunked',
+                ])
+            ) === 'transfer_conflict',
+        'transport refusal diagnostics contain only bounded reason identifiers'
     );
     $lengthDrift = red_addon_subscription_webhook_capture(
         array_replace($server, [
@@ -304,7 +364,7 @@ try {
         dirname(__DIR__)
             . '/includes/addon_subscription_webhook_endpoint_helpers.php'
     );
-    $inputAt = strpos($endpointSource, "file_get_contents('php://input')");
+    $inputAt = strpos($endpointSource, "'php://input'");
     $preflightAt = strpos(
         $endpointSource,
         'red_addon_subscription_webhook_preflight($_SERVER)'
@@ -338,7 +398,15 @@ try {
             && is_int($indexDatabaseAt)
             && $webhookBlockAt < $indexPreflightAt
             && $indexPreflightAt < $indexDatabaseAt,
-        'body and database I/O remain after exact config-gated preflight'
+        'bounded body and database I/O remain after config-gated preflight'
+    );
+    $assert(
+        str_contains($endpointSource, '262145')
+            && str_contains(
+                $endpointSource,
+                'RED-CMS subscription webhook transport refused: '
+            ),
+        'live transport reads are bounded and refusal logging is reason-only'
     );
 
     echo 'Subscription webhook endpoint passed '
