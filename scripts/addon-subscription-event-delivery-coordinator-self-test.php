@@ -38,7 +38,7 @@ $binding = [
     'storePackageVersion' => '0.1.50',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.16',
+    'stripePackageVersion' => '0.1.17',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $secret = 'whsec_synthetic_delivery_coordinator_123456789';
@@ -136,6 +136,22 @@ $makeDeferredRequest = static function (
         'rawBody' => $rawBody,
         'signatureHeader' => 't=' . $receivedAt . ',v1=' . $signature,
         'receivedAt' => $receivedAt,
+    ];
+};
+
+$resignRequest = static function (
+    array $request,
+    int $newReceivedAt
+) use ($secret): array {
+    $rawBody = $request['rawBody'];
+    return [
+        'rawBody' => $rawBody,
+        'signatureHeader' => 't=' . $newReceivedAt . ',v1=' . hash_hmac(
+            'sha256',
+            $newReceivedAt . '.' . $rawBody,
+            $secret
+        ),
+        'receivedAt' => $newReceivedAt,
     ];
 };
 
@@ -487,15 +503,19 @@ try {
     );
     $interruptedHash = $interrupted['lifecycleResultSha256'];
     $beforeRecoveryAdapter = $adapterCalls;
+    $recoveryRetryRequest = $resignRequest(
+        $recoveryRequest,
+        $receivedAt + 120
+    );
     $recovered = red_addon_subscription_event_delivery_coordinate(
         $binding,
-        $recoveryRequest,
+        $recoveryRetryRequest,
         $signatureVerifier,
         $eventProjector,
         $journalInvoker,
         $serviceInvoker,
         $adapterInvoker,
-        $receivedAt + 40
+        $receivedAt + 130
     );
     $assert(
         $recovered['valid']
@@ -863,6 +883,48 @@ try {
             && ($routeRefused['data']['acknowledged'] ?? false)
             && !($routeRefused['data']['applied'] ?? true),
         'terminal lifecycle refusal is journaled and acknowledged without retry'
+    );
+
+    $rows = [];
+    $state = $initialState;
+    $staleDeferredRequest = $makeDeferredRequest(
+        'evt_DeliveryCoordinatorStaleDeferred123'
+    );
+    $staleDeferred = red_addon_subscription_event_delivery_coordinate(
+        $binding,
+        $staleDeferredRequest,
+        $signatureVerifier,
+        static fn (): array => [],
+        $journalInvoker,
+        $serviceInvoker,
+        $adapterInvoker,
+        $receivedAt + 10
+    );
+    $staleDeferredRetry = $resignRequest(
+        $staleDeferredRequest,
+        $receivedAt + 180
+    );
+    $closedDeferred = red_addon_subscription_event_delivery_coordinate(
+        $binding,
+        $staleDeferredRetry,
+        $signatureVerifier,
+        $eventProjector,
+        $journalInvoker,
+        $serviceInvoker,
+        $adapterInvoker,
+        $receivedAt + 190
+    );
+    $assert(
+        !$staleDeferred['valid']
+            && $staleDeferred['status'] === 'verified'
+            && $staleDeferred['restartable']
+            && !$closedDeferred['valid']
+            && $closedDeferred['status'] === 'refused'
+            && $closedDeferred['journalCompleted']
+            && !$closedDeferred['restartable']
+            && $closedDeferred['claimStateSha256']
+                === $staleDeferred['claimStateSha256'],
+        'freshly signed retry rebinds one verified receipt and closes deferred Checkout without activation'
     );
 
     $rows = [];

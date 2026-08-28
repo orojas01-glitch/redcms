@@ -202,9 +202,7 @@ if (!function_exists('red_addon_subscription_delivery_journal_valid')) {
                 && $journal['eventEvidenceSha256'] === ''
                 && $journal['lifecycleResultSha256'] === '';
         }
-        if ($journal['claimStateSha256']
-            !== $claim['claimStateSha256']
-        ) {
+        if (!red_addon_valid_sha256($journal['claimStateSha256'])) {
             return false;
         }
         if ($journal['status'] === 'verified') {
@@ -295,6 +293,12 @@ if (!function_exists('red_addon_subscription_event_delivery_coordinate')) {
                 $result['reason'] = 'subscription_journal_unavailable';
                 return $result;
             }
+            if ($journal['status'] !== 'absent') {
+                $claim['claimStateSha256'] =
+                    $journal['claimStateSha256'];
+                $result['claimStateSha256'] =
+                    $journal['claimStateSha256'];
+            }
             if ($journal['status'] === 'applied') {
                 return array_replace($result, [
                     'valid' => true,
@@ -328,7 +332,9 @@ if (!function_exists('red_addon_subscription_event_delivery_coordinate')) {
                     $journal,
                     $claim,
                     ['verified']
-                )) {
+                ) || $journal['claimStateSha256']
+                    !== $claim['claimStateSha256']
+                ) {
                     $result['reason'] = 'subscription_journal_claim_failed';
                     return $result;
                 }
@@ -404,6 +410,8 @@ if (!function_exists('red_addon_subscription_event_delivery_coordinate')) {
                 $claim,
                 [$completionStatus]
             )
+                || $journal['claimStateSha256']
+                    !== $claim['claimStateSha256']
                 || $journal['eventEvidenceSha256']
                     !== $verifiedEvent['eventEvidenceSha256']
                 || $journal['lifecycleResultSha256']
