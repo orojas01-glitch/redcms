@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
     printf 'Usage: %s\n' "$0"
-    printf '%s\n' 'Runs the exact Store Lite 0.1.35 plus Wompi 0.1.4 C3B disposable rehearsal.'
+    printf '%s\n' 'Runs one explicitly pinned Store Lite plus Wompi disposable rehearsal.'
 }
 
 if [[ $# -gt 0 ]]; then
@@ -23,7 +23,8 @@ source "$SCRIPT_DIR/db-common.sh"
 
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite}"
 WOMPI_REPOSITORY="${RED_WOMPI_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite-wompi}"
-STORE_REVISION='f7de77eb1694fb6003340632c5018024753fe1fa'
+STORE_REVISION="${RED_STORE_LITE_REVISION:-f7de77eb1694fb6003340632c5018024753fe1fa}"
+STORE_VERSION="${RED_STORE_LITE_VERSION:-0.1.35}"
 WOMPI_REVISION="${RED_WOMPI_REVISION:-5f372b3a2e35723f638a03cf089deedc238c99a4}"
 WOMPI_VERSION="${RED_WOMPI_VERSION:-0.1.4}"
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
@@ -239,9 +240,12 @@ wompi_version="$("$RED_PHP_BIN_RESOLVED" -r '
     $manifest = json_decode(file_get_contents($argv[1]), true, 64, JSON_THROW_ON_ERROR);
     echo $manifest["version"] ?? "";
 ' "$WOMPI_REPOSITORY/package/addon.json")"
-if [[ "$store_version" != '0.1.35' || "$wompi_version" != "$WOMPI_VERSION" ]]; then
-    printf 'Exact package versions required; Store Lite=%s Wompi=%s.\n' \
-        "$store_version" "$wompi_version" >&2
+if [[ !( "$STORE_VERSION" == '0.1.35' || "$STORE_VERSION" == '0.1.50' )
+    || "$store_version" != "$STORE_VERSION"
+    || "$wompi_version" != "$WOMPI_VERSION"
+]]; then
+    printf 'Pinned package versions required; expected Store Lite=%s Wompi=%s, found Store Lite=%s Wompi=%s.\n' \
+        "$STORE_VERSION" "$WOMPI_VERSION" "$store_version" "$wompi_version" >&2
     exit 65
 fi
 

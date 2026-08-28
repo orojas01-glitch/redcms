@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "id": "replace-with-client-slug",
+    "canonicalOrigin": "https://store.example.com",
+    "documentRoot": "/absolute/client/document-root",
+    "databaseName": "replace_with_client_database",
+    "ownerAdminRecordId": 0
+  },
+  "storeLite": {
+    "currency": "USD",
+    "fulfillment": [
+      "pickup"
+    ],
+    "subscriptionsEnabled": false
+  },
+  "payment": {
+    "selectedAdapter": "stripe",
+    "environment": "sandbox",
+    "secretReferences": {
+      "stripe.secret-key": "RED_CLIENT_STRIPE_SECRET_KEY",
+      "stripe.webhook-secret": "RED_CLIENT_STRIPE_WEBHOOK_SECRET"
+    }
+  },
+  "deployment": {
+    "installState": "installed_disabled",
+    "enableAfterOwnerReview": false,
+    "liveModeAuthorized": false
+  }
+}

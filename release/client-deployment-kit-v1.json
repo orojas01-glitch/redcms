@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "redcms.store-lite-client-kit",
+  "version": "0.1.3",
+  "core": {
+    "id": "redcms",
+    "version": "5.1.0",
+    "minimumCommit": "070fdd8d155c329b1618b26c09e4a8bb41ea07bf",
+    "archivePath": "redcms"
+  },
+  "packages": [
+    {
+      "selection": "store-lite",
+      "id": "redcms.store-lite",
+      "version": "0.1.50",
+      "commit": "56727d2de0bbd2c476316f62001a429b354c599f",
+      "repository": "redcms-store-lite",
+      "sourcePath": "package",
+      "archivePath": "redcms/addons/redcms/store-lite",
+      "required": true,
+      "releaseState": "sandbox_verified"
+    },
+    {
+      "selection": "stripe",
+      "id": "redcms.store-lite-stripe-checkout",
+      "version": "0.1.18",
+      "commit": "cca26ef8bddaaf087def534c00d0f063fb3a4c19",
+      "repository": "redcms-store-lite-stripe-checkout",
+      "sourcePath": "package",
+      "archivePath": "redcms/addons/redcms/store-lite-stripe-checkout",
+      "required": false,
+      "releaseState": "sandbox_verified"
+    },
+    {
+      "selection": "wompi",
+      "id": "redcms.store-lite-wompi",
+      "version": "0.1.5",
+      "commit": "cc2ddd03ab54f663a089f7d059d802180e555d15",
+      "repository": "redcms-store-lite-wompi",
+      "sourcePath": "package",
+      "archivePath": "redcms/addons/redcms/store-lite-wompi",
+      "required": false,
+      "releaseState": "offline_verified_account_blocked"
+    }
+  ],
+  "unsupportedSelections": {
+    "paypal": "Adapter contract and package are not yet implemented."
+  },
+  "secretPolicy": {
+    "includeValues": false,
+    "ownerEnteredPerClient": true,
+    "allowedArtifactFiles": [
+      "RELEASE-EVIDENCE.json",
+      "SHA256SUMS"
+    ]
+  }
+}

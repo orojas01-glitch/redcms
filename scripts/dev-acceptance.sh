@@ -44,6 +44,7 @@ if [[ ! -s "$INSTALLER_FILE" ]]; then
     exit 66
 fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/client-deployment-kit-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-migration-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/store-lite-product-contract-self-test.php"

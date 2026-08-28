@@ -20,9 +20,12 @@ add-on and CMS lifecycles, forced rollback, runtime log, and exact disposable
 database/grant cleanup passed against a fresh temporary current-schema
 baseline. See [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md).
 
-The separately distributed Store Lite 0.1.31 basic-demo proof is complete on
-its isolated demo installation. Store Lite remains optional and is not bundled
-with the clean starter.
+The separately distributed Store Lite `0.1.50` package and Stripe Checkout
+adapter `0.1.18` have completed one isolated end-to-end Sandbox subscription
+lifecycle. Store Lite remains optional and is not bundled with the clean
+starter. The Wompi `0.1.5` adapter remains offline-verified and blocked before
+its first merchant-account Sandbox request; PayPal remains a separate planned
+adapter rather than a legacy core payment path.
 
 Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
@@ -961,6 +964,14 @@ Client themes, client media, and client databases are intentionally excluded.
 Site-specific installations must be backed up and distributed separately so a
 clean release can never overwrite retained production content.
 
+The credential-free [Store Lite Client Deployment Kit](docs/CLIENT-DEPLOYMENT-KIT.md)
+composes tracked core bytes with pinned private Store Lite, Stripe, and/or
+Wompi package bytes. Its dry-run-first builder verifies source revisions,
+manifest identities, package integrity, and the clean-starter boundary before
+writing a new archive outside every source repository. Payment-provider status
+and the Stripe ACH, Wompi/Nequi, and PayPal sequence are tracked in
+[Payment Provider Readiness](docs/PAYMENT-PROVIDER-READINESS.md).
+
 ## Local Development
 
 The verified local environment uses:
@@ -994,6 +1005,7 @@ Verify that the tracked package contains only portable starter defaults:
 
 ```bash
 php scripts/clean-starter-boundary-self-test.php
+php scripts/client-deployment-kit-self-test.php
 ```
 
 Run PHP syntax checks:

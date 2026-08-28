@@ -17,6 +17,7 @@ function red_wompi_c4c1_assert($condition, $message)
 }
 
 try {
+    $expectedStoreVersion = getenv('RED_STORE_LITE_VERSION') ?: '0.1.35';
     $password = password_hash('WompiC4C1-Disposable-2026!', PASSWORD_DEFAULT);
     $statement = mysqli_prepare(
         $connection,
@@ -80,11 +81,13 @@ try {
     $wompiPackage = $catalog['packages'][$wompiPackageId] ?? [];
     red_wompi_c4c1_assert(
         !empty($catalog['valid'])
-            && ($storePackage['manifest']['version'] ?? null) === '0.1.35'
+            && in_array($expectedStoreVersion, ['0.1.35', '0.1.50'], true)
+            && ($storePackage['manifest']['version'] ?? null)
+                === $expectedStoreVersion
             && ($wompiPackage['manifest']['version'] ?? null) === '0.1.5'
             && ($wompiPackage['integrity']['declaredFiles'] ?? null) === 19
             && ($wompiPackage['integrity']['verifiedFiles'] ?? null) === 19,
-        'exact Store Lite and published Wompi 0.1.5 discover without execution'
+        'pinned Store Lite and published Wompi 0.1.5 discover without execution'
     );
     red_wompi_c4c1_assert(
         red_wompi_c3b_record_enabled_store(
