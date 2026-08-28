@@ -4,6 +4,14 @@
 require_once __DIR__
     . '/addon_payment_adapter_wompi_no_contact_claim_helpers.php';
 
+if (!function_exists('red_addon_wompi_merchant_read_store_version')) {
+    function red_addon_wompi_merchant_read_store_version($version)
+    {
+        return is_string($version)
+            && in_array($version, ['0.1.35', '0.1.50'], true);
+    }
+}
+
 if (!function_exists('red_addon_wompi_merchant_read_result')) {
     function red_addon_wompi_merchant_read_result($status = 'invalid')
     {
@@ -202,23 +210,25 @@ if (!function_exists('red_addon_wompi_merchant_read_package_state')) {
                 mysqli_free_result($query);
             }
             mysqli_stmt_close($statement);
+            $storeVersion = $rows[0]['PackageVersion'] ?? null;
             if (!$executed
-                || $rows !== [[
-                    'PackageID' => 'redcms.store-lite',
-                    'PackageVersion' => '0.1.35',
-                    'LifecycleState' => 'enabled',
-                ], [
-                    'PackageID' => 'redcms.store-lite-wompi',
-                    'PackageVersion' => '0.1.5',
-                    'LifecycleState' => 'enabled',
-                ]]
+                || count($rows) !== 2
+                || ($rows[0]['PackageID'] ?? null) !== 'redcms.store-lite'
+                || !red_addon_wompi_merchant_read_store_version(
+                    $storeVersion
+                )
+                || ($rows[0]['LifecycleState'] ?? null) !== 'enabled'
+                || ($rows[1]['PackageID'] ?? null)
+                    !== 'redcms.store-lite-wompi'
+                || ($rows[1]['PackageVersion'] ?? null) !== '0.1.5'
+                || ($rows[1]['LifecycleState'] ?? null) !== 'enabled'
             ) {
                 return $result;
             }
             return [
                 'valid' => true,
                 'packageVersion' => '0.1.5',
-                'storePackageVersion' => '0.1.35',
+                'storePackageVersion' => $storeVersion,
             ];
         } catch (Throwable $throwable) {
             return $result;
@@ -292,7 +302,9 @@ if (!function_exists('red_addon_wompi_merchant_read_preflight')) {
             || !is_array($package)
             || !is_array($store)
             || ($package['manifest']['version'] ?? null) !== '0.1.5'
-            || ($store['manifest']['version'] ?? null) !== '0.1.35'
+            || !red_addon_wompi_merchant_read_store_version(
+                $store['manifest']['version'] ?? null
+            )
         ) {
             $result['errors'][] = 'package_invalid';
             return $result;
@@ -317,7 +329,13 @@ if (!function_exists('red_addon_wompi_merchant_read_preflight')) {
         $settingState = red_addon_wompi_merchant_read_setting_state(
             $connection
         );
-        if (empty($packageState['valid']) || empty($settingState['valid'])) {
+        if (empty($packageState['valid'])
+            || empty($settingState['valid'])
+            || ($packageState['packageVersion'] ?? null)
+                !== ($package['manifest']['version'] ?? null)
+            || ($packageState['storePackageVersion'] ?? null)
+                !== ($store['manifest']['version'] ?? null)
+        ) {
             $result['errors'][] = 'current_state_refused';
             return $result;
         }
@@ -346,7 +364,7 @@ if (!function_exists('red_addon_wompi_merchant_read_preflight')) {
             'packageId' => 'redcms.store-lite-wompi',
             'packageVersion' => '0.1.5',
             'storePackageId' => 'redcms.store-lite',
-            'storePackageVersion' => '0.1.35',
+            'storePackageVersion' => $packageState['storePackageVersion'],
             'actorAdminRecordId' => $actorAdminRecordId,
             'clientScopeSha256' => $clientScopeSha256,
             'databaseSha256' => $databaseSha256,

@@ -12,7 +12,7 @@ and release gate.
 | Provider track | Package | Current verified boundary | Not yet release-ready |
 | --- | --- | --- | --- |
 | Stripe Checkout | `redcms.store-lite-stripe-checkout` `0.1.18` | Hosted card Checkout and the subscription activation/cancellation lifecycle were proven in Stripe Sandbox on the isolated reference site. | General live-mode release, client-owned production credentials, refunds/disputes, and ACH delayed-payment lifecycle. |
-| Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, sealed transport, event verification, atomic enablement, and two-client isolation are verified offline. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
+| Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, current Store Lite `0.1.50` discovery, disabled installation, atomic enablement, sealed transport, event verification, and client isolation are verified offline. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
 | PayPal Checkout | separate adapter reserved; no package yet | Provider-neutral Store Lite payment taxonomy and the core integration-adapter model already reserve PayPal. | Package manifest/profile, Orders v2 create/capture, server-side OAuth, button handoff, webhook verification/replay, refunds, subscriptions, Sandbox lifecycle, and client deployment. |
 
 ## Stripe bank payments

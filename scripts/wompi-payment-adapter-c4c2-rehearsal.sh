@@ -16,6 +16,8 @@ fi
 
 RED_WOMPI_REVISION='cc2ddd03ab54f663a089f7d059d802180e555d15' \
 RED_WOMPI_VERSION='0.1.5' \
+RED_STORE_LITE_REVISION='56727d2de0bbd2c476316f62001a429b354c599f' \
+RED_STORE_LITE_VERSION='0.1.50' \
 RED_WOMPI_C3B_DATABASE="redcms_payment_adapter_db_c4c2_$$" \
 RED_WOMPI_SELF_TEST_SCRIPT='wompi-payment-adapter-c4c1-self-test.php' \
 RED_WOMPI_AFTER_SELF_TEST_SCRIPT='wompi-payment-adapter-c4c2-operator-inner.sh' \

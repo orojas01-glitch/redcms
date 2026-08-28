@@ -37,7 +37,7 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.0',
+        && ($release['version'] ?? null) === '0.1.1',
     'release identity is exact'
 );
 red_client_kit_test_assert(
