@@ -103,3 +103,15 @@ A release archive is ready for client installation only when:
 The kit is a distribution mechanism, not provider certification. Provider
 readiness and remaining gates are tracked in
 [`PAYMENT-PROVIDER-READINESS.md`](PAYMENT-PROVIDER-READINESS.md).
+
+When the configured local starter database is an older retained snapshot, run
+the broad acceptance suite through a disposable current-schema anchor:
+
+```sh
+scripts/client-deployment-kit-full-acceptance.sh
+```
+
+The wrapper imports the portable installer into a uniquely named database,
+applies current migrations, runs the full disposable acceptance suite against
+that anchor, then revokes the exact temporary grant and removes the anchor. It
+also verifies that the configured primary database is unchanged.

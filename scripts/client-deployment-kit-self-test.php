@@ -17,14 +17,20 @@ function red_client_kit_test_assert(bool $condition, string $message): void
 $releasePath = $root . '/release/client-deployment-kit-v1.json';
 $profilePath = $root . '/docs/examples/client-deployment-profile.v1.example.json';
 $builderPath = $root . '/scripts/client-deployment-kit.php';
+$fullAcceptancePath = $root . '/scripts/client-deployment-kit-full-acceptance.sh';
 
 $releaseBytes = file_get_contents($releasePath);
 $profileBytes = file_get_contents($profilePath);
 $builder = file_get_contents($builderPath);
+$fullAcceptance = file_get_contents($fullAcceptancePath);
 
 red_client_kit_test_assert(is_string($releaseBytes), 'release manifest is readable');
 red_client_kit_test_assert(is_string($profileBytes), 'client profile is readable');
 red_client_kit_test_assert(is_string($builder), 'builder is readable');
+red_client_kit_test_assert(
+    is_string($fullAcceptance),
+    'full acceptance wrapper is readable'
+);
 
 try {
     $release = json_decode($releaseBytes, true, 64, JSON_THROW_ON_ERROR);
@@ -37,7 +43,7 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.2',
+        && ($release['version'] ?? null) === '0.1.3',
     'release identity is exact'
 );
 red_client_kit_test_assert(
@@ -124,6 +130,18 @@ red_client_kit_test_assert(
     !preg_match('/\b(?:curl_|mysqli_|fsockopen|stream_socket_client)\b/', $builder),
     'builder has no database or provider-network primitive'
 );
+foreach ([
+    'redcms_client_kit_anchor_',
+    'dev-acceptance.sh',
+    'DROP DATABASE IF EXISTS',
+    'REVOKE ALL PRIVILEGES',
+    'primary:unchanged',
+] as $guard) {
+    red_client_kit_test_assert(
+        str_contains($fullAcceptance, $guard),
+        'full acceptance wrapper retains guard: ' . $guard
+    );
+}
 
 printf(
     "Client deployment kit self-test passed: %d assertions.\n",
