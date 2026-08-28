@@ -6,7 +6,9 @@ require_once dirname(__DIR__)
     . '/includes/addon_subscription_event_webhook_handler_helpers.php';
 
 $adapterRoot = realpath(
-    dirname(__DIR__) . '/../redcms-store-lite-stripe-checkout/package'
+    getenv('RED_STRIPE_ADAPTER_ROOT')
+        ?: dirname(__DIR__)
+            . '/../redcms-store-lite-stripe-checkout/package'
 );
 if (!is_string($adapterRoot)) {
     fwrite(STDERR, "Stripe adapter package is unavailable.\n");
@@ -36,7 +38,7 @@ $binding = [
     'storePackageVersion' => '0.1.50',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.15',
+    'stripePackageVersion' => '0.1.16',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $secret = 'whsec_synthetic_delivery_coordinator_123456789';
@@ -84,6 +86,43 @@ $makeRequest = static function (
         'livemode' => false,
         'type' => 'checkout.session.completed',
     ];
+    $rawBody = json_encode(
+        $event,
+        JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+    );
+    $signature = hash_hmac(
+        'sha256',
+        $receivedAt . '.' . $rawBody,
+        $secret
+    );
+    return [
+        'rawBody' => $rawBody,
+        'signatureHeader' => 't=' . $receivedAt . ',v1=' . $signature,
+        'receivedAt' => $receivedAt,
+    ];
+};
+
+$makeDeferredRequest = static function (
+    string $eventRef
+) use (
+    $makeRequest,
+    $secret,
+    $offer,
+    $subscription,
+    $receivedAt
+): array {
+    $request = $makeRequest(
+        $eventRef,
+        ['redcms_offer_state_sha256' => $offer],
+        '2026-07-29.dahlia'
+    );
+    $event = json_decode(
+        $request['rawBody'],
+        true,
+        64,
+        JSON_THROW_ON_ERROR
+    );
+    $event['data']['object']['subscription'] = $subscription;
     $rawBody = json_encode(
         $event,
         JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
@@ -824,6 +863,65 @@ try {
             && ($routeRefused['data']['acknowledged'] ?? false)
             && !($routeRefused['data']['applied'] ?? true),
         'terminal lifecycle refusal is journaled and acknowledged without retry'
+    );
+
+    $rows = [];
+    $state = $initialState;
+    $deferredRouteRequest = $makeDeferredRequest(
+        'evt_DeliveryCoordinatorDeferred123'
+    );
+    $deferredEnvelope = $signatureVerifier(
+        $deferredRouteRequest['rawBody'],
+        $deferredRouteRequest['signatureHeader'],
+        $deferredRouteRequest['receivedAt']
+    );
+    $deferredProjection = $eventProjector(
+        $deferredEnvelope,
+        $deferredRouteRequest['rawBody']
+    );
+    $assert(
+        ($deferredProjection['valid'] ?? false)
+            && red_addon_subscription_delivery_projection_valid(
+                $deferredProjection,
+                $deferredEnvelope
+            )
+            && ($deferredProjection['verifiedEvent']['providerStatus'] ?? '')
+                === 'complete_paid_deferred',
+        'unexpanded completed Checkout reaches the bounded deferred projection'
+    );
+    $beforeDeferredApply = $applyCalls;
+    $deferredRoute = red_addon_webhook_invoke_registered(
+        $route,
+        $deferredRouteRequest['rawBody'],
+        $deferredRouteRequest['signatureHeader'],
+        $deferredRouteRequest['receivedAt'],
+        $package,
+        $webhookHandler,
+        $manifest,
+        $webhookAccess
+    );
+    $deferredKey = hash(
+        'sha256',
+        'evt_DeliveryCoordinatorDeferred123'
+    );
+    $assert(
+        $deferredRoute['success']
+            && $deferredRoute['statusCode'] === 200
+            && ($deferredRoute['data']['outcome'] ?? '')
+                === 'subscription_event_refused'
+            && !($deferredRoute['data']['applied'] ?? true)
+            && $applyCalls === $beforeDeferredApply
+            && ($rows[$deferredKey]['status'] ?? '') === 'refused'
+            && $state === $initialState,
+        'unexpanded completed Checkout is terminally deferred for paid-invoice activation ('
+            . implode(':', [
+                $deferredRoute['success'] ? 'success' : 'failed',
+                (string) $deferredRoute['statusCode'],
+                $deferredRoute['data']['outcome'] ?? 'no-outcome',
+                (string) ($applyCalls - $beforeDeferredApply),
+                $rows[$deferredKey]['status'] ?? 'no-row',
+                $state === $initialState ? 'unchanged' : 'changed',
+            ]) . ')'
     );
 
     $frontController = (string) file_get_contents(

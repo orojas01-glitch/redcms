@@ -1189,7 +1189,7 @@ request bootstrap excludes the disabled package.
     separately distributed Store Lite field model and browser bootstrap remain
     the next Gate 2D2 steps.
 
-82. Completed Store Lite Gate 2D2B in the separately distributed 0.1.15
+82. Completed Store Lite Gate 2D2B in the separately distributed 0.1.16
     package. Its pure public cart-form presenter revalidates one complete
     product and returns only the declared product, quantity, and optional
     sellable-variant controls. Simple products and variable products with up

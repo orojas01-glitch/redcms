@@ -19,18 +19,20 @@ body I/O, runtime loading, or secret resolution.
 
 ## Transport boundary
 
-The enabled endpoint requires a query-free direct HTTPS `POST`, exact
-`application/json`, an exact body length from 2 through 262,144 bytes, and one
-printable `Stripe-Signature` projection. Transfer encoding and content encoding
-are refused. Some supported servers expose both canonical `CONTENT_` values and
+The enabled endpoint requires a query-free direct HTTPS `POST`,
+`application/json` with no charset or UTF-8 charset, and one printable
+`Stripe-Signature` projection. A declared body length must be between 1 and
+262,144 bytes. Missing length and exact chunked transfer are accepted only with
+a 262,145-byte bounded `php://input` read followed by an exact 262,144-byte
+ceiling; conflicting length/transfer metadata and every content encoding are
+refused. Some supported servers expose both canonical `CONTENT_` values and
 `HTTP_CONTENT_` aliases; aliases are accepted only when byte-for-byte identical
-to the canonical value. Preflight precedes database access and the single
-`php://input` read.
+to the canonical value. Preflight still precedes database access and body I/O.
 
 ## Runtime and secret scope
 
 Runtime assembly pins RED-CMS `5.1.0`, Store Lite `0.1.50`, and Stripe adapter
-`0.1.15`. Both packages must be enabled/current with exact manifest and
+`0.1.16`. Both packages must be enabled/current with exact manifest and
 inventory evidence. Core registers only that dependency pair and resolves only
 the configured `stripe.webhook-secret` reference. The Stripe API key is outside
 this request context.
@@ -55,9 +57,10 @@ body.
 
 ## Verification
 
-- 24 pure endpoint assertions cover exact targeting, direct-HTTPS facts,
-  canonical alias agreement, body/header bounds, default-disabled behavior,
-  response mapping, emitter rules, and pre-I/O ordering.
+- 32 pure endpoint assertions cover exact targeting, direct-HTTPS facts,
+  Stripe-compatible UTF-8 JSON, canonical alias agreement, bounded
+  declared/lengthless/chunked transport, default-disabled behavior, response
+  mapping, reason-only refusal logging, emitter rules, and pre-I/O ordering.
 - The 16-assertion disposable launch rehearsal resolves only a process-local
   synthetic webhook secret, runs a real renewal plus replay through installed
   package/runtime/database boundaries, restores the environment, and removes

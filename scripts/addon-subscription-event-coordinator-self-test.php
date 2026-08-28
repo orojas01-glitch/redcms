@@ -21,7 +21,7 @@ $binding = [
     'storePackageVersion' => '0.1.50',
     'storeService' => 'commerce.subscriptions',
     'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-    'stripePackageVersion' => '0.1.15',
+    'stripePackageVersion' => '0.1.16',
     'stripeAdapter' => 'redcms.store-lite-stripe-checkout/checkout',
 ];
 $intentReference = 'sint_' . str_repeat('1', 32);
@@ -77,6 +77,24 @@ try {
             $source
         ),
         'event coordinator has no request, database, secret, transport, or response primitive'
+    );
+    $deferredCheckout = array_replace($verifiedEvent, [
+        'providerStatus' => 'complete_paid_deferred',
+        'currentPeriodEndEpoch' => null,
+    ]);
+    $assert(
+        red_addon_subscription_event_verified_shape_valid($deferredCheckout)
+            && !red_addon_subscription_event_verified_shape_valid(
+                array_replace($deferredCheckout, [
+                    'providerSubscriptionRef' => null,
+                ])
+            )
+            && !red_addon_subscription_event_verified_shape_valid(
+                array_replace($deferredCheckout, [
+                    'providerStatus' => 'complete_paid',
+                ])
+            ),
+        'unexpanded completed Checkout is valid only as a deferred event'
     );
 
     $calls = [];

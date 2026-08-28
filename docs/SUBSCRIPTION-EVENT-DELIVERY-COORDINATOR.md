@@ -1,7 +1,7 @@
 # Subscription Event Delivery Coordinator
 
 Status: complete as an unlinked internal recovery boundary for Store Lite
-`0.1.50` and Stripe adapter `0.1.15`.
+`0.1.50` and Stripe adapter `0.1.16`.
 
 The coordinator joins four previously separate stages in one operation:
 
@@ -20,6 +20,12 @@ lifecycle-result hash without a second Store Lite mutation or adapter
 normalization, and the receipt completes. A lifecycle refusal with a valid
 projected intent closes as `refused`; an event that cannot safely project an
 intent remains visibly `verified` and fail-closed for later operational review.
+With adapter `0.1.16`, an unexpanded completed Checkout is a valid deferred
+projection: it cannot supply an authoritative subscription period, so the
+normalizer terminally refuses and acknowledges it without mutation. The
+correlated current Dahlia paid invoice supplies subscription metadata through
+`parent.subscription_details` and one unambiguous matching line-item period;
+that event remains the activation authority.
 
 The focused fixture uses the actual adapter signature verifier, bounded JSON
 decoder, raw-event projector, and verified-event normalizer with synthetic
@@ -29,10 +35,11 @@ signature refusal, malformed correlation metadata, and private-data exclusion.
 It also invokes the exact adapter manifest route through the core webhook
 boundary with only `stripe.webhook-secret` available. Expanded secret scope is
 rejected before invocation; terminal lifecycle refusal is journaled and safely
-acknowledged without provider retry.
+acknowledged without provider retry. The focused fixture now passes 30
+assertions, including the unexpanded Checkout deferral.
 
 The disposable database rehearsal installs and enables exact Store Lite
-`0.1.50` and Stripe adapter `0.1.15` packages, executes the same interruption
+`0.1.50` and Stripe adapter `0.1.16` packages, executes the same interruption
 and recovery against the real transactional receipt and Store Lite lifecycle
 tables, proves only one additional lifecycle-history row, and removes the
 database, grant, and staged project while the configured primary database hash
