@@ -1,6 +1,6 @@
 # RED-CMS 5.1 And Store Lite Progress
 
-Last updated: 2026-08-23 after the published `v5.1.0` release, completed Store
+Last updated: 2026-08-28 after the published `v5.1.0` release, completed Store
 Lite basic-demo proof, completed Stripe payment-adapter work through the D4C
 network-disabled no-contact rehearsal, the owner's deferral of D4D real
 Sandbox contact, the Colombia C0 Wompi/Nequi provider decision, the C1
@@ -16,6 +16,23 @@ C4B4C sealed transport-double start/result runner, plus the C4B4D dry-run CLI
 and network-disabled disposable rehearsal, and C4C1 external Wompi `0.1.5`
 read-only transport plus exact sealed-double core adoption, the C4C2 dry-run/
 sealed-double operator rehearsal, and the C4C3A durable provider-double gate.
+
+## Portable client release update
+
+The active product target is now repeatable deployment to a new isolated client
+domain, not live activation on the reference demo. Store Lite `0.1.50` and
+Stripe adapter `0.1.18` completed one provider-signed Sandbox subscription
+lifecycle on the reference installation. The clean starter currently passes
+its 22-assertion boundary test.
+
+Portable Release P1 adds the credential-free client-kit manifest, example
+client profile, dry-run-first archive builder, exact revision/integrity checks,
+secret-pattern scan, release evidence, and checksum manifest. Wompi `0.1.5`
+remains offline-verified before its first merchant-account request. PayPal is
+visible in the provider roadmap but is refused by the release builder until its
+separate adapter package exists. See
+[`CLIENT-DEPLOYMENT-KIT.md`](CLIENT-DEPLOYMENT-KIT.md) and
+[`PAYMENT-PROVIDER-READINESS.md`](PAYMENT-PROVIDER-READINESS.md).
 
 This is the canonical graphical status page for the current RED-CMS 5.1
 objective. Green work is complete, blue is the active gate, orange is

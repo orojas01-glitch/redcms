@@ -1,14 +1,14 @@
 # RED-CMS Store Lite Direction
 
-Status: the separately distributed Store Lite 0.1.31 package is deployed only
-to the isolated `demo.red-sphere.com` RED-CMS 5.1.0 installation. The hosted
-catalog, simple and bounded-variable products, Product and Cart placement,
-Add-to-cart, quantity update, line removal, guest checkout, pickup and delivery,
-pay on receipt, and Products/Orders administrator surfaces are verified. The
-Store Lite v1 basic-demo target is achieved. Payment Adapter Gate P0 fixes the
-provider-neutral contract and Gate P1 selects Stripe Checkout as the first USD
-hosted-card adapter candidate. Fixture, sandbox, and hosted integration remain
-separate later gates.
+Status: the separately distributed Store Lite `0.1.50` package is the current
+portable package baseline. The isolated `demo.red-sphere.com` installation is
+a reference and Sandbox proof, not a release source or required live target.
+The catalog, cart, guest-order, subscription-offer, signed payment-event, and
+subscription-lifecycle contracts are current. Stripe adapter `0.1.18` completed
+one end-to-end Sandbox subscription lifecycle; Wompi `0.1.5` remains
+offline-verified pending authorized merchant Sandbox access; PayPal remains a
+separate planned adapter. New clients receive a clean core, Store Lite, and
+only their selected adapter through the credential-free client deployment kit.
 
 Store Lite is the first planned proof that RED-CMS can gain a client-specific
 business capability through a separately distributed add-on. It is not a core
@@ -25,7 +25,7 @@ separate payment adapter may later connect hosted checkout to a provider.
 Store Lite serves small client sites that need a modest catalog and a safe way
 to accept orders without turning RED-CMS into a general commerce platform.
 
-The first release should support:
+The original basic release supports:
 
 - a simple public product catalog;
 - simple products with one sellable item and variable products with bounded
@@ -43,10 +43,17 @@ The first release should support:
 - a bounded administrator order workspace; and
 - retained data when the package is disabled.
 
-It deliberately excludes unbounded variant matrices, subscriptions,
-marketplace sellers, weight-based pricing, automatic tax calculation, complex
-shipping, restaurant modifiers, appointment scheduling, protected-content
-entitlements, and stored card data.
+Package versions after the basic release add bounded monthly/yearly
+subscription offers, an author-placeable Subscription component, subscription
+intent and lifecycle persistence, and provider-neutral entitlement state.
+Those extensions do not bundle a provider or enable live payment by default.
+
+The original basic target deliberately excluded unbounded variant matrices,
+subscriptions, marketplace sellers, weight-based pricing, automatic tax
+calculation, complex shipping, restaurant modifiers, appointment scheduling,
+protected-content entitlements, and stored card data. The later bounded
+subscription extension supersedes only that original subscription exclusion;
+the remaining exclusions still apply.
 
 ## Product Types And Variant Boundary
 
