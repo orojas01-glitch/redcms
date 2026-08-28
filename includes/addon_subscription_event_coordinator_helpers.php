@@ -47,7 +47,7 @@ if (!function_exists('red_addon_subscription_event_binding_valid')) {
     {
         return red_addon_subscription_checkout_binding_valid($binding)
             && ($binding['storePackageVersion'] ?? '') === '0.1.50'
-            && ($binding['stripePackageVersion'] ?? '') === '0.1.15';
+            && ($binding['stripePackageVersion'] ?? '') === '0.1.16';
     }
 }
 
@@ -211,15 +211,20 @@ if (!function_exists('red_addon_subscription_event_verified_shape_valid')) {
             return false;
         }
         $type = $event['eventType'] ?? '';
+        $providerStatus = $event['providerStatus'] ?? '';
         $expectedStatus = [
-            'checkout.session.completed' => 'complete_paid',
             'invoice.paid' => 'paid_active',
             'invoice.payment_failed' => 'payment_failed',
             'customer.subscription.deleted' => 'canceled',
             'checkout.session.expired' => 'expired',
         ][$type] ?? null;
-        if ($expectedStatus === null
-            || ($event['providerStatus'] ?? '') !== $expectedStatus
+        if (($type === 'checkout.session.completed'
+                && !in_array($providerStatus, [
+                    'complete_paid', 'complete_paid_deferred',
+                ], true))
+            || ($type !== 'checkout.session.completed'
+                && ($expectedStatus === null
+                    || $providerStatus !== $expectedStatus))
         ) {
             return false;
         }
@@ -227,7 +232,10 @@ if (!function_exists('red_addon_subscription_event_verified_shape_valid')) {
             'checkout.session.completed' =>
                 is_string($checkout)
                 && is_string($subscription)
-                && is_int($periodEnd),
+                && (($providerStatus === 'complete_paid'
+                        && is_int($periodEnd))
+                    || ($providerStatus === 'complete_paid_deferred'
+                        && $periodEnd === null)),
             'invoice.paid', 'invoice.payment_failed',
             'customer.subscription.deleted' =>
                 $checkout === null && is_string($subscription),

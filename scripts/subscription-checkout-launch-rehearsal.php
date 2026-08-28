@@ -200,7 +200,7 @@ try {
             && is_array($storePackage)
             && is_array($adapterPackage)
             && ($storePackage['manifest']['version'] ?? '') === '0.1.50'
-            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.15',
+            && ($adapterPackage['manifest']['version'] ?? '') === '0.1.16',
         'exact Store Lite and Stripe launch candidates are trusted'
     );
 
@@ -602,7 +602,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.15',
+            'stripePackageVersion' => '0.1.16',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -621,7 +621,7 @@ try {
             'storePackageVersion' => '0.1.50',
             'storeService' => 'commerce.subscriptions',
             'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-            'stripePackageVersion' => '0.1.15',
+            'stripePackageVersion' => '0.1.16',
             'stripeAdapter' =>
                 'redcms.store-lite-stripe-checkout/checkout',
         ],
@@ -755,7 +755,7 @@ try {
         'storePackageVersion' => '0.1.50',
         'storeService' => 'commerce.subscriptions',
         'stripePackageId' => 'redcms.store-lite-stripe-checkout',
-        'stripePackageVersion' => '0.1.15',
+        'stripePackageVersion' => '0.1.16',
         'stripeAdapter' =>
             'redcms.store-lite-stripe-checkout/checkout',
     ];
@@ -1014,7 +1014,7 @@ try {
             'schema' => 1,
             'purpose' => 'subscription-sandbox-secret-availability',
             'packageId' => $adapterPackageId,
-            'packageVersion' => '0.1.15',
+            'packageVersion' => '0.1.16',
             'settingKey' => 'stripe.secret-key',
             'settingsStateSha256' =>
                 $secretAccessEvidence['stateSha256'] ?? '',
@@ -1037,7 +1037,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.15',
+                'stripePackageVersion' => '0.1.16',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1058,7 +1058,7 @@ try {
                 'storeService' => 'commerce.subscriptions',
                 'stripePackageId' =>
                     'redcms.store-lite-stripe-checkout',
-                'stripePackageVersion' => '0.1.15',
+                'stripePackageVersion' => '0.1.16',
                 'stripeAdapter' =>
                     'redcms.store-lite-stripe-checkout/checkout',
             ],
@@ -1183,7 +1183,7 @@ try {
         'mode' => $runMode,
         'coreVersion' => '5.1.0',
         'storeLiteVersion' => '0.1.50',
-        'stripeAdapterVersion' => '0.1.15',
+        'stripeAdapterVersion' => '0.1.16',
         'assertions' => $assertions,
         'networkAccess' => false,
         'providerContact' => false,
