@@ -338,7 +338,7 @@ if (!function_exists('red_addon_public_mutation_subject_cleanup')) {
             }
             $subjectsDeleted = mysqli_query(
                 $connection,
-                'DELETE FROM RED_Addon_Public_Mutation_Subjects
+                'DELETE IGNORE FROM RED_Addon_Public_Mutation_Subjects
                  WHERE ExpiresAt <= UTC_TIMESTAMP()
                  ORDER BY ExpiresAt ASC, RecordID ASC
                  LIMIT 100'

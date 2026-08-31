@@ -110,6 +110,10 @@ function red_addon_public_mutation_subject_test_cleanup(
     $connection,
     array $subjectIds
 ) {
+    mysqli_query(
+        $connection,
+        'DROP TABLE IF EXISTS RED_Addon_Public_Subject_Retain_Fixture'
+    );
     $ids = array_values(array_filter(
         array_unique(array_map('intval', $subjectIds)),
         static function ($recordId) {
@@ -379,11 +383,38 @@ try {
         !empty($csrfBeforeSubjectExpiry['valid']),
         'an active subject may receive a later core-owned CSRF value'
     );
+
+    mysqli_query(
+        $connection,
+        'CREATE TABLE RED_Addon_Public_Subject_Retain_Fixture (
+            RecordID INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            SubjectRecordID INT UNSIGNED NOT NULL,
+            PRIMARY KEY (RecordID),
+            UNIQUE KEY uq_red_addon_public_subject_retain (SubjectRecordID),
+            CONSTRAINT fk_red_addon_public_subject_retain
+                FOREIGN KEY (SubjectRecordID)
+                REFERENCES RED_Addon_Public_Mutation_Subjects (RecordID)
+                ON DELETE RESTRICT ON UPDATE RESTRICT
+         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+    $retainedSubject = red_addon_public_mutation_subject_issue($connection);
+    $subjectIds[] = $retainedSubject['subjectRecordId'] ?? 0;
+    red_addon_public_mutation_subject_test_assert(
+        !empty($retainedSubject['valid'])
+            && mysqli_query(
+                $connection,
+                'INSERT INTO RED_Addon_Public_Subject_Retain_Fixture
+                    (SubjectRecordID) VALUES (' .
+                    (int) $retainedSubject['subjectRecordId'] . ')'
+            ) === true,
+        'fixture retains one subject through a restrictive foreign key'
+    );
     mysqli_query(
         $connection,
         'UPDATE RED_Addon_Public_Mutation_Subjects
          SET ExpiresAt=DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 SECOND)
-         WHERE RecordID=' . (int) $subjectA['subjectRecordId']
+         WHERE RecordID IN (' . (int) $subjectA['subjectRecordId'] . ',' .
+            (int) $retainedSubject['subjectRecordId'] . ')'
     );
     red_addon_public_mutation_subject_test_assert(
         empty(red_addon_public_mutation_subject_resolve(
@@ -409,10 +440,30 @@ try {
                     (SELECT COUNT(*)
                      FROM RED_Addon_Public_Mutation_CSRF_Tokens
                      WHERE SubjectRecordID=' .
-                        (int) $subjectA['subjectRecordId'] . ')
+                        (int) $subjectA['subjectRecordId'] . '),
+                    (SELECT COUNT(*)
+                     FROM RED_Addon_Public_Mutation_Subjects
+                     WHERE RecordID=' .
+                        (int) $retainedSubject['subjectRecordId'] . ')
                  )'
-            ) === '0:0',
-        'bounded cleanup removes expired subject rows and cascading CSRF rows'
+            ) === '0:0:1',
+        'bounded cleanup removes safe expired evidence while retaining a subject referenced by package history'
+    );
+
+    mysqli_query(
+        $connection,
+        'DROP TABLE RED_Addon_Public_Subject_Retain_Fixture'
+    );
+    red_addon_public_mutation_subject_test_assert(
+        red_addon_public_mutation_subject_cleanup($connection)
+            && red_addon_public_mutation_subject_test_scalar(
+                $connection,
+                'SELECT COUNT(*)
+                 FROM RED_Addon_Public_Mutation_Subjects
+                 WHERE RecordID=' .
+                    (int) $retainedSubject['subjectRecordId']
+            ) === '0',
+        'retained expired subject becomes cleanable after its package reference is removed'
     );
 
     red_addon_public_mutation_subject_test_cleanup($connection, $subjectIds);
