@@ -550,6 +550,7 @@ try {
                 'env',
                 'COPYFILE_DISABLE=1',
                 'tar',
+                '--no-xattrs',
                 '-czf',
                 $output,
                 '-C',
