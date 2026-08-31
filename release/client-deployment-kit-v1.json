@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "core": {
     "id": "redcms",
     "version": "5.1.0",
-    "minimumCommit": "070fdd8d155c329b1618b26c09e4a8bb41ea07bf",
+    "minimumCommit": "3fdb9196af339ce82afdfdf5331a9e1bdc31dd7a",
     "archivePath": "redcms"
   },
   "packages": [
@@ -23,8 +23,8 @@
     {
       "selection": "stripe",
       "id": "redcms.store-lite-stripe-checkout",
-      "version": "0.1.19",
-      "commit": "0f9392041b39c01906549cfcd6932a5445138c5f",
+      "version": "0.1.20",
+      "commit": "b25a76fa00819d96a8a06440e14269e3c4abe4a9",
       "repository": "redcms-store-lite-stripe-checkout",
       "sourcePath": "package",
       "archivePath": "redcms/addons/redcms/store-lite-stripe-checkout",
