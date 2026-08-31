@@ -220,7 +220,7 @@ if (!function_exists('red_addon_subscription_event_journal')) {
                             'verified', ?, ?
                      FROM RED_Addon_Installations
                      WHERE PackageID='redcms.store-lite-stripe-checkout'
-                       AND PackageVersion IN ('0.1.18', '0.1.19')
+                       AND PackageVersion IN ('0.1.18', '0.1.19', '0.1.20')
                        AND LifecycleState='enabled'"
                 );
                 $parameters = [

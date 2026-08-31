@@ -59,7 +59,7 @@ if (!function_exists('red_addon_subscription_webhook_runtime_run')) {
                 || ($store['manifest']['version'] ?? '') !== '0.1.50'
                 || !in_array(
                     $adapter['manifest']['version'] ?? '',
-                    ['0.1.18', '0.1.19'],
+                    ['0.1.18', '0.1.19', '0.1.20'],
                     true
                 )
             ) {

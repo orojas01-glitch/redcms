@@ -253,7 +253,7 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 ['redcms.store-lite-stripe-checkout'] ?? null;
             if (($catalog['valid'] ?? false) !== true
                 || !is_array($adapterPackage)
-                || ($adapterPackage['manifest']['version'] ?? '') !== '0.1.19'
+                || ($adapterPackage['manifest']['version'] ?? '') !== '0.1.20'
             ) {
                 return red_addon_subscription_checkout_public_runtime_refusal(
                     'adapter_package_unavailable'
@@ -320,7 +320,7 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 'schema' => 1,
                 'purpose' => 'subscription-sandbox-secret-availability',
                 'packageId' => 'redcms.store-lite-stripe-checkout',
-                'packageVersion' => '0.1.19',
+                'packageVersion' => '0.1.20',
                 'settingKey' => 'stripe.secret-key',
                 'settingsStateSha256' => $secret['stateSha256'],
                 'resolvedCount' => 1,
@@ -333,7 +333,7 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     'storeService' => 'commerce.subscriptions',
                     'stripePackageId' =>
                         'redcms.store-lite-stripe-checkout',
-                    'stripePackageVersion' => '0.1.19',
+                    'stripePackageVersion' => '0.1.20',
                     'stripeAdapter' => $adapterId,
                 ],
                 $subjectRecordId,

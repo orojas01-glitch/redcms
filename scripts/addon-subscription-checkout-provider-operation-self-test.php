@@ -176,7 +176,7 @@ try {
                 'status' => 'subscription_checkout_session_created',
                 'packageId' => 'redcms.store-lite-stripe-checkout',
                 'packageVersion' => isset($input['providerCatalog'])
-                    ? '0.1.19' : '0.1.18',
+                    ? '0.1.20' : '0.1.18',
                 'operation' => $operation,
                 'intentReference' => $intentReference,
                 'checkoutSessionRef' => $session,
@@ -343,13 +343,13 @@ try {
         'old adapter identity is refused before state loading'
     );
 
-    $binding19 = $binding;
-    $binding19['stripePackageVersion'] = '0.1.19';
+    $binding20 = $binding;
+    $binding20['stripePackageVersion'] = '0.1.20';
     $journalState = 'absent';
     $calls = [];
     $lastAdapterInput = [];
     $catalogResult = red_addon_subscription_provider_operation(
-        $binding19,
+        $binding20,
         $subjectRecordId,
         $offerId,
         $policy,
@@ -363,7 +363,7 @@ try {
         $catalogResult['valid']
             && $catalogResult['ready']
             && ($lastAdapterInput['providerCatalog'] ?? null) === $catalog,
-        'adapter 0.1.19 receives the exact server-local catalog binding: '
+        'adapter 0.1.20 receives the exact server-local catalog binding: '
             . json_encode([$catalogResult, $lastAdapterInput])
     );
 

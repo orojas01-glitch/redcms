@@ -57,7 +57,7 @@ if (!function_exists('red_addon_subscription_provider_binding_valid')) {
         return red_addon_subscription_checkout_binding_valid($binding)
             && in_array(
                 $binding['stripePackageVersion'] ?? '',
-                ['0.1.18', '0.1.19'],
+                ['0.1.18', '0.1.19', '0.1.20'],
                 true
             );
     }
@@ -139,7 +139,7 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
             || !is_callable($adapterInvoker)
             || !is_callable($journal)
             || ($stripeVersion === '0.1.18' && $providerCatalog !== null)
-            || ($stripeVersion === '0.1.19'
+            || (in_array($stripeVersion, ['0.1.19', '0.1.20'], true)
                 && $providerCatalog !== null
                 && !is_array($catalog))
         ) {

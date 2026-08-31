@@ -1,7 +1,7 @@
 # Subscription Catalog Price Binding
 
-Status: source and activation-file preparation only. Stripe, the hosted demo,
-and live mode are unchanged.
+Status: source and activation-file preparation only. Provider execution and
+live mode remain separate activation steps.
 
 ## Closed binding
 
@@ -15,14 +15,15 @@ The prepared runtime accepts one server-local binding with exactly:
 - `livemode=false`.
 
 The binding must match the currently loaded published and available Store Lite
-offer before the provider attempt is claimed. Adapter `0.1.19` then sends
+offer before the provider attempt is claimed. Adapter `0.1.20` then sends
 `line_items[0][price]` while retaining the existing dynamic Store Lite intent
 metadata required by the signed webhook lifecycle. The browser never supplies
 the Price, Product, amount, or interval.
 
-The existing inline recurring Price contract remains accepted only by adapter
-`0.1.18`. The catalog-bound public runtime requires `0.1.19`; package/version
-drift fails closed.
+The existing inline recurring Price contract remains accepted by the earlier
+adapter path. The catalog-bound public runtime requires `0.1.20`; package and
+version drift fail closed. The transport refuses any request that mixes a
+catalog Price with inline recurring Price data.
 
 ## Configuration ownership
 

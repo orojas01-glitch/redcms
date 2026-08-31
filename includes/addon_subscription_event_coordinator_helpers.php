@@ -49,7 +49,7 @@ if (!function_exists('red_addon_subscription_event_binding_valid')) {
             && ($binding['storePackageVersion'] ?? '') === '0.1.50'
             && in_array(
                 $binding['stripePackageVersion'] ?? '',
-                ['0.1.18', '0.1.19'],
+                ['0.1.18', '0.1.19', '0.1.20'],
                 true
             );
     }
