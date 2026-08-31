@@ -546,7 +546,16 @@ try {
         }
 
         $tar = red_client_kit_run(
-            ['tar', '-czf', $output, '-C', $temporary . '/stage', '.']
+            [
+                'env',
+                'COPYFILE_DISABLE=1',
+                'tar',
+                '-czf',
+                $output,
+                '-C',
+                $temporary . '/stage',
+                '.',
+            ]
         );
         if ($tar['exit'] !== 0 || !is_file($output)) {
             throw new RuntimeException('release_archive_write_failed');

@@ -118,6 +118,7 @@ foreach ([
     "clean-starter-boundary-self-test.php",
     "output_must_be_outside_source_repositories",
     "package_integrity_mismatch:",
+    "COPYFILE_DISABLE=1",
     "secret_value_pattern_in_artifact",
     "containsSecrets' => false",
     "providerContact' => false",
