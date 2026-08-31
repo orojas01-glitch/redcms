@@ -43,7 +43,7 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.3',
+        && ($release['version'] ?? null) === '0.1.4',
     'release identity is exact'
 );
 red_client_kit_test_assert(
@@ -68,7 +68,7 @@ red_client_kit_test_assert(
 red_client_kit_test_assert(
     ($packages['store-lite']['version'] ?? null) === '0.1.50'
         && ($packages['store-lite']['required'] ?? null) === true
-        && ($packages['stripe']['version'] ?? null) === '0.1.18'
+        && ($packages['stripe']['version'] ?? null) === '0.1.19'
         && ($packages['wompi']['version'] ?? null) === '0.1.5',
     'package versions match the reviewed repository manifests'
 );
@@ -113,6 +113,8 @@ foreach ([
     "--confirm-plan-sha256=",
     "--apply",
     "--untracked-files=no",
+    "red_client_kit_php_command",
+    "'php-cli'",
     "clean-starter-boundary-self-test.php",
     "output_must_be_outside_source_repositories",
     "package_integrity_mismatch:",

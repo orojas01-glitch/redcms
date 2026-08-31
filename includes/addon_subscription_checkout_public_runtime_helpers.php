@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/addon_subscription_checkout_provider_journal_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_dispatch_helpers.php';
+require_once __DIR__ . '/addon_subscription_catalog_binding_helpers.php';
 
 if (!function_exists('red_addon_subscription_checkout_public_runtime_enabled')) {
     function red_addon_subscription_checkout_public_runtime_enabled()
@@ -22,6 +23,18 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_enabled')) 
         );
         return ($enabled === true || $enabled === '1')
             && red_addon_valid_sha256($authorization);
+    }
+}
+
+if (!function_exists('red_addon_subscription_checkout_public_runtime_catalog')) {
+    function red_addon_subscription_checkout_public_runtime_catalog()
+    {
+        $value = red_server_config_value(
+            'SUBSCRIPTION_STRIPE_CATALOG_BINDING',
+            ['RED_SUBSCRIPTION_STRIPE_CATALOG_BINDING_JSON'],
+            null
+        );
+        return red_addon_subscription_catalog_binding_normalize($value);
     }
 }
 
@@ -214,6 +227,8 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 ? (int) ($subject['subjectRecordId'] ?? 0) : 0;
             $offerId = is_array($fields)
                 ? ($fields['fields']['offer'] ?? null) : null;
+            $providerCatalog =
+                red_addon_subscription_checkout_public_runtime_catalog();
             if (empty($subject['valid'])
                 || empty($fields['valid'])
                 || $subjectRecordId < 1
@@ -222,6 +237,8 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     '/\A[a-z0-9][a-z0-9._-]{0,63}\z/D',
                     $offerId
                 ) !== 1
+                || !is_array($providerCatalog)
+                || ($providerCatalog['offerId'] ?? '') !== $offerId
             ) {
                 return red_addon_subscription_checkout_public_runtime_refusal(
                     'request_projection_unavailable'
@@ -236,7 +253,7 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 ['redcms.store-lite-stripe-checkout'] ?? null;
             if (($catalog['valid'] ?? false) !== true
                 || !is_array($adapterPackage)
-                || ($adapterPackage['manifest']['version'] ?? '') !== '0.1.18'
+                || ($adapterPackage['manifest']['version'] ?? '') !== '0.1.19'
             ) {
                 return red_addon_subscription_checkout_public_runtime_refusal(
                     'adapter_package_unavailable'
@@ -303,7 +320,7 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                 'schema' => 1,
                 'purpose' => 'subscription-sandbox-secret-availability',
                 'packageId' => 'redcms.store-lite-stripe-checkout',
-                'packageVersion' => '0.1.18',
+                'packageVersion' => '0.1.19',
                 'settingKey' => 'stripe.secret-key',
                 'settingsStateSha256' => $secret['stateSha256'],
                 'resolvedCount' => 1,
@@ -316,7 +333,7 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     'storeService' => 'commerce.subscriptions',
                     'stripePackageId' =>
                         'redcms.store-lite-stripe-checkout',
-                    'stripePackageVersion' => '0.1.18',
+                    'stripePackageVersion' => '0.1.19',
                     'stripeAdapter' => $adapterId,
                 ],
                 $subjectRecordId,
@@ -351,7 +368,8 @@ if (!function_exists('red_addon_subscription_checkout_public_runtime_complete'))
                     ),
                 red_addon_subscription_provider_database_journal(
                     $connection
-                )
+                ),
+                $providerCatalog
             );
             $public = red_addon_subscription_checkout_public_response(
                 $execution,

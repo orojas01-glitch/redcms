@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "currency": "USD",
+  "product": {
+    "id": "ai-assistant-foundation",
+    "type": "simple",
+    "title": "AI Assistance Foundation",
+    "summary": "A configured AI messaging assistant grounded in approved business knowledge, with managed lead, handoff, language, administration, and monitoring capabilities.",
+    "currency": "USD",
+    "state": "published",
+    "availability": "available",
+    "imageRef": null,
+    "sku": "RS-AI-FOUNDATION",
+    "priceMinor": 5900,
+    "stock": null,
+    "options": [],
+    "variants": []
+  },
+  "offer": {
+    "id": "ai-assistant-foundation-monthly",
+    "productId": "ai-assistant-foundation",
+    "variantId": null,
+    "title": "AI Assistance Foundation",
+    "summary": "Sandbox demonstration of the managed AI Assistant foundation subscription.",
+    "currency": "USD",
+    "priceMinor": 5900,
+    "billingPeriod": "monthly",
+    "state": "published",
+    "availability": "available",
+    "buttonLabel": "Start sandbox subscription"
+  },
+  "component": {
+    "type": "redcms.store-lite/subscription",
+    "placementRecordId": null,
+    "activationRequired": true
+  }
+}

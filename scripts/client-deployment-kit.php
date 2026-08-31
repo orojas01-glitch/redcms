@@ -46,6 +46,26 @@ function red_client_kit_run(array $command, ?string $cwd = null): array
     ];
 }
 
+function red_client_kit_php_command(string $script): array
+{
+    $binary = trim((string) PHP_BINARY);
+    if ($binary !== '') {
+        return [$binary, $script];
+    }
+
+    $launcher = $_SERVER['_'] ?? getenv('_');
+    if (is_string($launcher)
+        && $launcher !== ''
+        && is_file($launcher)
+        && is_executable($launcher)
+        && strtolower(basename($launcher)) === 'frankenphp'
+    ) {
+        return [$launcher, 'php-cli', $script];
+    }
+
+    throw new RuntimeException('php_cli_unavailable');
+}
+
 function red_client_kit_realpath(string $path): string
 {
     $resolved = realpath($path);
@@ -329,7 +349,9 @@ try {
         throw new RuntimeException('output_must_be_outside_source_repositories');
     }
     $boundary = red_client_kit_run(
-        [PHP_BINARY, $projectResolved . '/scripts/clean-starter-boundary-self-test.php'],
+        red_client_kit_php_command(
+            $projectResolved . '/scripts/clean-starter-boundary-self-test.php'
+        ),
         $projectResolved
     );
     if ($boundary['exit'] !== 0) {

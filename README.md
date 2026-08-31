@@ -47,6 +47,15 @@ TLS and disposable-database proofs pass, while no real secret, provider
 contact, payment, browser action, endpoint activation, or deployment occurred.
 See [Subscription Event Delivery Coordinator](docs/SUBSCRIPTION-EVENT-DELIVERY-COORDINATOR.md).
 
+An offline `0.1.19` adapter candidate and matching core runtime preparation now
+add one closed server-local mapping from a Store Lite offer to an existing
+Stripe Sandbox catalog Product and recurring Price. The mapping is revalidated
+against the offer's currency, amount, period, active state, and non-live mode;
+the resulting Checkout request uses the Price ID without creating inline
+catalog records. Existing `0.1.18` subscription and webhook behavior remains
+compatible. This preparation is not deployed, enabled, or provider-contacting.
+See [Subscription Catalog Price Binding](docs/SUBSCRIPTION-CATALOG-PRICE-BINDING.md).
+
 The optional post-release payment-adapter track has completed P3A and the
 separately distributed Store Lite package has completed P3B through version
 0.1.35. Core can

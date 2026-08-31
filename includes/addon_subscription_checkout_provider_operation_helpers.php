@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/addon_subscription_checkout_public_response_helpers.php';
+require_once __DIR__ . '/addon_subscription_catalog_binding_helpers.php';
 
 if (!function_exists('red_addon_subscription_provider_result')) {
     function red_addon_subscription_provider_result($reason = 'invalid')
@@ -54,7 +55,11 @@ if (!function_exists('red_addon_subscription_provider_binding_valid')) {
     function red_addon_subscription_provider_binding_valid($binding)
     {
         return red_addon_subscription_checkout_binding_valid($binding)
-            && ($binding['stripePackageVersion'] ?? '') === '0.1.18';
+            && in_array(
+                $binding['stripePackageVersion'] ?? '',
+                ['0.1.18', '0.1.19'],
+                true
+            );
     }
 }
 
@@ -112,9 +117,17 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
         $authority,
         $serviceInvoker,
         $adapterInvoker,
-        $journal
+        $journal,
+        $providerCatalog = null
     ) {
         $result = red_addon_subscription_provider_result();
+        $stripeVersion = is_array($binding)
+            ? ($binding['stripePackageVersion'] ?? '') : '';
+        $catalog = $providerCatalog === null
+            ? null
+            : red_addon_subscription_catalog_binding_normalize(
+                $providerCatalog
+            );
         if (!red_addon_subscription_provider_binding_valid($binding)
             || !is_int($subjectRecordId)
             || $subjectRecordId < 1
@@ -125,6 +138,10 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
             || !is_callable($serviceInvoker)
             || !is_callable($adapterInvoker)
             || !is_callable($journal)
+            || ($stripeVersion === '0.1.18' && $providerCatalog !== null)
+            || ($stripeVersion === '0.1.19'
+                && $providerCatalog !== null
+                && !is_array($catalog))
         ) {
             return $result;
         }
@@ -159,6 +176,15 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
                 $result['reason'] = 'subscription_projection_invalid';
                 return $result;
             }
+            if (is_array($catalog)
+                && !red_addon_subscription_catalog_binding_matches_offer(
+                    $catalog,
+                    $offer
+                )
+            ) {
+                $result['reason'] = 'provider_catalog_mismatch';
+                return $result;
+            }
             $intentReference = red_addon_subscription_intent_reference(
                 $subjectRecordId,
                 $offerId,
@@ -171,7 +197,7 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
                 'offerStateSha256' => $intent['offerStateSha256'],
                 'status' => 'requested',
             ];
-            $planSha256 = red_addon_subscription_provider_hash([
+            $planMaterial = [
                 'schema' => 1,
                 'purpose' => 'subscription-checkout-provider-operation',
                 'binding' => $binding,
@@ -186,7 +212,11 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
                     $authority['secretAvailabilitySha256'],
                 'maximumAttempts' => 1,
                 'retryAuthorized' => false,
-            ]);
+            ];
+            if (is_array($catalog)) {
+                $planMaterial['providerCatalog'] = $catalog;
+            }
+            $planSha256 = red_addon_subscription_provider_hash($planMaterial);
             if ($intentReference === ''
                 || !red_addon_valid_sha256($planSha256)
             ) {
@@ -242,22 +272,26 @@ if (!function_exists('red_addon_subscription_provider_operation')) {
                 return $result;
             }
             $result['journalStarted'] = true;
+            $adapterInput = [
+                'contactTarget' =>
+                    'stripe-subscription-sandbox-real-post',
+                'intent' => $adapterIntent,
+                'offer' => $offer,
+                'policy' => $policy,
+                'execution' => [
+                    'planSha256' => $planSha256,
+                    'claimStateSha256' =>
+                        $authority['authorizationSha256'],
+                    'executionStartStateSha256' => $startStateSha256,
+                ],
+            ];
+            if (is_array($catalog)) {
+                $adapterInput['providerCatalog'] = $catalog;
+            }
             $invocation = $adapterInvoker(
                 $binding['stripeAdapter'],
                 'subscription.checkout.create-sandbox-real-post',
-                [
-                    'contactTarget' =>
-                        'stripe-subscription-sandbox-real-post',
-                    'intent' => $adapterIntent,
-                    'offer' => $offer,
-                    'policy' => $policy,
-                    'execution' => [
-                        'planSha256' => $planSha256,
-                        'claimStateSha256' =>
-                            $authority['authorizationSha256'],
-                        'executionStartStateSha256' => $startStateSha256,
-                    ],
-                ]
+                $adapterInput
             );
             $data = is_array($invocation) ? ($invocation['data'] ?? null) : null;
             if (!red_addon_subscription_checkout_invocation_valid(

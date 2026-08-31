@@ -56,6 +56,16 @@ $authority = [
 ];
 $subjectRecordId = 42;
 $offerId = $offer['id'];
+$catalog = [
+    'offerId' => $offerId,
+    'stripeProductId' => 'prod_VAdppdm2hxfXT7',
+    'stripePriceId' => 'price_1UAIXQPzjg2rInjnX5CypQNL',
+    'currency' => 'USD',
+    'priceMinor' => 2900,
+    'billingPeriod' => 'monthly',
+    'active' => true,
+    'livemode' => false,
+];
 $intentReference = red_addon_subscription_intent_reference(
     $subjectRecordId,
     $offerId,
@@ -141,6 +151,7 @@ try {
         ]);
     };
     $adapterCalls = 0;
+    $lastAdapterInput = [];
     $adapterInvoker = function (
         string $adapter,
         string $operation,
@@ -148,6 +159,7 @@ try {
     ) use (
         &$calls,
         &$adapterCalls,
+        &$lastAdapterInput,
         $invocation,
         $intentReference,
         $session,
@@ -155,6 +167,7 @@ try {
     ): array {
         $calls[] = 'adapter:' . $operation;
         $adapterCalls++;
+        $lastAdapterInput = $input;
         return $invocation(
             'redcms.store-lite-stripe-checkout',
             $operation,
@@ -162,7 +175,8 @@ try {
                 'valid' => true,
                 'status' => 'subscription_checkout_session_created',
                 'packageId' => 'redcms.store-lite-stripe-checkout',
-                'packageVersion' => '0.1.18',
+                'packageVersion' => isset($input['providerCatalog'])
+                    ? '0.1.19' : '0.1.18',
                 'operation' => $operation,
                 'intentReference' => $intentReference,
                 'checkoutSessionRef' => $session,
@@ -327,6 +341,30 @@ try {
             $journal
         )['valid'] === false,
         'old adapter identity is refused before state loading'
+    );
+
+    $binding19 = $binding;
+    $binding19['stripePackageVersion'] = '0.1.19';
+    $journalState = 'absent';
+    $calls = [];
+    $lastAdapterInput = [];
+    $catalogResult = red_addon_subscription_provider_operation(
+        $binding19,
+        $subjectRecordId,
+        $offerId,
+        $policy,
+        $authority,
+        $serviceInvoker,
+        $adapterInvoker,
+        $journal,
+        $catalog
+    );
+    $assert(
+        $catalogResult['valid']
+            && $catalogResult['ready']
+            && ($lastAdapterInput['providerCatalog'] ?? null) === $catalog,
+        'adapter 0.1.19 receives the exact server-local catalog binding: '
+            . json_encode([$catalogResult, $lastAdapterInput])
     );
 
     $indeterminateState = 'absent';

@@ -12,7 +12,7 @@ the public core repository:
 
 - RED-CMS core `5.1.0` from this repository;
 - required Store Lite `0.1.50` from `redcms-store-lite`;
-- optional Stripe Checkout `0.1.18` from
+- optional Stripe Checkout `0.1.19` from
   `redcms-store-lite-stripe-checkout`; and
 - optional Wompi `0.1.5` from `redcms-store-lite-wompi`.
 
@@ -20,6 +20,11 @@ The exact package revisions and destinations are pinned in
 [`release/client-deployment-kit-v1.json`](../release/client-deployment-kit-v1.json).
 PayPal is intentionally refused by this release manifest until its separate
 adapter contract and package exist.
+
+Adapter `0.1.19` includes the credential-free catalog-Price binding contract.
+Its prior `0.1.18` lifecycle evidence remains valid for the unchanged webhook
+path, while the new existing-Price Checkout path remains activation-deferred
+until a client-specific Sandbox rehearsal passes.
 
 ## Build the archive
 

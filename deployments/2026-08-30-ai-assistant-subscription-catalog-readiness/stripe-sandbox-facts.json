@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "capturedOn": "2026-08-30",
+  "mode": "sandbox",
+  "account": "RED-CMS Store Lite Development",
+  "product": {
+    "id": "prod_VAdppdm2hxfXT7",
+    "name": "AI Assistance Foundation",
+    "active": true
+  },
+  "price": {
+    "id": "price_1UAIXQPzjg2rInjnX5CypQNL",
+    "currency": "USD",
+    "unitAmountMinor": 5900,
+    "type": "recurring",
+    "interval": "month",
+    "intervalCount": 1,
+    "active": true,
+    "defaultForProduct": true
+  },
+  "eventDestination": {
+    "id": "we_1U8qk9Pzjg2rInjnjStHjpRP",
+    "name": "RED-CMS Store Lite Sandbox subscriptions",
+    "url": "https://demo.red-sphere.com/addons/redcms/store-lite-stripe-checkout/provider-events",
+    "active": true,
+    "events": [
+      "checkout.session.completed",
+      "checkout.session.expired",
+      "customer.subscription.deleted",
+      "invoice.paid",
+      "invoice.payment_failed"
+    ]
+  },
+  "restrictedKey": {
+    "name": "RED-CMS Store Lite Sandbox checkout",
+    "present": true,
+    "valueIncluded": false
+  },
+  "secretsIncluded": false
+}

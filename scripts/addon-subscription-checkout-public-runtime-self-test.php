@@ -21,10 +21,14 @@ $previousEnabled = getenv('RED_SUBSCRIPTION_CHECKOUT_SANDBOX_ENABLED');
 $previousAuthorization = getenv(
     'RED_SUBSCRIPTION_CHECKOUT_AUTHORIZATION_SHA256'
 );
+$previousCatalog = getenv(
+    'RED_SUBSCRIPTION_STRIPE_CATALOG_BINDING_JSON'
+);
 
 try {
     putenv('RED_SUBSCRIPTION_CHECKOUT_SANDBOX_ENABLED');
     putenv('RED_SUBSCRIPTION_CHECKOUT_AUTHORIZATION_SHA256');
+    putenv('RED_SUBSCRIPTION_STRIPE_CATALOG_BINDING_JSON');
 
     $assert(
         red_addon_subscription_checkout_public_runtime_target(
@@ -41,6 +45,10 @@ try {
     $assert(
         !red_addon_subscription_checkout_public_runtime_enabled(),
         'provider runtime defaults disabled without server authorization'
+    );
+    $assert(
+        red_addon_subscription_checkout_public_runtime_catalog() === null,
+        'provider catalog binding defaults closed'
     );
 
     $ordinary = red_addon_public_mutation_response_success('accepted');
@@ -119,9 +127,29 @@ try {
     putenv(
         'RED_SUBSCRIPTION_CHECKOUT_AUTHORIZATION_SHA256=' . str_repeat('b', 64)
     );
+    $catalog = [
+        'offerId' => 'ai-assistant-foundation-monthly',
+        'stripeProductId' => 'prod_VAdppdm2hxfXT7',
+        'stripePriceId' => 'price_1UAIXQPzjg2rInjnX5CypQNL',
+        'currency' => 'USD',
+        'priceMinor' => 5900,
+        'billingPeriod' => 'monthly',
+        'active' => true,
+        'livemode' => false,
+    ];
+    putenv(
+        'RED_SUBSCRIPTION_STRIPE_CATALOG_BINDING_JSON=' . json_encode(
+            $catalog,
+            JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+        )
+    );
     $assert(
         red_addon_subscription_checkout_public_runtime_enabled(),
         'exact server authorization enables only the Sandbox runtime gate'
+    );
+    $assert(
+        red_addon_subscription_checkout_public_runtime_catalog() === $catalog,
+        'exact server-local Stripe catalog binding is available to runtime'
     );
     $complete = red_addon_subscription_checkout_return(
         'GET',
@@ -208,6 +236,11 @@ try {
         : putenv(
             'RED_SUBSCRIPTION_CHECKOUT_AUTHORIZATION_SHA256='
                 . $previousAuthorization
+        );
+    $previousCatalog === false
+        ? putenv('RED_SUBSCRIPTION_STRIPE_CATALOG_BINDING_JSON')
+        : putenv(
+            'RED_SUBSCRIPTION_STRIPE_CATALOG_BINDING_JSON=' . $previousCatalog
         );
 }
 

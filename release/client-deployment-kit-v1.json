@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "core": {
     "id": "redcms",
     "version": "5.1.0",
@@ -23,13 +23,13 @@
     {
       "selection": "stripe",
       "id": "redcms.store-lite-stripe-checkout",
-      "version": "0.1.18",
-      "commit": "cca26ef8bddaaf087def534c00d0f063fb3a4c19",
+      "version": "0.1.19",
+      "commit": "0f9392041b39c01906549cfcd6932a5445138c5f",
       "repository": "redcms-store-lite-stripe-checkout",
       "sourcePath": "package",
       "archivePath": "redcms/addons/redcms/store-lite-stripe-checkout",
       "required": false,
-      "releaseState": "sandbox_verified"
+      "releaseState": "offline_verified_catalog_activation_deferred"
     },
     {
       "selection": "wompi",

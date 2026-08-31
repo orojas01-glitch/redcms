@@ -89,7 +89,11 @@ if (!function_exists('red_addon_subscription_checkout_binding_valid')) {
             && ($binding['storeService'] ?? '') === 'commerce.subscriptions'
             && ($binding['stripePackageId'] ?? '')
                 === 'redcms.store-lite-stripe-checkout'
-            && ($binding['stripePackageVersion'] ?? '') === '0.1.18'
+            && in_array(
+                $binding['stripePackageVersion'] ?? '',
+                ['0.1.18', '0.1.19'],
+                true
+            )
             && ($binding['stripeAdapter'] ?? '')
                 === 'redcms.store-lite-stripe-checkout/checkout';
     }
