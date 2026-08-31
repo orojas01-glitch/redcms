@@ -23,9 +23,10 @@ adapter contract and package exist.
 
 Adapter `0.1.20` includes the credential-free catalog-Price binding contract
 and the bounded transport acceptance for that exact request form. Its prior
-`0.1.18` lifecycle evidence remains valid for the unchanged webhook path,
-while the existing-Price Checkout path remains activation-deferred until a
-client-specific Sandbox rehearsal passes.
+`0.1.18` lifecycle evidence remains valid for the unchanged webhook path. The
+existing-Price path completed its $59/month activation-and-cancellation
+lifecycle on `demo.red-sphere.com`; every future client still requires its own
+isolated Sandbox acceptance before live-mode review.
 
 ## Build the archive
 

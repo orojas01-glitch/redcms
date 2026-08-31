@@ -47,15 +47,18 @@ TLS and disposable-database proofs pass, while no real secret, provider
 contact, payment, browser action, endpoint activation, or deployment occurred.
 See [Subscription Event Delivery Coordinator](docs/SUBSCRIPTION-EVENT-DELIVERY-COORDINATOR.md).
 
-An offline `0.1.20` adapter candidate and matching core runtime preparation now
-add one closed server-local mapping from a Store Lite offer to an existing
+Adapter `0.1.20` and its matching core runtime add one closed server-local
+mapping from a Store Lite offer to an existing
 Stripe Sandbox catalog Product and recurring Price. The mapping is revalidated
 against the offer's currency, amount, period, active state, and non-live mode;
 the resulting Checkout request uses the Price ID without creating inline
 catalog records. Existing `0.1.18` and `0.1.19` subscription and webhook
 behavior remains compatible. The bounded transport accepts the exact catalog
-Price form and rejects mixed inline/catalog requests. Source preparation alone
-is not deployment, provider contact, or payment evidence.
+Price form and rejects mixed inline/catalog requests. The configured $59/month
+offer completed hosted Sandbox activation and immediate cancellation on
+`demo.red-sphere.com`; Stripe returned 200 for all three signed lifecycle
+deliveries, and Store Lite transitioned `active/active` then
+`canceled/revoked`. Live mode remains unauthorized.
 See [Subscription Catalog Price Binding](docs/SUBSCRIPTION-CATALOG-PRICE-BINDING.md).
 
 The optional post-release payment-adapter track has completed P3A and the

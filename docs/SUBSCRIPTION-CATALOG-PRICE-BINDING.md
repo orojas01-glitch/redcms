@@ -1,7 +1,7 @@
 # Subscription Catalog Price Binding
 
-Status: source and activation-file preparation only. Provider execution and
-live mode remain separate activation steps.
+Status: $59/month catalog Price lifecycle verified on
+`demo.red-sphere.com` in Stripe Sandbox; live mode remains unauthorized.
 
 ## Closed binding
 
@@ -43,6 +43,9 @@ refusal, use of the configured Price ID, removal of inline `price_data`, one
 sealed provider exchange, foreign-offer refusal, transient Checkout URL
 handling, and compatibility with the existing subscription and webhook paths.
 
-Provider catalog retrieval, deployment, Checkout navigation, test payment,
-signed delivery, cancellation, live mode, refunds, and customer provisioning
-remain separate operational evidence.
+The demo acceptance additionally proved hosted Checkout, a paid $59 Sandbox
+invoice, 200 responses for the signed completed-Checkout and paid-invoice
+deliveries, `active/active` Store Lite state, and an immediate cancellation
+with a 200 deletion delivery and `canceled/revoked` state. The public demo
+offer remains available. Production credentials, live mode, refunds,
+disputes, and customer provisioning remain separate release gates.

@@ -43,7 +43,7 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.5',
+        && ($release['version'] ?? null) === '0.1.6',
     'release identity is exact'
 );
 red_client_kit_test_assert(
@@ -69,6 +69,8 @@ red_client_kit_test_assert(
     ($packages['store-lite']['version'] ?? null) === '0.1.50'
         && ($packages['store-lite']['required'] ?? null) === true
         && ($packages['stripe']['version'] ?? null) === '0.1.20'
+        && ($packages['stripe']['releaseState'] ?? null)
+            === 'sandbox_verified_catalog_lifecycle'
         && ($packages['wompi']['version'] ?? null) === '0.1.5',
     'package versions match the reviewed repository manifests'
 );
