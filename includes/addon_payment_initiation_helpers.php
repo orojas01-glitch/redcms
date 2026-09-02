@@ -41,7 +41,10 @@ if (!function_exists('red_addon_payment_initiation_reference_valid')) {
 }
 
 if (!function_exists('red_addon_payment_initiation_https_url_valid')) {
-    function red_addon_payment_initiation_https_url_valid($value)
+    function red_addon_payment_initiation_https_url_valid(
+        $value,
+        $providerReference = null
+    )
     {
         if (!is_string($value)
             || strlen($value) < 1
@@ -51,8 +54,19 @@ if (!function_exists('red_addon_payment_initiation_https_url_valid')) {
             return false;
         }
         $url = parse_url($value);
-        return is_array($url)
-            && ($url['scheme'] ?? null) === 'https'
+        if (!is_array($url)) {
+            return false;
+        }
+        $queryValid = !array_key_exists('query', $url);
+        if (!$queryValid
+            && red_addon_payment_initiation_reference_valid(
+                $providerReference
+            )
+        ) {
+            $queryValid = $url['query']
+                === 'token=' . rawurlencode($providerReference);
+        }
+        return ($url['scheme'] ?? null) === 'https'
             && is_string($url['host'] ?? null)
             && preg_match(
                 '/\A(?=.{1,253}\z)(?:[a-z0-9](?:[a-z0-9-]{0,61}'
@@ -62,8 +76,8 @@ if (!function_exists('red_addon_payment_initiation_https_url_valid')) {
             && !array_key_exists('user', $url)
             && !array_key_exists('pass', $url)
             && !array_key_exists('port', $url)
-            && !array_key_exists('query', $url)
             && !array_key_exists('fragment', $url)
+            && $queryValid
             && is_string($url['path'] ?? null)
             && str_starts_with($url['path'], '/')
             && $url['path'] !== '/';
@@ -88,7 +102,8 @@ if (!function_exists('red_addon_payment_initiation_normalize')) {
                     $value['providerReference'] ?? null
                 )
                 || !red_addon_payment_initiation_https_url_valid(
-                    $value['checkoutUrl'] ?? null
+                    $value['checkoutUrl'] ?? null,
+                    $value['providerReference'] ?? null
                 )
             ) {
                 $result['reason'] = 'hosted_redirect_invalid';

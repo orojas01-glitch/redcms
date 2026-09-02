@@ -43,7 +43,7 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.6',
+        && ($release['version'] ?? null) === '0.1.7',
     'release identity is exact'
 );
 red_client_kit_test_assert(
@@ -87,7 +87,7 @@ foreach ($packages as $selection => $package) {
 }
 red_client_kit_test_assert(
     ($release['unsupportedSelections']['paypal'] ?? null)
-        === 'Adapter contract and package are not yet implemented.',
+        === 'Offline package foundation exists; core adoption, provider transports, and Sandbox payment acceptance are not yet complete.',
     'PayPal is visible but cannot be misreported as release-ready'
 );
 red_client_kit_test_assert(

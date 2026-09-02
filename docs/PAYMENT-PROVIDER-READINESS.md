@@ -1,6 +1,6 @@
 # Store Lite Payment Provider Readiness
 
-Status date: 2026-08-30.
+Status date: 2026-09-01.
 
 Store Lite owns provider-neutral catalog, order, payment-event, and subscription
 state. Each external provider remains a separately installed adapter with its
@@ -13,7 +13,7 @@ and release gate.
 | --- | --- | --- | --- |
 | Stripe Checkout | `redcms.store-lite-stripe-checkout` `0.1.20` | The configured $59/month catalog Price completed a hosted `demo.red-sphere.com` Sandbox lifecycle: Checkout creation returned 200; completed Checkout and paid invoice deliveries returned 200; Store Lite reached `active/active`; immediate cancellation returned 200 and reached `canceled/revoked`. | General live-mode release, client-owned production credentials, per-client Sandbox acceptance, refunds/disputes, and ACH delayed-payment lifecycle. |
 | Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, current Store Lite `0.1.50` discovery, disabled installation, atomic enablement, sealed transport, event verification, and a current 21-assertion two-client isolation rehearsal are verified offline. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
-| PayPal Checkout | separate adapter reserved; no package yet | Provider-neutral Store Lite payment taxonomy and the core integration-adapter model already reserve PayPal. | Package manifest/profile, Orders v2 create/capture, server-side OAuth, button handoff, webhook verification/replay, refunds, subscriptions, Sandbox lifecycle, and client deployment. |
+| PayPal Checkout | `redcms.store-lite-paypal` `0.1.0` offline foundation | The separate package passes 67 contract and package assertions for one-time USD Orders v2 create/capture planning, exact Sandbox approval-redirect handling, verified `PAYMENT.CAPTURE.COMPLETED` projection, replay refusal, manifest integrity, settings, a non-operational event route, and evidence-only migrations. | Core profile adoption, installation/enablement, server-side OAuth and create/capture transports, button/endpoints, webhook verification transport, Store Lite payment mutation, refunds/reversals/disputes, Sandbox lifecycle, subscriptions, and client deployment. |
 
 ## Stripe bank payments
 
@@ -66,29 +66,33 @@ Official references:
 
 ## PayPal
 
-PayPal should be the next new adapter repository. The first version should be
-one-time Checkout only and use server-side Orders v2 create/capture plus a
-provider-signed webhook receipt. It must not reuse the legacy
-`paypal_response.php` PDT compatibility route, because that route predates the
-Store Lite payment lifecycle and cannot provide the new adapter's installation,
-replay, isolation, or subscription guarantees.
+PayPal now has a separate `redcms.store-lite-paypal` `0.1.0` repository. Its
+first offline foundation is one-time USD Checkout only and closes pure Orders
+v2 create/capture and verified-event projection contracts. It must not reuse
+the legacy `paypal_response.php` PDT compatibility route, because that route
+predates the Store Lite payment lifecycle and cannot provide the new adapter's
+installation, replay, isolation, or subscription guarantees.
 
-Recommended gates:
+Current gates:
 
-1. package identity, settings, outbound hosts, callback route, and exact Store
-   Lite dependency;
-2. pure create-order and capture response contracts with idempotency;
-3. client-side PayPal button handoff backed by core-owned server endpoints;
-4. raw webhook preservation, signature verification, replay ledger, capture,
+1. **Complete offline:** package identity, settings, Sandbox API host, future
+   callback route, exact Store Lite dependency, and integrity inventory;
+2. **Complete offline:** pure create-order, approval-redirect, capture-response,
+   and already-verified paid-event contracts with idempotency/replay evidence;
+3. **Next:** exact RED-CMS core profile adoption followed by disposable
+   install/enable/disable and two-client isolation;
+4. server-side OAuth/create/capture transport and a PayPal button handoff
+   backed by core-owned endpoints;
+5. raw webhook preservation, signature verification, replay ledger, capture,
    refund, reversal, and dispute projections;
-5. disposable install/enable/disable and two-client isolation;
 6. PayPal Sandbox one-time purchase acceptance; and
-7. a later, separate subscription-plan lifecycle using the existing Store Lite
+7. a later, separate subscription-plan lifecycle using the Store Lite
    subscription offer and entitlement model.
 
 Official references:
 
-- [PayPal Standard Checkout](https://developer.paypal.com/checkout/)
-- [PayPal Checkout integration](https://developer.paypal.com/studio/checkout/standard/integrate)
+- [PayPal REST authentication](https://developer.paypal.com/api/rest/authentication/)
+- [PayPal Orders v2 integration](https://developer.paypal.com/api/rest/integration/orders-api/)
 - [PayPal webhooks](https://developer.paypal.com/api/rest/webhooks/rest/)
+- [PayPal webhook event names](https://developer.paypal.com/api/rest/webhooks/event-names/)
 - [PayPal subscriptions](https://developer.paypal.com/platforms/subscriptions/overview/)

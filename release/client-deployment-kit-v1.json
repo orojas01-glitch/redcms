@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "core": {
     "id": "redcms",
     "version": "5.1.0",
@@ -44,7 +44,7 @@
     }
   ],
   "unsupportedSelections": {
-    "paypal": "Adapter contract and package are not yet implemented."
+    "paypal": "Offline package foundation exists; core adoption, provider transports, and Sandbox payment acceptance are not yet complete."
   },
   "secretPolicy": {
     "includeValues": false,

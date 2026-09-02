@@ -568,7 +568,44 @@ try {
             'providerReference' => $hostedValue['providerReference'],
             'checkoutUrl' => $hostedValue['checkoutUrl'] . '?status=paid',
         ])['reason'] === 'hosted_redirect_invalid',
-        'query-bearing hosted initiation is refused'
+        'unbound query-bearing hosted initiation is refused'
+    );
+    $paypalReference = '5O190127TN364715T';
+    $paypalHostedValue = [
+        'providerReference' => $paypalReference,
+        'checkoutUrl' => 'https://www.sandbox.paypal.com/checkoutnow?token='
+            . $paypalReference,
+    ];
+    $paypalHosted = red_addon_payment_initiation_normalize(
+        'hosted_redirect',
+        $paypalHostedValue
+    );
+    red_colombia_c1_assert(
+        ($paypalHosted['accepted'] ?? false) === true
+            && ($paypalHosted['value'] ?? null) === $paypalHostedValue,
+        'one token query exactly bound to the provider reference is accepted'
+    );
+    red_colombia_c1_assert(
+        red_addon_payment_initiation_normalize('hosted_redirect', [
+            'providerReference' => $paypalReference,
+            'checkoutUrl' =>
+                'https://www.sandbox.paypal.com/checkoutnow?token=OTHER12345',
+        ])['reason'] === 'hosted_redirect_invalid',
+        'mismatched provider-reference token is refused'
+    );
+    red_colombia_c1_assert(
+        red_addon_payment_initiation_normalize('hosted_redirect', [
+            'providerReference' => $paypalReference,
+            'checkoutUrl' => $paypalHostedValue['checkoutUrl'] . '&state=x',
+        ])['reason'] === 'hosted_redirect_invalid',
+        'additional hosted query parameters are refused'
+    );
+    red_colombia_c1_assert(
+        red_addon_payment_initiation_normalize('hosted_redirect', [
+            'providerReference' => $paypalReference,
+            'checkoutUrl' => $paypalHostedValue['checkoutUrl'] . '#fragment',
+        ])['reason'] === 'hosted_redirect_invalid',
+        'hosted redirect fragments remain refused'
     );
     red_colombia_c1_assert(
         red_addon_payment_initiation_normalize('hosted_redirect', [
