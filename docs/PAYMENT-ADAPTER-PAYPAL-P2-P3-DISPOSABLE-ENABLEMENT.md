@@ -4,7 +4,7 @@ Status date: 2026-09-02.
 
 ## Outcome
 
-The exact external `redcms.store-lite-paypal` `0.1.0` package now completes a
+The exact external `redcms.store-lite-paypal` package now completes a
 fresh, isolated RED-CMS lifecycle through atomic enablement without contacting
 PayPal. The tests use only synthetic ordinary setting values and opaque secret
 reference identifiers; they never supply, resolve, print, or persist a PayPal
@@ -14,7 +14,7 @@ credential value.
 
 The guarded rehearsal:
 
-1. pins clean Store Lite `0.1.50` and PayPal `0.1.0` repository commits;
+1. pins clean Store Lite `0.1.50` and current PayPal repository commits;
 2. creates one uniquely named `redcms_paypal_p2_*` database and scoped grant;
 3. installs the starter schema and all 47 current core migrations;
 4. records Store Lite as the already-proven enabled dependency baseline

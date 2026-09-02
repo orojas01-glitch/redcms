@@ -209,11 +209,11 @@ try {
             && !empty($storePackage['valid'])
             && !empty($paypalPackage['valid'])
             && ($storePackage['manifest']['version'] ?? null) === '0.1.50'
-            && ($paypalPackage['manifest']['version'] ?? null) === '0.1.0'
+            && ($paypalPackage['manifest']['version'] ?? null) === '0.2.0'
             && count(
                 $paypalPackage['manifest']['integrity']['files'] ?? []
-            ) === 10,
-        'exact Store Lite and ten-file PayPal package discover together'
+            ) === 13,
+        'exact Store Lite and thirteen-file PayPal package discover together'
     );
     red_paypal_p2_assert(
         !class_exists(RED_CMS_Store_Lite_PayPal_Offline_Adapter::class, false),
@@ -271,7 +271,7 @@ try {
     );
     red_paypal_p2_assert(
         $installed['status'] === 'installed_disabled'
-            && $installed['version'] === '0.1.0'
+            && $installed['version'] === '0.2.0'
             && $installed['appliedMigrations'] === [
                 '2026-09-01-paypal-order-attempts',
                 '2026-09-01-paypal-event-receipts',

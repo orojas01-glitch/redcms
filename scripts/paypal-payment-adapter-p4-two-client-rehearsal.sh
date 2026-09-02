@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/db-common.sh"
 STORE_REPOSITORY="${RED_STORE_LITE_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite}"
 PAYPAL_REPOSITORY="${RED_PAYPAL_REPOSITORY:-$(dirname "$RED_PROJECT_ROOT")/redcms-store-lite-paypal}"
 STORE_REVISION='56727d2de0bbd2c476316f62001a429b354c599f'
-PAYPAL_REVISION='ab474be3d7075be07abcec340bc712a8da00460f'
+PAYPAL_REVISION='94118c7f94cc6c5e1886d39e70cb295e0f1afa97'
 FRANKENPHP_BIN="${FRANKENPHP_BIN:-/Users/oscarrojas/Documents/red-cms-dev/frankenphp-1.12.4/frankenphp}"
 RUN_SUFFIX="$(date +%s)_$$"
 CLIENT_A_DATABASE="${RED_PAYPAL_P4_CLIENT_A_DATABASE:-redcms_paypal_p4_a_$RUN_SUFFIX}"

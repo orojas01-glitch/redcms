@@ -6,9 +6,10 @@ a reference and Sandbox proof, not a release source or required live target.
 The catalog, cart, guest-order, subscription-offer, signed payment-event, and
 subscription-lifecycle contracts are current. Stripe adapter `0.1.18` completed
 one end-to-end Sandbox subscription lifecycle; Wompi `0.1.5` remains
-offline-verified pending authorized merchant Sandbox access; PayPal `0.1.0`
+offline-verified pending authorized merchant Sandbox access; PayPal `0.2.0`
 now has a separate offline Orders v2 foundation with core profile, disposable
-installation, atomic enablement, and two-client isolation verified. New
+installation, atomic enablement, two-client isolation, and sealed transport
+contracts verified. New
 clients receive a clean core, Store Lite, and only their selected adapter
 through the credential-free client deployment kit.
 

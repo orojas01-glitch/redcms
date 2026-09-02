@@ -125,7 +125,7 @@ try {
     );
     red_paypal_registrar_assert(
         !empty($package['valid'])
-            && ($package['manifest']['version'] ?? null) === '0.1.0',
+            && ($package['manifest']['version'] ?? null) === '0.2.0',
         'exact external PayPal package validates in isolation'
     );
     red_paypal_registrar_assert(

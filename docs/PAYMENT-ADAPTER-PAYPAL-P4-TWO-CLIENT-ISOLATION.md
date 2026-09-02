@@ -6,7 +6,7 @@ Status date: 2026-09-02.
 
 The PayPal offline lifecycle is now verified across two independent disposable
 RED-CMS client databases. Both use the exact same Store Lite `0.1.50` and
-PayPal `0.1.0` package bytes, but different client-local ordinary values and
+PayPal `0.2.0` package bytes, but different client-local ordinary values and
 opaque secret references.
 
 No PayPal account, credential value, OAuth token, provider request, order,

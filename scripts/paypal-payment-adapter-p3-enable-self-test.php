@@ -176,7 +176,7 @@ try {
             && !empty($storePackage['valid'])
             && !empty($paypalPackage['valid'])
             && ($storePackage['manifest']['version'] ?? null) === '0.1.50'
-            && ($paypalPackage['manifest']['version'] ?? null) === '0.1.0',
+            && ($paypalPackage['manifest']['version'] ?? null) === '0.2.0',
         'exact Store Lite and PayPal packages discover together'
     );
     red_paypal_p3_assert(
@@ -360,7 +360,7 @@ try {
     red_paypal_p3_assert(
         $enabled['status'] === 'enabled'
             && $enabled['packageId'] === $paypalPackageId
-            && $enabled['version'] === '0.1.0'
+            && $enabled['version'] === '0.2.0'
             && hash_equals(
                 $enabled['registrationSha256'],
                 $plan['registrationSha256']

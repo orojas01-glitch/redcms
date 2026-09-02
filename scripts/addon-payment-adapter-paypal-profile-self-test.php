@@ -305,7 +305,7 @@ try {
             is_array($externalManifest)
                 && ($externalManifest['id'] ?? null)
                     === 'redcms.store-lite-paypal'
-                && ($externalManifest['version'] ?? null) === '0.1.0',
+                && ($externalManifest['version'] ?? null) === '0.2.0',
             'external package identity and version are exact'
         );
         red_paypal_profile_assert(

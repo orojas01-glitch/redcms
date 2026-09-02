@@ -43,6 +43,9 @@ because core classified it as Stripe-shaped. After the closed provider branch
 was added, the profile test passed 39 assertions, including all ten external
 package integrity files.
 
+The current `0.2.0` thirteen-file package now passes 42 assertions through the
+same version-independent closed profile.
+
 Before registrar adoption, the exact PayPal registration plan failed final
 validation because the registrar expected a Stripe profile. After adding the
 PayPal profile identity and exact adapter/route checks, the registrar test
