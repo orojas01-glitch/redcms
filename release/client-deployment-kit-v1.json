@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "core": {
     "id": "redcms",
     "version": "5.1.0",
@@ -44,7 +44,7 @@
     }
   ],
   "unsupportedSelections": {
-    "paypal": "Offline package and core profile exist; disposable lifecycle, provider transports, and Sandbox payment acceptance are not yet complete."
+    "paypal": "Offline package, core profile, and one-client enablement are verified; two-client isolation, provider transports, and Sandbox payment acceptance are not yet complete."
   },
   "secretPolicy": {
     "includeValues": false,

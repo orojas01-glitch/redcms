@@ -161,11 +161,14 @@ if (!function_exists('red_addon_payment_adapter_ingress_plan_result')) {
     {
         $packageId = is_string($packageId) ? $packageId : '';
         $wompiProfile = $packageId === 'redcms.store-lite-wompi';
+        $paypalProfile = $packageId === 'redcms.store-lite-paypal';
         return [
             'valid' => false,
-            'profileId' => $wompiProfile
-                ? 'store_lite_wompi_adapter_v1'
-                : 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $paypalProfile
+                ? 'store_lite_paypal_adapter_v1'
+                : ($wompiProfile
+                    ? 'store_lite_wompi_adapter_v1'
+                    : 'store_lite_stripe_checkout_adapter_v1'),
             'ingressContractReady' => false,
             'enableReady' => false,
             'activationSupported' => false,
@@ -185,13 +188,23 @@ if (!function_exists('red_addon_payment_adapter_ingress_plan_result')) {
             'serverEventPath' => '',
             'method' => 'POST',
             'contentType' => 'application/json',
-            'requiredHeaders' => $wompiProfile
-                ? ['Content-Type', 'Content-Length']
-                : [
+            'requiredHeaders' => $paypalProfile
+                ? [
                     'Content-Type',
                     'Content-Length',
-                    'Stripe-Signature',
-                ],
+                    'PayPal-Auth-Algo',
+                    'PayPal-Cert-Url',
+                    'PayPal-Transmission-Id',
+                    'PayPal-Transmission-Sig',
+                    'PayPal-Transmission-Time',
+                ]
+                : ($wompiProfile
+                    ? ['Content-Type', 'Content-Length']
+                    : [
+                        'Content-Type',
+                        'Content-Length',
+                        'Stripe-Signature',
+                    ]),
             'maximumBodyBytes' => 65536,
             'contractSha256' => '',
             'registrarPlanSha256' => '',
@@ -421,14 +434,26 @@ if (!function_exists('red_addon_payment_adapter_server_event_headers')) {
     )
     {
         $bodySignedProfile = $profileId === 'store_lite_wompi_adapter_v1';
+        $paypalProfile = $profileId === 'store_lite_paypal_adapter_v1';
         if (!$bodySignedProfile
+            && !$paypalProfile
             && $profileId !== 'store_lite_stripe_checkout_adapter_v1'
         ) {
             return null;
         }
-        $expectedNames = $bodySignedProfile
-            ? ['Content-Type', 'Content-Length']
-            : ['Content-Type', 'Content-Length', 'Stripe-Signature'];
+        $expectedNames = $paypalProfile
+            ? [
+                'Content-Type',
+                'Content-Length',
+                'PayPal-Auth-Algo',
+                'PayPal-Cert-Url',
+                'PayPal-Transmission-Id',
+                'PayPal-Transmission-Sig',
+                'PayPal-Transmission-Time',
+            ]
+            : ($bodySignedProfile
+                ? ['Content-Type', 'Content-Length']
+                : ['Content-Type', 'Content-Length', 'Stripe-Signature']);
         if (!is_array($capture)
             || array_keys($capture) !== ['complete', 'headers']
             || $capture['complete'] !== true
@@ -450,9 +475,31 @@ if (!function_exists('red_addon_payment_adapter_server_event_headers')) {
             $values[$header['name']] = $header['value'];
         }
         $contentLength = $values['Content-Length'];
-        $signature = $bodySignedProfile
-            ? ''
-            : $values['Stripe-Signature'];
+        if ($bodySignedProfile) {
+            $signature = '';
+        } elseif ($paypalProfile) {
+            $verificationHeaders = [];
+            foreach (array_slice($expectedNames, 2) as $headerName) {
+                $headerValue = $values[$headerName];
+                if ($headerValue === ''
+                    || strlen($headerValue) > 2048
+                    || trim($headerValue) !== $headerValue
+                    || preg_match('/[\x00-\x1F\x7F]/', $headerValue) === 1
+                ) {
+                    return null;
+                }
+                $verificationHeaders[$headerName] = $headerValue;
+            }
+            $signature = json_encode(
+                $verificationHeaders,
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            );
+            if (!is_string($signature)) {
+                return null;
+            }
+        } else {
+            $signature = $values['Stripe-Signature'];
+        }
         if ($values['Content-Type'] !== 'application/json'
             || preg_match('/\A[1-9][0-9]{0,4}\z/D', $contentLength) !== 1
             || (int) $contentLength > 65536

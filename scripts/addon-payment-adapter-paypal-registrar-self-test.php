@@ -111,6 +111,7 @@ function red_paypal_registrar_database_plan(array $package): array
     return $plan;
 }
 
+if (!defined('RED_PAYPAL_REGISTRAR_FIXTURE_ONLY')) {
 try {
     $resolved = realpath($packageRoot);
     if ($resolved === false || !is_file($resolved . '/addon.json')) {
@@ -200,5 +201,6 @@ try {
 echo 'PayPal payment-adapter registrar self-test passed: '
     . $assertions . " assertions.\n";
 echo "No handler, secret, network, PayPal, payment, webhook, database, runtime, or Store Lite effect occurred.\n";
+}
 
 ?>

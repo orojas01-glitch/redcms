@@ -21,9 +21,11 @@ if (!function_exists('red_addon_payment_adapter_enablement_result')) {
         $packageId = is_string($packageId) ? $packageId : '';
         return [
             'valid' => false,
-            'profileId' => $packageId === 'redcms.store-lite-wompi'
-                ? 'store_lite_wompi_adapter_v1'
-                : 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $packageId === 'redcms.store-lite-paypal'
+                ? 'store_lite_paypal_adapter_v1'
+                : ($packageId === 'redcms.store-lite-wompi'
+                    ? 'store_lite_wompi_adapter_v1'
+                    : 'store_lite_stripe_checkout_adapter_v1'),
             'enableReady' => false,
             'activationSupported' => false,
             'stateMutation' => false,

@@ -1,6 +1,6 @@
 # PayPal P1 Core Profile and Registrar Adoption
 
-Status date: 2026-09-01.
+Status date: 2026-09-02.
 
 ## Outcome
 
@@ -57,15 +57,25 @@ Preserved regressions:
 - typed adapter invocation: 19 assertions; and
 - provider-neutral initiation: 59 assertions.
 
-## Remaining blockers
+## P2 and P3 closure
 
-Profile validation retains atomic enablement, database-bound preflight,
-registrar validation, and server-event ingress blockers. The standalone
-registrar proof clears only registrar validation and retains atomic enablement
-plus server-event ingress. A disposable database rehearsal must prove package
-installation, both migrations, InnoDB tables, dependency evidence, and exact
-cleanup before either blocker can be reduced further.
+Two later disposable rehearsals now close the remaining offline one-client
+gates. P2 passes 16 assertions for disabled installation, exact migrations,
+two empty InnoDB tables, database evidence, registrar evidence, repeat-install
+refusal, and audit facts. P3 passes 17 assertions for four synthetic settings,
+two opaque secret declarations, missing-secret and stale-plan refusal, forced
+transaction rollback, one successful atomic enablement, and repeat-enable
+refusal.
 
-No database, installation, migration, credential, OAuth token, PayPal order,
-capture, payment, webhook, browser, Store Lite mutation, hosted-demo change, or
-deployment occurs in P1.
+The non-routable ingress contract passes 13 assertions and captures the exact
+PayPal verification-header set plus raw body only as transient verification
+material. It performs no signature verification, postback, JSON parsing,
+handler invocation, response, route publication, or provider contact.
+
+Both database runs applied all 47 core migrations in unique disposable
+schemas. Cleanup proved `database:0 grant:0 staged-project:0
+primary:unchanged`.
+
+No credential value, OAuth token, PayPal order, capture, payment, webhook
+verification/response, browser, Store Lite payment mutation, hosted-demo
+change, client deployment, or live-mode action occurs in P1 through P3.
