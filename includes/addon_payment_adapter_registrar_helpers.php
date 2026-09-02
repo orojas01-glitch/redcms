@@ -17,9 +17,11 @@ if (!function_exists('red_addon_payment_adapter_registrar_result')) {
         $packageId = is_string($packageId) ? $packageId : '';
         return [
             'valid' => false,
-            'profileId' => $packageId === 'redcms.store-lite-wompi'
-                ? 'store_lite_wompi_adapter_v1'
-                : 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $packageId === 'redcms.store-lite-paypal'
+                ? 'store_lite_paypal_adapter_v1'
+                : ($packageId === 'redcms.store-lite-wompi'
+                    ? 'store_lite_wompi_adapter_v1'
+                    : 'store_lite_stripe_checkout_adapter_v1'),
             'registrarEvidenceReady' => false,
             'enableReady' => false,
             'activationSupported' => false,
@@ -260,19 +262,25 @@ if (!function_exists('red_addon_payment_adapter_registrar_preflight_is_valid')) 
         $expectedProfileId = red_addon_payment_adapter_registrar_result(
             $packageId
         )['profileId'];
-        $wompiShapeValid = $expectedProfileId
-            !== 'store_lite_wompi_adapter_v1'
-            || (($planData['adapter'] ?? null)
+        $providerShapeValid = true;
+        if ($expectedProfileId === 'store_lite_wompi_adapter_v1') {
+            $providerShapeValid = ($planData['adapter'] ?? null)
                     === 'redcms.store-lite-wompi/checkout'
                 && ($planData['serverEventRoute'] ?? null)
-                    === 'redcms.store-lite-wompi/provider-events');
+                    === 'redcms.store-lite-wompi/provider-events';
+        } elseif ($expectedProfileId === 'store_lite_paypal_adapter_v1') {
+            $providerShapeValid = ($planData['adapter'] ?? null)
+                    === 'redcms.store-lite-paypal/checkout'
+                && ($planData['serverEventRoute'] ?? null)
+                    === 'redcms.store-lite-paypal/provider-events';
+        }
         if (!is_array($plan)
             || array_keys($plan) !== array_keys(
                 red_addon_payment_adapter_registrar_result('')
             )
             || empty($plan['valid'])
             || ($plan['profileId'] ?? null) !== $expectedProfileId
-            || !$wompiShapeValid
+            || !$providerShapeValid
             || empty($plan['registrarEvidenceReady'])
             || ($plan['enableReady'] ?? null) !== false
             || ($plan['activationSupported'] ?? null) !== false

@@ -47,9 +47,10 @@ The manifest declares:
   headers, approval URL, credential value, or PayPal customer data.
 
 The only callable adapter operation is `contract.probe`. All provider
-operations fail with `provider_transport_disabled`. Current RED-CMS profile
-validation deliberately refuses activation because PayPal has not yet passed
-an exact core-profile adoption slice.
+operations fail with `provider_transport_disabled`. RED-CMS recognizes the
+exact package as `store_lite_paypal_adapter_v1`, but validation remains
+non-activating and preserves the database, registrar, ingress, and atomic
+enablement blockers.
 
 ## Core compatibility change
 
@@ -76,11 +77,10 @@ webhook, browser, deployment, or Store Lite mutation occurs.
 
 ## Next gate
 
-Add the exact PayPal manifest as a closed core payment-adapter profile, then run
-a disposable install/enable/disable and two-client isolation rehearsal. Only
-after those pass should the owner enter a Sandbox client ID, client secret,
-webhook ID, and return origin for server-side OAuth, create/capture, signature
-verification, and one real Sandbox purchase acceptance.
+Run a disposable install/enable/disable and two-client isolation rehearsal.
+Only after those pass should the owner enter a Sandbox client ID, client
+secret, webhook ID, and return origin for server-side OAuth, create/capture,
+signature verification, and one real Sandbox purchase acceptance.
 
 Official provider contracts used for this slice:
 

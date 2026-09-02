@@ -15,9 +15,11 @@ if (!function_exists('red_addon_payment_adapter_profile_result')) {
         $packageId = is_string($packageId) ? $packageId : '';
         return [
             'valid' => false,
-            'profileId' => $packageId === 'redcms.store-lite-wompi'
-                ? 'store_lite_wompi_adapter_v1'
-                : 'store_lite_stripe_checkout_adapter_v1',
+            'profileId' => $packageId === 'redcms.store-lite-paypal'
+                ? 'store_lite_paypal_adapter_v1'
+                : ($packageId === 'redcms.store-lite-wompi'
+                    ? 'store_lite_wompi_adapter_v1'
+                    : 'store_lite_stripe_checkout_adapter_v1'),
             'contractReady' => false,
             'activationSupported' => false,
             'stateMutation' => false,
@@ -120,6 +122,7 @@ if (!function_exists('red_addon_payment_adapter_profile')) {
             : '';
         $result = red_addon_payment_adapter_profile_result($packageId);
         $wompiProfile = $packageId === 'redcms.store-lite-wompi';
+        $paypalProfile = $packageId === 'redcms.store-lite-paypal';
         $provides = is_array($manifest['provides'] ?? null)
             ? $manifest['provides']
             : [];
@@ -155,6 +158,11 @@ if (!function_exists('red_addon_payment_adapter_profile')) {
             $result['adapter'] = $adapters[0];
             if ($wompiProfile
                 && $adapters[0] !== 'redcms.store-lite-wompi/checkout'
+            ) {
+                $result['errors'][] = 'capability_surface_invalid';
+            }
+            if ($paypalProfile
+                && $adapters[0] !== 'redcms.store-lite-paypal/checkout'
             ) {
                 $result['errors'][] = 'capability_surface_invalid';
             }
@@ -199,6 +207,11 @@ if (!function_exists('red_addon_payment_adapter_profile')) {
             $result['dependencyPackageId'] = 'redcms.store-lite';
             if ($wompiProfile
                 && ($dependency['version'] ?? null) !== '>=0.1.35 <1.0'
+            ) {
+                $result['errors'][] = 'dependency_contract_invalid';
+            }
+            if ($paypalProfile
+                && ($dependency['version'] ?? null) !== '>=0.1.50 <1.0'
             ) {
                 $result['errors'][] = 'dependency_contract_invalid';
             }
@@ -260,6 +273,18 @@ if (!function_exists('red_addon_payment_adapter_profile')) {
         ) {
             $result['errors'][] = 'setting_contract_invalid';
         }
+        if ($paypalProfile
+            && ($ordinarySettingKeys !== [
+                'checkout.return-origin',
+                'paypal.webhook-id',
+            ]
+                || $secretSettingKeys !== [
+                    'paypal.client-id',
+                    'paypal.client-secret',
+                ])
+        ) {
+            $result['errors'][] = 'setting_contract_invalid';
+        }
 
         $migrations = is_array($manifest['migrations'] ?? null)
             ? $manifest['migrations']
@@ -299,6 +324,18 @@ if (!function_exists('red_addon_payment_adapter_profile')) {
         ) {
             $result['errors'][] = 'migration_contract_invalid';
         }
+        if ($paypalProfile
+            && (array_column($migrations, 'id') !== [
+                '2026-09-01-paypal-order-attempts',
+                '2026-09-01-paypal-event-receipts',
+            ]
+                || array_column($migrations, 'path') !== [
+                    'migrations/2026-09-01-create-order-attempts.sql',
+                    'migrations/2026-09-01-create-event-receipts.sql',
+                ])
+        ) {
+            $result['errors'][] = 'migration_contract_invalid';
+        }
 
         $routes = is_array($manifest['routes'] ?? null)
             ? $manifest['routes']
@@ -319,11 +356,19 @@ if (!function_exists('red_addon_payment_adapter_profile')) {
             ) {
                 $result['errors'][] = 'server_event_route_invalid';
             }
+            if ($paypalProfile
+                && ($serverEventRoute['id']
+                        !== 'redcms.store-lite-paypal/provider-events'
+                    || $serverEventRoute['path']
+                        !== '/addons/redcms/store-lite-paypal/provider-events')
+            ) {
+                $result['errors'][] = 'server_event_route_invalid';
+            }
         }
 
-        $expectedOutboundHost = $wompiProfile
-            ? 'sandbox.wompi.co'
-            : 'api.stripe.com';
+        $expectedOutboundHost = $paypalProfile
+            ? 'api-m.sandbox.paypal.com'
+            : ($wompiProfile ? 'sandbox.wompi.co' : 'api.stripe.com');
         if (($manifest['outboundHosts'] ?? null)
             !== [$expectedOutboundHost]
         ) {
@@ -365,6 +410,7 @@ if (!function_exists('red_addon_payment_adapter_profile_is_valid')) {
                 ? $profileData['profileId']
                 : '';
         $wompiProfile = $profileId === 'store_lite_wompi_adapter_v1';
+        $paypalProfile = $profileId === 'store_lite_paypal_adapter_v1';
         $stripeProfile = $profileId
             === 'store_lite_stripe_checkout_adapter_v1';
         $ordinarySettingKeys = is_array(
@@ -393,11 +439,13 @@ if (!function_exists('red_addon_payment_adapter_profile_is_valid')) {
                 break;
             }
         }
-        $providerShapeValid = $stripeProfile
-            ? (($profileData['secretSettingCount'] ?? null) === 2
-                && ($profileData['outboundHost'] ?? null) === 'api.stripe.com')
-            : ($wompiProfile
-                && ($profileData['packageId'] ?? null)
+        if ($stripeProfile) {
+            $providerShapeValid =
+                ($profileData['secretSettingCount'] ?? null) === 2
+                && ($profileData['outboundHost'] ?? null) === 'api.stripe.com';
+        } elseif ($wompiProfile) {
+            $providerShapeValid =
+                ($profileData['packageId'] ?? null)
                     === 'redcms.store-lite-wompi'
                 && ($profileData['adapter'] ?? null)
                     === 'redcms.store-lite-wompi/checkout'
@@ -417,14 +465,38 @@ if (!function_exists('red_addon_payment_adapter_profile_is_valid')) {
                     'wompi.private-key',
                 ]
                 && ($profileData['outboundHost'] ?? null)
-                    === 'sandbox.wompi.co');
+                    === 'sandbox.wompi.co';
+        } else {
+            $providerShapeValid = $paypalProfile
+                && ($profileData['packageId'] ?? null)
+                    === 'redcms.store-lite-paypal'
+                && ($profileData['adapter'] ?? null)
+                    === 'redcms.store-lite-paypal/checkout'
+                && ($profileData['serverEventRoute'] ?? null)
+                    === 'redcms.store-lite-paypal/provider-events'
+                && ($profileData['serverEventPath'] ?? null)
+                    === '/addons/redcms/store-lite-paypal/provider-events'
+                && ($profileData['migrationCount'] ?? null) === 2
+                && ($profileData['ordinarySettingCount'] ?? null) === 2
+                && ($profileData['secretSettingCount'] ?? null) === 2
+                && ($profileData['ordinarySettingKeys'] ?? null) === [
+                    'checkout.return-origin',
+                    'paypal.webhook-id',
+                ]
+                && ($profileData['secretSettingKeys'] ?? null) === [
+                    'paypal.client-id',
+                    'paypal.client-secret',
+                ]
+                && ($profileData['outboundHost'] ?? null)
+                    === 'api-m.sandbox.paypal.com';
+        }
         if (!is_array($profile)
             || array_keys($profile) !== array_keys(
                 red_addon_payment_adapter_profile_result('')
             )
             || empty($profile['valid'])
             || empty($profile['contractReady'])
-            || (!$stripeProfile && !$wompiProfile)
+            || (!$stripeProfile && !$wompiProfile && !$paypalProfile)
             || ($profile['activationSupported'] ?? null) !== false
             || ($profile['stateMutation'] ?? null) !== false
             || ($profile['runtimeLoad'] ?? null) !== false
