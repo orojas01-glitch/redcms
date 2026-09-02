@@ -14,11 +14,13 @@ require_once $projectRoot . '/class/class_connection.php';
 require_once $projectRoot
     . '/includes/addon_payment_adapter_registrar_helpers.php';
 
-if (!preg_match(
-    '/\Aredcms_paypal_p2_[A-Za-z0-9_]+\z/',
-    (string) DBNAME
-)) {
-    fwrite(STDERR, 'PayPal P2 refused non-disposable database.\n');
+if (!defined('RED_PAYPAL_P2_FIXTURE_ONLY')
+    && !preg_match(
+        '/\Aredcms_paypal_p2_[A-Za-z0-9_]+\z/',
+        (string) DBNAME
+    )
+) {
+    fwrite(STDERR, "PayPal P2 refused non-disposable database.\n");
     exit(65);
 }
 

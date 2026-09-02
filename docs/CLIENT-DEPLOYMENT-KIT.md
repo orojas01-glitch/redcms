@@ -19,10 +19,9 @@ the public core repository:
 The exact package revisions and destinations are pinned in
 [`release/client-deployment-kit-v1.json`](../release/client-deployment-kit-v1.json).
 PayPal remains intentionally refused by this release manifest. Its separate
-`0.1.0` offline foundation, exact core profile, and one-client disposable
-enablement are verified, but two-client isolation, provider transports, and
-Sandbox payment acceptance are not yet complete, so it is not a client-kit
-selection.
+`0.1.0` offline foundation, exact core profile, disposable enablement, and
+two-client isolation are verified, but provider transports and Sandbox payment
+acceptance are not yet complete, so it is not a client-kit selection.
 
 Adapter `0.1.20` includes the credential-free catalog-Price binding contract
 and the bounded transport acceptance for that exact request form. Its prior

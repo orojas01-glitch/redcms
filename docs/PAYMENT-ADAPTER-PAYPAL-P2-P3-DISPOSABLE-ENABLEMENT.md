@@ -92,11 +92,13 @@ Ingress plus atomic enablement proof:
 scripts/paypal-payment-adapter-p2-rehearsal.sh --enable
 ```
 
-## Remaining gate
+## P4 closure
 
-One-client enablement does not prove client isolation. The next offline gate is
-two independent disposable client databases with different ordinary values and
-opaque references, independent enable/disable transitions, distinct
-client-bound evidence hashes, immutable package hashes, forced rollback, and
-exact cleanup. Provider transports and real Sandbox credentials remain later
-approval-gated work.
+P4 now verifies two independent disposable client databases with different
+ordinary values and opaque references, independent enable/disable transitions,
+distinct client-bound evidence hashes, immutable package hashes, forced
+rollback, and exact cleanup. See
+[`PAYMENT-ADAPTER-PAYPAL-P4-TWO-CLIENT-ISOLATION.md`](PAYMENT-ADAPTER-PAYPAL-P4-TWO-CLIENT-ISOLATION.md).
+
+Provider transports and real Sandbox credentials remain later approval-gated
+work.

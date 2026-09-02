@@ -13,7 +13,7 @@ and release gate.
 | --- | --- | --- | --- |
 | Stripe Checkout | `redcms.store-lite-stripe-checkout` `0.1.20` | The configured $59/month catalog Price completed a hosted `demo.red-sphere.com` Sandbox lifecycle: Checkout creation returned 200; completed Checkout and paid invoice deliveries returned 200; Store Lite reached `active/active`; immediate cancellation returned 200 and reached `canceled/revoked`. | General live-mode release, client-owned production credentials, per-client Sandbox acceptance, refunds/disputes, and ACH delayed-payment lifecycle. |
 | Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, current Store Lite `0.1.50` discovery, disabled installation, atomic enablement, sealed transport, event verification, and a current 21-assertion two-client isolation rehearsal are verified offline. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
-| PayPal Checkout | `redcms.store-lite-paypal` `0.1.0` offline foundation | Package contracts pass 67 assertions; exact profile 39; registrar 10; non-routable ingress 13; disposable install 16; atomic enablement 17. One-time USD Orders v2 planning, approval redirects, verified paid-event projection/replay refusal, exact package/core surfaces, both migrations, rollback, and cleanup are verified without provider contact. | Two-client isolation, server-side OAuth and create/capture transports, button/endpoints, webhook verification transport, Store Lite payment mutation, refunds/reversals/disputes, Sandbox lifecycle, subscriptions, and client deployment. |
+| PayPal Checkout | `redcms.store-lite-paypal` `0.1.0` offline foundation | Package contracts pass 67 assertions; exact profile 39; registrar 10; non-routable ingress 13; disposable install 16; atomic enablement 17; two-client isolation 21. Orders v2 planning, approval redirects, verified paid-event projection/replay refusal, exact package/core surfaces, migrations, rollback, independent client lifecycle/load order, and cleanup are verified without provider contact. | Server-side OAuth and create/capture transports, button/endpoints, webhook verification transport, Store Lite payment mutation, refunds/reversals/disputes, Sandbox lifecycle, subscriptions, and client deployment. |
 
 ## Stripe bank payments
 
@@ -83,8 +83,9 @@ Current gates:
    only package validation with no handler invocation or publication;
 4. **Complete offline:** disposable disabled installation, exact migrations,
    non-routable ingress capture, forced rollback, and atomic enablement;
-5. **Next:** independent two-client enable/disable and isolation;
-6. server-side OAuth/create/capture transport and a PayPal button handoff
+5. **Complete offline:** independent two-client enable/disable, lifecycle-lock,
+   evidence-hash, setting/reference, and runtime-order isolation;
+6. **Next:** server-side OAuth/create/capture transport and a PayPal button handoff
    backed by core-owned endpoints;
 7. raw webhook preservation, signature verification, replay ledger, capture,
    refund, reversal, and dispute projections;

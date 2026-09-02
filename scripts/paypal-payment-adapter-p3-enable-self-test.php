@@ -111,6 +111,7 @@ function red_paypal_p3_state_fingerprint($connection): string
     return hash('sha256', json_encode($material, JSON_UNESCAPED_SLASHES));
 }
 
+if (!defined('RED_PAYPAL_P3_FIXTURE_ONLY')) {
 try {
     $password = password_hash('PayPalP3-Disposable-2026!', PASSWORD_DEFAULT);
     $statement = mysqli_prepare(
@@ -412,6 +413,7 @@ try {
 } catch (Throwable $throwable) {
     fwrite(STDERR, $throwable->getMessage() . "\n");
     exit(1);
+}
 }
 
 ?>
