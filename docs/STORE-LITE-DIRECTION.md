@@ -9,7 +9,10 @@ one end-to-end Sandbox subscription lifecycle; Wompi `0.1.5` remains
 offline-verified pending authorized merchant Sandbox access; PayPal `0.2.0`
 now has a separate offline Orders v2 foundation with core profile, disposable
 installation, atomic enablement, two-client isolation, and sealed transport
-contracts verified. New
+contracts verified. Its separate operator-only provider test also completed a
+USD 4.99 Sandbox order/capture and activated a USD 59 monthly Sandbox
+subscription. This does not yet wire PayPal into Store Lite endpoints,
+payment/entitlement mutation, signed webhooks, or client deployment. New
 clients receive a clean core, Store Lite, and only their selected adapter
 through the credential-free client deployment kit.
 

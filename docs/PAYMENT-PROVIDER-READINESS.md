@@ -13,7 +13,7 @@ and release gate.
 | --- | --- | --- | --- |
 | Stripe Checkout | `redcms.store-lite-stripe-checkout` `0.1.20` | The configured $59/month catalog Price completed a hosted `demo.red-sphere.com` Sandbox lifecycle: Checkout creation returned 200; completed Checkout and paid invoice deliveries returned 200; Store Lite reached `active/active`; immediate cancellation returned 200 and reached `canceled/revoked`. | General live-mode release, client-owned production credentials, per-client Sandbox acceptance, refunds/disputes, and ACH delayed-payment lifecycle. |
 | Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, current Store Lite `0.1.50` discovery, disabled installation, atomic enablement, sealed transport, event verification, and a current 21-assertion two-client isolation rehearsal are verified offline. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
-| PayPal Checkout | `redcms.store-lite-paypal` `0.2.0` sealed transport foundation | Package contracts pass 83 assertions; exact profile 42; registrar 10; non-routable ingress 13; disposable install 16; atomic enablement 17; two-client isolation 21. OAuth, Orders create/capture, and webhook-verification request/response contracts now pass through one-use no-network doubles without leaking credentials, tokens, raw events, or signatures. | Real bounded transport, button/endpoints, Store Lite payment mutation, Sandbox lifecycle, refunds/reversals/disputes, subscriptions, and client deployment. |
+| PayPal Checkout | `redcms.store-lite-paypal` `0.2.0` sealed transport foundation | The offline adapter suite passes 89 assertions; exact profile 42; registrar 10; non-routable ingress 13; disposable install 16; atomic enablement 17; two-client isolation 21. A separate operator-only Sandbox flow proved a USD 4.99 order/capture `COMPLETED` and a USD 59 monthly plan/subscription `ACTIVE`, without retaining credentials or tokens. | Runtime transport, button/endpoints, Store Lite payment/entitlement mutation, signed webhook lifecycle, renewal/failure/cancellation handling, refunds/reversals/disputes, and client deployment. |
 
 ## Stripe bank payments
 
@@ -67,10 +67,12 @@ Official references:
 ## PayPal
 
 PayPal now has a separate `redcms.store-lite-paypal` `0.2.0` repository. Its
-first offline foundation is one-time USD Checkout only and closes pure Orders
-v2 create/capture and verified-event projection contracts. It must not reuse
-the legacy `paypal_response.php` PDT compatibility route, because that route
-predates the Store Lite payment lifecycle and cannot provide the new adapter's
+installable adapter foundation remains one-time USD Checkout only and closes
+pure Orders v2 create/capture and verified-event projection contracts. A
+separate operator-only provider test has also proved PayPal's buyer/API path
+for one-time and monthly subscription objects. It must not reuse the legacy
+`paypal_response.php` PDT compatibility route, because that route predates the
+Store Lite payment lifecycle and cannot provide the new adapter's
 installation, replay, isolation, or subscription guarantees.
 
 Current gates:
@@ -87,13 +89,21 @@ Current gates:
    evidence-hash, setting/reference, and runtime-order isolation;
 6. **Complete offline:** sealed OAuth/create/capture and webhook-verification
    contracts with deterministic one-use transport doubles;
-7. **Next:** real bounded server transport and a PayPal button handoff
+7. **Complete provider-only Sandbox:** buyer approval plus API verification
+   produced one USD 4.99 `COMPLETED` order/capture and one USD 59 monthly
+   `ACTIVE` plan/subscription; credentials and OAuth tokens were not retained;
+8. **Next:** real bounded server transport and a PayPal button handoff
    backed by core-owned endpoints;
-8. raw webhook preservation, signature verification, replay ledger, capture,
+9. raw webhook preservation, signature verification, replay ledger, capture,
    refund, reversal, and dispute projections;
-9. PayPal Sandbox one-time purchase acceptance; and
-10. a later, separate subscription-plan lifecycle using the Store Lite
-   subscription offer and entitlement model.
+10. installed Store Lite Sandbox acceptance proving order/payment mutation;
+    and
+11. a separate subscription-plan lifecycle using the Store Lite subscription
+    offer, signed events, renewal/cancellation states, and entitlement model.
+
+The provider-only result and its redacted JSON evidence are retained at PayPal
+adapter commit `27b4f22`. That evidence validates PayPal itself, not runtime
+integration or deployment on `demo.red-sphere.com`.
 
 Official references:
 

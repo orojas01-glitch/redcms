@@ -24,8 +24,12 @@ The separately distributed Store Lite `0.1.50` package and Stripe Checkout
 adapter `0.1.18` have completed one isolated end-to-end Sandbox subscription
 lifecycle. Store Lite remains optional and is not bundled with the clean
 starter. The Wompi `0.1.5` adapter remains offline-verified and blocked before
-its first merchant-account Sandbox request; PayPal remains a separate planned
-adapter rather than a legacy core payment path.
+its first merchant-account Sandbox request. The separate PayPal `0.2.0`
+adapter has completed provider-only Sandbox approval/API validation for one
+USD 4.99 order and one USD 59 monthly subscription: the order and capture are
+`COMPLETED`, while the plan and subscription are `ACTIVE`. PayPal is not yet
+wired into Store Lite runtime endpoints, payment mutation, or webhooks and
+remains separate from the legacy core payment path.
 
 Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
