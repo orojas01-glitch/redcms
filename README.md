@@ -20,11 +20,14 @@ add-on and CMS lifecycles, forced rollback, runtime log, and exact disposable
 database/grant cleanup passed against a fresh temporary current-schema
 baseline. See [RED-CMS 5.1.0 Release Notes](docs/RELEASE-NOTES-5.1.0.md).
 
-The separately distributed Store Lite `0.1.50` package and Stripe Checkout
-adapter `0.1.18` have completed one isolated end-to-end Sandbox subscription
-lifecycle. Store Lite remains optional and is not bundled with the clean
-starter. The Wompi `0.1.5` adapter remains offline-verified and blocked before
-its first merchant-account Sandbox request. The separate PayPal `0.2.0`
+The separately distributed Store Lite `0.1.51` package and Stripe Checkout
+adapter `0.1.21` are the current client-kit baseline. Their compatible legacy
+single-offer path retains one isolated end-to-end Sandbox subscription
+lifecycle as historical evidence; the new review-cart and multi-line commerce
+path is offline-verified and intentionally unwired. Store Lite remains optional
+and is not bundled with the clean starter. The Wompi `0.1.5` adapter remains
+offline-verified and blocked before its first merchant-account Sandbox request.
+The separate PayPal `0.2.0`
 adapter has completed provider-only Sandbox approval/API validation for one
 USD 4.99 order and one USD 59 monthly subscription: the order and capture are
 `COMPLETED`, while the plan and subscription are `ACTIVE`. PayPal is not yet
@@ -34,7 +37,7 @@ remains separate from the legacy core payment path.
 Current Version 5.1 and Store Lite milestone map:
 [`docs/ADD-ON-PLATFORM-STATUS.md`](docs/ADD-ON-PLATFORM-STATUS.md).
 
-The current offline subscription-event release gate binds Store Lite `0.1.50`
+The recorded legacy subscription-event release gate binds Store Lite `0.1.50`
 to Stripe adapter `0.1.18` through one restartable internal coordinator. It
 joins signature verification, transactional receipt claim, raw-event
 projection, and lifecycle application. A disposable failure after lifecycle
@@ -64,6 +67,16 @@ offer completed hosted Sandbox activation and immediate cancellation on
 deliveries, and Store Lite transitioned `active/active` then
 `canceled/revoked`. Live mode remains unauthorized.
 See [Subscription Catalog Price Binding](docs/SUBSCRIPTION-CATALOG-PRICE-BINDING.md).
+
+Store Lite `0.1.51` now adds separate review-cart tables and pure contracts for
+setup/monthly totals, opaque expiring links, and payment/onboarding state.
+Stripe adapter `0.1.21` adds server-owned lookup-key resolution, multi-line
+subscription Checkout, official-SDK signature verification, and hash-only
+commerce receipts with `stripe/stripe-php` `21.3.1` locked. No administrator
+cart screen, handoff endpoint, public webhook route, SDK vendor installation,
+provider request, payment, tax change, or deployment is activated by these
+sources. The exact boundary and next-project decisions are recorded in
+[Red Sphere Commerce Platform Reconciliation](docs/COMMERCE-PLATFORM-RECONCILIATION-2026-09-02.md).
 
 The optional post-release payment-adapter track has completed P3A and the
 separately distributed Store Lite package has completed P3B through version
@@ -1210,6 +1223,8 @@ database.
 - [Version 5.1 Add-On Contract](docs/ADD-ON-CONTRACT.md)
 - [Public Mutation Boundary](docs/PUBLIC-MUTATION-BOUNDARY.md)
 - [Store Lite Direction](docs/STORE-LITE-DIRECTION.md)
+- [Red Sphere Commerce Platform Reconciliation](docs/COMMERCE-PLATFORM-RECONCILIATION-2026-09-02.md)
+- [commerce.red-sphere.com Project Start](docs/COMMERCE-RED-SPHERE-PROJECT-START.md)
 - [Store Lite Payment Adapter Direction](docs/PAYMENT-ADAPTER-DIRECTION.md)
 - [Store Lite Payment Adapter P1 Decision](docs/PAYMENT-ADAPTER-P1-DECISION.md)
 - [Store Lite Payment Adapter P2 Fixture](docs/PAYMENT-ADAPTER-P2-FIXTURE.md)

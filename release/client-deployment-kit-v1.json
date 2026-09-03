@@ -1,35 +1,35 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "core": {
     "id": "redcms",
-    "version": "5.1.0",
-    "minimumCommit": "de5f1eb2add970b47fb04aa7ec1c70bc68540b4c",
+    "version": "5.1.1",
+    "minimumCommit": "cee2062fe0d5d2b292169ea076c0e03bdf1173ae",
     "archivePath": "redcms"
   },
   "packages": [
     {
       "selection": "store-lite",
       "id": "redcms.store-lite",
-      "version": "0.1.50",
-      "commit": "56727d2de0bbd2c476316f62001a429b354c599f",
+      "version": "0.1.51",
+      "commit": "57a948929142efb417285d2dbd76b5b3478b7738",
       "repository": "redcms-store-lite",
       "sourcePath": "package",
       "archivePath": "redcms/addons/redcms/store-lite",
       "required": true,
-      "releaseState": "sandbox_verified"
+      "releaseState": "legacy_sandbox_evidence_offline_commerce_foundation"
     },
     {
       "selection": "stripe",
       "id": "redcms.store-lite-stripe-checkout",
-      "version": "0.1.20",
-      "commit": "66d9a8a17874a8bca3f118b902c6bf82a681b45b",
+      "version": "0.1.21",
+      "commit": "35a7b4bcb1dba1cf94e3d51ea50658b57ef09874",
       "repository": "redcms-store-lite-stripe-checkout",
       "sourcePath": "package",
       "archivePath": "redcms/addons/redcms/store-lite-stripe-checkout",
       "required": false,
-      "releaseState": "sandbox_verified_catalog_lifecycle"
+      "releaseState": "legacy_sandbox_evidence_offline_commerce_foundation"
     },
     {
       "selection": "wompi",
@@ -44,7 +44,7 @@
     }
   ],
   "unsupportedSelections": {
-    "paypal": "Offline lifecycle and sealed transport contracts are verified; real provider transport and Sandbox payment acceptance are not yet complete."
+    "paypal": "Provider-only Sandbox order and subscription objects are verified; runtime transport, Store Lite mutation, signed webhook lifecycle, and client deployment are not complete."
   },
   "secretPolicy": {
     "includeValues": false,

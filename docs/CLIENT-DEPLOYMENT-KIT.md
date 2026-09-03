@@ -10,26 +10,35 @@ administrator accounts, provider identifiers, or secrets.
 The kit composes independently versioned sources without moving their code into
 the public core repository:
 
-- RED-CMS core `5.1.0` from this repository;
-- required Store Lite `0.1.50` from `redcms-store-lite`;
-- optional Stripe Checkout `0.1.20` from
+- RED-CMS core `5.1.1` from this repository;
+- required Store Lite `0.1.51` from `redcms-store-lite`;
+- optional Stripe Checkout `0.1.21` from
   `redcms-store-lite-stripe-checkout`; and
 - optional Wompi `0.1.5` from `redcms-store-lite-wompi`.
 
 The exact package revisions and destinations are pinned in
 [`release/client-deployment-kit-v1.json`](../release/client-deployment-kit-v1.json).
 PayPal remains intentionally refused by this release manifest. Its separate
-`0.2.0` offline foundation, exact core profile, disposable enablement,
-two-client isolation, and sealed transport contracts are verified, but real
-provider transport and Sandbox payment acceptance are not yet complete, so it
-is not a client-kit selection.
+`0.2.0` offline foundation and provider-only Sandbox order/subscription objects
+are verified, but runtime transport, Store Lite mutation, signed webhook
+lifecycle, and client deployment are incomplete, so it is not a client-kit
+selection.
 
-Adapter `0.1.20` includes the credential-free catalog-Price binding contract
-and the bounded transport acceptance for that exact request form. Its prior
-`0.1.18` lifecycle evidence remains valid for the unchanged webhook path. The
-existing-Price path completed its $59/month activation-and-cancellation
-lifecycle on `demo.red-sphere.com`; every future client still requires its own
-isolated Sandbox acceptance before live-mode review.
+Store Lite `0.1.51` adds isolated review-cart tables and pure contracts for
+dual setup/monthly totals, opaque expiring links, and a constrained cart state
+machine. Stripe adapter `0.1.21` adds multi-line subscription Checkout,
+server-owned lookup-key resolution, official-SDK signature verification, and
+hash-only commerce receipts. These commerce additions are offline-verified and
+unwired. The prior single-offer Sandbox lifecycle remains historical evidence
+for the compatible legacy path, not provider acceptance for the new commerce
+path. Every client requires its own isolated Sandbox acceptance before any
+live-mode review.
+
+The Stripe package carries an exact `stripe/stripe-php` `21.3.1` Composer
+manifest and lockfile but intentionally does not carry `vendor/`. A commerce
+project must install the locked dependency in its isolated build and load the
+autoloader before invoking the SDK-backed classes. The generic kit does not do
+that automatically and does not activate the declared webhook route.
 
 ## Build the archive
 
@@ -85,8 +94,10 @@ is always included:
    provider account.
 7. Enter non-secret settings and owner-controlled secret references on the
    server. Never put raw values in the client profile or archive.
-8. Enable the adapter, configure its Sandbox webhook/event destination, and
-   complete one provider-signed Sandbox lifecycle.
+8. For an SDK-backed Stripe build, install only the locked production
+   dependencies in the isolated build, then enable the adapter, configure its
+   Sandbox webhook/event destination, and complete one provider-signed Sandbox
+   lifecycle.
 9. Record route, package, database, browser, webhook, and rollback evidence.
 10. Treat live-mode enablement as a separate client authorization after the
     Sandbox acceptance report passes.

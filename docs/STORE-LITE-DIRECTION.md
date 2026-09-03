@@ -1,11 +1,15 @@
 # RED-CMS Store Lite Direction
 
-Status: the separately distributed Store Lite `0.1.50` package is the current
+Status: the separately distributed Store Lite `0.1.51` package is the current
 portable package baseline. The isolated `demo.red-sphere.com` installation is
 a reference and Sandbox proof, not a release source or required live target.
 The catalog, cart, guest-order, subscription-offer, signed payment-event, and
-subscription-lifecycle contracts are current. Stripe adapter `0.1.18` completed
-one end-to-end Sandbox subscription lifecycle; Wompi `0.1.5` remains
+subscription-lifecycle contracts are current. Version `0.1.51` adds an unwired
+provider-neutral review-cart foundation with isolated tables, dual
+setup/monthly totals, opaque-token hashing, and constrained cart states. Stripe
+adapter `0.1.21` adds the matching unwired multi-line Checkout/official-SDK
+foundation; its compatible legacy path retains the prior single-offer Sandbox
+evidence. Wompi `0.1.5` remains
 offline-verified pending authorized merchant Sandbox access; PayPal `0.2.0`
 now has a separate offline Orders v2 foundation with core profile, disposable
 installation, atomic enablement, two-client isolation, and sealed transport

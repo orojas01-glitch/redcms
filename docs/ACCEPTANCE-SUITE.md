@@ -1566,6 +1566,17 @@ process environment.
   event. The response helper remains unlinked from the front controller, so no
   provider contact, Checkout, secret resolution, Stripe navigation, webhook,
   client change, demo change, or deployment occurs.
+- Commerce-foundation reconciliation pins client kit `0.1.12` to RED-CMS
+  `5.1.1`, Store Lite `0.1.51`, and Stripe adapter `0.1.21`. Store Lite's new
+  contracts pass 65 focused assertions and its complete additive migration
+  passes 79 assertions in a disposable database with 25 InnoDB package tables.
+  The Stripe adapter's complete offline suite and 78 new commerce assertions
+  pass; its two-table receipt migration passes the core SQL guard and a separate
+  disposable database check with exact cleanup. Composer locks
+  `stripe/stripe-php` `v21.3.1` and reports no advisories. These are local
+  foundation checks: the administrator cart workflow, public review route,
+  authenticated handoff, real SDK runtime, signed Sandbox lifecycle, browser
+  QA, and deployment remain work for the isolated commerce project.
 - A full-table checksum comparison makes HTTP 403 alone insufficient: every allowed/denied permission request must also leave all 36 tables unchanged.
 - The Move Content lifecycle requires one valid browser-parsable tool form, exact source/destination placement changes, real protected endpoint responses, matching public rendering after each move, destination-layout refusal for undeclared positions, and transaction-preserved state after refusal. Moving between contexts clears only the source position column; unrelated placements remain intact.
 - The Section-delete lifecycle uses a disposable Webmaster, Section, and two Articles only inside the disposable database. It requires count-aware confirmation, CSRF refusal with unchanged state, one transaction that archives every related Article before deleting the Section, exact response reporting, recovery through **Inactive Articles**, an active-theme 404 at the old route, and zero targeted artifacts. Form/Gallery child rows and media are deliberately left attached to their preserved parent Articles.

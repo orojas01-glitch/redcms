@@ -1,6 +1,6 @@
 # Store Lite Payment Provider Readiness
 
-Status date: 2026-09-02.
+Status date: 2026-09-03.
 
 Store Lite owns provider-neutral catalog, order, payment-event, and subscription
 state. Each external provider remains a separately installed adapter with its
@@ -11,8 +11,8 @@ and release gate.
 
 | Provider track | Package | Current verified boundary | Not yet release-ready |
 | --- | --- | --- | --- |
-| Stripe Checkout | `redcms.store-lite-stripe-checkout` `0.1.20` | The configured $59/month catalog Price completed a hosted `demo.red-sphere.com` Sandbox lifecycle: Checkout creation returned 200; completed Checkout and paid invoice deliveries returned 200; Store Lite reached `active/active`; immediate cancellation returned 200 and reached `canceled/revoked`. | General live-mode release, client-owned production credentials, per-client Sandbox acceptance, refunds/disputes, and ACH delayed-payment lifecycle. |
-| Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, current Store Lite `0.1.50` discovery, disabled installation, atomic enablement, sealed transport, event verification, and a current 21-assertion two-client isolation rehearsal are verified offline. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
+| Stripe Checkout | `redcms.store-lite-stripe-checkout` `0.1.21` | The legacy single-offer path retains the prior `0.1.20` hosted Sandbox lifecycle evidence. The new `0.1.21` commerce foundation passes the complete offline adapter suite plus a disposable migration check for multi-line subscription Checkout, lookup-key resolution, official-SDK verification, and hash-only receipts. | Runtime service/route wiring, locked SDK installation, exact Red Sphere Sandbox catalog mapping, signed multi-line Checkout/invoice/subscription lifecycle, failures/out-of-order events, and all live-mode work. |
+| Wompi / Nequi | `redcms.store-lite-wompi` `0.1.5` | Nequi/COP contract, package integrity, Store Lite `0.1.51` discovery, disabled installation, atomic enablement, sealed transport, event verification, and a refreshed 21-assertion two-client isolation rehearsal are verified offline with exact cleanup. | The first merchant-account Sandbox request, Nequi transaction, signed event, and production activation require authorized Wompi account access. |
 | PayPal Checkout | `redcms.store-lite-paypal` `0.2.0` sealed transport foundation | The offline adapter suite passes 89 assertions; exact profile 42; registrar 10; non-routable ingress 13; disposable install 16; atomic enablement 17; two-client isolation 21. A separate operator-only Sandbox flow proved a USD 4.99 order/capture `COMPLETED` and a USD 59 monthly plan/subscription `ACTIVE`, without retaining credentials or tokens. | Runtime transport, button/endpoints, Store Lite payment/entitlement mutation, signed webhook lifecycle, renewal/failure/cancellation handling, refunds/reversals/disputes, and client deployment. |
 
 ## Stripe bank payments
