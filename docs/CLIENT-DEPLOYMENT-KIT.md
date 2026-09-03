@@ -136,3 +136,9 @@ The wrapper imports the portable installer into a uniquely named database,
 applies current migrations, runs the full disposable acceptance suite against
 that anchor, then revokes the exact temporary grant and removes the anchor. It
 also verifies that the configured primary database is unchanged.
+
+Client kit `0.1.12` passed this full acceptance on 2026-09-03 with all 47 core
+migrations, an idempotent no-op rerun, complete database and HTTP lifecycle
+checks, exact anchor/grant cleanup, and an unchanged configured primary. That
+evidence validates the release mechanism and core; it does not replace the
+separate commerce-site Sandbox, webhook, accessibility, or deployment gates.

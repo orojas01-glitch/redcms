@@ -114,6 +114,13 @@ adds the database transaction and runtime controller.
 - Composer installer checksum matched the official published checksum;
   Composer locked `stripe/stripe-php` `v21.3.1` and reported no security
   advisories. The exact-version warning is intentional for a release artifact.
+- Client kit `0.1.12` dry-run and archive build verified 62 Store Lite and 35
+  Stripe package files, emitted a no-secret/files-only release record, and
+  passed its external archive checksum plus every internal `SHA256SUMS` entry.
+- The client-kit full acceptance passed all 47 core migrations, the idempotent
+  rerun, the complete database/HTTP/administrator/public lifecycle, and exact
+  inner/anchor database and grant cleanup; the configured primary database was
+  unchanged.
 - Secret-pattern review found no credential values. Dedicated scanners were not
   installed locally, so their absence remains a recorded tooling limitation.
 
