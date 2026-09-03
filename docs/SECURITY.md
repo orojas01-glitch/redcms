@@ -114,6 +114,23 @@ PayPal. Confirmation mail uses only that configured sender and the verified
 payer address; it has no fixed BCC or fallback recipient. This compatibility
 route does not activate the Version 5.1 member, entitlement, or payment model.
 
+### Historical PayPal PDT token finding
+
+The repository-security review on 2026-09-03 found an apparent PayPal PDT
+identity token in the initial public history at commit `073ce8b`. Commit
+`c47fdde` removed the embedded value, and the current compatibility endpoint
+accepts a token only through server-local configuration. The token value must
+not be copied into an issue, log, screenshot, baseline, or current source.
+
+This historical finding is deliberately not listed in `.gitleaksignore`.
+Account status remains an operator-owned verification step: confirm whether
+Payment Data Transfer is enabled in the PayPal business account and whether
+any deployed legacy PayPal Standard return route still depends on it. If the
+old route is unused, disable PDT and remove any server-local PDT configuration.
+If it is still required, replace the exposed identity token through the PayPal
+account before updating the server-local value. Do not rewrite published Git
+history without a separately reviewed coordination and rollback plan.
+
 ## Database Backup Security
 
 Full database dumps contain administrator hashes, email addresses, site content, and configuration data stored in tables. Keep backups outside the public web root with access limited to the operator, record their SHA-256 checksums, use encrypted storage for production copies, and remove expired archives according to the site's retention policy.
