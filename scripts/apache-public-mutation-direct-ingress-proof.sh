@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-PROJECT_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_ROOT=$(CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd)
 INTEGRATION_DIR="$PROJECT_ROOT/server-integrations/apache-public-mutation-direct-ingress"
 APACHE_BIN="${RED_APACHE_BIN:-/usr/sbin/httpd}"
 PHP_BIN="${PHP_CLI:-/Users/oscarrojas/Documents/red-cms-dev/php-8.5.8/bin/php}"

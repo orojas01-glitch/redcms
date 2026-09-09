@@ -31,9 +31,17 @@ jobs:
       RED_ACCEPTANCE_DB_ADMIN_PASS: ci-disposable-only
       RED_LOCAL_CONFIG: /tmp/redcms-no-local-config.php
       FRANKENPHP_BIN: /tmp/frankenphp
+      RED_STRIPE_ADAPTER_ROOT: ${{ github.workspace }}/.ci-fixtures/stripe/package
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
+      - name: Checkout offline Stripe contract fixture
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: orojas01-glitch/redcms-store-lite-stripe-checkout
+          ref: 35a7b4bcb1dba1cf94e3d51ea50658b57ef09874
+          path: .ci-fixtures/stripe
           persist-credentials: false
       - name: Install runtime tools
         run: |
@@ -42,9 +50,9 @@ jobs:
           curl --fail --location --silent --show-error https://github.com/php/frankenphp/releases/download/v1.12.4/frankenphp-linux-x86_64 -o /tmp/frankenphp
           echo 'b39c7511483c99faf0d857cc0789b39cc23023038260b31d4b40dd4ae18795dc  /tmp/frankenphp' | sha256sum -c -
           chmod +x /tmp/frankenphp
-      - name: Shell errors
-        run: git ls-files -z 'scripts/*.sh' | xargs -0 shellcheck -S error
-      - name: Offline core and theme contracts
+      - name: Shell warnings and errors
+        run: git ls-files -z 'scripts/*.sh' | xargs -0 shellcheck -S warning
+      - name: Core, offline adapter and theme contracts
         run: scripts/core-security-checks.sh
       - name: Apache artifact boundary
         run: RED_HTTPD_BIN=/usr/sbin/apache2 RED_APACHE_MODULES=/usr/lib/apache2/modules python3 scripts/apache-boundary-self-test.py
@@ -72,7 +80,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           persist-credentials: false

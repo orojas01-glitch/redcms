@@ -147,3 +147,11 @@ See [SCALA-DEMO-HARDENING-20260909.md](SCALA-DEMO-HARDENING-20260909.md) for the
 authorized demo deployment, 47 MariaDB migrations, authenticated editor evidence,
 enforced browser blocking, thumbnail-compatible upload rules and remaining limits.
 This later scope supersedes the earlier local-only deployment status above.
+
+## GitHub CI execution
+
+The owner-authorized branch push and first remote run are recorded in
+[GITHUB-CI-HARDENING.md](GITHUB-CI-HARDENING.md), together with the pinned-fixture
+repair and ShellCheck warning cleanup. Earlier remote-unverified status above is
+historical; use the linked workflow for exact current commit/job evidence.
+The historical credential gate remains unresolved.

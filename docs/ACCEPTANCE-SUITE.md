@@ -4,6 +4,11 @@ Date: 2026-08-15
 
 ## Purpose
 
+GitHub execution and pinned offline fixture requirements are documented in
+[GITHUB-CI-HARDENING.md](GITHUB-CI-HARDENING.md). Set `RED_STRIPE_ADAPTER_ROOT`
+to the pinned external package for the webhook/subscription contract tests;
+those tests do not install the adapter or contact Stripe.
+
 The 5.1.2 [CSP checks](CSP-HARDENING.md) run in `core-security-checks.sh`
 and the hardening CI workflow. `csp-http-self-test.py` tests synthetic PHP headers;
 `csp-browser-qa.mjs` proves browser blocking/reporting on loopback;

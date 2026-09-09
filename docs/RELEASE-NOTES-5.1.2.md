@@ -66,3 +66,8 @@ Apache regression tests and real thumbnail/upload-denial checks pass.
 
 Apache rules also deny provider-named `php.ini` files. Per-installation PHP settings
 must use the effective `user_ini.filename` and be verified after cache refresh.
+
+[GitHub CI execution](GITHUB-CI-HARDENING.md) identified and repairs an undeclared
+offline Stripe test fixture. CI pins that separate public repository, uses a
+maintained checkout action, and now enforces ShellCheck warnings as well as errors.
+The historical secret scan remains strict and unresolved.

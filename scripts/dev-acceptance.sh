@@ -5077,7 +5077,7 @@ red_acceptance_assert_equals \
     "$status_summary"
 
 printf '%s\n' 'Running hash-only migration and reset-race checks.'
-RED_DB_NAME="$ACCEPTANCE_DATABASE" FRANKENPHP_BIN="$FRANKENPHP_BIN" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/admin-password-migration-self-test.php"
+env RED_DB_NAME="$ACCEPTANCE_DATABASE" FRANKENPHP_BIN="$FRANKENPHP_BIN" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/admin-password-migration-self-test.php"
 
 printf '%s\n' 'Running read-only public utility profile checks.'
 "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-read-only-utility-self-test.php"

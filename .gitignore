@@ -25,3 +25,4 @@ deployments/
 *.log
 # Local/CI browser test dependencies are never release artifacts.
 node_modules/
+.ci-fixtures/

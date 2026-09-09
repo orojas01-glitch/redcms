@@ -74,8 +74,7 @@ red_store_lite_app_mysql() {
     "$RED_MYSQL_BIN" \
         "--defaults-extra-file=$RED_DB_DEFAULTS_FILE" \
         "--database=$REHEARSAL_DATABASE" \
-        --batch --raw --skip-column-names \
-        "$@"
+        --batch --raw --skip-column-names
 }
 
 red_store_lite_primary_mysql() {

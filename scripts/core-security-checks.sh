@@ -3,7 +3,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PHP_CLI="${RED_PHP_BIN:-${PHP_CLI:-php}}"
 "$PHP_CLI" "$SCRIPT_DIR/csp-self-test.php"
-# Match the dependency-free pre-database gate in the full suite.
+# Match the pre-database gate; some offline contracts require a pinned adapter fixture.
 while IFS= read -r test; do
     "$PHP_CLI" "$SCRIPT_DIR/$test"
 done < <(sed -n '/^FRANKENPHP_BIN=/q; s/^"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR\/\([^"]*\)"$/\1/p' "$SCRIPT_DIR/dev-acceptance.sh")

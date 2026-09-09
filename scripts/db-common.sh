@@ -47,6 +47,8 @@ red_config_value() {
 RED_DB_HOST_PORT="$(red_config_value DBHOST)"
 RED_DB_USER_RESOLVED="$(red_config_value DBUSER)"
 RED_DB_PASS_RESOLVED="$(red_config_value DBPASS)"
+# Used by scripts that source this shared helper.
+# shellcheck disable=SC2034
 RED_DB_NAME_RESOLVED="$(red_config_value DBNAME)"
 RED_DB_HOST_RESOLVED="$RED_DB_HOST_PORT"
 RED_DB_PORT_RESOLVED="${RED_DB_PORT:-3306}"
@@ -88,7 +90,11 @@ red_sha256_file() {
     fi
 }
 
+# Used by scripts that source this shared helper.
+# shellcheck disable=SC2034
 RED_MYSQL_BIN="$(red_find_mysql_tool mysql)"
+# Used by scripts that source this shared helper.
+# shellcheck disable=SC2034
 RED_MYSQLDUMP_BIN="$(red_find_mysql_tool mysqldump)"
 RED_DB_DEFAULTS_FILE=""
 

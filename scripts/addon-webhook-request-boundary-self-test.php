@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/addon_webhook_request_helpers.php';
 $adapterRoot = realpath(
-    dirname(__DIR__) . '/../redcms-store-lite-stripe-checkout/package'
+    getenv('RED_STRIPE_ADAPTER_ROOT')
+        ?: dirname(__DIR__) . '/../redcms-store-lite-stripe-checkout/package'
 );
 if (!is_string($adapterRoot)) {
     fwrite(STDERR, "Stripe adapter package is unavailable.\n");
