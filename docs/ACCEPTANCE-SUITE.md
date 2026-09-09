@@ -1600,3 +1600,26 @@ process environment.
 - The primary database is re-read after cleanup and must match its starting isolation snapshot.
 
 The acceptance suite does not alter production or replace the separate backup, deployment, migration, and rollback procedures required for HostGator.
+
+
+## 5.1.2 hardening gates
+
+Run `scripts/core-security-checks.sh` with `RED_PHP_BIN` pointing to PHP for
+network-free core and theme contracts. Run `scripts/hardening-full-acceptance.sh`
+for the existing full suite against a new current-schema reference and separate
+disposable acceptance database; it does not require upgrading the retained primary.
+It accepts only localhost database hosts and cleans its exact reference/grant.
+Administrator database credentials remain environment-owned and value-free in logs.
+
+Run `scripts/admin-session-http-self-test.py` and
+`scripts/apache-boundary-self-test.py` for synthetic local HTTP/server evidence.
+On Linux set `RED_HTTPD_BIN` and `RED_APACHE_MODULES` to installed Apache paths.
+Current source scanning is `python3 scripts/security-scan.py`; history scanning
+is `gitleaks git --redact=100 --no-banner --log-opts=HEAD`. Dependency scanning
+uses only `osv-scanner scan source -L release/bundled-dependencies.cdx.json`.
+Do not use a recursive scanner over the workstation directory.
+
+The new CI workflow has no deployment or provider credentials, grants read-only
+repository access and pins checkout and the FrankenPHP download checksum. Its
+history/dependency gates intentionally fail on unresolved findings; do not use
+`continue-on-error` or suppress those blockers to obtain green status.

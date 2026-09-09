@@ -294,8 +294,7 @@ try {
     red_addon_owner_test_assert(
         str_contains($loginSource, 'red_admin_addon_refresh_session_authorization')
             && str_contains($bootstrapSource, 'red_admin_addon_refresh_session_authorization')
-            && str_contains($bootstrapSource, "\$_SESSION['AdminRole']")
-            && str_contains($bootstrapSource, "\$_SESSION['AdminCapabilities']"),
+            && str_contains($bootstrapSource, 'red_destroy_session()'),
         'login and protected-request validation both refresh persisted Owner authorization'
     );
 

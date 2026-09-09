@@ -6,6 +6,10 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
+A local [5.1.2 hardening candidate](docs/RELEASE-NOTES-5.1.2.md) is under review.
+It is not released: dependency and historical credential closure remain blocked.
+See the [security policy](SECURITY.md) and [deployment requirements](docs/DEPLOYMENT-SECURITY-5.1.md).
+
 RED-CMS 5.1.1 is the focused maintenance release for reliable Other-component
 editing. It makes one administrator HTML source canonical across embedded and
 dedicated routes, mirrors exact bytes to `ShortDesc` and `LongDesc`, and

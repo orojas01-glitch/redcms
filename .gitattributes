@@ -1,0 +1,4 @@
+/deployments export-ignore
+/.codex export-ignore
+/.github export-ignore
+/.gitleaksignore export-ignore

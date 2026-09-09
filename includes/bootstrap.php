@@ -8,12 +8,28 @@ if (!defined('RED_CMS_VERSION')) {
 }
 
 require_once __DIR__ . '/admin_addon_authorization_helpers.php';
+require_once __DIR__ . '/admin_session_helpers.php';
 
 if (!function_exists('red_start_session')) {
     function red_start_session()
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
+            ini_set('session.use_strict_mode', '1');
+            ini_set('session.use_only_cookies', '1');
+            ini_set('session.use_trans_sid', '0');
+            session_set_cookie_params([
+                'lifetime' => 0, 'path' => '/', 'domain' => '',
+                'secure' => red_session_https(), 'httponly' => true, 'samesite' => 'Lax',
+            ]);
             session_start();
+            if (!empty($_SESSION['AdminRecordID'])) {
+                if (!red_admin_session_current($_SESSION, time())) {
+                    red_destroy_session();
+                    session_start();
+                } else {
+                    $_SESSION['AdminSessionLastSeen'] = time();
+                }
+            }
         }
     }
 }
@@ -62,6 +78,11 @@ if (!function_exists('red_require_admin')) {
     function red_require_admin($requireCsrf = false)
     {
         red_start_session();
+        if (!headers_sent()) {
+            header('Cache-Control: no-store');
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+        }
 
         if (empty($_SESSION['alias']) || empty($_SESSION['AdminRecordID']) || empty($_SESSION['AdminPasswordFingerprint'])) {
             http_response_code(403);
@@ -125,17 +146,7 @@ if (!function_exists('red_require_admin')) {
             $fingerprint = $admin ? hash('sha256', (string) ($admin['Password'] ?? '')) : '';
             if (!$admin || !hash_equals((string) $_SESSION['AdminPasswordFingerprint'], $fingerprint)) {
                 mysqli_close($connection);
-                unset(
-                    $_SESSION['alias'],
-                    $_SESSION['AdminRecordID'],
-                    $_SESSION['AdminUsername'],
-                    $_SESSION['AdminType'],
-                    $_SESSION['AdminComponents'],
-                    $_SESSION['AdminTools'],
-                    $_SESSION['AdminRole'],
-                    $_SESSION['AdminCapabilities'],
-                    $_SESSION['AdminPasswordFingerprint']
-                );
+                red_destroy_session();
                 http_response_code(403);
                 echo 'no';
                 exit;

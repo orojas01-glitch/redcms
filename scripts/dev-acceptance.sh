@@ -43,6 +43,8 @@ if [[ ! -s "$INSTALLER_FILE" ]]; then
     printf 'Installer SQL is missing or empty: %s\n' "$INSTALLER_FILE" >&2
     exit 66
 fi
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/admin-session-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/public-form-operation-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/client-deployment-kit-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-self-test.php"

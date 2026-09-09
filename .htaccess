@@ -1,6 +1,17 @@
 Options +FollowSymlinks
 RewriteEngine On
 
+# Stop direct downloads before the public front controller runs.
+Options -Indexes
+RewriteRule (^|/)(\.(?!well-known(?:/|$))[^/]+)(/|$) - [F,L]
+RewriteRule ^(?:deployments|database|scripts|release|docs|server-integrations|includes|class|UPDATES\ PROCEDURES)(?:/|$) - [F,L,NC]
+RewriteRule \.(?:sql|xlsx?|ods|pem|key|p12|pfx|bak|log|tar|tgz|gz|zip)$ - [F,L,NC]
+
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
 RewriteCond %{REQUEST_URI} ^/system.*
 RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$
 RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$

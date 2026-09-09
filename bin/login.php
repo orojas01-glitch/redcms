@@ -107,7 +107,8 @@ $dependencies = [
 			$isPasswordHash = isset($passwordInfo['algoName']) && $passwordInfo['algoName'] !== 'unknown';
 			$passwordValid = $isPasswordHash
 				? password_verify($password, $storedPassword)
-				: hash_equals($storedPassword, $password);
+				: getenv('RED_ADMIN_ALLOW_LEGACY_PASSWORDS') !== '0'
+					&& $storedPassword !== '' && hash_equals($storedPassword, $password);
 
 			if ($passwordValid) {
 				if (!$isPasswordHash || password_needs_rehash($storedPassword, PASSWORD_DEFAULT)) {
@@ -116,12 +117,16 @@ $dependencies = [
 						(int) $info['RecordID'],
 						$password
 					);
+					if (!$isPasswordHash && $updatedHash === '') {
+						mysqli_stmt_close($stmt);
+						return 'unavailable';
+					}
 					if ($updatedHash !== '') {
 						$storedPassword = $updatedHash;
 					}
 				}
 
-				session_regenerate_id(true);
+				red_admin_session_establish();
 				$_SESSION['alias'] = $info['Alias'];
 				$_SESSION['AdminRecordID'] = (int) $info['RecordID'];
 				$_SESSION['AdminUsername'] = (string) $info['Username'];

@@ -66,7 +66,10 @@ grep -F 'DRY RUN: current client, Owner, packages, public-key hash, and opaque-r
     "$TEMP_ROOT/dry-run.txt" >/dev/null
 grep -F 'No package file or handler was loaded' "$TEMP_ROOT/dry-run.txt" \
     >/dev/null
-! grep -F 'pub_test_' "$TEMP_ROOT/dry-run.txt" >/dev/null
+if grep -F 'pub_test_' "$TEMP_ROOT/dry-run.txt" >/dev/null; then
+    printf '%s\n' 'Refused: sensitive value appeared in dry-run output.' >&2
+    exit 1
+fi
 
 value() {
     local label="$1"
@@ -135,7 +138,10 @@ grep -F 'Real provider contact authorized: no' "$TEMP_ROOT/apply.txt" \
     >/dev/null
 grep -F 'No real key value, network request, Wompi contact, transaction, payment, event, order mutation, retry, or client action occurred.' \
     "$TEMP_ROOT/apply.txt" >/dev/null
-! grep -F 'pub_test_' "$TEMP_ROOT/apply.txt" >/dev/null
+if grep -F 'pub_test_' "$TEMP_ROOT/apply.txt" >/dev/null; then
+    printf '%s\n' 'Refused: sensitive value appeared in apply output.' >&2
+    exit 1
+fi
 
 STATE="$(php_no_contact \
     "$PROJECT_ROOT/scripts/wompi-payment-adapter-c4c2-state-check.php")"

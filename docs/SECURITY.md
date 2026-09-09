@@ -2402,3 +2402,23 @@ explicitly allowlisted administrator event/target pairs.
 - Rotate real production credentials and confirm production PHP/MySQL versions before deployment.
 
 The active milestone order is maintained in `docs/ROADMAP.md`.
+
+## 5.1.2 hardening candidate
+
+The formal support/reporting/patch policy is in [`../SECURITY.md`](../SECURITY.md).
+Session expiry, successful legacy-hash upgrade requirements, server HTTPS/CSP
+configuration and operational evidence are specified in
+[`DEPLOYMENT-SECURITY-5.1.md`](DEPLOYMENT-SECURITY-5.1.md). The earlier plaintext
+compatibility description above is narrowed: a failed hash upgrade now refuses
+login. Existing sessions without the new timestamps require a fresh login.
+
+The 2026-09-09 redacted history scan independently reproduced one unresolved
+historical PDT finding at `073ce8b57318`, `bin/paypal_response.php:15`. No token
+value was displayed or retained in candidate documentation. It remains outside
+the scanner ignore list. Local current-source cleanup cannot revoke it. Owner
+confirmation of revocation/replacement or provider-confirmed permanent invalidity
+is required before closure; turning off a feature is not proof a token was rotated.
+The modern separately packaged PayPal adapter remains a distinct credential path.
+
+See [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md) for exact baseline, verification,
+rollback and unresolved release blockers. Nothing here certifies a client deployment.

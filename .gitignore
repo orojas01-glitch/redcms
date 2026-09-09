@@ -2,3 +2,24 @@
 .ftpquota
 error_log
 includes/config.local.php
+
+# Local operator state and deployment material (never a release input).
+.codex/
+deployments/
+*.xlsx
+*.xls
+*.ods
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.sql.gz
+*.sql.zip
+*.tar
+*.tar.gz
+*.tgz
+*.bak
+*.log

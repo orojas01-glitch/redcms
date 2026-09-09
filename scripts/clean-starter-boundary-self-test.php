@@ -256,7 +256,7 @@ try {
     $readme = red_clean_starter_test_source($repositoryRoot, 'README.md');
     $security = red_clean_starter_test_source($repositoryRoot, 'docs/SECURITY.md');
     red_clean_starter_test_assert(
-        stripos($readme, 'under review') === false
+        str_contains($readme, 'releases/tag/v5.1.0')
             && str_contains($readme, 'pull request #2')
             && str_contains($security, 'Portable Starter Data'),
         'release and security documentation describe the merged portable baseline'

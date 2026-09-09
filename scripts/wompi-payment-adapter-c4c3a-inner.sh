@@ -78,7 +78,10 @@ php_no_contact "$COMMAND" "--actor-admin=$ACTOR_ID" \
 grep -F 'DRY RUN: current client, Owner, packages, authorization, hashes, and unused durable start were revalidated.' \
     "$TEMP_ROOT/dry-run.txt" >/dev/null
 grep -F 'no durable row was written' "$TEMP_ROOT/dry-run.txt" >/dev/null
-! grep -F 'pub_test_' "$TEMP_ROOT/dry-run.txt" >/dev/null
+if grep -F 'pub_test_' "$TEMP_ROOT/dry-run.txt" >/dev/null; then
+    printf '%s\n' 'Refused: sensitive value appeared in dry-run output.' >&2
+    exit 1
+fi
 
 value() {
     local label="$1"
@@ -162,7 +165,10 @@ grep -F 'Durable attempt consumed: yes' "$TEMP_ROOT/apply.txt" >/dev/null
 grep -F 'Replay protection active: yes' "$TEMP_ROOT/apply.txt" >/dev/null
 grep -F 'Real provider contact authorized: no' "$TEMP_ROOT/apply.txt" \
     >/dev/null
-! grep -F 'pub_test_' "$TEMP_ROOT/apply.txt" >/dev/null
+if grep -F 'pub_test_' "$TEMP_ROOT/apply.txt" >/dev/null; then
+    printf '%s\n' 'Refused: sensitive value appeared in apply output.' >&2
+    exit 1
+fi
 
 EXPECTED_AUDITS=$((BASELINE_AUDITS + 2))
 STATE_AFTER="$(php_no_contact \

@@ -502,6 +502,8 @@ try {
         'alias' => $adminAlias,
         'AdminRecordID' => $adminId,
         'AdminPasswordFingerprint' => hash('sha256', $adminPassword),
+        'AdminSessionIssuedAt' => time(),
+        'AdminSessionLastSeen' => time(),
         'AdminType' => $adminType,
         'AdminComponents' => $adminComponents,
         'AdminTools' => '',
