@@ -221,6 +221,8 @@
 
     function editorConfig(form, field) {
         return {
+            license_key: 'gpl',
+            promotion: false,
             selector: '#' + field.id,
             height: 390,
             menubar: false,
@@ -231,9 +233,9 @@
             verify_html: true,
             plugins: [
                 'advlist autolink lists link image charmap anchor',
-                'searchreplace visualblocks fullscreen table paste wordcount'
-            ],
-            toolbar: 'undo redo | styleselect | bold italic underline | bullist numlist | link image table | removeformat fullscreen',
+                'searchreplace visualblocks fullscreen table wordcount'
+            ].join(' '),
+            toolbar: 'undo redo | styles | bold italic underline | bullist numlist | link image table | removeformat fullscreen',
             style_formats: [
                 {title: 'Heading 1', format: 'h1'},
                 {title: 'Heading 2', format: 'h2'},

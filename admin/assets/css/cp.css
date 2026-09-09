@@ -3842,7 +3842,8 @@ div#cp_ftp{background-color: #63C}
 	min-height: 72px;
 }
 
-#advanced .red-admin-editor-field .mce-tinymce {
+#advanced .red-admin-editor-field .mce-tinymce,
+#advanced .red-admin-editor-field .tox-tinymce {
 	width: 100% !important;
 	overflow: hidden;
 	border: 1px solid #bdc9d3;
@@ -8043,7 +8044,8 @@ dl#cp_accordion dd .sub_menu  li{list-style:none;line-height:30px!important;padd
 	resize: vertical;
 }
 
-#advanced .red-admin-video-description-card .mce-tinymce {
+#advanced .red-admin-video-description-card .mce-tinymce,
+#advanced .red-admin-video-description-card .tox-tinymce {
 	box-sizing: border-box;
 	width: 100% !important;
 	border-color: #cbd8e1;
@@ -8438,7 +8440,8 @@ dl#cp_accordion dd .sub_menu  li{list-style:none;line-height:30px!important;padd
 	resize: vertical;
 }
 
-#advanced .red-admin-other-editor-pane--visual .mce-tinymce {
+#advanced .red-admin-other-editor-pane--visual .mce-tinymce,
+#advanced .red-admin-other-editor-pane--visual .tox-tinymce {
 	box-sizing: border-box;
 	width: 100% !important;
 	border: 1px solid #bfcbd6 !important;

@@ -75,7 +75,7 @@ wrapper resolves this without migrating the retained primary. A source assertion
 and embedded-view header warning were corrected before the final passing run.
 No client database, payment provider, credential or live deployment was changed.
 
-## Release blockers and owner decisions
+## Initial release blockers and owner decisions (superseded for TinyMCE below)
 
 1. TinyMCE 4.0.12 remains installed and unsupported. Approve the distribution
    licensing route before a compatible supported replacement is integrated and
@@ -91,3 +91,17 @@ No client database, payment provider, credential or live deployment was changed.
 Do not publish 5.1.2 or mark security checks clean while the first two gates fail.
 The core version/client-kit remain 5.1.1 intentionally. Existing accepted
 post-release add-on/payment work is preserved; no 5.2 editor redesign was started.
+
+
+## 2026-09-09 TinyMCE follow-up
+
+The owner selected free self-hosted core and confirmed RED-CMS is open source.
+TinyMCE 8.9.0 replaces 4.0.12 locally, preserving existing MIT source notices and
+adding GPL/source notices. The package integrity, six configurations, 84 real-editor
+browser assertions and 28 existing Other HTML/reconciliation assertions pass.
+The public-coordinate OSV query now returns no matches for all four inventoried
+versions. The TinyMCE dependency/licensing-selection blocker above is resolved
+for this local integration; the PayPal and remaining operational gates are unchanged.
+See [TINYMCE-8-UPGRADE.md](TINYMCE-8-UPGRADE.md) for precise scope and limitations.
+No Scala or HostGator state was changed. Source/license delivery remains part of
+preparing the future client/demo distribution.

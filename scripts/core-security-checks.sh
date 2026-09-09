@@ -9,3 +9,5 @@ done < <(sed -n '/^FRANKENPHP_BIN=/q; s/^"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR\/\
 for test in theme-contract theme-layout-extensibility theme-preflight theme-readiness theme-region-context; do
     "$PHP_CLI" "$SCRIPT_DIR/$test-self-test.php"
 done
+
+node "$SCRIPT_DIR/tinymce-vendor-self-test.mjs"

@@ -3346,8 +3346,6 @@ try {
         'insertdatetime',
         'media',
         'table',
-        'paste',
-        'textcolor',
         'wordcount',
     ];
     $tinyMcePluginAssetsPresent = true;
@@ -3360,6 +3358,7 @@ try {
     red_theme_test_assert(
         is_string($newArticleScript)
             && $tinyMcePluginAssetsPresent
+            && str_contains($newArticleScript, "license_key: 'gpl'")
             && !str_contains($newArticleScript, 'moxiemanager')
             && str_contains($newArticleScript, 'window.tinymce.triggerSave()')
             && str_contains($newArticleSource, 'data-submit-url="/admin/bin/insert_content.php"')

@@ -92,14 +92,15 @@ if (in_array((string) $row['Item'], ['Website_CSS', 'Website_Footer', 'Website_H
 <!-- TinyMCE -->
 <script type="text/javascript">
 tinymce.init({
-	mode : "exact",
-	elements : "##",
+    license_key: "gpl",
+    promotion: false,
+	selector : "[data-red-legacy-advanced-visual]",
     plugins: [
-        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+        "advlist autolink lists link image charmap preview anchor pagebreak",
         "searchreplace wordcount visualblocks visualchars code fullscreen",
-        "insertdatetime media nonbreaking save table contextmenu directionality",
-        "emoticons template paste textcolor moxiemanager"
-    ],
+        "insertdatetime media nonbreaking save table directionality",
+        "emoticons"
+    ].join(' '),
    /*content_css: "/css/style.css",*/
     style_formats: [
     {title: "Headers", items: [
@@ -268,10 +269,10 @@ function run_update_advanced (update_advanced)
 		{
 			///////////////
 			case 'Website_Title':
-			echo 'tinymce.remove(tinyMCE.get(ShortLine));'. "\n";
+			echo 'if (tinymce.get("ShortLine")) { tinymce.get("ShortLine").remove(); }'. "\n";
 			break;
 			case 'Website_Slogan':
-			echo 'tinymce.remove(tinyMCE.get(ShortLine));'. "\n";
+			echo 'if (tinymce.get("ShortLine")) { tinymce.get("ShortLine").remove(); }'. "\n";
 			break;
 		}
 	?>

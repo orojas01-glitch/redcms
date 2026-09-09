@@ -1621,5 +1621,15 @@ Do not use a recursive scanner over the workstation directory.
 
 The new CI workflow has no deployment or provider credentials, grants read-only
 repository access and pins checkout and the FrankenPHP download checksum. Its
-history/dependency gates intentionally fail on unresolved findings; do not use
+history/dependency gates fail on unresolved findings (TinyMCE is now updated); do not use
 `continue-on-error` or suppress those blockers to obtain green status.
+
+
+`node scripts/tinymce-vendor-self-test.mjs` verifies the complete upstream editor
+inventory and all six production GPL/core configurations; it now runs in core
+checks. `node scripts/tinymce-browser-qa.mjs` uses an available local Playwright
+and Chrome installation, with a synthetic loopback-only server. It verifies real
+editor functionality on desktop/mobile and refuses external requests. Use
+`RED_PLAYWRIGHT_MODULE`, `RED_CHROME_EXECUTABLE`, `RED_PHP_BIN`, and
+`RED_TINYMCE_QA_OUTPUT` when overriding local tools or evidence location. It makes
+no database writes, real form submissions or client/server deployment.

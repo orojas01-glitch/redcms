@@ -1,7 +1,8 @@
 # RED-CMS 5.1.2 — unpublished hardening candidate
 
-**Release blocked.** TinyMCE 4.0.12 remains unsupported with known advisory
-matches, and historical PayPal PDT credential revocation is unverified. This is
+**Release blocked.** Historical PayPal PDT credential revocation is unverified;
+client-specific operational and remote release checks remain pending. TinyMCE has
+now been upgraded locally to 8.9.0 GPL core with passing browser and dependency checks. This is
 reviewable local work, not a published release. Runtime version and the accepted
 client-kit manifest remain 5.1.1 until the release gates are resolved.
 
@@ -31,3 +32,5 @@ Review [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md),
 [`BUNDLED-DEPENDENCIES.md`](BUNDLED-DEPENDENCIES.md). Restore selected paths from
 `checkpoint/5.1.2-before-hardening`, or revert reviewed hardening commits; preserve
 later work and never reset/delete untracked operator files.
+
+TinyMCE upgrade detail: [TINYMCE-8-UPGRADE.md](TINYMCE-8-UPGRADE.md).

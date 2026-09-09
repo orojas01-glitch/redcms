@@ -2,3 +2,6 @@
 /.codex export-ignore
 /.github export-ignore
 /.gitleaksignore export-ignore
+
+# Preserve exact upstream bytes; project code still uses normal whitespace checks.
+/admin/assets/js/tiny_mce/** -whitespace linguist-vendored

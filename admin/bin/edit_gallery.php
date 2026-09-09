@@ -325,17 +325,19 @@ if (($row['GalleryType'] ?? '') === 'Banner') {
 <!-- TinyMCE -->
 <script type="text/javascript">
 tinymce.init({
-	mode : "exact",
+    license_key: "gpl",
+    promotion: false,
 	<?php
 	if ($row['GalleryType']=='Video' || $row['GalleryType']=='Banner')
-	echo 'elements : "ShortDesc",';
+	echo 'selector : "#ShortDesc",';
+    else echo 'selector : "[data-red-legacy-gallery-visual]",';
 	?>
     plugins: [
-        "advlist autolink lists link image charmap print preview hr anchor pagebreak",
+        "advlist autolink lists link image charmap preview anchor pagebreak",
         "searchreplace wordcount visualblocks visualchars code fullscreen",
-        "insertdatetime media nonbreaking save table contextmenu directionality",
-        "emoticons template paste textcolor moxiemanager"
-    ],
+        "insertdatetime media nonbreaking save table directionality",
+        "emoticons"
+    ].join(' '),
    /*content_css: "/css/style.css",*/
     style_formats: [
     {title: "Headers", items: [

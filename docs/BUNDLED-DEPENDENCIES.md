@@ -7,7 +7,7 @@ OSV is queried with this file, never the repository or client configuration.
 
 | Library | Verified bundled version / surface | Candidate result |
 | --- | --- | --- |
-| TinyMCE | 4.0.12, `admin/assets/js/tiny_mce/` | Release blocker: unsupported; 19 OSV advisory matches |
+| TinyMCE | 8.9.0, `admin/assets/js/tiny_mce/` | Local GPL core upgrade verified; no OSV matches returned |
 | jQuery | 3.7.1, `js/jquery-3.7.1.min.js` | No OSV matches returned in this query |
 | Bootstrap | 5.3.3, `js/bootstrap*` and `css/bootstrap*` | No OSV matches returned in this query |
 | PHPMailer | 6.9.3, `bin/phpmailer.php`, `bin/SMTP.php`, `bin/Exception.php` | No OSV matches returned in this query; SMTP delivery remains unverified |
@@ -21,27 +21,17 @@ libraries and must be checked in their own repositories.
 
 ## TinyMCE decision and compatibility boundary
 
-Upstream [ended TinyMCE 4 support](https://www.tiny.cloud/blog/tinymce-4-support-window/).
-The supported replacement requires an approved [GPL or commercial licensing
-route](https://www.tiny.cloud/docs/tinymce/latest/license-key/). RED-CMS has no
-root distribution license establishing GPL compatibility, and no commercial
-license was supplied. Do not silently change RED-CMS's license or enable paid
-cloud services. No dependency replacement is represented as completed here.
+The owner confirmed RED-CMS is open source and selected the free self-hosted core.
+TinyMCE 8.9.0 now runs in GPL mode; existing MIT notices in RED-CMS source remain.
+The earlier TinyMCE 4.0.12 payload was replaced, resolving the 19 advisory matches
+in the package-coordinate scan. Nothing was suppressed to produce the clean result.
 
-The [4-to-8 migration](https://www.tiny.cloud/docs/tinymce/latest/migration-from-4x-to-8x/)
-changes plugin names and controls. Preserve the current editor layout and
-capabilities; this is dependency maintenance, not the 5.2 redesign. The concrete
-replacement review must cover:
+See [local upgrade evidence and rollback](TINYMCE-8-UPGRADE.md) and
+[third-party license/source notices](../THIRD-PARTY-NOTICES.md). All six production
+configurations and desktop/mobile synthetic browser checks pass. Complete client
+content/CSP compatibility and remote CI remain deployment-stage verification.
 
-- Article, Other, Video, Gallery create/edit and Advanced editor initialization;
-- styleselect to styles mapping; paste/textcolor functionality after plugins move
-  into core; code, table, lists, image, link, media, fullscreen and word count;
-- current URL preservation, source mode, async editor teardown/reinitialization;
-- Other's byte-exact canonical HTML and legacy mismatch reconciliation;
-- Article's separate short/long fields, save/reload, revision restore and uploads;
-- existing markup including embeds, desktop/mobile rendering and CSP behavior.
-
-OSV advisory IDs for the installed TinyMCE are recorded by the scanner output;
-CI intentionally fails its dependency gate until a reviewed replacement removes
-the findings. Do not postpone this security dependency decision to a visual
-redesign or call the current candidate clean/releasable.
+Official references: [current GPL mode](https://www.tiny.cloud/docs/tinymce/latest/license-key/),
+[4-to-8 migration](https://www.tiny.cloud/docs/tinymce/latest/migration-from-4x-to-8x/).
+The supported editor's built-in skin changes; no CMS content-editor redesign was
+performed. The free core, local assets and existing persistence paths are retained.

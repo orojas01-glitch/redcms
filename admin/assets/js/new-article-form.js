@@ -72,6 +72,8 @@
 
     function editorConfig(selector, height, onReady) {
         return {
+            license_key: 'gpl',
+            promotion: false,
             selector: selector,
             height: height,
             menubar: false,
@@ -83,9 +85,9 @@
             plugins: [
                 'advlist autolink lists link image charmap preview anchor',
                 'searchreplace visualblocks code fullscreen insertdatetime media',
-                'table paste textcolor wordcount'
-            ],
-            toolbar: 'undo redo | styleselect | bold italic underline | bullist numlist | alignleft aligncenter alignright | link image | removeformat code fullscreen',
+                'table wordcount'
+            ].join(' '),
+            toolbar: 'undo redo | styles | bold italic underline | bullist numlist | alignleft aligncenter alignright | link image | removeformat code fullscreen',
             style_formats: [
                 {title: 'Heading 1', format: 'h1'},
                 {title: 'Heading 2', format: 'h2'},

@@ -6,8 +6,8 @@
     {
       "type": "library",
       "name": "tinymce",
-      "version": "4.0.12",
-      "purl": "pkg:npm/tinymce@4.0.12"
+      "version": "8.9.0",
+      "purl": "pkg:npm/tinymce@8.9.0"
     },
     {
       "type": "library",

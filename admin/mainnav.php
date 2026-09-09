@@ -69,7 +69,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/admin/class/class_add_tools.php';
 ?>
 <a name="atop"></a>
 <!-- TinyMCE -->
-<script type="text/javascript" src="/admin/assets/js/tiny_mce/tinymce.min.js"></script>
+<script type="text/javascript" src="/admin/assets/js/tiny_mce/tinymce.min.js?v=8.9.0"></script>
 <script type="text/javascript" src="/admin/assets/js/area-rename-redirect.js"></script>
 	<script type="text/javascript" src="/admin/assets/js/area-hierarchy.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/area-hierarchy.js')); ?>"></script>
 	<script type="text/javascript" src="/admin/assets/js/layout-preview.js?v=<?php echo rawurlencode((string) filemtime(__DIR__ . '/assets/js/layout-preview.js')); ?>"></script>

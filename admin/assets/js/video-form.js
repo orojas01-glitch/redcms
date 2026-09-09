@@ -315,6 +315,8 @@
 
     function editorConfig(selector, onReady) {
         return {
+            license_key: 'gpl',
+            promotion: false,
             selector: selector,
             height: 210,
             menubar: false,
@@ -325,9 +327,9 @@
             plugins: [
                 'advlist autolink lists link charmap preview anchor',
                 'searchreplace visualblocks code fullscreen',
-                'table paste textcolor wordcount'
-            ],
-            toolbar: 'undo redo | styleselect | bold italic underline | bullist numlist | alignleft aligncenter alignright | link | removeformat code fullscreen',
+                'table wordcount'
+            ].join(' '),
+            toolbar: 'undo redo | styles | bold italic underline | bullist numlist | alignleft aligncenter alignright | link | removeformat code fullscreen',
             setup: function (editor) {
                 editor.on('init', onReady);
             }
