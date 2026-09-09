@@ -27,8 +27,8 @@ no-op rerun, authentication and account invalidation, theme/add-on/content lifec
 uploads and forced rollback, with exact temporary database/grant cleanup. HTTP
 session tests also pass. A synthetic Apache fixture also passed eight denied-path checks and public/ACME
 compatibility. Local CSP HTTP/browser checks pass, and the owner-authorized isolated Scala demo
-now enforces the compatibility policy. Remote CI and other client deployments
-remain unverified.
+now enforces the compatibility policy. The GitHub core job and current source/dependency checks now pass; historical
+scanning remains blocked. Other client deployments require separate verification.
 
 Review [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md),
 [`DEPLOYMENT-SECURITY-5.1.md`](DEPLOYMENT-SECURITY-5.1.md), and
@@ -67,7 +67,7 @@ Apache regression tests and real thumbnail/upload-denial checks pass.
 Apache rules also deny provider-named `php.ini` files. Per-installation PHP settings
 must use the effective `user_ini.filename` and be verified after cache refresh.
 
-[GitHub CI execution](GITHUB-CI-HARDENING.md) identified and repairs an undeclared
+[GitHub CI execution](GITHUB-CI-HARDENING.md) identified an undeclared
 offline Stripe test fixture. CI pins that separate public repository, uses a
 maintained checkout action, and now enforces ShellCheck warnings as well as errors.
 The historical secret scan remains strict and unresolved.

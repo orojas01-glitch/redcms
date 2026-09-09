@@ -151,14 +151,17 @@ for these installation-specific checks.
 
 SMTP delivery, full restore rehearsal, monitoring and per-client operational
 proof remain separate requirements. The host's default CLI OPcache/lint crash,
-historical PDT invalidity and remote CI remain unresolved. A working demo is not
+historical PDT invalidity remains unresolved. Subsequent GitHub CI execution
+and results are recorded in [GITHUB-CI-HARDENING.md](GITHUB-CI-HARDENING.md). A working demo is not
 permission to publish the release or deploy to clients.
 
 ## Rollback and private handoff
 
 Current-source secret scanning passed with zero findings; changed Apache rules
 passed the 14-path synthetic gate and real positive/negative endpoint checks.
-Remote CI has not been run because nothing was pushed.
+The later owner-authorized GitHub run passes the core job and current
+source/dependency scans, with historical scanning still blocked; see the linked
+CI execution record.
 
 The private operational handoff records exact account-local staging/backup paths,
 checksums, configuration status and outstanding owner input. Keep those paths,

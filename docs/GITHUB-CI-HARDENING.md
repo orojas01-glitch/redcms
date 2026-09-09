@@ -97,3 +97,23 @@ for the exact tested commit and final job statuses. A successful core job cannot
 turn the unresolved historical security finding into a pass. Revocation or
 confirmed invalidity needs owner evidence before any narrowly documented incident
 closure is considered; deleting current code does not establish that evidence.
+
+## Verified remote result
+
+[Run 34410506021](https://github.com/orojas01-glitch/redcms/actions/runs/34410506021)
+completed against `3181afb8be82b1a7b2d4a53f578bbc37ee1fdfd8`:
+
+| Gate | Result |
+| --- | --- |
+| Core job, including shell/header contracts, offline adapter/core/theme tests, Apache, retired endpoint, HTTP sessions/CSP, disposable migrations/authentication/CRUD/rollback and browser editor/CSP checks | Passed |
+| Current tracked-source secret scan | Passed |
+| Bundled dependency coordinates | Passed |
+| Browser-tooling dependency coordinates | Passed |
+| Historical secret scan | Failed; existing credential incident remains unresolved |
+
+The overall workflow is therefore **failed**, not green or release-approved.
+This closes the demonstrated CI execution/reproducibility issues while retaining
+an honest historical-security gate. The documentation-only follow-up commit does
+not change the executable sources validated in this run. Its automatic rerun can
+be inspected through the current workflow link above. No main merge, tag/release,
+client deployment, provider contact or credential rotation occurred in this work.
