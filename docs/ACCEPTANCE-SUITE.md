@@ -1643,3 +1643,8 @@ navigation, jQuery compatibility, upload isolation/error handling and easing.
 `RED_LEGACY_BASELINE_REF` can load only the allowlisted historical JS assets from a
 local Git checkpoint for before/after reproduction; it does not switch or restore
 the worktree. No real client uploads or credentials are used.
+
+
+`python3 scripts/legacy-pdt-retirement-self-test.py` checks the retired PDT URL
+under five HTTP methods with synthetic legacy settings and disabled transports.
+The CI workflow runs this independently from the newer PayPal adapter checks.

@@ -48,6 +48,8 @@ jobs:
         run: scripts/core-security-checks.sh
       - name: Apache artifact boundary
         run: RED_HTTPD_BIN=/usr/sbin/apache2 RED_APACHE_MODULES=/usr/lib/apache2/modules python3 scripts/apache-boundary-self-test.py
+      - name: Retired legacy payment boundary
+        run: python3 scripts/legacy-pdt-retirement-self-test.py
       - name: HTTP session policy
         run: python3 scripts/admin-session-http-self-test.py
       - name: Disposable authentication, migrations, CRUD and rollback

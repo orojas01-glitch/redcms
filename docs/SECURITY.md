@@ -1,6 +1,6 @@
 # RED-CMS Security Notes
 
-Date: 2026-08-07
+Date: 2026-09-09
 
 ## Configuration Secrets
 
@@ -23,10 +23,6 @@ Supported environment variables:
 - `RED_DB_NAME`
 - `RED_IPSTACK_ACCESS_KEY`
 - `RED_LEGACY_MAIL_OWNER`
-- `RED_PAYPAL_PDT_HOSTNAME`
-- `RED_PAYPAL_PDT_AUTH_TOKEN`
-- `RED_PAYPAL_CONFIRMATION_FROM_EMAIL`
-- `RED_PAYPAL_CONFIRMATION_FROM_NAME`
 - `RED_PUBLIC_MUTATION_TRUSTED_ORIGIN` (one canonical HTTPS origin for a
   future core-owned public-mutation dispatcher; it is not a secret and must
   not be supplied by `Host`, a request header, or a request-projected server
@@ -108,28 +104,27 @@ server-local configuration value. With no valid configured owner, they return
 `mail failed` and invoke no mail transport. The obsolete ASP.NET handler is
 inert.
 
-`/bin/paypal_response.php` remains default-inert. It requires a server-local PDT
-token and a valid `RED_PAYPAL_CONFIRMATION_FROM_EMAIL` before contacting
-PayPal. Confirmation mail uses only that configured sender and the verified
-payer address; it has no fixed BCC or fallback recipient. This compatibility
-route does not activate the Version 5.1 member, entitlement, or payment model.
+`/bin/paypal_response.php` is retired as of 2026-09-09 at the owner's request.
+It contains only a terminal HTTP 410 response with no-store/nosniff headers. It
+loads no bootstrap, configuration, session, database, mail or provider transport.
+The PDT helper and the four obsolete PDT/confirmation settings were removed from
+current supported configuration and the private local configuration. No modern
+PayPal adapter or database schema was changed.
 
 ### Historical PayPal PDT token finding
 
-The repository-security review on 2026-09-03 found an apparent PayPal PDT
-identity token in the initial public history at commit `073ce8b`. Commit
-`c47fdde` removed the embedded value, and the current compatibility endpoint
-accepts a token only through server-local configuration. The token value must
-not be copied into an issue, log, screenshot, baseline, or current source.
+The owner confirmed the integration was used long ago and authorized complete
+local retirement. This resolves the application-retirement decision; it does not
+establish provider-side revocation. The redacted historical finding at `073ce8b`
+remains in Git history and remains outside `.gitleaksignore`. No token value is
+recorded in reports. A later owner/provider confirmation of invalidity is still
+needed to close the credential incident; replacement is unnecessary for this
+retired application. No Git history rewrite or PayPal account action occurred.
 
-This historical finding is deliberately not listed in `.gitleaksignore`.
-Account status remains an operator-owned verification step: confirm whether
-Payment Data Transfer is enabled in the PayPal business account and whether
-any deployed legacy PayPal Standard return route still depends on it. If the
-old route is unused, disable PDT and remove any server-local PDT configuration.
-If it is still required, replace the exposed identity token through the PayPal
-account before updating the server-local value. Do not rewrite published Git
-history without a separately reviewed coordination and rollback plan.
+See [LEGACY-PDT-RETIREMENT.md](LEGACY-PDT-RETIREMENT.md) for local deletion,
+retirement behavior, rollback and deployment boundaries. Old server configuration
+must be retired separately during an authorized server update; local removal is
+not a claim that a previously deployed copy was updated.
 
 ## Database Backup Security
 

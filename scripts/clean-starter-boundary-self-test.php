@@ -188,7 +188,6 @@ try {
         str_contains($runtimeConfig, "getenv(\$envKey)")
             && str_contains($runtimeConfig, "config.local.php")
             && str_contains($configExample, "'LEGACY_MAIL_OWNER' => ''")
-            && str_contains($configExample, "'PAYPAL_CONFIRMATION_FROM_EMAIL' => ''")
             && str_contains($configExample, "'ADDON_SECRET_REFERENCES' => []"),
         'outbound legacy mail settings stay server-local and default disabled'
     );
@@ -218,31 +217,16 @@ try {
     );
 
     $paypalEndpoint = red_clean_starter_test_source($repositoryRoot, 'bin/paypal_response.php');
-    $paypalHelpers = red_clean_starter_test_source($repositoryRoot, 'includes/public_paypal_helpers.php');
     red_clean_starter_test_assert(
-        str_contains($paypalEndpoint, 'RED_PAYPAL_CONFIRMATION_FROM_EMAIL')
-            && str_contains($paypalEndpoint, 'FILTER_VALIDATE_EMAIL')
-            && str_contains($paypalHelpers, 'Payment confirmation')
-            && !str_contains($paypalHelpers, 'AddBCC')
-            && !preg_match('~(?<!->)\bmail\s*\(~', $paypalHelpers),
-        'PayPal confirmation mail is opt-in, generic, and has no fixed BCC or fallback'
+        str_contains($paypalEndpoint, 'http_response_code(410)')
+            && !file_exists($repositoryRoot . '/includes/public_paypal_helpers.php')
+            && !str_contains($configExample, 'PAYPAL_PDT_')
+            && !str_contains($configExample, 'PAYPAL_CONFIRMATION_'),
+        'retired PDT URL has no helper or supported credential configuration'
     );
-    require_once $repositoryRoot . '/includes/public_paypal_helpers.php';
     red_clean_starter_test_assert(
-        red_public_paypal_parse_pdt("SUCCESS\nitem_name=Starter%20Access\n") === [
-            'item_name' => 'Starter Access',
-        ]
-            && str_contains(
-                red_public_paypal_confirmation_body('<Item>', '10.00', 'txn-1'),
-                '&lt;Item&gt;'
-            )
-            && !red_public_paypal_send_confirmation(
-                'payer@example.com',
-                'Starter',
-                'Customer',
-                '<p>Confirmation</p>'
-            ),
-        'PayPal parsing escapes provider values and invokes no mail without a configured sender'
+        !preg_match('/require|include|session_|curl_|mail\s*\(|red_config_value/', $paypalEndpoint),
+        'retired PDT response cannot bootstrap configuration, session or transport'
     );
 
     $apacheConfig = red_clean_starter_test_source($repositoryRoot, '.htaccess');

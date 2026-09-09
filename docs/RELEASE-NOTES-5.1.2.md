@@ -39,3 +39,9 @@ The [legacy utility review](LEGACY-UTILITY-PROVENANCE.md) also completes locally
 verified sources/licenses, repaired menu and upload compatibility, preserved URLs,
 and new behavioral/provenance regression gates. Remaining maintenance/deployment
 limits are documented explicitly; no Scala or HostGator change occurred.
+
+
+The owner-authorized [legacy PDT retirement](LEGACY-PDT-RETIREMENT.md) removes
+its implementation and obsolete settings. The former callback returns only HTTP
+410; newer PayPal adapter contracts and database compatibility remain intact.
+Historical credential invalidity remains unverified; retirement is not revocation.

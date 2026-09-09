@@ -117,3 +117,13 @@ See [LEGACY-UTILITY-PROVENANCE.md](LEGACY-UTILITY-PROVENANCE.md) for source/lice
 facts, 38 browser and 168 source/API checks, rollback and precise limitations.
 The earlier pending legacy-utility provenance item is superseded by that report;
 this does not close the PayPal, server/SMTP/backup/monitoring or remote CI gates.
+
+
+## 2026-09-09 legacy PDT retirement
+
+The owner confirmed the integration was used long ago and authorized local removal.
+The PDT helper and four obsolete configuration keys are removed. The former URL
+has only a terminal 410 retirement response, independent of all runtime/settings.
+The separate modern PayPal adapter is preserved. This completes the application
+retirement decision; it does not close the historical credential incident or
+change any previously deployed server. See [LEGACY-PDT-RETIREMENT.md](LEGACY-PDT-RETIREMENT.md).

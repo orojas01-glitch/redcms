@@ -71,9 +71,9 @@ installable adapter foundation remains one-time USD Checkout only and closes
 pure Orders v2 create/capture and verified-event projection contracts. A
 separate operator-only provider test has also proved PayPal's buyer/API path
 for one-time and monthly subscription objects. It must not reuse the legacy
-`paypal_response.php` PDT compatibility route, because that route predates the
-Store Lite payment lifecycle and cannot provide the new adapter's
-installation, replay, isolation, or subscription guarantees.
+`paypal_response.php` PDT URL: that old integration is now retired and returns
+HTTP 410. It cannot provide the new adapter's installation, replay, isolation,
+or subscription guarantees. The separate adapter is unchanged by the retirement.
 
 Current gates:
 
