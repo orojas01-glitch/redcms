@@ -77,6 +77,14 @@ from 204 to 205. Its bytes were compared with the prior commit and were identica
 Only the current-source fingerprint's line number was updated; the original
 commit-specific fixture exception and the unsuppressed PDT incident remain intact.
 
+The next Linux run passed Apache and both HTTP policy fixtures, then reached the
+full database suite. Its 405 response/body checks passed but the Allow-header
+assertion failed. Literal `\r` in an extended grep pattern is not a portable
+carriage-return expression. The Allow, logout and archive-count assertions now
+use POSIX whitespace classes. A new gate extracts the nine actual shell patterns
+and checks 36 LF/CRLF and wrong-value cases, preserving negative assertions.
+The same correction applies to the separate subscription HTTPS proof script.
+
 ## Verification and remaining gate
 
 Actionlint, local core contracts against the pinned fixture, and the full fresh

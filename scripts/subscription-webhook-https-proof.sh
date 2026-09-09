@@ -150,7 +150,7 @@ GET_STATUS="$(curl --silent --show-error --cacert "$CERTIFICATE" \
     --dump-header "$GET_HEADERS" --output /dev/null --write-out '%{http_code}' \
     "https://localhost:$PORT/addons/redcms/store-lite-stripe-checkout/provider-events")"
 [[ "$GET_STATUS" == '405' ]] || fail 'GET did not return 405'
-grep -Eiq '^Allow: POST\r?$' "$GET_HEADERS" \
+grep -Eiq '^Allow:[[:space:]]*POST[[:space:]]*$' "$GET_HEADERS" \
     || fail 'GET response omitted Allow: POST'
 
 QUERY_STATUS="$(curl --silent --show-error --cacert "$CERTIFICATE" \

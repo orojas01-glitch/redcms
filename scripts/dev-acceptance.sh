@@ -1124,7 +1124,7 @@ red_acceptance_run_authentication() {
         'administrator action endpoint method body' \
         '{"ok":false,"reason":"method_not_allowed"}' \
         "$body"
-    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_action_method_headers" \
+    if ! grep -Eqi '^Allow:[[:space:]]*POST[[:space:]]*$' "$addon_action_method_headers" \
         || grep -Eqi '^Set-Cookie:' "$addon_action_method_headers"; then
         printf '%s\n' 'FAIL: administrator action endpoint method refusal is not request-free.' >&2
         return 1
@@ -1175,7 +1175,7 @@ red_acceptance_run_authentication() {
         'administrator form JSON endpoint method body' \
         '{"ok":false,"reason":"method_not_allowed"}' \
         "$body"
-    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_method_headers" \
+    if ! grep -Eqi '^Allow:[[:space:]]*POST[[:space:]]*$' "$addon_form_method_headers" \
         || grep -Eqi '^Set-Cookie:' "$addon_form_method_headers"; then
         printf '%s\n' 'FAIL: administrator form JSON method refusal is not request-free.' >&2
         return 1
@@ -1241,7 +1241,7 @@ red_acceptance_run_authentication() {
     body="$(red_acceptance_response_text "$addon_form_edit_method_denial")"
     red_acceptance_assert_equals 'administrator form editor method HTTP status' '405' "$status"
     red_acceptance_assert_equals 'administrator form editor method body' 'no' "$body"
-    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_edit_method_headers" \
+    if ! grep -Eqi '^Allow:[[:space:]]*POST[[:space:]]*$' "$addon_form_edit_method_headers" \
         || grep -Eqi '^Set-Cookie:' "$addon_form_edit_method_headers"; then
         printf '%s\n' 'FAIL: administrator form editor method refusal is not request-free.' >&2
         return 1
@@ -1293,7 +1293,7 @@ red_acceptance_run_authentication() {
         'administrator form Save method body' \
         '{"ok":false,"reason":"method_not_allowed"}' \
         "$body"
-    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_save_method_headers" \
+    if ! grep -Eqi '^Allow:[[:space:]]*POST[[:space:]]*$' "$addon_form_save_method_headers" \
         || grep -Eqi '^Set-Cookie:' "$addon_form_save_method_headers"; then
         printf '%s\n' 'FAIL: administrator form Save method refusal is not request-free.' >&2
         return 1
@@ -1340,7 +1340,7 @@ red_acceptance_run_authentication() {
     body="$(red_acceptance_response_text "$addon_form_new_method_denial")"
     red_acceptance_assert_equals 'administrator form Create editor method HTTP status' '405' "$status"
     red_acceptance_assert_equals 'administrator form Create editor method body' 'no' "$body"
-    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_new_method_headers" \
+    if ! grep -Eqi '^Allow:[[:space:]]*POST[[:space:]]*$' "$addon_form_new_method_headers" \
         || grep -Eqi '^Set-Cookie:' "$addon_form_new_method_headers"; then
         printf '%s\n' 'FAIL: administrator form Create editor method refusal is not request-free.' >&2
         return 1
@@ -1390,7 +1390,7 @@ red_acceptance_run_authentication() {
         'administrator form Create method body' \
         '{"ok":false,"reason":"method_not_allowed"}' \
         "$body"
-    if ! grep -Eqi '^Allow:[[:space:]]*POST\r?$' "$addon_form_create_method_headers" \
+    if ! grep -Eqi '^Allow:[[:space:]]*POST[[:space:]]*$' "$addon_form_create_method_headers" \
         || grep -Eqi '^Set-Cookie:' "$addon_form_create_method_headers"; then
         printf '%s\n' 'FAIL: administrator form Create method refusal is not request-free.' >&2
         return 1
@@ -1450,7 +1450,7 @@ red_acceptance_run_authentication() {
         "$ACCEPTANCE_BASE_URL/bin/logout.php?logout")"
     status="${metrics%%:*}"
     red_acceptance_assert_equals 'logout HTTP status' '302' "$status"
-    if ! grep -Eqi '^Location:[[:space:]]*/[[:space:]]*\r?$' "$logout_headers"; then
+    if ! grep -Eqi '^Location:[[:space:]]*/[[:space:]]*$' "$logout_headers"; then
         printf '%s\n' 'FAIL: logout response did not redirect to the public homepage.' >&2
         return 1
     fi
@@ -2292,7 +2292,7 @@ red_acceptance_run_section_archive_delete() {
     body="$(red_acceptance_response_text "$delete_response")"
     red_acceptance_assert_equals 'Section archive delete HTTP status' '200' "$status"
     red_acceptance_assert_equals 'Section archive delete response' 'yes' "$body"
-    if ! grep -Eqi '^X-RED-Archived-Articles:[[:space:]]*2\r?$' "$delete_headers"; then
+    if ! grep -Eqi '^X-RED-Archived-Articles:[[:space:]]*2[[:space:]]*$' "$delete_headers"; then
         printf '%s\n' 'FAIL: Section archive response is missing the exact two-Article archive header.' >&2
         return 1
     fi
