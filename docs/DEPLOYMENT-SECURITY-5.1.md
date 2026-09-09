@@ -44,13 +44,12 @@ risk. Password change and account deletion invalidate protected requests; curren
 permissions reload from the database. Expiry can interrupt unsaved editing.
 
 Apply `2026-07-02-red-admin-password-hash.sql` before enabling this patch.
-Plaintext compatibility is temporary: a valid legacy login must persist a modern
-hash before access is granted. A narrow column or failed upgrade now refuses
-login. Back up and verify the migration, test a recovery manager, reset inactive
-legacy accounts using the existing admin workflow, then set process environment
-`RED_ADMIN_ALLOW_LEGACY_PASSWORDS=0`. Audit only counts, never stored passwords.
-Do not roll back to plaintext. Removal in a later patch requires client migration
-records; this candidate does not silently lock out all unmigrated accounts.
+Plaintext login is removed, and `RED_ADMIN_ALLOW_LEGACY_PASSWORDS` is ignored.
+Run the counts-only audit in `scripts/admin-password-migration.php`, complete any
+explicit offline conversion or owner reset before deployment, and verify a recovery
+manager. The tool refuses ambiguous values and unsafe bcrypt lengths and never
+prints usernames, passwords or hashes. See [HASH-ONLY-ADMIN-AUTH.md](HASH-ONLY-ADMIN-AUTH.md).
+Do not revert storage to plaintext or reintroduce a compatibility flag.
 
 ## CSP and embedding
 

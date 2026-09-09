@@ -1648,3 +1648,10 @@ the worktree. No real client uploads or credentials are used.
 `python3 scripts/legacy-pdt-retirement-self-test.py` checks the retired PDT URL
 under five HTTP methods with synthetic legacy settings and disabled transports.
 The CI workflow runs this independently from the newer PayPal adapter checks.
+
+
+The hash-only password contract runs in both core and full acceptance. The full
+suite additionally exercises the counts-only/explicit conversion CLI on disposable
+rows, reset-race protection, rejection of plaintext-backed sessions, plaintext HTTP
+login refusal with the obsolete flag enabled, and valid hash rehashing. Normal
+role/CRUD fixtures store synthetic hashes; they no longer depend on plaintext login.

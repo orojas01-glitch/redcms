@@ -9,6 +9,7 @@ if (!defined('RED_CMS_VERSION')) {
 
 require_once __DIR__ . '/admin_addon_authorization_helpers.php';
 require_once __DIR__ . '/admin_session_helpers.php';
+require_once __DIR__ . '/admin_password_helpers.php';
 
 if (!function_exists('red_start_session')) {
     function red_start_session()
@@ -144,7 +145,8 @@ if (!function_exists('red_require_admin')) {
             mysqli_stmt_close($stmt);
 
             $fingerprint = $admin ? hash('sha256', (string) ($admin['Password'] ?? '')) : '';
-            if (!$admin || !hash_equals((string) $_SESSION['AdminPasswordFingerprint'], $fingerprint)) {
+            if (!$admin || !red_admin_password_is_hash((string) $admin['Password'])
+                || !hash_equals((string) $_SESSION['AdminPasswordFingerprint'], $fingerprint)) {
                 mysqli_close($connection);
                 red_destroy_session();
                 http_response_code(403);

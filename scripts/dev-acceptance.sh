@@ -43,6 +43,7 @@ if [[ ! -s "$INSTALLER_FILE" ]]; then
     printf 'Installer SQL is missing or empty: %s\n' "$INSTALLER_FILE" >&2
     exit 66
 fi
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/admin-password-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/admin-session-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/public-form-operation-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
@@ -235,6 +236,17 @@ ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME="codex_acceptance_asset_injectio
 ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD="CodexAssetInjection-2026!"
 ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_ALIAS="CodexAssets"
 
+# Low-cost synthetic hashes exercise successful rehashing at login.
+ACCEPTANCE_AUTH_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_AUTH_PASSWORD")"
+ACCEPTANCE_GUEST_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_GUEST_PASSWORD")"
+ACCEPTANCE_SECTION_ARCHIVE_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_PASSWORD")"
+ACCEPTANCE_ARTICLE_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_ARTICLE_ADMIN_PASSWORD")"
+ACCEPTANCE_FORM_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_FORM_ADMIN_PASSWORD")"
+ACCEPTANCE_GALLERY_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_GALLERY_ADMIN_PASSWORD")"
+ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD")"
+ACCEPTANCE_ROLLBACK_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_ROLLBACK_ADMIN_PASSWORD")"
+ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD_HASH="$("$RED_PHP_BIN_RESOLVED" -r 'echo password_hash($argv[1], PASSWORD_BCRYPT, ["cost"=>4]);' "$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD")"
+
 red_acceptance_create_admin_defaults() {
     ADMIN_DEFAULTS_FILE="$(mktemp "${TMPDIR:-/tmp}/redcms-acceptance-admin.XXXXXX")"
     chmod 600 "$ADMIN_DEFAULTS_FILE"
@@ -411,6 +423,7 @@ red_acceptance_start_php() {
         cd "$RED_PROJECT_ROOT"
         export RED_DB_NAME="$ACCEPTANCE_DATABASE"
         export PORT="$ACCEPTANCE_PORT"
+        export RED_ADMIN_ALLOW_LEGACY_PASSWORDS=1 # Obsolete flag must not restore plaintext login.
         exec "$SCRIPT_DIR/dev-php-server.sh"
     ) > "$ACCEPTANCE_PHP_LOG" 2>&1 &
     ACCEPTANCE_PHP_PID=$!
@@ -814,7 +827,7 @@ red_acceptance_run_addon_asset_injection() {
         ) VALUES (
             $ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_RECORD_ID,
             '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_USERNAME',
-            '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD',
+            '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_ADDON_ASSET_INJECTION_ADMIN_ALIAS',
             'webmaster',
@@ -1022,13 +1035,19 @@ red_acceptance_run_authentication() {
     ")"
     red_acceptance_assert_equals 'generic failed-login throttle fixtures' '1:1' "$failure_counts"
 
-    red_acceptance_post_login 'legacy-password-login' "$ACCEPTANCE_AUTH_USERNAME" "$ACCEPTANCE_AUTH_PASSWORD" 'yes'
+    red_acceptance_post_login 'plaintext-password-refused' "$ACCEPTANCE_AUTH_USERNAME" "$ACCEPTANCE_AUTH_PASSWORD" 'no'
+    red_acceptance_assert_equals 'refused plaintext remains unchanged' '1' \
+        "$(red_acceptance_app_mysql --execute="SELECT COUNT(*) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_AUTH_RECORD_ID AND Password='$ACCEPTANCE_AUTH_PASSWORD';")"
+    red_acceptance_assert_equals 'plaintext login grants no administrator access' '403' \
+        "$(curl -sS --max-time 10 -b "$ACCEPTANCE_COOKIE_JAR" -o "$ACCEPTANCE_RESPONSE_DIR/plaintext-denied.txt" -w '%{http_code}' "$ACCEPTANCE_BASE_URL/admin/bin/update_content.php")"
+    red_acceptance_app_mysql --execute="UPDATE RED_Admin SET Password='$ACCEPTANCE_AUTH_PASSWORD_HASH' WHERE RecordID=$ACCEPTANCE_AUTH_RECORD_ID;"
+    red_acceptance_post_login 'hashed-password-rehash' "$ACCEPTANCE_AUTH_USERNAME" "$ACCEPTANCE_AUTH_PASSWORD" 'yes'
     password_state="$(red_acceptance_app_mysql --execute="
-        SELECT CONCAT_WS(':', CHAR_LENGTH(Password), LEFT(Password, 4), Password<>'$ACCEPTANCE_AUTH_PASSWORD')
+        SELECT CONCAT_WS(':', CHAR_LENGTH(Password), LEFT(Password, 4), Password<>'$ACCEPTANCE_AUTH_PASSWORD_HASH')
         FROM RED_Admin
         WHERE RecordID=$ACCEPTANCE_AUTH_RECORD_ID;
     ")"
-    red_acceptance_assert_equals 'legacy password bcrypt upgrade' '60:$2y$:1' "$password_state"
+    red_acceptance_assert_equals 'valid bcrypt hash upgraded' '60:$2y$:1' "$password_state"
     upgraded_password_hash="$(red_acceptance_app_mysql --execute="
         SELECT Password FROM RED_Admin WHERE RecordID=$ACCEPTANCE_AUTH_RECORD_ID;
     ")"
@@ -1604,7 +1623,7 @@ red_acceptance_run_guest_permissions() {
         ) VALUES (
             $ACCEPTANCE_GUEST_RECORD_ID,
             '$ACCEPTANCE_GUEST_USERNAME',
-            '$ACCEPTANCE_GUEST_PASSWORD',
+            '$ACCEPTANCE_GUEST_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_GUEST_ALIAS',
             'guest',
@@ -1622,7 +1641,7 @@ red_acceptance_run_guest_permissions() {
 
     fixture_state="$(red_acceptance_app_mysql --execute="
         SELECT CONCAT_WS(
-            ':', COUNT(*), SUM(Password='$ACCEPTANCE_GUEST_PASSWORD'),
+            ':', COUNT(*), SUM(Password='$ACCEPTANCE_GUEST_PASSWORD_HASH'),
             SUM(AdminType='guest'), SUM(AdminComponents='100'), SUM(AdminTools='1')
         )
         FROM RED_Admin
@@ -1632,7 +1651,7 @@ red_acceptance_run_guest_permissions() {
 
     red_acceptance_post_login 'guest-login' "$ACCEPTANCE_GUEST_USERNAME" "$ACCEPTANCE_GUEST_PASSWORD" 'yes'
     red_acceptance_assert_equals \
-        'Guest password bcrypt upgrade' \
+        'Guest password bcrypt rehash' \
         '60:$2y$' \
         "$(red_acceptance_app_mysql --execute="SELECT CONCAT(CHAR_LENGTH(Password), ':', LEFT(Password, 4)) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_GUEST_RECORD_ID;")"
     red_acceptance_assert_equals \
@@ -1982,7 +2001,7 @@ red_acceptance_run_section_archive_delete() {
         ) VALUES (
             $ACCEPTANCE_SECTION_ARCHIVE_ADMIN_RECORD_ID,
             '$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_USERNAME',
-            '$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_PASSWORD',
+            '$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_ALIAS',
             'webmaster',
@@ -2020,7 +2039,7 @@ red_acceptance_run_section_archive_delete() {
             (SELECT COUNT(*) FROM RED_Admin
              WHERE RecordID=$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_RECORD_ID
                AND Username='$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_USERNAME'
-               AND Password='$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_PASSWORD'
+               AND Password='$ACCEPTANCE_SECTION_ARCHIVE_ADMIN_PASSWORD_HASH'
                AND AdminType='webmaster'),
             (SELECT COUNT(*) FROM RED_Sections
              WHERE RecordID=$ACCEPTANCE_SECTION_ARCHIVE_RECORD_ID
@@ -2536,7 +2555,7 @@ red_acceptance_run_article_crud() {
         ) VALUES (
             $ACCEPTANCE_ARTICLE_ADMIN_RECORD_ID,
             '$ACCEPTANCE_ARTICLE_ADMIN_USERNAME',
-            '$ACCEPTANCE_ARTICLE_ADMIN_PASSWORD',
+            '$ACCEPTANCE_ARTICLE_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_ARTICLE_ADMIN_ALIAS',
             'webmaster',
@@ -2554,7 +2573,7 @@ red_acceptance_run_article_crud() {
 
     fixture_state="$(red_acceptance_app_mysql --execute="
         SELECT CONCAT_WS(
-            ':', COUNT(*), SUM(Password='$ACCEPTANCE_ARTICLE_ADMIN_PASSWORD'),
+            ':', COUNT(*), SUM(Password='$ACCEPTANCE_ARTICLE_ADMIN_PASSWORD_HASH'),
             SUM(AdminType='webmaster'), SUM(FIND_IN_SET('100', AdminComponents)>0)
         )
         FROM RED_Admin
@@ -2569,7 +2588,7 @@ red_acceptance_run_article_crud() {
         "$ACCEPTANCE_ARTICLE_ADMIN_PASSWORD" \
         'yes'
     red_acceptance_assert_equals \
-        'Article Webmaster password bcrypt upgrade' \
+        'Article Webmaster password bcrypt rehash' \
         '60:$2y$' \
         "$(red_acceptance_app_mysql --execute="SELECT CONCAT(CHAR_LENGTH(Password), ':', LEFT(Password, 4)) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_ARTICLE_ADMIN_RECORD_ID;")"
 
@@ -3066,7 +3085,7 @@ red_acceptance_run_form_crud() {
         ) VALUES (
             $ACCEPTANCE_FORM_ADMIN_RECORD_ID,
             '$ACCEPTANCE_FORM_ADMIN_USERNAME',
-            '$ACCEPTANCE_FORM_ADMIN_PASSWORD',
+            '$ACCEPTANCE_FORM_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_FORM_ADMIN_ALIAS',
             'webmaster',
@@ -3084,7 +3103,7 @@ red_acceptance_run_form_crud() {
 
     fixture_state="$(red_acceptance_app_mysql --execute="
         SELECT CONCAT_WS(
-            ':', COUNT(*), SUM(Password='$ACCEPTANCE_FORM_ADMIN_PASSWORD'),
+            ':', COUNT(*), SUM(Password='$ACCEPTANCE_FORM_ADMIN_PASSWORD_HASH'),
             SUM(AdminType='webmaster'), SUM(FIND_IN_SET('102', AdminComponents)>0)
         )
         FROM RED_Admin
@@ -3099,7 +3118,7 @@ red_acceptance_run_form_crud() {
         "$ACCEPTANCE_FORM_ADMIN_PASSWORD" \
         'yes'
     red_acceptance_assert_equals \
-        'Form Webmaster password bcrypt upgrade' \
+        'Form Webmaster password bcrypt rehash' \
         '60:$2y$' \
         "$(red_acceptance_app_mysql --execute="SELECT CONCAT(CHAR_LENGTH(Password), ':', LEFT(Password, 4)) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_FORM_ADMIN_RECORD_ID;")"
 
@@ -3535,7 +3554,7 @@ red_acceptance_run_gallery_crud() {
         ) VALUES (
             $ACCEPTANCE_GALLERY_ADMIN_RECORD_ID,
             '$ACCEPTANCE_GALLERY_ADMIN_USERNAME',
-            '$ACCEPTANCE_GALLERY_ADMIN_PASSWORD',
+            '$ACCEPTANCE_GALLERY_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_GALLERY_ADMIN_ALIAS',
             'webmaster',
@@ -3553,7 +3572,7 @@ red_acceptance_run_gallery_crud() {
 
     fixture_state="$(red_acceptance_app_mysql --execute="
         SELECT CONCAT_WS(
-            ':', COUNT(*), SUM(Password='$ACCEPTANCE_GALLERY_ADMIN_PASSWORD'),
+            ':', COUNT(*), SUM(Password='$ACCEPTANCE_GALLERY_ADMIN_PASSWORD_HASH'),
             SUM(AdminType='webmaster'), SUM(FIND_IN_SET('107', AdminComponents)>0)
         )
         FROM RED_Admin
@@ -3568,7 +3587,7 @@ red_acceptance_run_gallery_crud() {
         "$ACCEPTANCE_GALLERY_ADMIN_PASSWORD" \
         'yes'
     red_acceptance_assert_equals \
-        'Gallery Webmaster password bcrypt upgrade' \
+        'Gallery Webmaster password bcrypt rehash' \
         '60:$2y$' \
         "$(red_acceptance_app_mysql --execute="SELECT CONCAT(CHAR_LENGTH(Password), ':', LEFT(Password, 4)) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_GALLERY_ADMIN_RECORD_ID;")"
 
@@ -4037,7 +4056,7 @@ red_acceptance_run_gallery_upload() {
         ) VALUES (
             $ACCEPTANCE_GALLERY_UPLOAD_ADMIN_RECORD_ID,
             '$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_USERNAME',
-            '$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD',
+            '$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_ALIAS',
             'webmaster',
@@ -4055,7 +4074,7 @@ red_acceptance_run_gallery_upload() {
 
     fixture_state="$(red_acceptance_app_mysql --execute="
         SELECT CONCAT_WS(
-            ':', COUNT(*), SUM(Password='$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD'),
+            ':', COUNT(*), SUM(Password='$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD_HASH'),
             SUM(AdminType='webmaster'), SUM(FIND_IN_SET('106', AdminComponents)>0)
         )
         FROM RED_Admin
@@ -4070,7 +4089,7 @@ red_acceptance_run_gallery_upload() {
         "$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_PASSWORD" \
         'yes'
     red_acceptance_assert_equals \
-        'Gallery upload Webmaster password bcrypt upgrade' \
+        'Gallery upload Webmaster password bcrypt rehash' \
         '60:$2y$' \
         "$(red_acceptance_app_mysql --execute="SELECT CONCAT(CHAR_LENGTH(Password), ':', LEFT(Password, 4)) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_GALLERY_UPLOAD_ADMIN_RECORD_ID;")"
 
@@ -4369,7 +4388,7 @@ red_acceptance_run_forced_rollback() {
         ) VALUES (
             $ACCEPTANCE_ROLLBACK_ADMIN_RECORD_ID,
             '$ACCEPTANCE_ROLLBACK_ADMIN_USERNAME',
-            '$ACCEPTANCE_ROLLBACK_ADMIN_PASSWORD',
+            '$ACCEPTANCE_ROLLBACK_ADMIN_PASSWORD_HASH',
             'Admin',
             '$ACCEPTANCE_ROLLBACK_ADMIN_ALIAS',
             'webmaster',
@@ -4391,7 +4410,7 @@ red_acceptance_run_forced_rollback() {
         "$ACCEPTANCE_ROLLBACK_ADMIN_PASSWORD" \
         'yes'
     red_acceptance_assert_equals \
-        'rollback Webmaster password bcrypt upgrade' \
+        'rollback Webmaster password bcrypt rehash' \
         '60:$2y$' \
         "$(red_acceptance_app_mysql --execute="SELECT CONCAT(CHAR_LENGTH(Password), ':', LEFT(Password, 4)) FROM RED_Admin WHERE RecordID=$ACCEPTANCE_ROLLBACK_ADMIN_RECORD_ID;")"
 
@@ -5056,6 +5075,9 @@ red_acceptance_assert_equals \
     'migration status summary' \
     "Summary: $MIGRATION_FILE_COUNT applied, 0 pending, 0 drifted" \
     "$status_summary"
+
+printf '%s\n' 'Running hash-only migration and reset-race checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" FRANKENPHP_BIN="$FRANKENPHP_BIN" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/admin-password-migration-self-test.php"
 
 printf '%s\n' 'Running read-only public utility profile checks.'
 "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-read-only-utility-self-test.php"

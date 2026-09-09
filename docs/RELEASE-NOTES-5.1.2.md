@@ -9,7 +9,8 @@ client-kit manifest remain 5.1.1 until the release gates are resolved.
 The candidate reconciles v5.1.1 ancestry and accepted post-release commerce/security
 work without rewriting history. It adds strict host-only session cookies,
 fixation/CSRF renewal, 30-minute inactivity and 8-hour absolute expiration, complete
-logout cleanup, and mandatory successful hash migration for legacy login. Existing
+logout cleanup, and hash-only administrator login with an explicit pre-deployment
+audit/conversion boundary. Existing
 sessions must sign in again. Schema files, public URLs, add-on boundaries and editor
 behavior are preserved.
 
@@ -45,3 +46,6 @@ The owner-authorized [legacy PDT retirement](LEGACY-PDT-RETIREMENT.md) removes
 its implementation and obsolete settings. The former callback returns only HTTP
 410; newer PayPal adapter contracts and database compatibility remain intact.
 Historical credential invalidity remains unverified; retirement is not revocation.
+
+[Hash-only administrator authentication](HASH-ONLY-ADMIN-AUTH.md) removes the
+plaintext fallback and its flag; local accounts already use hashes.

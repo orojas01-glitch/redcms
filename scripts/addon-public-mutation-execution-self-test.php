@@ -1054,65 +1054,73 @@ try {
         'the atomic runner purges expired opaque rate evidence inside its transaction before claiming the current window'
     );
 
-    [$rateSubject, $rateCsrf] = array_slice(
-        red_addon_public_mutation_execution_test_evidence(
-            $connection,
-            $plan,
-            $subjectIds
-        ),
-        0,
-        2
-    );
-    $handlerMode = 'unchanged';
-    $rateResults = [];
-    for ($attempt = 0; $attempt < 13; $attempt++) {
-        $rateKey = red_addon_public_mutation_idempotency_issue(
-            $connection,
-            $rateSubject,
-            $plan
-        );
-        if (empty($rateKey['valid'])) {
-            throw new RuntimeException('Could not issue rate-limit fixture key.');
-        }
-        $rateResults[] = red_addon_public_mutation_execute(
-            $connection,
-            $manifest,
-            $routeId,
-            $mutationId,
-            $rateSubject,
-            $rateCsrf['token'],
-            $rateKey['key'],
-            ['product' => 'rate-fixture', 'quantity' => 1]
-        );
-    }
-    $handlerMode = 'accepted';
-    red_addon_public_mutation_execution_test_assert(
-        count(array_filter(
-            array_slice($rateResults, 0, 12),
-            static function ($item) {
-                return !empty($item['completed'])
-                    && ($item['outcome'] ?? '') === 'unchanged';
-            }
-        )) === 12
-            && ($rateResults[12]['reason'] ?? '') === 'rate_limited'
-            && red_addon_public_mutation_execution_test_scalar(
+    // Keep this one fixed-window assertion inside one database-clock window.
+    // Crossing a real minute boundary legitimately permits another request.
+    mysqli_query($connection, 'SET timestamp=UNIX_TIMESTAMP()');
+    try {
+        [$rateSubject, $rateCsrf] = array_slice(
+            red_addon_public_mutation_execution_test_evidence(
                 $connection,
-                'SELECT CONCAT_WS(\':\',
-                    (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions e
-                     INNER JOIN RED_Addon_Public_Mutation_Idempotency_Keys k
-                       ON k.RecordID=e.IdempotencyRecordID
-                     WHERE k.SubjectRecordID=' .
-                        (int) $rateSubject['subjectRecordId'] . '),
-                    (SELECT RequestCount FROM RED_Addon_Public_Mutation_Rate_Limits
-                     WHERE SubjectRecordID=' .
-                        (int) $rateSubject['subjectRecordId'] . ' LIMIT 1),
-                    (SELECT COUNT(*) FROM RED_Addon_Activity_Log
-                     WHERE PackageID=\'' . $packageId . '\'
-                       AND DetailCode=\'public_mutation_unchanged\')
-                )'
-            ) === '12:12:12',
-        'the atomic runner applies the fixed twelve-request budget before a thirteenth key can reserve or invoke a package mutation'
-    );
+                $plan,
+                $subjectIds
+            ),
+            0,
+            2
+        );
+        $handlerMode = 'unchanged';
+        $rateResults = [];
+        for ($attempt = 0; $attempt < 13; $attempt++) {
+            $rateKey = red_addon_public_mutation_idempotency_issue(
+                $connection,
+                $rateSubject,
+                $plan
+            );
+            if (empty($rateKey['valid'])) {
+                throw new RuntimeException('Could not issue rate-limit fixture key.');
+            }
+            $rateResults[] = red_addon_public_mutation_execute(
+                $connection,
+                $manifest,
+                $routeId,
+                $mutationId,
+                $rateSubject,
+                $rateCsrf['token'],
+                $rateKey['key'],
+                ['product' => 'rate-fixture', 'quantity' => 1]
+            );
+        }
+        $handlerMode = 'accepted';
+        red_addon_public_mutation_execution_test_assert(
+            count(array_filter(
+                array_slice($rateResults, 0, 12),
+                static function ($item) {
+                    return !empty($item['completed'])
+                        && ($item['outcome'] ?? '') === 'unchanged';
+                }
+            )) === 12
+                && ($rateResults[12]['reason'] ?? '') === 'rate_limited'
+                && red_addon_public_mutation_execution_test_scalar(
+                    $connection,
+                    'SELECT CONCAT_WS(\':\',
+                        (SELECT COUNT(*) FROM RED_Addon_Public_Mutation_Executions e
+                         INNER JOIN RED_Addon_Public_Mutation_Idempotency_Keys k
+                           ON k.RecordID=e.IdempotencyRecordID
+                         WHERE k.SubjectRecordID=' .
+                            (int) $rateSubject['subjectRecordId'] . '),
+                        (SELECT RequestCount FROM RED_Addon_Public_Mutation_Rate_Limits
+                         WHERE SubjectRecordID=' .
+                            (int) $rateSubject['subjectRecordId'] . ' LIMIT 1),
+                        (SELECT COUNT(*) FROM RED_Addon_Activity_Log
+                         WHERE PackageID=\'' . $packageId . '\'
+                           AND DetailCode=\'public_mutation_unchanged\')
+                    )'
+                ) === '12:12:12',
+            'the atomic runner applies the fixed twelve-request budget before a thirteenth key can reserve or invoke a package mutation'
+        );
+
+    } finally {
+        mysqli_query($connection, 'SET timestamp=0');
+    }
 
     $noRuntimeManifest = $manifest;
     unset($noRuntimeManifest['publicMutationContracts'][0]['runtimeSettings']);

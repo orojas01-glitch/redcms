@@ -50,13 +50,15 @@ SAPIs project request headers into server arrays.
 
 ## Admin Passwords
 
-`bin/login.php` now supports modern password hashes using PHP `password_hash()` and `password_verify()`.
+`bin/login.php` accepts only PHP-recognized password hashes verified with
+`password_verify()`. Plaintext-password comparison and its environment toggle are
+removed. Protected sessions backed by non-hash values are invalidated. Failed
+login responses and throttling remain generic. Valid hash rehashing uses an exact
+old-hash comparison so it cannot overwrite an intervening reset.
 
-Backward compatibility is deliberate:
-
-- Existing plain-text passwords can still log in temporarily.
-- After a successful login, the password is upgraded to a hash only if the database column is large enough.
-- Run the migration below before relying on automatic upgrades.
+Before client deployment, audit password-format readiness and complete any
+explicit server-local conversion/reset. See [HASH-ONLY-ADMIN-AUTH.md](HASH-ONLY-ADMIN-AUTH.md).
+The following existing schema migration remains required where not already applied:
 
 ```sql
 ALTER TABLE `RED_Admin`
@@ -2401,11 +2403,10 @@ The active milestone order is maintained in `docs/ROADMAP.md`.
 ## 5.1.2 hardening candidate
 
 The formal support/reporting/patch policy is in [`../SECURITY.md`](../SECURITY.md).
-Session expiry, successful legacy-hash upgrade requirements, server HTTPS/CSP
+Session expiry, hash-only authentication, server HTTPS/CSP
 configuration and operational evidence are specified in
-[`DEPLOYMENT-SECURITY-5.1.md`](DEPLOYMENT-SECURITY-5.1.md). The earlier plaintext
-compatibility description above is narrowed: a failed hash upgrade now refuses
-login. Existing sessions without the new timestamps require a fresh login.
+[`DEPLOYMENT-SECURITY-5.1.md`](DEPLOYMENT-SECURITY-5.1.md). Plaintext compatibility is removed; an explicit offline migration command
+is available before deploying the hash-only boundary. Existing sessions without the new timestamps require a fresh login.
 
 The 2026-09-09 redacted history scan independently reproduced one unresolved
 historical PDT finding at `073ce8b57318`, `bin/paypal_response.php:15`. No token

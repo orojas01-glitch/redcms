@@ -6,65 +6,6 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/login_throttle_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_operation_helpers.php';
 
-function red_admin_password_column_supports_hash($connection)
-{
-	$stmt = mysqli_prepare(
-		$connection,
-		"SELECT DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=? LIMIT 1"
-	);
-	if (!$stmt) {
-		return false;
-	}
-
-	$tableName = 'RED_Admin';
-	$columnName = 'Password';
-	mysqli_stmt_bind_param($stmt, 'ss', $tableName, $columnName);
-	if (!mysqli_stmt_execute($stmt)) {
-		mysqli_stmt_close($stmt);
-		return false;
-	}
-
-	$result = mysqli_stmt_get_result($stmt);
-	$column = $result ? mysqli_fetch_assoc($result) : null;
-	mysqli_stmt_close($stmt);
-
-	if (!$column || empty($column['DATA_TYPE'])) {
-		return false;
-	}
-
-	$dataType = strtolower((string) $column['DATA_TYPE']);
-	$maxLength = isset($column['CHARACTER_MAXIMUM_LENGTH']) ? (int) $column['CHARACTER_MAXIMUM_LENGTH'] : 0;
-
-	if (in_array($dataType, ['varchar', 'char'], true)) {
-		return $maxLength >= 255;
-	}
-
-	return in_array($dataType, ['text', 'mediumtext', 'longtext'], true);
-}
-
-function red_update_admin_password_hash($connection, $recordId, $password)
-{
-	if (!red_admin_password_column_supports_hash($connection)) {
-		return '';
-	}
-
-	$passwordHash = password_hash($password, PASSWORD_DEFAULT);
-	if ($passwordHash === false) {
-		return '';
-	}
-
-	$stmt = mysqli_prepare($connection, "UPDATE RED_Admin SET Password=? WHERE RecordID=?");
-	if (!$stmt) {
-		return '';
-	}
-
-	mysqli_stmt_bind_param($stmt, 'si', $passwordHash, $recordId);
-	$updated = mysqli_stmt_execute($stmt);
-	mysqli_stmt_close($stmt);
-
-	return $updated ? $passwordHash : '';
-}
-
 $loginContract = red_public_form_operation_contract('login');
 $loginPayload = [
 	'username' => array_key_exists('username', $_POST) ? $_POST['username'] : '',
@@ -103,27 +44,24 @@ $dependencies = [
 		if ($result && $result->num_rows > 0) {
 			$info = mysqli_fetch_assoc($result);
 			$storedPassword = isset($info['Password']) ? (string) $info['Password'] : '';
-			$passwordInfo = password_get_info($storedPassword);
-			$isPasswordHash = isset($passwordInfo['algoName']) && $passwordInfo['algoName'] !== 'unknown';
-			$passwordValid = $isPasswordHash
-				? password_verify($password, $storedPassword)
-				: getenv('RED_ADMIN_ALLOW_LEGACY_PASSWORDS') !== '0'
-					&& $storedPassword !== '' && hash_equals($storedPassword, $password);
+			$passwordValid = red_admin_password_verify($password, $storedPassword);
+			if (!red_admin_password_is_hash($storedPassword)) {
+				password_verify($password, red_login_dummy_password_hash());
+			}
 
 			if ($passwordValid) {
-				if (!$isPasswordHash || password_needs_rehash($storedPassword, PASSWORD_DEFAULT)) {
+				if (password_needs_rehash($storedPassword, PASSWORD_DEFAULT)) {
 					$updatedHash = red_update_admin_password_hash(
 						$db->connection,
 						(int) $info['RecordID'],
-						$password
+						$password,
+						$storedPassword
 					);
-					if (!$isPasswordHash && $updatedHash === '') {
+					if ($updatedHash === '') {
 						mysqli_stmt_close($stmt);
 						return 'unavailable';
 					}
-					if ($updatedHash !== '') {
-						$storedPassword = $updatedHash;
-					}
+					$storedPassword = $updatedHash;
 				}
 
 				red_admin_session_establish();

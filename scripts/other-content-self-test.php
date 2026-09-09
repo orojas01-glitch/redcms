@@ -462,7 +462,7 @@ try {
 
     $otherRegistry = red_admin_component_registry_row($connection, 'Other');
     $otherComponentId = (int) ($otherRegistry['RecordID'] ?? 0);
-    $adminPassword = 'OtherQAPassword';
+    $adminPassword = password_hash('OtherQAPassword', PASSWORD_DEFAULT);
     $adminComponents = (string) $otherComponentId;
     $stmt = mysqli_prepare(
         $connection,

@@ -127,3 +127,13 @@ has only a terminal 410 retirement response, independent of all runtime/settings
 The separate modern PayPal adapter is preserved. This completes the application
 retirement decision; it does not close the historical credential incident or
 change any previously deployed server. See [LEGACY-PDT-RETIREMENT.md](LEGACY-PDT-RETIREMENT.md).
+
+
+## 2026-09-09 hash-only authentication follow-up
+
+Plaintext-password compatibility is removed. The former environment flag cannot
+re-enable it. A counts-only local audit found two hashed accounts and no values
+needing conversion/reset; no real account passwords were changed. Explicit offline
+conversion tooling and negative plaintext/session tests preserve the pre-deployment
+migration boundary. See [HASH-ONLY-ADMIN-AUTH.md](HASH-ONLY-ADMIN-AUTH.md).
+This supersedes the initial temporary plaintext-compatibility policy above.
