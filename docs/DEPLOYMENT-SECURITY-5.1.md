@@ -9,7 +9,9 @@ AllowOverride configured, or an explicitly reviewed equivalent server profile.
 The repository `.htaccess` is an Apache control only: Caddy, nginx and PHP's
 built-in server do not enforce it. Serve only reviewed release files, not a
 workstation directory. Keep configuration, backups and operator tools outside
-public reach. Disable directory indexes. Preserve the canonical routes and
+public reach. Disable directory indexes. Ship `images/.htaccess` to block executable uploads
+while retaining the root `images/resize.php` thumbnail endpoint; verify both
+allowed thumbnails and denied scripts in nested upload directories. Preserve the canonical routes and
 `/.well-known/` certificate validation paths.
 
 Configure HTTP-to-HTTPS redirect with a fixed canonical hostname in the server
@@ -28,6 +30,10 @@ boundary; application code deliberately ignores X-Forwarded-Proto and
 X-Forwarded-For. Verify PHP sees HTTPS=on. Do not expose the origin's HTTP listener.
 Configure `display_errors=Off`, `log_errors=On`, `zend.exception_ignore_args=On`,
 a private log destination, and a private per-client session storage directory.
+Verify the active `user_ini.filename` rather than assuming `.user.ini`; the Scala
+demo uses `php.ini`. The core Apache rules deny that filename at every depth.
+Keep the file owner-readable only, allow for PHP-FPM settings-cache refresh, and
+verify the effective web runtime. Changing session storage requires fresh login.
 No shared cookie domain or shared session save path across clients is permitted.
 
 ## Administrator sessions and passwords
@@ -58,8 +64,9 @@ bootstrap. See [CSP-HARDENING.md](CSP-HARDENING.md) for exact settings, compatib
 limits, tests and rollback. It defaults off for unreviewed installations; start
 with `CSP_MODE=report-only` on the isolated demo and enable enforcement only after
 reviewing that installation's integrations. PHP owns this policy; do not duplicate
-it in Apache/proxy headers. Local HTTP and browser enforcement checks pass; live
-hosting verification is still pending.
+it in Apache/proxy headers. Local HTTP/browser enforcement checks and the isolated Scala demo rehearsal
+pass within the scope in [SCALA-DEMO-HARDENING-20260909.md](SCALA-DEMO-HARDENING-20260909.md).
+Other client/production installations still require their own verification.
 
 The current editor, themes and database HTML use inline scripts/styles and may
 embed external media. A universal strict CSP would break accepted behavior.

@@ -1,6 +1,8 @@
 # RED-CMS 5.1.2 local hardening candidate
 
-Status: local hardening groups verified; release blocked. No release or deployment performed.
+Status: local hardening groups and an owner-authorized isolated Scala demo
+rehearsal verified within their documented scopes; release remains blocked.
+No release publication or client deployment performed.
 
 ## Baseline and rollback
 
@@ -138,3 +140,10 @@ needing conversion/reset; no real account passwords were changed. Explicit offli
 conversion tooling and negative plaintext/session tests preserve the pre-deployment
 migration boundary. See [HASH-ONLY-ADMIN-AUTH.md](HASH-ONLY-ADMIN-AUTH.md).
 This supersedes the initial temporary plaintext-compatibility policy above.
+
+## Isolated Scala CSP rehearsal
+
+See [SCALA-DEMO-HARDENING-20260909.md](SCALA-DEMO-HARDENING-20260909.md) for the
+authorized demo deployment, 47 MariaDB migrations, authenticated editor evidence,
+enforced browser blocking, thumbnail-compatible upload rules and remaining limits.
+This later scope supersedes the earlier local-only deployment status above.

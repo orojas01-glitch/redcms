@@ -4,6 +4,7 @@ RewriteEngine On
 # Stop direct downloads before the public front controller runs.
 Options -Indexes
 RewriteRule (^|/)(\.(?!well-known(?:/|$))[^/]+)(/|$) - [F,L]
+RewriteRule (^|/)php\.ini$ - [F,L,NC]
 RewriteRule ^(?:deployments|database|scripts|release|docs|server-integrations|includes|class|UPDATES\ PROCEDURES)(?:/|$) - [F,L,NC]
 RewriteRule \.(?:sql|xlsx?|ods|pem|key|p12|pfx|bak|log|tar|tgz|gz|zip)$ - [F,L,NC]
 

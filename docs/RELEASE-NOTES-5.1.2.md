@@ -26,8 +26,9 @@ The full local acceptance suite passed 47 migrations with zero pending/drifted,
 no-op rerun, authentication and account invalidation, theme/add-on/content lifecycles,
 uploads and forced rollback, with exact temporary database/grant cleanup. HTTP
 session tests also pass. A synthetic Apache fixture also passed eight denied-path checks and public/ACME
-compatibility. Local CSP HTTP/browser checks now pass; remote CI, hosted CSP and
-client deployment remain unverified.
+compatibility. Local CSP HTTP/browser checks pass, and the owner-authorized isolated Scala demo
+now enforces the compatibility policy. Remote CI and other client deployments
+remain unverified.
 
 Review [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md),
 [`DEPLOYMENT-SECURITY-5.1.md`](DEPLOYMENT-SECURITY-5.1.md), and
@@ -57,3 +58,11 @@ configuration failure and browser regression checks. All six TinyMCE modes pass
 under enforcement. Inline JavaScript remains allowed; a stricter report can
 identify that remaining gap. Client snippets and live host behavior still need
 installation-specific verification before enabling enforcement.
+
+The [Scala demo rehearsal](SCALA-DEMO-HARDENING-20260909.md) verifies authenticated
+editor behavior and actual CSP blocking. A thumbnail-compatible `images/.htaccess`
+now blocks executable uploads while preserving the shipped resize endpoint; local
+Apache regression tests and real thumbnail/upload-denial checks pass.
+
+Apache rules also deny provider-named `php.ini` files. Per-installation PHP settings
+must use the effective `user_ini.filename` and be verified after cache refresh.

@@ -17,6 +17,13 @@ with tempfile.TemporaryDirectory(prefix='redcms-apache-boundary-') as temp:
     web.mkdir()
     (web / '.htaccess').write_bytes((root / '.htaccess').read_bytes())
     (web / 'ok.txt').write_text('public fixture')
+    (web / 'php.ini').write_text('; synthetic per-directory PHP settings')
+    (web / 'images/articles').mkdir(parents=True)
+    (web / 'images/gallery').mkdir()
+    (web / 'images/.htaccess').write_bytes((root / 'images/.htaccess').read_bytes())
+    # No PHP interpreter is attached: these are harmless access-control sentinels.
+    for relative in ['resize.php', 'probe.php', 'articles/resize.php', 'gallery/probe.phtml', 'articles/probe.php.jpg', 'articles/probe.php83', 'articles/photo.png']:
+        (web / 'images' / relative).write_text('synthetic image boundary fixture')
     challenge = web / '.well-known/acme-challenge/test'
     challenge.parent.mkdir(parents=True)
     challenge.write_text('synthetic validation')
@@ -57,9 +64,13 @@ DocumentRoot "{web}"
             raise RuntimeError('Apache fixture failed to start')
         assert status == 200, 'public fixture must remain available'
         assert headers.get('X-Content-Type-Options') == 'nosniff'
-        for path in ['/.git/config', '/.env', '/database/test.sql', '/scripts/test.php', '/deployments/test.php', '/includes/config.local.php', '/synthetic.xlsx', '/synthetic.pem']:
+        for path in ['/.git/config', '/.env', '/php.ini', '/database/test.sql', '/scripts/test.php', '/deployments/test.php', '/includes/config.local.php', '/synthetic.xlsx', '/synthetic.pem']:
             assert get(path)[0] == 403, 'protected path not denied: ' + path
         assert get('/.well-known/acme-challenge/test')[0] == 200
-        print('Apache boundary passed: 8 protected paths denied; public and ACME files served; nosniff present.')
+        for path in ['/images/probe.php', '/images/articles/resize.php', '/images/gallery/probe.phtml', '/images/articles/probe.php.jpg', '/images/articles/probe.php83']:
+            assert get(path)[0] == 403, 'uploaded executable path not denied: ' + path
+        assert get('/images/resize.php')[0] == 200, 'shipped thumbnail endpoint must remain reachable'
+        assert get('/images/articles/photo.png')[0] == 200, 'ordinary uploaded image must remain reachable'
+        print('Apache boundary passed: 14 protected paths denied; public, ACME, thumbnail and image paths served; nosniff present.')
     finally:
         server.terminate(); server.wait(timeout=5)

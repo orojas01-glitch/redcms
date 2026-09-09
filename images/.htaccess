@@ -1,0 +1,5 @@
+# Keep the shipped thumbnail endpoint; uploaded files must never execute.
+Options -ExecCGI -Indexes
+RewriteEngine On
+RewriteRule ^resize\.php$ - [L]
+RewriteRule \.(?:php[0-9]*|phtml|pht|phar|cgi|pl|shtml)(?:\.|/|$) - [F,L,NC]

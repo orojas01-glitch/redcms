@@ -1,9 +1,12 @@
 # RED-CMS 5.1.2 CSP hardening
 
-Status: implemented and verified locally; not enabled on any hosted installation.
+Status: implemented locally and enforced on the owner-authorized isolated Scala
+demo. See [SCALA-DEMO-HARDENING-20260909.md](SCALA-DEMO-HARDENING-20260909.md)
+for actual server/browser evidence and remaining limits.
 This is a compatibility policy, not a strict nonce-based XSS policy or a security
-certification. No server, DNS, provider, private configuration or client database
-was changed. The protected workbook was not accessed.
+certification. The initial local implementation changed no server state. The later demo
+rehearsal changed only the selected demo installation; no client database, DNS
+or payment-provider setting was changed. The protected workbook was not accessed.
 
 ## Baseline and rollback
 
@@ -112,7 +115,8 @@ SPanel alone does not prove which web server handles a domain or whether it hono
 `.htaccess`. Before changing the named demo, verify its exact domain, document
 root, isolated database, current revision, recoverable backup and PHP/server
 configuration. The open panel context in this task did not identify a RED-CMS demo
-file manager. No upload or server edit was attempted.
+file manager. That was the initial local preparation state; the later owner-authorized demo
+deployment and its verified edits are recorded in the linked rehearsal report.
 
 After separately authorized deployment to the isolated demo:
 
