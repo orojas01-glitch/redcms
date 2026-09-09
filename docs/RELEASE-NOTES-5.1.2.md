@@ -34,3 +34,8 @@ Review [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md),
 later work and never reset/delete untracked operator files.
 
 TinyMCE upgrade detail: [TINYMCE-8-UPGRADE.md](TINYMCE-8-UPGRADE.md).
+
+The [legacy utility review](LEGACY-UTILITY-PROVENANCE.md) also completes locally:
+verified sources/licenses, repaired menu and upload compatibility, preserved URLs,
+and new behavioral/provenance regression gates. Remaining maintenance/deployment
+limits are documented explicitly; no Scala or HostGator change occurred.

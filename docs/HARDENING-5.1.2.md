@@ -75,7 +75,7 @@ wrapper resolves this without migrating the retained primary. A source assertion
 and embedded-view header warning were corrected before the final passing run.
 No client database, payment provider, credential or live deployment was changed.
 
-## Initial release blockers and owner decisions (superseded for TinyMCE below)
+## Initial release blockers and owner decisions (superseded for TinyMCE and legacy utilities below)
 
 1. TinyMCE 4.0.12 remains installed and unsupported. Approve the distribution
    licensing route before a compatible supported replacement is integrated and
@@ -105,3 +105,15 @@ for this local integration; the PayPal and remaining operational gates are uncha
 See [TINYMCE-8-UPGRADE.md](TINYMCE-8-UPGRADE.md) for precise scope and limitations.
 No Scala or HostGator state was changed. Source/license delivery remains part of
 preparing the future client/demo distribution.
+
+
+## 2026-09-09 legacy utility follow-up
+
+The seven-file provenance review is complete locally. Unlicensed/unattributed
+mobile-menu/theme glue was replaced, Superfish updated to pinned 1.7.10, upload
+compatibility helpers repaired, and the preserved BSD easing source adapted for
+jQuery 3. Tests reproduce the earlier failures and verify the corrected behavior.
+See [LEGACY-UTILITY-PROVENANCE.md](LEGACY-UTILITY-PROVENANCE.md) for source/license
+facts, 38 browser and 168 source/API checks, rollback and precise limitations.
+The earlier pending legacy-utility provenance item is superseded by that report;
+this does not close the PayPal, server/SMTP/backup/monitoring or remote CI gates.

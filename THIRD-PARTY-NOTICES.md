@@ -23,4 +23,20 @@ as the complete preferred source. Do not include client data or credentials.
 Existing RED-CMS MIT source-header notices are preserved. This upgrade does not
 assign a new blanket license to separately distributed add-ons or client content.
 Other bundled components retain their existing copyright/license headers; their
-inventory and remaining provenance gaps are in `docs/BUNDLED-DEPENDENCIES.md`.
+inventory and review dispositions are in `docs/BUNDLED-DEPENDENCIES.md`.
+
+## Legacy utility follow-up
+
+- Superfish 1.7.10: Copyright (c) 2018 Joel Birch; used under the MIT option.
+  The upstream notice is in `docs/licenses/Superfish-MIT.txt` and the source header.
+- jQuery Easing 1.3 with a RED-CMS calling-convention adapter: Copyright © 2008
+  George McGinley Smith, BSD-3-Clause. See the retained source header and
+  `docs/licenses/jquery-easing-BSD-3-Clause.txt`.
+- Filedrop compatibility fork: original interface/source lineage by Weixi Yen,
+  Copyright (c) 2010 Resopollution, MIT. See `docs/licenses/filedrop-MIT.txt`.
+  The complete MIT terms are reproduced from the license cited by those headers.
+- The current mobileMenu and legacy-theme initialization are original RED-CMS MIT
+  implementations. Historical unlicensed/unattributed implementations were replaced.
+
+Source identities, modifications, maintenance limits and usage are recorded in
+`docs/LEGACY-UTILITY-PROVENANCE.md` and `release/legacy-utilities-manifest.json`.

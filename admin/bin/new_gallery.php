@@ -191,9 +191,7 @@ if(empty($_SESSION['alias']))
 <!-- Our CSS stylesheet file -->
 <link rel="stylesheet" href="/admin/assets/css/styles.css" />
 
-<!--[if lt IE 9]>
-  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
+<!-- Retired IE-only HTTP shim; supported browsers provide native HTML5. -->
 <!-- Including the HTML5 Uploader plugin -->
 <script src="/admin/assets/js/jquery.filedrop.js"></script>
 <script src="/admin/assets/js/jquery.filedrop2.js"></script>
@@ -298,7 +296,7 @@ $(function(){
 		echo 'maxfiles: 10, '. "\n";
 		?>
 		maxfilesize: 2,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&ArtRecordID=<?php echo $ArtRecordID ?>&UC=Gallery&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&ArtRecordID=<?php echo $ArtRecordID ?>&UC=Gallery&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -414,7 +412,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
 		maxfilesize: 2,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=BigPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');
@@ -525,7 +523,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
 		maxfilesize: 2,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $ArtRecordID ?>&UC=SmallPict&Insert=true&AuthComponent=Gallery&AuthSubtype=<?php echo rawurlencode($Type) ?>&Language=<?php echo rawurlencode($Language) ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');

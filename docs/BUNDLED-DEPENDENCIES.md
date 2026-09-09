@@ -11,9 +11,10 @@ OSV is queried with this file, never the repository or client configuration.
 | jQuery | 3.7.1, `js/jquery-3.7.1.min.js` | No OSV matches returned in this query |
 | Bootstrap | 5.3.3, `js/bootstrap*` and `css/bootstrap*` | No OSV matches returned in this query |
 | PHPMailer | 6.9.3, `bin/phpmailer.php`, `bin/SMTP.php`, `bin/Exception.php` | No OSV matches returned in this query; SMTP delivery remains unverified |
-| jQuery filedrop | 0.1.0 banner, three administrator copies | Legacy utility; no verified package coordinate or maintained upstream pin |
-| jQuery easing | 1.3 banner | Legacy utility; separate source/compatibility review pending |
-| mobilemenu, superfish, tm-scripts | Hand-bundled public utilities | Complete upstream version/provenance unresolved; excluded from OSV coverage claims |
+| Filedrop compatibility fork | RED-CMS 1.0.0, three standalone administrator APIs | MIT lineage reviewed; instance/transport failures corrected and tested |
+| jQuery easing | 1.3 plus RED-CMS calling adapter | Exact upstream BSD source verified; jQuery 3 compatibility repaired; not core-loaded |
+| Superfish | 1.7.10, official tagged source plus startup hook | MIT; no OSV matches returned; dormant upstream, local regression coverage |
+| mobilemenu and tm-scripts | Original RED-CMS 1.0.0 compatibility implementations | Replaced historical code with missing license/provenance; browser tests pass |
 
 No OSV match is not proof of support, exploit absence or a complete dependency
 inventory. Independently distributed add-ons/adapters are not bundled core
@@ -35,3 +36,13 @@ Official references: [current GPL mode](https://www.tiny.cloud/docs/tinymce/late
 [4-to-8 migration](https://www.tiny.cloud/docs/tinymce/latest/migration-from-4x-to-8x/).
 The supported editor's built-in skin changes; no CMS content-editor redesign was
 performed. The free core, local assets and existing persistence paths are retained.
+
+
+## Legacy utilities review completed locally
+
+See [provenance, corrections and limitations](LEGACY-UTILITY-PROVENANCE.md).
+All seven scoped files now have an explicit source/license/ownership disposition,
+pinned hashes and regression coverage. The source-only/local implementations are
+not falsely described as npm packages or as covered by the five-coordinate OSV
+query. Dormant upstream maintenance, physical-browser verification and client
+integration-slot usage remain explicit limitations, not unperformed provenance work.

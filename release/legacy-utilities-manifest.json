@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-09-09",
+  "baseline": "46f2b75466c5b41216897b078dab23b52d4edee9",
+  "files": [
+    {
+      "path": "admin/assets/js/jquery.filedrop.js",
+      "baselineSha256": "ec66cc2d054a8fbc819ee4ebe4343641abc2abb7ac9633c7c28b7476386d2533",
+      "sha256": "dd7c2a6e8be39770b5a7ac6756da31e7033a6873152d40a4a333585ec2e2f4ad",
+      "component": "RED-CMS filedrop compatibility fork",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "https://github.com/weixiyen/jquery-filedrop",
+      "lineage": "Modified 0.1.0 family; original exact import revision not claimed",
+      "runtime": "Retained fallback branches; modern Gallery/Video/Banner forms exit before these scripts"
+    },
+    {
+      "path": "admin/assets/js/jquery.filedrop2.js",
+      "baselineSha256": "634013cc2c8cfa4cfae2bc79755a3a8b97582fe18564ea0352ab34956cd24cc6",
+      "sha256": "a131b78899d1af81b1701299aac31ddf3c06f00a45031e2eb719fb0f7cac2693",
+      "component": "RED-CMS filedrop compatibility fork",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "https://github.com/weixiyen/jquery-filedrop",
+      "lineage": "Modified 0.1.0 family; original exact import revision not claimed",
+      "runtime": "Retained fallback branches; modern Gallery/Video/Banner forms exit before these scripts"
+    },
+    {
+      "path": "admin/assets/js/jquery.filedrop3.js",
+      "baselineSha256": "73048cfc9feffb075db447d7ca97d956011ce6334c5f80c2f72c14649d0bdfe5",
+      "sha256": "6bb7886a697fe77a583d95574d3bc8fe7e735110ebd75f407b76994dbc94d3b7",
+      "component": "RED-CMS filedrop compatibility fork",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "https://github.com/weixiyen/jquery-filedrop",
+      "lineage": "Modified 0.1.0 family; original exact import revision not claimed",
+      "runtime": "Retained fallback branches; modern Gallery/Video/Banner forms exit before these scripts"
+    },
+    {
+      "path": "js/jquery.easing.1.3.js",
+      "baselineSha256": "0757f7ff6e5f6a581922a5e2d42c5e0cf7475d880885a9802e8bdd5e4188dd34",
+      "sha256": "ca434c11cb0c530f4b6094bda840a415499e75b7e47918c6c58e74a17412af27",
+      "component": "jQuery Easing with RED-CMS argument adapter",
+      "version": "1.3-redcms.1",
+      "license": "BSD-3-Clause",
+      "source": "https://github.com/gdsmith/jquery.easing/blob/0ea4f96be8b46215ec63a84108ceec74ef3374f2/jquery.easing.1.3.js",
+      "upstreamPrefixBytes": 8097,
+      "upstreamSha256": "0757f7ff6e5f6a581922a5e2d42c5e0cf7475d880885a9802e8bdd5e4188dd34",
+      "runtime": "No checked-in core loader; public compatibility URL retained"
+    },
+    {
+      "path": "js/jquery.mobilemenu.js",
+      "baselineSha256": "74b82866eb048c2b912a2ef88fd46683b5643e793d25df2a1b94559636dcd568",
+      "sha256": "a83ce57e0cae1f6d3a4f97733594dd6c75c0183a8668eee82b8fc5247baede3d",
+      "component": "RED-CMS mobileMenu implementation",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "Original RED-CMS implementation of existing API",
+      "replaces": "Exact mambows/mobilemenu 20cfbc8 source lacked license declaration; not retained",
+      "runtime": "Legacy fallback theme only"
+    },
+    {
+      "path": "js/superfish.js",
+      "baselineSha256": "a66992d720b56850c819bac41612c2c1fcfac0ccc408eab0c7205616468a7826",
+      "sha256": "31bb57c060e0cba30bc298abdb8c3e0e379c097fa23bf5e3ea8c28b92f00f5ba",
+      "component": "Superfish",
+      "version": "1.7.10",
+      "license": "MIT",
+      "source": "https://github.com/joeldbirch/superfish/blob/442820e74732cd5bcfb00f86d37b0cd57d867294/dist/js/superfish.js",
+      "upstreamPrefixBytes": 7610,
+      "upstreamSha256": "5c94aadfbe04dda0b0b5e2caa901efbab78ea6092ca3fa63d849c7e66688269f",
+      "runtime": "Legacy fallback theme only; original startup hook retained"
+    },
+    {
+      "path": "js/tm-scripts.js",
+      "baselineSha256": "73a14e1a5cafe39c7a5db241b59297a3a977b60a755c9472e4b639c14c7cd71a",
+      "sha256": "ae6cd38d47928d1e004f2649a3abf7bd7668c8eb497ec3bd4bd4057bc93d999a",
+      "component": "RED-CMS legacy theme initialization",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "Original RED-CMS year/mobile-menu glue",
+      "replaces": "Unattributed historical tm-scripts glue; exact origin not established",
+      "runtime": "Legacy fallback theme only"
+    }
+  ],
+  "upstreamHistory": {
+    "mobilemenu": {
+      "commit": "20cfbc8b20784b8b2ca98db8cf9920e2f49895f7",
+      "sourcePath": "jquery.mobilemenu.js",
+      "lineSimilarity": 1.0,
+      "localSha256": "74b82866eb048c2b912a2ef88fd46683b5643e793d25df2a1b94559636dcd568",
+      "upstreamSha256": "74b82866eb048c2b912a2ef88fd46683b5643e793d25df2a1b94559636dcd568"
+    },
+    "superfish": {
+      "commit": "0d3a5f4c095ccfbc1e4724319138a2ca126b9814",
+      "sourcePath": "src/js/superfish.js",
+      "lineSimilarity": 0.97872,
+      "localSha256": "a66992d720b56850c819bac41612c2c1fcfac0ccc408eab0c7205616468a7826",
+      "upstreamSha256": "de374484df39f525b35a5a5bc8f64a8c00b3c6d2c95e353bbe077710adc49620"
+    },
+    "jquery.easing": {
+      "commit": "0ea4f96be8b46215ec63a84108ceec74ef3374f2",
+      "sourcePath": "jquery.easing.1.3.js",
+      "lineSimilarity": 1.0,
+      "localSha256": "0757f7ff6e5f6a581922a5e2d42c5e0cf7475d880885a9802e8bdd5e4188dd34",
+      "upstreamSha256": "0757f7ff6e5f6a581922a5e2d42c5e0cf7475d880885a9802e8bdd5e4188dd34"
+    },
+    "jquery-filedrop": {
+      "commit": "a7ad5a723bc5b53c21d4ac2c151775fdae16d029",
+      "sourcePath": "jquery.filedrop.js",
+      "lineSimilarity": 0.92097,
+      "localSha256": "ec66cc2d054a8fbc819ee4ebe4343641abc2abb7ac9633c7c28b7476386d2533",
+      "upstreamSha256": "1d3d744326231caec7ee671091cc6aa1a5d88e0d37dbe00fe67f64b0331dc8e9"
+    }
+  }
+}

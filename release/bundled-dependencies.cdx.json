@@ -26,6 +26,12 @@
       "name": "phpmailer/phpmailer",
       "version": "6.9.3",
       "purl": "pkg:composer/phpmailer/phpmailer@6.9.3"
+    },
+    {
+      "type": "library",
+      "name": "superfish",
+      "version": "1.7.10",
+      "purl": "pkg:npm/superfish@1.7.10"
     }
   ]
 }

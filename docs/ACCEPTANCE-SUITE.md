@@ -1633,3 +1633,13 @@ editor functionality on desktop/mobile and refuses external requests. Use
 `RED_PLAYWRIGHT_MODULE`, `RED_CHROME_EXECUTABLE`, `RED_PHP_BIN`, and
 `RED_TINYMCE_QA_OUTPUT` when overriding local tools or evidence location. It makes
 no database writes, real form submissions or client/server deployment.
+
+
+`node scripts/legacy-utilities-self-test.mjs` checks the seven-file provenance
+manifest, exact retained upstream prefixes, upload-copy consistency and both easing
+APIs; it runs in core checks. `node scripts/legacy-utilities-browser-qa.mjs` uses
+available local Playwright/Chrome against synthetic loopback routes. It covers
+navigation, jQuery compatibility, upload isolation/error handling and easing.
+`RED_LEGACY_BASELINE_REF` can load only the allowlisted historical JS assets from a
+local Git checkpoint for before/after reproduction; it does not switch or restore
+the worktree. No real client uploads or credentials are used.

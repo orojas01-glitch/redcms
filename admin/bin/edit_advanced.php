@@ -83,9 +83,7 @@ if (in_array((string) $row['Item'], ['Website_CSS', 'Website_Footer', 'Website_H
 ?>
 <!-- Our CSS stylesheet file -->
 <link rel="stylesheet" href="/admin/assets/css/styles.css" />
-<!--[if lt IE 9]>
-  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
+<!-- Retired IE-only HTTP shim; supported browsers provide native HTML5. -->
 <!-- Including the HTML5 Uploader plugin -->
 <script src="/admin/assets/js/jquery.filedrop.js"></script>
 
@@ -161,7 +159,7 @@ $(function(){
 		paramname:'pic',
 		maxfiles: 1,
     	maxfilesize: 6,
-		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=Webpage_Logo&Language=<?php echo rawurlencode($language); ?>&csrf_token=<?php echo rawurlencode($csrfToken); ?>',
+		url: '/admin/bin/post_file.php?RecordID=<?php echo $RecordID ?>&UC=Webpage_Logo&Language=<?php echo rawurlencode($language); ?>',
 		
 		uploadFinished:function(i,file,response){
 			$.data(file).addClass('done');

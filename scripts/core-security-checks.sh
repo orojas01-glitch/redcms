@@ -11,3 +11,4 @@ for test in theme-contract theme-layout-extensibility theme-preflight theme-read
 done
 
 node "$SCRIPT_DIR/tinymce-vendor-self-test.mjs"
+node "$SCRIPT_DIR/legacy-utilities-self-test.mjs"

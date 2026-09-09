@@ -203,3 +203,17 @@ jQuery.extend( jQuery.easing,
  * OF THE POSSIBILITY OF SUCH DAMAGE. 
  *
  */
+// RED-CMS compatibility adapter 1.0.0: preserve the upstream curves and add
+// jQuery 3's progress-only calling convention alongside the legacy five arguments.
+(function ($) {
+    'use strict';
+    Object.keys($.easing).forEach(function (name) {
+        if (!/^ease|^swing$/.test(name) || typeof $.easing[name] !== 'function') return;
+        var original = $.easing[name];
+        $.easing[name] = function (progress, time, start, change, duration) {
+            return arguments.length === 1
+                ? original(progress, progress, 0, 1, 1)
+                : original(progress, time, start, change, duration);
+        };
+    });
+})(jQuery);
