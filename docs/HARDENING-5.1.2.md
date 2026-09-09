@@ -41,6 +41,7 @@ substitute for behavioral authentication tests.
 | Acceptance | Stale phase hashes rejected accepted changes; negated grep assertions bypassed errexit | 62 public-form assertions; source errors pass ShellCheck; leak sentinels now explicit failure; remaining lower-severity legacy ShellCheck notices are not represented as all-clear |
 | CI and operations | CI previously covered only one ingress proof | New core/theme, disposable migration/auth/CRUD/rollback, Apache/session and scan workflow; remote execution unverified |
 | Policies | No root security policy or portable update record | Added security/support/reporting/patch policy, deployment contract, dependency inventory and private client-update template; mailbox/SLA owner decision remains |
+| CSP | No application browser policy; public pages can embed administration | Added server-owned modes and narrow origin configuration; 27 contracts, 8 HTTP cases, 15 browser checks and 84 editor assertions pass. Defaults off pending installation review; inline-script XSS and real integrations/live hosting remain limitations. See [CSP-HARDENING.md](CSP-HARDENING.md) |
 
 ## Executed acceptance
 

@@ -52,8 +52,22 @@ jobs:
         run: python3 scripts/legacy-pdt-retirement-self-test.py
       - name: HTTP session policy
         run: python3 scripts/admin-session-http-self-test.py
+      - name: HTTP CSP policy and configuration refusal
+        run: python3 scripts/csp-http-self-test.py
       - name: Disposable authentication, migrations, CRUD and rollback
         run: scripts/hardening-full-acceptance.sh
+      - name: Install locked browser acceptance tools
+        run: |
+          npm ci --prefix scripts/browser-qa --ignore-scripts --no-audit --no-fund
+          scripts/browser-qa/node_modules/.bin/playwright install --with-deps chromium
+      - name: Browser CSP enforcement and editor compatibility
+        env:
+          RED_PLAYWRIGHT_MODULE: ${{ github.workspace }}/scripts/browser-qa/node_modules/playwright
+          RED_PHP_BIN: /usr/bin/php
+          RED_TINYMCE_QA_OUTPUT: /tmp/redcms-tinymce-csp-qa
+        run: |
+          node scripts/csp-browser-qa.mjs
+          node scripts/tinymce-browser-qa.mjs
   scans:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -75,3 +89,6 @@ jobs:
       - name: Public dependency coordinates only
         if: always()
         run: osv-scanner scan source -L release/bundled-dependencies.cdx.json
+      - name: Public browser tooling dependency coordinates
+        if: always()
+        run: osv-scanner scan source -L scripts/browser-qa/package-lock.json

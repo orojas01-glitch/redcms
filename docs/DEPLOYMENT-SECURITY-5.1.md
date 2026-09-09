@@ -53,16 +53,25 @@ Do not revert storage to plaintext or reintroduce a compatibility flag.
 
 ## CSP and embedding
 
+The candidate now provides server-controlled application CSP in the shared PHP
+bootstrap. See [CSP-HARDENING.md](CSP-HARDENING.md) for exact settings, compatibility
+limits, tests and rollback. It defaults off for unreviewed installations; start
+with `CSP_MODE=report-only` on the isolated demo and enable enforcement only after
+reviewing that installation's integrations. PHP owns this policy; do not duplicate
+it in Apache/proxy headers. Local HTTP and browser enforcement checks pass; live
+hosting verification is still pending.
+
 The current editor, themes and database HTML use inline scripts/styles and may
 embed external media. A universal strict CSP would break accepted behavior.
-Start with a server-level **report-only** policy in private staging; enumerate
+Start with the application **report-only** policy in private staging; enumerate
 actual script/style/image/font/frame/connect origins for public and administrator
 routes separately. Keep reports private and scrub URLs and payload samples.
 Do not add a report collector or third-party telemetry without approval.
 
-An initial staging policy is `default-src 'self'; object-src 'none'; base-uri
-'self'; frame-ancestors 'self'`. It will report expected legacy inline activity;
-it is not an enforced XSS mitigation. Before enforcement verify all editor modes,
+The compatibility profile retains inline scripts and styles, blocks objects and
+restricts base URLs, framing and resource origins. It does not prevent inline XSS.
+The optional strict report identifies inline-script usage without blocking it.
+Before enforcement verify all editor modes,
 uploads, video embeds, global integration snippets and optional add-ons. Protected
 administrator endpoints set no-store, nosniff and SAMEORIGIN when headers can still
 be emitted; set these at the server for complete embedded-view coverage.

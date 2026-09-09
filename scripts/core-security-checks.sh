@@ -2,6 +2,7 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PHP_CLI="${RED_PHP_BIN:-${PHP_CLI:-php}}"
+"$PHP_CLI" "$SCRIPT_DIR/csp-self-test.php"
 # Match the dependency-free pre-database gate in the full suite.
 while IFS= read -r test; do
     "$PHP_CLI" "$SCRIPT_DIR/$test"

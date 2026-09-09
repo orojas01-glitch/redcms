@@ -26,7 +26,8 @@ The full local acceptance suite passed 47 migrations with zero pending/drifted,
 no-op rerun, authentication and account invalidation, theme/add-on/content lifecycles,
 uploads and forced rollback, with exact temporary database/grant cleanup. HTTP
 session tests also pass. A synthetic Apache fixture also passed eight denied-path checks and public/ACME
-compatibility. Remote CI, browser CSP and client deployment remain unverified.
+compatibility. Local CSP HTTP/browser checks now pass; remote CI, hosted CSP and
+client deployment remain unverified.
 
 Review [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md),
 [`DEPLOYMENT-SECURITY-5.1.md`](DEPLOYMENT-SECURITY-5.1.md), and
@@ -49,3 +50,10 @@ Historical credential invalidity remains unverified; retirement is not revocatio
 
 [Hash-only administrator authentication](HASH-ONLY-ADMIN-AUTH.md) removes the
 plaintext fallback and its flag; local accounts already use hashes.
+
+[CSP hardening](CSP-HARDENING.md) adds a server-controlled, opt-in compatibility
+policy with report-only/enforcement modes, restricted origin extensions, generic
+configuration failure and browser regression checks. All six TinyMCE modes pass
+under enforcement. Inline JavaScript remains allowed; a stricter report can
+identify that remaining gap. Client snippets and live host behavior still need
+installation-specific verification before enabling enforcement.

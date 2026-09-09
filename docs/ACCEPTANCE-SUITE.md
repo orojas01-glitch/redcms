@@ -4,6 +4,15 @@ Date: 2026-08-15
 
 ## Purpose
 
+The 5.1.2 [CSP checks](CSP-HARDENING.md) run in `core-security-checks.sh`
+and the hardening CI workflow. `csp-http-self-test.py` tests synthetic PHP headers;
+`csp-browser-qa.mjs` proves browser blocking/reporting on loopback;
+`tinymce-browser-qa.mjs` now runs its 84 existing assertions under the generated
+enforced compatibility policy. Browser tooling is pinned in
+`scripts/browser-qa/package-lock.json`, separate from shipped runtime libraries.
+Set `RED_PHP_BIN` and `RED_PLAYWRIGHT_MODULE` for the installed local tools.
+These checks do not replace actual Scala/client deployment verification.
+
 `scripts/dev-acceptance.sh` creates and removes a disposable local database to prove that the checked-in installer and every migration still produce the expected RED-CMS schema.
 
 This is a local development and controlled staging tool. It is not a HostGator deployment script and should not be uploaded into or run from the public web root.

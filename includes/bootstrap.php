@@ -10,6 +10,8 @@ if (!defined('RED_CMS_VERSION')) {
 require_once __DIR__ . '/admin_addon_authorization_helpers.php';
 require_once __DIR__ . '/admin_session_helpers.php';
 require_once __DIR__ . '/admin_password_helpers.php';
+require_once __DIR__ . '/csp_helpers.php';
+red_csp_emit();
 
 if (!function_exists('red_start_session')) {
     function red_start_session()

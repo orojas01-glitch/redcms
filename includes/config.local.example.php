@@ -11,6 +11,11 @@ return [
     'DBNAME' => 'database_name',
     'IPSTACK_ACCESS_KEY' => '',
     'LEGACY_MAIL_OWNER' => '',
+    // Review docs/CSP-HARDENING.md. Start report-only on the isolated demo;
+    // enforce only after checking that installation's themes/integrations.
+    'CSP_MODE' => 'off', // off | report-only | enforce
+    'CSP_SOURCES' => [], // directive => array of exact approved HTTPS origins
+    'CSP_STRICT_REPORT' => false, // report remaining inline-script usage locally
     // Canonical HTTPS origin for a future core-owned public-mutation path.
     // Never derive this from Host or a request header.
     'PUBLIC_MUTATION_TRUSTED_ORIGIN' => '',

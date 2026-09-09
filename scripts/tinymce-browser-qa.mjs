@@ -18,6 +18,8 @@ const php = process.env.RED_PHP_BIN || '/Users/oscarrojas/Documents/red-cms-dev/
 const output = process.env.RED_TINYMCE_QA_OUTPUT || '/private/tmp/redcms-tinymce-browser-qa';
 await mkdir(output, {recursive: true});
 const configs = {};
+// Real generated compatibility policy; all existing editor checks run enforced.
+const csp = execFileSync(php, ['-r', 'require $argv[1]; echo red_csp_policy();', path.join(root, 'includes/csp_helpers.php')], {encoding: 'utf8'});
 for (const [profile, file] of [['article', 'new-article-form.js'], ['video', 'video-form.js']]) {
     const source = await readFile(path.join(root, 'admin/assets/js', file), 'utf8');
     const start = source.indexOf('    function editorConfig(');
@@ -51,7 +53,7 @@ const server = createServer(async (req, res) => {
             bytes = await readFile(path.join(root, 'admin/assets/js/tiny_mce', relative));
             type = ({'.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.woff':'font/woff','.woff2':'font/woff2'})[path.extname(relative)] || 'application/octet-stream';
         } else throw new Error('route');
-        res.writeHead(200, {'Content-Type': type}); res.end(bytes);
+        res.writeHead(200, {'Content-Type': type, 'Content-Security-Policy': csp}); res.end(bytes);
     } catch { res.writeHead(404); res.end('fixture unavailable'); }
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

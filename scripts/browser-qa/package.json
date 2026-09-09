@@ -1,0 +1,9 @@
+{
+  "name": "redcms-browser-acceptance",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local and CI acceptance tooling only; never loaded by RED-CMS",
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}
