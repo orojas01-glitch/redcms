@@ -8,7 +8,7 @@ a2b96fb3ffc873668f2aed56fe14138062b45cf0:scripts/addon-webhook-request-boundary-
 c4382ccdf3a3d34d0d0e019e7e039c101f01f16e:scripts/frankenphp-public-mutation-custom-binary-proof.sh:generic-api-key:71
 scripts/frankenphp-public-mutation-custom-binary-proof.sh:generic-api-key:71
 scripts/frankenphp-public-mutation-dispatch-proof.sh:generic-api-key:20
-scripts/addon-webhook-request-boundary-self-test.php:generic-api-key:204
+scripts/addon-webhook-request-boundary-self-test.php:generic-api-key:205
 scripts/addon-subscription-event-delivery-coordinator-self-test.php:generic-api-key:44
 scripts/addon-subscription-event-delivery-coordinator-self-test.php:generic-api-key:782
 scripts/addon-subscription-event-delivery-coordinator-self-test.php:generic-api-key:800

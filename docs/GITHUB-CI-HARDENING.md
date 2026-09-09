@@ -63,6 +63,20 @@ No warnings/errors remain at this gate. There are still 76 informational and 21
 style suggestions; this is not represented as every ShellCheck suggestion being
 resolved. CI now enforces `shellcheck -S warning`, not merely error severity.
 
+## Follow-up runner corrections
+
+The second run passed the core/offline contracts and exposed an Apache fixture
+startup failure on Ubuntu. The fixture had assumed every module was a shared
+library, matching the local macOS layout, and discarded startup diagnostics.
+It now detects compiled-in modules, requires remaining module files explicitly,
+sets a private runtime directory, validates configuration before starting, and
+reports bounded synthetic-server diagnostics. The local 14-path Apache gate passes.
+
+The adapter-root change shifted a previously accepted synthetic fixture line
+from 204 to 205. Its bytes were compared with the prior commit and were identical.
+Only the current-source fingerprint's line number was updated; the original
+commit-specific fixture exception and the unsuppressed PDT incident remain intact.
+
 ## Verification and remaining gate
 
 Actionlint, local core contracts against the pinned fixture, and the full fresh
