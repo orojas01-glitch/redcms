@@ -114,6 +114,23 @@ PayPal. Confirmation mail uses only that configured sender and the verified
 payer address; it has no fixed BCC or fallback recipient. This compatibility
 route does not activate the Version 5.1 member, entitlement, or payment model.
 
+### Historical PayPal PDT token finding
+
+The repository-security review on 2026-09-03 found an apparent PayPal PDT
+identity token in the initial public history at commit `073ce8b`. Commit
+`c47fdde` removed the embedded value, and the current compatibility endpoint
+accepts a token only through server-local configuration. The token value must
+not be copied into an issue, log, screenshot, baseline, or current source.
+
+This historical finding is deliberately not listed in `.gitleaksignore`.
+Account status remains an operator-owned verification step: confirm whether
+Payment Data Transfer is enabled in the PayPal business account and whether
+any deployed legacy PayPal Standard return route still depends on it. If the
+old route is unused, disable PDT and remove any server-local PDT configuration.
+If it is still required, replace the exposed identity token through the PayPal
+account before updating the server-local value. Do not rewrite published Git
+history without a separately reviewed coordination and rollback plan.
+
 ## Database Backup Security
 
 Full database dumps contain administrator hashes, email addresses, site content, and configuration data stored in tables. Keep backups outside the public web root with access limited to the operator, record their SHA-256 checksums, use encrypted storage for production copies, and remove expired archives according to the site's retention policy.
@@ -2294,6 +2311,41 @@ Dahlia `invoice.paid` event may activate access only when
 `parent.subscription_details` supplies matching intent/offer metadata and its
 matching subscription line items agree on one bounded period end. Customer,
 address, invoice URL, payment-method, and unrelated line fields are excluded.
+
+## Isolated Commerce Foundation
+
+Store Lite `0.1.51` and Stripe adapter `0.1.21` add source-level contracts for
+the separate Red Sphere commerce installation without exposing a new core
+route. Their security boundary is fail-closed:
+
+- browser input never supplies authoritative prices, totals, tax, Stripe Price
+  IDs, lookup keys, descriptions, eligibility, or cart state;
+- a review URL contains only a 256-bit random opaque token, while persistence
+  stores its SHA-256, expiry, revocation/consumption state, and cart snapshot;
+- sales-assisted and configurator carts remain distinct and use seven-day and
+  24-hour expiry policies respectively; Checkout Sessions use 30 minutes;
+- payment state comes only from verified Stripe events, never the Checkout
+  success page;
+- `invoice.paid` is the paid-cart authority in the current subscription
+  contract, while Checkout completion remains non-authoritative;
+- webhook verification uses the official SDK, a five-minute signature
+  tolerance, bounded raw input, and no raw-body/signature/secret persistence;
+- Checkout and webhook idempotency use unique hashes, and post-provider
+  ambiguity is marked attempted with automatic retry disabled;
+- only restricted test keys are accepted by the new SDK gateway; live and
+  unrestricted keys fail before client creation;
+- tax stays `not_configured`, and automatic tax is absent from the Checkout
+  request; and
+- a paid cart starts onboarding as `pending`; it never claims automatic
+  implementation or provisioning.
+
+The SDK dependency is locked but not vendored. The adapter's declared webhook
+route remains refusal-only, and no new database service, controller, secret
+resolver, provider call, or production deployment is linked by the release.
+Client-specific runtime wiring requires a fresh review of transactions, replay,
+out-of-order delivery, rate limits, CSRF/handoff authentication, CSP, logging,
+backups, and rollback inside the isolated project. See
+[`COMMERCE-PLATFORM-RECONCILIATION-2026-09-02.md`](COMMERCE-PLATFORM-RECONCILIATION-2026-09-02.md).
 
 ## Multi-User Authorization
 

@@ -217,9 +217,9 @@ if [[ "$(git -C "$STORE_REPOSITORY" rev-parse HEAD)" != "$STORE_REVISION"
     printf 'Store Lite must be clean at %s.\n' "$STORE_REVISION" >&2
     exit 65
 fi
-if [[ !( "$WOMPI_VERSION" == '0.1.4'
+if [[ ! ( "$WOMPI_VERSION" == '0.1.4'
           && "$WOMPI_REVISION" == '5f372b3a2e35723f638a03cf089deedc238c99a4' )
-    && !( "$WOMPI_VERSION" == '0.1.5'
+    && ! ( "$WOMPI_VERSION" == '0.1.5'
           && "$WOMPI_REVISION" == 'cc2ddd03ab54f663a089f7d059d802180e555d15' )
 ]]; then
     printf 'Unsupported Wompi version/revision pair: %s %s.\n' \
@@ -240,7 +240,7 @@ wompi_version="$("$RED_PHP_BIN_RESOLVED" -r '
     $manifest = json_decode(file_get_contents($argv[1]), true, 64, JSON_THROW_ON_ERROR);
     echo $manifest["version"] ?? "";
 ' "$WOMPI_REPOSITORY/package/addon.json")"
-if [[ !( "$STORE_VERSION" == '0.1.35' || "$STORE_VERSION" == '0.1.50' )
+if [[ ! ( "$STORE_VERSION" == '0.1.35' || "$STORE_VERSION" == '0.1.50' )
     || "$store_version" != "$STORE_VERSION"
     || "$wompi_version" != "$WOMPI_VERSION"
 ]]; then

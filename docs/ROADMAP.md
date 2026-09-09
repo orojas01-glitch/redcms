@@ -71,6 +71,20 @@ fixture and later gated sandbox are separate gates; see
 the fixture boundary in
 [`PAYMENT-ADAPTER-P2-FIXTURE.md`](PAYMENT-ADAPTER-P2-FIXTURE.md).
 
+#### Red Sphere isolated commerce foundation
+
+The 2026-09-02 reconciliation advances the portable baseline to RED-CMS
+`5.1.1`, Store Lite `0.1.51`, Stripe adapter `0.1.21`, and client kit `0.1.12`.
+The provider-neutral review cart, dual setup/monthly totals, opaque-token
+contract, multi-line subscription Checkout, lookup-key resolver, official SDK
+signature verifier, and hash-only receipt tables are complete as unwired local
+foundations. The next active work belongs in a separate
+`commerce.red-sphere.com` project: isolated installation/database, sales-
+assisted cart UI, Sandbox Checkout/webhook runtime, and then the configurator
+handoff. HostGator deployment, public routing, live mode, tax configuration,
+and production configurator copy remain separate approval gates. See
+[`COMMERCE-PLATFORM-RECONCILIATION-2026-09-02.md`](COMMERCE-PLATFORM-RECONCILIATION-2026-09-02.md).
+
 P3 planning is defined, all five closed P3A core-contract slices are
 implemented, and the separately distributed Store Lite package completes P3B
 through version 0.1.35. The separately distributed Stripe adapter has completed

@@ -18,11 +18,15 @@ $releasePath = $root . '/release/client-deployment-kit-v1.json';
 $profilePath = $root . '/docs/examples/client-deployment-profile.v1.example.json';
 $builderPath = $root . '/scripts/client-deployment-kit.php';
 $fullAcceptancePath = $root . '/scripts/client-deployment-kit-full-acceptance.sh';
+$bootstrapPath = $root . '/includes/bootstrap.php';
+$maintenanceNotesPath = $root . '/docs/RELEASE-NOTES-5.1.1.md';
 
 $releaseBytes = file_get_contents($releasePath);
 $profileBytes = file_get_contents($profilePath);
 $builder = file_get_contents($builderPath);
 $fullAcceptance = file_get_contents($fullAcceptancePath);
+$bootstrap = file_get_contents($bootstrapPath);
+$maintenanceNotes = file_get_contents($maintenanceNotesPath);
 
 red_client_kit_test_assert(is_string($releaseBytes), 'release manifest is readable');
 red_client_kit_test_assert(is_string($profileBytes), 'client profile is readable');
@@ -30,6 +34,11 @@ red_client_kit_test_assert(is_string($builder), 'builder is readable');
 red_client_kit_test_assert(
     is_string($fullAcceptance),
     'full acceptance wrapper is readable'
+);
+red_client_kit_test_assert(is_string($bootstrap), 'core bootstrap is readable');
+red_client_kit_test_assert(
+    is_string($maintenanceNotes),
+    '5.1.1 maintenance release notes are readable'
 );
 
 try {
@@ -43,16 +52,19 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.11',
+        && ($release['version'] ?? null) === '0.1.12',
     'release identity is exact'
 );
 red_client_kit_test_assert(
-    ($release['core']['version'] ?? null) === '5.1.0'
-        && preg_match(
-            '/\A[a-f0-9]{40}\z/',
-            (string) ($release['core']['minimumCommit'] ?? '')
-        ) === 1,
-    'core compatibility and minimum revision are pinned'
+    ($release['core']['version'] ?? null) === '5.1.1'
+        && ($release['core']['minimumCommit'] ?? null)
+            === 'cee2062fe0d5d2b292169ea076c0e03bdf1173ae',
+    'core 5.1.1 compatibility and reconciled minimum revision are pinned'
+);
+red_client_kit_test_assert(
+    str_contains($bootstrap, "define('RED_CMS_VERSION', '5.1.1')")
+        && str_contains($maintenanceNotes, '# RED-CMS 5.1.1 Release Notes'),
+    'runtime identity and maintenance release documentation agree on 5.1.1'
 );
 
 $packages = [];
@@ -66,11 +78,17 @@ red_client_kit_test_assert(
     'release contains only Store Lite and the two implemented adapter selections'
 );
 red_client_kit_test_assert(
-    ($packages['store-lite']['version'] ?? null) === '0.1.50'
+    ($packages['store-lite']['version'] ?? null) === '0.1.51'
+        && ($packages['store-lite']['commit'] ?? null)
+            === '57a948929142efb417285d2dbd76b5b3478b7738'
         && ($packages['store-lite']['required'] ?? null) === true
-        && ($packages['stripe']['version'] ?? null) === '0.1.20'
+        && ($packages['store-lite']['releaseState'] ?? null)
+            === 'legacy_sandbox_evidence_offline_commerce_foundation'
+        && ($packages['stripe']['version'] ?? null) === '0.1.21'
+        && ($packages['stripe']['commit'] ?? null)
+            === '35a7b4bcb1dba1cf94e3d51ea50658b57ef09874'
         && ($packages['stripe']['releaseState'] ?? null)
-            === 'sandbox_verified_catalog_lifecycle'
+            === 'legacy_sandbox_evidence_offline_commerce_foundation'
         && ($packages['wompi']['version'] ?? null) === '0.1.5',
     'package versions match the reviewed repository manifests'
 );
@@ -87,7 +105,7 @@ foreach ($packages as $selection => $package) {
 }
 red_client_kit_test_assert(
     ($release['unsupportedSelections']['paypal'] ?? null)
-        === 'Offline lifecycle and sealed transport contracts are verified; real provider transport and Sandbox payment acceptance are not yet complete.',
+        === 'Provider-only Sandbox order and subscription objects are verified; runtime transport, Store Lite mutation, signed webhook lifecycle, and client deployment are not complete.',
     'PayPal is visible but cannot be misreported as release-ready'
 );
 red_client_kit_test_assert(
