@@ -2,7 +2,9 @@
 
 This is the current status record. Earlier dated sections in HARDENING-5.1.2.md
 retain audit history and may describe issues that were subsequently fixed.
-The candidate branch is `codex/5.1.2-security-hardening`. No main merge, release
+The candidate branch is `codex/5.1.2-security-hardening`; the completed SMTP and
+operational closeout implementation is commit `96e0578f5e9cd6d806cf6975dc67e2bda3046322`.
+No main merge, release
 tag, published release or client deployment is authorized by this record.
 Runtime version and client-kit manifest remain 5.1.1 until release approval.
 
@@ -50,9 +52,28 @@ at warning severity, Actionlint, whitespace and redacted current-source scanning
 The unchanged SMTP runtime previously passed the full disposable acceptance suite
 with 47 migrations, authentication, content/theme/add-on operations, uploads,
 forced rollback, clean runtime log and exact temporary database/grant cleanup.
-The candidate push runs the complete GitHub workflow on the assembled revision;
-its exact revision and result will be recorded in GITHUB-CI-HARDENING.md.
-A successful core job does not make a failed historical scan green.
+The complete GitHub workflow ran on that assembled revision:
+[run 34558550868](https://github.com/orojas01-glitch/redcms/actions/runs/34558550868).
+
+| Final executable-candidate gate | Result |
+| --- | --- |
+| Shell, offline core/adapter/theme, Apache, retired PDT, HTTP sessions/CSP, disposable authentication/migrations/CRUD/rollback, browser CSP/editor | Passed |
+| Current tracked-source secret scan | Passed; zero findings locally and successful remote gate |
+| Bundled and browser-tooling dependency scans | Passed |
+| Historical secret scan | Failed; one existing finding, count independently checked from the redacted job log |
+| Overall workflow | Failed solely at the historical-secret step; release remains blocked |
+
+The later verification-record commit changes documentation only and triggers its
+own workflow. See [current candidate runs](https://github.com/orojas01-glitch/redcms/actions/workflows/core-hardening.yml?query=branch%3Acodex%2F5.1.2-security-hardening)
+for its exact SHA/result. No CI bypass, disabled gate or new scanner suppression
+was used to produce this result.
+
+A local review archive of `96e0578` contains 1,360 regular files and passed an
+excluded-path inventory check: no local configuration, workbook, keys, logs or
+deployment/operator folders. SHA-256:
+`a2fe1c26372e08cb52571bd2f1a01aee24261a7b74958ed810d5bc8bbdc7114d`.
+It is not a published release or a substitute for installation-specific packaging,
+corresponding-source/license delivery, private configuration and restore planning.
 
 ## Outstanding operational requirements and limitations
 

@@ -98,7 +98,7 @@ turn the unresolved historical security finding into a pass. Revocation or
 confirmed invalidity needs owner evidence before any narrowly documented incident
 closure is considered; deleting current code does not establish that evidence.
 
-## Verified remote result
+## Initial verified remote result
 
 [Run 34410506021](https://github.com/orojas01-glitch/redcms/actions/runs/34410506021)
 completed against `3181afb8be82b1a7b2d4a53f578bbc37ee1fdfd8`:
@@ -117,3 +117,19 @@ an honest historical-security gate. The documentation-only follow-up commit does
 not change the executable sources validated in this run. Its automatic rerun can
 be inspected through the current workflow link above. No main merge, tag/release,
 client deployment, provider contact or credential rotation occurred in this work.
+
+## SMTP and operational closeout result — 2026-09-10
+
+[Run 34558550868](https://github.com/orojas01-glitch/redcms/actions/runs/34558550868)
+completed against `96e0578f5e9cd6d806cf6975dc67e2bda3046322`, including the new
+35-assertion SMTP transport test in the pre-database/core gate.
+Every core step passed, including browser CSP/TinyMCE and disposable
+authentication/migration/CRUD/rollback acceptance. Current-source scanning and
+both dependency-coordinate scans passed. The historical-secret step alone failed;
+the redacted scanner log reported one finding. Overall conclusion: failure.
+
+The implementation and operational evidence are committed and pushed to the
+candidate branch. The subsequent verification-record commit changes documentation
+only; its automatic rerun is available from the current-workflow link above.
+See [HARDENING-5.1.2-CLOSEOUT.md](HARDENING-5.1.2-CLOSEOUT.md) for the release
+decision and remaining operational requirements. No main merge or release was made.

@@ -72,7 +72,10 @@ and cleanup of both temporary databases/grants. CLI proof dry-run with synthetic
 settings passed without connecting; a send without exact recipient confirmation
 was refused (exit 64). PHP syntax, ShellCheck warning gate and whitespace checks
 passed. Current tracked-source secret scanning, including the new helper and
-scripts, reported zero findings. Remote CI has not run on these uncommitted edits.
+scripts, reported zero findings. The implementation is committed as `96e0578`;
+[GitHub run 34558550868](https://github.com/orojas01-glitch/redcms/actions/runs/34558550868)
+passes the complete core job, including this SMTP test, and current-source and
+dependency scans. The historical-secret gate alone remains failed.
 
 Checkpoint: `checkpoint/before-smtp-hardening`, based on
 `b61b7ffc0c5267da218cb0a53218d8f5301929aa`. Earlier uncommitted policy/recovery
