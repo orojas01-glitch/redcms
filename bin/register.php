@@ -87,6 +87,7 @@ if (!$stored) {
 }
 
 $sent = false;
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail_transport_helpers.php';
 try {
     require_once __DIR__ . '/Exception.php';
     require_once __DIR__ . '/phpmailer.php';
@@ -108,9 +109,10 @@ try {
     $mail->Subject = red_public_form_header_value($subject);
     $mail->Body = $emailhtml;
     $mail->AltBody = 'Registration form submission';
+    red_mail_configure_transport($mail);
     $sent = (bool) $mail->send();
 } catch (Throwable $exception) {
-    error_log('Public Register PHPMailer delivery failed: ' . $exception->getMessage());
+    error_log('Public Register mail delivery failed.');
 }
 
 if (!$sent) {

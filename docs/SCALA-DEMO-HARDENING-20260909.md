@@ -149,7 +149,17 @@ slots, physical devices and other browser engines were not exercised live.
 Local six-configuration editor tests remain separate evidence, not substitutes
 for these installation-specific checks.
 
-SMTP delivery, full restore rehearsal, monitoring and per-client operational
+Fresh snapshot integrity, file extraction/comparison and isolated database import
+now pass; see [the recovery rehearsal](SCALA-DEMO-RECOVERY-20260909.md). Restored
+owner login/editor behavior remains unverified; the encrypted NAS image was
+subsequently reopened and its enclosed checksums passed, as recorded there.
+Authenticated synthetic SMTP delivery to Gmail now passes with SPF/DKIM/DMARC;
+see [SMTP-DELIVERY.md](SMTP-DELIVERY.md). A subsequent live Contact browser
+submission also reached Gmail with SPF/DKIM/DMARC passing, and its temporary
+delivery settings were restored exactly. Five-minute Scala monitoring with SSL
+and homepage checks is now enabled with owner approval; a populated provider
+sample is verified while actual alert delivery remains pending in
+[the operations record](SCALA-DEMO-OPERATIONS-20260910.md). Per-client operational
 proof remain separate requirements. The host's default CLI OPcache/lint crash,
 historical PDT invalidity remains unresolved. Subsequent GitHub CI execution
 and results are recorded in [GITHUB-CI-HARDENING.md](GITHUB-CI-HARDENING.md). A working demo is not

@@ -6,10 +6,12 @@ The current release adds a consistent administrator workspace, standard theme pa
 
 ## Release Status
 
-A local [5.1.2 hardening candidate](docs/RELEASE-NOTES-5.1.2.md) is under review.
-It is not released: historical credential closure and deployment verification remain pending.
-The obsolete legacy PDT integration is [retired locally](docs/LEGACY-PDT-RETIREMENT.md).
-The local TinyMCE 8.9.0 GPL core upgrade is verified; see [upgrade evidence](docs/TINYMCE-8-UPGRADE.md).
+A [5.1.2 hardening candidate](docs/RELEASE-NOTES-5.1.2.md) is under review.
+It is not released: the historical credential finding remains unresolved.
+See the [candidate closeout record](docs/HARDENING-5.1.2-CLOSEOUT.md) for current
+checks, demo evidence, operational limitations and the release gate.
+The obsolete legacy PDT integration is [retired](docs/LEGACY-PDT-RETIREMENT.md).
+TinyMCE 8.9.0 GPL core is verified locally and on the isolated demo; see [upgrade evidence](docs/TINYMCE-8-UPGRADE.md).
 See the [security policy](SECURITY.md) and [deployment requirements](docs/DEPLOYMENT-SECURITY-5.1.md).
 
 RED-CMS 5.1.1 is the focused maintenance release for reliable Other-component

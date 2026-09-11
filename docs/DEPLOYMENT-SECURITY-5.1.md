@@ -85,8 +85,11 @@ be emitted; set these at the server for complete embedded-view coverage.
 
 ## Operational evidence required per client
 
-- Mail: current forms use PHPMailer/local mail defaults and fallback delivery;
-  authenticated SMTP is not configured by this patch. Record TLS/auth configuration,
+- Mail: core forms retain local mail by default; opt-in authenticated SMTP and
+  fail-closed transport are documented in [SMTP-DELIVERY.md](SMTP-DELIVERY.md).
+  The isolated demo has a verified synthetic SMTP-to-Gmail delivery with SPF,
+  DKIM and DMARC passing; other installations still need their own evidence.
+  Record TLS/auth configuration,
   fixed approved sender, SPF/DKIM/DMARC checks, a synthetic provider receipt and
   independent inbox arrival. A successful `mail()` return proves only local handoff.
 - Backups: use the existing guarded backup/restore tools, encrypted private storage,
@@ -98,7 +101,10 @@ be emitted; set these at the server for complete embedded-view coverage.
 - Global integration slots: database-managed head/body HTML is executable trusted
   administrator content, not a secret store or CSP bypass exemption. Inventory
   each installed client's slots, purpose, owner, third-party hosts and rollback
-  reference privately. No client slot was queried or changed in this task.
+  reference privately. The isolated demo's nine global settings were inventoried
+  without exposing content; its Header/Footer/database CSS slots were empty.
+  Other client slots were not queried or changed. See
+  [the demo operations review](SCALA-DEMO-OPERATIONS-20260910.md).
 
 Live headers, browser CSP, SMTP, restore objectives and monitoring remain
 unverified until each client records evidence.

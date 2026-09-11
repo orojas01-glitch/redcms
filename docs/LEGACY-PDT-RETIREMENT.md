@@ -63,6 +63,11 @@ Owner authorization to retire code is not proof of PayPal-side invalidation. The
 credential incident remains open until invalidity/revocation is confirmed; this
 retired application does not need a replacement token.
 
+Owner clarification on 2026-09-09: a previous revocation attempt found the legacy
+integration disabled. This is recorded as an owner report, not independent
+confirmation that the historical token was revoked or permanently invalidated.
+No additional provider action was performed and the scanner finding remains open.
+
 No PayPal account, Scala, HostGator, client database or remote repository was
 changed. A later authorized deployment must replace the old callback, remove its
 helper, and remove obsolete settings from that specific server. Do not delete

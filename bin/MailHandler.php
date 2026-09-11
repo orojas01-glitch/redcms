@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/runtime_config_helpers.php';
+require_once __DIR__ . '/../includes/mail_transport_helpers.php';
 
 function red_legacy_mail_post($key)
 {
@@ -58,12 +59,28 @@ if (red_legacy_mail_post("stripHTML") === 'true') {
 }
 
 try {
-    if (!mail($owner_email, $subject, $messageBody, $headers)) {
+    if (red_mail_legacy_fallback_allowed()) {
+        $sent = mail($owner_email, $subject, $messageBody, $headers);
+    } else {
+        require_once __DIR__ . '/Exception.php';
+        require_once __DIR__ . '/phpmailer.php';
+        $mailer = new PHPMailer\PHPMailer\PHPMailer();
+        $mailer->setFrom($owner_email);
+        $mailer->addAddress($owner_email);
+        $mailer->addReplyTo($fromEmail);
+        $mailer->CharSet = 'UTF-8';
+        $mailer->Subject = $subject;
+        $mailer->Body = $messageBody;
+        red_mail_configure_transport($mailer);
+        $sent = $mailer->send();
+    }
+    if (!$sent) {
         throw new Exception('mail failed');
     } else {
         echo 'mail sent';
     }
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    error_log('Legacy mail delivery failed.');
+    echo "mail failed\n";
 }
 ?>

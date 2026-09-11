@@ -12,12 +12,20 @@ is a separate objective.
 
 ## Reporting a vulnerability
 
-Report privately to the RED-CMS maintainer through the existing private client
-support conversation or repository-owner contact channel. If GitHub offers
-“Report a vulnerability” at https://github.com/orojas01-glitch/redcms/security,
-use that private form. Availability of that GitHub feature is not yet verified;
-do not fall back to a public issue containing exploit details or client data.
-A dedicated reporting mailbox and response-time commitment remain owner decisions.
+Report privately to [security@red-sphere.com](mailto:security@red-sphere.com).
+Existing clients can also use their
+private support conversation. This address is for security vulnerabilities;
+ordinary bug reports and feature requests belong in the usual project support channels.
+GitHub private vulnerability reporting was verified disabled on 2026-09-09; the repository does
+not currently provide that intake form. Do not fall back to a public issue
+containing exploit details or client data.
+
+We aim to acknowledge security reports within 5 business days, provide an initial
+assessment within 10 business days, and update confirmed, unresolved cases at least
+every 14 calendar days. Business days are Monday through Friday excluding US
+federal holidays, using America/New_York time. These are communication targets;
+fix dates depend on severity, scope and compatibility. See
+[the intake procedure](docs/SECURITY-RESPONSE-PROCEDURE.md).
 
 Include affected version, surface, a minimal synthetic reproduction, consequence,
 and a safe way to reply. Do not send passwords, tokens, database exports, personal

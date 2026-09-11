@@ -46,6 +46,7 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/admin-password-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/admin-session-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/public-form-operation-self-test.php"
+"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/mail-transport-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/clean-starter-boundary-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/client-deployment-kit-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/seo-metadata-self-test.php"

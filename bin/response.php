@@ -5,6 +5,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_operation_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail_transport_helpers.php';
 
 if (empty($_SESSION['contact']) || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     red_public_form_redirect_home();
@@ -88,12 +89,13 @@ if (!$honeypot) {
         $mail->Subject = red_public_form_header_value($subject);
         $mail->Body = $emailhtml;
         $mail->AltBody = 'Form response submission';
+        red_mail_configure_transport($mail);
         $sent = (bool) $mail->send();
     } catch (Throwable $exception) {
-        error_log('Public Response PHPMailer delivery failed: ' . $exception->getMessage());
+        error_log('Public Response mail delivery failed.');
     }
 
-    if (!$sent) {
+    if (!$sent && red_mail_legacy_fallback_allowed()) {
         $recipient = $form['recipientMailboxes'][0]['email'] ?? '';
         $from = $form['fromMailbox']['email'] ?? '';
         if (filter_var($recipient, FILTER_VALIDATE_EMAIL) !== false

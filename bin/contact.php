@@ -5,6 +5,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/includes/config.php';
 require $_SERVER['DOCUMENT_ROOT'] . '/class/class_connection.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_helpers.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/public_form_operation_helpers.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/includes/mail_transport_helpers.php';
 
 $contactPayload = $_POST;
 
@@ -74,13 +75,17 @@ table.standard td {	border-width: 0px;	padding: 4px;	border-style: inset; border
             $mail->Body = $body;
             $mail->AltBody = 'Contact form submission';
 
+            red_mail_configure_transport($mail);
             return (bool) $mail->send();
         } catch (Throwable $exception) {
-            error_log('Public Contact PHPMailer delivery failed: ' . $exception->getMessage());
+            error_log('Public Contact mail delivery failed.');
             return false;
         }
     },
     'fallbackMail' => static function ($form, $values, $body) {
+        if (!red_mail_legacy_fallback_allowed()) {
+            return false;
+        }
         $recipient = $form['recipientMailboxes'][0]['email'] ?? '';
         $thisFrom = $form['fromMailbox']['email'] ?? '';
         if (filter_var($recipient, FILTER_VALIDATE_EMAIL) === false

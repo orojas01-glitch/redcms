@@ -1,9 +1,19 @@
 # RED-CMS 5.1.2 — unpublished hardening candidate
 
-**Release blocked.** Historical PayPal PDT credential revocation is unverified;
-client-specific operational and remote release checks remain pending. TinyMCE has
-now been upgraded locally to 8.9.0 GPL core with passing browser and dependency checks. This is
-reviewable local work, not a published release. Runtime version and the accepted
+Local SMTP follow-up: core PHP form mail now supports opt-in authenticated,
+certificate-verified SMTP with a fixed sender and no local-mail fallback in SMTP
+mode. Existing local-mail defaults and form responses remain compatible. The Scala
+demo's authorized synthetic SMTP-to-Gmail delivery and live Contact browser
+submission passed, including SPF/DKIM/DMARC; other installations remain unverified. See
+[SMTP-DELIVERY.md](SMTP-DELIVERY.md).
+
+**Release blocked.** Historical PayPal PDT credential invalidity is unverified.
+The owner reports the retired integration was disabled; this does not establish
+token revocation. Core fixes, the isolated demo and operational evidence are
+summarized in [the current closeout record](HARDENING-5.1.2-CLOSEOUT.md), including
+the exact CI result and remaining installation-specific requirements.
+TinyMCE 8.9.0 GPL core is verified locally and on the demo. This is a reviewable
+candidate, not a published release. Runtime version and the accepted
 client-kit manifest remain 5.1.1 until the release gates are resolved.
 
 The candidate reconciles v5.1.1 ancestry and accepted post-release commerce/security
@@ -25,7 +35,7 @@ explicitly when their sentinel is found.
 The full local acceptance suite passed 47 migrations with zero pending/drifted,
 no-op rerun, authentication and account invalidation, theme/add-on/content lifecycles,
 uploads and forced rollback, with exact temporary database/grant cleanup. HTTP
-session tests also pass. A synthetic Apache fixture also passed eight denied-path checks and public/ACME
+session tests also pass. A synthetic Apache fixture also passed 14 denied-path checks and public/ACME
 compatibility. Local CSP HTTP/browser checks pass, and the owner-authorized isolated Scala demo
 now enforces the compatibility policy. The GitHub core job and current source/dependency checks now pass; historical
 scanning remains blocked. Other client deployments require separate verification.
@@ -41,7 +51,8 @@ TinyMCE upgrade detail: [TINYMCE-8-UPGRADE.md](TINYMCE-8-UPGRADE.md).
 The [legacy utility review](LEGACY-UTILITY-PROVENANCE.md) also completes locally:
 verified sources/licenses, repaired menu and upload compatibility, preserved URLs,
 and new behavioral/provenance regression gates. Remaining maintenance/deployment
-limits are documented explicitly; no Scala or HostGator change occurred.
+limits are documented explicitly. The later Scala demo deployment is recorded
+separately; no HostGator/client deployment is claimed.
 
 
 The owner-authorized [legacy PDT retirement](LEGACY-PDT-RETIREMENT.md) removes

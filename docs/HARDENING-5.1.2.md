@@ -1,8 +1,13 @@
 # RED-CMS 5.1.2 local hardening candidate
 
-Status: local hardening groups and an owner-authorized isolated Scala demo
-rehearsal verified within their documented scopes; release remains blocked.
-No release publication or client deployment performed.
+Current status is maintained in [HARDENING-5.1.2-CLOSEOUT.md](HARDENING-5.1.2-CLOSEOUT.md).
+Core fixes and the isolated Scala demo rehearsal are verified within their
+documented scopes; the historical credential finding still blocks release.
+No release publication or client deployment has been performed.
+
+This document preserves the chronological audit. Initial failures and pending
+items below describe their original phase, not the current candidate. Later
+follow-ups and the closeout record supersede those earlier status statements.
 
 ## Baseline and rollback
 
@@ -33,7 +38,7 @@ Initial public-form test reproduced a stale login source hash failure after
 repairs were merged. Existing source hashes are phase checkpoints, not a
 substitute for behavioral authentication tests.
 
-## Completed bounded groups
+## Initial bounded groups (historical snapshot)
 
 | Group | Verified issue and narrow correction | Evidence / remaining limit |
 | --- | --- | --- |
@@ -42,10 +47,10 @@ substitute for behavioral authentication tests.
 | Sessions/authentication | Default cookies, no application expiry, incomplete logout, plaintext login despite failed hash upgrade | 12 session assertions, HTTP renewal/expiry/logout, full database auth and account invalidation pass; old sessions must reauthenticate |
 | Acceptance | Stale phase hashes rejected accepted changes; negated grep assertions bypassed errexit | 62 public-form assertions; source errors pass ShellCheck; leak sentinels now explicit failure; remaining lower-severity legacy ShellCheck notices are not represented as all-clear |
 | CI and operations | CI previously covered only one ingress proof | New core/theme, disposable migration/auth/CRUD/rollback, Apache/session and scan workflow; remote execution unverified |
-| Policies | No root security policy or portable update record | Added security/support/reporting/patch policy, deployment contract, dependency inventory and private client-update template; mailbox/SLA owner decision remains |
+| Policies | No root security policy or portable update record | Added security/support/reporting/patch policy, deployment contract, dependency inventory and private client-update template; dedicated mailbox receipt and 5/10-business-day, 14-calendar-day response targets confirmed by owner; local policy complete, publication pending |
 | CSP | No application browser policy; public pages can embed administration | Added server-owned modes and narrow origin configuration; 27 contracts, 8 HTTP cases, 15 browser checks and 84 editor assertions pass. Defaults off pending installation review; inline-script XSS and real integrations/live hosting remain limitations. See [CSP-HARDENING.md](CSP-HARDENING.md) |
 
-## Executed acceptance
+## Initial acceptance (historical snapshot; superseded results linked above)
 
 - `scripts/core-security-checks.sh`: all pre-database core checks and five
   dependency-free theme suites passed (theme contract 276 assertions; layout

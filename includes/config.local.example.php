@@ -11,6 +11,16 @@ return [
     'DBNAME' => 'database_name',
     'IPSTACK_ACCESS_KEY' => '',
     'LEGACY_MAIL_OWNER' => '',
+    // Opt-in authenticated SMTP. Keep credentials server-local; never in the DB.
+    // smtp mode refuses failure fallback to PHP mail(). See docs/SMTP-DELIVERY.md.
+    'MAIL_TRANSPORT' => 'mail',
+    'SMTP_HOST' => '',
+    'SMTP_PORT' => 587,
+    'SMTP_SECURITY' => 'starttls', // starttls/587 or smtps/465, verified TLS only
+    'SMTP_USERNAME' => '',
+    'SMTP_PASSWORD' => '',
+    'SMTP_FROM_EMAIL' => '',
+    'SMTP_FROM_NAME' => '',
     // Review docs/CSP-HARDENING.md. Start report-only on the isolated demo;
     // enforce only after checking that installation's themes/integrations.
     'CSP_MODE' => 'off', // off | report-only | enforce
