@@ -12,7 +12,9 @@ The owner reports the retired integration was disabled; this does not establish
 token revocation. Core fixes, the isolated demo and operational evidence are
 summarized in [the current closeout record](HARDENING-5.1.2-CLOSEOUT.md), including
 the exact CI result and remaining installation-specific requirements.
-TinyMCE 8.9.0 GPL core is verified locally and on the demo. This is a reviewable
+TinyMCE 8.9.0 GPL core is verified locally and on the demo; the 8.9.3 patch
+release, which fixes a media plugin stored XSS (GHSA-mf2p-h6hf-fcwm), replaces it
+and is verified locally only. This is a reviewable
 candidate, not a published release. Runtime version and the accepted
 client-kit manifest remain 5.1.1 until the release gates are resolved.
 

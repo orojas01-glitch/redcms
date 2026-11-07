@@ -1,6 +1,6 @@
 # Third-party notices
 
-## TinyMCE 8.9.0
+## TinyMCE 8.9.3
 
 Copyright (c) 2025 Ephox Corporation DBA Tiny Technologies, Inc.
 
@@ -9,9 +9,9 @@ This RED-CMS build uses the self-hosted core under **GPL-2.0-or-later**, with
 The upstream notice remains at `admin/assets/js/tiny_mce/license.md` and the
 GPL version 2 text is provided in `docs/licenses/GPL-2.0.txt`.
 
-Official upstream source: https://github.com/tinymce/tinymce/tree/8.9.0
-Corresponding source archive: https://github.com/tinymce/tinymce/archive/refs/tags/8.9.0.tar.gz
-Package source: https://registry.npmjs.org/tinymce/-/tinymce-8.9.0.tgz
+Official upstream source: https://github.com/tinymce/tinymce/tree/8.9.3
+Corresponding source archive: https://github.com/tinymce/tinymce/archive/refs/tags/8.9.3.tar.gz
+Package source: https://registry.npmjs.org/tinymce/-/tinymce-8.9.3.tgz
 
 `release/tinymce-vendor-manifest.json` records registry integrity and every
 bundled file hash. Both minified and unminified package files are retained.

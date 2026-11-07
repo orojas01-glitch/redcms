@@ -20,7 +20,7 @@ await walk(vendor);
 assert.deepEqual(actual.sort(), Object.keys(manifest.files).sort(), 'Exact upstream inventory');
 for (const file of actual) assert.equal(createHash('sha256').update(await readFile(path.join(vendor, file))).digest('hex'), manifest.files[file], 'Vendor integrity: '+file);
 const pkg = JSON.parse(await readFile(path.join(vendor, 'package.json'), 'utf8'));
-assert.equal(pkg.version, '8.9.0');
+assert.equal(pkg.version, '8.9.3');
 assert(!pkg.scripts && !pkg.dependencies, 'No install scripts or runtime npm dependencies');
 const bom = JSON.parse(await readFile(path.join(root, 'release/bundled-dependencies.cdx.json'), 'utf8'));
 assert.equal(bom.components.find(c => c.name === 'tinymce').version, pkg.version);
