@@ -7,6 +7,13 @@ demo's authorized synthetic SMTP-to-Gmail delivery and live Contact browser
 submission passed, including SPF/DKIM/DMARC; other installations remain unverified. See
 [SMTP-DELIVERY.md](SMTP-DELIVERY.md).
 
+Administrator account protection follow-up: a Webmaster could previously reset the
+password, email or role of the Owner or a Superadmin through Administrator Users
+and then sign in as that account. Now only the Owner can change or delete the Owner
+account, and only a Superadmin or the Owner can change or delete a Superadmin.
+Self-service changes and Guest management are unchanged. The disposable Owner
+authorization self-test covers the refusals.
+
 **Release blocked.** Historical PayPal PDT credential invalidity is unverified.
 The owner reports the retired integration was disabled; this does not establish
 token revocation. Core fixes, the isolated demo and operational evidence are

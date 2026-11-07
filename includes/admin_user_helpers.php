@@ -360,6 +360,42 @@ if (!function_exists('red_admin_user_manager_count')) {
     }
 }
 
+if (!function_exists('red_admin_user_protected_target_refusal')) {
+    /**
+     * Refuses a change to another account that holds more authority than the
+     * acting manager. Only the Owner may change the Owner account, and only a
+     * Superadmin or the Owner may change a Superadmin account. Without this, a
+     * Webmaster could reset a stronger account's password or email and sign in
+     * as it. Returns '' when the change may proceed.
+     */
+    function red_admin_user_protected_target_refusal($connection, $actorRecordId, array $target)
+    {
+        $actorRecordId = (int) $actorRecordId;
+        $targetRecordId = (int) ($target['RecordID'] ?? 0);
+        if ($actorRecordId <= 0 || $targetRecordId <= 0) {
+            return 'invalid';
+        }
+        if ($actorRecordId === $targetRecordId) {
+            return '';
+        }
+
+        if (red_admin_addon_is_owner($connection, $targetRecordId)) {
+            return 'owner_protected';
+        }
+
+        if (red_admin_user_type($target['AdminType'] ?? '') === 'superadmin') {
+            $actor = red_admin_user_lookup($connection, $actorRecordId);
+            $actorIsSuperadmin = $actor
+                && red_admin_user_type($actor['AdminType'] ?? '') === 'superadmin';
+            if (!$actorIsSuperadmin && !red_admin_addon_is_owner($connection, $actorRecordId)) {
+                return 'protected_account';
+            }
+        }
+
+        return '';
+    }
+}
+
 if (!function_exists('red_admin_user_create')) {
     function red_admin_user_create($connection, $post)
     {
@@ -441,6 +477,10 @@ if (!function_exists('red_admin_user_update')) {
             return 'invalid';
         }
         $currentRecordId = (int) ($_SESSION['AdminRecordID'] ?? 0);
+        $protectedRefusal = red_admin_user_protected_target_refusal($connection, $currentRecordId, $target);
+        if ($protectedRefusal !== '') {
+            return $protectedRefusal;
+        }
         $currentType = red_admin_user_type($target['AdminType'] ?? 'guest', 'guest');
         $requestedType = strtolower(red_admin_user_text($post['AdminType'] ?? ''));
         $adminType = red_admin_user_assignable_type($requestedType);
@@ -542,8 +582,9 @@ if (!function_exists('red_admin_user_delete')) {
             return 'invalid';
         }
 
-        if (red_admin_addon_is_owner($connection, $recordId)) {
-            return 'owner_protected';
+        $protectedRefusal = red_admin_user_protected_target_refusal($connection, $currentRecordId, $target);
+        if ($protectedRefusal !== '') {
+            return $protectedRefusal;
         }
 
         if (red_admin_user_is_manager_type($target['AdminType'] ?? '')) {
