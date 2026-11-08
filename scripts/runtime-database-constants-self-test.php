@@ -41,8 +41,8 @@ $assert(
         && substr_count(
             $frontController,
             'red_runtime_database_constants_bootstrap()'
-        ) === 2,
-    'webhook and public-mutation early routes bootstrap package database constants'
+        ) === 3,
+    'Stripe webhook, Wompi webhook and public-mutation early routes bootstrap package database constants'
 );
 
 echo 'Runtime database constants passed ' . $assertions . " assertions.\n";
