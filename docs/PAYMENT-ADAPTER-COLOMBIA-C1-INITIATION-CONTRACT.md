@@ -124,3 +124,38 @@ phone/email, DNS, TLS, HTTP request, Wompi transaction, Nequi notification,
 payment, webhook ingress, browser checkout, Store Lite order mutation, hosted-
 demo change, client installation, or deployment. See
 [`PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md`](PAYMENT-ADAPTER-COLOMBIA-C2-PACKAGE.md).
+
+## W2: hosted GET form for Wompi Web Checkout (2026-11-08)
+
+The owner chose Wompi Web Checkout for the first launch (package `0.2.0`, W1).
+Web Checkout is a GET form to `https://checkout.wompi.co/p/` carrying signed
+fields, which `hosted_redirect` cannot express because it only accepts a
+query-free URL (or one bound `token` query). The union gains one closed mode:
+
+```php
+red_addon_payment_initiation_normalize('hosted_get_form', [
+    'providerReference' => 'ord_<32 hex>',
+    'action' => 'https://checkout.wompi.co/p/',
+    'fields' => [
+        ['public-key', 'pub_test_...' or 'pub_prod_...'],
+        ['currency', 'COP'],
+        ['amount-in-cents', '<integer, 3 to 12 digits>'],
+        ['reference', '<same as providerReference>'],
+        ['signature:integrity', '<64 lowercase hex>'],
+        ['redirect-url', '<https URL, no query or fragment>'],
+        // optional: ['expiration-time', 'YYYY-MM-DDTHH:MM:SS.mmmZ'],
+    ],
+]);
+```
+
+The action is one fixed provider URL. Field names, order and count are exact.
+The value patterns admit only public material: a private key, integrity secret
+or event secret cannot pass, and the integrity signature is a hash. The
+`ord_` reference must equal the provider reference, so the form cannot be
+re-pointed at another order. Refusal reason: `hosted_get_form_invalid`.
+`hosted_redirect` and `out_of_band_confirmation` are unchanged.
+
+The W1 planner's real output for a Sandbox order is accepted unchanged. The C1
+self-test now passes 74 assertions (19 new: acceptance, optional expiry, and
+twelve refusals plus cross-mode refusal). As before, the helper has no runtime
+caller, and nothing contacts Wompi.
