@@ -23,6 +23,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET'
     }
 }
 
+$redWompiCheckoutReturnTarget = $_SERVER['REQUEST_URI'] ?? '';
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET'
+    && is_string($redWompiCheckoutReturnTarget)
+    && str_starts_with($redWompiCheckoutReturnTarget, '/checkout/wompi-return')
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__ . '/includes/addon_wompi_checkout_return_helpers.php';
+    $redWompiCheckoutReturn = red_addon_wompi_checkout_return(
+        'GET',
+        $redWompiCheckoutReturnTarget
+    );
+    if (!empty($redWompiCheckoutReturn['claimed'])) {
+        // Same closed shape and emitter as the subscription return pages.
+        red_addon_subscription_checkout_return_emit($redWompiCheckoutReturn);
+        exit;
+    }
+}
+
 $redAddonAssetRequestUri = $_SERVER['REQUEST_URI'] ?? '';
 if (is_string($redAddonAssetRequestUri)
     && str_starts_with($redAddonAssetRequestUri, '/_red/addons/')

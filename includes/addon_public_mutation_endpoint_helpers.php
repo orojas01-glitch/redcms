@@ -18,6 +18,7 @@ require_once __DIR__ . '/addon_public_mutation_direct_ingress_helpers.php';
 require_once __DIR__ . '/addon_public_mutation_response_emitter_helpers.php';
 require_once __DIR__
     . '/addon_subscription_checkout_public_runtime_helpers.php';
+require_once __DIR__ . '/addon_wompi_checkout_public_runtime_helpers.php';
 
 if (!function_exists('red_addon_public_mutation_endpoint_response_valid')) {
     function red_addon_public_mutation_endpoint_response_valid($response)
@@ -25,7 +26,8 @@ if (!function_exists('red_addon_public_mutation_endpoint_response_valid')) {
         return red_addon_public_mutation_response_emitter_valid($response)
             || red_addon_subscription_checkout_public_response_valid(
                 $response
-            );
+            )
+            || red_addon_wompi_checkout_public_response_valid($response);
     }
 }
 
@@ -263,6 +265,30 @@ if (!function_exists('red_addon_public_mutation_endpoint_dispatch_current')) {
             : red_addon_public_mutation_server_request_result(
                 'transport_unavailable'
             );
+        // A Wompi order is refused before it exists when the server cannot
+        // send the customer to Wompi afterwards.
+        $wompi = $enabled && $method === 'POST'
+            ? red_addon_wompi_checkout_public_runtime_prepare(
+                $connection,
+                dirname(__DIR__),
+                $requestTarget,
+                $capture
+            )
+            : null;
+        if (is_array($wompi)
+            && $wompi['applies'] === true
+            && $wompi['ready'] !== true
+        ) {
+            $refused = red_addon_public_mutation_endpoint_result(
+                'endpoint_unavailable'
+            );
+            $refused['claimed'] = true;
+            $refused['response'] =
+                red_addon_wompi_checkout_public_runtime_refusal(
+                    'prepare_' . $wompi['reason']
+                );
+            return $refused;
+        }
         $result = red_addon_public_mutation_endpoint_dispatch(
             $connection,
             $method,
@@ -270,6 +296,25 @@ if (!function_exists('red_addon_public_mutation_endpoint_dispatch_current')) {
             $capture,
             $enabled
         );
+        if (is_array($wompi)
+            && $wompi['applies'] === true
+            && ($result['claimed'] ?? false) === true
+            && ($result['reason'] ?? '') === 'endpoint_ready'
+        ) {
+            $result['response'] =
+                red_addon_wompi_checkout_public_runtime_complete(
+                    $connection,
+                    $wompi,
+                    $capture,
+                    $result['response']
+                );
+            if (!red_addon_public_mutation_endpoint_response_valid(
+                $result['response']
+            )) {
+                $result['reason'] = 'endpoint_unavailable';
+            }
+            return $result;
+        }
         if ($enabled
             && $method === 'POST'
             && red_addon_subscription_checkout_public_runtime_target(
@@ -349,6 +394,12 @@ if (!function_exists('red_addon_public_mutation_endpoint_emit')) {
             red_addon_subscription_checkout_public_response_emit(
                 $result['response']
             );
+            return;
+        }
+        if (red_addon_wompi_checkout_public_response_valid(
+            $result['response']
+        )) {
+            red_addon_wompi_checkout_public_response_emit($result['response']);
             return;
         }
         red_addon_public_mutation_response_emit($result['response']);

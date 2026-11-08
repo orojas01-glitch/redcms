@@ -156,9 +156,13 @@ try {
     $adapterPackage = $catalog['packages'][$adapterPackageId] ?? null;
     red_wompi_launch_assert(
         !empty($catalog['valid'])
-            && ($storePackage['manifest']['version'] ?? '') === '0.1.53'
+            && in_array(
+                $storePackage['manifest']['version'] ?? '',
+                ['0.1.53', '0.1.54'],
+                true
+            )
             && ($adapterPackage['manifest']['version'] ?? '') === '0.4.0',
-        'exact Store Lite 0.1.53 and Wompi 0.4.0 packages are trusted ('
+        'exact Store Lite 0.1.53/0.1.54 and Wompi 0.4.0 packages are trusted ('
             . json_encode($catalog['errors'] ?? []) . ')'
     );
 
@@ -169,13 +173,17 @@ try {
         $connection, $storePackageId, $projectRoot, $actorId,
         $storeInstallPlan['planSha256'] ?? ''
     );
-    foreach ([
+    $storeSettings = [
         ['catalog.currency', 'text', 'COP'],
         ['checkout.delivery-enabled', 'boolean', false],
         ['checkout.delivery-fee-minor', 'integer', 0],
         ['checkout.pay-on-receipt-enabled', 'boolean', true],
         ['checkout.pickup-enabled', 'boolean', true],
-    ] as [$key, $type, $value]) {
+    ];
+    if ($storePackage['manifest']['version'] === '0.1.54') {
+        $storeSettings[] = ['checkout.wompi-enabled', 'boolean', true];
+    }
+    foreach ($storeSettings as [$key, $type, $value]) {
         red_wompi_launch_setting(
             $connection, $storePackageId, $actorId, $key, $type,
             json_encode($value, JSON_THROW_ON_ERROR), null
