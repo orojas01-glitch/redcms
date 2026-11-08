@@ -7,7 +7,7 @@ OSV is queried with this file, never the repository or client configuration.
 
 | Library | Verified bundled version / surface | Candidate result |
 | --- | --- | --- |
-| TinyMCE | 8.9.0, `admin/assets/js/tiny_mce/` | Local GPL core upgrade verified; no OSV matches returned |
+| TinyMCE | 8.9.3, `admin/assets/js/tiny_mce/` | Patch upgrade from 8.9.0 resolves GHSA-mf2p-h6hf-fcwm (High, media plugin stored XSS); local checks pass |
 | jQuery | 3.7.1, `js/jquery-3.7.1.min.js` | No OSV matches returned in this query |
 | Bootstrap | 5.3.3, `js/bootstrap*` and `css/bootstrap*` | No OSV matches returned in this query |
 | PHPMailer | 6.9.3, `bin/phpmailer.php`, `bin/SMTP.php`, `bin/Exception.php` | No OSV matches returned in this query; SMTP delivery remains unverified |
@@ -23,7 +23,7 @@ libraries and must be checked in their own repositories.
 ## TinyMCE decision and compatibility boundary
 
 The owner confirmed RED-CMS is open source and selected the free self-hosted core.
-TinyMCE 8.9.0 now runs in GPL mode; existing MIT notices in RED-CMS source remain.
+TinyMCE 8.9.3 now runs in GPL mode; existing MIT notices in RED-CMS source remain.
 The earlier TinyMCE 4.0.12 payload was replaced, resolving the 19 advisory matches
 in the package-coordinate scan. Nothing was suppressed to produce the clean result.
 

@@ -106,7 +106,7 @@ try {
                 const table = ed.getContent().includes('<table');
                 return {version:tinymce.majorVersion+'.'+tinymce.minorVersion,editable:!ed.mode.isReadOnly(),undo,redo,saved,sanitized,table,license:ed.options.get('license_key')};
             });
-            check(result.version === '8.9.0' && result.license === 'gpl' && result.editable, `${profile}: GPL editor is editable`);
+            check(result.version === '8.9.3' && result.license === 'gpl' && result.editable, `${profile}: GPL editor is editable`);
             check(result.undo && result.redo && result.saved, `${profile}: undo/redo/save`);
             if (profile !== 'other') {
                 await page.evaluate(() => tinymce.activeEditor.execCommand('mceCodeEditor'));

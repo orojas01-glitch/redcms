@@ -11,7 +11,7 @@ It is not released: the historical credential finding remains unresolved.
 See the [candidate closeout record](docs/HARDENING-5.1.2-CLOSEOUT.md) for current
 checks, demo evidence, operational limitations and the release gate.
 The obsolete legacy PDT integration is [retired](docs/LEGACY-PDT-RETIREMENT.md).
-TinyMCE 8.9.0 GPL core is verified locally and on the isolated demo; see [upgrade evidence](docs/TINYMCE-8-UPGRADE.md).
+TinyMCE 8.9.3 GPL core: 8.9.0 was verified locally and on the isolated demo; the 8.9.3 patch release (media plugin stored XSS fix, GHSA-mf2p-h6hf-fcwm) is verified locally only; see [upgrade evidence](docs/TINYMCE-8-UPGRADE.md).
 See the [security policy](SECURITY.md) and [deployment requirements](docs/DEPLOYMENT-SECURITY-5.1.md).
 
 RED-CMS 5.1.1 is the focused maintenance release for reliable Other-component

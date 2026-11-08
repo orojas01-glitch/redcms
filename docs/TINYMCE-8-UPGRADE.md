@@ -77,3 +77,24 @@ Final core/theme checks pass, and current tracked-source Gitleaks reports zero
 findings. Upstream-only whitespace is preserved with a narrowly scoped vendor
 attribute; first-party whitespace checks and full vendor hash verification remain
 active. The earlier baseline `.gitleaksignore` was not broadened for this upgrade.
+
+## 2026-11-07 patch upgrade to 8.9.3
+
+OSV reported GHSA-mf2p-h6hf-fcwm (High) against the bundled 8.9.0: a stored XSS
+in the media plugin through event handler attributes, fixed in 8.9.3 according
+to the upstream changelog. Official npm `tinymce` 8.9.3 replaced the vendor
+payload. Its SHA-512 integrity matched the registry metadata before extraction.
+It has no install scripts or runtime npm dependencies, and the package file set is
+identical to 8.9.0 (272 files, 49 changed). `license.md` and `notices.txt` are
+unchanged. No configuration, plugin list or toolbar changed. The loader cache key
+is 8.9.3.
+
+Checks run locally with PHP 8.3 and the pre-installed Chromium:
+`tinymce-vendor-self-test.mjs` (272 exact files) passes, `tinymce-browser-qa.mjs`
+passes all 84 assertions, including XSS sanitization, and
+`other-content-browser-qa.mjs` passes all 28.
+
+Not done: the corresponding-source archive for the 8.9.3 tag could not be
+downloaded from the build sandbox, so its SHA-256 is still `null` in the vendor
+manifest. Compute and record it before client distribution. The isolated demo
+has not been updated.
