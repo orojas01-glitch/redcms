@@ -186,6 +186,59 @@
         return url.href === value ? value : null;
     }
 
+    function wompiCheckoutUrl(value) {
+        if (typeof value !== 'string'
+            || value.length < 1
+            || value.length > 4096
+            || /[\u0000-\u001F\u007F]/.test(value)
+        ) {
+            return null;
+        }
+        var url;
+        try {
+            url = new URL(value);
+        } catch (error) {
+            return null;
+        }
+        if (url.protocol !== 'https:'
+            || url.hostname !== 'checkout.wompi.co'
+            || url.port !== ''
+            || url.username !== ''
+            || url.password !== ''
+            || url.hash !== ''
+            || url.pathname !== '/p/'
+        ) {
+            return null;
+        }
+        var names = [];
+        url.searchParams.forEach(function (fieldValue, name) {
+            names.push(name);
+        });
+        var params = url.searchParams;
+        var redirect;
+        try {
+            redirect = new URL(params.get('redirect-url') || '');
+        } catch (error) {
+            return null;
+        }
+        if (names.join(',') !== 'public-key,currency,amount-in-cents,'
+                + 'reference,signature:integrity,redirect-url,expiration-time'
+            || !/^pub_test_[A-Za-z0-9]{8,128}$/.test(params.get('public-key'))
+            || params.get('currency') !== 'COP'
+            || !/^[1-9][0-9]{2,11}$/.test(params.get('amount-in-cents'))
+            || !/^ord_[a-f0-9]{32}$/.test(params.get('reference'))
+            || !/^[a-f0-9]{64}$/.test(params.get('signature:integrity'))
+            || redirect.protocol !== 'https:'
+            || redirect.origin !== window.location.origin
+            || redirect.pathname !== '/checkout/wompi-return'
+            || redirect.search !== ''
+            || redirect.hash !== ''
+        ) {
+            return null;
+        }
+        return url.href === value ? value : null;
+    }
+
     function responseResult(response, body, expectedUrl) {
         if (typeof body !== 'string' || body.length < 1 || body.length > 4608) {
             return null;
@@ -225,6 +278,25 @@
                 refresh: false,
                 redirect: redirect,
                 message: 'Redirecting to secure checkout…'
+            };
+        }
+        if (response.status === 200
+            && keys.join(',')
+                === 'checkoutUrl,navigationMode,ok,outcome'
+            && payload.ok === true
+            && payload.outcome === 'wompi_checkout_ready'
+            && payload.navigationMode === 'location.assign'
+        ) {
+            var wompiRedirect = wompiCheckoutUrl(payload.checkoutUrl);
+            if (wompiRedirect === null) {
+                return null;
+            }
+            return {
+                complete: true,
+                refresh: false,
+                redirect: wompiRedirect,
+                event: 'redcms:wompi-checkout-ready',
+                message: 'Order placed. Redirecting to Wompi to pay…'
             };
         }
         if (response.status === 200
@@ -277,6 +349,7 @@
     async function send(state) {
         var refresh = false;
         var redirect = '';
+        var redirectEvent = 'redcms:subscription-checkout-ready';
         setBusy(state, true);
         setStatus(state, 'Updating…');
         try {
@@ -310,6 +383,8 @@
                 state.finished = result.complete;
                 refresh = result.refresh;
                 redirect = result.redirect || '';
+                redirectEvent = result.event
+                    || 'redcms:subscription-checkout-ready';
                 setStatus(state, result.message);
             }
         } catch (error) {
@@ -319,7 +394,7 @@
         setBusy(state, false);
         if (redirect !== '') {
             var navigation = new CustomEvent(
-                'redcms:subscription-checkout-ready',
+                redirectEvent,
                 {
                     cancelable: true,
                     detail: Object.freeze({checkoutUrl: redirect})
