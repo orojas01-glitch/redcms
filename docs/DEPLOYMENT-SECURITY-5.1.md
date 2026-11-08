@@ -108,3 +108,15 @@ be emitted; set these at the server for complete embedded-view coverage.
 
 Live headers, browser CSP, SMTP, restore objectives and monitoring remain
 unverified until each client records evidence.
+
+## Thumbnail endpoint (`images/resize.php`)
+
+The legacy thumbnail endpoint stays at the same URL because admin editors,
+public article/gallery/other pages and the `legacy-bootstrap` theme still use
+it. Since 2026-11-08 it serves only JPEG or PNG files that really live in
+`images/articles/` or `images/gallery/` (resolved with `realpath`, so `..` and
+symlinks out of those folders are refused), accepts integer `w`/`h` from 0 to
+2000, refuses source images above 40 megapixels, and answers every refusal with
+a bodyless 404. It needs the PHP GD extension, as before. Covered by
+`scripts/legacy-image-resize-self-test.php`. Removing the endpoint would need the
+callers changed first.

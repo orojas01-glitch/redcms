@@ -46,7 +46,7 @@ jobs:
       - name: Install runtime tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y php-cli php-mysql php-xml php-mbstring default-mysql-client shellcheck apache2-bin
+          sudo apt-get install -y php-cli php-gd php-mysql php-xml php-mbstring default-mysql-client shellcheck apache2-bin
           curl --fail --location --silent --show-error https://github.com/php/frankenphp/releases/download/v1.12.4/frankenphp-linux-x86_64 -o /tmp/frankenphp
           echo 'b39c7511483c99faf0d857cc0789b39cc23023038260b31d4b40dd4ae18795dc  /tmp/frankenphp' | sha256sum -c -
           chmod +x /tmp/frankenphp
