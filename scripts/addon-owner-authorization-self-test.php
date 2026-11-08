@@ -25,7 +25,8 @@ $assertions = 0;
 $managerId = 2147000970;
 $secondManagerId = 2147000971;
 $guestId = 2147000972;
-$fixtureIds = [$managerId, $secondManagerId, $guestId];
+$superadminId = 2147000973;
+$fixtureIds = [$managerId, $secondManagerId, $guestId, $superadminId];
 $db = new connection(DBHOST, DBUSER, DBPASS, DBNAME);
 $connection = $db->connection;
 
@@ -123,6 +124,7 @@ try {
         [$managerId, 'codex_owner_manager', 'OwnerOne', 'webmaster', 'owner-one@example.test'],
         [$secondManagerId, 'codex_owner_actor', 'OwnerActor', 'webmaster', 'owner-actor@example.test'],
         [$guestId, 'codex_owner_guest', 'OwnerGuest', 'guest', 'owner-guest@example.test'],
+        [$superadminId, 'codex_owner_super', 'OwnerSuper', 'superadmin', 'owner-super@example.test'],
     ];
     foreach ($fixtures as $fixture) {
         [$recordId, $username, $alias, $adminType, $email] = $fixture;
@@ -250,6 +252,80 @@ try {
             ) === 'webmaster:1',
         'Administrator Users cannot demote or delete the protected Owner'
     );
+
+    $passwordOf = static function ($recordId) use ($connection) {
+        return red_addon_owner_test_scalar(
+            $connection,
+            'SELECT CONCAT_WS(":", Password, Email, AdminType) FROM RED_Admin WHERE RecordID=' . (int) $recordId
+        );
+    };
+    $ownerBefore = $passwordOf($managerId);
+    $superBefore = $passwordOf($superadminId);
+    $takeover = static function ($recordId, $alias, $email, $adminType) use ($connection) {
+        return red_admin_user_update($connection, [
+            'RecordID' => $recordId,
+            'Alias' => $alias,
+            'Email' => $email,
+            'Password' => 'AttackerChosenPassword-2026!',
+            'AdminType' => $adminType,
+            'components' => ['100'],
+            'tools' => ['1'],
+        ]);
+    };
+    red_addon_owner_test_assert(
+        $takeover($managerId, 'OwnerOne', 'owner-one@example.test', 'webmaster') === 'owner_protected'
+            && $takeover($managerId, 'OwnerOne', 'attacker@example.test', 'webmaster') === 'owner_protected'
+            && $passwordOf($managerId) === $ownerBefore,
+        'a Webmaster cannot reset the Owner password or email'
+    );
+    red_addon_owner_test_assert(
+        $takeover($superadminId, 'OwnerSuper', 'owner-super@example.test', 'superadmin') === 'protected_account'
+            && $takeover($superadminId, 'OwnerSuper', 'owner-super@example.test', 'webmaster') === 'protected_account'
+            && red_admin_user_delete($connection, ['RecordID' => $superadminId]) === 'protected_account'
+            && $passwordOf($superadminId) === $superBefore,
+        'a Webmaster cannot reset, demote or delete a Superadmin'
+    );
+    red_addon_owner_test_assert(
+        red_admin_user_update($connection, [
+            'RecordID' => $guestId,
+            'Alias' => 'OwnerGuest',
+            'Email' => 'owner-guest@example.test',
+            'Password' => '',
+            'AdminType' => 'guest',
+            'components' => ['100'],
+            'tools' => ['1'],
+        ]) === 'yes'
+            && red_admin_user_update($connection, [
+                'RecordID' => $secondManagerId,
+                'Alias' => 'OwnerActor',
+                'Email' => 'owner-actor@example.test',
+                'Password' => 'OwnActorPassword-2026!',
+                'AdminType' => 'webmaster',
+                'components' => ['100'],
+                'tools' => ['1'],
+            ]) === 'yes',
+        'a Webmaster can still manage Guests and change their own password'
+    );
+    $_SESSION = ['AdminRecordID' => $managerId];
+    red_addon_owner_test_assert(
+        red_admin_user_update($connection, [
+            'RecordID' => $superadminId,
+            'Alias' => 'OwnerSuper',
+            'Email' => 'owner-super@example.test',
+            'Password' => '',
+            'AdminType' => 'superadmin',
+            'components' => ['100'],
+            'tools' => ['1'],
+        ]) === 'yes',
+        'the Owner can still manage a Superadmin'
+    );
+    $_SESSION = ['AdminRecordID' => $superadminId];
+    red_addon_owner_test_assert(
+        $takeover($managerId, 'OwnerOne', 'owner-one@example.test', 'webmaster') === 'owner_protected'
+            && $passwordOf($managerId) === $ownerBefore,
+        'even a Superadmin cannot reset the Owner password'
+    );
+    $_SESSION = ['AdminRecordID' => $secondManagerId];
 
     mysqli_query($connection, "DELETE FROM RED_Admin_Capabilities WHERE AdminRecordID IN ($managerId,$secondManagerId)");
     mysqli_query($connection, "DELETE FROM RED_Admin_Roles WHERE AdminRecordID=$managerId");
