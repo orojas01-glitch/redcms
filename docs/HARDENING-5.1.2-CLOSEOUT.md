@@ -25,6 +25,12 @@ current-source scan alone does not resolve it. No replacement token is needed
 for retired functionality. This report does not assert the token is active or
 that any account was compromised.
 
+Update 2026-11-08: the owner confirmed PDT is off on the PayPal account and
+accepted the residual risk. The finding is closed by one exact-fingerprint
+`.gitleaksignore` entry (see [LEGACY-PDT-RETIREMENT.md](LEGACY-PDT-RETIREMENT.md)).
+This is an owner risk acceptance, not provider proof of revocation. Release
+approval still requires the remaining gates in this record.
+
 ## Completed work and evidence
 
 | Surface | Correction and verified scope |

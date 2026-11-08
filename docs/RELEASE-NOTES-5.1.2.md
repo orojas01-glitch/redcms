@@ -59,6 +59,8 @@ The owner-authorized [legacy PDT retirement](LEGACY-PDT-RETIREMENT.md) removes
 its implementation and obsolete settings. The former callback returns only HTTP
 410; newer PayPal adapter contracts and database compatibility remain intact.
 Historical credential invalidity remains unverified; retirement is not revocation.
+On 2026-11-08 the owner confirmed PDT is off on the account and accepted the
+residual risk, closing the scanner finding with one exact-fingerprint ignore entry.
 
 [Hash-only administrator authentication](HASH-ONLY-ADMIN-AUTH.md) removes the
 plaintext fallback and its flag; local accounts already use hashes.
