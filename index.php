@@ -168,6 +168,88 @@ if (is_string($redSubscriptionWebhookTarget)
     }
 }
 
+$redWompiWebhookTarget = $_SERVER['REQUEST_URI'] ?? '';
+if (is_string($redWompiWebhookTarget)
+    && $redWompiWebhookTarget
+        === '/addons/redcms/store-lite-wompi/provider-events'
+) {
+    require_once __DIR__ . '/includes/runtime_config_helpers.php';
+    require_once __DIR__
+        . '/includes/addon_wompi_webhook_runtime_helpers.php';
+
+    if (!red_addon_wompi_webhook_endpoint_enabled()) {
+        red_addon_subscription_webhook_emit(
+            red_addon_subscription_webhook_response(
+                404,
+                ['ok' => false, 'error' => 'not_found'],
+                'endpoint_disabled'
+            )
+        );
+        exit;
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        red_addon_subscription_webhook_emit(
+            red_addon_subscription_webhook_response(
+                405,
+                ['ok' => false, 'error' => 'method_not_allowed'],
+                'method_invalid'
+            )
+        );
+        exit;
+    }
+    if (red_addon_wompi_webhook_preflight($_SERVER) === null) {
+        red_addon_subscription_webhook_emit(
+            red_addon_subscription_webhook_response(
+                400,
+                ['ok' => false, 'error' => 'invalid_request'],
+                'transport_invalid'
+            )
+        );
+        exit;
+    }
+    $redWompiWebhookConnection = null;
+    try {
+        if (!red_runtime_database_constants_bootstrap()) {
+            throw new RuntimeException(
+                'Wompi runtime database configuration is unavailable.'
+            );
+        }
+        $redWompiWebhookConnection = @mysqli_connect(
+            red_config_value('DBHOST', ['RED_DB_HOST', 'DBHOST'], 'localhost'),
+            red_config_value('DBUSER', ['RED_DB_USER', 'DBUSER'], ''),
+            red_config_value('DBPASS', ['RED_DB_PASS', 'DBPASS'], ''),
+            red_config_value('DBNAME', ['RED_DB_NAME', 'DBNAME'], '')
+        );
+        if (!$redWompiWebhookConnection
+            || !@mysqli_set_charset($redWompiWebhookConnection, 'utf8mb4')
+        ) {
+            throw new RuntimeException(
+                'Wompi webhook database is unavailable.'
+            );
+        }
+        $redWompiWebhookResult = red_addon_wompi_webhook_dispatch_current(
+            $redWompiWebhookConnection,
+            __DIR__
+        );
+    } catch (Throwable $exception) {
+        error_log('RED-CMS Wompi webhook failed.');
+        $redWompiWebhookResult = red_addon_subscription_webhook_response(
+            503,
+            ['ok' => false, 'error' => 'temporarily_unavailable'],
+            'endpoint_unavailable'
+        );
+    } finally {
+        unset($GLOBALS['RED_ADDON_RUNTIME_CONTEXT']);
+        if ($redWompiWebhookConnection instanceof mysqli) {
+            mysqli_close($redWompiWebhookConnection);
+        }
+    }
+    if (!empty($redWompiWebhookResult['claimed'])) {
+        red_addon_subscription_webhook_emit($redWompiWebhookResult);
+        exit;
+    }
+}
+
 $redPublicReadMethod = $_SERVER['REQUEST_METHOD'] ?? '';
 $redPublicReadTarget = $_SERVER['REQUEST_URI'] ?? '';
 if (is_string($redPublicReadMethod)
