@@ -33,10 +33,15 @@ if (!function_exists('red_addon_wompi_webhook_runtime_result')) {
 }
 
 if (!function_exists('red_addon_wompi_webhook_runtime_run')) {
+    /**
+     * $lookupOverride exists only for the disposable rehearsal, which must
+     * not contact Wompi. The front controller never passes it.
+     */
     function red_addon_wompi_webhook_runtime_run(
         $connection,
         $projectRoot,
-        $request
+        $request,
+        $lookupOverride = null
     ) {
         $unavailable = red_addon_wompi_webhook_runtime_result(
             'runtime_unavailable'
@@ -52,6 +57,7 @@ if (!function_exists('red_addon_wompi_webhook_runtime_run')) {
             || !is_string($request['signatureHeader'])
             || !is_int($request['receivedAt'])
             || red_addon_runtime_current_context() !== null
+            || ($lookupOverride !== null && !is_callable($lookupOverride))
         ) {
             return $unavailable;
         }
@@ -177,7 +183,7 @@ if (!function_exists('red_addon_wompi_webhook_runtime_run')) {
                         'RED_CMS_Store_Lite_Wompi_Event_Ingress_Coordinator',
                         'handle',
                     ],
-                    [
+                    $lookupOverride ?? [
                         'RED_CMS_Store_Lite_Wompi_Transaction_Lookup_Transport',
                         'get',
                     ],

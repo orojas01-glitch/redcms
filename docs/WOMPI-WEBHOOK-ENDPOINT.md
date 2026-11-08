@@ -85,6 +85,28 @@ coordinator status mapping, and gate-before-database ordering in `index.php`.
 With the package present it also runs a signed synthetic `APPROVED` event
 through the real coordinator to an applied `paid` result.
 
-Not yet verified: a disposable database rehearsal with both packages enabled,
-and a real Sandbox delivery. No endpoint activation, secret provisioning,
+`scripts/wompi-webhook-launch-rehearsal.sh` (11 assertions) stages a project
+copy with Store Lite `0.1.53` and Wompi `0.4.0`, creates a disposable database
+and grant, installs and enables both packages through the normal owner
+lifecycle with opaque secret references, stores one pending `wompi_checkout`
+order, and sends deliveries through the real capture, dispatch, runtime,
+registered-webhook, coordinator and Store Lite boundaries. The confirmation
+GET is a local double (the only seam: `red_addon_wompi_webhook_runtime_run`'s
+rehearsal-only `$lookupOverride`, which the front controller never passes).
+It proves: forged delivery `400` with no lookup or write; unresolved events
+secret `500` with no write; lookup still `PENDING` `500` with no write; signed
+`APPROVED` delivery `200` and the order moves to `paid` once; redelivery `200`
+with no second write; no secret or customer data in any response; environment
+restored. Cleanup proves `database:0 grant:0 staged-project:0
+primary:unchanged`. Run it with, for example,
+`RED_PHP_CLI=php RED_ACCEPTANCE_DB_ADMIN_USER=… scripts/wompi-webhook-launch-rehearsal.sh`
+next to `redcms-store-lite` and `redcms-store-lite-wompi` checkouts.
+
+Known limitation: Store Lite recognizes a replay only against the original
+pre-payment order. The endpoint reads the current order, so a redelivery of an
+already applied event is reported internally as `apply_refused`
+(`payment_event_replay_conflict`) rather than `replayed`. The response (200)
+and the data (no second write) are correct either way.
+
+Not yet verified: a real Sandbox delivery. No endpoint activation, real secret,
 Wompi contact, payment or deployment occurred.
