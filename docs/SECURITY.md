@@ -2416,5 +2416,10 @@ confirmation of revocation/replacement or provider-confirmed permanent invalidit
 is required before closure; turning off a feature is not proof a token was rotated.
 The modern separately packaged PayPal adapter remains a distinct credential path.
 
+2026-11-08: the owner reported PDT is off on the PayPal account and accepted the
+residual risk. The finding is closed by one exact-fingerprint `.gitleaksignore`
+entry. This is a risk acceptance, not proof of revocation; see
+[LEGACY-PDT-RETIREMENT.md](LEGACY-PDT-RETIREMENT.md).
+
 See [`HARDENING-5.1.2.md`](HARDENING-5.1.2.md) for exact baseline, verification,
 rollback and unresolved release blockers. Nothing here certifies a client deployment.

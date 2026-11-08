@@ -12,3 +12,5 @@ scripts/addon-webhook-request-boundary-self-test.php:generic-api-key:205
 scripts/addon-subscription-event-delivery-coordinator-self-test.php:generic-api-key:44
 scripts/addon-subscription-event-delivery-coordinator-self-test.php:generic-api-key:782
 scripts/addon-subscription-event-delivery-coordinator-self-test.php:generic-api-key:800
+# Historical PayPal PDT identity token. Owner accepted risk 2026-11-08: PDT is off on the account; see docs/LEGACY-PDT-RETIREMENT.md.
+073ce8b5731854f46ee7813423c7c2d41c4dc22f:bin/paypal_response.php:generic-api-key:15

@@ -72,3 +72,24 @@ No PayPal account, Scala, HostGator, client database or remote repository was
 changed. A later authorized deployment must replace the old callback, remove its
 helper, and remove obsolete settings from that specific server. Do not delete
 historic database tables or purchase records as part of this file-only retirement.
+
+## 2026-11-08 owner risk acceptance
+
+The owner checked the live PayPal business account (paypal.com, Account
+settings, Website payments, Website preferences) and reported that Payment data
+transfer is already **Off**. This repeats the 2026-09-09 report. It shows that
+PDT is disabled; it is not provider confirmation that the historical identity
+token was rotated or permanently invalidated.
+
+The token's only use is PDT transaction lookups on that account, and those are
+unavailable while PDT is off. On that basis the owner chose to **accept the
+residual risk and close the finding**, rather than wait for written PayPal
+confirmation. Disposition:
+
+- Exactly one entry was added to `.gitleaksignore`: the full fingerprint
+  `073ce8b5731854f46ee7813423c7c2d41c4dc22f:bin/paypal_response.php:generic-api-key:15`.
+  No rule, path or other commit is ignored, so any new finding still fails.
+- No history was rewritten, and no token value was displayed or recorded.
+- If PDT is ever turned back on for that account, treat the old token as
+  compromised: confirm that PayPal issued a different identity token, and remove
+  this ignore entry until that is confirmed.
