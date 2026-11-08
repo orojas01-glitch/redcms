@@ -622,6 +622,109 @@ try {
         'unknown hosted fields are refused'
     );
 
+    $wompiReference = 'ord_' . str_repeat('a1', 16);
+    $wompiFields = [
+        ['public-key', 'pub_test_Q5yDA9xoKdePzhSGeVe9HAez7HgGORGf'],
+        ['currency', 'COP'],
+        ['amount-in-cents', '2490000'],
+        ['reference', $wompiReference],
+        ['signature:integrity', hash(
+            'sha256',
+            $wompiReference . '2490000COP' . 'test_integrity_synthetic'
+        )],
+        ['redirect-url', 'https://shop.example.com/checkout/return'],
+    ];
+    $wompiForm = [
+        'providerReference' => $wompiReference,
+        'action' => 'https://checkout.wompi.co/p/',
+        'fields' => $wompiFields,
+    ];
+    $wompiAccepted = red_addon_payment_initiation_normalize(
+        'hosted_get_form',
+        $wompiForm
+    );
+    red_colombia_c1_assert(
+        ($wompiAccepted['accepted'] ?? false) === true
+            && ($wompiAccepted['mode'] ?? '') === 'hosted_get_form'
+            && ($wompiAccepted['value'] ?? null) === $wompiForm,
+        'the exact Wompi Web Checkout GET form is accepted unchanged'
+    );
+    $withExpiry = $wompiForm;
+    $withExpiry['fields'][] = ['expiration-time', '2026-11-08T12:00:00.000Z'];
+    red_colombia_c1_assert(
+        red_addon_payment_initiation_normalize('hosted_get_form', $withExpiry)
+            ['accepted'] === true,
+        'an optional trailing expiration time is accepted'
+    );
+    $wompiMutations = [
+        'another provider action host' => static function (array $v): array {
+            $v['action'] = 'https://evil.example/p/';
+            return $v;
+        },
+        'a private key in place of the public key' =>
+            static function (array $v): array {
+                $v['fields'][0][1] = 'prv_test_Q5yDA9xoKdePzhSGeVe9HAez7HgGORGf';
+                return $v;
+            },
+        'an integrity secret in place of the signature' =>
+            static function (array $v): array {
+                $v['fields'][4][1] = 'test_integrity_synthetic';
+                return $v;
+            },
+        'a reference that differs from the provider reference' =>
+            static function (array $v): array {
+                $v['fields'][3][1] = 'ord_' . str_repeat('b2', 16);
+                return $v;
+            },
+        'a currency other than COP' => static function (array $v): array {
+            $v['fields'][1][1] = 'USD';
+            return $v;
+        },
+        'a non-integer amount' => static function (array $v): array {
+            $v['fields'][2][1] = '24900.00';
+            return $v;
+        },
+        'a redirect URL carrying a query' => static function (array $v): array {
+            $v['fields'][5][1] .= '?status=APPROVED';
+            return $v;
+        },
+        'a non-HTTPS redirect URL' => static function (array $v): array {
+            $v['fields'][5][1] = 'http://shop.example.com/checkout/return';
+            return $v;
+        },
+        'reordered fields' => static function (array $v): array {
+            [$v['fields'][0], $v['fields'][1]] =
+                [$v['fields'][1], $v['fields'][0]];
+            return $v;
+        },
+        'an extra field' => static function (array $v): array {
+            $v['fields'][] = ['customer-data:email', 'a@example.com'];
+            return $v;
+        },
+        'a missing field' => static function (array $v): array {
+            array_pop($v['fields']);
+            return $v;
+        },
+        'an unknown top-level key' => static function (array $v): array {
+            $v['method'] = 'POST';
+            return $v;
+        },
+    ];
+    foreach ($wompiMutations as $label => $mutate) {
+        red_colombia_c1_assert(
+            red_addon_payment_initiation_normalize(
+                'hosted_get_form',
+                $mutate($wompiForm)
+            )['reason'] === 'hosted_get_form_invalid',
+            'hosted GET form refuses ' . $label
+        );
+    }
+    red_colombia_c1_assert(
+        red_addon_payment_initiation_normalize('hosted_redirect', $wompiForm)
+            ['accepted'] === false,
+        'a GET form cannot pass as a hosted redirect'
+    );
+
     $providerReference = '1234-1700000000-56789';
     $outOfBandValue = [
         'providerReference' => $providerReference,

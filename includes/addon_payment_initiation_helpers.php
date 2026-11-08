@@ -5,7 +5,8 @@
  * This dependency-free helper does not load a package, resolve a secret, open
  * a database, publish a route, or contact a provider. It preserves the
  * existing hosted reference/URL value and adds one closed out-of-band shape
- * for approval in a provider-owned application.
+ * for approval in a provider-owned application, plus one closed
+ * provider-hosted GET form (Wompi Web Checkout).
  */
 
 if (!function_exists('red_addon_payment_initiation_result')) {
@@ -84,6 +85,74 @@ if (!function_exists('red_addon_payment_initiation_https_url_valid')) {
     }
 }
 
+if (!function_exists('red_addon_payment_initiation_hosted_get_form_valid')) {
+    /**
+     * Closed provider-hosted GET form (Wompi Web Checkout). The action is one
+     * fixed provider URL and the fields are an exact, ordered, public-only
+     * list: the integrity signature is a hash, and no private key, integrity
+     * secret or event secret shape can pass the field patterns.
+     */
+    function red_addon_payment_initiation_hosted_get_form_valid($value)
+    {
+        if (!is_array($value)
+            || !red_addon_payment_initiation_exact_keys($value, [
+                'providerReference', 'action', 'fields',
+            ])
+            || !red_addon_payment_initiation_reference_valid(
+                $value['providerReference'] ?? null
+            )
+            || ($value['action'] ?? null) !== 'https://checkout.wompi.co/p/'
+            || !is_array($value['fields'] ?? null)
+            || !array_is_list($value['fields'])
+        ) {
+            return false;
+        }
+        $required = [
+            'public-key', 'currency', 'amount-in-cents', 'reference',
+            'signature:integrity', 'redirect-url',
+        ];
+        $names = [];
+        $fields = [];
+        foreach ($value['fields'] as $field) {
+            if (!is_array($field)
+                || !array_is_list($field)
+                || count($field) !== 2
+                || !is_string($field[0])
+                || !is_string($field[1])
+            ) {
+                return false;
+            }
+            $names[] = $field[0];
+            $fields[$field[0]] = $field[1];
+        }
+        if ($names !== $required
+            && $names !== array_merge($required, ['expiration-time'])
+        ) {
+            return false;
+        }
+        return preg_match(
+            '/\Apub_(?:test|prod)_[A-Za-z0-9]{8,128}\z/D',
+            $fields['public-key']
+        ) === 1
+            && $fields['currency'] === 'COP'
+            && preg_match('/\A[1-9][0-9]{2,11}\z/D', $fields['amount-in-cents'])
+                === 1
+            && $fields['reference'] === $value['providerReference']
+            && preg_match('/\Aord_[a-f0-9]{32}\z/D', $fields['reference'])
+                === 1
+            && preg_match('/\A[a-f0-9]{64}\z/D', $fields['signature:integrity'])
+                === 1
+            && red_addon_payment_initiation_https_url_valid(
+                $fields['redirect-url']
+            )
+            && (!array_key_exists('expiration-time', $fields)
+                || preg_match(
+                    '/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\z/D',
+                    $fields['expiration-time']
+                ) === 1);
+    }
+}
+
 if (!function_exists('red_addon_payment_initiation_normalize')) {
     function red_addon_payment_initiation_normalize($mode, $value)
     {
@@ -107,6 +176,11 @@ if (!function_exists('red_addon_payment_initiation_normalize')) {
                 )
             ) {
                 $result['reason'] = 'hosted_redirect_invalid';
+                return $result;
+            }
+        } elseif ($mode === 'hosted_get_form') {
+            if (!red_addon_payment_initiation_hosted_get_form_valid($value)) {
+                $result['reason'] = 'hosted_get_form_invalid';
                 return $result;
             }
         } elseif ($mode === 'out_of_band_confirmation') {
