@@ -790,4 +790,50 @@ if (!function_exists('red_addon_setting_editor_update')) {
     }
 }
 
+if (!function_exists('red_addon_settings_page_packages')) {
+    /**
+     * Installed (enabled or installed-disabled) add-ons whose current package
+     * files are valid and declare at least one setting, keyed by package id.
+     * Pure: takes the registry rows and the discovered catalog packages.
+     */
+    function red_addon_settings_page_packages($installations, $catalogPackages)
+    {
+        if (!is_array($installations) || !is_array($catalogPackages)) {
+            return [];
+        }
+        $packages = [];
+        foreach ($installations as $packageId => $row) {
+            $package = $catalogPackages[$packageId] ?? null;
+            $manifest = is_array($package) ? ($package['manifest'] ?? null) : null;
+            $state = is_array($row) ? ($row['LifecycleState'] ?? '') : '';
+            if (!is_string($packageId)
+                || !red_addon_valid_package_id($packageId)
+                || !in_array($state, ['installed_disabled', 'enabled'], true)
+                || !is_array($package)
+                || empty($package['valid'])
+                || !is_array($manifest)
+            ) {
+                continue;
+            }
+            $schema = red_addon_settings_schema($manifest);
+            if (!is_array($schema) || $schema === []) {
+                continue;
+            }
+            $name = is_string($manifest['name'] ?? null)
+                && trim($manifest['name']) !== ''
+                    ? trim($manifest['name'])
+                    : $packageId;
+            $packages[$packageId] = [
+                'name' => $name,
+                'version' => (string) ($manifest['version'] ?? ''),
+                'installedVersion' => (string) ($row['PackageVersion'] ?? ''),
+                'state' => $state,
+                'settingCount' => count($schema),
+            ];
+        }
+        ksort($packages, SORT_STRING);
+        return $packages;
+    }
+}
+
 ?>

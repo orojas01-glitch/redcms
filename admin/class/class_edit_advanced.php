@@ -91,7 +91,7 @@ class editadvanced
                 return ($row['Item'] ?? '') !== 'Website_Red_Sphere_Credit';
             }));
         }
-        $itemCount = count($rows) + ($canManageUsers ? 1 : 0) + ($canManageSite ? 2 : 0);
+        $itemCount = count($rows) + ($canManageUsers ? 1 : 0) + ($canManageSite ? 3 : 0);
 
         echo '<div class="container_12 cp_padtop red-admin-area-list-container"><div class="wrapper"><article class="grid_12 cp_admin"><div class="red-admin-area-list-shell">';
 		echo '<form id="editadvanced" name="editadvanced" class="cp red-admin-area-list-form"><fieldset>';
@@ -116,6 +116,10 @@ class editadvanced
 				echo '<div class="red-admin-area-list__row" role="row">';
 				echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--primary" role="cell"><span class="red-admin-area-list__title">Layout Builder</span><span class="red-admin-area-list__meta">Create reusable row and column structures</span></div>';
 				echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--action" role="cell">'.red_admin_list_ui_action_button('edit_layout_builder();', 'Open Layout Builder').'</div>';
+				echo '</div>';
+				echo '<div class="red-admin-area-list__row" role="row">';
+				echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--primary" role="cell"><span class="red-admin-area-list__title">Add-on settings</span><span class="red-admin-area-list__meta">Store Lite, Wompi and other installed add-ons</span></div>';
+				echo '<div class="red-admin-area-list__cell red-admin-area-list__cell--action" role="cell">'.red_admin_list_ui_action_link('/admin/bin/addon_settings.php', 'Open Add-on settings').'</div>';
 				echo '</div>';
 			}
 
