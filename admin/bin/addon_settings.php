@@ -148,7 +148,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 </head>
 <body>
 <main>
-<a class="back" href="/admin/">&larr; Back to admin</a>
+<a class="back" href="/">&larr; Back to website</a>
 <h1>Add-on settings</h1>
 <p class="lede">Settings for the add-ons installed on this site, such as Store Lite and Wompi. Keys and other secrets are never typed here: those show only whether they are configured on the server.</p>
 <?php if ($packages === []): ?>
