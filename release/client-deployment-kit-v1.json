@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
   "id": "redcms.store-lite-client-kit",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "core": {
     "id": "redcms",
     "version": "5.1.1",
-    "minimumCommit": "cee2062fe0d5d2b292169ea076c0e03bdf1173ae",
+    "minimumCommit": "de9786d359aed7a7e4f65307c8bc3d0bca141d53",
     "archivePath": "redcms"
   },
   "packages": [
     {
       "selection": "store-lite",
       "id": "redcms.store-lite",
-      "version": "0.1.51",
-      "commit": "57a948929142efb417285d2dbd76b5b3478b7738",
+      "version": "0.1.54",
+      "commit": "d4631cef68410bdebfabf9619447415c103d72a1",
       "repository": "redcms-store-lite",
       "sourcePath": "package",
       "archivePath": "redcms/addons/redcms/store-lite",
@@ -34,13 +34,13 @@
     {
       "selection": "wompi",
       "id": "redcms.store-lite-wompi",
-      "version": "0.1.5",
-      "commit": "cc2ddd03ab54f663a089f7d059d802180e555d15",
+      "version": "0.4.0",
+      "commit": "f04674c3e03bcb75b4f483b6a2845da05670c78c",
       "repository": "redcms-store-lite-wompi",
       "sourcePath": "package",
       "archivePath": "redcms/addons/redcms/store-lite-wompi",
       "required": false,
-      "releaseState": "offline_verified_account_blocked"
+      "releaseState": "sandbox_web_checkout_handoff_unverified"
     }
   ],
   "unsupportedSelections": {
