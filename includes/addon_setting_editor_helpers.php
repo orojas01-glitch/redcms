@@ -202,7 +202,8 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
         $connection,
         array $manifest,
         $packageId,
-        $allowMissingSecrets = false
+        $allowMissingSecrets = false,
+        $allowMissingOrdinary = false
     ) {
         $invalid = [
             'valid' => false,
@@ -210,6 +211,7 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
             'ordinaryValues' => [],
             'secretConfigured' => [],
             'currentStateSha256' => '',
+            'missingSettings' => [],
             'errors' => ['storage_unavailable'],
         ];
         $schema = red_addon_settings_schema($manifest);
@@ -311,6 +313,7 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
         $configured = [];
         $ordinary = [];
         $secretConfigured = [];
+        $missingOrdinary = [];
         foreach ($schema as $definition) {
             $key = $definition['key'];
             $type = $definition['type'];
@@ -339,14 +342,22 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
                 $ordinary[$key] = $definition['default'];
                 continue;
             }
+            if ($allowMissingOrdinary) {
+                // First-time setup: no stored value and no default yet.
+                $missingOrdinary[] = $key;
+                continue;
+            }
             $invalid['errors'] = ['setting_required'];
             return $invalid;
         }
+        sort($missingOrdinary, SORT_STRING);
         $validated = red_addon_settings_validate_values(
             $manifest,
             $configured
         );
-        if ($allowMissingSecrets && $validated['errors'] !== []) {
+        if (($allowMissingSecrets || $missingOrdinary !== [])
+            && $validated['errors'] !== []
+        ) {
             $missingSecrets = [];
             foreach ($schema as $definition) {
                 if (($definition['type'] ?? '') !== 'secret-reference') {
@@ -357,12 +368,15 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
                     $missingSecrets[] = $key;
                 }
             }
-            if ($missingSecrets !== []) {
+            if ($missingSecrets !== [] || $missingOrdinary !== []) {
                 foreach ($schema as $definition) {
                     if (($definition['type'] ?? '') === 'secret-reference') {
                         continue;
                     }
                     $key = $definition['key'];
+                    if (in_array($key, $missingOrdinary, true)) {
+                        continue;
+                    }
                     if (!array_key_exists($key, $ordinary)) {
                         $invalid['errors'] = ['setting_required'];
                         return $invalid;
@@ -402,8 +416,37 @@ if (!function_exists('red_addon_setting_editor_current_configuration')) {
             'ordinaryValues' => $validated['values'],
             'secretConfigured' => $secretConfigured,
             'currentStateSha256' => (string) $currentState['stateSha256'],
+            'missingSettings' => $missingOrdinary,
             'errors' => [],
         ];
+    }
+}
+
+if (!function_exists('red_addon_setting_editor_plan_sha256')) {
+    /**
+     * Fingerprint of what the editor showed: the package identity, the
+     * administrator, the lifecycle state and the stored settings. A save is
+     * accepted only while this still matches, so a change made elsewhere in
+     * the meantime is reported as stale instead of being overwritten.
+     */
+    function red_addon_setting_editor_plan_sha256(
+        $connection,
+        array $snapshot,
+        $adminRecordId,
+        $lifecycleState,
+        $currentStateSha256
+    ) {
+        $encoded = json_encode([
+            'database' => red_addon_setting_database_name($connection),
+            'actorAdminRecordId' => (int) $adminRecordId,
+            'packageId' => (string) ($snapshot['id'] ?? ''),
+            'version' => (string) ($snapshot['version'] ?? ''),
+            'manifestSha256' => (string) ($snapshot['manifestSha256'] ?? ''),
+            'inventorySha256' => (string) ($snapshot['inventorySha256'] ?? ''),
+            'lifecycleState' => (string) $lifecycleState,
+            'currentStateSha256' => (string) $currentStateSha256,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return is_string($encoded) ? hash('sha256', $encoded) : '';
     }
 }
 
@@ -482,38 +525,48 @@ if (!function_exists('red_addon_setting_editor_context')) {
             $result['reason'] = 'permission_denied';
             return $result;
         }
+        // Unset settings (first-time setup, or a secret not provisioned yet)
+        // still open the editor: ordinary ones render empty, secrets render
+        // "Not configured". The values are validated when they are saved.
         $current = red_addon_setting_editor_current_configuration(
             $connection,
             $manifest,
-            $snapshot['id']
+            $snapshot['id'],
+            true,
+            true
         );
         if (empty($current['valid'])) {
             $result['reason'] = (string) ($current['errors'][0]
                 ?? 'current_state_invalid');
             return $result;
         }
-        $plan = red_addon_setting_write_preflight(
+        $lifecycleState = (string) ($read['lifecycleState'] ?? '');
+        $planSha256 = red_addon_setting_editor_plan_sha256(
             $connection,
-            $package,
+            $snapshot,
             $adminRecordId,
-            $current['configuredValues']
+            $lifecycleState,
+            $current['currentStateSha256']
         );
-        if (empty($plan['valid']) || !red_addon_valid_sha256($plan['planSha256'] ?? '')) {
-            $result['reason'] = (string) ($plan['errors'][0]
-                ?? 'write_unavailable');
+        if (!red_addon_valid_sha256($planSha256)) {
+            $result['reason'] = 'write_unavailable';
             return $result;
+        }
+        $ordinaryValues = $current['ordinaryValues'];
+        foreach ($current['missingSettings'] as $missingKey) {
+            $ordinaryValues[$missingKey] = null;
         }
         return [
             'ready' => true,
             'packageId' => $snapshot['id'],
             'version' => $snapshot['version'],
-            'lifecycleState' => (string) ($read['lifecycleState'] ?? ''),
+            'lifecycleState' => $lifecycleState,
             'manifest' => $manifest,
             'settings' => $read['settings'],
-            'ordinaryValues' => $current['ordinaryValues'],
+            'ordinaryValues' => $ordinaryValues,
             'secretConfigured' => $current['secretConfigured'],
             'modelSha256' => (string) $read['modelSha256'],
-            'planSha256' => $plan['planSha256'],
+            'planSha256' => $planSha256,
             'reason' => 'ready',
         ];
     }
@@ -725,10 +778,28 @@ if (!function_exists('red_addon_setting_editor_update')) {
         ) {
             return $failure;
         }
+        // The form carries the editor fingerprint it was rendered with.
+        $context = red_addon_setting_editor_context(
+            $connection,
+            $package,
+            $adminRecordId
+        );
+        if (empty($context['ready'])) {
+            if (($context['reason'] ?? '') === 'permission_denied') {
+                $failure['reason'] = 'permission_denied';
+            }
+            return $failure;
+        }
+        if (!hash_equals($context['planSha256'], (string) $expectedPlanSha256)) {
+            $failure['reason'] = 'stale_plan';
+            return $failure;
+        }
         $current = red_addon_setting_editor_current_configuration(
             $connection,
             $manifest,
-            $snapshot['id']
+            $snapshot['id'],
+            true,
+            true
         );
         if (empty($current['valid'])) {
             return $failure;
@@ -752,8 +823,31 @@ if (!function_exists('red_addon_setting_editor_update')) {
             )
         );
         if (empty($decoded['valid'])) {
-            $failure['reason'] = (string) ($decoded['errors'][0]
-                ?? 'invalid_values');
+            $reason = (string) ($decoded['errors'][0] ?? '');
+            $failure['reason'] = in_array(
+                $reason,
+                ['secret_submission', 'secret_unconfigured'],
+                true
+            ) ? $reason : 'invalid_values';
+            return $failure;
+        }
+        // The write plan covers the submitted values; the write recomputes it
+        // under the settings lock, so a concurrent change is still refused.
+        $writePlan = red_addon_setting_write_preflight(
+            $connection,
+            $package,
+            $adminRecordId,
+            $decoded['configuredValues']
+        );
+        if (empty($writePlan['valid'])
+            || !red_addon_valid_sha256($writePlan['planSha256'] ?? '')
+        ) {
+            $reason = (string) ($writePlan['errors'][0] ?? '');
+            $failure['reason'] = $reason === 'values_invalid'
+                ? 'invalid_values'
+                : ($reason === 'permission_denied'
+                    ? 'permission_denied'
+                    : 'settings_unavailable');
             return $failure;
         }
         $written = red_addon_setting_write(
@@ -761,7 +855,7 @@ if (!function_exists('red_addon_setting_editor_update')) {
             $package,
             $adminRecordId,
             $decoded['configuredValues'],
-            $expectedPlanSha256
+            $writePlan['planSha256']
         );
         if (($written['status'] ?? '') === 'updated') {
             return [
