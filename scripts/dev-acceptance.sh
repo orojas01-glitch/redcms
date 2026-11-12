@@ -90,7 +90,6 @@ fi
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-runtime-setting-contract-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-values-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-editor-self-test.php"
-"$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-setting-editor-first-save-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/admin-addon-settings-page-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-secret-resolution-self-test.php"
 "$RED_PHP_BIN_RESOLVED" "$SCRIPT_DIR/addon-secret-availability-self-test.php"
@@ -5102,6 +5101,9 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 
 printf '%s\n' 'Running permission-scoped add-on setting read-model checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-read-model-self-test.php"
+
+printf '%s\n' 'Running first-time add-on settings editor save checks.'
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-editor-first-save-self-test.php"
 
 printf '%s\n' 'Running permission-scoped administrator tool dispatch checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-dispatch-self-test.php"
