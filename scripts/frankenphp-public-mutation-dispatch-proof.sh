@@ -121,7 +121,15 @@ for include_file in \
     addon_public_mutation_response_emitter_helpers.php \
     addon_public_mutation_dispatch_helpers.php \
     addon_public_mutation_endpoint_helpers.php \
-    addon_public_mutation_subject_cookie_emitter_helpers.php; do
+    addon_public_mutation_subject_cookie_emitter_helpers.php \
+    addon_adapter_helpers.php \
+    addon_subscription_catalog_binding_helpers.php \
+    addon_subscription_checkout_coordinator_helpers.php \
+    addon_subscription_checkout_provider_journal_helpers.php \
+    addon_subscription_checkout_provider_operation_helpers.php \
+    addon_subscription_checkout_public_response_helpers.php \
+    addon_subscription_checkout_public_runtime_helpers.php \
+    addon_wompi_checkout_public_runtime_helpers.php; do
     cp "$PROJECT_ROOT/includes/$include_file" "$BUILD_CONTEXT/includes/$include_file"
 done
 
