@@ -5104,6 +5104,7 @@ RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/
 
 printf '%s\n' 'Running first-time add-on settings editor save checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-setting-editor-first-save-self-test.php"
+RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-secret-first-setup-self-test.php"
 
 printf '%s\n' 'Running permission-scoped administrator tool dispatch checks.'
 RED_DB_NAME="$ACCEPTANCE_DATABASE" "$FRANKENPHP_BIN" php-cli "$RED_PROJECT_ROOT/scripts/addon-admin-tool-dispatch-self-test.php"

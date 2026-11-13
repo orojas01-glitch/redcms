@@ -72,6 +72,33 @@ secret value, source path, provider detail, package path, plan detail, or SQL
 error. It executes no package PHP, changes no lifecycle state, creates no
 route, and does not make Store Lite enablement-ready.
 
+## First-time setup
+
+A package with secret-reference settings and ordinary settings that have no
+default (for example a payment adapter's public key) cannot be configured
+through the settings editor alone: the editor refuses to save while a secret
+reference is unbound, and a references-only replacement refuses while an
+ordinary setting has never been stored. The replacement target therefore
+accepts, as an optional final argument, values for ordinary settings that
+have never been stored. Every never-stored ordinary setting must be supplied;
+already-stored values, secret settings, and undeclared keys are refused. The
+complete configuration is written once through the same locked writer.
+
+The server-local CLI `scripts/admin-addon-secret-setup.php` exposes this path
+with a dry-run plan and an exact database and plan confirmation:
+
+```text
+php scripts/admin-addon-secret-setup.php --package=vendor.package --actor-admin=ID \
+  --reference=setting.key=config:reference [--reference=...] \
+  [--setting=setting.key=value ...]
+php scripts/admin-addon-secret-setup.php ... same arguments ... \
+  --confirm-database=NAME --confirm-plan-sha256=SHA256 --apply
+```
+
+It accepts opaque references only; secret values must already be provisioned
+server-locally and are never printed. Afterwards the ordinary values are
+edited through the settings editor as usual.
+
 ## Acceptance gate
 
 Disposable evidence must prove:

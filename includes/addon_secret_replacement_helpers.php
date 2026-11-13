@@ -116,7 +116,8 @@ if (!function_exists('red_addon_secret_replacement_target')) {
         $connection,
         array $package,
         $adminRecordId,
-        array $settingReferences
+        array $settingReferences,
+        array $missingOrdinaryValues = []
     ) {
         $result = [
             'valid' => false,
@@ -169,16 +170,80 @@ if (!function_exists('red_addon_secret_replacement_target')) {
             }
         }
 
+        // First-time setup: ordinary settings that have never been stored
+        // may be supplied together with the references, because the complete
+        // typed configuration cannot be written while any of them is absent.
+        // Values for settings that are already stored are refused here; they
+        // change through the ordinary settings editor.
+        if (count($missingOrdinaryValues) > 200
+            || (array_is_list($missingOrdinaryValues)
+                && $missingOrdinaryValues !== [])
+        ) {
+            $result['reason'] = 'invalid_values';
+            return $result;
+        }
         $current = red_addon_setting_editor_current_configuration(
             $connection,
             $manifest,
             $snapshot['id'],
-            true
+            true,
+            $missingOrdinaryValues !== []
         );
         if (empty($current['valid'])) {
             $result['reason'] = (string) ($current['errors'][0]
                 ?? 'settings_unavailable');
             return $result;
+        }
+        $missingSettings = is_array($current['missingSettings'] ?? null)
+            ? $current['missingSettings']
+            : [];
+        $suppliedOrdinary = [];
+        foreach ($missingOrdinaryValues as $key => $rawValue) {
+            $definition = is_string($key) ? ($definitions[$key] ?? null) : null;
+            $type = is_array($definition)
+                ? (string) ($definition['type'] ?? '')
+                : '';
+            if ($type === ''
+                || $type === 'secret-reference'
+                || !in_array($key, $missingSettings, true)
+                || !is_string($rawValue)
+                || strlen($rawValue) > 4096
+            ) {
+                $result['reason'] = 'invalid_values';
+                return $result;
+            }
+            if ($type === 'boolean') {
+                if ($rawValue !== '0' && $rawValue !== '1') {
+                    $result['reason'] = 'invalid_values';
+                    return $result;
+                }
+                $suppliedOrdinary[$key] = $rawValue === '1';
+            } elseif ($type === 'integer') {
+                $integer = filter_var(
+                    $rawValue,
+                    FILTER_VALIDATE_INT,
+                    ['options' => [
+                        'min_range' => -2147483648,
+                        'max_range' => 2147483647,
+                    ]]
+                );
+                if (preg_match('/\A(?:0|-?[1-9][0-9]*)\z/D', $rawValue) !== 1
+                    || $integer === false
+                ) {
+                    $result['reason'] = 'invalid_values';
+                    return $result;
+                }
+                $suppliedOrdinary[$key] = (int) $integer;
+            } elseif (in_array(
+                $type,
+                ['text', 'select', 'url', 'email'],
+                true
+            )) {
+                $suppliedOrdinary[$key] = $rawValue;
+            } else {
+                $result['reason'] = 'invalid_values';
+                return $result;
+            }
         }
         $declarations = red_addon_secret_reference_declarations();
         $inventory = red_addon_secret_value_inventory();
@@ -194,7 +259,21 @@ if (!function_exists('red_addon_secret_replacement_target')) {
             }
         }
 
-        $configured = $current['configuredValues'];
+        $configured = array_filter(
+            $current['configuredValues'],
+            static function ($value) {
+                return $value !== null;
+            }
+        );
+        foreach ($suppliedOrdinary as $key => $value) {
+            $configured[$key] = $value;
+        }
+        foreach ($missingSettings as $missingKey) {
+            if (!array_key_exists($missingKey, $configured)) {
+                $result['reason'] = 'setting_required';
+                return $result;
+            }
+        }
         foreach ($settingReferences as $key => $reference) {
             $configured[$key] = $reference;
         }
@@ -232,7 +311,8 @@ if (!function_exists('red_addon_secret_replacement_update')) {
         array $package,
         $adminRecordId,
         array $settingReferences,
-        $expectedPlanSha256
+        $expectedPlanSha256,
+        array $missingOrdinaryValues = []
     ) {
         $failure = red_addon_secret_replacement_result();
         if (!red_addon_valid_sha256($expectedPlanSha256)) {
@@ -243,7 +323,8 @@ if (!function_exists('red_addon_secret_replacement_update')) {
             $connection,
             $package,
             $adminRecordId,
-            $settingReferences
+            $settingReferences,
+            $missingOrdinaryValues
         );
         if (empty($target['valid'])) {
             $failure['reason'] = (string) ($target['reason']
