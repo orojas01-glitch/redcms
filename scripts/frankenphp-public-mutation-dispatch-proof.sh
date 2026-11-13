@@ -95,6 +95,7 @@ for include_file in \
     addon_registry_helpers.php \
     addon_runtime_helpers.php \
     addon_runtime_secret_helpers.php \
+    visitor_country_helpers.php \
     addon_secret_resolution_helpers.php \
     addon_secret_availability_helpers.php \
     addon_setting_helpers.php \
@@ -120,7 +121,15 @@ for include_file in \
     addon_public_mutation_response_emitter_helpers.php \
     addon_public_mutation_dispatch_helpers.php \
     addon_public_mutation_endpoint_helpers.php \
-    addon_public_mutation_subject_cookie_emitter_helpers.php; do
+    addon_public_mutation_subject_cookie_emitter_helpers.php \
+    addon_adapter_helpers.php \
+    addon_subscription_catalog_binding_helpers.php \
+    addon_subscription_checkout_coordinator_helpers.php \
+    addon_subscription_checkout_provider_journal_helpers.php \
+    addon_subscription_checkout_provider_operation_helpers.php \
+    addon_subscription_checkout_public_response_helpers.php \
+    addon_subscription_checkout_public_runtime_helpers.php \
+    addon_wompi_checkout_public_runtime_helpers.php; do
     cp "$PROJECT_ROOT/includes/$include_file" "$BUILD_CONTEXT/includes/$include_file"
 done
 
@@ -176,8 +185,8 @@ docker exec -i "$DB_CONTAINER" mysql \
 shopt -s nullglob
 MIGRATIONS=("$PROJECT_ROOT"/database/migrations/*.sql)
 shopt -u nullglob
-if [[ "${#MIGRATIONS[@]}" -ne 46 ]]; then
-    echo "Expected 46 migrations, found ${#MIGRATIONS[@]}." >&2
+if [[ "${#MIGRATIONS[@]}" -ne 47 ]]; then
+    echo "Expected 47 migrations, found ${#MIGRATIONS[@]}." >&2
     exit 1
 fi
 for migration in "${MIGRATIONS[@]}"; do

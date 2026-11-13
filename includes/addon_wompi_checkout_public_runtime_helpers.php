@@ -32,9 +32,9 @@ if (!function_exists('red_addon_wompi_checkout_public_runtime_versions')) {
     function red_addon_wompi_checkout_public_runtime_versions()
     {
         return [
-            // 0.1.55 only makes each payment method independently
-            // switchable; the Wompi handoff contract is unchanged.
-            'redcms.store-lite' => ['0.1.54', '0.1.55'],
+            // 0.1.55/0.1.56 only change which payment methods are
+            // shown; the Wompi handoff contract is unchanged.
+            'redcms.store-lite' => ['0.1.54', '0.1.55', '0.1.56'],
             'redcms.store-lite-wompi' => ['0.4.0'],
         ];
     }

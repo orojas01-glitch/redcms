@@ -158,11 +158,11 @@ try {
         !empty($catalog['valid'])
             && in_array(
                 $storePackage['manifest']['version'] ?? '',
-                ['0.1.53', '0.1.54', '0.1.55'],
+                ['0.1.53', '0.1.54', '0.1.55', '0.1.56'],
                 true
             )
             && ($adapterPackage['manifest']['version'] ?? '') === '0.4.0',
-        'exact Store Lite 0.1.53/0.1.54/0.1.55 and Wompi 0.4.0 packages are trusted ('
+        'exact Store Lite 0.1.53-0.1.56 and Wompi 0.4.0 packages are trusted ('
             . json_encode($catalog['errors'] ?? []) . ')'
     );
 
