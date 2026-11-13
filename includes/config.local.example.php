@@ -26,6 +26,12 @@ return [
     'CSP_MODE' => 'off', // off | report-only | enforce
     'CSP_SOURCES' => [], // directive => array of exact approved HTTPS origins
     'CSP_STRICT_REPORT' => false, // report remaining inline-script usage locally
+    // Visitor country for display choices only (e.g. a Colombia-only payment
+    // option); never for authorization. off | cloudflare (CF-IPCountry; only
+    // when all traffic goes through Cloudflare) | server-variable (web-server
+    // GeoIP module: GEOIP_COUNTRY_CODE / MM_COUNTRY_CODE, or the name below).
+    'VISITOR_COUNTRY_SOURCE' => 'off',
+    'VISITOR_COUNTRY_SERVER_VARIABLE' => '',
     // Canonical HTTPS origin for a future core-owned public-mutation path.
     // Never derive this from Host or a request header.
     'PUBLIC_MUTATION_TRUSTED_ORIGIN' => '',

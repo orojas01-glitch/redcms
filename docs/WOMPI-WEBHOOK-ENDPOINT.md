@@ -29,7 +29,7 @@ refused. These checks run before the database is opened.
 
 ## Decision
 
-Runtime assembly pins RED-CMS `5.1.0`, Store Lite `0.1.53`, `0.1.54` or `0.1.55` and Wompi adapter
+Runtime assembly pins RED-CMS `5.1.0`, Store Lite `0.1.53` to `0.1.56` and Wompi adapter
 `0.4.0`. Both packages must be enabled/current with exact manifest and
 inventory evidence. Only the `wompi.event-secret` reference is resolved; the
 private and integrity keys are outside this request.
@@ -86,7 +86,7 @@ With the package present it also runs a signed synthetic `APPROVED` event
 through the real coordinator to an applied `paid` result.
 
 `scripts/wompi-webhook-launch-rehearsal.sh` (11 assertions) stages a project
-copy with Store Lite `0.1.53`, `0.1.54` or `0.1.55` and Wompi `0.4.0`, creates a disposable database
+copy with Store Lite `0.1.53` to `0.1.56` and Wompi `0.4.0`, creates a disposable database
 and grant, installs and enables both packages through the normal owner
 lifecycle with opaque secret references, stores one pending `wompi_checkout`
 order, and sends deliveries through the real capture, dispatch, runtime,

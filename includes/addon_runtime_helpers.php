@@ -10,6 +10,7 @@
 
 require_once __DIR__ . '/addon_registry_helpers.php';
 require_once __DIR__ . '/addon_runtime_secret_helpers.php';
+require_once __DIR__ . '/visitor_country_helpers.php';
 
 if (!class_exists('RED_Addon_Runtime_Registry', false)) {
     final class RED_Addon_Runtime_Registry
