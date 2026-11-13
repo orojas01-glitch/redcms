@@ -95,6 +95,12 @@ php scripts/admin-addon-secret-setup.php ... same arguments ... \
   --confirm-database=NAME --confirm-plan-sha256=SHA256 --apply
 ```
 
+Payment-adapter profiles forbid package-declared setting permissions, so a
+setting in an `adapter` manifest that declares no `permission` is managed by
+the Owner alone (in the CLI and in the settings editor). The internal marker
+`addons.owner-only` is never checked against granted capabilities. Settings of
+other package types without a permission remain unmanageable.
+
 It accepts opaque references only; secret values must already be provisioned
 server-locally and are never printed. Afterwards the ordinary values are
 edited through the settings editor as usual.

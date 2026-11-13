@@ -419,6 +419,63 @@ try {
         !empty($rebind['valid']),
         'reference replacement without ordinary values keeps working after setup'
     );
+
+    // Payment-adapter profiles forbid package-declared setting permissions,
+    // so such settings are managed by the Owner alone.
+    $adapterManifest = $manifest;
+    $adapterManifest['type'] = 'adapter';
+    foreach ($adapterManifest['settings'] as $index => $setting) {
+        unset($adapterManifest['settings'][$index]['permission']);
+    }
+    $servicePermissionless = $adapterManifest;
+    $servicePermissionless['type'] = 'service';
+    $ownerPlan = red_addon_setting_permission_plan(
+        $adapterManifest,
+        'provider.public-key'
+    );
+    red_addon_secret_first_setup_assert(
+        is_array($ownerPlan)
+            && !empty($ownerPlan['ownerOnly'])
+            && red_addon_setting_permission_plan(
+                $servicePermissionless,
+                'provider.public-key'
+            ) === null,
+        'only adapter settings without a declared permission fall back to the Owner'
+    );
+    $granted = mysqli_query(
+        $connection,
+        "INSERT INTO RED_Admin_Capabilities (
+            AdminRecordID, Capability, GrantedByAdminRecordID
+         ) VALUES ($actorId, 'addons.owner-only', $actorId)"
+    );
+    $denied = red_addon_setting_permission_decision(
+        $connection,
+        $adapterManifest,
+        'provider.private-key',
+        $actorId
+    );
+    red_addon_secret_first_setup_assert(
+        $granted
+            && empty($denied['authorized'])
+            && $denied['reason'] === 'permission_denied',
+        'a non-Owner is refused even with a capability named like the marker'
+    );
+    mysqli_query(
+        $connection,
+        "INSERT INTO RED_Admin_Roles
+         (AdminRecordID, RoleName, AssignedByAdminRecordID)
+         VALUES ($actorId, 'owner', $actorId)"
+    );
+    $allowed = red_addon_setting_permission_decision(
+        $connection,
+        $adapterManifest,
+        'provider.private-key',
+        $actorId
+    );
+    red_addon_secret_first_setup_assert(
+        !empty($allowed['authorized']),
+        'the Owner may manage adapter settings that declare no permission'
+    );
 } finally {
     putenv('RED_ADDON_SECRET_REFERENCES');
     putenv('RED_ADDON_SECRET_VALUES_JSON');
