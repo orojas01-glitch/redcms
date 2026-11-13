@@ -49,6 +49,20 @@ if (!function_exists('red_addon_setting_permission_plan')) {
             if (($definition['key'] ?? null) !== $settingKey) {
                 continue;
             }
+            if (!array_key_exists('permission', $definition)
+                && ($manifest['type'] ?? null) === 'adapter'
+            ) {
+                // Payment-adapter profiles forbid package-declared setting
+                // permissions, so their settings (provider keys and secret
+                // references) are managed by the Owner alone. The marker is
+                // never checked against granted capabilities.
+                return [
+                    'setting' => $settingKey,
+                    'operation' => 'manage',
+                    'permission' => 'addons.owner-only',
+                    'ownerOnly' => true,
+                ];
+            }
             $permission = $definition['permission'] ?? null;
             if (!is_string($permission)
                 || !red_addon_valid_permission($permission)
@@ -233,7 +247,13 @@ if (!function_exists('red_addon_setting_permission_decision')) {
             $result['reason'] = 'storage_unavailable';
             return $result;
         }
-        if (!red_addon_setting_actor_has_permission(
+        if (!empty($plan['ownerOnly'])) {
+            require_once __DIR__ . '/admin_addon_authorization_helpers.php';
+            if (!red_admin_addon_is_owner($connection, $adminRecordId)) {
+                $result['reason'] = 'permission_denied';
+                return $result;
+            }
+        } elseif (!red_addon_setting_actor_has_permission(
             $connection,
             $adminRecordId,
             $plan['permission']
