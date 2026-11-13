@@ -95,6 +95,7 @@ for include_file in \
     addon_registry_helpers.php \
     addon_runtime_helpers.php \
     addon_runtime_secret_helpers.php \
+    visitor_country_helpers.php \
     addon_secret_resolution_helpers.php \
     addon_secret_availability_helpers.php \
     addon_setting_helpers.php \
