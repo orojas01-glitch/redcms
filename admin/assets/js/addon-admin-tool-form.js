@@ -161,6 +161,9 @@
             if (!response.ok || !data.ok) {
                 var error = new Error(data.reason || 'save_failed');
                 error.reason = data.reason || 'save_failed';
+                error.problems = Array.isArray(data.problems)
+                    ? data.problems
+                    : [];
                 throw error;
             }
             return data;
@@ -209,7 +212,24 @@
         });
     }
 
-    function failureMessage(reason, creating) {
+    function problemMessages(problems) {
+        if (!Array.isArray(problems)) {
+            return [];
+        }
+        return problems.filter(function (problem) {
+            return problem
+                && typeof problem.message === 'string'
+                && problem.message !== '';
+        }).map(function (problem) {
+            return problem.message;
+        });
+    }
+
+    function failureMessage(reason, creating, problems) {
+        var messages = problemMessages(problems);
+        if (reason === 'invalid_values' && messages.length) {
+            return 'Nothing was saved. ' + messages.join(' ');
+        }
         if (reason === 'state_conflict') {
             return creating
                 ? 'This draft changed after it was opened. Start again before creating.'
@@ -458,7 +478,8 @@
             if (status) {
                 status.textContent = failureMessage(
                     error.reason || error.message,
-                    creating
+                    creating,
+                    error.problems
                 );
             }
             if (submit) {

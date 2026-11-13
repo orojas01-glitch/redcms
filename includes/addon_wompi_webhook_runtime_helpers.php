@@ -10,7 +10,7 @@ if (!function_exists('red_addon_wompi_webhook_runtime_versions')) {
     function red_addon_wompi_webhook_runtime_versions()
     {
         return [
-            'redcms.store-lite' => ['0.1.53', '0.1.54'],
+            'redcms.store-lite' => ['0.1.53', '0.1.54', '0.1.55'],
             'redcms.store-lite-wompi' => ['0.4.0'],
         ];
     }

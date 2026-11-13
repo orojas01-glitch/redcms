@@ -700,10 +700,32 @@ if (!function_exists('red_addon_admin_tool_form_create_endpoint_render')) {
     }
 }
 
+if (!function_exists('red_addon_admin_tool_form_public_problems')) {
+    /**
+     * Re-normalizes add-on refusal problems for the JSON body. Only the
+     * values_refused outcome carries them, so no other failure leaks detail.
+     */
+    function red_addon_admin_tool_form_public_problems($reason, $problems)
+    {
+        if ((string) $reason !== 'values_refused'
+            || !is_array($problems)
+            || $problems === []
+            || !class_exists('RED_Addon_Admin_Tool_Form_Values_Refused', false)
+        ) {
+            return [];
+        }
+        $refused = new RED_Addon_Admin_Tool_Form_Values_Refused(
+            array_values($problems)
+        );
+        return $refused->problems();
+    }
+}
+
 if (!function_exists('red_addon_admin_tool_form_save_failure')) {
-    function red_addon_admin_tool_form_save_failure($reason)
+    function red_addon_admin_tool_form_save_failure($reason, $problems = [])
     {
         $mapping = [
+            'values_refused' => [422, 'invalid_values'],
             'invalid_request' => [400, 'invalid_request'],
             'permission_denied' => [403, 'permission_denied'],
             'body_too_large' => [413, 'body_too_large'],
@@ -720,9 +742,17 @@ if (!function_exists('red_addon_admin_tool_form_save_failure')) {
         ];
         [$status, $publicReason] = $mapping[(string) $reason]
             ?? [503, 'temporary_unavailable'];
+        $body = ['ok' => false, 'reason' => $publicReason];
+        $problems = red_addon_admin_tool_form_public_problems(
+            $reason,
+            $problems
+        );
+        if ($problems !== []) {
+            $body['problems'] = $problems;
+        }
         return [
             'httpStatus' => $status,
-            'body' => ['ok' => false, 'reason' => $publicReason],
+            'body' => $body,
         ];
     }
 }
@@ -767,15 +797,17 @@ if (!function_exists('red_addon_admin_tool_form_save_dispatch')) {
             ];
         }
         return red_addon_admin_tool_form_save_failure(
-            $written['reason'] ?? 'save_failed'
+            $written['reason'] ?? 'save_failed',
+            $written['problems'] ?? []
         );
     }
 }
 
 if (!function_exists('red_addon_admin_tool_form_create_failure')) {
-    function red_addon_admin_tool_form_create_failure($reason)
+    function red_addon_admin_tool_form_create_failure($reason, $problems = [])
     {
         $mapping = [
+            'values_refused' => [422, 'invalid_values'],
             'invalid_request' => [400, 'invalid_request'],
             'permission_denied' => [403, 'permission_denied'],
             'body_too_large' => [413, 'body_too_large'],
@@ -793,9 +825,17 @@ if (!function_exists('red_addon_admin_tool_form_create_failure')) {
         ];
         [$status, $publicReason] = $mapping[(string) $reason]
             ?? [503, 'temporary_unavailable'];
+        $body = ['ok' => false, 'reason' => $publicReason];
+        $problems = red_addon_admin_tool_form_public_problems(
+            $reason,
+            $problems
+        );
+        if ($problems !== []) {
+            $body['problems'] = $problems;
+        }
         return [
             'httpStatus' => $status,
-            'body' => ['ok' => false, 'reason' => $publicReason],
+            'body' => $body,
         ];
     }
 }
@@ -843,7 +883,8 @@ if (!function_exists('red_addon_admin_tool_form_create_dispatch')) {
             ];
         }
         return red_addon_admin_tool_form_create_failure(
-            $created['reason'] ?? 'create_failed'
+            $created['reason'] ?? 'create_failed',
+            $created['problems'] ?? []
         );
     }
 }

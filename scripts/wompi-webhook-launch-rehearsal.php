@@ -158,11 +158,11 @@ try {
         !empty($catalog['valid'])
             && in_array(
                 $storePackage['manifest']['version'] ?? '',
-                ['0.1.53', '0.1.54'],
+                ['0.1.53', '0.1.54', '0.1.55'],
                 true
             )
             && ($adapterPackage['manifest']['version'] ?? '') === '0.4.0',
-        'exact Store Lite 0.1.53/0.1.54 and Wompi 0.4.0 packages are trusted ('
+        'exact Store Lite 0.1.53/0.1.54/0.1.55 and Wompi 0.4.0 packages are trusted ('
             . json_encode($catalog['errors'] ?? []) . ')'
     );
 
@@ -180,7 +180,7 @@ try {
         ['checkout.pay-on-receipt-enabled', 'boolean', true],
         ['checkout.pickup-enabled', 'boolean', true],
     ];
-    if ($storePackage['manifest']['version'] === '0.1.54') {
+    if ($storePackage['manifest']['version'] !== '0.1.53') {
         $storeSettings[] = ['checkout.wompi-enabled', 'boolean', true];
     }
     foreach ($storeSettings as [$key, $type, $value]) {
