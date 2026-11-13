@@ -624,7 +624,7 @@ try {
 
     $wompiReference = 'ord_' . str_repeat('a1', 16);
     $wompiFields = [
-        ['public-key', 'pub_test_Q5yDA9xoKdePzhSGeVe9HAez7HgGORGf'],
+        ['public-key', 'pub_test_' . str_repeat('P', 32)],
         ['currency', 'COP'],
         ['amount-in-cents', '2490000'],
         ['reference', $wompiReference],
@@ -663,7 +663,7 @@ try {
         },
         'a private key in place of the public key' =>
             static function (array $v): array {
-                $v['fields'][0][1] = 'prv_test_Q5yDA9xoKdePzhSGeVe9HAez7HgGORGf';
+                $v['fields'][0][1] = 'prv_test_' . str_repeat('P', 32);
                 return $v;
             },
         'an integrity secret in place of the signature' =>

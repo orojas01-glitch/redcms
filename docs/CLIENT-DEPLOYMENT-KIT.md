@@ -11,10 +11,10 @@ The kit composes independently versioned sources without moving their code into
 the public core repository:
 
 - RED-CMS core `5.1.1` from this repository;
-- required Store Lite `0.1.51` from `redcms-store-lite`;
+- required Store Lite `0.1.54` from `redcms-store-lite`;
 - optional Stripe Checkout `0.1.21` from
   `redcms-store-lite-stripe-checkout`; and
-- optional Wompi `0.1.5` from `redcms-store-lite-wompi`.
+- optional Wompi `0.4.0` from `redcms-store-lite-wompi`.
 
 The exact package revisions and destinations are pinned in
 [`release/client-deployment-kit-v1.json`](../release/client-deployment-kit-v1.json).
@@ -39,6 +39,15 @@ manifest and lockfile but intentionally does not carry `vendor/`. A commerce
 project must install the locked dependency in its isolated build and load the
 autoloader before invoking the SDK-backed classes. The generic kit does not do
 that automatically and does not activate the declared webhook route.
+
+Kit `0.1.13` requires core at or after the Add-on settings page merge
+(`de9786d`), which also carries the Wompi Web Checkout handoff. Store Lite
+`0.1.54` offers Wompi Web Checkout as a COP payment method behind the
+`checkout.wompi-enabled` setting, and Wompi `0.4.0` supplies the Web Checkout
+planner and Sandbox transaction lookup. The handoff stays off until the
+server-side Sandbox gate and keys are provisioned; see
+[WOMPI-CHECKOUT-HANDOFF.md](WOMPI-CHECKOUT-HANDOFF.md). Sandbox payment
+acceptance for this pairing is not yet recorded.
 
 ## Build the archive
 

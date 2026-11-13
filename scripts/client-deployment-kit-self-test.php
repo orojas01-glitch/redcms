@@ -52,14 +52,14 @@ try {
 red_client_kit_test_assert(
     ($release['schemaVersion'] ?? null) === 1
         && ($release['id'] ?? null) === 'redcms.store-lite-client-kit'
-        && ($release['version'] ?? null) === '0.1.12',
+        && ($release['version'] ?? null) === '0.1.13',
     'release identity is exact'
 );
 red_client_kit_test_assert(
     ($release['core']['version'] ?? null) === '5.1.1'
         && ($release['core']['minimumCommit'] ?? null)
-            === 'cee2062fe0d5d2b292169ea076c0e03bdf1173ae',
-    'core 5.1.1 compatibility and reconciled minimum revision are pinned'
+            === 'de9786d359aed7a7e4f65307c8bc3d0bca141d53',
+    'core 5.1.1 compatibility and the Wompi checkout and add-on settings revision are pinned'
 );
 red_client_kit_test_assert(
     str_contains($bootstrap, "define('RED_CMS_VERSION', '5.1.1')")
@@ -78,9 +78,9 @@ red_client_kit_test_assert(
     'release contains only Store Lite and the two implemented adapter selections'
 );
 red_client_kit_test_assert(
-    ($packages['store-lite']['version'] ?? null) === '0.1.51'
+    ($packages['store-lite']['version'] ?? null) === '0.1.54'
         && ($packages['store-lite']['commit'] ?? null)
-            === '57a948929142efb417285d2dbd76b5b3478b7738'
+            === 'd4631cef68410bdebfabf9619447415c103d72a1'
         && ($packages['store-lite']['required'] ?? null) === true
         && ($packages['store-lite']['releaseState'] ?? null)
             === 'legacy_sandbox_evidence_offline_commerce_foundation'
@@ -89,7 +89,11 @@ red_client_kit_test_assert(
             === '35a7b4bcb1dba1cf94e3d51ea50658b57ef09874'
         && ($packages['stripe']['releaseState'] ?? null)
             === 'legacy_sandbox_evidence_offline_commerce_foundation'
-        && ($packages['wompi']['version'] ?? null) === '0.1.5',
+        && ($packages['wompi']['version'] ?? null) === '0.4.0'
+        && ($packages['wompi']['commit'] ?? null)
+            === 'f04674c3e03bcb75b4f483b6a2845da05670c78c'
+        && ($packages['wompi']['releaseState'] ?? null)
+            === 'sandbox_web_checkout_handoff_unverified',
     'package versions match the reviewed repository manifests'
 );
 foreach ($packages as $selection => $package) {
