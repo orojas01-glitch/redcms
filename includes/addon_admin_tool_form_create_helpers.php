@@ -288,8 +288,10 @@ if (!function_exists('red_addon_admin_tool_form_create_invoke')) {
     function red_addon_admin_tool_form_create_invoke(
         $creator,
         $connection,
-        RED_Addon_Admin_Tool_Form_Create_Request $request
+        RED_Addon_Admin_Tool_Form_Create_Request $request,
+        &$problems = null
     ) {
+        $problems = [];
         if (!is_callable($creator)) {
             return null;
         }
@@ -327,6 +329,10 @@ if (!function_exists('red_addon_admin_tool_form_create_invoke')) {
                 $headersBefore,
                 $statusBefore
             );
+            if ($throwable instanceof RED_Addon_Admin_Tool_Form_Values_Refused) {
+                $problems = $throwable->problems();
+                return null;
+            }
             error_log('RED-CMS administrator form creator failed.');
             return null;
         }
@@ -556,17 +562,24 @@ if (!function_exists('red_addon_admin_tool_form_create')) {
                 $runtimeSettings['settings']
             );
             $result['creatorInvoked'] = true;
+            $creatorProblems = [];
             $created = red_addon_admin_tool_form_create_invoke(
                 $lockedBinding['creator'],
                 $connection,
-                $request
+                $request,
+                $creatorProblems
             );
             if (!$created instanceof RED_Addon_Admin_Tool_Form_Created_Record
                 || !red_addon_admin_tool_form_write_transaction_active(
                     $connection
                 )
             ) {
-                $transactionReason = 'creator_failed';
+                if ($creatorProblems !== []) {
+                    $result['problems'] = $creatorProblems;
+                    $transactionReason = 'values_refused';
+                } else {
+                    $transactionReason = 'creator_failed';
+                }
                 throw new RuntimeException($transactionReason);
             }
             $result['targetRecordId'] = $created->recordId();

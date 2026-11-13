@@ -13,6 +13,72 @@ require_once __DIR__ . '/addon_admin_tool_form_submission_helpers.php';
 require_once __DIR__ . '/addon_install_helpers.php';
 require_once __DIR__ . '/admin_transaction_helpers.php';
 
+if (!class_exists('RED_Addon_Admin_Tool_Form_Values_Refused', false)) {
+    /**
+     * Thrown by an add-on form creator or writer when it refuses the
+     * submitted values for a reason the administrator can fix. Core rolls
+     * the transaction back and shows each bounded plain-text problem next
+     * to the form instead of a generic failure. Anything else thrown still
+     * maps to the generic create_failed / save_failed outcome.
+     */
+    final class RED_Addon_Admin_Tool_Form_Values_Refused extends RuntimeException
+    {
+        public const MAX_PROBLEMS = 8;
+        public const MAX_MESSAGE_LENGTH = 200;
+
+        /** @var list<array{field: string, message: string}> */
+        private array $problems;
+
+        /**
+         * @param list<array{field: string, message: string}> $problems
+         */
+        public function __construct(array $problems)
+        {
+            $normalized = [];
+            foreach ($problems as $problem) {
+                if (count($normalized) >= self::MAX_PROBLEMS) {
+                    break;
+                }
+                $field = is_array($problem) ? ($problem['field'] ?? null) : null;
+                $message = is_array($problem)
+                    ? ($problem['message'] ?? null)
+                    : null;
+                if (!is_string($field)
+                    || preg_match('/\A[a-z][a-z0-9-]{0,63}\z/D', $field) !== 1
+                    || !is_string($message)
+                ) {
+                    continue;
+                }
+                $message = trim((string) preg_replace(
+                    '/[\x00-\x1F\x7F]+/u',
+                    ' ',
+                    $message
+                ));
+                if ($message === '' || !mb_check_encoding($message, 'UTF-8')) {
+                    continue;
+                }
+                if (mb_strlen($message, 'UTF-8') > self::MAX_MESSAGE_LENGTH) {
+                    $message = rtrim(mb_substr(
+                        $message,
+                        0,
+                        self::MAX_MESSAGE_LENGTH - 1,
+                        'UTF-8'
+                    )) . '…';
+                }
+                $normalized[] = ['field' => $field, 'message' => $message];
+            }
+            $this->problems = $normalized;
+            parent::__construct('Administrator form values were refused.');
+        }
+
+        /** @return list<array{field: string, message: string}> */
+        public function problems(): array
+        {
+            return $this->problems;
+        }
+    }
+}
+
 if (!class_exists('RED_Addon_Admin_Tool_Form_Write_Request', false)) {
     final class RED_Addon_Admin_Tool_Form_Write_Request
     {
@@ -370,8 +436,10 @@ if (!function_exists('red_addon_admin_tool_form_write_invoke')) {
     function red_addon_admin_tool_form_write_invoke(
         $writer,
         $connection,
-        RED_Addon_Admin_Tool_Form_Write_Request $request
+        RED_Addon_Admin_Tool_Form_Write_Request $request,
+        &$problems = null
     ) {
+        $problems = [];
         if (!is_callable($writer)) {
             return false;
         }
@@ -406,6 +474,10 @@ if (!function_exists('red_addon_admin_tool_form_write_invoke')) {
                 $headersBefore,
                 $statusBefore
             );
+            if ($throwable instanceof RED_Addon_Admin_Tool_Form_Values_Refused) {
+                $problems = $throwable->problems();
+                return false;
+            }
             error_log('RED-CMS administrator form writer failed.');
             return false;
         }
@@ -686,13 +758,20 @@ if (!function_exists('red_addon_admin_tool_form_write')) {
                 $runtimeSettings['settings']
             );
             $result['writerInvoked'] = true;
+            $writerProblems = [];
             if (!red_addon_admin_tool_form_write_invoke(
                 $lockedBinding['writer'],
                 $connection,
-                $request
+                $request,
+                $writerProblems
             ) || !red_addon_admin_tool_form_write_transaction_active($connection)
             ) {
-                $transactionReason = 'writer_failed';
+                if ($writerProblems !== []) {
+                    $result['problems'] = $writerProblems;
+                    $transactionReason = 'values_refused';
+                } else {
+                    $transactionReason = 'writer_failed';
+                }
                 throw new RuntimeException($transactionReason);
             }
             $saved = red_addon_admin_tool_form_load_values(

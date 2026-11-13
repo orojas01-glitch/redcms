@@ -11,7 +11,7 @@ can mark an order paid.
    when Store Lite's "Offer Wompi Web Checkout" setting is on and the catalog
    currency is COP (Store Lite 0.1.54).
 2. On submit, before any order is created, core checks that the handoff can
-   work: the server gate, the exact package pair (Store Lite 0.1.54, Wompi
+   work: the server gate, the exact package pair (Store Lite 0.1.54 or 0.1.55, Wompi
    0.4.0, both enabled and current), a Sandbox public key (`pub_test_…`), the
    integrity key reference, and the canonical HTTPS origin. If any is missing
    the request is refused with the normal "temporarily unavailable" response

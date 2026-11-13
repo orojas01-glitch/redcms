@@ -32,8 +32,10 @@ if (!function_exists('red_addon_wompi_checkout_public_runtime_versions')) {
     function red_addon_wompi_checkout_public_runtime_versions()
     {
         return [
-            'redcms.store-lite' => '0.1.54',
-            'redcms.store-lite-wompi' => '0.4.0',
+            // 0.1.55 only makes each payment method independently
+            // switchable; the Wompi handoff contract is unchanged.
+            'redcms.store-lite' => ['0.1.54', '0.1.55'],
+            'redcms.store-lite-wompi' => ['0.4.0'],
         ];
     }
 }
@@ -257,10 +259,17 @@ if (!function_exists('red_addon_wompi_checkout_public_runtime_prepare')) {
         $versions = red_addon_wompi_checkout_public_runtime_versions();
         $adapter = $catalog['packages'][$adapterId] ?? null;
         if (($catalog['valid'] ?? false) !== true
-            || ($store['manifest']['version'] ?? '') !== $versions[$storeId]
+            || !in_array(
+                $store['manifest']['version'] ?? '',
+                $versions[$storeId],
+                true
+            )
             || !is_array($adapter)
-            || ($adapter['manifest']['version'] ?? '')
-                !== $versions[$adapterId]
+            || !in_array(
+                $adapter['manifest']['version'] ?? '',
+                $versions[$adapterId],
+                true
+            )
         ) {
             return red_addon_wompi_checkout_public_runtime_prepare_result(
                 true,
